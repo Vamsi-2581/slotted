@@ -2,6 +2,18 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.7 — 2026-10-20
+
+- fix(presence): stop() reversível para o StrictMode do React, destroy() volta a ser final
+- chore(theme): regenera o contrato com width do menu e o recuo do anel
+- fix(app-shell, side-navigation): o recuo do anel publica-se de --_row-ring-inset, e o tokens.json da side-navigation lista-o
+- fix(side-navigation): o contrato lê --slotted-app-shell-row-ring-inset
+- feat(menu): width 'content' | 'anchor'
+- fix(button, kbd): o slot do Button deixa de impor display:block e 16px a uma tecla
+- fix(app-shell): a costura relê a cor em cada região; cabeça, corpo e pé da nav partilham a calha da barra e um recuo do anel de foco (--slotted-app-shell-row-ring-inset), e a side-navigation mantém a borda das linhas
+- fix(table): TableEmpty escreve a sua própria linha
+- fix(presence): destroy é reversível
+
 ## 0.1.0-beta.6 — 2026-10-20
 
 - ci(release): uma só validação

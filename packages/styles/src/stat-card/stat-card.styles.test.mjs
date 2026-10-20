@@ -338,14 +338,17 @@ test('gives the action a comfortable target on a coarse pointer', () => {
  * The card's part rules stop at a nested family: a badge in `status` has a
  * `label` part of its own, and the card's `label` rule painted it in the
  * card's muted ink. Every rule that reaches a part is inside the family's
- * `@scope`, whose limit is the content of any nested family root. The computed
+ * `@scope`, whose limit is the content of a family root nested inside the
+ * card. The limit is anchored at `:scope`: written `[data-ui]:not(:scope) > *`
+ * it matched the card's own root under a parent that carries `data-ui`, a
+ * `Grid`, and no part rule applied. The computed
  * style is compared in Chrome by `tools/harness/scenarios/stat-card-nested.mjs`.
  */
 test('reaches its own parts and stops at a nested family', () => {
   const flat = declarations.replace(/\s+/g, ' ');
   assert.doesNotMatch(flat, /\[data-ui='stat-card'\][^{,]*\s\[data-part=/);
   for (const block of flat.match(/@scope \([^)]*\) to \([^{]*\) \{/g) ?? []) {
-    assert.equal(block, "@scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {");
+    assert.equal(block, "@scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {");
   }
   assert.ok((flat.match(/@scope /g) ?? []).length > 0);
 });

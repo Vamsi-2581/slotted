@@ -185,7 +185,6 @@ export interface DateTimePickerHighlight {
         data-part="positioner"
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
-        [attr.data-positioned]="positioned() ? '' : null"
       >
         <div
           data-part="content"
@@ -429,7 +428,6 @@ export class SlDateTimePicker implements AfterViewInit, ControlValueAccessor, Va
     time: { hour: 12, minute: 0, second: 0 },
   });
   protected readonly view = signal<CalendarView>('day');
-  protected readonly positioned = signal(false);
   protected readonly sheet = signal(false);
   private readonly formDisabled = signal<boolean | undefined>(undefined);
 
@@ -1176,7 +1174,9 @@ export class SlDateTimePicker implements AfterViewInit, ControlValueAccessor, Va
         'start' | 'end' | undefined,
       ];
       this.positioner = createPositioner(anchor, layer, { align: align ?? 'center', side });
-      void this.positioner.update().then(() => this.positioned.set(true));
+      /* The positioner writes `data-positioned` with the side, on the element, in
+         the task that opened the layer; a binding to say it again was a frame later. */
+      void this.positioner.update();
     }
 
     /* The dialog takes focus when it opens, in the surface `openTo` names. */
@@ -1221,6 +1221,6 @@ export class SlDateTimePicker implements AfterViewInit, ControlValueAccessor, Va
     this.positioner = null;
     this.dismissable?.destroy();
     this.dismissable = null;
-    this.positioned.set(false);
+    this.layer?.nativeElement.removeAttribute('data-positioned');
   }
 }

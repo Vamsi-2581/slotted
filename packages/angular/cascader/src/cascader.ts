@@ -701,7 +701,12 @@ export class SlCascader<T = unknown>
         }
       },
     });
-    void this.positioner.update().then(() => this.positioned.set(true));
+    /* `data-open` is written on the element in the task that opened the layer,
+       with the position; the binding says it again on the next check. */
+    void this.positioner.update().then(() => {
+      if (this.open()) node.setAttribute('data-open', '');
+      this.positioned.set(true);
+    });
 
     this.layer = createDismissableLayer(node, {
       branches: [this.host],

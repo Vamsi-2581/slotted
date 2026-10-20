@@ -151,7 +151,6 @@ let sequence = 0;
         data-part="positioner"
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
-        [attr.data-positioned]="positioned() ? '' : null"
       >
         <div
           data-part="content"
@@ -309,7 +308,6 @@ export class SlDatePicker<V extends CalendarValue | PlainYearMonth = CalendarVal
   private readonly ownOpen = signal(false);
   private readonly ownValue = signal<CalendarValue>(null);
   protected readonly view = signal<CalendarView>('day');
-  protected readonly positioned = signal(false);
   protected readonly sheet = signal(false);
   private readonly formDisabled = signal<boolean | undefined>(undefined);
 
@@ -644,7 +642,9 @@ export class SlDatePicker<V extends CalendarValue | PlainYearMonth = CalendarVal
         'start' | 'end' | undefined,
       ];
       this.positioner = createPositioner(anchor, layer, { align: align ?? 'center', side });
-      void this.positioner.update().then(() => this.positioned.set(true));
+      /* The positioner writes `data-positioned` with the side, on the element, in
+         the task that opened the layer; a binding to say it again was a frame later. */
+      void this.positioner.update();
     }
 
     /* The dialog takes focus when it opens, on the day that holds the roving
@@ -694,6 +694,6 @@ export class SlDatePicker<V extends CalendarValue | PlainYearMonth = CalendarVal
     this.positioner = null;
     this.dismissable?.destroy();
     this.dismissable = null;
-    this.positioned.set(false);
+    this.layer?.nativeElement.removeAttribute('data-positioned');
   }
 }

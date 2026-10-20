@@ -302,7 +302,12 @@ export class SlTooltipLayer {
       ...options,
       ...(arrow ? { arrow, arrowPadding: this.tooltip.resolvedArrowPadding() } : {}),
     });
-    void this.positioner.update().then(() => this.positioned.set(true));
+    /* `data-open` is written on the element in the task that opened the tip,
+       with the position, rather than by the effect on the next check. */
+    void this.positioner.update().then(() => {
+      if (this.tooltip.isOpen()) layer.setAttribute('data-open', '');
+      this.positioned.set(true);
+    });
   }
 
   /**

@@ -1576,7 +1576,12 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
       sideOffset: 4,
       strategy: this.strategy() ?? this.defaults.strategy,
     });
-    void this.positionerHandle.update().then(() => this.positioned.set(true));
+    /* `data-open` is written on the element in the task that opened the popup,
+       with the position; the binding below says it again on the next check. */
+    void this.positionerHandle.update().then(() => {
+      if (this.isOpen()) this.layerNode?.setAttribute('data-open', '');
+      this.positioned.set(true);
+    });
   }
 
   private bind() {

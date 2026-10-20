@@ -281,7 +281,12 @@ export class SlPopoverLayer {
       ...options,
       ...(arrow ? { arrow, arrowPadding: this.popover.resolvedArrowPadding() } : {}),
     });
-    void this.positioner.update().then(() => this.positioned.set(true));
+    /* `data-open` is written on the element in the task that opened the panel,
+       with the position, rather than by the effect on the next check. */
+    void this.positioner.update().then(() => {
+      if (this.popover.isOpen()) layer.setAttribute('data-open', '');
+      this.positioned.set(true);
+    });
   }
 
   /**

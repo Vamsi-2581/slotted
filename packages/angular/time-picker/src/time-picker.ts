@@ -137,7 +137,6 @@ let sequence = 0;
         data-part="positioner"
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
-        [attr.data-positioned]="positioned() ? '' : null"
       >
         <div
           data-part="content"
@@ -308,7 +307,6 @@ export class SlTimePicker implements OnInit {
   private readonly ownValue = signal<PlainTime | null>(null);
   private readonly ownHighlight = signal<PlainTime | null>(null);
   private readonly clock = signal<PlainTime>({ hour: 12, minute: 0, second: 0 });
-  protected readonly positioned = signal(false);
   protected readonly sheet = signal(false);
 
   private positioner: PositionerHandle | null = null;
@@ -695,7 +693,9 @@ export class SlTimePicker implements OnInit {
         'start' | 'end' | undefined,
       ];
       this.positioner = createPositioner(anchor, layer, { align: align ?? 'center', side });
-      void this.positioner.update().then(() => this.positioned.set(true));
+      /* The positioner writes `data-positioned` with the side, on the element, in
+         the task that opened the layer; a binding to say it again was a frame later. */
+      void this.positioner.update();
     }
 
     const trigger = this.triggerRef?.nativeElement;
@@ -724,6 +724,6 @@ export class SlTimePicker implements OnInit {
     this.positioner = null;
     this.dismissable?.destroy();
     this.dismissable = null;
-    this.positioned.set(false);
+    this.layer?.nativeElement.removeAttribute('data-positioned');
   }
 }

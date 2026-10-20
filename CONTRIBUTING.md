@@ -123,8 +123,10 @@ version. A release is one command on a clean `main` and a workflow:
    writes the version into the six manifests and the entry into
    `CHANGELOG.md`, commits `chore(release): v<version>`, tags `v<version>` and
    pushes both.
-3. The tag starts `.github/workflows/release.yml`, which builds, runs
-   `pnpm check:full` and runs `node scripts/release.mjs --publish`. The step
+3. The tag starts `.github/workflows/release.yml`, which builds and runs
+   `node scripts/release.mjs --publish`. It does not validate again: the commit
+   it releases passed CI, and the release commit changes only the versions and
+   `CHANGELOG.md`, which is also why CI does not run on it. The step
    publishes in dependency order and skips a version already on the registry,
    so re-running a failed workflow finishes the release.
 

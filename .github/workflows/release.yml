@@ -43,11 +43,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # No second validation: `pnpm release` refuses a commit whose CI has not
+      # passed, and the release commit changes only the six versions and
+      # CHANGELOG.md. The build is what the publish step packs.
       - name: Build packages
         run: pnpm build
-
-      - name: Validate repository
-        run: pnpm check:full
 
       - name: Publish to npm
         run: node scripts/release.mjs --publish

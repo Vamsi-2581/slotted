@@ -46,7 +46,8 @@ gh run list --workflow release.yml --limit 1
 gh run watch <id>
 ```
 
-The workflow runs `pnpm build`, `pnpm check:full` and the publish step: about 20 minutes.
+The workflow runs `pnpm build` and the publish step: about 5 minutes. It does not validate again; CI on the
+released commit is the one validation, and CI skips the `chore(release)` commit.
 
 ## 4. Verify
 
@@ -64,7 +65,7 @@ versions.
 | Symptom                                        | Cause and action                                                                                                                                                                                                                 |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm release` refuses                         | The message names the guard. Fix the state it names; never bypass a guard.                                                                                                                                                       |
-| `check:full` fails in the workflow             | A defect on `main`. Fix it with a test on `main` through CI, then `pnpm release` again: the next version. The failed tag stays; its version was never published.                                                                 |
+| `pnpm build` fails in the workflow             | A defect on `main` that CI did not reach. Fix it with a test on `main` through CI, then `pnpm release` again: the next version. The failed tag stays; its version was never published.                                           |
 | Publish step: `E404`, `E403` or `ENEEDAUTH`    | The package has no trusted publisher for `andrelopes-code/slotted` › `release.yml`. The user configures it on npmjs.com; then `gh run rerun <id> --failed`.                                                                      |
 | Some packages published, the step failed after | `gh run rerun <id> --failed`. The step skips every version already on the registry.                                                                                                                                              |
 | A package new to `packages/`                   | npm configures a trusted publisher only on an existing package: the user publishes its first version by hand, then runs the `npm trust github` command in CONTRIBUTING.md › Publishing to npm, and the next release includes it. |

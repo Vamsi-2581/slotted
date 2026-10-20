@@ -16,6 +16,9 @@ concurrency:
 jobs:
   validate:
     name: Validate
+    # The release commit changes only the versions and CHANGELOG.md of a commit
+    # CI already passed; `pnpm release` refuses to cut one from anything else.
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(release):') }}
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository

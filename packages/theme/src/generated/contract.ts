@@ -2607,6 +2607,7 @@ export type ComponentToken =
   | '--slotted-app-shell-row-line-height'
   | '--slotted-app-shell-row-mark'
   | '--slotted-app-shell-row-mark-size'
+  | '--slotted-app-shell-row-ring-inset'
   | '--slotted-app-shell-row-text-line-height'
   | '--slotted-app-shell-row-text-size'
   | '--slotted-app-shell-scrim'
@@ -4820,6 +4821,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-app-shell-row-line-height",
   "--slotted-app-shell-row-mark",
   "--slotted-app-shell-row-mark-size",
+  "--slotted-app-shell-row-ring-inset",
   "--slotted-app-shell-row-text-line-height",
   "--slotted-app-shell-row-text-size",
   "--slotted-app-shell-scrim",

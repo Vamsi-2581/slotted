@@ -1231,6 +1231,7 @@
 
 <script type="module">
   import { createCollapse } from '@slotted/core/overflow';
+  import { createStickyHeader } from '@slotted/core/sticky-header';
 
   const bars = document.querySelectorAll(
     '[data-scene="fold"] [data-ui="toolbar"][data-overflow="menu"]',
@@ -1244,7 +1245,58 @@
       units: () => [...bar.querySelectorAll(':scope > *:not([data-part="overflow"])')],
     });
   }
+
+  for (const root of document.querySelectorAll('[data-scene="glass"] [data-ui="page-header"]')) {
+    const part = (name) => root.querySelector(`:scope > * > [data-part="${name}"]`);
+    createStickyHeader({
+      root,
+      area: () => part('header-area'),
+      chrome: () => [part('title-area')].filter((element) => element !== null),
+      state: () => ({ expanded: true, pinned: false, collapse: 'manual' }),
+      onScrolled: () => {},
+      onRevealed: () => {},
+      onScrollRequest: () => {},
+      onStuck: (stuck) => root.toggleAttribute('data-stuck', stuck),
+    });
+  }
 </script>
+
+<!--
+  A translucent stuck header, live. The module script of this file runs `createStickyHeader`
+  on this scene's header inside its own scroller and writes `data-stuck` as the
+  bindings do. `tools/harness/scenarios/page-header-glass.mjs` scrolls the
+  scroller and reads the ground and the backdrop filter of the stuck header.
+-->
+<section data-scene="glass" data-widths="1400">
+  <div data-glass-scroller style="block-size: 360px; overflow: auto">
+    <header
+      data-ui="page-header"
+      data-part="root"
+      data-size="md"
+      data-level="1"
+      data-collapse="manual"
+      data-variant="band"
+      data-expanded
+      style="
+        --slotted-page-header-background: rgb(0 0 255 / 0.5);
+        --slotted-page-header-backdrop-filter: blur(8px);
+      "
+    >
+      <div data-ui="container" data-part="root" data-size="wide" data-inset="6">
+        <div data-part="title-area">
+          <div data-part="title-row">
+            <div data-part="title">
+              <h1 data-part="heading">Encomendas</h1>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div
+      style="block-size: 2000px; background: repeating-linear-gradient(#fff 0 20px, #000 20px 40px)"
+    ></div>
+  </div>
+</section>
 
 <section data-scene="progress-default">
   <header

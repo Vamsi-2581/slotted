@@ -235,6 +235,43 @@
   }
 
   /**
+   * The title area paints the ground only where something passes under it:
+   * the header area, which it covers while it collapses. Without one, the
+   * root's ground is the one layer under the title, so a ground with alpha is
+   * composited once — painted on both, 0.5 read as 0.75. With a header area
+   * the title keeps its own ground, because a title that let the area show
+   * through would print the area's words under its own.
+   */
+  [data-ui='page-header']:not(:has(> * > [data-part='header-area']))
+    > *
+    > [data-part='title-area'] {
+    background-color: transparent;
+  }
+
+  /**
+   * Stuck, the chrome stands over the content, and a theme may blur what passes
+   * under it: `--slotted-page-header-backdrop-filter`, `none` unless set. It
+   * composes with a ground that has alpha, which is what lets the content show
+   * at all. The filter is the stuck state's alone, so a `plain` header,
+   * transparent at rest, filters nothing at rest.
+   */
+  [data-ui='page-header'][data-stuck] {
+    -webkit-backdrop-filter: var(--slotted-page-header-backdrop-filter, none);
+    backdrop-filter: var(--slotted-page-header-backdrop-filter, none);
+  }
+
+  /**
+   * A reader who asked for less transparency gets none of the effect, and under
+   * forced colours the ground is the system's and the blur has nothing to add.
+   */
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui='page-header'][data-stuck] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  /**
    * The pill straddles the chrome's edge, so whatever ends at that edge
    * keeps half a pill clear of it: the title area, because stuck the edge
    * is its own, and the header area's columns, because at rest it is theirs.

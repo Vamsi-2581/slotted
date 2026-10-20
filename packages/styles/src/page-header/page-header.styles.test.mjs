@@ -569,3 +569,27 @@ test('measures a title beside a folding toolbar by its widest line, not its part
     ),
   );
 });
+
+/**
+ * A ground with alpha is composited once: the root paints it, and the title
+ * area paints it only over a header area it has to cover. Stuck, the root
+ * takes the theme's backdrop filter, and gives it up for a reader who asked
+ * for less transparency and under forced colours. The composited alpha and the
+ * computed filter are read in Chrome by `tools/harness/scenarios/page-header-glass.mjs`.
+ */
+test('paints one ground under a title with nothing to cover, and filters the backdrop while stuck', () => {
+  const flat = declarations.replace(/\s+/g, ' ');
+  assert.match(
+    flat,
+    /\[data-ui='page-header'\]:not\(:has\(> \* > \[data-part='header-area'\]\)\) > \* > \[data-part='title-area'\] \{ background-color: transparent; \}/,
+  );
+  assert.match(
+    flat,
+    /\[data-ui='page-header'\]\[data-stuck\] \{ -webkit-backdrop-filter: var\(--slotted-page-header-backdrop-filter, none\); backdrop-filter: var\(--slotted-page-header-backdrop-filter, none\); \}/,
+  );
+  assert.match(
+    flat,
+    /@media \(prefers-reduced-transparency: reduce\), \(forced-colors: active\) \{ \[data-ui='page-header'\]\[data-stuck\] \{ -webkit-backdrop-filter: none; backdrop-filter: none; \} \}/,
+  );
+  assert.match(fragment, /data-scene="glass"/);
+});

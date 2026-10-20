@@ -1894,6 +1894,7 @@
     "data-fit",
     "data-flow",
     "data-focus-mode",
+    "data-focus-origin",
     "data-focusable",
     "data-folded",
     "data-following",

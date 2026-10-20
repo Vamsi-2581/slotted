@@ -31,6 +31,7 @@
   "--slotted-line-height-md",
   "--slotted-line-height-sm",
   "--slotted-line-height-xl",
+  "--slotted-page-header-backdrop-filter",
   "--slotted-page-header-background",
   "--slotted-page-header-border",
   "--slotted-page-header-control-size",

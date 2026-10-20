@@ -3773,6 +3773,7 @@ export type ComponentToken =
   | '--slotted-page-footer-border'
   | '--slotted-page-footer-padding-block'
   | '--slotted-page-ground'
+  | '--slotted-page-header-backdrop-filter'
   | '--slotted-page-header-background'
   | '--slotted-page-header-border'
   | '--slotted-page-header-control-size'
@@ -5976,6 +5977,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-page-footer-border",
   "--slotted-page-footer-padding-block",
   "--slotted-page-ground",
+  "--slotted-page-header-backdrop-filter",
   "--slotted-page-header-background",
   "--slotted-page-header-border",
   "--slotted-page-header-control-size",

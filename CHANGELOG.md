@@ -2,6 +2,38 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.5 — 2026-10-20
+
+- docs(evals): caminhos relativos do material de agente
+- docs(plans): quinta iteração
+- docs(plans): quinta iteração
+- perf(angular, popups): data-open e data-positioned escritos no elemento na tarefa da abertura, sem esperar a verificação seguinte
+- perf(pickers): superfície montada, no portal e posicionada no commit da abertura; foco de entrada e revelação da lista de horas no frame seguinte
+- perf(side-navigation): flyout com portal e posicionador em layout effect, data-open escrito pela medição
+- perf(cascader): data-open escrito pela medição que posiciona a camada, no commit da abertura
+- perf(entity-picker): data-open escrito pela medição que posiciona o popup, no commit da abertura
+- perf(tooltip): data-open escrito pela medição que posiciona a dica, sem render de positioned; camada do portal ao chegar o ponteiro ou o foco
+- perf(menu): data-open no primeiro frame depois do clique; o foco de entrada move-se no frame seguinte
+- perf(popover): data-open no primeiro frame depois do clique; o foco inicial move-se no frame seguinte
+- perf(multi-select, combobox): data-open no primeiro frame depois do clique, como o select; cenário popup-open.mjs por família
+- docs(plans): quinta iteração
+- perf(select, angular): a pressão registada substitui a leitura da caixa no clique, a camada do portal nasce no foco ou na pressão, e o destaque revela-se no frame seguinte
+- fix(stat-card): regras de parte em @scope com limite no conteúdo de uma família aninhada
+- perf(select, core/positioner): data-open no primeiro frame depois do clique
+- fix(agent-docs): renderExamples num diretório próprio por chamada
+- fix(core/measure): createIndicator escreve data-positioned na segunda posição, sem requestAnimationFrame
+- docs(plans): quinta iteração
+- feat(tabs): um marcador na lista que desliza por translate, na caixa de conteúdo da tab, com tokens de espessura, raio, recuo e opacidade do hover
+- feat(core/measure): createIndicator
+- feat(page-header): um só fundo sob um título sem header-area e --slotted-page-header-backdrop-filter enquanto preso
+- feat(react): bin slotted-agent-docs
+- fix(agent-docs): caminhos dos SKILL.md e das diretrizes relativos ao próprio ficheiro; o snippet declara a base na primeira frase
+- docs(plans): quinta iteração
+- fix(table, scroll-area, chart): anel da região de scroll só para foco vindo do teclado; o anel do navegador sai para foco por ponteiro
+- fix(app-shell): main recebe tabindex só para o foco do skip link e de focusMain; um clique no conteúdo não o foca
+- feat(core/focus): focusTarget e createFocusOrigin
+- fix(stat-card): value de StatCardValue e StatCardDelta aceita undefined sob exactOptionalPropertyTypes
+
 ## 0.1.0-beta.4 — 2026-10-20
 
 - test(accordion): sai o teto de 100 ms por tempo de relógio

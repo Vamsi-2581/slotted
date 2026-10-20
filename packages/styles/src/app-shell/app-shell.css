@@ -89,7 +89,7 @@
      * scrolls and clips at its padding box, and a full-width control's ring
      * stood outside that box on both sides.
      */
-    --_ring-inset: calc(
+    --_row-ring-inset: calc(
       var(--slotted-focus-ring-width, 2px) + var(--slotted-focus-ring-offset, 2px)
     );
 
@@ -532,8 +532,8 @@
      * `side-navigation` reads it to keep its rows' box on the edge it had,
      * and a row it reaches outside these parts reads nothing.
      */
-    --slotted-app-shell-row-ring-inset: var(--_ring-inset);
-    padding-inline: calc(var(--_nav-inset) + var(--_ring-inset));
+    --slotted-app-shell-row-ring-inset: var(--_row-ring-inset);
+    padding-inline: calc(var(--_nav-inset) + var(--_row-ring-inset));
   }
   /**
    * The body scrolls the way `scroll-area` scrolls, and for the reasons written
@@ -1407,7 +1407,7 @@
   [data-ui='app-shell']
     > [data-part='nav']:has(> [data-part='nav-rail'])
     > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {
-    padding-inline-start: calc(var(--_row-inset) + var(--_ring-inset));
+    padding-inline-start: calc(var(--_row-inset) + var(--_row-ring-inset));
     transition: visibility var(--_duration) step-start;
   }
   [data-ui='app-shell'][data-nav-mode='inline'][data-open]
@@ -1548,7 +1548,7 @@
      at the mark's size keeps its focus ring inside the body beside the gutter. */
   [data-ui='app-shell'][data-nav-mode='inline'] > [data-part='nav'] {
     inline-size: calc(
-      var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_ring-inset)) + var(--_nav-edges)
+      var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_row-ring-inset)) + var(--_nav-edges)
     );
   }
   [data-ui='app-shell'][data-nav-mode='inline'][data-open] > [data-part='nav'] {
@@ -1827,7 +1827,7 @@
   @container slotted-app-shell (inline-size >= 600px) {
     [data-ui='app-shell']:not([data-nav-mode]) > [data-part='nav'] {
       inline-size: calc(
-        var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_ring-inset)) + var(--_nav-edges)
+        var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_row-ring-inset)) + var(--_nav-edges)
       );
     }
     [data-ui='app-shell']:not([data-nav-mode])[data-open] > [data-part='nav'] {

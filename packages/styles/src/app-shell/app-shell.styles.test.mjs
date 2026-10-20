@@ -151,7 +151,7 @@ test('insets the rows of the overlay card on the inset plane', () => {
   const parts = rule(
     "> [data-part='nav']\n    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {",
   ).body;
-  assert.match(parts, /padding-inline:\s*calc\(var\(--_nav-inset\) \+ var\(--_ring-inset\)\)/);
+  assert.match(parts, /padding-inline:\s*calc\(var\(--_nav-inset\) \+ var\(--_row-ring-inset\)\)/);
 });
 
 /**
@@ -190,7 +190,7 @@ test('flushes the content on the inset plane once the navigation is a layer', ()
  * three, and they are published because the rows inside the regions belong to
  * `side-navigation`, wave 8.
  */
-test('publishes the six measures its rows stand on', () => {
+test('publishes the measures its rows stand on', () => {
   for (const token of Object.keys(contract.published).filter((key) => key.startsWith('--'))) {
     assert.match(css, new RegExp(`${token}: var\\(--_row-`), `${token} is not published`);
   }
@@ -321,7 +321,7 @@ test('adds nothing to one side of the region under either plane', () => {
   }
   assert.match(
     rule("[data-nav-mode='inline'] > [data-part='nav'] {").body,
-    /inline-size:\s*calc\(\s*var\(--_rail-size\) \+ 2 \* \(var\(--_nav-inset\) \+ var\(--_ring-inset\)\) \+ var\(--_nav-edges\)\s*\)/,
+    /inline-size:\s*calc\(\s*var\(--_rail-size\) \+ 2 \* \(var\(--_nav-inset\) \+ var\(--_row-ring-inset\)\) \+ var\(--_nav-edges\)\s*\)/,
   );
   assert.match(rule("[data-canvas='flush'] {").body, /--_nav-inset:\s*var\(--_row-inset\)/);
 });
@@ -340,12 +340,12 @@ test('adds nothing to one side of the region under either plane', () => {
 test('pads the column parts by the focus ring and shares the body gutter', () => {
   assert.match(
     css,
-    /--_ring-inset:\s*calc\(\s*var\(--slotted-focus-ring-width, 2px\) \+ var\(--slotted-focus-ring-offset, 2px\)\s*\)/,
+    /--_row-ring-inset:\s*calc\(\s*var\(--slotted-focus-ring-width, 2px\) \+ var\(--slotted-focus-ring-offset, 2px\)\s*\)/,
   );
   const parts = rule(
     "> [data-part='nav']\n    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {",
   ).body;
-  assert.match(parts, /--slotted-app-shell-row-ring-inset:\s*var\(--_ring-inset\)/);
+  assert.match(parts, /--slotted-app-shell-row-ring-inset:\s*var\(--_row-ring-inset\)/);
   const ends = rule(
     "[data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-header'],\n  [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-footer'] {",
   ).body;

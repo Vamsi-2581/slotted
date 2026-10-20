@@ -136,6 +136,8 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
     '[attr.data-full-width]': "resolvedFullWidth() ? '' : null",
     '[attr.data-multiple]': "resolvedMultiple() ? '' : null",
     '[attr.data-open]': "isOpen() ? '' : null",
+    '(pointerdown)': 'onFramePointerDown()',
+    '(focusin)': 'prepare()',
     '[attr.data-disabled]': "resolvedDisabled() ? '' : null",
     '[attr.data-readonly]': "resolvedReadOnly() ? '' : null",
     '[attr.data-invalid]': "resolvedInvalid() ? '' : null",
@@ -696,6 +698,12 @@ export class SlSelect implements ControlValueAccessor, Validator {
     const destroyRef = inject(DestroyRef);
     const host = inject(ElementRef<HTMLElement>);
 
+    /* Every press resets the record in the capture phase; one on the frame sets it after. */
+    const doc = (host.nativeElement as HTMLElement).ownerDocument;
+    const resetPress = () => (this.pressedFrame = false);
+    doc.addEventListener('pointerdown', resetPress, true);
+    destroyRef.onDestroy(() => doc.removeEventListener('pointerdown', resetPress, true));
+
     effect(() => {
       const row = this.tags()?.nativeElement ?? null;
       const trigger = this.chipOverflow()?.nativeElement ?? null;
@@ -798,10 +806,27 @@ export class SlSelect implements ControlValueAccessor, Validator {
    * Whether a click landed on the control's frame. A click a `label` elsewhere
    * forwards to the button carries the label's coordinates, which lie outside it.
    */
-  private pressedOnFrame(x: number, y: number): boolean {
-    const button = this.triggerRef().nativeElement;
-    const box = (button.parentElement ?? button).getBoundingClientRect();
-    return x >= box.left && x <= box.right && y >= box.top && y <= box.bottom;
+  /** The last press went down on the frame; see `onTriggerClick`. */
+  private pressedFrame = false;
+
+  protected onFramePointerDown() {
+    this.pressedFrame = true;
+    this.prepare();
+  }
+
+  /**
+   * The reader is about to open the popup: the control took focus or a press.
+   * The portal's layer is made then, because making it reads the trigger's
+   * computed style, and a read in the open's own task is a style recalculation
+   * the first frame waits for. A press focuses before it clicks, in a task of
+   * its own.
+   */
+  protected prepare() {
+    if (this.portalRoot !== null) return;
+    this.portalRoot = createPortalRoot({
+      origin: this.triggerRef().nativeElement,
+      disabled: this.portal() === false,
+    });
   }
 
   scrollToKey(value: SelectOptionValue) {
@@ -905,11 +930,16 @@ export class SlSelect implements ControlValueAccessor, Validator {
 
   protected onTriggerClick(event: MouseEvent) {
     /* A press on the field's label arrives here as the click the label
-       forwards: a pointer click at the label's coordinates, outside the frame.
-       It focuses the control and does not open the list — the select-only
-       example's label only focuses, and so does a native select's. A keyboard
-       or assistive-technology click carries detail 0 and opens. */
-    if (event.detail > 0 && !this.pressedOnFrame(event.clientX, event.clientY)) {
+       forwards: a pointer click whose press went down on the label, not on
+       the frame. It focuses the control and does not open the list — the
+       select-only example's label only focuses, and so does a native
+       select's. A keyboard or assistive-technology click carries detail 0 and
+       opens. The press is recorded rather than the click's coordinates
+       compared with the frame's box: that box is a layout read in the click's
+       own task, after the release changed the frame's style. */
+    const fromFrame = this.pressedFrame;
+    this.pressedFrame = false;
+    if (event.detail > 0 && !fromFrame) {
       this.focus();
       return;
     }
@@ -1165,10 +1195,7 @@ export class SlSelect implements ControlValueAccessor, Validator {
       return;
     }
 
-    this.portalRoot = createPortalRoot({
-      origin: this.triggerRef().nativeElement,
-      disabled: this.portal() === false,
-    });
+    this.prepare();
 
     this.view = this.viewContainer.createEmbeddedView(this.template());
     this.view.detectChanges();
@@ -1179,7 +1206,7 @@ export class SlSelect implements ControlValueAccessor, Validator {
     this.surfaceNode = this.layerNode?.querySelector<HTMLElement>("[data-part='content']") ?? null;
     if (this.layerNode === null) return;
 
-    this.portalRoot.container?.append(this.layerNode);
+    this.portalRoot?.container?.append(this.layerNode);
     this.presence = createPresence({ present: this.isOpen() });
     this.presence.setNode(this.layerNode);
     this.recount();
@@ -1209,8 +1236,14 @@ export class SlSelect implements ControlValueAccessor, Validator {
       },
     );
     /* The height that bounds the list arrives with the position, after the
-       highlight has landed, so the highlighted row is revealed again. */
-    void this.positioner.update().then(() => this.reveal(this.highlightedValue()));
+       highlight has landed, so the highlighted row is revealed again — in the
+       next frame, whose layout the browser computes anyway, rather than by a
+       read here after the position's writes. */
+    void this.positioner.update().then(() => {
+      const view = this.layerNode?.ownerDocument.defaultView;
+      if (view === null || view === undefined) return;
+      view.requestAnimationFrame(() => this.reveal(this.highlightedValue()));
+    });
   }
 
   private bind() {

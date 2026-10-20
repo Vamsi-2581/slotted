@@ -130,7 +130,8 @@ describe('SlSelect, inside a field', () => {
 
   /**
    * A press on the label reaches the trigger as the click the label forwards: a
-   * pointer click (detail 1) at the label's coordinates, outside the frame. It
+   * pointer click (detail 1) whose press went down on the label, not on the
+   * control's frame. It
    * focuses the control and leaves the list closed, as the select-only
    * example's label does and as a native select does.
    */
@@ -143,11 +144,15 @@ describe('SlSelect, inside a field', () => {
       trigger().dispatchEvent(
         new MouseEvent('click', { bubbles: true, detail: 1, clientX, clientY }),
       );
+    const pressOn = (element: Element) =>
+      element.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    pressOn(fixture.nativeElement.querySelector('[data-part="label"], label'));
     click(-40, -20);
     fixture.detectChanges();
     expect(document.activeElement).toBe(trigger());
     expect(trigger().getAttribute('aria-expanded')).toBe('false');
 
+    pressOn(trigger());
     click(0, 0);
     fixture.detectChanges();
     expect(trigger().getAttribute('aria-expanded')).toBe('true');

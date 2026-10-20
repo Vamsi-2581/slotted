@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { useRef, useState } from 'react';
+import { Profiler, useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/accordion/contract.json';
@@ -302,5 +302,61 @@ describe('Accordion', () => {
   it('hands the heading level to every item', () => {
     render(<Basic headingLevel="2" />);
     expect(document.querySelectorAll('h2[data-part="header"]')).toHaveLength(3);
+  });
+});
+
+const OPERATIONS = Array.from({ length: 50 }, (_unused, index) => `operation-${index}`);
+
+function Operations({ onCommit }: { onCommit?: () => void }) {
+  return (
+    <Profiler id="operations" onRender={() => onCommit?.()}>
+      <Accordion mount="active">
+        {OPERATIONS.map((operation) => (
+          <Collapsible key={operation} value={operation}>
+            <CollapsibleHeader>
+              <CollapsibleTrigger>{operation}</CollapsibleTrigger>
+            </CollapsibleHeader>
+            <CollapsiblePanel>
+              <p>{operation}</p>
+            </CollapsiblePanel>
+          </Collapsible>
+        ))}
+      </Accordion>
+    </Profiler>
+  );
+}
+
+/**
+ * A page listing one disclosure per API operation paid about seven
+ * milliseconds per closed item. Three causes, each removed: the accordion and
+ * every panel held their own element in state, so attaching it rendered the
+ * whole set a second and a third time; and the arrow engine read every
+ * trigger's computed style as it was created and again on the mutation the
+ * mount caused.
+ */
+describe('Accordion, the cost of fifty closed items', () => {
+  it('mounts them in one commit and reads no computed style', () => {
+    let commits = 0;
+    const styles = vi.spyOn(window, 'getComputedStyle');
+    const { unmount } = render(<Operations onCommit={() => (commits += 1)} />);
+
+    expect(commits).toBe(1);
+    expect(styles).not.toHaveBeenCalled();
+    expect(document.querySelectorAll('[data-part="content"]')).toHaveLength(0);
+    styles.mockRestore();
+    unmount();
+  });
+
+  it('mounts them within a hundred milliseconds', () => {
+    render(<Operations />).unmount();
+    const times = [0, 1, 2].map(() => {
+      const start = performance.now();
+      const { unmount } = render(<Operations />);
+      const elapsed = performance.now() - start;
+      unmount();
+      return elapsed;
+    });
+
+    expect(times.sort((a, b) => a - b)[1]).toBeLessThan(100);
   });
 });

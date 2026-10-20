@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { MouseEvent } from 'react';
 
 import { Glyph, Icon } from '../icon';
@@ -178,10 +178,13 @@ export function CollapsiblePanel({
   ...nativeProps
 }: CollapsiblePanelProps) {
   const { ids, loading, mount, open, region, seen, toggle } = useCollapsible();
-  const [element, setElement] = useState<HTMLElement | null>(null);
+  /* A ref rather than state: held in state, attaching the panel rendered it a
+     second time on mount, for an element nothing renders from. */
+  const node = useRef<HTMLElement | null>(null);
   const untilFound = mount === 'until-found';
 
   useEffect(() => {
+    const element = node.current;
     if (element === null) return undefined;
 
     if (open) {
@@ -201,7 +204,7 @@ export function CollapsiblePanel({
     element.removeAttribute('hidden');
     element.setAttribute('inert', '');
     return undefined;
-  }, [element, open, toggle, untilFound]);
+  }, [open, toggle, untilFound]);
 
   /**
    * The box always exists; what `mount` decides is whether its content does.
@@ -230,10 +233,10 @@ export function CollapsiblePanel({
   return (
     <div
       {...rootProps}
-      ref={(node) => {
-        setElement(node);
-        if (typeof ref === 'function') ref(node);
-        else if (ref !== null && ref !== undefined) ref.current = node;
+      ref={(element) => {
+        node.current = element;
+        if (typeof ref === 'function') ref(element);
+        else if (ref !== null && ref !== undefined) ref.current = element;
       }}
     />
   );

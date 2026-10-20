@@ -68,9 +68,9 @@ export interface ArrowNavigationOptions {
 export interface ArrowNavigationHandle {
   /** Removes the listener and leaves every item as it stands. */
   destroy: () => void;
-  /** Re-reads the item list after one is added or removed. */
+  /** Marks the item list for a re-read after one is added or removed. */
   refresh: () => void;
-  /** The items, in the order the DOM holds them, as of the last read. */
+  /** The items, in the order the DOM holds them, read again after a `refresh`. */
   items: () => readonly HTMLElement[];
   /** The first item the platform will focus, or `-1` when there is none. */
   firstEnabled: () => number;
@@ -159,15 +159,27 @@ export function createArrowNavigation(
   const ownedKeys = options.ownedKeys ?? (() => EMPTY);
 
   let items: HTMLElement[] = [];
+  /**
+   * The collection is read when something asks for it, not when it may have
+   * changed. Reading filters every item through `getComputedStyle`, which
+   * forces a style recalculation of whatever the page has just mounted — and an
+   * accordion of fifty disclosures paid it at creation and again on the
+   * mutation that mounting itself caused, for a list no key had asked for.
+   */
+  let stale = true;
 
-  function readItems() {
-    items = [...container.querySelectorAll<HTMLElement>(options.itemSelector)].filter(
-      (item) => !isNavigationHidden(item),
-    );
+  function currentItems() {
+    if (stale) {
+      items = [...container.querySelectorAll<HTMLElement>(options.itemSelector)].filter(
+        (item) => !isNavigationHidden(item),
+      );
+      stale = false;
+    }
+    return items;
   }
 
   function firstEnabled() {
-    return items.findIndex((item) => !isNavigationDisabled(item, includeAriaDisabled));
+    return currentItems().findIndex((item) => !isNavigationDisabled(item, includeAriaDisabled));
   }
 
   function step(from: number, delta: number) {
@@ -206,7 +218,8 @@ export function createArrowNavigation(
   }
 
   function handleKeydown(event: KeyboardEvent) {
-    readItems();
+    stale = true;
+    currentItems();
     const vertical = orientation() === 'vertical';
     const keys = vertical ? VERTICAL_KEYS : direction() === 'rtl' ? MIRRORED_KEYS : HORIZONTAL_KEYS;
     /**
@@ -258,13 +271,14 @@ export function createArrowNavigation(
     event.preventDefault();
   }
 
-  readItems();
   container.addEventListener('keydown', handleKeydown);
 
   return {
     destroy: () => container.removeEventListener('keydown', handleKeydown),
-    refresh: () => readItems(),
-    items: () => items,
+    refresh: () => {
+      stale = true;
+    },
+    items: currentItems,
     firstEnabled,
   };
 }

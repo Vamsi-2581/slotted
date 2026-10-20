@@ -163,6 +163,26 @@ describe('createArrowNavigation', () => {
     handle.destroy();
   });
 
+  /**
+   * Reading the collection filters every item through `getComputedStyle`. An
+   * accordion of fifty disclosures read it as the engine was created and again
+   * on the mutation its own mount caused, forcing a style recalculation inside
+   * the task that mounted them, for a list no key had asked for.
+   */
+  it('reads no computed style until a key or a caller asks for the items', () => {
+    const { container, items } = mount(three);
+    const styles = vi.spyOn(window, 'getComputedStyle');
+    const handle = createArrowNavigation(container, { itemSelector: 'button' });
+    handle.refresh();
+
+    expect(styles).not.toHaveBeenCalled();
+
+    expect(handle.items()).toEqual(items);
+    expect(styles).toHaveBeenCalledTimes(3);
+    styles.mockRestore();
+    handle.destroy();
+  });
+
   it('stops handling keys after destroy', () => {
     const { container, items } = mount(three);
     const handle = createArrowNavigation(container, {

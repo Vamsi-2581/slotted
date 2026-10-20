@@ -3,7 +3,7 @@ import '@slotted/styles/accordion/accordion.css';
 import { isHeldOpen, nextOpenValues, sameOpenValues } from '@slotted/core/disclosure';
 import { createArrowNavigation } from '@slotted/core/focus';
 import { createControllable } from '@slotted/core/state';
-import { createContext, useContext, useEffect, useImperativeHandle, useState } from 'react';
+import { createContext, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { useAccordionDefaults } from './accordion-defaults';
 import type {
@@ -104,7 +104,12 @@ export function Accordion({
   const [own, setOwn] = useState<readonly string[]>(defaultValue ?? []);
   const current = value ?? own;
 
-  const [element, setElement] = useState<HTMLElement | null>(null);
+  /**
+   * A ref rather than state: the element is read by the effect below and by the
+   * handle, and neither renders it. Held in state, attaching it re-rendered the
+   * accordion on mount — and with a new context value, every item in it.
+   */
+  const element = useRef<HTMLElement | null>(null);
 
   const resolvedDisabled = disabled === true;
   const resolvedHeadingLevel = headingLevel ?? defaults.headingLevel;
@@ -125,21 +130,22 @@ export function Accordion({
    * which is the whole difference between it and the roving stop `tabs` uses.
    */
   useEffect(() => {
-    if (element === null) return undefined;
+    const node = element.current;
+    if (node === null) return undefined;
 
-    const navigation = createArrowNavigation(element, {
+    const navigation = createArrowNavigation(node, {
       itemSelector: ACCORDION_TRIGGER_SELECTOR,
       loop: resolvedLoop,
       orientation: () => 'vertical',
     });
     const observer = new MutationObserver(() => navigation.refresh());
-    observer.observe(element, { childList: true, subtree: true });
+    observer.observe(node, { childList: true, subtree: true });
 
     return () => {
       observer.disconnect();
       navigation.destroy();
     };
-  }, [element, resolvedLoop]);
+  }, [resolvedLoop]);
 
   function commit(next: readonly string[], reason: AccordionSelectionReason, source: unknown) {
     let cancelled = false;
@@ -190,7 +196,7 @@ export function Accordion({
     handle,
     () => ({
       openAll: () => {
-        const values = itemValues(element)
+        const values = itemValues(element.current)
           .filter((item) => !item.disabled)
           .map((item) => item.value);
         commit(resolvedMultiple ? values : values.slice(0, 1), 'programmatic', undefined);
@@ -203,10 +209,10 @@ export function Accordion({
         commit([], 'programmatic', undefined);
       },
     }),
-    /* `commit` closes over the render it was made in, and the four values below
+    /* `commit` closes over the render it was made in, and the three values below
        are everything it reads. Listing the function itself would rebuild the
        handle on every render and hand the consumer a new object each time. */
-    [element, current, resolvedMultiple, resolvedRequireOpen],
+    [current, resolvedMultiple, resolvedRequireOpen],
   );
 
   const rootProps: AccordionRootProps = {
@@ -227,7 +233,7 @@ export function Accordion({
         <div
           {...rootProps}
           ref={(node) => {
-            setElement(node);
+            element.current = node;
             if (typeof ref === 'function') ref(node);
             else if (ref !== null && ref !== undefined) ref.current = node;
           }}

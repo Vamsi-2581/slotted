@@ -212,7 +212,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'mount',
     title: 'When the content exists',
-    note: 'eager builds it up front so the panel can transition closed, lazy builds it on the first open, active drops it each time, and until-found lets the browser’s own page search open the panel.',
+    note: 'eager builds it up front so the panel can transition closed, lazy builds it on the first open, active drops it each time, and until-found lets the browser’s own page search open the panel. A closed item under active commits once and reads no layout and no computed style; it creates no observer and no portal. Fifty closed items inside an Accordion, measured in Chrome: 7 ms of script and 23 ms to layout with a production build of React, 46 ms of script and 83 ms to layout with its development build.',
     snippet: defineSnippet({
       id: 'collapsible-react-mount',
       language: 'tsx',

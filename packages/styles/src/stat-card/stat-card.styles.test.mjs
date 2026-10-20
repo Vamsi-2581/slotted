@@ -8,6 +8,7 @@ const contract = JSON.parse(
     'utf8',
   ),
 );
+const ui = `[data-ui='${contract.ui}']`;
 const css = readFileSync(new URL('./stat-card.css', import.meta.url), 'utf8');
 const fragment = readFileSync(new URL('./stat-card.harness.html', import.meta.url), 'utf8');
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -17,7 +18,6 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
 const { parts } = contract.members['stat-card'];
 
 /** Every innermost rule, with the at-rule it sits in. */
@@ -39,8 +39,17 @@ function collectRules(sheet) {
     const close = sheet.indexOf('}', index);
     const nested = sheet.indexOf('{', index + 1);
     if (nested === -1 || nested > close) {
+      /* A rule inside the family's `@scope` names its root `:scope`; the
+         assertions name it by its identifier, which is the same element. */
+      const scoped = stack.some((frame) => frame.startsWith('@scope'));
       collected.push({
-        selector: selector.trim(),
+        selector: scoped
+          ? selector
+              .trim()
+              .split(',')
+              .map((item) => item.replace(/^:scope/, ui))
+              .join(',')
+          : selector.trim(),
         body: sheet.slice(index + 1, close),
         scope:
           stack.find((frame) => frame.startsWith('@media') || frame.startsWith('@container')) ?? '',
@@ -323,4 +332,20 @@ test('gives the action a comfortable target on a coarse pointer', () => {
   assert.equal(coarse.length, 1, 'no halo on the action under a coarse pointer');
   assert.match(coarse[0].body, /--slotted-target-comfortable/);
   assert.match(coarse[0].body, /position:absolute/);
+});
+
+/**
+ * The card's part rules stop at a nested family: a badge in `status` has a
+ * `label` part of its own, and the card's `label` rule painted it in the
+ * card's muted ink. Every rule that reaches a part is inside the family's
+ * `@scope`, whose limit is the content of any nested family root. The computed
+ * style is compared in Chrome by `tools/harness/scenarios/stat-card-nested.mjs`.
+ */
+test('reaches its own parts and stops at a nested family', () => {
+  const flat = declarations.replace(/\s+/g, ' ');
+  assert.doesNotMatch(flat, /\[data-ui='stat-card'\][^{,]*\s\[data-part=/);
+  for (const block of flat.match(/@scope \([^)]*\) to \([^{]*\) \{/g) ?? []) {
+    assert.equal(block, "@scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {");
+  }
+  assert.ok((flat.match(/@scope /g) ?? []).length > 0);
 });

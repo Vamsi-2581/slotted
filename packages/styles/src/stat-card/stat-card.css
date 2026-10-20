@@ -218,28 +218,32 @@
    * number is broken only when it is wider than the card itself. A floor on
    * the trend was tried and pushed the trend through the card's edge.
    */
-  [data-ui='stat-card'] [data-part='body'] {
-    column-gap: var(--_trend-gap);
-    display: grid;
-    flex: 1 1 auto;
-    grid-template-areas:
-      'header header'
-      'figure trend'
-      'message message';
-    grid-template-columns: minmax(min-content, 1fr) minmax(0, var(--_trend-size));
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    min-inline-size: 0;
-    row-gap: var(--_region-gap);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='body'] {
+      column-gap: var(--_trend-gap);
+      display: grid;
+      flex: 1 1 auto;
+      grid-template-areas:
+        'header header'
+        'figure trend'
+        'message message';
+      grid-template-columns: minmax(min-content, 1fr) minmax(0, var(--_trend-size));
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      min-inline-size: 0;
+      row-gap: var(--_region-gap);
+    }
   }
 
-  [data-ui='stat-card'][data-layout='stacked'] [data-part='body'] {
-    grid-template-areas:
-      'header'
-      'figure'
-      'trend'
-      'message';
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-layout='stacked'] [data-part='body'] {
+      grid-template-areas:
+        'header'
+        'figure'
+        'trend'
+        'message';
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
+    }
   }
 
   /**
@@ -250,15 +254,19 @@
    * inline axis gives these regions no intrinsic width: the figure alone
    * decides the column, and the text is cut or wrapped by the card's width.
    */
-  [data-ui='stat-card'] [data-part='header'] {
-    contain: inline-size;
-    grid-area: header;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='header'] {
+      contain: inline-size;
+      grid-area: header;
+    }
   }
 
-  [data-ui='stat-card'] [data-part='figure'] {
-    align-self: start;
-    grid-area: figure;
-    min-inline-size: 0;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='figure'] {
+      align-self: start;
+      grid-area: figure;
+      min-inline-size: 0;
+    }
   }
 
   /**
@@ -268,32 +276,40 @@
    * width is the space a wide value left, which a query on the card cannot
    * see.
    */
-  [data-ui='stat-card'] [data-part='trend'] {
-    /* The marker's ring is the card's ground, not the page's. */
-    --slotted-sparkline-ring-color: var(--_surface);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='trend'] {
+      /* The marker's ring is the card's ground, not the page's. */
+      --slotted-sparkline-ring-color: var(--_surface);
 
-    align-self: center;
-    container-name: stat-card-trend;
-    container-type: inline-size;
-    grid-area: trend;
-    inline-size: 100%;
-    min-inline-size: 0;
-  }
-
-  @container stat-card-trend (max-width: 39px) {
-    [data-ui='stat-card'] [data-part='trend'] > * {
-      visibility: hidden;
+      align-self: center;
+      container-name: stat-card-trend;
+      container-type: inline-size;
+      grid-area: trend;
+      inline-size: 100%;
+      min-inline-size: 0;
     }
   }
 
-  [data-ui='stat-card'][data-layout='stacked'] [data-part='trend'] {
-    align-self: end;
-    margin-block-start: var(--slotted-space-2, 0.25rem);
+  @container stat-card-trend (max-width: 39px) {
+    @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+      :scope [data-part='trend'] > * {
+        visibility: hidden;
+      }
+    }
   }
 
-  [data-ui='stat-card'] [data-part='message'] {
-    contain: inline-size;
-    grid-area: message;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-layout='stacked'] [data-part='trend'] {
+      align-self: end;
+      margin-block-start: var(--slotted-space-2, 0.25rem);
+    }
+  }
+
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='message'] {
+      contain: inline-size;
+      grid-area: message;
+    }
   }
 
   /**
@@ -303,29 +319,37 @@
    * (`docs/token-foundation.md`, rule 4).
    */
   @container stat-card (max-width: 219px) {
-    [data-ui='stat-card'] [data-part='body'] {
-      grid-template-areas:
-        'header'
-        'figure'
-        'trend'
-        'message';
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: auto minmax(0, 1fr) auto auto;
+    @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+      :scope [data-part='body'] {
+        grid-template-areas:
+          'header'
+          'figure'
+          'trend'
+          'message';
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr) auto auto;
+      }
     }
 
-    [data-ui='stat-card'] [data-part='trend'] {
-      align-self: end;
-      margin-block-start: var(--slotted-space-2, 0.25rem);
+    @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+      :scope [data-part='trend'] {
+        align-self: end;
+        margin-block-start: var(--slotted-space-2, 0.25rem);
+      }
     }
 
-    [data-ui='stat-card'] [data-part='value'] {
-      font-size: var(--_value-size-narrow);
-      line-height: var(--_value-line-narrow);
+    @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+      :scope [data-part='value'] {
+        font-size: var(--_value-size-narrow);
+        line-height: var(--_value-line-narrow);
+      }
     }
 
     /* The value steps down here, and so does the line its placeholder keeps. */
-    [data-ui='stat-card'][data-loading] [data-part='value'] {
-      min-block-size: calc(var(--_value-size-narrow) * var(--_value-line-narrow));
+    @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+      :scope[data-loading] [data-part='value'] {
+        min-block-size: calc(var(--_value-size-narrow) * var(--_value-line-narrow));
+      }
     }
   }
 
@@ -337,13 +361,15 @@
    * them as part of the name, instead of floating them at the middle of the
    * block.
    */
-  [data-ui='stat-card'] [data-part='header'] {
-    align-items: baseline;
-    column-gap: var(--slotted-space-3, 0.375rem);
-    display: flex;
-    flex-wrap: wrap;
-    min-inline-size: 0;
-    row-gap: var(--slotted-space-2, 0.25rem);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='header'] {
+      align-items: baseline;
+      column-gap: var(--slotted-space-3, 0.375rem);
+      display: flex;
+      flex-wrap: wrap;
+      min-inline-size: 0;
+      row-gap: var(--slotted-space-2, 0.25rem);
+    }
   }
 
   /**
@@ -355,32 +381,38 @@
    * proportion of the type rather than a scale step: it is a width of
    * words, and it scales with them.
    */
-  [data-ui='stat-card'] [data-part='label'] {
-    color: var(--_ink-muted);
-    flex: 1 1 0%;
-    font-size: var(--_label-size);
-    font-weight: var(--slotted-font-weight-medium, 500);
-    line-height: var(--_label-line);
-    margin: 0;
-    min-inline-size: min(100%, 10rem);
-    overflow-wrap: break-word;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='label'] {
+      color: var(--_ink-muted);
+      flex: 1 1 0%;
+      font-size: var(--_label-size);
+      font-weight: var(--slotted-font-weight-medium, 500);
+      line-height: var(--_label-line);
+      margin: 0;
+      min-inline-size: min(100%, 10rem);
+      overflow-wrap: break-word;
+    }
   }
 
-  [data-ui='stat-card'] [data-part='status'] {
-    display: inline-flex;
-    flex: none;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='status'] {
+      display: inline-flex;
+      flex: none;
+    }
   }
 
   /* The action takes the end of the header's first line and stays there
      when the label wraps: it is the one thing on the card the reader presses,
      and a corner is where a control is looked for. */
-  [data-ui='stat-card'] [data-part='action'] {
-    flex: none;
-    /* The label's line, so a link here is as tall in the fallback face as in
-       the web face and the header does not grow when the font arrives. */
-    font-size: var(--_label-size);
-    line-height: var(--_label-line);
-    margin-inline-start: auto;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='action'] {
+      flex: none;
+      /* The label's line, so a link here is as tall in the fallback face as in
+         the web face and the header does not grow when the font arrives. */
+      font-size: var(--_label-size);
+      line-height: var(--_label-line);
+      margin-inline-start: auto;
+    }
   }
 
   /* On a finger the card's one control is a full target among 44-pixel
@@ -388,16 +420,19 @@
      part itself when `render` made it one — reaches
      the comfortable size in both axes, and the header keeps its height. */
   @media (pointer: coarse) {
-    [data-ui='stat-card']
-      :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button)) {
-      position: relative;
+    @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+      :scope :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button)) {
+        position: relative;
+      }
     }
 
-    [data-ui='stat-card']
-      :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button))::before {
-      content: '';
-      inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
-      position: absolute;
+    @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+      :scope
+        :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button))::before {
+        content: '';
+        inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
+        position: absolute;
+      }
     }
   }
 
@@ -409,17 +444,21 @@
    * so a delta that does not fit beside a wide number drops under it rather
    * than pushing the number.
    */
-  [data-ui='stat-card'] [data-part='figure'] {
-    align-items: baseline;
-    column-gap: var(--slotted-space-3, 0.375rem);
-    display: flex;
-    flex-wrap: wrap;
-    row-gap: 0;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='figure'] {
+      align-items: baseline;
+      column-gap: var(--slotted-space-3, 0.375rem);
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: 0;
+    }
   }
 
-  [data-ui='stat-card'] [data-part='comparison'] {
-    contain: inline-size;
-    flex: 1 1 100%;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='comparison'] {
+      contain: inline-size;
+      flex: 1 1 100%;
+    }
   }
 
   /**
@@ -432,40 +471,44 @@
    * to pull a large numeral's counters back together, and it is the same
    * fraction at every size.
    */
-  [data-ui='stat-card'] [data-part='value'] {
-    /* The figure and its unit are two flex items on one baseline — the text
-       node is an item of its own — so the gap spaces the unit from the digit
-       on whichever side it stands. A margin on the unit, reset by
-       `:first-child` for a leading unit, hugged a trailing one: after a bare
-       figure the unit is the first element child. */
-    align-items: baseline;
-    color: var(--_ink);
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 0.15em;
-    font-size: var(--_value-size);
-    font-variant-numeric: proportional-nums;
-    font-weight: var(--slotted-font-weight-semibold, 600);
-    /* The figure is set at the 3xl or 4xl step, where the theme's tighter
-       tracking applies. */
-    letter-spacing: var(--slotted-letter-spacing-tighter, -0.03em);
-    unicode-bidi: plaintext;
-    line-height: var(--_value-line);
-    margin: 0;
-    min-inline-size: 0;
-    /* A number is never truncated: a value wider than its column breaks
-       rather than clips, and a consumer who wants it whole formats it
-       compact or stacks the card. */
-    overflow-wrap: break-word;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='value'] {
+      /* The figure and its unit are two flex items on one baseline — the text
+         node is an item of its own — so the gap spaces the unit from the digit
+         on whichever side it stands. A margin on the unit, reset by
+         `:first-child` for a leading unit, hugged a trailing one: after a bare
+         figure the unit is the first element child. */
+      align-items: baseline;
+      color: var(--_ink);
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.15em;
+      font-size: var(--_value-size);
+      font-variant-numeric: proportional-nums;
+      font-weight: var(--slotted-font-weight-semibold, 600);
+      /* The figure is set at the 3xl or 4xl step, where the theme's tighter
+         tracking applies. */
+      letter-spacing: var(--slotted-letter-spacing-tighter, -0.03em);
+      unicode-bidi: plaintext;
+      line-height: var(--_value-line);
+      margin: 0;
+      min-inline-size: 0;
+      /* A number is never truncated: a value wider than its column breaks
+         rather than clips, and a consumer who wants it whole formats it
+         compact or stacks the card. */
+      overflow-wrap: break-word;
+    }
   }
 
   /* The unit is in the value's own line, a step down in size and weight, so
      `$` and `%` read as annotation of the number rather than as digits. */
-  [data-ui='stat-card'] [data-part='unit'] {
-    color: var(--_ink-muted);
-    font-size: var(--_delta-size);
-    font-weight: var(--slotted-font-weight-medium, 500);
-    letter-spacing: 0;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='unit'] {
+      color: var(--_ink-muted);
+      font-size: var(--_delta-size);
+      font-weight: var(--slotted-font-weight-medium, 500);
+      letter-spacing: 0;
+    }
   }
 
   /**
@@ -474,44 +517,58 @@
    * metrics, and the tone's text role already clears the reading ratio on
    * the surface. It sits on the value's baseline.
    */
-  [data-ui='stat-card'] [data-part='delta'] {
-    align-items: center;
-    color: var(--_tone-text);
-    column-gap: var(--slotted-space-1, 0.125rem);
-    display: inline-flex;
-    font-size: var(--_delta-size);
-    font-variant-numeric: tabular-nums;
-    font-weight: var(--slotted-font-weight-semibold, 600);
-    line-height: 1;
-    /* A signed number is a run of its own: in a right-to-left document the
-       sign of `+12.4%` is a neutral character and drifts to the far end of
-       the run, so the run is laid out by its own content. */
-    unicode-bidi: plaintext;
-    white-space: nowrap;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'] {
+      align-items: center;
+      color: var(--_tone-text);
+      column-gap: var(--slotted-space-1, 0.125rem);
+      display: inline-flex;
+      font-size: var(--_delta-size);
+      font-variant-numeric: tabular-nums;
+      font-weight: var(--slotted-font-weight-semibold, 600);
+      line-height: 1;
+      /* A signed number is a run of its own: in a right-to-left document the
+         sign of `+12.4%` is a neutral character and drifts to the far end of
+         the run, so the run is laid out by its own content. */
+      unicode-bidi: plaintext;
+      white-space: nowrap;
+    }
   }
 
-  [data-ui='stat-card'] [data-part='delta'][data-tone='neutral'] {
-    --_tone-text: var(--_ink-muted);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'][data-tone='neutral'] {
+      --_tone-text: var(--_ink-muted);
+    }
   }
 
-  [data-ui='stat-card'] [data-part='delta'][data-tone='accent'] {
-    --_tone-text: var(--slotted-tone-accent-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'][data-tone='accent'] {
+      --_tone-text: var(--slotted-tone-accent-text);
+    }
   }
 
-  [data-ui='stat-card'] [data-part='delta'][data-tone='secondary'] {
-    --_tone-text: var(--slotted-tone-secondary-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'][data-tone='secondary'] {
+      --_tone-text: var(--slotted-tone-secondary-text);
+    }
   }
 
-  [data-ui='stat-card'] [data-part='delta'][data-tone='success'] {
-    --_tone-text: var(--slotted-tone-success-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'][data-tone='success'] {
+      --_tone-text: var(--slotted-tone-success-text);
+    }
   }
 
-  [data-ui='stat-card'] [data-part='delta'][data-tone='warning'] {
-    --_tone-text: var(--slotted-tone-warning-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'][data-tone='warning'] {
+      --_tone-text: var(--slotted-tone-warning-text);
+    }
   }
 
-  [data-ui='stat-card'] [data-part='delta'][data-tone='danger'] {
-    --_tone-text: var(--slotted-tone-danger-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'][data-tone='danger'] {
+      --_tone-text: var(--slotted-tone-danger-text);
+    }
   }
 
   /**
@@ -522,38 +579,43 @@
    * change draws `minus`. The binding renders the glyph inside the icon box;
    * the part hands the box its size, and the box inherits the delta's ink.
    */
-  [data-ui='stat-card'] [data-part='indicator'] {
-    --slotted-icon-size: var(--_indicator-size);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='indicator'] {
+      --slotted-icon-size: var(--_indicator-size);
 
-    display: inline-flex;
-    flex: none;
+      display: inline-flex;
+      flex: none;
+    }
   }
 
   /* A reflection across the horizontal axis, not motion: nothing travels when
      a rise becomes a fall. Time runs from the right in a right-to-left
      document, so the rise points the other way there, as the sparkline beside
      it does — the `directional` icon box the binding draws does that. */
-  [data-ui='stat-card']
-    [data-part='delta'][data-trend='down']
-    [data-part='indicator']
-    > [data-ui='icon'] {
-    rotate: x 180deg;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='delta'][data-trend='down'] [data-part='indicator'] > [data-ui='icon'] {
+      rotate: x 180deg;
+    }
   }
 
   /* ── Comparison: the prose under the figure ───────────────────────────── */
 
-  [data-ui='stat-card'] [data-part='comparison'] {
-    color: var(--_ink-muted);
-    font-size: var(--_prose-size);
-    line-height: var(--_prose-line);
-    margin-block-start: var(--_region-gap);
-    margin: 0;
-    min-inline-size: 0;
-    overflow-wrap: anywhere;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='comparison'] {
+      color: var(--_ink-muted);
+      font-size: var(--_prose-size);
+      line-height: var(--_prose-line);
+      margin-block-start: var(--_region-gap);
+      margin: 0;
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+    }
   }
 
-  [data-ui='stat-card'] [data-part='period'] {
-    color: var(--_ink-muted);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='period'] {
+      color: var(--_ink-muted);
+    }
   }
 
   /* ── Trend: where a sparkline goes ────────────────────────────────────── */
@@ -566,55 +628,75 @@
    * — a card with no delta, or a metric with no valence, draws its trend in
    * the theme's blue and not in grey.
    */
-  [data-ui='stat-card'] [data-part='trend'] {
-    align-self: center;
-    display: flex;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='trend'] {
+      align-self: center;
+      display: flex;
+    }
   }
 
-  [data-ui='stat-card'][data-tone='success'] [data-part='trend'] {
-    --slotted-sparkline-color: var(--slotted-tone-success-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-tone='success'] [data-part='trend'] {
+      --slotted-sparkline-color: var(--slotted-tone-success-text);
+    }
   }
 
-  [data-ui='stat-card'][data-tone='danger'] [data-part='trend'] {
-    --slotted-sparkline-color: var(--slotted-tone-danger-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-tone='danger'] [data-part='trend'] {
+      --slotted-sparkline-color: var(--slotted-tone-danger-text);
+    }
   }
 
-  [data-ui='stat-card'][data-tone='warning'] [data-part='trend'] {
-    --slotted-sparkline-color: var(--slotted-tone-warning-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-tone='warning'] [data-part='trend'] {
+      --slotted-sparkline-color: var(--slotted-tone-warning-text);
+    }
   }
 
-  [data-ui='stat-card'][data-tone='accent'] [data-part='trend'] {
-    --slotted-sparkline-color: var(--slotted-tone-accent-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-tone='accent'] [data-part='trend'] {
+      --slotted-sparkline-color: var(--slotted-tone-accent-text);
+    }
   }
 
-  [data-ui='stat-card'][data-tone='secondary'] [data-part='trend'] {
-    --slotted-sparkline-color: var(--slotted-tone-secondary-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-tone='secondary'] [data-part='trend'] {
+      --slotted-sparkline-color: var(--slotted-tone-secondary-text);
+    }
   }
 
-  [data-ui='stat-card'][data-fill='plain'] [data-part='trend'] {
-    --slotted-sparkline-ring-color: var(--slotted-surface-raised, Canvas);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-fill='plain'] [data-part='trend'] {
+      --slotted-sparkline-ring-color: var(--slotted-surface-raised, Canvas);
+    }
   }
 
   /* ── Message: what stands in for a value that is missing or failed ────── */
 
-  [data-ui='stat-card'] [data-part='message'] {
-    color: var(--_ink-muted);
-    font-size: var(--_prose-size);
-    line-height: var(--_prose-line);
-    margin: 0;
-    min-inline-size: 0;
-    overflow-wrap: anywhere;
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope [data-part='message'] {
+      color: var(--_ink-muted);
+      font-size: var(--_prose-size);
+      line-height: var(--_prose-line);
+      margin: 0;
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+    }
   }
 
-  [data-ui='stat-card'][data-status='error'] [data-part='message'] {
-    color: var(--slotted-tone-danger-text);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-status='error'] [data-part='message'] {
+      color: var(--slotted-tone-danger-text);
+    }
   }
 
   /* A value that is not there is a dash in the muted step, at the value's
      own size, so the row keeps its height and its rhythm. */
-  [data-ui='stat-card'][data-status='empty'] [data-part='value'],
-  [data-ui='stat-card'][data-status='error'] [data-part='value'] {
-    color: var(--_ink-muted);
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-status='empty'] [data-part='value'],
+    :scope[data-status='error'] [data-part='value'] {
+      color: var(--_ink-muted);
+    }
   }
 
   /* ── Loading ──────────────────────────────────────────────────────────── */
@@ -634,28 +716,36 @@
    * arrived. The floor is one line of the value's own type, so the two states
    * occupy the same box.
    */
-  [data-ui='stat-card'][data-loading] [data-part='value'] {
-    min-block-size: calc(var(--_value-size) * var(--_value-line));
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-loading] [data-part='value'] {
+      min-block-size: calc(var(--_value-size) * var(--_value-line));
+    }
   }
 
-  [data-ui='stat-card'][data-loading] [data-part='trend'] {
-    --slotted-skeleton-block-size: var(
-      --slotted-sparkline-block-size,
-      var(--slotted-space-9, 2rem)
-    );
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-loading] [data-part='trend'] {
+      --slotted-skeleton-block-size: var(
+        --slotted-sparkline-block-size,
+        var(--slotted-space-9, 2rem)
+      );
+    }
   }
 
-  [data-ui='stat-card'][data-loading][data-size='sm'] [data-part='trend'] {
-    --slotted-skeleton-block-size: var(
-      --slotted-sparkline-block-size-sm,
-      var(--slotted-space-7, 1.25rem)
-    );
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-loading][data-size='sm'] [data-part='trend'] {
+      --slotted-skeleton-block-size: var(
+        --slotted-sparkline-block-size-sm,
+        var(--slotted-space-7, 1.25rem)
+      );
+    }
   }
 
-  [data-ui='stat-card'][data-loading][data-size='lg'] [data-part='trend'] {
-    --slotted-skeleton-block-size: var(
-      --slotted-sparkline-block-size-lg,
-      var(--slotted-space-11, 3rem)
-    );
+  @scope ([data-ui='stat-card']) to ([data-ui]:not(:scope) > *) {
+    :scope[data-loading][data-size='lg'] [data-part='trend'] {
+      --slotted-skeleton-block-size: var(
+        --slotted-sparkline-block-size-lg,
+        var(--slotted-space-11, 3rem)
+      );
+    }
   }
 }

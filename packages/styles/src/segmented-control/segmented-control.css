@@ -59,6 +59,8 @@
     --_inset: var(--slotted-segmented-control-inset, var(--slotted-space-1, 0.125rem));
     /** What is left for a segment once the track has taken its edge and ring. */
     --_inner: calc(var(--_height) - (var(--_inset) + var(--_border-width)) * 2);
+    /** The space between two segments: the ring's own step. */
+    --_spacing: var(--slotted-segmented-control-gap, var(--_inset));
     /** The thumb's corner, kept concentric with the track's own. */
     --_thumb-radius: max(calc(var(--_radius) - var(--_inset)), var(--slotted-radius-xs, 2px));
     /**
@@ -101,6 +103,7 @@
      * did not — the thumb and its segment no longer matched, and the label
      * overflowed the track.
      */
+    gap: var(--_spacing);
     grid-auto-columns: minmax(max(var(--_inner), var(--slotted-target-min, 24px)), 1fr);
     grid-auto-flow: column;
     isolation: isolate;
@@ -203,11 +206,11 @@
     padding-inline: var(--_padding-inline);
     /**
      * Positioned without a `z-index`: the segment paints after the thumb, which
-     * comes first in the DOM, so its words lie over the thumb, and its divider
-     * and its hover ground — pseudo-elements at `z-index: -1` — lie under it.
-     * A segment at `z-index: 1` lifted its divider and its hover ground over the
-     * thumb as well, and a thumb crossing a hovered segment or a divider lost
-     * part of its edge for the length of the slide.
+     * comes first in the DOM, so its words lie over the thumb, and its hover
+     * ground — a pseudo-element at `z-index: -1` — lies under it. A segment at
+     * `z-index: 1` lifted its ground over the thumb as well, and a thumb
+     * crossing a hovered segment lost part of its edge for the length of the
+     * slide.
      */
     position: relative;
     transition: color var(--slotted-control-transition-duration)
@@ -237,45 +240,15 @@
   }
 
   /**
-   * ── The rule between two segments ─────────────────────────────────────
+   * ── The space between two segments ────────────────────────────────────
    *
-   * A track of words with nothing between them reads as a sentence. The rule
-   * is what says the control is divided, and it is what Mantine ships on by
-   * default, Apple draws, and Carbon draws. It is shorter than the segment, so
-   * it reads as a divider rather than as a second frame, and it gives way
-   * around the thumb — a grey line touching the accent edge is the "border
-   * inside a border" this family had to correct elsewhere.
+   * Segments stand apart by the same step as the ring of track around them,
+   * so each one — its hover ground, the thumb on it — is a shape of its own
+   * on the track. The first appearance set them flush and drew a short rule
+   * between two: the rule read as a ruler's marks across the control, and a
+   * hover ground ran into its neighbour's edge. With room between them and a
+   * ground under the pointer, nothing has to divide them.
    */
-  [data-ui='segmented-control'] [data-part='item'] + [data-part='item']::before {
-    /* No system colour behind it: an unthemed decoration disappears rather
-       than shouting, which is what `fallbacks.test.mjs` holds a pseudo-element
-       to. The rule is a decoration — what divides the segments in forced
-       colours is the thumb's own border. */
-    background: var(--slotted-segmented-control-divider-color, var(--slotted-border-subtle));
-    content: '';
-    inline-size: var(--_border-width);
-    inset-block: 22%;
-    inset-inline-start: 0;
-    position: absolute;
-    transition: opacity var(--_travel) var(--slotted-easing-standard);
-    z-index: -1;
-  }
-
-  [data-ui='segmented-control'][data-part='root'][data-orientation='vertical']
-    [data-part='item']
-    + [data-part='item']::before {
-    block-size: var(--_border-width);
-    inline-size: auto;
-    inset-block: auto;
-    inset-block-start: 0;
-    inset-inline: 22%;
-  }
-
-  [data-ui='segmented-control'] [data-part='item'][data-checked]::before,
-  [data-ui='segmented-control'] [data-part='item'][data-checked] + [data-part='item']::before {
-    opacity: 0;
-  }
-
   /**
    * The radio itself, carrying the focus the platform gives it and the whole
    * hit area of the segment. It reaches past the thumb and over the ring of
@@ -290,7 +263,9 @@
     border-radius: inherit;
     cursor: inherit;
     inset-block: calc(-1 * (var(--_inset) + var(--_border-width)));
-    inset-inline: 0;
+    /* Half the space on each side, so the room between two segments is not a
+       place a press lands on nothing. */
+    inset-inline: calc(var(--_spacing) / -2);
     margin: 0;
     opacity: 0;
     padding: 0;
@@ -369,7 +344,9 @@
     border-radius: var(--_thumb-radius);
     box-shadow: var(--slotted-segmented-control-indicator-shadow, var(--slotted-shadow-xs, none));
     box-sizing: border-box;
-    inline-size: calc((100% - var(--_inset) * 2) / var(--_count));
+    inline-size: calc(
+      (100% - var(--_inset) * 2 - var(--_spacing) * (var(--_count) - 1)) / var(--_count)
+    );
     inset-block-start: var(--_inset);
     inset-inline-start: var(--_inset);
     pointer-events: none;
@@ -377,7 +354,7 @@
     transition:
       opacity var(--slotted-control-transition-duration) var(--slotted-easing-standard),
       translate var(--_travel) var(--slotted-easing-standard);
-    translate: calc(var(--_index) * 100%);
+    translate: calc(var(--_index) * (100% + var(--_spacing)));
     z-index: 0;
 
     @starting-style {
@@ -386,14 +363,16 @@
   }
 
   [data-ui='segmented-control'] [data-part='indicator']:dir(rtl) {
-    translate: calc(var(--_index) * -100%);
+    translate: calc(var(--_index) * (-100% - var(--_spacing)));
   }
 
   [data-ui='segmented-control'][data-part='root'][data-orientation='vertical']
     [data-part='indicator'] {
-    block-size: calc((100% - var(--_inset) * 2) / var(--_count));
+    block-size: calc(
+      (100% - var(--_inset) * 2 - var(--_spacing) * (var(--_count) - 1)) / var(--_count)
+    );
     inline-size: calc(100% - var(--_inset) * 2);
-    translate: 0 calc(var(--_index) * 100%);
+    translate: 0 calc(var(--_index) * (100% + var(--_spacing)));
   }
 
   /**
@@ -588,9 +567,6 @@
   }
 
   [data-ui='segmented-control'][data-part='root'][data-variant='underline'] [data-part='indicator'],
-  [data-ui='segmented-control'][data-part='root'][data-variant='underline']
-    [data-part='item']
-    + [data-part='item']::before,
   [data-ui='segmented-control'][data-part='root'][data-variant='underline']
     [data-part='item']::after {
     display: none;

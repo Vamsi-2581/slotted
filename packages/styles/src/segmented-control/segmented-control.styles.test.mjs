@@ -41,8 +41,7 @@ test('places the thumb by arithmetic and never by measuring', () => {
   for (const property of contract.indicator.customProperties) {
     assert.match(dense, new RegExp(property.replace(/-/g, '\\-')), `never reads ${property}`);
   }
-  assert.match(dense, /translate:calc\(var\(--_index\)\*100%\)/);
-  assert.match(dense, /inline-size:calc\(\(100%-var\(--_inset\)\*2\)\/var\(--_count\)\)/);
+  assert.match(dense, /translate:calc\(var\(--_index\)\*\(100%\+var\(--_spacing\)\)\)/);
   assert.equal(contract.indicator.measured, false);
 });
 
@@ -50,11 +49,11 @@ test('places the thumb by arithmetic and never by measuring', () => {
 test('mirrors the thumb in a right-to-left document', () => {
   assert.match(
     dense,
-    /\[data-part='indicator'\]:dir\(rtl\)\{translate:calc\(var\(--_index\)\*-100%\)/,
+    /\[data-part='indicator'\]:dir\(rtl\)\{translate:calc\(var\(--_index\)\*\(-100%-var\(--_spacing\)\)\)/,
   );
   assert.match(
     dense,
-    /\[data-orientation='vertical'\]\[data-part='indicator'\]\{[^}]*translate:0calc\(var\(--_index\)\*100%\)/,
+    /\[data-orientation='vertical'\]\[data-part='indicator'\]\{[^}]*translate:0calc\(var\(--_index\)\*\(100%\+var\(--_spacing\)\)\)/,
   );
 });
 
@@ -112,20 +111,20 @@ test('keeps the target at the control’s own height rather than the thumb’s',
 });
 
 /**
- * A track of words with nothing between them reads as a sentence. The rule is
- * what says the control is divided — Mantine ships it on by default, Apple
- * draws it, Carbon draws it — and it gives way around the thumb, because a
- * grey line touching the accent edge is the "border inside a border" this pair
- * had to correct in the other family.
+ * Segments stand apart by the ring's own step, with no rule between them: the
+ * thumb is one column wide and moves by its own width plus that step, so the
+ * arithmetic still reads nothing from layout.
  */
-test('rules between two segments, and gives way around the thumb', () => {
-  assert.match(dense, /\[data-part='item'\]\+\[data-part='item'\]::before\{/);
-  assert.match(dense, /--slotted-segmented-control-divider-color/);
+test('spaces the segments apart and moves the thumb by a column and a gap', () => {
+  assert.doesNotMatch(dense, /\[data-part='item'\]\+\[data-part='item'\]::before/);
+  assert.match(dense, /--_spacing:var\(--slotted-segmented-control-gap,var\(--_inset\)\)/);
+  assert.match(dense, /gap:var\(--_spacing\)/);
+  assert.match(dense, /translate:calc\(var\(--_index\)\*\(100%\+var\(--_spacing\)\)\)/);
   assert.match(
     dense,
-    /\[data-part='item'\]\[data-checked\]::before,[^{]*\[data-part='item'\]::before\{opacity:0/,
+    /inline-size:calc\(\(100%-var\(--_inset\)\*2-var\(--_spacing\)\*\(var\(--_count\)-1\)\)\/var\(--_count\)\)/,
   );
-  assert.match(dense, /::before\{[^}]*transition:opacityvar\(--_travel\)/);
+  assert.match(dense, /\[data-part='control'\]\{[^}]*inset-inline:calc\(var\(--_spacing\)\/-2\)/);
 });
 
 /**
@@ -191,7 +190,6 @@ test('slides the thumb over the dividers and the hover ground', () => {
   assert.notEqual(start, -1);
   const item = dense.slice(start);
   assert.doesNotMatch(item.slice(0, item.indexOf('}')), /z-index/);
-  assert.match(dense, /\[data-part='item'\]\+\[data-part='item'\]::before\{[^}]*z-index:-1/);
   assert.match(dense, /\[data-part='item'\]::after\{[^}]*z-index:-1/);
   assert.match(
     dense,

@@ -127,11 +127,11 @@ test('is exactly as tall as a control, and keeps the target at that height', () 
   assert.ok(contract.height.reason.length > 0);
 });
 
-/** A track of words with nothing between them reads as a sentence. */
-test('rules between its segments and gives the rule up around the thumb', () => {
-  assert.match(contract.divider.drawnOn, /every segment after the first/);
-  assert.match(contract.divider.givesWayTo, /checked segment/);
-  assert.ok(contract.divider.reason.length > 0);
+/** Segments stand apart by the ring's own step, with no rule between them. */
+test('spaces its segments apart and draws no rule between them', () => {
+  assert.match(contract.spacing.between, /--slotted-segmented-control-gap/);
+  assert.equal(contract.spacing.divider, false);
+  assert.ok(contract.spacing.reason.length > 0);
 });
 
 /**

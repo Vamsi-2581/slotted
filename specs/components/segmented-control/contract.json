@@ -76,10 +76,10 @@
     "target": "the radio reaches the track's own edge, so the target is the control's height rather than the thumb's",
     "reason": "A segmented control is put in forms beside a text field and a select. A family that added its padding to the control height would stand two or six pixels prouder than every other control on the row."
   },
-  "divider": {
-    "drawnOn": "the leading edge of every segment after the first",
-    "givesWayTo": "the checked segment and the one after it",
-    "reason": "A track of words with nothing between them reads as a sentence. Mantine ships the rule on by default, Apple draws it and Carbon draws it; it gives way around the thumb because a neutral line touching the accent edge is a border inside a border."
+  "spacing": {
+    "between": "the ring's own step, --slotted-segmented-control-gap, defaulting to the track's inset",
+    "divider": false,
+    "reason": "Segments stand apart so each one, its hover ground and the thumb on it, is a shape of its own on the track. Set flush with a short rule between two, the rules read as a ruler's marks across the control and a hover ground ran into its neighbour's edge."
   },
   "motion": {
     "thumb": "--slotted-duration-medium",
@@ -217,7 +217,7 @@
   },
   "variant": {
     "track": "A box with a thumb behind the chosen segment; the segments share the width of the widest.",
-    "underline": "The words alone, each as wide as itself, the chosen one in the text colour and underlined, the others muted. No thumb, no dividers, no ground; the semantics, the keyboard and the single tab stop are the same radio group.",
+    "underline": "The words alone, each as wide as itself, the chosen one in the text colour and underlined, the others muted. No thumb, no ground; the semantics, the keyboard and the single tab stop are the same radio group.",
     "labelledBy": "Inside a field the root is named by the field label through aria-labelledby, unless the consumer names it; the root is a div, which a label element cannot label."
   }
 }

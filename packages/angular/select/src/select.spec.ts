@@ -1013,3 +1013,32 @@ describe('SlSelect, the icon column', () => {
     expect(named('Cherry').querySelector("[data-part='icon']")).toBeNull();
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SlSelect, SlSelectItem],
+  template: `
+    <sl-select aria-label="Account" [value]="'a1b2c3'">
+      <sl-select-item value="a1b2c3">Checking</sl-select-item>
+      <sl-select-item value="d4e5f6">Savings</sl-select-item>
+    </sl-select>
+  `,
+})
+class AccountHost {}
+
+/**
+ * A value that is not its own label shows the label of its option while the
+ * control is closed and the popup has never been built. The options are
+ * projected content, created with the host whether or not the popup exists.
+ */
+describe('SlSelect, the closed control and an identifier', () => {
+  it('names the value from its option without items', async () => {
+    const fixture = TestBed.createComponent(AccountHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(trigger().textContent?.trim()).toBe('Checking');
+    expect(document.querySelector("[role='listbox']")).toBeNull();
+  });
+});

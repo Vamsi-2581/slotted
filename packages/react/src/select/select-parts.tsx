@@ -931,7 +931,31 @@ export function SelectContent({
     latest.current.setHighlighted(moveHighlight(surfaceNode, null, 'first', false), 'keyboard');
   }, [count, select.open, select.query, select.search, surfaceNode]);
 
-  if (!mounted) return null;
+  /**
+   * The labels a closed control has to print. Under `mount="active"` the popup
+   * does not exist until the first open, so a held value that is not its own
+   * label — an identifier — read as the identifier until `items` was passed.
+   * While such a value is held and the popup is not built, the options are
+   * rendered once into a fragment no document holds: each registers its label,
+   * and the fragment goes in the next commit. A set of values no option names
+   * is collected once, not on every render.
+   */
+  const unresolved = select.selection
+    .filter((held) => select.labelFor(held) === undefined)
+    .join('\u0000');
+  const [collector, setCollector] = useState<DocumentFragment | null>(null);
+  const collected = useRef<string | null>(null);
+  useEffect(() => {
+    if (collector !== null) {
+      setCollector(null);
+      return;
+    }
+    if (mounted || unresolved === '' || collected.current === unresolved) return;
+    collected.current = unresolved;
+    setCollector((select.triggerNode?.ownerDocument ?? document).createDocumentFragment());
+  }, [collector, mounted, select.triggerNode, unresolved]);
+
+  if (!mounted) return collector === null ? null : createPortal(children, collector);
 
   const rootProps: SelectPositionerProps = {
     'data-align': align,

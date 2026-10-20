@@ -43,7 +43,10 @@ export function SelectItem({
   ...nativeProps
 }: SelectItemProps) {
   const select = useSelect();
-  const [node, setNode] = useState<HTMLDivElement | null>(null);
+  /* A ref rather than state: held in state, attaching the option rendered it
+     a second time before its label could be read — one commit later than the
+     closed control's collection pass waits for. */
+  const node = useRef<HTMLDivElement | null>(null);
   const registered = useRef<string | null>(null);
 
   /**
@@ -53,12 +56,13 @@ export function SelectItem({
    * answer either way.
    */
   useEffect(() => {
-    if (node === null) return;
-    const label = textValue ?? node.querySelector("[data-part='label']")?.textContent?.trim() ?? '';
+    if (node.current === null) return;
+    const label =
+      textValue ?? node.current.querySelector("[data-part='label']")?.textContent?.trim() ?? '';
     if (label === '' || label === registered.current) return;
     registered.current = label;
     select.registerLabel(value, label);
-  }, [node, select, textValue, value]);
+  }, [children, select, textValue, value]);
 
   const text = textValue ?? (typeof children === 'string' ? children : undefined);
 
@@ -144,7 +148,7 @@ export function SelectItem({
       onPointerDown={onPointerDown}
       onPointerEnter={onPointerEnter}
       ref={(element: HTMLDivElement | null) => {
-        setNode(element);
+        node.current = element;
         if (typeof ref === 'function') ref(element);
         else if (ref !== null && ref !== undefined) ref.current = element;
       }}

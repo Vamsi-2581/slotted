@@ -582,7 +582,7 @@ const api = apiRows([
     'SelectItems',
     '—',
     'Select',
-    'Values with their labels, so the closed control can show the label of a value whose option has not been rendered. Options are rendered only while the list is open.',
+    'Values with their labels, read before any option renders. Without it, a held value takes its label from its SelectItem: while the list is closed and a held value has no label, the options render once outside the document and register theirs. Pass items when the options are not rendered until the list opens, such as options fetched on open.',
   ],
   [
     'name',

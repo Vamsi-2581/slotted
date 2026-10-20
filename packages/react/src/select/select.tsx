@@ -276,7 +276,9 @@ export function Select({
    * `mount="active"`, so an option's own label is unavailable exactly when the
    * closed control has to print it. `items` is the answer for a select that
    * knows its options up front; the registry below is the answer for one that
-   * does not, filled the first time the popup is built and kept afterwards; and
+   * does not, filled by the options themselves — rendered once into a detached
+   * fragment while a held value has no label, and again whenever the popup is
+   * built — and kept afterwards; and
    * `SelectValue`'s render function is the answer for a value the family cannot
    * resolve at all. When none of the three answers, the control prints the raw
    * value under `data-unmatched` rather than falling back to the placeholder,

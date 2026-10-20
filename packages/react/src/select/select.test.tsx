@@ -261,6 +261,32 @@ describe('Select', () => {
     expect(trigger()).toHaveTextContent('Blueberry');
   });
 
+  /**
+   * A value that is not its own label — an identifier — read "a1b2…" in the
+   * closed control until `items` was passed, because the options that know the
+   * label did not exist before the first open. The options are now built where
+   * nothing displays them while a held value has no label.
+   */
+  it('names a value from its option before the popup has ever been built', async () => {
+    render(
+      <Select value="a1b2c3">
+        <SelectTrigger aria-label="Account">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="a1b2c3">Checking</SelectItem>
+          <SelectItem value="d4e5f6">Savings</SelectItem>
+        </SelectContent>
+      </Select>,
+    );
+    const control = screen.getByRole('combobox', { name: 'Account' });
+
+    await waitFor(() => expect(control).toHaveTextContent('Checking'));
+    expect(control.querySelector("[data-part='value']")).not.toHaveAttribute('data-unmatched');
+    expect(screen.queryByRole('listbox')).toBeNull();
+    expect(document.querySelectorAll("[data-part='item']")).toHaveLength(0);
+  });
+
   it('shows a value it cannot resolve rather than falling back to the placeholder', () => {
     render(<Basic defaultValue="usr_8f21c0" />);
     expect(trigger()).toHaveTextContent('usr_8f21c0');
@@ -712,7 +738,7 @@ describe('Select', () => {
     expect(document.querySelector<HTMLSelectElement>("select[name='fruit']")?.value).toBe('apple');
   });
 
-  it('speaks the language in force, and lays its own messages over it', () => {
+  it('speaks the language in force, and lays its own messages over it', async () => {
     render(
       <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>
         <Basic
@@ -724,7 +750,7 @@ describe('Select', () => {
       </SlottedProvider>,
     );
     expect(trigger()).toHaveTextContent('2 selecionados');
-    expect(screen.getByRole('button', { name: 'Remover apple' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Remover Apple' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Esvaziar' })).toBeInTheDocument();
   });
 

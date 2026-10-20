@@ -164,7 +164,11 @@ test('stands a row off the column edge without moving its mark', () => {
       css.indexOf("[data-ui='side-navigation'] :is([data-part='link'], [data-part='trigger']) {"),
     )
     .slice(0, 900);
-  assert.match(row, /margin-inline:\s*var\(--_standoff\)/);
-  assert.match(row, /padding-inline:\s*calc\(var\(--_inset\) - var\(--_standoff\)\)/);
+  assert.match(row, /margin-inline:\s*calc\(var\(--_standoff\) - var\(--_ring-inset\)\)/);
+  assert.match(
+    row,
+    /padding-inline:\s*calc\(var\(--_inset\) - var\(--_standoff\) \+ var\(--_ring-inset\)\)/,
+  );
+  assert.match(css, /--_ring-inset:\s*var\(--slotted-app-shell-row-ring-inset, 0px\)/);
   assert.match(css, /--_standoff:\s*min\(var\(--slotted-space-2[^)]*\)[^;]*var\(--_inset\)\)/);
 });

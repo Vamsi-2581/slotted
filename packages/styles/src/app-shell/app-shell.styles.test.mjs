@@ -151,7 +151,7 @@ test('insets the rows of the overlay card on the inset plane', () => {
   const parts = rule(
     "> [data-part='nav']\n    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {",
   ).body;
-  assert.match(parts, /padding-inline:\s*var\(--_nav-inset\)/);
+  assert.match(parts, /padding-inline:\s*calc\(var\(--_nav-inset\) \+ var\(--_ring-inset\)\)/);
 });
 
 /**
@@ -321,7 +321,7 @@ test('adds nothing to one side of the region under either plane', () => {
   }
   assert.match(
     rule("[data-nav-mode='inline'] > [data-part='nav'] {").body,
-    /inline-size:\s*calc\(var\(--_rail-size\) \+ 2 \* var\(--_nav-inset\) \+ var\(--_nav-edges\)\)/,
+    /inline-size:\s*calc\(\s*var\(--_rail-size\) \+ 2 \* \(var\(--_nav-inset\) \+ var\(--_ring-inset\)\) \+ var\(--_nav-edges\)\s*\)/,
   );
   assert.match(rule("[data-canvas='flush'] {").body, /--_nav-inset:\s*var\(--_row-inset\)/);
 });
@@ -331,6 +331,28 @@ test('adds nothing to one side of the region under either plane', () => {
  * belongs to `side-navigation`, which answers the region's own query rather
  * than being told.
  */
+/**
+ * A control a product puts in the column draws its focus ring outside its box,
+ * and the body clips at its padding box. The three parts pad by the ring's
+ * reach and publish it, and the head and the foot reserve the gutter the body
+ * reserves, so the three share one content edge with classic scrollbars.
+ */
+test('pads the column parts by the focus ring and shares the body gutter', () => {
+  assert.match(
+    css,
+    /--_ring-inset:\s*calc\(\s*var\(--slotted-focus-ring-width, 2px\) \+ var\(--slotted-focus-ring-offset, 2px\)\s*\)/,
+  );
+  const parts = rule(
+    "> [data-part='nav']\n    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {",
+  ).body;
+  assert.match(parts, /--slotted-app-shell-row-ring-inset:\s*var\(--_ring-inset\)/);
+  const ends = rule(
+    "[data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-header'],\n  [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-footer'] {",
+  ).body;
+  assert.match(ends, /overflow:\s*hidden/);
+  assert.match(ends, /scrollbar-gutter:\s*stable/);
+});
+
 test('makes the navigation region a query container of its own', () => {
   assert.match(css, /container-name:\s*slotted-app-shell-nav/);
 });
@@ -470,7 +492,7 @@ test('draws the pane control as the navigation control turned', () => {
  * recomputed from that ground, or a hover on it paints the ground itself.
  */
 test('separates by a tone that recalibrates the controls standing on it', () => {
-  assert.match(rule("[data-separation='tone'] {").body, /--_seam:\s*none/);
+  assert.match(rule("[data-separation='tone'] > [data-part] {").body, /--_seam:\s*none/);
   assert.match(
     css,
     /--slotted-app-shell-tone-surface,\s*color-mix\(in oklab, var\(--slotted-surface\), var\(--slotted-text\) 4\.5%\)/,
@@ -491,8 +513,19 @@ test('separates by a tone that recalibrates the controls standing on it', () => 
   const forced = css.slice(css.indexOf('@media (forced-colors: active)'));
   assert.match(
     forced,
-    /\[data-separation='tone'\] \{\s*--_seam: var\(--_rule-width\) solid CanvasText/,
+    /\[data-separation='tone'\] > \[data-part\] \{\s*--_seam: var\(--_rule-width\) solid CanvasText/,
   );
+});
+
+/**
+ * `--_seam` declared on the root resolved the root's border colour, so the
+ * property written on one region recoloured nothing there. The chain is
+ * declared again on every region, where a `var()` reads the region's scope.
+ */
+test('re-reads the seam colour in each region', () => {
+  const region = rule("[data-ui='app-shell'] > [data-part] {").body;
+  assert.match(region, /--_rule:\s*var\(--slotted-app-shell-border-color,/);
+  assert.match(region, /--_seam:\s*var\(--_rule-width\) solid var\(--_rule\)/);
 });
 
 /** One box for a card over two regions, and none once the navigation is a layer. */

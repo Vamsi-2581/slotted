@@ -985,7 +985,9 @@ export const REACT_APP_SHELL_DOCS = {
 }
 
 /* The six the shell publishes, for the rows a product brings. Read them; do
-   not restate them. */
+   not restate them. The navigation parts publish a seventh,
+   --slotted-app-shell-row-ring-inset: the padding they add for an outward
+   focus ring. */
 .my-nav-item {
   min-block-size: var(--slotted-app-shell-row-height);
   padding-inline: var(--slotted-app-shell-row-inset);

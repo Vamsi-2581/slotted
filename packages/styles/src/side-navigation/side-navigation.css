@@ -48,6 +48,13 @@
      * there is to give.
      */
     --_standoff: min(var(--slotted-space-2, 0.25rem), var(--_inset));
+    /**
+     * The inline padding `app-shell`'s navigation parts add for an outward
+     * focus ring, read so a row's box keeps the edge it had there: the row
+     * reaches back into that padding, and its own ring is drawn inside. Nought
+     * outside those parts.
+     */
+    --_ring-inset: var(--slotted-app-shell-row-ring-inset, 0px);
     --_gap: var(--slotted-app-shell-row-gap, var(--slotted-control-gap-md, 8px));
     --_font-size: var(--slotted-app-shell-row-font-size, var(--slotted-font-size-sm, 0.8125rem));
     --_line-height: var(--slotted-app-shell-row-line-height, var(--slotted-line-height-sm, 1.45));
@@ -354,11 +361,11 @@
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     grid-template-rows: auto auto;
     margin-block: 0;
-    margin-inline: var(--_standoff);
+    margin-inline: calc(var(--_standoff) - var(--_ring-inset));
     min-block-size: var(--_row-height);
     min-inline-size: 0;
     padding-block: 0;
-    padding-inline: calc(var(--_inset) - var(--_standoff));
+    padding-inline: calc(var(--_inset) - var(--_standoff) + var(--_ring-inset));
     position: relative;
     text-align: start;
     text-decoration: none;

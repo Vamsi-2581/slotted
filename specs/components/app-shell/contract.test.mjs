@@ -320,6 +320,7 @@ test('publishes the geometry of a row, so a consumer list stands on it', () => {
       '--slotted-app-shell-row-height',
       '--slotted-app-shell-row-font-size',
       '--slotted-app-shell-row-line-height',
+      '--slotted-app-shell-row-ring-inset',
     ],
   );
   assert.match(

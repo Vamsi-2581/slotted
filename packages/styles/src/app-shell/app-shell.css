@@ -82,6 +82,16 @@
     /** The box a row's mark occupies: a control's own size, so the two agree. */
     --_row-mark: var(--slotted-app-shell-row-mark-size, var(--slotted-control-height-md, 34px));
     --_row-gap: var(--slotted-control-gap-md, 8px);
+    /**
+     * How far a focus ring drawn outside a control reaches past its box: the
+     * ring's width and its offset, 4px with the default theme. The three parts
+     * of the navigation column pad their inline sides by it, because the body
+     * scrolls and clips at its padding box, and a full-width control's ring
+     * stood outside that box on both sides.
+     */
+    --_ring-inset: calc(
+      var(--slotted-focus-ring-width, 2px) + var(--slotted-focus-ring-offset, 2px)
+    );
 
     /**
      * A row's type. A list of destinations is text and not a control, so it
@@ -495,7 +505,19 @@
     gap: var(--_row-gap);
     min-block-size: var(--_rail-size);
     min-inline-size: 0;
+    /**
+     * The gutter the body reserves, reserved here too. `scrollbar-gutter`
+     * applies to a scroll container only, and `hidden` is the overflow that
+     * makes one without a bar of its own: with classic scrollbars the body's
+     * content box ended one bar width (10px in Chrome) before the head's and
+     * the foot's. Nothing is clipped that was drawn before: the ring inset
+     * keeps a control's focus ring inside the padding box. The bar's width is
+     * the body's, or the gutter is the platform's full bar (15px in Chrome).
+     */
+    overflow: hidden;
     padding-block: var(--_row-inset);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
   }
   /**
    * The inset is the rows', not the region's: on the parts, a seam drawn by
@@ -505,7 +527,13 @@
   [data-ui='app-shell']
     > [data-part='nav']
     > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {
-    padding-inline: var(--_nav-inset);
+    /**
+     * Published where it pads, beside the row geometry the root publishes:
+     * `side-navigation` reads it to keep its rows' box on the edge it had,
+     * and a row it reaches outside these parts reads nothing.
+     */
+    --slotted-app-shell-row-ring-inset: var(--_ring-inset);
+    padding-inline: calc(var(--_nav-inset) + var(--_ring-inset));
   }
   /**
    * The body scrolls the way `scroll-area` scrolls, and for the reasons written
@@ -1221,6 +1249,19 @@
     border-start-end-radius: 0;
     margin-inline-end: 0;
   }
+
+  /**
+   * The seam re-read in each region's scope. `--_seam` declared on the root
+   * holds the root's `--slotted-app-shell-border-color`, so the property written
+   * on a region recoloured nothing. Declared again on every region, the chain
+   * resolves where the region stands: a colour written there recolours the
+   * seams the region and its parts draw, and `transparent` removes them. The
+   * tone rules below state the same two declarations at a higher specificity.
+   */
+  [data-ui='app-shell'] > [data-part] {
+    --_rule: var(--slotted-app-shell-border-color, var(--slotted-border-subtle, ButtonBorder));
+    --_seam: var(--_rule-width) solid var(--_rule);
+  }
   /* ── Separation by tone ──────────────────────────────────────────────── */
 
   /**
@@ -1238,7 +1279,8 @@
    * where it is declared, and a region carrying a scheme of its own must mix
    * its own ink.
    */
-  [data-ui='app-shell'][data-separation='tone'] {
+  [data-ui='app-shell'][data-separation='tone'],
+  [data-ui='app-shell'][data-separation='tone'] > [data-part] {
     --_seam: none;
     --_seam-width: 0px;
   }
@@ -1365,7 +1407,7 @@
   [data-ui='app-shell']
     > [data-part='nav']:has(> [data-part='nav-rail'])
     > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {
-    padding-inline-start: var(--_row-inset);
+    padding-inline-start: calc(var(--_row-inset) + var(--_ring-inset));
     transition: visibility var(--_duration) step-start;
   }
   [data-ui='app-shell'][data-nav-mode='inline'][data-open]
@@ -1400,7 +1442,8 @@
    * a forced-colours rule of its own for.
    */
   @media (forced-colors: active) {
-    [data-ui='app-shell'][data-separation='tone'] {
+    [data-ui='app-shell'][data-separation='tone'],
+    [data-ui='app-shell'][data-separation='tone'] > [data-part] {
       --_seam: var(--_rule-width) solid CanvasText;
       --_seam-width: var(--_rule-width);
     }
@@ -1501,8 +1544,12 @@
    * mode at any width. The container query further down is the fallback for
    * the frame before the binding has measured, and nothing else.
    */
+  /* The rail holds the parts' ring inset on each side as well, so a control
+     at the mark's size keeps its focus ring inside the body beside the gutter. */
   [data-ui='app-shell'][data-nav-mode='inline'] > [data-part='nav'] {
-    inline-size: calc(var(--_rail-size) + 2 * var(--_nav-inset) + var(--_nav-edges));
+    inline-size: calc(
+      var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_ring-inset)) + var(--_nav-edges)
+    );
   }
   [data-ui='app-shell'][data-nav-mode='inline'][data-open] > [data-part='nav'] {
     inline-size: var(--_nav-size);
@@ -1779,7 +1826,9 @@
    */
   @container slotted-app-shell (inline-size >= 600px) {
     [data-ui='app-shell']:not([data-nav-mode]) > [data-part='nav'] {
-      inline-size: calc(var(--_rail-size) + 2 * var(--_nav-inset) + var(--_nav-edges));
+      inline-size: calc(
+        var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_ring-inset)) + var(--_nav-edges)
+      );
     }
     [data-ui='app-shell']:not([data-nav-mode])[data-open] > [data-part='nav'] {
       inline-size: var(--_nav-size);

@@ -427,6 +427,7 @@
     "--slotted-app-shell-row-height": "the height of a row: the mark box, so a mark is centred in the row it stands in",
     "--slotted-app-shell-row-font-size": "the type size of a row label. A list of destinations is text and not a control, so it composes the type scale and not the control scale",
     "--slotted-app-shell-row-line-height": "the line height of a row label, from the scale: normal varies by font and a two-line row needs the number",
+    "--slotted-app-shell-row-ring-inset": "the inline padding nav-header, nav-body and nav-footer add for a focus ring drawn outside a control — the ring width plus its offset — published on those three parts only; a row drawing its ring inside reaches back into it and keeps its edge",
     "reason": "The rows inside the regions are not this family — side-navigation and top-navigation, wave 8 — and a consumer who brings its own list has nothing to align to unless the shell says what a row is. Six numbers, and every left edge, every row height and every label in the frame is one of them. No surveyed implementation publishes its row geometry."
   },
   "separation": {

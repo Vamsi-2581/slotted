@@ -128,6 +128,29 @@ describe('createPresence', () => {
     });
   });
 
+  /** React's StrictMode replays unmount and mount on the same handle in development. */
+  it('resumes after destroy, as a StrictMode replay calls it', () => {
+    const presence = createPresence({ present: false });
+    presence.destroy();
+
+    presence.sync(true);
+    expect(presence.status).toBe('entering');
+    presence.setNode(mount());
+    vi.advanceTimersToNextFrame();
+    expect(presence.status).toBe('open');
+    presence.destroy();
+  });
+
+  it('runs again an entering frame that destroy cancelled', () => {
+    const presence = createPresence({ initialPresent: true, skipInitialAnimation: false });
+    presence.destroy();
+
+    presence.setNode(mount());
+    vi.advanceTimersToNextFrame();
+    expect(presence.status).toBe('open');
+    presence.destroy();
+  });
+
   it('opens without the entering frame when it is present on the first mount', () => {
     const presence = createPresence({ initialPresent: true });
 

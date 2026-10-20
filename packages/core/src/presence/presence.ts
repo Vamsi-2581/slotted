@@ -77,6 +77,12 @@ export interface PresenceHandle {
   sync: (present: boolean | undefined) => void;
   /** Ends a running exit now. */
   finish: () => void;
+  /**
+   * Cancels the pending frame, timer and listeners, and drops the node. The
+   * handle stays usable: React's StrictMode unmounts and mounts a component
+   * again on the same handle in development, so a later `setNode`, `sync` or
+   * `request` resumes it, and an `entering` frame the call cancelled runs again.
+   */
   destroy: () => void;
 }
 
@@ -135,7 +141,7 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
   } = options;
 
   let node: HTMLElement | null = null;
-  let destroyed = false;
+  let stopped = false;
   let cancelFrame: (() => void) | null = null;
   let timer: ReturnType<typeof setTimeout> | null = null;
   let listening: HTMLElement | null = null;
@@ -226,7 +232,7 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
   }
 
   function setStatus(next: PresenceStatus) {
-    if (destroyed || next === status) return;
+    if (stopped || next === status) return;
     const previous = status;
     status = next;
     options.onStatusChange?.(next, previous);
@@ -275,6 +281,14 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
     });
   }
 
+  /** The work `destroy` cancelled, taken up again by the next call that reaches the handle. */
+  function resume() {
+    if (!stopped) return;
+    stopped = false;
+    if (status === 'entering') enter();
+    else if (status === 'exiting') waitForExit();
+  }
+
   function settle() {
     if (state.value === applied) return;
     applied = state.value;
@@ -310,6 +324,7 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
       return status;
     },
     setNode(next) {
+      if (next !== null) resume();
       if (next === node) return;
       node = next;
       /* Mid-exit, the listeners move with it: a re-render is not a new exit. */
@@ -320,13 +335,13 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
       }
     },
     request(next, reason, source) {
-      if (destroyed) return false;
+      resume();
       const moved = state.request(next, reason, source);
       settle();
       return moved;
     },
     sync(present) {
-      if (destroyed) return;
+      resume();
       state.sync(present);
       settle();
     },
@@ -335,7 +350,7 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
     },
     destroy() {
       stopWaiting();
-      destroyed = true;
+      stopped = true;
       node = null;
     },
   };

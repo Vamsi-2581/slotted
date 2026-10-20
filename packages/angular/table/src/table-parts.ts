@@ -567,7 +567,9 @@ export class SlTableGroupRow {
 
 /**
  * What is shown when there is nothing. It takes a `result-state`, whose status
- * axis already separates an empty set from a set a filter emptied.
+ * axis already separates an empty set from a set a filter emptied. The cell
+ * goes in a plain `tr`, not an `slTableRow`: the row is not a record, so it
+ * takes no hover, stripe or selection — the row React's `TableEmpty` writes.
  */
 @Directive({
   selector: 'td[slTableEmpty]',

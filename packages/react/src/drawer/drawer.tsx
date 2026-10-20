@@ -168,9 +168,10 @@ export function Drawer({
     if (currentOpen) setLive(null);
   }, [currentOpen]);
 
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
   useEffect(() => {
     const handle = presence.current;
-    return () => handle?.destroy();
+    return () => handle?.stop();
   }, []);
 
   /** Whether this drawer has ever been open, which is what `lazy` reads. */

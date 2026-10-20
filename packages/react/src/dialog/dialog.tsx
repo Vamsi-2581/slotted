@@ -130,9 +130,10 @@ function DialogFamily({
     presence.current?.sync(current);
   }, [current]);
 
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
   useEffect(() => {
     const handle = presence.current;
-    return () => handle?.destroy();
+    return () => handle?.stop();
   }, []);
 
   /** Whether this layer has ever been open, which is what `lazy` reads. */

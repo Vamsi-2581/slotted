@@ -72,7 +72,8 @@ function useLeaving(open: boolean, onGone: () => void) {
     presence.request(open, 'programmatic');
   }, [presence, open]);
 
-  useEffect(() => () => presence.destroy(), [presence]);
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
+  useEffect(() => () => presence.stop(), [presence]);
 
   return { open: status === 'open', ref: setNode };
 }

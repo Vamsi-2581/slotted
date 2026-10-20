@@ -116,9 +116,10 @@ export function LoadingOverlay({
   useEffect(() => {
     presence.current?.sync(painted);
   }, [painted]);
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
   useEffect(() => {
     const handle = presence.current;
-    return () => handle?.destroy();
+    return () => handle?.stop();
   }, []);
 
   const mounted = presence.current.mounted;

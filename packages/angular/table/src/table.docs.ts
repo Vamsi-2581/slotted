@@ -520,7 +520,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'The three states of an empty body',
       source:
-        '@if (loading() && rows().length === 0) {\n  <tbody slTableLoader [skeletonRows]="5"></tbody>\n} @else if (rows().length === 0) {\n  <tbody slTableBody>\n    <tr slTableRow>\n      <td slTableEmpty>\n        <section slResultState status="no-results"></section>\n      </td>\n    </tr>\n  </tbody>\n} @else {\n  <tbody slTableBody></tbody>\n}',
+        '@if (loading() && rows().length === 0) {\n  <tbody slTableLoader [skeletonRows]="5"></tbody>\n} @else if (rows().length === 0) {\n  <tbody slTableBody>\n    <tr>\n      <td slTableEmpty>\n        <section slResultState status="no-results"></section>\n      </td>\n    </tr>\n  </tbody>\n} @else {\n  <tbody slTableBody></tbody>\n}',
     }),
   },
   {

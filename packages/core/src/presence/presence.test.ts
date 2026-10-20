@@ -129,9 +129,9 @@ describe('createPresence', () => {
   });
 
   /** React's StrictMode replays unmount and mount on the same handle in development. */
-  it('resumes after destroy, as a StrictMode replay calls it', () => {
+  it('resumes after stop, as a StrictMode replay calls it', () => {
     const presence = createPresence({ present: false });
-    presence.destroy();
+    presence.stop();
 
     presence.sync(true);
     expect(presence.status).toBe('entering');
@@ -141,14 +141,26 @@ describe('createPresence', () => {
     presence.destroy();
   });
 
-  it('runs again an entering frame that destroy cancelled', () => {
+  it('runs again an entering frame that stop cancelled', () => {
     const presence = createPresence({ initialPresent: true, skipInitialAnimation: false });
-    presence.destroy();
+    presence.stop();
 
     presence.setNode(mount());
     vi.advanceTimersToNextFrame();
     expect(presence.status).toBe('open');
     presence.destroy();
+  });
+
+  it('ignores every call after destroy', () => {
+    const status = vi.fn();
+    const presence = createPresence({ present: false, onStatusChange: status });
+    presence.destroy();
+
+    presence.sync(true);
+    presence.setNode(mount());
+    vi.advanceTimersToNextFrame();
+    expect(presence.status).toBe('unmounted');
+    expect(status).not.toHaveBeenCalled();
   });
 
   it('opens without the entering frame when it is present on the first mount', () => {

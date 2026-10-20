@@ -452,9 +452,10 @@ export function AppShell({
   useEffect(() => {
     veilPresence.current?.sync(veil);
   }, [veil]);
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
   useEffect(() => {
     const handle = veilPresence.current;
-    return () => handle?.destroy();
+    return () => handle?.stop();
   }, []);
   const setVeil = useCallback((node: HTMLDivElement | null) => {
     veilPresence.current?.setNode(node);

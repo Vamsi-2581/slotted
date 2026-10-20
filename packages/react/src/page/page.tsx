@@ -197,9 +197,10 @@ function FooterPresence({ children }: { children: React.ReactNode }) {
     presence.current.sync(present);
   }, [present]);
 
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
   useEffect(() => {
     const handle = presence.current;
-    return () => handle.destroy();
+    return () => handle.stop();
   }, []);
 
   if (status === 'unmounted') return null;

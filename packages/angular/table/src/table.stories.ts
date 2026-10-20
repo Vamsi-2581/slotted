@@ -592,7 +592,7 @@ export const ColumnControls: Story = {
             <td slTableCell numeric>{{ invoice.amount }}</td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>
@@ -763,7 +763,7 @@ const TYPED = `
             <td slTableCell>{{ invoice.overdue ? 'Yes' : 'No' }}</td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>
@@ -942,7 +942,7 @@ const TIME = `
             <td slTableCell text="nowrap">{{ row.cutoff }}</td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>
@@ -1022,7 +1022,7 @@ const DATE_TIME = `
             <td slTableCell text="nowrap">{{ slot(row.scheduledAt) }}</td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>
@@ -1095,7 +1095,7 @@ const RANGE = `
             <td slTableCell text="nowrap">{{ row.due }}</td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>
@@ -1169,7 +1169,7 @@ const TAGS = `
             <td slTableCell numeric>{{ row.amount }}</td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>
@@ -1206,7 +1206,7 @@ const FREE_TAGS = `
             <td slTableCell numeric>{{ row.amount }}</td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>
@@ -1590,7 +1590,7 @@ export const EmptyAndLoading: Story = {
   <div slTable [columns]="4" variant="framed">
     <div slTableContent>${HEAD}
       <tbody slTableBody>
-        <tr slTableRow>
+        <tr>
           <td slTableEmpty>
             <section slResultState status="no-results">
               <div slResultStateContent>
@@ -1909,7 +1909,7 @@ export const Listing: Story = {
             </td>
           </tr>
         } @empty {
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="no-results">
                 <div slResultStateContent>

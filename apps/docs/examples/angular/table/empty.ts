@@ -42,7 +42,7 @@ import {
           </tr>
         </thead>
         <tbody slTableBody>
-          <tr slTableRow>
+          <tr>
             <td slTableEmpty>
               <section slResultState status="empty">
                 <div slResultStateContent>

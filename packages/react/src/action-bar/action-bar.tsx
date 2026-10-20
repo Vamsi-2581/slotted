@@ -171,9 +171,10 @@ export function ActionBar({
     presence.current?.sync(resolvedPresent);
   }, [resolvedPresent]);
 
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
   useEffect(() => {
     const handle = presence.current;
-    return () => handle?.destroy();
+    return () => handle?.stop();
   }, []);
 
   const registerActions = useCallback((node: HTMLElement | null) => setActions(node), []);

@@ -222,7 +222,8 @@ export function NavigationMenuContent({
     createPresence({ present: item.open, onStatusChange: () => refresh() }),
   );
   useLayoutEffect(() => presence.sync(item.open), [item.open, presence]);
-  useEffect(() => () => presence.destroy(), [presence]);
+  /* Stopped, not destroyed: StrictMode mounts again on the same handle. */
+  useEffect(() => () => presence.stop(), [presence]);
 
   const { motion } = navigation;
   const leaving = !item.open && presence.status === 'exiting';

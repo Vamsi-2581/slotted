@@ -12,6 +12,7 @@ import {
   input,
   numberAttribute,
   signal,
+  untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
@@ -138,11 +139,18 @@ export class SlComboboxItem {
      */
     afterRenderEffect(() => {
       this.visible();
-      this.combobox.registerLabel(this.value(), this.label());
-      this.combobox.recount();
+      const value = this.value();
+      const label = this.label();
+      /* Untracked: what the parent reads while registering is its state, not
+         this option's, and tracking it re-ran every option's effect on every
+         open and every highlight move. */
+      untracked(() => {
+        this.combobox.registerLabel(value, label);
+        this.combobox.collectionChanged();
+      });
     });
 
-    inject(DestroyRef).onDestroy(() => this.combobox.recount());
+    inject(DestroyRef).onDestroy(() => this.combobox.collectionChanged());
   }
 
   protected onPointerEnter(event: PointerEvent) {

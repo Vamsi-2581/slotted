@@ -13,6 +13,7 @@ import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import {
   afterNextRender,
+  afterRenderEffect,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -372,6 +373,8 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
   private readonly ownId = `sl-combobox-input-${this.identifier}`;
 
   private readonly registry = signal(new Map<ComboboxOptionValue, string>());
+  /** Bumped by an option whose presence or visibility changed; read once per render. */
+  private readonly collection = signal(0);
   readonly optionCount = signal(0);
   /**
    * The completion `autocomplete="both"` shows: the rest of the first match, or
@@ -503,6 +506,14 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
       if (this.resolvedMount() === 'eager' && !this.isOpen()) this.build();
     });
 
+    /* One count per render, however many options changed in it. Each option
+       counting the popup itself read the whole collection once per option —
+       quadratic in the option count on every keystroke that filters. */
+    afterRenderEffect(() => {
+      this.collection();
+      untracked(() => this.recount());
+    });
+
     destroyRef.onDestroy(() => this.teardown());
   }
 
@@ -545,6 +556,11 @@ export class SlCombobox implements ControlValueAccessor, OnInit, Validator {
     if (query === '' || given === null) return true;
     if (given !== undefined) return given(label, query);
     return this.fallbackFilter().contains(label, query);
+  }
+
+  /** An option says the collection changed; the count follows after the render. */
+  collectionChanged() {
+    this.collection.update((version) => version + 1);
   }
 
   recount() {

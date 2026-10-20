@@ -11,6 +11,7 @@ import {
   input,
   numberAttribute,
   signal,
+  untracked,
   ViewEncapsulation,
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
@@ -133,11 +134,18 @@ export class SlMultiSelectItem {
      */
     afterRenderEffect(() => {
       this.visible();
-      this.multiSelect.registerLabel(this.value(), this.label());
-      this.multiSelect.recount();
+      const value = this.value();
+      const label = this.label();
+      /* Untracked: what the parent reads while registering is its state, not
+         this option's, and tracking it re-ran every option's effect on every
+         open and every highlight move. */
+      untracked(() => {
+        this.multiSelect.registerLabel(value, label);
+        this.multiSelect.collectionChanged();
+      });
     });
 
-    inject(DestroyRef).onDestroy(() => this.multiSelect.recount());
+    inject(DestroyRef).onDestroy(() => this.multiSelect.collectionChanged());
   }
 
   protected onPointerEnter(event: PointerEvent) {

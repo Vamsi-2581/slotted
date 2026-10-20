@@ -4,7 +4,7 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SlMultiSelect } from './multi-select';
 import { SlMultiSelectItem } from './multi-select-items';
@@ -734,5 +734,69 @@ describe('SlMultiSelect, typing faster than the render', () => {
 
     expect(chipValues()).toEqual(['kiwi']);
     expect(field().value).toBe('l');
+  });
+});
+
+const MANY = Array.from({ length: 40 }, (_, index) => ({
+  value: `v${index}`,
+  label: `Option ${index}`,
+}));
+
+@Component({
+  standalone: true,
+  imports: [SlMultiSelect, SlMultiSelectItem],
+  template: `
+    <sl-multi-select aria-label="Many" [portal]="false" [(open)]="open">
+      @for (row of rows; track row.value) {
+        <sl-multi-select-item [value]="row.value" [label]="row.label" />
+      }
+    </sl-multi-select>
+  `,
+})
+class ManyHost {
+  readonly open = signal(false);
+  readonly rows = MANY;
+}
+
+/**
+ * The cost of opening and of moving the highlight is one read of the
+ * collection, whatever the list holds. An option that recounted the popup from
+ * its own render effect read the whole collection once per option on every
+ * open and every highlight move — quadratic in the option count.
+ */
+describe('SlMultiSelect, the cost of a long list', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [ManyHost] }).compileComponents();
+  });
+
+  it('reads the collection a bounded number of times to open and to move the highlight', async () => {
+    const reads = vi.spyOn(SlMultiSelect.prototype, 'options');
+    const fixture = TestBed.createComponent(ManyHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    reads.mockClear();
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(reads.mock.calls.length).toBeLessThan(8);
+
+    reads.mockClear();
+    document
+      .querySelector("[data-part='item'][data-value='v10']")
+      ?.dispatchEvent(new PointerEvent('pointerenter'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelector('[data-current]')?.getAttribute('data-value')).toBe('v10');
+    expect(reads.mock.calls.length).toBeLessThan(4);
+
+    reads.mockClear();
+    field().value = 'Option 1';
+    field().dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(document.querySelectorAll("[data-part='item']:not([hidden])").length).toBe(11);
+    expect(reads.mock.calls.length).toBeLessThan(8);
+    reads.mockRestore();
   });
 });

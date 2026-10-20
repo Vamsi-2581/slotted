@@ -523,6 +523,8 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   private readonly ownId = `sl-multi-select-input-${this.identifier}`;
 
   private readonly registry = signal(new Map<MultiSelectOptionValue, string>());
+  /** Bumped by an option whose presence or visibility changed; read once per render. */
+  private readonly collection = signal(0);
   readonly optionCount = signal(0);
   readonly hiddenCount = signal(0);
   readonly narrow = signal(false);
@@ -700,6 +702,14 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
       });
     });
 
+    /* One count per render, however many options changed in it. Each option
+       counting the popup itself read the whole collection once per option —
+       quadratic in the option count on every keystroke that filters. */
+    afterRenderEffect(() => {
+      this.collection();
+      untracked(() => this.recount());
+    });
+
     destroyRef.onDestroy(() => {
       this.teardown();
       this.ring?.destroy();
@@ -754,6 +764,11 @@ export class SlMultiSelect implements ControlValueAccessor, OnInit, Validator {
   /** Whether an option may be taken: a full control refuses what it does not hold. */
   refuses(value: MultiSelectOptionValue): boolean {
     return this.full() && !this.value().includes(value);
+  }
+
+  /** An option says the collection changed; the count follows after the render. */
+  collectionChanged() {
+    this.collection.update((version) => version + 1);
   }
 
   recount() {

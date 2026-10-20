@@ -64,6 +64,7 @@ export function Table({
   defaultExpanded,
   defaultSort,
   defaultValue,
+  edges,
   expanded,
   layout,
   loading,
@@ -100,6 +101,7 @@ export function Table({
   const currentExpanded = expanded ?? ownExpanded;
 
   const resolvedColumns = columns ?? defaults.columns ?? 1;
+  const resolvedEdges = edges ?? defaults.edges ?? 'inset';
   const resolvedLayout = layout ?? defaults.layout ?? 'auto';
   const resolvedMode = selectionMode ?? defaults.selectionMode ?? 'none';
   const resolvedSticky = (stickyHeader ?? defaults.stickyHeader ?? false) === true;
@@ -251,6 +253,7 @@ export function Table({
     ...nativeProps,
     children,
     'data-cell-align': resolvedCellAlign,
+    'data-edges': resolvedEdges,
     'data-layout': resolvedLayout,
     ...(loading === true ? { 'data-loading': '' } : {}),
     'data-part': 'root',

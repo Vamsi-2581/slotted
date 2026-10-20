@@ -4,6 +4,13 @@ import { inject, Injectable, InjectionToken } from '@angular/core';
 export type TableVariant = 'plain' | 'ruled' | 'framed';
 
 /**
+ * Whether the first and the last column keep the cell's inset on their outer
+ * side. `flush` reaches `plain` and `ruled` only: a `framed` table keeps the
+ * inset, because its text stands against a border.
+ */
+export type TableEdges = 'inset' | 'flush';
+
+/**
  * Whether the browser sizes the columns from their content or from what the
  * table states. `fixed` is what makes a stated width hold and a truncated cell
  * truncate at all.
@@ -46,6 +53,7 @@ export type TableExpandedReason = 'pointer' | 'keyboard' | 'programmatic';
 export interface TableDefaults {
   cellAlign: TableAlign;
   columns: number;
+  edges: TableEdges;
   layout: TableLayout;
   selectionMode: TableSelectionMode;
   stickyFooter: boolean;
@@ -58,6 +66,7 @@ export interface TableDefaults {
 const FALLBACK: TableDefaults = {
   cellAlign: 'center',
   columns: 1,
+  edges: 'inset',
   layout: 'auto',
   selectionMode: 'none',
   stickyFooter: false,

@@ -668,6 +668,13 @@ export const REACT_TABLE_DOCS = {
         'Table',
         'How much of a frame the set is given',
       ],
+      [
+        'edges',
+        "'inset' | 'flush'",
+        'inset',
+        'Table',
+        'Whether the first and the last column keep the cell inset on their outer side. flush lines a plain or ruled table up with the heading around it, leaving the theme’s --slotted-table-edge-inset (0 unless set); a framed table ignores it. Sticky and selection columns keep their own offsets',
+      ],
       ['striped', 'boolean', 'false', 'Table', 'A tinted ground on every second record'],
       [
         'stickyHeader',

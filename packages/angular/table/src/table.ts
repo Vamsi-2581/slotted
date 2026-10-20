@@ -26,6 +26,7 @@ import {
   injectTableDefaults,
   SlTableIdFactory,
   type TableAlign,
+  type TableEdges,
   type TableLayout,
   type TableSelectionMode,
   type TableSelectionReason,
@@ -37,6 +38,7 @@ import {
 export type {
   TableAlign,
   TableDefaults,
+  TableEdges,
   TableExpandedReason,
   TableLayout,
   TableSelectionMode,
@@ -88,6 +90,7 @@ export const TABLE_ROW_SELECTOR = '[data-part="body"] > [data-part="row"][data-v
     'data-ui': 'table',
     'data-part': 'root',
     '[attr.data-variant]': 'resolvedVariant()',
+    '[attr.data-edges]': 'resolvedEdges()',
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-cell-align]': 'resolvedCellAlign()',
     '[attr.data-striped]': "resolvedStriped() ? '' : null",
@@ -106,6 +109,12 @@ export class SlTable implements ControlValueAccessor {
   readonly expanded = model<readonly string[]>([]);
 
   readonly variant = input<TableVariant | undefined>(undefined);
+  /**
+   * Whether the first and the last column keep the cell's inset on their outer
+   * side. `flush` lines a `plain` or `ruled` table's text up with the heading
+   * around it; a `framed` table ignores it.
+   */
+  readonly edges = input<TableEdges | undefined>(undefined);
   readonly layout = input<TableLayout | undefined>(undefined);
   readonly selectionMode = input<TableSelectionMode | undefined>(undefined);
   /**
@@ -166,6 +175,7 @@ export class SlTable implements ControlValueAccessor {
   private readonly formDisabled = signal(false);
 
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
+  readonly resolvedEdges = computed(() => this.edges() ?? this.defaults.edges);
   readonly resolvedLayout = computed(() => this.layout() ?? this.defaults.layout);
   readonly resolvedCellAlign = computed(() => this.cellAlign() ?? this.defaults.cellAlign);
   readonly resolvedMode = computed(() => this.selectionMode() ?? this.defaults.selectionMode);

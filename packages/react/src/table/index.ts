@@ -45,6 +45,7 @@ export type {
   TableDefaults,
   TableDefaultsProviderProps,
   TableDetailProps,
+  TableEdges,
   TableEmptyProps,
   TableExpandedReason,
   TableExpandedRequest,

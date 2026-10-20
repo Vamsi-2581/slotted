@@ -1109,6 +1109,32 @@ describe('an application setting the family once', () => {
   });
 });
 
+/**
+ * The outer inset is an axis the stylesheet reads from the root; the computed
+ * padding it produces is asserted in a browser, by
+ * `tools/harness/scenarios/table-edges.mjs`.
+ */
+describe('the outer edges', () => {
+  it('writes inset by default, and what an application or the table states', () => {
+    render(
+      <>
+        <Invoices />
+        <TableDefaultsProvider edges="flush">
+          <Invoices />
+          <Invoices edges="inset" />
+        </TableDefaultsProvider>
+      </>,
+    );
+
+    const roots = screen.getAllByRole('table').map((table) => table.closest('[data-ui]'));
+    expect(roots.map((root) => root?.getAttribute('data-edges'))).toEqual([
+      'inset',
+      'flush',
+      'inset',
+    ]);
+  });
+});
+
 describe('the language in force', () => {
   it('speaks it, and lays its own messages over it', () => {
     render(
@@ -1239,5 +1265,110 @@ describe('rows of a ledger', () => {
     const row = document.querySelector('[data-part="body"] > [data-part="row"]');
     expect(row).not.toHaveAttribute('tabindex');
     expect(row).not.toHaveAttribute('role');
+  });
+});
+
+const HUNDRED = Array.from({ length: 100 }, (_unused, row) => row);
+const TWENTY = Array.from({ length: 20 }, (_unused, column) => column);
+
+function median(mount: () => () => void) {
+  mount()();
+  const times = [0, 1, 2].map(() => {
+    const start = performance.now();
+    const unmount = mount();
+    const elapsed = performance.now() - start;
+    unmount();
+    return elapsed;
+  });
+  return times.sort((a, b) => a - b)[1] ?? 0;
+}
+
+/**
+ * A hundred rows of twenty cells, against the same rows as a plain `table`.
+ * Measured in Chrome, the family costs 1.2 times the plain table in a
+ * production build and about 2.1 times in React's development build, whose
+ * per-element instrumentation is the difference; the scroller no longer
+ * forces a layout of every row inside the task that mounts them.
+ */
+describe('Table, the cost of a hundred rows', () => {
+  it('mounts a hundred rows of twenty cells within twice a plain table', () => {
+    const plain = median(
+      () =>
+        render(
+          <table>
+            <tbody>
+              {HUNDRED.map((row) => (
+                <tr key={row}>
+                  {TWENTY.map((column) => (
+                    <td key={column}>{`r${row}c${column}`}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>,
+        ).unmount,
+    );
+    const family = median(
+      () =>
+        render(
+          <Table columns={20}>
+            <TableContent>
+              <TableBody>
+                {HUNDRED.map((row) => (
+                  <TableRow key={row}>
+                    {TWENTY.map((column) => (
+                      <TableCell key={column}>{`r${row}c${column}`}</TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </TableContent>
+          </Table>,
+        ).unmount,
+    );
+
+    expect(family).toBeLessThan(plain * 2);
+  });
+
+  it('reads no layout while it mounts when an observer will report the first size', () => {
+    const reports: (() => void)[] = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          reports.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    let reads = 0;
+    const width = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientWidth');
+    Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
+      configurable: true,
+      get: () => {
+        reads += 1;
+        return 0;
+      },
+    });
+
+    const { unmount } = render(
+      <Table columns={2}>
+        <TableContent>
+          <TableBody>
+            <TableRow>
+              <TableCell>a</TableCell>
+              <TableCell>b</TableCell>
+            </TableRow>
+          </TableBody>
+        </TableContent>
+      </Table>,
+    );
+
+    expect(reads).toBe(0);
+    expect(reports).toHaveLength(1);
+    unmount();
+    if (width !== undefined) Object.defineProperty(HTMLElement.prototype, 'clientWidth', width);
+    vi.unstubAllGlobals();
   });
 });

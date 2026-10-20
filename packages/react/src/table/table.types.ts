@@ -34,6 +34,13 @@ import type {
 export type TableVariant = 'plain' | 'ruled' | 'framed';
 
 /**
+ * Whether the first and the last column keep the cell's inset on their outer
+ * side. `flush` reaches `plain` and `ruled` only: a `framed` table keeps the
+ * inset, because its text stands against a border.
+ */
+export type TableEdges = 'inset' | 'flush';
+
+/**
  * Whether the browser sizes the columns from their content or from what the
  * table states. `fixed` is what makes a stated width hold and a truncated cell
  * truncate at all.
@@ -318,6 +325,7 @@ export interface TableSetFilterProps extends TableConditionFilterProps<
 export interface TableDefaults {
   cellAlign?: TableAlign | undefined;
   columns?: number | undefined;
+  edges?: TableEdges | undefined;
   layout?: TableLayout | undefined;
   selectionMode?: TableSelectionMode | undefined;
   stickyFooter?: boolean | undefined;
@@ -335,6 +343,7 @@ export interface TableDefaultsProviderProps extends TableDefaults {
 export interface TableRootProps extends HTMLAttributes<HTMLElement> {
   children?: ReactNode | undefined;
   'data-cell-align'?: TableAlign | undefined;
+  'data-edges': TableEdges;
   'data-layout': TableLayout;
   'data-loading'?: '' | undefined;
   'data-part': string;
@@ -400,6 +409,13 @@ export interface TableProps extends Omit<ComponentPropsWithRef<'div'>, 'onChange
   striped?: boolean | undefined;
   value?: readonly string[] | undefined;
   variant?: TableVariant | undefined;
+  /**
+   * Whether the first and the last column keep the cell's inset on their outer
+   * side. `flush` lines a `plain` or `ruled` table's text up with the heading
+   * around it; a `framed` table ignores it. The theme's
+   * `--slotted-table-edge-inset` is what `flush` leaves, nought unless it is set.
+   */
+  edges?: TableEdges | undefined;
 }
 
 /** The one action a consumer cannot express declaratively. */

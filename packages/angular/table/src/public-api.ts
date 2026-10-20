@@ -7,6 +7,7 @@ export {
 export type {
   TableAlign,
   TableDefaults,
+  TableEdges,
   TableExpandedReason,
   TableLayout,
   TableSelectionMode,

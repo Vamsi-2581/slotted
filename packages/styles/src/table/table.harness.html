@@ -284,6 +284,114 @@
   </div>
 </section>
 
+<section data-scene="edges">
+  <div
+    data-ui="table"
+    data-part="root"
+    data-variant="plain"
+    data-edges="flush"
+    data-probe="plain-flush"
+  >
+    <div data-part="scroll">
+      <table data-part="table">
+        <caption data-part="caption">
+          plain, edges flush — the text lines up with the heading above it
+        </caption>
+        <thead data-part="head">
+          <tr data-part="row">
+            <th data-part="column-header" scope="col">Region</th>
+            <th data-part="column-header" scope="col" data-numeric>Orders</th>
+          </tr>
+        </thead>
+        <tbody data-part="body">
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">North</th>
+            <td data-part="cell" data-numeric>412</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    data-ui="table"
+    data-part="root"
+    data-variant="ruled"
+    data-edges="flush"
+    data-probe="ruled-flush"
+  >
+    <div data-part="scroll">
+      <table data-part="table">
+        <caption data-part="caption">
+          ruled, edges flush
+        </caption>
+        <thead data-part="head">
+          <tr data-part="row">
+            <th data-part="column-header" scope="col">Region</th>
+            <th data-part="column-header" scope="col" data-numeric>Orders</th>
+          </tr>
+        </thead>
+        <tbody data-part="body">
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">North</th>
+            <td data-part="cell" data-numeric>412</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    data-ui="table"
+    data-part="root"
+    data-variant="framed"
+    data-edges="flush"
+    data-probe="framed-flush"
+  >
+    <div data-part="scroll">
+      <table data-part="table">
+        <caption data-part="caption">
+          framed, edges flush — ignored: text keeps its distance from the frame
+        </caption>
+        <thead data-part="head">
+          <tr data-part="row">
+            <th data-part="column-header" scope="col">Region</th>
+            <th data-part="column-header" scope="col" data-numeric>Orders</th>
+          </tr>
+        </thead>
+        <tbody data-part="body">
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">North</th>
+            <td data-part="cell" data-numeric>412</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div data-ui="table" data-part="root" data-variant="ruled" data-probe="ruled-inset">
+    <div data-part="scroll">
+      <table data-part="table">
+        <caption data-part="caption">
+          ruled, edges inset — the default
+        </caption>
+        <thead data-part="head">
+          <tr data-part="row">
+            <th data-part="column-header" scope="col">Region</th>
+            <th data-part="column-header" scope="col" data-numeric>Orders</th>
+          </tr>
+        </thead>
+        <tbody data-part="body">
+          <tr data-part="row">
+            <th data-part="row-header" scope="row">North</th>
+            <td data-part="cell" data-numeric>412</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <section data-scene="sorting">
   <div data-ui="table" data-part="root" data-variant="ruled">
     <div data-part="scroll">

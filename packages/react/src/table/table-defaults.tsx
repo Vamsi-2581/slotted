@@ -22,6 +22,7 @@ export function TableDefaultsProvider({ children, ...defaults }: TableDefaultsPr
       value={{
         cellAlign: defaults.cellAlign ?? inherited.cellAlign,
         columns: defaults.columns ?? inherited.columns,
+        edges: defaults.edges ?? inherited.edges,
         layout: defaults.layout ?? inherited.layout,
         selectionMode: defaults.selectionMode ?? inherited.selectionMode,
         stickyFooter: defaults.stickyFooter ?? inherited.stickyFooter,

@@ -378,6 +378,26 @@ describe('an application setting the family once', () => {
   });
 });
 
+describe('the outer edges', () => {
+  it('writes inset unless an application or the table says flush', async () => {
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideTableDefaults({ edges: 'flush' })],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect(query(fixture, '[data-ui="table"]').getAttribute('data-edges')).toBe('flush');
+  });
+
+  it('writes inset by default', async () => {
+    await TestBed.configureTestingModule({ imports: [Host] }).compileComponents();
+    const fixture = TestBed.createComponent(Host);
+    fixture.detectChanges();
+    expect(query(fixture, '[data-ui="table"]').getAttribute('data-edges')).toBe('inset');
+  });
+});
+
 /**
  * Both ends of the same box, and a selection column pinned beside the column
  * that names the record. Two columns pinned to the same edge both resolve

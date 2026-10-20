@@ -232,7 +232,7 @@
     color: var(--_muted);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     padding-block: var(--_pad-block);
-    padding-inline: var(--_pad-inline);
+    padding-inline: var(--_edge-inset);
     text-align: start;
   }
 
@@ -317,6 +317,57 @@
     padding-inline: var(--_pad-inline);
     text-align: start;
     vertical-align: var(--_cell-align);
+  }
+
+  /**
+   * ── The outer edges ────────────────────────────────────────────────────
+   *
+   * The first and the last column take `--_edge-inset` on their outer side:
+   * the cell's own inset by default, and under `edges="flush"` the theme's
+   * `--slotted-table-edge-inset`, nought when it sets none — so a `plain` or
+   * `ruled` table lines its text up with the heading above it. A `framed`
+   * table keeps the inset whatever `edges` says: its text stands against a
+   * border, and text touching a border is the cramped picture the frame
+   * exists to avoid. A pinned column keeps its own offset, which is a
+   * position rather than a padding, and the selection cell keeps its own
+   * inset because it is not one of the parts named here — a table that leads
+   * with a chooser has no text at its edge.
+   */
+  [data-ui='table'][data-part='root'] {
+    --_edge-inset: var(--_pad-inline);
+  }
+
+  [data-ui='table'][data-part='root'][data-edges='flush']:is(
+      [data-variant='plain'],
+      [data-variant='ruled']
+    ) {
+    --_edge-inset: var(--slotted-table-edge-inset, 0px);
+  }
+
+  [data-ui='table']
+    [data-part='row']
+    > :is([data-part='cell'], [data-part='row-header'], [data-part='group-header']):first-child,
+  [data-ui='table']
+    [data-part='row']
+    > [data-part='column-header']:first-child:not(:has(> [data-part='sort'])),
+  [data-ui='table']
+    [data-part='row']
+    > [data-part='column-header']:first-child
+    > [data-part='sort'] {
+    padding-inline-start: var(--_edge-inset);
+  }
+
+  [data-ui='table']
+    [data-part='row']
+    > :is([data-part='cell'], [data-part='row-header'], [data-part='group-header']):last-child,
+  [data-ui='table']
+    [data-part='row']
+    > [data-part='column-header']:last-child:not(:has(> [data-part='sort'])),
+  [data-ui='table']
+    [data-part='row']
+    > [data-part='column-header']:last-child
+    > [data-part='sort'] {
+    padding-inline-end: var(--_edge-inset);
   }
 
   [data-ui='table'] [data-block-align='start'] {

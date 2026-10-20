@@ -533,6 +533,7 @@
   "messagesReason": "The words the family says come from the table catalog of the language in force, laid over by one messages input on the root. The operator names and the joins are two groups keyed by the engine (filterOperators.contains, filterJoins.and), the map filter-bar and data-grid read for the same operators. Every sentence the family speaks is one message with slots — the column, the row, the filter, the count — so each language orders its own words; selectAll and filterMatches are plural messages, and filterOperands chooses among no value, one and two.",
   "axes": {
     "variant": ["plain", "ruled", "framed"],
+    "edges": ["inset", "flush"],
     "striped": [true, false],
     "stickyHeader": [true, false],
     "stickyFooter": [true, false],
@@ -548,6 +549,7 @@
   },
   "resolution": {
     "variant": ["prop", "defaults", "ruled"],
+    "edges": ["prop", "defaults", "inset"],
     "striped": ["prop", "defaults", false],
     "stickyHeader": ["prop", "defaults", false],
     "stickyFooter": ["prop", "defaults", false],
@@ -613,6 +615,7 @@
       "nativeElement": "div",
       "defaults": {
         "variant": "ruled",
+        "edges": "inset",
         "striped": false,
         "stickyHeader": false,
         "stickyTo": "scroll",

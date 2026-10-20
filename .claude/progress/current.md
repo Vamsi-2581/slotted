@@ -1,10 +1,10 @@
 # Checkpoint
 
-- Plano: `docs/history/plans/2026-10-19-mount-cost-and-features.md` (tabela Resultado preenchida, itens 1–6).
-- Ramo `main`, HEAD `f0c4e25d`. Árvore com 52 caminhos alterados ou novos, não commitados: fatias 1 e 2.
-- Concluído: fatias 1 (itens 1, 2, 3) e 2 (itens 4, 5, 6). Cada item tem teste que falha antes da mudança.
-- Testes: `pnpm check` exit 0; core 2183/2183; React 4063/4063 (259 ficheiros); `@slotted/styles` 1681; `@slotted/themes` 90; `@slotted/theme` vitest 95 e node 109; agent-docs 200; Angular chart 16, page-header 24, filter-bar 39, button 57; build do `@slotted/react` com `package-boundary.verify.mjs` exit 0.
-- Não corrido: suite Angular completa; `pnpm check:full`.
-- Ajustes de escopo: `observeChartTheme` deixa de reler em `fonts.ready` com fontes carregadas; `end` do Button sob `justify="between"` toma a largura do conteúdo.
-- Problemas conhecidos: legenda do chart mede no `useLayoutEffect`; `findScrollParent` lê estilo na construção do sticky-header; famílias não leem os tokens de material; `usePressSelection` sem equivalente Angular; skill `theme-app` sem caso de avaliação novo.
-- Próxima ação: decisão do utilizador sobre commit (`git add -A && git commit`) e sobre `pnpm check:full`.
+- Plano: `docs/history/plans/2026-10-19-fourth-iteration.md` (13 itens, 5 fatias; tabela Resultado e Problemas conhecidos preenchidos).
+- Ramo `main`, HEAD `d06d8cf8`. Árvore com as mudanças das cinco fatias, não commitadas.
+- Concluído: itens 1 a 13.
+- Testes: `pnpm check` exit 0 depois da fatia 5; core 2191/2191, React 4078/4078, Angular 3211/3211; `node tools/harness/scenarios/table-edges.mjs` ok; `@slotted/styles` 1681/1681; typecheck Angular exit 0; React `tsc --noEmit` limpo após `pnpm --filter @slotted/core build`.
+- Não corrido: build do site `apps/docs` (os testes `page-sections` leem `apps/docs/dist` desatualizado); `pnpm check:full`; `pnpm eval:agent-docs`.
+- Ajustes de escopo: item 2 sem teste de razão que falhe antes; item 8 só React; item 10 nomeia API de React por exigência do critério de aceite; item 12 só React.
+- Problemas conhecidos: ver a seção do plano.
+- Próxima ação: pedir ao utilizador a decisão sobre commit (`git add -A && git commit`) e sobre o build do site para `page-sections`.

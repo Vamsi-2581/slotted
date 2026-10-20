@@ -1,4 +1,4 @@
-import { DOCS_DIR, type Binding } from './types.ts';
+import type { Binding } from './types.ts';
 
 /** A product skill: `content/skills/<name>/SKILL.md`, published per binding. */
 export interface Skill {
@@ -45,9 +45,14 @@ export function skillErrors(
   return errors;
 }
 
-export function renderContent(source: string, binding: Binding): string {
+/**
+ * `docsDir` is the root of the installed docs relative to the file being
+ * written (`..` from `guidelines/`, `../..` from `skills/<name>/`), so a path
+ * resolves against the file that names it, wherever `node_modules` is.
+ */
+export function renderContent(source: string, binding: Binding, docsDir: string): string {
   return source
-    .replaceAll('{{docsDir}}', DOCS_DIR[binding])
+    .replaceAll('{{docsDir}}', docsDir)
     .replaceAll('{{package}}', `@slotted/${binding}`)
     .replaceAll('{{themeScope}}', THEME_SCOPE[binding]);
 }

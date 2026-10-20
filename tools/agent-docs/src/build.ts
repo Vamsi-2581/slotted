@@ -77,15 +77,15 @@ export async function buildDocs({
   }
   if (content.topics.length > 0) {
     mkdirSync(join(out, 'guidelines'));
-    writeFileSync(join(out, 'guidelines/README.md'), renderContent(content.readme, binding));
+    writeFileSync(join(out, 'guidelines/README.md'), renderContent(content.readme, binding, '..'));
     writeFileSync(
       join(out, 'guidelines/index.md'),
-      renderContent(renderGuidelinesIndex(content.topics), binding),
+      renderContent(renderGuidelinesIndex(content.topics), binding, '..'),
     );
     for (const topic of content.topics)
       writeFileSync(
         join(out, 'guidelines', topic.file),
-        renderContent(renderTopic(topic), binding),
+        renderContent(renderTopic(topic), binding, '..'),
       );
   }
   if (content.skills.size > 0) {
@@ -94,7 +94,10 @@ export async function buildDocs({
   }
   for (const [name, skill] of content.skills) {
     mkdirSync(join(out, 'skills', name), { recursive: true });
-    writeFileSync(join(out, 'skills', name, 'SKILL.md'), renderContent(skill.source, binding));
+    writeFileSync(
+      join(out, 'skills', name, 'SKILL.md'),
+      renderContent(skill.source, binding, '../..'),
+    );
   }
 
   const verdicts = [...compiled.values()];

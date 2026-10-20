@@ -1,5 +1,7 @@
 ## Slotted UI (@slotted/angular)
 
+Paths below are relative to the directory that holds node_modules.
+
 Before writing or changing UI, read `{{docsDir}}/index.md`, then the file of each family you use. These files match the installed version: prefer them over prior knowledge of the library.
 
 - Import the standalone directives from the family entry point that each file's Import section shows (`@slotted/angular/<family>`), and place each on the native element its selector names: `<button slButton>`.

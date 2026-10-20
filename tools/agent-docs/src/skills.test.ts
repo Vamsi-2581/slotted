@@ -38,20 +38,22 @@ describe('skills', () => {
     ]);
   });
 
-  it('substitutes the docs directory and the package per binding', () => {
-    expect(renderContent(source, 'angular')).toContain(
-      'Read `node_modules/@slotted/angular/docs/skeleton.md` from `@slotted/angular`.',
+  it('substitutes the docs directory relative to the file, and the package per binding', () => {
+    expect(renderContent(source, 'angular', '../..')).toContain(
+      'Read `../../skeleton.md` from `@slotted/angular`.',
     );
-    expect(renderContent(source, 'react')).toContain(
-      '`node_modules/@slotted/react/dist/docs/skeleton.md`',
-    );
+    expect(renderContent(source, 'react', '..')).toContain('`../skeleton.md`');
   });
 
   it('substitutes the theme scope of each binding, and accepts the placeholder', () => {
     const scoped = source.replace('AF-01 applies.', 'Set the scheme on {{themeScope}}.');
     expect(skillErrors('waiting-states', parseSkill(scoped), new Set())).toEqual([]);
-    expect(renderContent(scoped, 'react')).toContain(`Set the scheme on ${THEME_SCOPE.react}.`);
-    expect(renderContent(scoped, 'angular')).toContain(`Set the scheme on ${THEME_SCOPE.angular}.`);
+    expect(renderContent(scoped, 'react', '../..')).toContain(
+      `Set the scheme on ${THEME_SCOPE.react}.`,
+    );
+    expect(renderContent(scoped, 'angular', '../..')).toContain(
+      `Set the scheme on ${THEME_SCOPE.angular}.`,
+    );
   });
 
   it('names a theme scope each binding exports', () => {

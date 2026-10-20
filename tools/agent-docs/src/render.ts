@@ -434,7 +434,7 @@ export function renderSkillsIndex(skills: ReadonlyMap<string, Skill>, binding: B
     '',
     ...[...skills.values()].map(
       (skill) =>
-        `- ${skill.name}: \`./${skill.name}/SKILL.md\` — ${renderContent(skill.description, binding)}`,
+        `- ${skill.name}: \`./${skill.name}/SKILL.md\` — ${renderContent(skill.description, binding, '..')}`,
     ),
     '',
   ].join('\n');

@@ -125,7 +125,6 @@ describe('buildDocs', () => {
       expect(
         b
           .replaceAll(THEME_SCOPE.angular, THEME_SCOPE.react)
-          .replaceAll('node_modules/@slotted/angular/docs', 'node_modules/@slotted/react/dist/docs')
           .replaceAll('@slotted/angular', '@slotted/react'),
         file,
       ).toBe(a);

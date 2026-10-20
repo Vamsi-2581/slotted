@@ -150,7 +150,7 @@ export function createScrollAffordance(
     typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(() => refresh());
   observer?.observe(container);
   container.addEventListener('scroll', refresh, { passive: true });
-  refresh();
+  if (observer === undefined) refresh();
 
   return {
     destroy: () => {

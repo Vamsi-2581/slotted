@@ -68,7 +68,7 @@ describe('createScrollAffordance', () => {
     document.body.innerHTML = '';
   });
 
-  it('measures once on creation', () => {
+  it('measures once on creation where no observer exists', () => {
     const container = mount({ client: 300, scroll: 800 });
     const handle = createScrollAffordance(container);
 
@@ -102,6 +102,49 @@ describe('createScrollAffordance', () => {
 
     expect(container.scrollBy).toHaveBeenCalledWith(expect.objectContaining({ left: 240 }));
     handle.destroy();
+  });
+
+  /**
+   * A table mounted with a scroller measured its overflow as the scroller was
+   * created, which forced a synchronous layout of every row inside the task
+   * that mounted them. The observer's first report arrives after the browser
+   * has laid the rows out, and the measurement waits for it.
+   */
+  it('reads no layout on creation when an observer will report the first size', () => {
+    const reports: (() => void)[] = [];
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          reports.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    document.body.innerHTML = '<div id="row"></div>';
+    const container = document.getElementById('row') as HTMLElement;
+    let reads = 0;
+    Object.defineProperty(container, 'clientWidth', {
+      configurable: true,
+      get: () => {
+        reads += 1;
+        return 300;
+      },
+    });
+    Object.defineProperty(container, 'scrollWidth', { value: 800, configurable: true });
+    const onChange = vi.fn();
+    const handle = createScrollAffordance(container, { onChange });
+
+    expect(reads).toBe(0);
+    expect(handle.state()).toEqual({ overflowing: false, atStart: true, atEnd: true });
+
+    reports[0]?.();
+
+    expect(reads).toBe(1);
+    expect(onChange).toHaveBeenCalledWith({ overflowing: true, atStart: true, atEnd: false });
+    handle.destroy();
+    vi.unstubAllGlobals();
   });
 
   it('stops measuring after destroy', () => {

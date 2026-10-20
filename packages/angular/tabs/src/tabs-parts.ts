@@ -85,10 +85,9 @@ export class SlTabEnd {}
 /**
  * One tab, in the box that holds it.
  *
- * The host is that box, and it is presentational for two reasons a `button`
- * cannot answer: a `button` may not contain a `button`, so a dismissible tab
- * needs somewhere to put its second control, and the marker has to span the
- * pair rather than only the label.
+ * The host is that box, and it is presentational because a `button` may not
+ * contain a `button`: a dismissible tab needs somewhere to put its second
+ * control.
  *
  * `href` makes the control an anchor, and a click carrying a modifier key is
  * left to the browser so a deep link still opens in a new browser tab.

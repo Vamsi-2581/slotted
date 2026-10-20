@@ -51,7 +51,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the slTab host, with role="presentation"',
     required: true,
     purpose:
-      'One tab and its optional close button. It exists because a button cannot contain a button, and because the marker spans the tab and its close button together. A class or an attribute written on slTab lands on it.',
+      'One tab and its optional close button. It exists because a button cannot contain a button, and it carries the hover bar under the tab. A class or an attribute written on slTab lands on it.',
   },
   {
     part: 'tab',
@@ -87,6 +87,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The close button. It has tabindex="-1", so the arrow keys move between tabs only, and it stays in the accessibility tree, so a screen reader can press it. From the keyboard, Delete closes the focused tab, which aria-keyshortcuts on the tab announces.',
+  },
+  {
+    part: 'marker',
+    element: 'span, aria-hidden',
+    required: false,
+    purpose:
+      'The bar under the selected tab. The list draws one and slides it between tabs; it spans the tab’s content box, never the close button. --slotted-tabs-marker-size, --slotted-tabs-marker-radius and --slotted-tabs-marker-inset shape it, and the hover bar takes the same geometry at --slotted-tabs-hover-marker-opacity.',
   },
   {
     part: 'panel',
@@ -559,7 +566,7 @@ export const ANGULAR_TABS_DOCS = {
       'The paging controls are aria-hidden and outside the Tab sequence, because the arrow keys reach every tab and scroll it into view. Cloudscape’s guidance warns against extra Tab stops between a tab list and its panel.',
       'A list that starts to overflow scrolls the selected tab into view once its paging controls are drawn, so the selected tab is not left behind the end control.',
       'Each tab names its panel with aria-controls and each panel names its tab with aria-labelledby. The ids come from the value, with the characters an id cannot hold escaped rather than replaced, so two values that differ only by a space never share a panel.',
-      'The selected tab is never shown by colour alone: the marker is a bar the width of a thick border, which stays visible in the high-contrast scheme, where the theme paints every surface Canvas and the fill of the contained variant disappears.',
+      'The selected tab is never shown by colour alone: the marker is a bar never thinner than a thick border, which stays visible in the high-contrast scheme, where the theme paints every surface Canvas and the fill of the contained variant disappears.',
       'A panel carries tabindex="0", so the Tab key reaches it from the list. The pattern permits that stop even when the panel’s first content is focusable.',
     ],
     snippets: [
@@ -583,6 +590,7 @@ export const ANGULAR_TABS_DOCS = {
       </button>
       <button data-part="dismiss" tabindex="-1" aria-label="Close Summary"></button>
     </div>
+    <span data-part="marker" aria-hidden="true" data-positioned></span>
   </div>
   <div data-part="actions">…</div>
   <div data-part="panel" role="tabpanel" id="p-a" aria-labelledby="t-a" tabindex="0">…</div>

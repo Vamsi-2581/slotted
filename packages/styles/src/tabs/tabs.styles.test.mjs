@@ -33,6 +33,8 @@ const PATHS = {
   actions: `${ui}>[data-part='actions']`,
 };
 const part = (name) => PATHS[name];
+/** The marker the list draws, reached like the item: down the chain, never by descent. */
+const marker = `${ui}>:where([data-part='list'])>[data-part='marker']`;
 /** The same chain from a root carrying modifiers, such as `[data-fit='equal']`. */
 const at = (modifiers, name) => `${ui}${modifiers}${PATHS[name].slice(ui.length)}`;
 /** The paging controls are the root's own children; see the test that says why. */
@@ -73,6 +75,11 @@ test('styles every part the contract declares', () => {
 
 test('renders every part the contract declares, in at least one scene', () => {
   for (const declared of member.parts) {
+    /* The marker is drawn at runtime, by the fragment's script as by the bindings. */
+    if (declared === 'marker') {
+      assert.match(fragment, /createIndicator\(list, \{[\s\S]*?part: 'marker'/);
+      continue;
+    }
     assert.match(
       fragment,
       new RegExp(`data-part="${declared}"`),
@@ -110,17 +117,13 @@ test('places every part in a grid cell rather than over one', () => {
   assert.match(rule(`${scroll}[data-direction='end']`), /grid-column:3/);
   assert.match(rule(part('actions')), /grid-column:4/);
   assert.match(rule(part('panel')), /grid-column:1 \/ -1/);
-  /* The things positioned over a cell are the marker and the hover bar under
-     it, both pseudo-elements on the item rather than parts of their own, and
-     the dismiss's invisible touch target on a coarse pointer (R2.6). */
+  /* The things positioned over a cell are the marker the list draws, the
+     hover bar on the item, and the dismiss's invisible touch target on a
+     coarse pointer (R2.6). */
   const positioned = [...normalized.matchAll(/([^{}]+)\{[^{}]*position:absolute/g)].flatMap(
     ([, selector]) => selector.split(','),
   );
-  assert.deepEqual(positioned, [
-    `${part('item')}::before`,
-    `${part('item')}::after`,
-    `${part('dismiss')}::after`,
-  ]);
+  assert.deepEqual(positioned, [marker, `${part('item')}::before`, `${part('dismiss')}::after`]);
 });
 
 /**
@@ -159,28 +162,58 @@ test('keeps a scrollbar until the paging controls replace it', () => {
 });
 
 /**
- * The marker is on every item and scaled to nothing, because a mark that
- * appears has nothing to transition from, and it is pulled over the track by
- * exactly the track's own width so the two lines are one line.
+ * One marker the list draws, slid by `translate` and sized by `inline-size`
+ * from the selected tab's measured box, and never scaled: a bar per item could
+ * only scale from an edge. Its thickness, rounding and inset are tokens, and
+ * the thickness never falls below the thick border width.
  */
-test('draws the marker on every item and moves it with the direction of travel', () => {
-  const marker = rule(`${part('item')}::after`);
-  assert.match(marker, /transform:scale\(0,1\)/);
-  assert.match(marker, /transform-origin:var\(--_marker-origin\) 50%/);
-  assert.match(marker, /inset-block-end:calc\(-1 \* var\(--_track-size\)\)/);
-  assert.match(rule(`${part('item')}[data-selected]::after`), /transform:scale\(1,1\)/);
-  for (const direction of contract.marker.directions.filter((value) => value !== 'none')) {
-    assert.ok(
-      normalized.includes(`${ui}[data-activation-direction='${direction}']{`),
-      `no origin answers ${direction}`,
-    );
-  }
+test('draws one marker in the list that slides to the selected tab', () => {
+  const body = rule(marker);
+  assert.match(body, /translate:calc\(var\(--_indicator-start,0px\) \+ var\(--_left-inset\)/);
+  assert.match(body, /inline-size:var\(--_length\)/);
+  assert.match(body, /block-size:var\(--_marker-size\)/);
+  assert.match(body, /border-radius:var\(--_marker-radius\)/);
+  assert.match(body, /--_length:max\(var\(--slotted-space-6,1rem\),var\(--_span\)\)/);
+  assert.doesNotMatch(declarations, /scale\(/);
+  assert.match(
+    rule(ui),
+    /--_marker-size:max\(var\(--slotted-tabs-marker-size,3px\),var\(--slotted-border-width-thick,2px\)\)/,
+  );
+  assert.match(
+    rule(ui),
+    /--_marker-radius:var\(--slotted-tabs-marker-radius,var\(--slotted-radius-full/,
+  );
+  assert.match(
+    rule(ui),
+    /--_marker-inset:var\(--slotted-tabs-marker-inset,var\(--_padding-inline\)\)/,
+  );
+  assert.match(rule(part('list')), /position:relative/);
 });
 
-/** `transform-origin` takes no logical keyword, so this pair is mirrored by hand. */
-test('mirrors the one rule that cannot be written logically', () => {
-  assert.ok(normalized.includes(`${ui}[data-activation-direction='forward']:dir(rtl){`));
-  assert.ok(normalized.includes(`${ui}[data-activation-direction='backward']:dir(rtl){`));
+/** The marker excludes the closing control, and stands on the list's edge over the track. */
+test('spans the tab’s content box and stands over the track', () => {
+  assert.ok(
+    normalized.includes(
+      `${ui}:not([data-orientation='vertical'])>[data-part='list']:has(>[data-part='item'][data-selected]>[data-part='dismiss'])>[data-part='marker']{--_end-inset:0px;}`,
+    ),
+  );
+  assert.match(rule(marker), /inset-block-end:var\(--_marker-lift,0px\)/);
+  const track = rule(at("[data-variant='line'][data-track='line']", 'list'));
+  assert.match(
+    track,
+    /box-shadow:inset 0 calc\(-1 \* var\(--_track-size\)\) 0 var\(--_track-color\)/,
+  );
+  assert.match(track, /padding-block-end:var\(--_track-size\)/);
+});
+
+/** The measurement is physical, so the inset on the left edge swaps under `:dir(rtl)`. */
+test('mirrors the rules that cannot be written logically', () => {
+  assert.ok(normalized.includes(`${ui}:dir(rtl)>:where([data-part='list'])>[data-part='marker']{`));
+  assert.ok(
+    normalized.includes(
+      `${ui}[data-orientation='vertical'][data-variant='line'][data-track='line']:dir(rtl)>[data-part='list']{`,
+    ),
+  );
   assert.doesNotMatch(declarations, /margin-left|margin-right|padding-left|padding-right/);
 });
 
@@ -192,7 +225,7 @@ test('mirrors the one rule that cannot be written logically', () => {
 test('says the selection with a mark as well as with a fill', () => {
   const selected = rule(`${at("[data-variant='contained']", 'item')}[data-selected]`);
   assert.match(selected, /background-color:var\(--slotted-tabs-contained-selected-background/);
-  assert.match(rule(`${part('item')}[data-selected]::after`), /opacity:1/);
+  assert.match(rule(marker), /background-color:var\(--slotted-tabs-marker-color/);
   assert.match(declarations, /@media \(forced-colors: active\)/);
 });
 
@@ -321,7 +354,7 @@ test('rings the closing control from outside and the tab from inside', () => {
  */
 test('can stand on a line the page already drew', () => {
   assert.ok(normalized.includes(`${at("[data-variant='line'][data-track='line']", 'list')}{`));
-  assert.match(rule(`${at("[data-track='none']", 'item')}::after`), /inset-block-end:0/);
+  assert.doesNotMatch(rule(at("[data-track='none']", 'list')), /box-shadow/);
   assert.match(fragment, /data-track="none"/);
 });
 
@@ -356,7 +389,14 @@ test('hides a panel with the attribute the platform already understands', () => 
 });
 
 test('transitions what the eye has to follow, and takes every duration from the scale', () => {
-  assert.match(rule(`${part('item')}::after`), /transition:/);
+  assert.match(
+    rule(`${marker}[data-positioned]`),
+    /transition:translate var\(--slotted-control-transition-duration\)/,
+  );
+  assert.match(
+    css,
+    /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\[data-part='marker'\]\[data-positioned\] \{\s*transition: none;/,
+  );
   assert.match(rule(part('tab')), /transition:/);
   assert.match(
     rule(`${part('panel')}:not([hidden])`),
@@ -374,10 +414,12 @@ test('turns the whole family for a vertical list rather than rearranging it', ()
   );
   assert.match(rule(at("[data-orientation='vertical']", 'list')), /flex-direction:column/);
   assert.match(rule(`${ui}[data-orientation='vertical']>[data-part='scroll']`), /display:none/);
-  assert.match(
-    rule(`${at("[data-orientation='vertical']", 'item')}::after`),
-    /transform:scale\(1,0\)/,
+  const vertical = rule(
+    `${ui}[data-orientation='vertical']>:where([data-part='list'])>[data-part='marker']`,
   );
+  assert.match(vertical, /block-size:var\(--_length\)/);
+  assert.match(vertical, /inline-size:var\(--_marker-size\)/);
+  assert.match(vertical, /translate:0 calc\(var\(--_indicator-start,0px\)/);
 });
 
 /**

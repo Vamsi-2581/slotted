@@ -34,9 +34,9 @@
     "panelTabIndex": "0"
   },
   "marker": {
-    "part": "item",
-    "drawnOn": "the selected item's own edge",
-    "measured": false,
+    "part": "marker",
+    "drawnOn": "the list's edge, under the selected tab's content box",
+    "measured": true,
     "directionAttribute": "data-activation-direction",
     "directions": ["forward", "backward", "none"]
   },
@@ -210,6 +210,7 @@
         "label",
         "end",
         "dismiss",
+        "marker",
         "panel",
         "scroll",
         "actions"

@@ -914,3 +914,287 @@
     </div>
   </div>
 </section>
+
+<!--
+  The marker, live. The module script of this file draws the marker of every
+  list with `createIndicator`, as the bindings do. `tools/harness/scenarios/tabs-marker.mjs`
+  reads its geometry against each selected tab and selects another tab.
+-->
+<section data-scene="marker">
+  <div data-demo-column>
+    <p data-demo-label>one marker per list, on the selected tab's content box</p>
+    <div
+      data-ui="tabs"
+      data-part="root"
+      data-variant="line"
+      data-size="md"
+      data-fit="auto"
+      data-orientation="horizontal"
+      data-track="line"
+      data-activation-direction="none"
+      data-probe="horizontal"
+      style="--slotted-tabs-marker-size: 4px; --slotted-tabs-marker-radius: 2px"
+    >
+      <div data-part="list" role="tablist" aria-label="Pedido">
+        <div data-part="item" role="presentation" data-selected>
+          <button
+            data-part="tab"
+            role="tab"
+            id="mh-0"
+            aria-controls="mh-0-panel"
+            aria-selected="true"
+            tabindex="0"
+            type="button"
+          >
+            <span data-part="label">Resumo</span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mh-1"
+            aria-controls="mh-1-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Itens</span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mh-2"
+            aria-controls="mh-2-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Nota</span>
+          </button>
+        </div>
+      </div>
+      <div data-part="panel" role="tabpanel" id="mh-0-panel" aria-labelledby="mh-0" tabindex="0">
+        Painel
+      </div>
+    </div>
+    <div
+      data-ui="tabs"
+      data-part="root"
+      data-variant="line"
+      data-size="md"
+      data-fit="auto"
+      data-orientation="horizontal"
+      data-track="line"
+      data-activation-direction="none"
+      data-probe="horizontal-dismissible"
+      style="--slotted-tabs-marker-size: 4px; --slotted-tabs-marker-radius: 2px"
+    >
+      <div data-part="list" role="tablist" aria-label="Pedido">
+        <div data-part="item" role="presentation" data-selected>
+          <button
+            data-part="tab"
+            role="tab"
+            id="mhd-0"
+            aria-controls="mhd-0-panel"
+            aria-selected="true"
+            tabindex="0"
+            type="button"
+          >
+            <span data-part="label">Resumo</span>
+          </button>
+          <button data-part="dismiss" type="button" tabindex="-1" aria-label="Fechar Resumo">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mhd-1"
+            aria-controls="mhd-1-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Itens</span>
+          </button>
+          <button data-part="dismiss" type="button" tabindex="-1" aria-label="Fechar Itens">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mhd-2"
+            aria-controls="mhd-2-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Nota</span>
+          </button>
+          <button data-part="dismiss" type="button" tabindex="-1" aria-label="Fechar Nota">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </div>
+      <div data-part="panel" role="tabpanel" id="mhd-0-panel" aria-labelledby="mhd-0" tabindex="0">
+        Painel
+      </div>
+    </div>
+    <div
+      data-ui="tabs"
+      data-part="root"
+      data-variant="line"
+      data-size="md"
+      data-fit="auto"
+      data-orientation="vertical"
+      data-track="line"
+      data-activation-direction="none"
+      data-probe="vertical"
+      style="--slotted-tabs-marker-size: 4px; --slotted-tabs-marker-radius: 2px"
+    >
+      <div data-part="list" role="tablist" aria-label="Pedido" aria-orientation="vertical">
+        <div data-part="item" role="presentation" data-selected>
+          <button
+            data-part="tab"
+            role="tab"
+            id="mv-0"
+            aria-controls="mv-0-panel"
+            aria-selected="true"
+            tabindex="0"
+            type="button"
+          >
+            <span data-part="label">Resumo</span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mv-1"
+            aria-controls="mv-1-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Itens</span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mv-2"
+            aria-controls="mv-2-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Nota</span>
+          </button>
+        </div>
+      </div>
+      <div data-part="panel" role="tabpanel" id="mv-0-panel" aria-labelledby="mv-0" tabindex="0">
+        Painel
+      </div>
+    </div>
+    <div
+      data-ui="tabs"
+      data-part="root"
+      data-variant="line"
+      data-size="md"
+      data-fit="auto"
+      data-orientation="vertical"
+      data-track="line"
+      data-activation-direction="none"
+      data-probe="vertical-dismissible"
+      style="--slotted-tabs-marker-size: 4px; --slotted-tabs-marker-radius: 2px"
+    >
+      <div data-part="list" role="tablist" aria-label="Pedido" aria-orientation="vertical">
+        <div data-part="item" role="presentation" data-selected>
+          <button
+            data-part="tab"
+            role="tab"
+            id="mvd-0"
+            aria-controls="mvd-0-panel"
+            aria-selected="true"
+            tabindex="0"
+            type="button"
+          >
+            <span data-part="label">Resumo</span>
+          </button>
+          <button data-part="dismiss" type="button" tabindex="-1" aria-label="Fechar Resumo">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mvd-1"
+            aria-controls="mvd-1-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Itens</span>
+          </button>
+          <button data-part="dismiss" type="button" tabindex="-1" aria-label="Fechar Itens">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+        <div data-part="item" role="presentation">
+          <button
+            data-part="tab"
+            role="tab"
+            id="mvd-2"
+            aria-controls="mvd-2-panel"
+            aria-selected="false"
+            tabindex="-1"
+            type="button"
+          >
+            <span data-part="label">Nota</span>
+          </button>
+          <button data-part="dismiss" type="button" tabindex="-1" aria-label="Fechar Nota">
+            <span data-ui="icon" data-part="root" aria-hidden="true"
+              ><svg data-part="glyph" data-glyph="x"></svg
+            ></span>
+          </button>
+        </div>
+      </div>
+      <div data-part="panel" role="tabpanel" id="mvd-0-panel" aria-labelledby="mvd-0" tabindex="0">
+        Painel
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="module">
+  import { createIndicator } from '@slotted/core/measure';
+
+  for (const root of document.querySelectorAll('[data-ui="tabs"]')) {
+    const list = root.querySelector(':scope > [data-part="list"]');
+    if (list === null) continue;
+    createIndicator(list, {
+      orientation: () => root.getAttribute('data-orientation') ?? 'horizontal',
+      part: 'marker',
+      target: () =>
+        list.querySelector(':scope > [data-part="item"][data-selected] > [data-part="tab"]'),
+    });
+  }
+</script>

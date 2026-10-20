@@ -1470,6 +1470,7 @@
       "item",
       "label",
       "list",
+      "marker",
       "panel",
       "root",
       "scroll",
@@ -1793,7 +1794,6 @@
   "attributes": [
     "data-action",
     "data-actions",
-    "data-activation-direction",
     "data-active",
     "data-adaptive",
     "data-aggregate",

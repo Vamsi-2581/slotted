@@ -4311,8 +4311,12 @@ export type ComponentToken =
   | '--slotted-tabs-hover-background'
   | '--slotted-tabs-hover-color'
   | '--slotted-tabs-hover-marker-color'
+  | '--slotted-tabs-hover-marker-opacity'
   | '--slotted-tabs-list-gap'
   | '--slotted-tabs-marker-color'
+  | '--slotted-tabs-marker-inset'
+  | '--slotted-tabs-marker-radius'
+  | '--slotted-tabs-marker-size'
   | '--slotted-tabs-scroll-color'
   | '--slotted-tabs-selected-color'
   | '--slotted-tabs-track-color'
@@ -6515,8 +6519,12 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-tabs-hover-background",
   "--slotted-tabs-hover-color",
   "--slotted-tabs-hover-marker-color",
+  "--slotted-tabs-hover-marker-opacity",
   "--slotted-tabs-list-gap",
   "--slotted-tabs-marker-color",
+  "--slotted-tabs-marker-inset",
+  "--slotted-tabs-marker-radius",
+  "--slotted-tabs-marker-size",
   "--slotted-tabs-scroll-color",
   "--slotted-tabs-selected-color",
   "--slotted-tabs-track-color",

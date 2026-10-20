@@ -4,6 +4,7 @@ import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
 import type { RovingTabindexHandle } from '@slotted/core/focus';
 import { createScrollAffordance, NOT_OVERFLOWING } from '@slotted/core/overflow';
 import type { OverflowState, ScrollAffordanceHandle } from '@slotted/core/overflow';
+import { createIndicator } from '@slotted/core/measure';
 import { createControllable } from '@slotted/core/state';
 import {
   createContext,
@@ -11,6 +12,7 @@ import {
   useDeferredValue,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -29,6 +31,10 @@ import type {
 
 /** Every tab in the list, in the order the DOM holds them. */
 export const TAB_SELECTOR = '[data-part="tab"]';
+/** The selected tab, the one the marker underlines. */
+const SELECTED_TAB_SELECTOR = ':scope > [data-part="item"][data-selected] > [data-part="tab"]';
+/** A layout effect where there is a document to lay out, an effect on the server. */
+const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
 const TabsContext = createContext<TabsContextValue | undefined>(undefined);
 
@@ -269,6 +275,21 @@ export function Tabs({
       roving.current = null;
     };
   }, [list, resolvedLoop, resolvedOrientation]);
+
+  /**
+   * The marker the list draws under the selected tab, measured by
+   * `createIndicator` before the first paint, so it is in place in the frame
+   * that shows the tabs and slides from there on.
+   */
+  useIsomorphicLayoutEffect(() => {
+    if (list === null) return undefined;
+    const indicator = createIndicator(list, {
+      orientation: () => resolvedOrientation,
+      part: 'marker',
+      target: () => list.querySelector<HTMLElement>(SELECTED_TAB_SELECTOR),
+    });
+    return indicator.destroy;
+  }, [list, resolvedOrientation]);
 
   useEffect(() => {
     if (list === null || resolvedOrientation === 'vertical') {

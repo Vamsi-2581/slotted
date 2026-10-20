@@ -108,6 +108,7 @@ test('gives the dismiss control a box of its own without breaking the ownership'
     'label',
     'end',
     'dismiss',
+    'marker',
     'panel',
     'scroll',
     'actions',
@@ -131,13 +132,14 @@ test('keeps the dismiss control out of the tab sequence and inside the tree', ()
 });
 
 /**
- * Every surveyed indicator is measured, and Base UI ships `renderBeforeHydration`
- * because of it. The direction of travel is an attribute instead, so the family
- * is right in a server response and during the first paint.
+ * One marker that slides between tabs is measured, as every surveyed indicator
+ * is: the list draws it from the selected tab's box. The direction of travel
+ * stays an attribute on the root for a consumer's own motion.
  */
-test('moves the marker from an attribute rather than from a measurement', () => {
-  assert.equal(contract.marker.measured, false);
-  assert.equal(contract.marker.part, 'item');
+test('draws one measured marker in the list, and keeps the direction attribute', () => {
+  assert.equal(contract.marker.measured, true);
+  assert.equal(contract.marker.part, 'marker');
+  assert.ok(contract.members.tabs.parts.includes('marker'));
   assert.equal(contract.marker.directionAttribute, 'data-activation-direction');
   assert.deepEqual(contract.marker.directions, ['forward', 'backward', 'none']);
 });

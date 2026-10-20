@@ -64,8 +64,14 @@ test('finds every stylesheet in the package', () => {
  * `--slotted-tour-target-x`, `-y`, `-width` and `-height`, which are viewport
  * pixels measured from the left and the top. A cutout that mirrored them would
  * frame the element's reflection in a right-to-left document.
+ *
+ * `tabs`' marker is the third: `createIndicator` writes the selected tab's
+ * start as pixels from the list's left edge, so the marker is placed from
+ * `left`, and the inset that differs at the closing control is swapped by hand
+ * under `:dir(rtl)`.
  */
-const PHYSICAL_BY_MEASUREMENT = /\[data-part=['"](?:arrow|spotlight)['"]\]/;
+const PHYSICAL_BY_MEASUREMENT =
+  /\[data-part=['"](?:arrow|spotlight)['"]\]|\[data-ui=['"]tabs['"]\][^,]*\[data-part=['"]marker['"]\]/;
 
 /**
  * Every declaration in a sheet, with the selectors it is nested inside. The

@@ -1,5 +1,6 @@
 import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
 import type { RemovalFocusHandle, RovingTabindexHandle } from '@slotted/core/focus';
+import { createIndicator } from '@slotted/core/measure';
 import { createScrollAffordance, NOT_OVERFLOWING } from '@slotted/core/overflow';
 import type { OverflowState, ScrollAffordanceHandle } from '@slotted/core/overflow';
 import { createControllable } from '@slotted/core/state';
@@ -383,6 +384,16 @@ export class SlTabs implements OnInit {
     this.affordance = affordance;
     this.overflow.set(affordance.state());
 
+    /** The marker the list draws under the selected tab, measured by `createIndicator`. */
+    const indicator = createIndicator(list, {
+      orientation: () => this.resolvedOrientation(),
+      part: 'marker',
+      target: () =>
+        list.querySelector<HTMLElement>(
+          ':scope > [data-part="item"][data-selected] > [data-part="tab"]',
+        ),
+    });
+
     /**
      * A tab arriving or leaving has to reach both handles, and neither
      * binding can be told by the other's change detection. The DOM is the
@@ -398,6 +409,7 @@ export class SlTabs implements OnInit {
 
     this.destroyRef.onDestroy(() => {
       observer.disconnect();
+      indicator.destroy();
       removal.destroy();
       affordance.destroy();
       tabindex.destroy();

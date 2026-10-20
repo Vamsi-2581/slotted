@@ -103,6 +103,30 @@ describe('SlTabs', () => {
     expect(panel.getAttribute('tabindex')).toBe('0');
   });
 
+  /**
+   * One marker the list draws, measured from the selected tab, rather than a
+   * bar per item: one bar can slide between two tabs. `jsdom` lays nothing
+   * out, so each tab's box is whatever the test says it is.
+   */
+  it('draws one marker in the list and moves it to the tab selected', async () => {
+    const list = query('[role="tablist"]') as HTMLElement;
+    const markers = () => list.querySelectorAll(':scope > [data-part="marker"]');
+    expect(markers()).toHaveLength(1);
+    const marker = markers()[0] as HTMLElement;
+    expect(marker.getAttribute('aria-hidden')).toBe('true');
+    expect(marker.hidden).toBe(false);
+
+    list.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 40 }) as DOMRect;
+    tab(1).getBoundingClientRect = () => ({ left: 120, top: 0, width: 80, height: 40 }) as DOMRect;
+    click(tab(1));
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(markers()).toHaveLength(1);
+    expect(marker.style.getPropertyValue('--_indicator-start')).toBe('120px');
+    expect(marker.style.getPropertyValue('--_indicator-length')).toBe('80px');
+  });
+
   /** A strip over one region the value filters names that region from every tab. */
   it('lets a tab name a region the family does not render', async () => {
     fixture.componentInstance.controls.set('feed');

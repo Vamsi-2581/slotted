@@ -68,10 +68,8 @@ export function TabList({ children, ref, render, ...nativeProps }: TabListProps)
 /**
  * One tab, in the box that holds it.
  *
- * The box is presentational and it exists for two reasons a `button` cannot
- * answer: a `button` may not contain a `button`, so a dismissible tab needs
- * somewhere to put its second control, and the marker has to span the pair
- * rather than only the label.
+ * The box is presentational and it exists because a `button` may not contain
+ * a `button`: a dismissible tab needs somewhere to put its second control.
  *
  * `className`, `style` and `render` reach that box; every native prop and the
  * `ref` reach the control, which is what `radio-group` does with its own item

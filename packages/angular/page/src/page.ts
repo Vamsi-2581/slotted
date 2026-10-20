@@ -17,6 +17,7 @@ import {
   HostAttributeToken,
   inject,
   input,
+  isDevMode,
   signal,
   ViewEncapsulation,
 } from '@angular/core';
@@ -35,6 +36,25 @@ export type {
 
 /** The custom property the scroller carries for what sticks above the footer. */
 export const STICKY_BOTTOM_PROPERTY = '--slotted-page-sticky-bottom';
+
+/**
+ * The inset lives on the body, so content written straight into the page is
+ * drawn against the viewport's edges and nothing else says why. A header is
+ * not that content — it carries its own inset — so it is the one child the
+ * check passes over.
+ */
+function warnWithoutBody(root: HTMLElement) {
+  const scroll = root.querySelector(':scope > [data-part="scroll"]');
+  if (scroll === null) return;
+  const content = [...scroll.children].filter(
+    (child) => child.getAttribute('data-ui') !== 'page-header',
+  );
+  if (content.length === 0) return;
+  if (content.some((child) => child.getAttribute('data-part') === 'body')) return;
+  console.warn(
+    'slPage has content outside slPageBody. Content outside the body receives no inset: wrap it in an element carrying slPageBody.',
+  );
+}
 
 /**
  * The column of a screen: who scrolls, how wide the content is, where the
@@ -128,6 +148,7 @@ export class SlPage {
   constructor() {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
+      if (isDevMode()) warnWithoutBody(this.native);
       if (typeof ResizeObserver === 'undefined') return;
       const target = findScrollParent(this.native) ?? this.native.ownerDocument.documentElement;
       const bar = () => this.native.querySelector<HTMLElement>(':scope > [data-part="footer"]');

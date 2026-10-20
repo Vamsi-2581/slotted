@@ -202,3 +202,35 @@ describe('Page', () => {
     expect(screen.getByTestId('page')).toHaveAttribute('lang', 'pt-BR');
   });
 });
+
+/**
+ * The inset lives on the body, so content written straight into the page is
+ * drawn against the viewport's edges, and nothing said why. In development the
+ * page says it, once, and names the part.
+ */
+describe('Page without a body', () => {
+  it('warns once, naming PageBody, and stays quiet when the body is there', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const { unmount } = render(
+      <Page>
+        <p>Conteúdo</p>
+      </Page>,
+    );
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0]?.[0])).toContain('PageBody');
+    unmount();
+
+    warn.mockClear();
+    render(
+      <Page>
+        <PageBody>
+          <p>Conteúdo</p>
+        </PageBody>
+      </Page>,
+    );
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});

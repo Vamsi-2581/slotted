@@ -29,6 +29,27 @@ export function usePage(): PageContextValue | undefined {
 
 const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
 
+const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
+
+/**
+ * The inset lives on the body, so content written straight into the page is
+ * drawn against the viewport's edges and nothing else says why. A header is
+ * not that content — it carries its own inset — so it is the one child the
+ * check passes over, and a `render` that produces the body part satisfies it.
+ */
+function warnWithoutBody(root: HTMLElement) {
+  const scroll = root.querySelector(':scope > [data-part="scroll"]');
+  if (scroll === null) return;
+  const content = [...scroll.children].filter(
+    (child) => child.getAttribute('data-ui') !== 'page-header',
+  );
+  if (content.length === 0) return;
+  if (content.some((child) => child.getAttribute('data-part') === 'body')) return;
+  console.warn(
+    'Page has content outside PageBody. Content outside PageBody receives no inset: wrap it in PageBody.',
+  );
+}
+
 /**
  * The column of a screen: who scrolls, how wide the content is, where the
  * footer stays, how much air the body has.
@@ -83,6 +104,10 @@ export function Page({
   };
 
   const [root, setRoot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isDevelopment && root !== null) warnWithoutBody(root);
+  }, [root]);
 
   /**
    * The footer's height, written on the scroller so a table's sticky summary

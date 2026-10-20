@@ -221,3 +221,43 @@ describe('SlPage language', () => {
     vi.unstubAllGlobals();
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SlPage, SlPageBody],
+  template: `@if (bare()) {
+      <main slPage><p>Conteúdo</p></main>
+    } @else {
+      <main slPage>
+        <div slPageBody><p>Conteúdo</p></div>
+      </main>
+    }`,
+})
+class BodyHost {
+  readonly bare = signal(true);
+}
+
+/**
+ * The inset lives on the body, so a page whose content sits straight in it is
+ * drawn against the viewport's edges. Nothing said why until the page said it.
+ */
+describe('SlPage without a body', () => {
+  it('warns once, naming slPageBody, and stays quiet when the body is there', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const bare = TestBed.createComponent(BodyHost);
+    bare.detectChanges();
+    await bare.whenStable();
+
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0]?.[0])).toContain('slPageBody');
+
+    warn.mockClear();
+    const wrapped = TestBed.createComponent(BodyHost);
+    wrapped.componentInstance.bare.set(false);
+    wrapped.detectChanges();
+    await wrapped.whenStable();
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});

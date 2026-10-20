@@ -155,4 +155,6 @@ for (const [index, first] of reading.before.entries()) {
     `${first.probe}: the selection moves the marker`,
   );
 }
-console.log('ok — one marker on the content box, its offset above the list edge, slid by translate');
+console.log(
+  'ok — one marker on the content box, its offset above the list edge, slid by translate',
+);

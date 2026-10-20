@@ -97,7 +97,7 @@ A table wider than its container scrolls inside its own region instead of wideni
 
 ## Empty
 
-`TableEmpty` is one cell that spans every column. Put a result state in it: `status="empty"` for a set with nothing in it yet, `status="no-results"` for a set a filter emptied.
+`TableEmpty` is one cell that spans every column, in a row of its own: the React part writes the row, and Angular's `td[slTableEmpty]` goes inside a `tr`. Put a result state in it: `status="empty"` for a set with nothing in it yet, `status="no-results"` for a set a filter emptied.
 
 <Example name="empty" wide />
 

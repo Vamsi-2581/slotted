@@ -27,18 +27,16 @@ export default function TableEmptyExample() {
           </TableRow>
         </TableHead>
         <TableBody>
-          <TableRow>
-            <TableEmpty>
-              <ResultState status="empty">
-                <ResultStateContent>
-                  <ResultStateTitle>No returns this week</ResultStateTitle>
-                  <ResultStateDescription>
-                    Returns appear here as soon as a customer opens one from their order page.
-                  </ResultStateDescription>
-                </ResultStateContent>
-              </ResultState>
-            </TableEmpty>
-          </TableRow>
+          <TableEmpty>
+            <ResultState status="empty">
+              <ResultStateContent>
+                <ResultStateTitle>No returns this week</ResultStateTitle>
+                <ResultStateDescription>
+                  Returns appear here as soon as a customer opens one from their order page.
+                </ResultStateDescription>
+              </ResultStateContent>
+            </ResultState>
+          </TableEmpty>
         </TableBody>
       </TableContent>
     </Table>

@@ -773,11 +773,9 @@ function TypedFilterDemo() {
         </TableHead>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableEmpty>
-                <ResultState status="no-results" title="No invoices match this filter" />
-              </TableEmpty>
-            </TableRow>
+            <TableEmpty>
+              <ResultState status="no-results" title="No invoices match this filter" />
+            </TableEmpty>
           ) : (
             rows.slice(0, 5).map((invoice) => (
               <TableRow key={invoice.id} value={invoice.id}>
@@ -927,11 +925,9 @@ function TimeFilterDemo() {
         </TableHead>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableEmpty>
-                <ResultState status="no-results" title="No pickups in this window" />
-              </TableEmpty>
-            </TableRow>
+            <TableEmpty>
+              <ResultState status="no-results" title="No pickups in this window" />
+            </TableEmpty>
           ) : (
             rows.map((delivery) => (
               <TableRow key={delivery.id} value={delivery.id}>
@@ -997,11 +993,9 @@ function DateTimeFilterDemo() {
         </TableHead>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableEmpty>
-                <ResultState status="no-results" title="Nothing scheduled after that" />
-              </TableEmpty>
-            </TableRow>
+            <TableEmpty>
+              <ResultState status="no-results" title="Nothing scheduled after that" />
+            </TableEmpty>
           ) : (
             rows.map((delivery) => (
               <TableRow key={delivery.id} value={delivery.id}>
@@ -1071,11 +1065,9 @@ function RangeFilterDemo() {
         </TableHead>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableEmpty>
-                <ResultState status="no-results" title="Nothing due in this period" />
-              </TableEmpty>
-            </TableRow>
+            <TableEmpty>
+              <ResultState status="no-results" title="Nothing due in this period" />
+            </TableEmpty>
           ) : (
             rows.map((invoice) => (
               <TableRow key={invoice.id} value={invoice.id}>
@@ -1146,11 +1138,9 @@ function TagsFilterDemo({ constrained }: { constrained: boolean }) {
         </TableHead>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableEmpty>
-                <ResultState status="no-results" title="No invoices match" />
-              </TableEmpty>
-            </TableRow>
+            <TableEmpty>
+              <ResultState status="no-results" title="No invoices match" />
+            </TableEmpty>
           ) : (
             rows.map((invoice) => (
               <TableRow key={invoice.id} value={invoice.id}>
@@ -1609,15 +1599,13 @@ export const EmptyAndLoading: Story = {
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableRow>
-                <TableEmpty>
-                  <ResultState status="no-results">
-                    <ResultStateContent>
-                      <ResultStateTitle>No invoices match this filter</ResultStateTitle>
-                    </ResultStateContent>
-                  </ResultState>
-                </TableEmpty>
-              </TableRow>
+              <TableEmpty>
+                <ResultState status="no-results">
+                  <ResultStateContent>
+                    <ResultStateTitle>No invoices match this filter</ResultStateTitle>
+                  </ResultStateContent>
+                </ResultState>
+              </TableEmpty>
             </TableBody>
           </TableContent>
         </Table>
@@ -1978,15 +1966,13 @@ function ListingDemo() {
         </TableHead>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow>
-              <TableEmpty>
-                <ResultState status="no-results">
-                  <ResultStateContent>
-                    <ResultStateTitle>No invoices match this filter</ResultStateTitle>
-                  </ResultStateContent>
-                </ResultState>
-              </TableEmpty>
-            </TableRow>
+            <TableEmpty>
+              <ResultState status="no-results">
+                <ResultStateContent>
+                  <ResultStateTitle>No invoices match this filter</ResultStateTitle>
+                </ResultStateContent>
+              </ResultState>
+            </TableEmpty>
           ) : (
             rows.map((invoice, index) => (
               <TableRow

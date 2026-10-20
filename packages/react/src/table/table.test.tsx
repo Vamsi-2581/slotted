@@ -27,6 +27,7 @@ import {
   TableColumnActions,
   TableColumnHeader,
   TableDetail,
+  TableEmpty,
   TableExpander,
   TableGroupRow,
   TableHead,
@@ -114,6 +115,37 @@ describe('the structure', () => {
     const amount = screen.getByText('1,240.00');
     expect(amount).toHaveAttribute('data-numeric', '');
     expect(amount).not.toHaveAttribute('data-align');
+  });
+});
+
+describe('an empty body', () => {
+  it('holds the empty cell in a row of its own, and React reports no nesting error', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    render(
+      <Table columns={2}>
+        <TableContent aria-label="Invoices">
+          <TableHead>
+            <TableRow>
+              <TableColumnHeader>Invoice</TableColumnHeader>
+              <TableColumnHeader>Client</TableColumnHeader>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableEmpty>No invoices</TableEmpty>
+          </TableBody>
+        </TableContent>
+      </Table>,
+    );
+
+    const cell = screen.getByText('No invoices');
+    expect(cell).toHaveAttribute('data-part', 'empty');
+    expect(cell.tagName).toBe('TD');
+    expect(cell).toHaveAttribute('colspan', '2');
+    expect(cell.parentElement?.tagName).toBe('TR');
+    expect(cell.parentElement).not.toHaveAttribute('data-part');
+    expect(cell.parentElement?.parentElement?.tagName).toBe('TBODY');
+    expect(error).not.toHaveBeenCalled();
+    error.mockRestore();
   });
 });
 

@@ -561,10 +561,18 @@ export function TableGroupRow({
  * What is shown when there is nothing. It takes a `result-state`, whose status
  * axis already separates an empty set from a set a filter emptied — a second
  * empty shape here would be a second answer to a question a family answers.
+ *
+ * The part writes its own row, because a `td` is valid only inside a `tr`. The
+ * row carries no `data-part`: it is not a record, so it takes no hover, stripe
+ * or selection. Props and `ref` reach the cell.
  */
 export function TableEmpty({ colSpan, ref, ...nativeProps }: TableEmptyProps) {
   const table = useTable();
-  return <td {...nativeProps} colSpan={colSpan ?? table.columns} data-part="empty" ref={ref} />;
+  return (
+    <tr>
+      <td {...nativeProps} colSpan={colSpan ?? table.columns} data-part="empty" ref={ref} />
+    </tr>
+  );
 }
 
 /**

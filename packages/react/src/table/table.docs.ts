@@ -259,7 +259,7 @@ const anatomy: AnatomyRow[] = [
     element: 'td',
     required: false,
     purpose:
-      'What is shown when there is nothing, spanning every column. It takes a ResultState, which already separates an empty set from a set a filter emptied.',
+      'What is shown when there is nothing, spanning every column, in a row the part writes itself. It takes a ResultState, which already separates an empty set from a set a filter emptied.',
   },
   {
     part: 'loader',
@@ -518,7 +518,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'The three states of an empty body',
       source:
-        '{\n  loading && rows.length === 0 ? (\n    <TableLoader skeletonRows={5} />\n  ) : rows.length === 0 ? (\n    <TableBody>\n      <TableRow>\n        <TableEmpty>\n          <ResultState status="no-results" title="No invoices match this filter" />\n        </TableEmpty>\n      </TableRow>\n    </TableBody>\n  ) : (\n    <TableBody>{rows}</TableBody>\n  );\n}',
+        '{\n  loading && rows.length === 0 ? (\n    <TableLoader skeletonRows={5} />\n  ) : rows.length === 0 ? (\n    <TableBody>\n      <TableEmpty>\n        <ResultState status="no-results" title="No invoices match this filter" />\n      </TableEmpty>\n    </TableBody>\n  ) : (\n    <TableBody>{rows}</TableBody>\n  );\n}',
     }),
   },
   {

@@ -259,6 +259,27 @@ describe('StatCard', () => {
     expect(part('value')).toHaveTextContent('—');
   });
 
+  it('takes a value it may not have yet, and draws an undefined one as an absent one', () => {
+    const maybe = undefined as string | undefined;
+    const delta = undefined as number | undefined;
+    render(
+      <>
+        <StatCard status="empty">
+          <StatCardValue value={maybe} />
+          <StatCardDelta value={delta} />
+        </StatCard>
+        <StatCard status="empty">
+          <StatCardValue />
+          <StatCardDelta />
+        </StatCard>
+      </>,
+    );
+
+    const [withUndefined, absent] = document.querySelectorAll('[data-ui="stat-card"]');
+    expect(withUndefined!.innerHTML).toBe(absent!.innerHTML);
+    expect(withUndefined!.querySelector('[data-part="value"]')).toHaveTextContent('—');
+  });
+
   it('keeps the consumer label id and then names the group by it', () => {
     render(
       <StatCard>

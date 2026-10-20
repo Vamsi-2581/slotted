@@ -100,7 +100,7 @@ export interface StatCardFigureProps extends ComponentPropsWithRef<'div'> {
 
 export interface StatCardValueProps extends ComponentPropsWithRef<'span'> {
   /** A number, formatted with the card's locale and `formatOptions`; or the text as the consumer wrote it. `children` wins. */
-  value?: number | string;
+  value?: number | string | undefined;
   formatOptions?: Intl.NumberFormatOptions;
   render?: (props: StatCardPartProps<'span'>) => ReactNode;
 }
@@ -117,7 +117,7 @@ export interface StatCardDeltaRootProps extends ComponentPropsWithRef<'span'> {
 
 export interface StatCardDeltaProps extends ComponentPropsWithRef<'span'> {
   /** The change. Unset, the root's `delta`. */
-  value?: number;
+  value?: number | undefined;
   /** `percent` reads the value as a fraction; `decimal` reads it as it is. */
   format?: StatCardDeltaFormat;
   formatOptions?: Intl.NumberFormatOptions;

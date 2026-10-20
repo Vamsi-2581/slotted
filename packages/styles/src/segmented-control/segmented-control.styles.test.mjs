@@ -111,15 +111,12 @@ test('keeps the target at the control’s own height rather than the thumb’s',
 });
 
 /**
- * Segments stand apart by a step above the ring: the thumb is one column wide
+ * Segments stand apart by the ring's own step: the thumb is one column wide
  * and moves by its own width plus that step, so the arithmetic still reads
  * nothing from layout.
  */
 test('spaces the segments apart and moves the thumb by a column and a gap', () => {
-  assert.match(
-    dense,
-    /--_spacing:var\(--slotted-segmented-control-gap,var\(--slotted-space-2,0\.25rem\)\)/,
-  );
+  assert.match(dense, /--_spacing:var\(--slotted-segmented-control-gap,var\(--_inset\)\)/);
   assert.match(dense, /gap:var\(--_spacing\)/);
   assert.match(dense, /translate:calc\(var\(--_index\)\*\(100%\+var\(--_spacing\)\)\)/);
   assert.match(

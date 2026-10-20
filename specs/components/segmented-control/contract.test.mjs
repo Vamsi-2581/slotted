@@ -127,7 +127,7 @@ test('is exactly as tall as a control, and keeps the target at that height', () 
   assert.ok(contract.height.reason.length > 0);
 });
 
-/** Segments stand apart by a step above the ring, with a rule in the middle of the gap. */
+/** Segments stand apart by the ring's own step, with a rule in the middle of the gap. */
 test('spaces its segments apart and rules the middle of each gap', () => {
   assert.match(contract.spacing.between, /--slotted-segmented-control-gap/);
   assert.ok(contract.spacing.reason.length > 0);

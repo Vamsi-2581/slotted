@@ -59,12 +59,8 @@
     --_inset: var(--slotted-segmented-control-inset, var(--slotted-space-1, 0.125rem));
     /** What is left for a segment once the track has taken its edge and ring. */
     --_inner: calc(var(--_height) - (var(--_inset) + var(--_border-width)) * 2);
-    /**
-     * The space between two segments, one step above the ring around them:
-     * at the ring's own two pixels the rule in the middle had no room either
-     * side of it, and the segments still read as touching.
-     */
-    --_spacing: var(--slotted-segmented-control-gap, var(--slotted-space-2, 0.25rem));
+    /** The space between two segments: the ring's own step. */
+    --_spacing: var(--slotted-segmented-control-gap, var(--_inset));
     /** The thumb's corner, kept concentric with the track's own. */
     --_thumb-radius: max(calc(var(--_radius) - var(--_inset)), var(--slotted-radius-xs, 2px));
     /**
@@ -246,8 +242,8 @@
   /**
    * ── Between two segments ──────────────────────────────────────────────
    *
-   * Segments stand apart by a step above the ring of track around them, so
-   * each one — its hover ground, the thumb on it — is a shape of its own
+   * Segments stand apart by the same step as the ring of track around them,
+   * so each one — its hover ground, the thumb on it — is a shape of its own
    * on the track, and a rule in the middle of that room says the control is
    * divided: a track of words with nothing between them reads as a sentence.
    *

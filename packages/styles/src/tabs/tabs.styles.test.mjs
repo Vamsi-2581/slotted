@@ -162,14 +162,14 @@ test('keeps a scrollbar until the paging controls replace it', () => {
 });
 
 /**
- * One marker the list draws, slid by `translate` and sized by `inline-size`
+ * One marker the list draws, placed by `left` and sized by `inline-size`
  * from the selected tab's measured box, and never scaled: a bar per item could
  * only scale from an edge. Its thickness, rounding and inset are tokens, and
  * the thickness never falls below the thick border width.
  */
 test('draws one marker in the list that slides to the selected tab', () => {
   const body = rule(marker);
-  assert.match(body, /translate:calc\(var\(--_indicator-start,0px\) \+ var\(--_left-inset\)/);
+  assert.match(body, /left:calc\(var\(--_indicator-start,0px\) \+ var\(--_left-inset\)/);
   assert.match(body, /inline-size:var\(--_length\)/);
   assert.match(body, /block-size:var\(--_marker-size\)/);
   assert.match(body, /border-radius:var\(--_marker-radius\)/);
@@ -395,7 +395,7 @@ test('hides a panel with the attribute the platform already understands', () => 
 test('transitions what the eye has to follow, and takes every duration from the scale', () => {
   assert.match(
     rule(`${marker}[data-moving]`),
-    /transition:translate var\(--slotted-duration-medium\) var\(--_marker-easing\)/,
+    /transition:left var\(--slotted-duration-medium\) var\(--_marker-easing\),top var\(--slotted-duration-medium\) var\(--_marker-easing\)/,
   );
   assert.match(
     css,
@@ -423,7 +423,7 @@ test('turns the whole family for a vertical list rather than rearranging it', ()
   );
   assert.match(vertical, /block-size:var\(--_length\)/);
   assert.match(vertical, /inline-size:var\(--_marker-size\)/);
-  assert.match(vertical, /translate:0 calc\(var\(--_indicator-start,0px\)/);
+  assert.match(vertical, /inset-block:calc\(var\(--_indicator-start,0px\)/);
 });
 
 /**

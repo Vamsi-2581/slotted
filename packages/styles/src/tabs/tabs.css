@@ -469,7 +469,11 @@
    * end padding, so the end inset is nought there. Below the width of a short
    * label it keeps a minimum length, centred on the content. It stands
    * `--slotted-tabs-marker-offset` above the list's edge, over the track, and the axes are physical in this one rule
-   * because the measurement is: the translate is from the list's left edge.
+   * because the measurement is: the position is from the list's left edge.
+   * Position and length are both layout properties, so one thread advances
+   * both edges in the same frame: a composited `translate` beside a
+   * main-thread `inline-size` drifted apart while the panel rendered, and the
+   * bar grew and shrank on its way between tabs of unequal widths.
    */
   [data-ui='tabs'] > :where([data-part='list']) > [data-part='marker'] {
     --_start-inset: var(--_marker-inset);
@@ -483,13 +487,11 @@
     border-radius: var(--_marker-radius);
     inline-size: var(--_length);
     inset-block-end: calc(var(--_marker-lift, 0px) + var(--_marker-offset));
-    left: 0;
+    left: calc(
+      var(--_indicator-start, 0px) + var(--_left-inset) + (var(--_span) - var(--_length)) / 2
+    );
     pointer-events: none;
     position: absolute;
-    translate: calc(
-        var(--_indicator-start, 0px) + var(--_left-inset) + (var(--_span) - var(--_length)) / 2
-      )
-      0;
   }
 
   [data-ui='tabs']:dir(rtl) > :where([data-part='list']) > [data-part='marker'] {
@@ -520,7 +522,8 @@
     --_marker-easing: var(--slotted-tabs-marker-easing, cubic-bezier(0.4, 0, 0.2, 1));
 
     transition:
-      translate var(--slotted-duration-medium) var(--_marker-easing),
+      left var(--slotted-duration-medium) var(--_marker-easing),
+      top var(--slotted-duration-medium) var(--_marker-easing),
       inline-size var(--slotted-duration-medium) var(--_marker-easing),
       block-size var(--slotted-duration-medium) var(--_marker-easing);
   }
@@ -590,10 +593,11 @@
     > [data-part='marker'] {
     block-size: var(--_length);
     inline-size: var(--_marker-size);
-    inset-block: 0 auto;
+    inset-block: calc(
+        var(--_indicator-start, 0px) + var(--_start-inset) + (var(--_span) - var(--_length)) / 2
+      )
+      auto;
     inset-inline: auto calc(var(--_marker-lift, 0px) + var(--_marker-offset));
-    translate: 0
-      calc(var(--_indicator-start, 0px) + var(--_start-inset) + (var(--_span) - var(--_length)) / 2);
   }
 
   [data-ui='tabs'][data-orientation='vertical']

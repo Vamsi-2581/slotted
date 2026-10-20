@@ -93,7 +93,9 @@ export function createIndicator(
       : rect.top - box.top - container.clientTop + container.scrollTop;
     const nextLength = horizontal ? rect.width : rect.height;
     hide(false);
-    if (nextStart === start && nextLength === length) return;
+    // A sub-pixel difference is the same position: writing it would drop
+    // `data-moving` and cut a slide short.
+    if (Math.abs(nextStart - start) < 0.5 && Math.abs(nextLength - length) < 0.5) return;
 
     const moving = placed !== null && target !== placed;
     if (moving !== element.hasAttribute('data-moving')) {

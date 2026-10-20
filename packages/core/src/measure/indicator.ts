@@ -12,9 +12,11 @@
  * The mark is an element this module creates and appends to the container,
  * `aria-hidden` and with the part name the caller gives. It writes two
  * properties on it, `--_indicator-start` and `--_indicator-length`, in pixels,
- * and `hidden` while there is no target. `data-positioned` arrives one frame
- * after the first position, so a stylesheet that transitions only a positioned
- * mark does not animate it in from the container's corner.
+ * and `hidden` while there is no target. `data-positioned` arrives with the
+ * second position, in the same style update as the values that move: a
+ * transition starts when the style after a change declares one, so a
+ * stylesheet that transitions only a positioned mark places the first position
+ * without motion and slides every one after it.
  *
  * It measures when the target can have moved: an item selected, added or
  * removed (a mutation under the container), and the container or the target
@@ -48,7 +50,6 @@ export function createIndicator(
   options: IndicatorOptions,
 ): IndicatorHandle {
   const doc = container.ownerDocument;
-  const view = doc.defaultView;
   const element = doc.createElement('span');
   element.setAttribute('data-part', options.part ?? 'indicator');
   element.setAttribute('aria-hidden', 'true');
@@ -58,7 +59,6 @@ export function createIndicator(
   let observed: HTMLElement | null = null;
   let start = Number.NaN;
   let length = Number.NaN;
-  let frame = 0;
   let destroyed = false;
 
   const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => update());
@@ -90,16 +90,13 @@ export function createIndicator(
     hide(false);
     if (nextStart === start && nextLength === length) return;
 
+    if (!Number.isNaN(start) && !element.hasAttribute('data-positioned')) {
+      element.setAttribute('data-positioned', '');
+    }
     start = nextStart;
     length = nextLength;
     element.style.setProperty('--_indicator-start', `${start}px`);
     element.style.setProperty('--_indicator-length', `${length}px`);
-    if (!element.hasAttribute('data-positioned') && frame === 0 && view !== null) {
-      frame = view.requestAnimationFrame(() => {
-        frame = 0;
-        if (!destroyed) element.setAttribute('data-positioned', '');
-      });
-    }
   }
 
   const mutations = new MutationObserver((records) => {
@@ -121,7 +118,6 @@ export function createIndicator(
       destroyed = true;
       mutations.disconnect();
       resize?.disconnect();
-      if (frame !== 0) view?.cancelAnimationFrame(frame);
       element.remove();
     },
   };

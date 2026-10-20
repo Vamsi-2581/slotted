@@ -23,7 +23,6 @@ function row() {
 }
 
 const settled = () => new Promise((resolve) => setTimeout(resolve, 0));
-const frame = () => new Promise((resolve) => requestAnimationFrame(() => resolve(undefined)));
 
 describe('createIndicator', () => {
   afterEach(() => {
@@ -47,9 +46,6 @@ describe('createIndicator', () => {
     expect(handle.element.style.getPropertyValue('--_indicator-start')).toBe('10px');
     expect(handle.element.style.getPropertyValue('--_indicator-length')).toBe('60px');
     expect(handle.element.hasAttribute('data-positioned')).toBe(false);
-
-    await frame();
-    expect(handle.element.hasAttribute('data-positioned')).toBe(true);
   });
 
   it('follows the selection when it moves, and adds the scroll the row has taken', async () => {
@@ -70,6 +66,7 @@ describe('createIndicator', () => {
       `${180 - 100 + list.scrollLeft}px`,
     );
     expect(handle.element.style.getPropertyValue('--_indicator-length')).toBe('90px');
+    expect(handle.element.hasAttribute('data-positioned')).toBe(true);
   });
 
   it('measures the block axis of a vertical row, and hides the mark with no target', async () => {

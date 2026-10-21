@@ -102,6 +102,7 @@ export function ProgressBar({
               data-part="indicator"
               data-part-indicator=""
               focusable="false"
+              key={resolved.paint}
               preserveAspectRatio="xMinYMid meet"
               viewBox={`0 -1.25 ${PROGRESS_WAVE_BAR_REACH} 2.5`}
             >
@@ -115,7 +116,7 @@ export function ProgressBar({
               />
             </svg>
           ) : (
-            <div data-part="indicator" data-part-indicator="" />
+            <div data-part="indicator" data-part-indicator="" key={resolved.paint} />
           )}
         </div>
       </>

@@ -14,6 +14,26 @@ import { ProgressCircle } from './progress-circle';
 import { ProgressIndicatorDefaultsProvider } from './progress-indicator-defaults';
 
 describe('ProgressBar', () => {
+  /**
+   * An edge bar stays mounted through its fade, so a sweep that kept its node
+   * came back mid-track when `loading` returned before the fade ended. Each
+   * paint after a withdrawal draws a new indicator, whose sweep starts at the
+   * leading edge.
+   */
+  it('starts the sweep over each time it is painted again', () => {
+    const { container, rerender } = render(
+      <ProgressBar label="Refreshing" loading placement="edge-end" />,
+    );
+    const indicator = () => container.querySelector('[data-part="indicator"]');
+    const first = indicator();
+
+    rerender(<ProgressBar label="Refreshing" loading={false} placement="edge-end" />);
+    expect(indicator()).toBe(first);
+    rerender(<ProgressBar label="Refreshing" loading placement="edge-end" />);
+
+    expect(indicator()).not.toBe(first);
+  });
+
   it('writes the family identity, the shape and the parts', () => {
     render(<ProgressBar label="Uploading" showValue value={40} />);
     const root = screen.getByRole('progressbar');

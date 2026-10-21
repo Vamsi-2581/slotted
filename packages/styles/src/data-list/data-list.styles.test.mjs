@@ -189,11 +189,18 @@ test('draws the focus ring from the foundation on every control the family owns'
   }
 });
 
-/** A refresh keeps the rows and moves nothing. */
+/**
+ * A refresh keeps the rows and moves nothing. A veil refuses the press: an
+ * inherited `pointer-events: none` restyled every row on each toggle.
+ */
 test('dims the set while it refreshes, without replacing it', () => {
   const busy = rule(`${ui}[aria-busy='true']>[data-ui-list]`);
   assert.match(busy, /opacity:0\.55/);
-  assert.match(busy, /pointer-events:none/);
+  assert.doesNotMatch(busy, /pointer-events/);
+  const veil = rule(`${ui}[aria-busy='true']>[data-ui-list]::after`);
+  assert.match(veil, /inset:0/);
+  assert.match(veil, /position:absolute/);
+  assert.match(rule(`${ui}>[data-ui-list]`), /position:relative/);
 });
 
 /** Loading keeps the item's anatomy: the field labels are real, the values are bars. */

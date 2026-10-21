@@ -87,6 +87,20 @@ const loader = (fixture: { nativeElement: HTMLElement }) =>
   fixture.nativeElement.querySelector<HTMLElement>('[data-shape="morph"]');
 
 describe('SlProgressBar', () => {
+  it('starts the sweep over each time it is painted again', () => {
+    const fixture = mount([], (host) => host.value.set(null));
+    const indicator = () => bar(fixture)!.querySelector('[data-part="indicator"]');
+    const first = indicator();
+
+    fixture.componentInstance.loading.set(false);
+    fixture.detectChanges();
+    expect(indicator()).toBe(first);
+    fixture.componentInstance.loading.set(true);
+    fixture.detectChanges();
+
+    expect(indicator()).not.toBe(first);
+  });
+
   it('writes the family identity, the shape and the parts', () => {
     const fixture = mount();
     const root = bar(fixture);

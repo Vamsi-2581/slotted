@@ -394,7 +394,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'progress',
     title: 'A refresh of what is on screen',
-    note: 'PageHeaderProgress draws an indeterminate bar over the line where the chrome ends, after 200 ms and for at least 400 ms. With tabs that line is the one the pill straddles, never the tab strip’s edge; without them it is the root’s hairline. The header writes no aria-busy: the region that waits — the page body — is the consumer’s to mark.',
+    note: 'PageHeaderProgress draws an indeterminate bar over the line where the chrome ends, after 200 ms and for at least 400 ms, wherever it is written among the parts. With a pill over the tabs that line is the one the pill straddles, never the tab strip’s edge; otherwise it is the root’s hairline. The header writes no aria-busy: the region that waits — the page body — is the consumer’s to mark.',
     snippet: defineSnippet({
       id: 'page-header-react-progress',
       language: 'tsx',

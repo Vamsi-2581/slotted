@@ -69,19 +69,21 @@ import {
       <span data-part="value" data-part-value="">{{ valueTextValue() }}</span>
     }
     <div data-part="track" data-part-track="">
-      @if (wave()) {
-        <svg
-          aria-hidden="true"
-          data-part="indicator"
-          data-part-indicator=""
-          focusable="false"
-          preserveAspectRatio="xMinYMid meet"
-          [attr.viewBox]="waveViewBox"
-        >
-          <svg:path [attr.d]="wavePath()" [attr.pathLength]="waveReach" />
-        </svg>
-      } @else {
-        <div data-part="indicator" data-part-indicator=""></div>
+      @for (generation of [paint()]; track generation) {
+        @if (wave()) {
+          <svg
+            aria-hidden="true"
+            data-part="indicator"
+            data-part-indicator=""
+            focusable="false"
+            preserveAspectRatio="xMinYMid meet"
+            [attr.viewBox]="waveViewBox"
+          >
+            <svg:path [attr.d]="wavePath()" [attr.pathLength]="waveReach" />
+          </svg>
+        } @else {
+          <div data-part="indicator" data-part-indicator=""></div>
+        }
       }
     </div>`,
   styleUrls: [

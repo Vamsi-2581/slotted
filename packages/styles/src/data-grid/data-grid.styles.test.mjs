@@ -653,3 +653,19 @@ test('keeps the scroller from being a size container and the window offsets from
     );
   }
 });
+
+/**
+ * A refresh dims the rows and a veil refuses the press. `pointer-events: none`
+ * on the body is inherited, and toggling it restyled every cell: 8 of the 9 ms
+ * a 70-row grid spent on `aria-busy` (`busy.perf.browser.test.tsx` in React).
+ */
+test('refuses a press on busy rows through a veil, not an inherited property', () => {
+  const body = "[data-ui-data-grid][aria-busy='true'] > [data-part-scroll] > [data-part-body]";
+  assert.match(rule(body), /opacity:0\.55/);
+  assert.doesNotMatch(rule(body), /pointer-events/);
+  assert.match(rule(`${body}::after`), /position:absolute/);
+  assert.match(
+    rule('[data-ui-data-grid] > [data-part-scroll] > [data-part-body]'),
+    /position:relative/,
+  );
+});

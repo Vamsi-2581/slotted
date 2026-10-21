@@ -112,9 +112,9 @@ export const PageHeaderTabs = part('tabs', 'PageHeaderTabs');
 
 /**
  * A refresh of what is already on screen, drawn over the line where the chrome
- * ends. Written after the controls and before the tabs, as the controls are:
- * there it is the line the pill straddles, and with no tabs it is the root's
- * own hairline. The frame is a row of the container one hairline tall; the
+ * ends, wherever it is written among the parts: with a pill over the tabs it is
+ * the line the pill straddles, and otherwise the root's own hairline. The
+ * frame is a row of the container one hairline tall; the
  * stylesheet gives the bar the header's width and draws nothing while the
  * title is still loading or while a region around the header is busy.
  */

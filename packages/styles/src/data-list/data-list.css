@@ -412,10 +412,23 @@
    * Over rows already shown the rows stay and recede, and nothing moves:
    * `data-grid`'s rule for the same wait, at the same strength.
    */
+  [data-ui-data-list] > [data-ui-list] {
+    /* The containing block of the veil a busy list lays over its rows. */
+    position: relative;
+  }
+
   [data-ui-data-list][aria-busy='true'] > [data-ui-list] {
     opacity: 0.55;
-    pointer-events: none;
     transition: opacity var(--_transition);
+  }
+
+  /* A veil refuses the press, as `data-grid`'s does: `pointer-events: none`
+     on the list is inherited, and toggling it restyled every row. */
+  [data-ui-data-list][aria-busy='true'] > [data-ui-list]::after {
+    content: '';
+    inset: 0;
+    position: absolute;
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 4);
   }
 
   [data-ui-data-list] > [data-part-empty] {

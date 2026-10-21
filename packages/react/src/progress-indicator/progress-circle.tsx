@@ -96,6 +96,7 @@ export function ProgressCircle({
               d={PROGRESS_WAVE_RING_PATH}
               data-part="indicator"
               data-part-indicator=""
+              key={resolved.paint}
               pathLength="100"
             />
           ) : (
@@ -104,6 +105,7 @@ export function ProgressCircle({
               cy="24"
               data-part="indicator"
               data-part-indicator=""
+              key={resolved.paint}
               pathLength="100"
               r="20"
             />

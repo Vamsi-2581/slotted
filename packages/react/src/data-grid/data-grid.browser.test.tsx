@@ -104,3 +104,36 @@ describe('DataGrid cursor around a control', () => {
     expect(inner.right).toBeLessThanOrEqual(outer.right - ring);
   });
 });
+
+/**
+ * Rows read again stay on screen and refuse the press. The refusal is a veil
+ * over the body rather than an inherited `pointer-events`, so the point a
+ * reader presses lands on the body, not on the cell under it.
+ */
+describe('a grid reading its rows again', () => {
+  it('refuses a press on a row while it is busy', () => {
+    const { rerender } = render(
+      <DataGrid<Entry>
+        aria-label="Entries"
+        columns={COLUMNS}
+        rowKey="id"
+        rows={ROWS.slice(0, 5)}
+      />,
+    );
+    const cell = document.querySelector('[data-part="body"] [role="gridcell"]') as HTMLElement;
+    const box = cell.getBoundingClientRect();
+    const centre = () => document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+    expect(cell.contains(centre())).toBe(true);
+
+    rerender(
+      <DataGrid<Entry>
+        aria-label="Entries"
+        columns={COLUMNS}
+        loading
+        rowKey="id"
+        rows={ROWS.slice(0, 5)}
+      />,
+    );
+    expect(cell.contains(centre())).toBe(false);
+  });
+});

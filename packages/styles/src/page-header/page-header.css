@@ -1018,25 +1018,36 @@
    * the lines the container's own breakout part spans — so the bar is the
    * header's width, as the line is, and not the measure's.
    *
-   * Written after the controls and before the tabs, as the controls are, it
-   * stands on the edge the pill straddles; on the root's own edge the bar
-   * would run under the tabs and read as the selected tab's indicator drawn
-   * across the whole row. With no tabs it is the root's own hairline. The bar
-   * stands on the frame's block-end edge and its thickness rises above it,
-   * which is why the frame does not clip.
+   * With a pill over the tabs it stands on the edge the pill straddles, the
+   * line the reader already sees as the chrome's end. Otherwise it is the
+   * root's own hairline, under the tabs when there are tabs: it is the only
+   * line there is. The bar stands on the frame's block-end edge and its
+   * thickness rises above it, which is why the frame does not clip.
    *
    * A snapped header keeps its edge on screen, and the frame keeps its place
    * beside the controls, so the bar stays with it. Above the title area,
    * whose ground would cover the bar's upper pixel once the area has slid
    * under the title; below the controls, whose pill straddles the same line.
+   *
+   * The place is the stylesheet's, not the order the parts are written in:
+   * the frame is the last row, on the root's hairline, and with a pill over
+   * the tabs the tabs move after it, so the frame is the row under the
+   * controls. Written before the tabs with no pill, the frame was a row of
+   * its own between the title and the strip, over no line.
    */
   [data-ui-page-header] > * > [data-part-progress] {
     block-size: var(--_rule-size);
     grid-column: full;
     margin-block-end: calc(-1 * var(--_rule-size));
+    order: 1;
     pointer-events: none;
     position: relative;
     z-index: 3;
+  }
+  [data-ui-page-header]:has(> * > [data-part-controls]):has(> * > [data-part-tabs]:not(:empty))
+    > *
+    > [data-part-tabs] {
+    order: 2;
   }
 
   /**

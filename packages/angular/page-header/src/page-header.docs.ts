@@ -186,7 +186,7 @@ const anatomy: AnatomyRow[] = [
       'the consumer’s element carrying slPageHeaderProgress, holding one [slProgressBar] at placement="edge-end"',
     required: false,
     purpose:
-      'A refresh of what is already on screen. A row one hairline tall and the header’s whole width, written after the controls and before the tabs: there the bar covers the line the pill straddles, and with no tabs the root’s own hairline. It draws nothing while loading is true or inside a region that is aria-busy.',
+      'A refresh of what is already on screen. A row one hairline tall and the header’s whole width, wherever it is written among the parts: the bar covers the line the pill straddles when a pill stands over the tabs, and the root’s own hairline otherwise. It draws nothing while loading is true or inside a region that is aria-busy.',
   },
 ];
 
@@ -372,7 +372,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'progress',
     title: 'A refresh of what is on screen',
-    note: 'slPageHeaderProgress draws an indeterminate bar over the line where the chrome ends, after 200 ms and for at least 400 ms. With tabs that line is the one the pill straddles, never the tab strip’s edge; without them it is the root’s hairline. The header writes no aria-busy: the region that waits — the page body — is the consumer’s to mark.',
+    note: 'slPageHeaderProgress draws an indeterminate bar over the line where the chrome ends, after 200 ms and for at least 400 ms, wherever it is written among the parts. With a pill over the tabs that line is the one the pill straddles, never the tab strip’s edge; otherwise it is the root’s hairline. The header writes no aria-busy: the region that waits — the page body — is the consumer’s to mark.',
     snippet: defineSnippet({
       id: 'page-header-angular-progress',
       language: 'angular',

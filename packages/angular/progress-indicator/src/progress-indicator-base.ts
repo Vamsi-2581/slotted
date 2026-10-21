@@ -97,6 +97,13 @@ export abstract class SlProgressIndicatorBase {
 
   /** Whether anything is painted at all: `delay` may still be running. */
   readonly painted = signal(false);
+  /**
+   * How many times the indicator has been painted after being withdrawn. The
+   * template draws the indicator once per value, so an indeterminate sweep
+   * starts at its leading edge each time it comes back rather than where the
+   * last one stood.
+   */
+  readonly paint = signal(0);
 
   readonly sizeValue = computed(() => this.size() ?? this.defaults.size ?? PROGRESS_DEFAULT_SIZE);
   readonly toneValue = computed(() => this.tone() ?? this.defaults.tone ?? PROGRESS_DEFAULT_TONE);
@@ -249,6 +256,7 @@ export abstract class SlProgressIndicatorBase {
     const was = this.painted();
     this.painted.set(answer.state.visible);
     if (was && !answer.state.visible) this.withdraw.emit();
+    if (!was && answer.state.visible) this.paint.update((count) => count + 1);
 
     if (answer.wait === null) return;
     this.timer = setTimeout(() => this.settle(request), answer.wait);

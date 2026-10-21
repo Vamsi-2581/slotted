@@ -1,7 +1,7 @@
 import { selectorKeyProps } from '@slotted/core/selector-key';
 import { progressGeometry, progressValueText } from '@slotted/core/progress';
 import type { ProgressGeometry } from '@slotted/core/progress';
-import { useId } from 'react';
+import { useId, useState } from 'react';
 
 import { useProgressIndicatorDefaults } from './progress-indicator-defaults';
 import { useLoadingVisibility } from './use-loading-visibility';
@@ -47,6 +47,12 @@ export interface ResolvedProgressIndicator {
   geometry: ProgressGeometry;
   /** Whether anything is painted at all: `delay` may still be running. */
   painted: boolean;
+  /**
+   * How many times the indicator has been painted after being withdrawn. The
+   * indicator part is keyed by it, so an indeterminate sweep starts at its
+   * leading edge each time it comes back rather than where the last one stood.
+   */
+  paint: number;
   labelId: string;
   labelText: string | undefined;
   labelHidden: boolean;
@@ -113,6 +119,12 @@ export function useProgressIndicator({
     minDuration: minDuration ?? defaults.minDuration ?? 0,
     onWithdraw,
   });
+  const [paint, setPaint] = useState(0);
+  const [wasPainted, setWasPainted] = useState(painted);
+  if (painted !== wasPainted) {
+    setWasPainted(painted);
+    if (painted) setPaint(paint + 1);
+  }
 
   const geometry = progressGeometry({
     value: measure?.value,
@@ -155,6 +167,7 @@ export function useProgressIndicator({
   return {
     geometry,
     painted,
+    paint,
     labelId,
     labelText,
     labelHidden: hideLabel === true,

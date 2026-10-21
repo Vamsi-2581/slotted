@@ -1199,6 +1199,8 @@
    */
   [data-ui-data-grid] > [data-part-scroll] > [data-part-body] {
     box-sizing: border-box;
+    /* The containing block of the veil a busy grid lays over its rows. */
+    position: relative;
     /* The virtual window: the body is as tall as every row and its padding is
        the offset of the first mounted one, so the mounted rows stand where the
        unmounted ones would. No transform, so a pinned column's `sticky`
@@ -2351,8 +2353,21 @@
 
   [data-ui-data-grid][aria-busy='true'] > [data-part-scroll] > [data-part-body] {
     opacity: 0.55;
-    pointer-events: none;
     transition: opacity var(--_transition);
+  }
+
+  /**
+   * The rows refuse a press while they are read again through a veil over
+   * them, not through `pointer-events: none` on the body: the property is
+   * inherited, and toggling it restyled every cell — 8 ms of a 70-row grid's
+   * 9 ms. The veil is one box; the body's opacity makes it a stacking context,
+   * so the veil's layer is above the pinned cells and below nothing outside.
+   */
+  [data-ui-data-grid][aria-busy='true'] > [data-part-scroll] > [data-part-body]::after {
+    content: '';
+    inset: 0;
+    position: absolute;
+    z-index: calc(var(--slotted-z-index-sticky, 100) + 4);
   }
 
   /**

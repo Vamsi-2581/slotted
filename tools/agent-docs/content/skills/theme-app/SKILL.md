@@ -12,18 +12,26 @@ theme or on a scope, never by CSS of the application on a family's parts.
 
 Take the first row that reaches the change.
 
-| The change                                             | Level                                                           | Declared in                                                                   |
-| ------------------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| The brand colour, or the colour of one intent          | a seed: `--slotted-seed-accent` or another name of `SEED_NAMES` | the theme's `seeds`, or a scope                                               |
-| Light, dark, high contrast, or the system's preference | the scheme: `light`, `dark`, `high-contrast`, `system`          | `data-slotted-scheme`, or the scheme of {{themeScope}}                        |
-| How tight controls and rows are                        | the density: `comfortable`, `compact`, `dense`                  | `data-slotted-density`, or the density of {{themeScope}}                      |
-| Spacing, corners, type, lines, shadows or motion       | a token of a group in `{{docsDir}}/tokens.md`                   | the theme's `base`; `schemes` for a value per scheme; `densities` per density |
-| One family's look                                      | a token the family's page lists under Tokens                    | the theme's `components`                                                      |
-| What no token reaches                                  | a theme rule                                                    | the theme's `rules`                                                           |
+| The change                                                                      | Level                                                           | Declared in                                                                                                  |
+| ------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| The brand colour, or the colour of one intent                                   | a seed: `--slotted-seed-accent` or another name of `SEED_NAMES` | the theme's `seeds`, or a scope                                                                              |
+| Light, dark, high contrast, or the system's preference                          | the scheme: `light`, `dark`, `high-contrast`, `system`          | `data-slotted-scheme`, or the scheme of {{themeScope}}                                                       |
+| How tight controls and rows are                                                 | the density: `comfortable`, `compact`, `dense`                  | `data-slotted-density`, or the density of {{themeScope}}                                                     |
+| How deep a scheme's grounds sit, or how far each layer steps from the one below | the recipe: one derivation per token per scheme                 | the theme's `recipe`, spread from the base theme's, as below; `themeConformance` still checks every contrast |
+| Spacing, corners, type, lines, shadows or motion                                | a token of a group in `{{docsDir}}/tokens.md`                   | the theme's `base`; `schemes` for a value per scheme; `densities` per density                                |
+| One family's look                                                               | a token the family's page lists under Tokens                    | the theme's `components`                                                                                     |
+| What no token reaches                                                           | a theme rule                                                    | the theme's `rules`                                                                                          |
 
-Every colour token derives from the five seeds within contrast bounds, so a
+Every colour token derives from the six seeds within contrast bounds, so a
 new seed keeps the ratios of every scheme. A colour of the `tone`, `surface`,
-`text` or `border` groups is changed through its seed, never declared by hand.
+`text` or `border` groups is changed through its seed, or through its
+derivation in the recipe, never declared by hand.
+
+A recipe change keeps every other derivation of the base theme: the theme's
+`recipe` spreads the base theme's recipe, spreads from it the scheme it
+changes, and replaces one token's derivation — its seed, its lightness and its
+chroma's scale and ceiling, the shape every derivation of the standard recipe
+has.
 
 ## 2. One theme for the product
 

@@ -14,17 +14,18 @@ npm install @slotted/react @slotted/core @slotted/theme @slotted/themes
 
 ## Use
 
-Load the component stylesheet and one theme once, then import each component from its subpath:
+Load one theme once, then import each component from its subpath. Each component imports its own stylesheet, so a bundler ships the CSS of the components the application renders and nothing else:
 
 ```tsx
 import '@slotted/themes/default.css';
-import '@slotted/react/styles.css';
 import { Button } from '@slotted/react/button';
 
 export function Actions() {
   return <Button>Save</Button>;
 }
 ```
+
+An application without a bundler links `@slotted/react/styles.css`, every family in one sheet, or `@slotted/react/<family>/styles.css`, one family and what it renders.
 
 Every rule the library ships lives in the `slotted` cascade layer. An application that keeps its own CSS in layers declares `@layer slotted, app;` before the first import ([styling](https://github.com/andrelopes-code/slotted/blob/main/docs/styling.md)).
 

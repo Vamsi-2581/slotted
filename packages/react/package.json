@@ -530,10 +530,11 @@
       "types": "./dist/types/wizard/index.d.ts",
       "import": "./dist/wizard.js"
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": "./dist/styles.css",
+    "./*/styles.css": "./dist/styles/*.css"
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.build.json && node declarations.build.mjs && node layer-order.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs --bin dist/bin/slotted-agent-docs.mjs && node package-boundary.verify.mjs",
+    "build": "vite build && vite build --config vite.styles.config.ts && tsc -p tsconfig.build.json && node declarations.build.mjs && node css.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs --bin dist/bin/slotted-agent-docs.mjs && node package-boundary.verify.mjs",
     "test": "vitest run --project unit",
     "test:browser": "vitest run --project browser && vitest run --config vitest.perf.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",

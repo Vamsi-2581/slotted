@@ -125,3 +125,46 @@ if (bundledCommonJs.length > 0) {
   for (const path of bundledCommonJs) console.error(`- ${path}`);
   process.exitCode = 1;
 }
+
+/**
+ * A family brings its own stylesheet. Each chunk imports the CSS of what it
+ * renders, so an application that imports Button, Field and TextField from
+ * their subpaths ships their CSS and not the 1.5 MB of every family: a login
+ * page blocked its first paint on all of it, and every element's style was
+ * matched against the whole sheet.
+ */
+const importsOf = (file) => {
+  const source = readFileSync(join(distDirectory, file), 'utf8');
+  return [...source.matchAll(/^import\s+(?:[^'"\n]*\sfrom\s+)?["']\.\/([^"']+)["'];?$/gm)].map(
+    (match) => match[1],
+  );
+};
+const closure = (entries) => {
+  const seen = new Set();
+  const visit = (file) => {
+    if (seen.has(file)) return;
+    seen.add(file);
+    if (file.endsWith('.js')) for (const next of importsOf(file)) visit(next);
+  };
+  for (const entry of entries) visit(entry);
+  return [...seen];
+};
+const loginCss = closure(['button.js', 'field.js', 'text-field.js'])
+  .filter((file) => file.endsWith('.css'))
+  .reduce((total, file) => total + readFileSync(join(distDirectory, file)).length, 0);
+const LOGIN_BUDGET = 150 * 1024;
+
+if (loginCss === 0 || loginCss > LOGIN_BUDGET) {
+  console.error(
+    `Button, Field and TextField bring ${loginCss} bytes of CSS; the budget is ${LOGIN_BUDGET}, and nought means the chunks import none.`,
+  );
+  process.exitCode = 1;
+}
+
+for (const family of ['button', 'field', 'text-field']) {
+  const sheet = join(distDirectory, 'styles', `${family}.css`);
+  if (!readFileSync(sheet, 'utf8').startsWith(LAYER_ORDER_STATEMENT)) {
+    console.error(`dist/styles/${family}.css does not open with the published layer order.`);
+    process.exitCode = 1;
+  }
+}

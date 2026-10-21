@@ -14,6 +14,7 @@
 - Fatia 8: itens 29, 23, 11.
 - Fatia 9: itens 31, 26, 18.
 - Fatia 10: itens 22, 4, 5.
+- Fatia 11: itens 14, 10.
 
 ## Testes
 - React: segmented-control browser 2/2, dialog browser 5/5, entity-picker unit 42/42; build com `package-boundary.verify.mjs` exit 0.
@@ -29,10 +30,10 @@
 - Fatia 10: React prompt-composer 23/23 + browser 1/1; Angular prompt-composer 16/16, `ng build` ok; styles 1707/1707; contratos 2181/2181; agent-docs 137/137.
 
 ## Em curso
-- Fatia 11: itens 14, 10.
+- Verificação final: `pnpm check:full`.
 
 ## Problemas conhecidos
 - Nenhum.
 
 ## Próxima ação exata
-Item 14: linha da receita em `tools/agent-docs/content/skills/theme-app/SKILL.md`, secção "1. Choose the level"; depois item 10 (CSS por família).
+Correr `pnpm check:full` e corrigir o que falhar; depois o resumo ao usuário. Pendentes de decisão: release (beta.10) com `pnpm eval:agent-docs` antes.

@@ -1,23 +1,36 @@
 # Checkpoint
 
-- Plano: sem arquivo de plano; quatro itens colados pelo usuário (command-palette ×2, dialog keyboard inset, drawer forced layouts).
-- Branch: main. HEAD: fc1b84e3 (fix tabs marker). Working tree: tudo em commit (fcb5c503..bd1f021a), enviado para origin/main.
+- Plano: `docs/history/plans/2026-10-21-equori-owner-review.md` (18 findings do equori, beta.7).
+- Branch: main. HEAD: ef08d483 (commit das alterações da sessão anterior).
+- Working tree: fatia 1 sem commit (dialog, core focus, page; React e Angular) + plano e checkpoint.
 
 ## Concluído
-1. command-palette: mousedown fora do input não tira o foco (React `onMouseDown` composto no root; Angular `keepFocus`). Teste browser React `packages/react/src/command-palette/command-palette.browser.test.tsx` (mouse e touch via CDP) falha antes, passa depois; spec Angular jsdom equivalente.
-2. command-palette: pointermove de touch não destaca; destaque por ponteiro não chama scrollIntoView (id guardado em `pointerHighlight`). Testes React unit + spec Angular falham antes, passam depois.
-- Infra: `packages/react/vitest.config.ts` com projetos `unit` (jsdom) e `browser` (Chromium 412×915, hasTouch); scripts `test` = `--project unit`, `test:browser`; `verify` inclui `test:browser`; CI instala Chromium; devDeps `@vitest/browser-playwright@4.1.11`, `playwright@1.63.0`; helper `src/test/press.ts`; `src/test/setup.browser.ts`.
-
-3. dialog: layer com fullScreen != never (ou fullscreen ativo) liga `observeKeyboardInset` e escreve `--slotted-keyboard-inset` no root (React `dialog-parts.tsx`, Angular `dialog.ts`); CSS acolchoa o content (border-box + padding-block-end) nas regras full-screen. Teste browser `dialog.browser.test.tsx` falha antes (915 vs 655), passa depois; unit React + spec Angular do binding falham antes, passam depois.
-
-4. drawer: zero layouts forçados na abertura. Core: `measure/after-layout.ts` (lote por documento após o layout: leituras, depois escritas; síncrono sem ResizeObserver); scroll lock lê a scrollbar e escreve depois do layout; focus-scope entra (focus com preventScroll) depois do layout e usa `checkVisibility`; `observeKeyboardInset` faz a 1ª leitura depois do layout. React/Angular drawer: posição de repouso medida só no ResizeObserver. Teste `packages/react/src/drawer/drawer.perf.browser.test.tsx` (config própria `vitest.perf.config.ts`, React de produção, CPU 4x, retry 2): antes 2 layouts forçados e quadros 50–83 ms; depois 0 e ≤50 ms.
-- `pnpm dedupe` aplicado (duas variantes de vitest no mesmo programa TS).
+- Fatia 1: itens 2 e 4 corrigidos; item 5 parcial (ver plano, tabela Resultado).
+- Fatia 2: item 3 corrigido no React.
 
 ## Testes
-- core 2210/2210; React unit 4102/4102, browser 3/3, perf 1/1; Angular completo 3231/3231; `pnpm check` exit 0.
+- React: dialog 144/144, page 17/17, toolbar/tabs/accordion/data-grid/menu/radio-group 282/282; tsc 0.
+- Core: 2214/2214; tsc 0.
+- Angular: dialog 55/55, page 14/14.
+- React data-grid: unit 92/92, browser 1/1; tsc 0.
+- eslint e prettier dos arquivos alterados sem erros.
+
+## Em curso
+- Fatia 3: item 1 concluído.
+- Fatia 4: itens 6, 7, 8 concluídos.
+- Fatia 5: itens 17, 9, 14 (API) concluídos.
+- Fatia 6: itens 18, 11, 12, LP-17 concluídos (agent-docs 214/214; sem `pnpm eval:agent-docs`, que pertence ao release).
+- Fatia 7: itens 13, 15, 16, 10 concluídos (agent-docs verify 214/214).
+- Verificação final: `pnpm check` exit 0; core 2 221/2 221; React unit 4 123/4 123; styles 1 692/1 692; harness 112/112; Angular 3 241/3 241 (suíte completa depois do item 1) e specs das famílias tocadas depois; agent-docs 214/214. Desenho aprovado pelo usuário: atributo-chave; exigência do usuário: custo de estilo imperceptível, incluir bucket universal.
+  - Medição (Chromium do vitest, DataGrid 50×7, 1 889 elementos, `style.setProperty`+`offsetHeight`): sem CSS 90 ms; CSS atual 451 ms; CSS com chave 112 ms. Benchmark descartável em `packages/react/src/__bench/recalc.browser.test.tsx`.
+  - Passos: (1) CSS-fonte `[data-part=v]`→`[data-part-v]`, `[data-ui=v]`→`[data-ui-v]` (minúsculas); (2) DOM: chave ao lado de cada `data-part`/`data-ui` estático (React JSX/objetos, Angular templates/host), helpers para dinâmicos (core `setPart`); (3) guarda nos setups de teste: exatamente uma chave `data-part-*`/`data-ui-*` igual ao valor; (4) bucket universal (506 seletores); (5) benchmark de estilo com orçamento.
 
 ## Problemas conhecidos
-- Quadro de 66 ms ocasional no teste perf (ruído; retry 2 cobre).
+- Item 1 exige desenho de arquitetura de seletores antes da implementação.
+- Item 5: recalc da subárvore herdada permanece; depende do item 1.
+
+## Estado do item 1
+- Concluído (ver plano). Verificação: React unit 4 118/4 118; styles 1 692/1 692; Angular 3 241/3 241; core 2 214 (4 intermitentes em chart-echarts sob carga, 23/23 isolados); perf 1/1; eslint/prettier sem erros. Em execução: React `--project browser` e Angular typecheck (log `scratchpad/browser1.log`).
 
 ## Próxima ação exata
-Release pedida pelo usuário: aguardar CI verde no HEAD (`gh run list --branch main --limit 1`), `pnpm release --dry-run`, mostrar ao usuário, `pnpm release`.
+Nenhuma: os 18 itens estão concluídos (ver plano). Commit pendente de pedido do usuário. O próximo release corre `pnpm eval:agent-docs` (conteúdo de agent-docs mudou) e `pnpm demo:refresh`.

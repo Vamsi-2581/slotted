@@ -8,6 +8,7 @@ const seeds = {
   accent: parseSeed('#1d4ed8')!,
   neutral: parseSeed('#64748b')!,
   success: parseSeed('#15803d')!,
+  info: parseSeed('oklch(0.6 0.15 255)')!,
   warning: parseSeed('#facc15')!,
   danger: parseSeed('#dc2626')!,
 };

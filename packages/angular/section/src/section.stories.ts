@@ -3,6 +3,7 @@ import { lucideClipboardList } from '@ng-icons/lucide';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import { SlAvatar, SlAvatarFallback } from '@slotted/angular/avatar';
+import { SlBadge } from '@slotted/angular/badge';
 import { SlButton } from '@slotted/angular/button';
 import {
   SlCollapsible,
@@ -64,6 +65,7 @@ import {
   SlSectionEyebrow,
   SlSectionHeader,
   SlSectionHeading,
+  SlSectionTags,
   SlSectionTitle,
 } from './section-parts';
 import { ANGULAR_SECTION_DOCS, ANGULAR_SECTION_TOKENS } from './section.docs';
@@ -161,6 +163,7 @@ function ITEMS(attributes = '', body = TABLE('some', false)) {
     <div slSectionTitle>
       <span slSectionEyebrow>36 itens</span>
       <h2 slSectionHeading>Itens do pedido</h2>
+      <div slSectionTags><span slBadge size="sm" tone="warning">Pendente</span></div>
       <p slSectionDescription>Quantidades e preços unitários conforme a cotação aceite em 2 de setembro.</p>
     </div>
     <div slSectionActions>
@@ -305,6 +308,8 @@ const meta: Meta<SectionStoryArgs> = {
         SlSectionTitle,
         SlSectionEyebrow,
         SlSectionHeading,
+        SlSectionTags,
+        SlBadge,
         SlSectionDescription,
         SlSectionActions,
         SlSectionBody,
@@ -365,7 +370,7 @@ const meta: Meta<SectionStoryArgs> = {
       page: createReferencePage({
         title: 'Section',
         description:
-          'One unit of content inside a page: a header — eyebrow, heading, description, actions — and a body one outline step deeper. A region when it has a heading, a sticky header under the page chrome when asked, and never a card.',
+          'One unit of content inside a page: a header — eyebrow, heading, tags, description, actions — and a body one outline step deeper. A region when it has a heading, a sticky header under the page chrome when asked, and never a card.',
         framework: 'Angular',
         ...ANGULAR_SECTION_DOCS.section,
         tokens: ANGULAR_SECTION_TOKENS,
@@ -384,10 +389,8 @@ export const Playground: Story = {
   render: (args) => ({
     props: { ...PROPS, ...args },
     template: page(
-      `<div slStack [gap]="9">
-  ${ITEMS('[size]="size" [level]="level" [ground]="ground" [divider]="divider" [sticky]="sticky"', TABLE())}
-  ${CONDITIONS('[size]="size" [level]="level" [ground]="ground" [divider]="divider" [sticky]="sticky"')}
-</div>`,
+      `${ITEMS('[size]="size" [level]="level" [ground]="ground" [divider]="divider" [sticky]="sticky"', TABLE())}
+${CONDITIONS('[size]="size" [level]="level" [ground]="ground" [divider]="divider" [sticky]="sticky"')}`,
     ),
   }),
 };
@@ -400,7 +403,7 @@ export const Anatomy: Story = {
       1,
       scene(
         'Every part, written out',
-        'The eyebrow with the count, the heading at level 2 because the page steps the outline, the description under it, two actions at the end of the row, and the body with the first rows of the table.',
+        'The eyebrow with the count, the heading at level 2 because the page steps the outline, a status tag beside it, the description under it, two actions at the end of the heading’s row — heading, tag and actions on one baseline — and the body with the first rows of the table.',
         viewport(`<main slPage><div slPageBody>${ITEMS('divider')}</div></main>`, 'tall'),
       ),
     ),
@@ -433,17 +436,17 @@ export const Size: Story = {
       3,
       scene(
         'sm',
-        'A group inside a form or a pane: the heading on md, the description on sm, the eyebrow the same xs at every size.',
+        'A group inside a form or a pane: the label on xs, the description on sm, the eyebrow the same xs at every size.',
         CONDITIONS('size="sm"'),
       ) +
         scene(
           'md, the default',
-          'A section of a page: the heading on lg. Size says nothing about rank — every one of these is a level 1 here, outside a page.',
+          'A section of a page: the label on xs, the step validated in a drawer full of tables and lists. Size says nothing about rank — every one of these is a level 1 here, outside a page.',
           CONDITIONS('size="md"'),
         ) +
         scene(
           'lg',
-          'The one section a screen is about: the heading on xl, a step under a page header’s own title.',
+          'The one section a screen is about: the label on sm, still a label under a page header’s own title.',
           CONDITIONS('size="lg"'),
         ),
     ),
@@ -458,10 +461,8 @@ export const Separation: Story = {
       1,
       scene(
         'Three sections, three separations',
-        'On the sunken canvas: the first separated by the stack’s gap alone, the second by a divider under its header, the third by a surface with an edge and a radius — and no shadow, no hover, because a section is not a card.',
-        page(
-          `<div slStack [gap]="9">${CONDITIONS()}${ITEMS('divider')}${HISTORY_SECTION('ground="surface"')}</div>`,
-        ),
+        'On the sunken canvas: the first separated by the family’s own spacing and the label alone, the second by a divider under its header, the third by a surface with an edge and a radius — and no shadow, no hover, because a section is not a card.',
+        page(`${CONDITIONS()}${ITEMS('divider')}${HISTORY_SECTION('ground="surface"')}`),
       ),
     ),
   }),
@@ -477,7 +478,7 @@ export const Sticky: Story = {
         'Headers that stay under the page chrome',
         'Scroll: the page header snaps, then the first section’s header stops under it, and the second pushes the first away. Pin the page header and every section header stops lower — the page publishes where its chrome ends.',
         page(
-          `<div slStack [gap]="9">${ITEMS('divider sticky', TABLE())}${CONDITIONS('divider sticky')}${HISTORY_SECTION('divider sticky')}</div>`,
+          `${ITEMS('divider sticky', TABLE())}${CONDITIONS('divider sticky')}${HISTORY_SECTION('divider sticky')}`,
           '',
           true,
         ),
@@ -543,7 +544,7 @@ export const Content: Story = {
       2,
       scene(
         'A nine-word heading and a long eyebrow',
-        'The heading wraps to two lines and the eyebrow wraps in small capitals; the description keeps its measure of seventy characters and the actions wrap under the title.',
+        'The heading wraps to two lines and the eyebrow wraps in small capitals; the description keeps its measure of seventy characters and the actions take a row of their own on a narrow header.',
         `<section slSection divider>
   <div slSectionHeader>
     <div slSectionTitle>

@@ -113,17 +113,68 @@ test('rules under the header when asked', () => {
   );
 });
 
-test('sizes the heading on the type scale, independent of its rank', () => {
-  assert.match(rule(ui), /--slotted-section-heading-size-md,var\(--slotted-font-size-lg/);
+/**
+ * A section's heading is a label: small capitals, tracked, on the step its
+ * size names — xs for sm and md, sm for lg — independent of its rank.
+ */
+test('sets the heading as a tracked label in small capitals, sized by size', () => {
+  assert.match(rule(ui), /--slotted-section-heading-size-md,var\(--slotted-font-size-xs/);
   assert.match(
     rule(`${ui}[data-size='sm']`),
-    /--slotted-section-heading-size-sm,var\(--slotted-font-size-md/,
+    /--slotted-section-heading-size-sm,var\(--slotted-font-size-xs/,
   );
   assert.match(
     rule(`${ui}[data-size='lg']`),
-    /--slotted-section-heading-size-lg,var\(--slotted-font-size-xl/,
+    /--slotted-section-heading-size-lg,var\(--slotted-font-size-sm/,
   );
+  const heading = rule(`${ui}>[data-part-header]>[data-part-title]>[data-part-heading]`);
+  assert.match(heading, /text-transform:uppercase/);
+  assert.match(heading, /letter-spacing:0\.08em/);
+  assert.match(heading, /color:var\(--_text\)/);
   assert.match(fragment, /<h4 data-part="heading"/, 'no scene shows a deeper rank');
+});
+
+/**
+ * A section inside another is a subsection: mixed case, muted, one step
+ * larger than the label above it, so the two levels differ in case, size and
+ * tone — never in tone alone.
+ */
+test('sets a nested section heading in mixed case and the muted tone', () => {
+  const nested = rule(`${ui} ${ui}>[data-part-header]>[data-part-title]>[data-part-heading]`);
+  assert.match(nested, /text-transform:none/);
+  assert.match(nested, /color:var\(--_muted\)/);
+  assert.match(nested, /font-size:var\(--_subheading-size\)/);
+  assert.match(rule(ui), /--slotted-section-subheading-size-md,var\(--slotted-font-size-md/);
+  assert.match(
+    rule(`${ui}[data-size='sm']`),
+    /--slotted-section-subheading-size-sm,var\(--slotted-font-size-sm/,
+  );
+  assert.match(
+    rule(`${ui}[data-size='lg']`),
+    /--slotted-section-subheading-size-lg,var\(--slotted-font-size-lg/,
+  );
+});
+
+/**
+ * The distance between sections is the family's where they follow one
+ * another in flow — a page's container, a family's body — and nowhere else,
+ * so a stack's gap or a grid's areas are never added to it.
+ */
+test('owns the space between sibling sections and before a subsection', () => {
+  assert.match(
+    rule(`:is([data-ui-container],[data-part-body])>${ui} + ${ui}`),
+    /margin-block-start:var\(--slotted-section-spacing,var\(--slotted-space-9,2rem\)\)/,
+  );
+  assert.match(
+    rule(`${ui}>[data-part-body]>${ui}:not(:first-child)`),
+    /margin-block-start:var\(--slotted-section-subsection-spacing,var\(--slotted-space-7,1\.25rem\)\)/,
+  );
+  assert.doesNotMatch(rule(ui), /(?<!scroll-)margin/);
+  assert.doesNotMatch(
+    normalized,
+    /(^|[{}])\[data-ui-section\] \+ \[data-ui-section\]\{/,
+    'a bare sibling rule would space grid items too',
+  );
 });
 
 /**
@@ -151,4 +202,35 @@ test('gives a stuck header air under the chrome without moving it at rest', () =
 
 test('publishes its raised ground to the families inside it', () => {
   assert.match(rule(`${ui}[data-ground='surface']`), /--slotted-ground:var\(--_ground\)/);
+});
+
+/**
+ * The heading, the tags and the actions are items of one grid row and share
+ * the heading's baseline, whatever the title holds above or below it. The
+ * title is a subgrid of the header's rows; the tags have a column of their
+ * own beside the heading and never leave it.
+ */
+test('sets the heading, the tags and the actions on one baseline row', () => {
+  const header = `${ui}>[data-part-header]`;
+  assert.match(rule(header), /align-items:baseline/);
+  assert.match(rule(header), /display:grid/);
+  assert.match(rule(header), /container-type:inline-size/);
+  const title = rule(`${header}>[data-part-title]`);
+  assert.match(title, /grid-template-rows:subgrid/);
+  assert.match(title, /grid-template-columns:minmax\(min-content,max-content\) 1fr/);
+  assert.match(rule(`${header}>[data-part-title]>[data-part-eyebrow]`), /grid-row:1/);
+  assert.match(rule(`${header}>[data-part-title]>[data-part-heading]`), /grid-row:2/);
+  const tags = rule(`${header}>[data-part-title]>[data-part-tags]`);
+  assert.match(tags, /grid-column:2/);
+  assert.match(tags, /grid-row:2/);
+  assert.match(tags, /align-items:baseline/);
+  assert.match(rule(`${header}>[data-part-title]>[data-part-description]`), /grid-row:3/);
+  assert.match(rule(`${header}>[data-part-actions]`), /grid-row:2/);
+});
+
+/** Only the actions leave the heading's row, and only on a narrow header. */
+test('moves the actions, never the tags, to a row of their own when narrow', () => {
+  const narrow = normalized.split('@container (inline-size < 20rem){')[1] ?? '';
+  assert.match(narrow, /\[data-part-actions\]\{grid-column:1 \/ -1;grid-row:4/);
+  assert.doesNotMatch(narrow, /data-part-tags/);
 });

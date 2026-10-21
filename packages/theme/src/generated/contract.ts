@@ -4026,6 +4026,11 @@ export type ComponentToken =
   | '--slotted-section-heading-size-sm'
   | '--slotted-section-inset'
   | '--slotted-section-radius'
+  | '--slotted-section-spacing'
+  | '--slotted-section-subheading-size-lg'
+  | '--slotted-section-subheading-size-md'
+  | '--slotted-section-subheading-size-sm'
+  | '--slotted-section-subsection-spacing'
   | '--slotted-section-surface'
   | '--slotted-segmented-control-active-background'
   | '--slotted-segmented-control-background'
@@ -6240,6 +6245,11 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-section-heading-size-sm",
   "--slotted-section-inset",
   "--slotted-section-radius",
+  "--slotted-section-spacing",
+  "--slotted-section-subheading-size-lg",
+  "--slotted-section-subheading-size-md",
+  "--slotted-section-subheading-size-sm",
+  "--slotted-section-subsection-spacing",
   "--slotted-section-surface",
   "--slotted-segmented-control-active-background",
   "--slotted-segmented-control-background",

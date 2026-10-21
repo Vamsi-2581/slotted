@@ -104,9 +104,6 @@ import { SessionStore } from '../../core/session/session.store';
       color: var(--slotted-text-muted);
       font-size: var(--slotted-font-size-sm);
     }
-    section {
-      margin-block-end: var(--slotted-space-6);
-    }
   `,
   template: `
     <sl-drawer [(open)]="open" side="end" size="md" aria-label="Demo controls">

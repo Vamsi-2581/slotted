@@ -12,6 +12,7 @@ import {
   SectionEyebrow,
   SectionHeader,
   SectionHeading,
+  SectionTags,
   SectionTitle,
 } from './section-parts';
 import type { SectionProps } from './section.types';
@@ -26,6 +27,9 @@ function Items({
         <SectionTitle>
           <SectionEyebrow>36 itens</SectionEyebrow>
           <SectionHeading>{title}</SectionHeading>
+          <SectionTags>
+            <span>Pendente</span>
+          </SectionTags>
           <SectionDescription>Conforme a cotação aceite.</SectionDescription>
         </SectionTitle>
         <SectionActions>
@@ -75,6 +79,16 @@ describe('Section', () => {
     );
     expect(screen.queryByRole('region')).toBeNull();
     expect(root()).not.toHaveAttribute('aria-labelledby');
+  });
+
+  /** Tags sit beside the heading, outside it, so the region's name is the heading's alone. */
+  it('keeps the tags out of the heading and out of the region name', () => {
+    render(<Items />);
+    const tags = document.querySelector('[data-part="tags"]') as HTMLElement;
+    expect(tags.tagName).toBe('DIV');
+    expect(tags.parentElement).toHaveAttribute('data-part', 'title');
+    expect(tags.previousElementSibling).toHaveAttribute('data-part', 'heading');
+    expect(screen.getByRole('region', { name: 'Itens do pedido' })).toBe(root());
   });
 
   /** The outline: h2 by default, one deeper each time. */

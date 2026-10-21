@@ -90,19 +90,17 @@ export function CustomerSections({ sticky = false }: { sticky?: boolean }) {
             </SectionTitle>
           </SectionHeader>
           <SectionBody>
-            <Stack gap={6}>
-              {paragraphs(item.id)}
-              {item.children?.map((child) => (
-                <Section id={child.id} key={child.id}>
-                  <SectionHeader>
-                    <SectionTitle>
-                      <SectionHeading>{child.label}</SectionHeading>
-                    </SectionTitle>
-                  </SectionHeader>
-                  <SectionBody>{paragraphs(child.id)}</SectionBody>
-                </Section>
-              ))}
-            </Stack>
+            <Stack gap={6}>{paragraphs(item.id)}</Stack>
+            {item.children?.map((child) => (
+              <Section id={child.id} key={child.id}>
+                <SectionHeader>
+                  <SectionTitle>
+                    <SectionHeading>{child.label}</SectionHeading>
+                  </SectionTitle>
+                </SectionHeader>
+                <SectionBody>{paragraphs(child.id)}</SectionBody>
+              </Section>
+            ))}
           </SectionBody>
         </Section>
       ))}
@@ -222,23 +220,21 @@ export function ContractClauses() {
             </SectionTitle>
           </SectionHeader>
           <SectionBody>
-            <Stack gap={6}>
-              <Text size="sm">{CONTRACT_TEXT[clause.id]}</Text>
-              {clause.children?.map((sub, subIndex) => (
-                <Section id={sub.id} key={sub.id}>
-                  <SectionHeader>
-                    <SectionTitle>
-                      <SectionHeading>
-                        {index + 1}.{subIndex + 1}. {sub.label}
-                      </SectionHeading>
-                    </SectionTitle>
-                  </SectionHeader>
-                  <SectionBody>
-                    <Text size="sm">{CONTRACT_TEXT[sub.id]}</Text>
-                  </SectionBody>
-                </Section>
-              ))}
-            </Stack>
+            <Text size="sm">{CONTRACT_TEXT[clause.id]}</Text>
+            {clause.children?.map((sub, subIndex) => (
+              <Section id={sub.id} key={sub.id}>
+                <SectionHeader>
+                  <SectionTitle>
+                    <SectionHeading>
+                      {index + 1}.{subIndex + 1}. {sub.label}
+                    </SectionHeading>
+                  </SectionTitle>
+                </SectionHeader>
+                <SectionBody>
+                  <Text size="sm">{CONTRACT_TEXT[sub.id]}</Text>
+                </SectionBody>
+              </Section>
+            ))}
           </SectionBody>
         </Section>
       ))}

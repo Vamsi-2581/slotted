@@ -28,7 +28,7 @@ export class SlSectionHeader implements OnInit, OnDestroy {
   }
 }
 
-/** Eyebrow, heading, description, in that order. */
+/** Eyebrow, heading, tags, description, in that order. */
 @Directive({
   selector: '[slSectionTitle]',
   standalone: true,
@@ -44,6 +44,17 @@ export class SlSectionTitle {}
 })
 export class SlSectionEyebrow {}
 
+/**
+ * Badges or tags beside the heading — a count, a status — on its baseline.
+ * Outside the heading, so they are not read into the region's name.
+ */
+@Directive({
+  selector: '[slSectionTags]',
+  standalone: true,
+  host: { 'data-part': 'tags', 'data-part-tags': '' },
+})
+export class SlSectionTags {}
+
 /** A paragraph under the heading, in the muted text, with a measure. */
 @Directive({
   selector: '[slSectionDescription]',
@@ -52,7 +63,7 @@ export class SlSectionEyebrow {}
 })
 export class SlSectionDescription {}
 
-/** The end of the header row: a button, a toolbar, a link. */
+/** The end of the heading's row, on its baseline: a button, a toolbar, a link. */
 @Directive({
   selector: '[slSectionActions]',
   standalone: true,

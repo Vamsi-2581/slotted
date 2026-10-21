@@ -25,9 +25,9 @@ export const ANGULAR_SECTION_TOKENS = sectionTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { SlSection, SlSectionHeader, SlSectionTitle, SlSectionEyebrow, SlSectionHeading, SlSectionDescription, SlSectionActions, SlSectionBody, provideSectionDefaults } from '@slotted/angular/section';",
+    "import { SlSection, SlSectionHeader, SlSectionTitle, SlSectionEyebrow, SlSectionHeading, SlSectionTags, SlSectionDescription, SlSectionActions, SlSectionBody, provideSectionDefaults } from '@slotted/angular/section';",
   selector:
-    '[slSection], [slSectionHeader], [slSectionTitle], [slSectionEyebrow], [slSectionHeading], [slSectionDescription], [slSectionActions], [slSectionBody]',
+    '[slSection], [slSectionHeader], [slSectionTitle], [slSectionEyebrow], [slSectionHeading], [slSectionTags], [slSectionDescription], [slSectionActions], [slSectionBody]',
   exportAs: 'slSection, slSectionHeading',
 };
 
@@ -44,20 +44,21 @@ const anatomy: AnatomyRow[] = [
     element: 'the element carrying slSectionHeader',
     required: false,
     purpose:
-      'The row above the body: the title column and the actions. Sticky under the page chrome when sticky is set, painted in the page’s ground so what scrolls under it is covered; its height is measured and added to the sticky top the body publishes, so a table’s column header or a nested section inside stops under it, not under the page.',
+      'The row above the body: the heading, its tags and the actions on one baseline, the eyebrow above and the description below on rows of their own. Sticky under the page chrome when sticky is set, painted in the page’s ground so what scrolls under it is covered; its height is measured and added to the sticky top the body publishes, so a table’s column header or a nested section inside stops under it, not under the page.',
   },
   {
     part: 'title',
     element: 'the element carrying slSectionTitle',
     required: false,
-    purpose: 'Eyebrow, heading and description, in that order, as one column.',
+    purpose:
+      'Eyebrow, heading, tags and description, in that order, laid out on the header’s rows, so the actions align with the heading and not with the top of an eyebrow.',
   },
   {
     part: 'eyebrow',
     element: 'the element carrying slSectionEyebrow',
     required: false,
     purpose:
-      'A short overline above the heading in small capitals — a count, a category. Structural rather than status: status is a mark beside the heading.',
+      'A short overline above the heading in small capitals — a count, a category. Structural rather than status: status is a tag.',
   },
   {
     part: 'heading',
@@ -66,6 +67,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'The heading. Rendering it is what names the region. A native heading written by the consumer is left alone; a div or a link gets role="heading" and aria-level from the rank the section resolved.',
+  },
+  {
+    part: 'tags',
+    element: 'the element carrying slSectionTags',
+    required: false,
+    purpose:
+      'Badges or tags beside the heading — a count, a status — aligned on the heading’s baseline. Outside the heading, so they are not read into the region’s name. They never leave the heading’s row: a long heading wraps its words and the badges stack beside it.',
   },
   {
     part: 'description',
@@ -79,7 +87,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the element carrying slSectionActions',
     required: false,
     purpose:
-      'The end of the header row: an slButton, an slToolbar, an slLink. It wraps under the title when the width runs out.',
+      'The end of the heading’s row, on its baseline: an slButton, an slToolbar, an slLink. On a header narrower than 20rem it takes a row of its own at the end.',
   },
   {
     part: 'body',
@@ -110,16 +118,17 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'anatomy',
     title: 'Every part, written out',
-    note: 'The eyebrow with the count, the heading, the description under it, two actions at the end of the row, and the body with the table. The section is a region named by its heading.',
+    note: 'The eyebrow with the count, the heading with a status tag beside it, the description under it, an action at the end of the heading’s row, and the body with the table. The section is a region named by its heading.',
     snippet: defineSnippet({
       id: 'section-angular-anatomy',
       language: 'angular',
-      label: 'The eight parts',
+      label: 'The nine parts',
       source: `<section slSection divider id="itens">
   <div slSectionHeader>
     <div slSectionTitle>
       <span slSectionEyebrow>36 itens</span>
       <h2 slSectionHeading>Itens do pedido</h2>
+      <div slSectionTags><span slBadge size="sm" tone="warning">Pendente</span></div>
       <p slSectionDescription>Quantidades conforme a cotação aceite.</p>
     </div>
     <div slSectionActions><button slButton size="sm" variant="outline">Exportar</button></div>
@@ -146,8 +155,8 @@ const scenes: ReferenceSceneMeta[] = [
   },
   {
     id: 'size',
-    title: 'The step the heading sits at',
-    note: 'sm for a group inside a form, md for a section of a page, lg for the one section a screen is about. The step is a size on the type scale and says nothing about the rank.',
+    title: 'The step the label sits at',
+    note: 'The heading is a label in tracked small capitals: xs for sm and md, sm for lg. A section nested in another sets its heading in mixed case and the muted tone, on sm, md or lg for its own size. The step says nothing about the rank.',
     snippet: defineSnippet({
       id: 'section-angular-size',
       language: 'angular',
@@ -158,7 +167,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'separation',
     title: 'Space, a rule, or a surface',
-    note: 'Three sections on the page’s sunken canvas: separated by the stack’s gap alone, by a divider under the header, and by a surface with an edge and a radius — no shadow, no hover, because a section is not a card.',
+    note: 'Three sections on the page’s sunken canvas: separated by the family’s own spacing and the label alone, by a divider under the header, and by a surface with an edge and a radius — no shadow, no hover, because a section is not a card.',
     snippet: defineSnippet({
       id: 'section-angular-separation',
       language: 'angular',
@@ -180,7 +189,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'nested',
     title: 'A section inside a section',
-    note: 'The fleet, its heavy vehicles, the tractors: three depths, three ranks, and every rule the family owns reaches its parts with a child combinator, so the outer header styles nothing of the inner one.',
+    note: 'The fleet, its heavy vehicles, the tractors: three depths, three ranks. The outer heading is a label in small capitals; the inner ones are mixed case in the muted tone, the level read in case, size and tone. Every other rule reaches its part with a child combinator, so the outer header styles nothing else of the inner one.',
     snippet: defineSnippet({
       id: 'section-angular-nested',
       language: 'angular',
@@ -263,7 +272,7 @@ export const ANGULAR_SECTION_DOCS = {
         "'sm' | 'md' | 'lg'",
         'md',
         'slSection, provideSectionDefaults',
-        'The step the heading sits at, on the type scale, independent of its rank',
+        'The step of the heading: the label’s, xs for sm and md and sm for lg; a nested section’s mixed-case heading, sm, md or lg. Independent of its rank',
       ],
       [
         'level',
@@ -364,6 +373,7 @@ export const ANGULAR_SECTION_DOCS = {
     <div data-part="title">
       <span data-part="eyebrow">36 itens</span>
       <h2 data-part="heading" id="itens-heading">Itens do pedido</h2>
+      <div data-part="tags">…</div>
       <p data-part="description">…</p>
     </div>
     <div data-part="actions">…</div>
@@ -377,7 +387,8 @@ export const ANGULAR_SECTION_DOCS = {
         label: 'Retuning the family for an application',
         source: `[data-ui='section'] {
   --slotted-section-gap: var(--slotted-space-6);
-  --slotted-section-heading-size-md: var(--slotted-font-size-xl);
+  --slotted-section-spacing: var(--slotted-space-10);
+  --slotted-section-heading-size-md: var(--slotted-font-size-sm);
   --slotted-section-surface: var(--slotted-surface);
   --slotted-section-radius: var(--slotted-radius-md);
 }`,

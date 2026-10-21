@@ -29,6 +29,7 @@ test('declares its anatomy as parts', () => {
     'title',
     'eyebrow',
     'heading',
+    'tags',
     'description',
     'actions',
     'body',

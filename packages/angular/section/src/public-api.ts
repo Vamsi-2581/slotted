@@ -13,5 +13,6 @@ export {
   SlSectionEyebrow,
   SlSectionHeader,
   SlSectionHeading,
+  SlSectionTags,
   SlSectionTitle,
 } from './section-parts';

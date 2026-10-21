@@ -400,7 +400,7 @@ export function OrderSections({
   /* On a sunken canvas a section stands on a surface; on a surface a rule separates. */
   const separation = ground === 'surface' ? { ground: 'surface' as const } : { divider: true };
   return (
-    <Stack gap={9}>
+    <>
       <Section {...separation} id="itens" sticky={sticky}>
         <SectionHeader>
           <SectionTitle>
@@ -475,7 +475,7 @@ export function OrderSections({
           </Stack>
         </SectionBody>
       </Section>
-    </Stack>
+    </>
   );
 }
 

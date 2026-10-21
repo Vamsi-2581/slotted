@@ -7,6 +7,7 @@ export {
   SectionEyebrow,
   SectionHeader,
   SectionHeading,
+  SectionTags,
   SectionTitle,
 } from './section-parts';
 export type {

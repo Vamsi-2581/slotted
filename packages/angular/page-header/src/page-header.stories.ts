@@ -301,63 +301,61 @@ function TABLE(rows = 'lines', sticky = true, compact = false) {
 }
 
 function SECTIONS(sticky = false, compact = false) {
-  return `<div slStack [gap]="9">
-  <section slSection id="itens" divider ${sticky ? 'sticky' : ''}>
-    <div slSectionHeader>
-      <div slSectionTitle>
-        <span slSectionEyebrow>36 itens</span>
-        <h2 slSectionHeading>Itens do pedido</h2>
-        <p slSectionDescription>Quantidades e preços unitários conforme a cotação aceite em 2 de setembro.</p>
-      </div>
-      <div slSectionActions>
-        <button slButton size="sm" variant="outline">Exportar</button>
-        <button slButton size="sm" tone="accent">Adicionar item</button>
-      </div>
+  return `<section slSection id="itens" divider ${sticky ? 'sticky' : ''}>
+  <div slSectionHeader>
+    <div slSectionTitle>
+      <span slSectionEyebrow>36 itens</span>
+      <h2 slSectionHeading>Itens do pedido</h2>
+      <p slSectionDescription>Quantidades e preços unitários conforme a cotação aceite em 2 de setembro.</p>
     </div>
-    <div slSectionBody>${TABLE('lines', sticky, compact)}</div>
-  </section>
-  <section slSection id="condicoes" divider ${sticky ? 'sticky' : ''}>
-    <div slSectionHeader>
-      <div slSectionTitle><h2 slSectionHeading>Condições comerciais</h2></div>
-      <div slSectionActions><button slButton size="sm" variant="ghost">Editar</button></div>
+    <div slSectionActions>
+      <button slButton size="sm" variant="outline">Exportar</button>
+      <button slButton size="sm" tone="accent">Adicionar item</button>
     </div>
-    <div slSectionBody>
-      <div slDescriptionList [columns]="2">
-        <div slDescriptionListItem>
-          <dt slDescriptionListTerm>Prazo de pagamento</dt>
-          <dd slDescriptionListDescription>45 dias contra a fatura</dd>
-        </div>
-        <div slDescriptionListItem>
-          <dt slDescriptionListTerm>Centro de custo</dt>
-          <dd slDescriptionListDescription>Frota Sudeste · CC 4120</dd>
-        </div>
-        <div slDescriptionListItem>
-          <dt slDescriptionListTerm>Frete</dt>
-          <dd slDescriptionListDescription>CIF, por conta do fornecedor</dd>
-        </div>
-        <div slDescriptionListItem>
-          <dt slDescriptionListTerm>Garantia</dt>
-          <dd slDescriptionListDescription>24 meses ou 120.000 km</dd>
-        </div>
+  </div>
+  <div slSectionBody>${TABLE('lines', sticky, compact)}</div>
+</section>
+<section slSection id="condicoes" divider ${sticky ? 'sticky' : ''}>
+  <div slSectionHeader>
+    <div slSectionTitle><h2 slSectionHeading>Condições comerciais</h2></div>
+    <div slSectionActions><button slButton size="sm" variant="ghost">Editar</button></div>
+  </div>
+  <div slSectionBody>
+    <div slDescriptionList [columns]="2">
+      <div slDescriptionListItem>
+        <dt slDescriptionListTerm>Prazo de pagamento</dt>
+        <dd slDescriptionListDescription>45 dias contra a fatura</dd>
+      </div>
+      <div slDescriptionListItem>
+        <dt slDescriptionListTerm>Centro de custo</dt>
+        <dd slDescriptionListDescription>Frota Sudeste · CC 4120</dd>
+      </div>
+      <div slDescriptionListItem>
+        <dt slDescriptionListTerm>Frete</dt>
+        <dd slDescriptionListDescription>CIF, por conta do fornecedor</dd>
+      </div>
+      <div slDescriptionListItem>
+        <dt slDescriptionListTerm>Garantia</dt>
+        <dd slDescriptionListDescription>24 meses ou 120.000 km</dd>
       </div>
     </div>
-  </section>
-  <section slSection id="historico" divider ${sticky ? 'sticky' : ''}>
-    <div slSectionHeader>
-      <div slSectionTitle>
-        <span slSectionEyebrow>7 eventos</span>
-        <h2 slSectionHeading>Histórico de aprovações</h2>
-      </div>
+  </div>
+</section>
+<section slSection id="historico" divider ${sticky ? 'sticky' : ''}>
+  <div slSectionHeader>
+    <div slSectionTitle>
+      <span slSectionEyebrow>7 eventos</span>
+      <h2 slSectionHeading>Histórico de aprovações</h2>
     </div>
-    <div slSectionBody>
-      <div slStack [gap]="4">
-        @for (event of history; track event.when) {
-          <p slText size="sm"><strong>{{ event.when }} · {{ event.who }}</strong> — {{ event.what }}</p>
-        }
-      </div>
+  </div>
+  <div slSectionBody>
+    <div slStack [gap]="4">
+      @for (event of history; track event.when) {
+        <p slText size="sm"><strong>{{ event.when }} · {{ event.who }}</strong> — {{ event.what }}</p>
+      }
     </div>
-  </section>
-</div>`;
+  </div>
+</section>`;
 }
 
 const FOOTER = `<footer slPageFooter>

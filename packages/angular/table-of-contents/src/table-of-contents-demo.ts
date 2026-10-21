@@ -90,29 +90,29 @@ const SECTION_PARTS = [
               Dois endereços ativos. A faturação e a entrega diferem desde a mudança de armazém em
               2024.
             </p>
-            <section slSection id="faturacao">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Faturação</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Rua do Almada 412, 3.º · 4050-032 Porto. Fatura eletrónica por SAF-T, enviada ao
-                  gabinete de contabilidade.
-                </p>
-              </div>
-            </section>
-            <section slSection id="entrega">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Entrega</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Armazém central, Zona Industrial da Maia, lote 27 · 4470-605 Maia. Receção de
-                  segunda a sexta, das 7h às 15h; cais 3 para paletes.
-                </p>
-              </div>
-            </section>
           </div>
+          <section slSection id="faturacao">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Faturação</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Rua do Almada 412, 3.º · 4050-032 Porto. Fatura eletrónica por SAF-T, enviada ao
+                gabinete de contabilidade.
+              </p>
+            </div>
+          </section>
+          <section slSection id="entrega">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Entrega</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Armazém central, Zona Industrial da Maia, lote 27 · 4470-605 Maia. Receção de
+                segunda a sexta, das 7h às 15h; cais 3 para paletes.
+              </p>
+            </div>
+          </section>
         </div>
       </section>
       <section slSection id="contactos">
@@ -137,29 +137,29 @@ const SECTION_PARTS = [
             <p slText size="sm">
               Condições negociadas em janeiro de 2026, válidas até revisão anual.
             </p>
-            <section slSection id="prazos">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Prazos de pagamento</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Pagamento a 45 dias após a data da fatura, por transferência. Desconto de 1,5 %
-                  por pagamento a 10 dias.
-                </p>
-              </div>
-            </section>
-            <section slSection id="limite">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Limite de crédito</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Limite de crédito de 180 000,00 €. Exposição atual de 112 430,80 €. Três faturas
-                  por vencer, nenhuma em atraso.
-                </p>
-              </div>
-            </section>
           </div>
+          <section slSection id="prazos">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Prazos de pagamento</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Pagamento a 45 dias após a data da fatura, por transferência. Desconto de 1,5 % por
+                pagamento a 10 dias.
+              </p>
+            </div>
+          </section>
+          <section slSection id="limite">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Limite de crédito</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Limite de crédito de 180 000,00 €. Exposição atual de 112 430,80 €. Três faturas por
+                vencer, nenhuma em atraso.
+              </p>
+            </div>
+          </section>
         </div>
       </section>
       <section slSection id="faturas">
@@ -228,29 +228,29 @@ export class SlTocCustomerDemo {}
               Dois endereços ativos. A faturação e a entrega diferem desde a mudança de armazém em
               2024.
             </p>
-            <section slSection id="faturacao">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Faturação</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Rua do Almada 412, 3.º · 4050-032 Porto. Fatura eletrónica por SAF-T, enviada ao
-                  gabinete de contabilidade.
-                </p>
-              </div>
-            </section>
-            <section slSection id="entrega">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Entrega</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Armazém central, Zona Industrial da Maia, lote 27 · 4470-605 Maia. Receção de
-                  segunda a sexta, das 7h às 15h; cais 3 para paletes.
-                </p>
-              </div>
-            </section>
           </div>
+          <section slSection id="faturacao">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Faturação</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Rua do Almada 412, 3.º · 4050-032 Porto. Fatura eletrónica por SAF-T, enviada ao
+                gabinete de contabilidade.
+              </p>
+            </div>
+          </section>
+          <section slSection id="entrega">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Entrega</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Armazém central, Zona Industrial da Maia, lote 27 · 4470-605 Maia. Receção de
+                segunda a sexta, das 7h às 15h; cais 3 para paletes.
+              </p>
+            </div>
+          </section>
         </div>
       </section>
       <section slSection id="contactos" sticky>
@@ -275,29 +275,29 @@ export class SlTocCustomerDemo {}
             <p slText size="sm">
               Condições negociadas em janeiro de 2026, válidas até revisão anual.
             </p>
-            <section slSection id="prazos">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Prazos de pagamento</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Pagamento a 45 dias após a data da fatura, por transferência. Desconto de 1,5 %
-                  por pagamento a 10 dias.
-                </p>
-              </div>
-            </section>
-            <section slSection id="limite">
-              <div slSectionHeader>
-                <div slSectionTitle><h3 slSectionHeading>Limite de crédito</h3></div>
-              </div>
-              <div slSectionBody>
-                <p slText size="sm">
-                  Limite de crédito de 180 000,00 €. Exposição atual de 112 430,80 €. Três faturas
-                  por vencer, nenhuma em atraso.
-                </p>
-              </div>
-            </section>
           </div>
+          <section slSection id="prazos">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Prazos de pagamento</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Pagamento a 45 dias após a data da fatura, por transferência. Desconto de 1,5 % por
+                pagamento a 10 dias.
+              </p>
+            </div>
+          </section>
+          <section slSection id="limite">
+            <div slSectionHeader>
+              <div slSectionTitle><h3 slSectionHeading>Limite de crédito</h3></div>
+            </div>
+            <div slSectionBody>
+              <p slText size="sm">
+                Limite de crédito de 180 000,00 €. Exposição atual de 112 430,80 €. Três faturas por
+                vencer, nenhuma em atraso.
+              </p>
+            </div>
+          </section>
         </div>
       </section>
       <section slSection id="faturas" sticky>

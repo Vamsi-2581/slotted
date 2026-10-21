@@ -13,6 +13,7 @@ import {
   SlSectionEyebrow,
   SlSectionHeader,
   SlSectionHeading,
+  SlSectionTags,
   SlSectionTitle,
 } from './section-parts';
 
@@ -22,6 +23,7 @@ const PARTS = [
   SlSectionTitle,
   SlSectionEyebrow,
   SlSectionHeading,
+  SlSectionTags,
   SlSectionDescription,
   SlSectionActions,
   SlSectionBody,
@@ -46,6 +48,7 @@ const PARTS = [
           @if (heading()) {
             <div slSectionHeading>Frota</div>
           }
+          <div slSectionTags><span>Em operação</span></div>
           <p slSectionDescription>Cavalos mecânicos e carretas.</p>
         </div>
         <div slSectionActions><button type="button">Exportar</button></div>
@@ -137,6 +140,7 @@ describe('SlSection', () => {
       'title',
       'eyebrow',
       'heading',
+      'tags',
       'description',
       'actions',
       'body',
@@ -155,6 +159,15 @@ describe('SlSection', () => {
     host.heading.set(false);
     fixture.detectChanges();
     expect(root().hasAttribute('aria-labelledby')).toBe(false);
+  });
+
+  /** Tags sit beside the heading, outside it, so the region's name is the heading's alone. */
+  it('keeps the tags out of the heading', () => {
+    const tags = root().querySelector('[data-part="tags"]') as HTMLElement;
+    expect(tags.hasAttribute('data-part-tags')).toBe(true);
+    expect(tags.parentElement?.getAttribute('data-part')).toBe('title');
+    expect(tags.previousElementSibling?.getAttribute('data-part')).toBe('heading');
+    expect(root().querySelector('[data-part="heading"]')?.textContent?.trim()).toBe('Frota');
   });
 
   /** The outline: h2 under one level, one deeper each time. */

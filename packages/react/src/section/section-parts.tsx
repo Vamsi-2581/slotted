@@ -64,8 +64,13 @@ export function SectionHeader({
   if (render !== undefined) return render({ ...rootProps, ref: setRef });
   return <div {...rootProps} ref={setRef} />;
 }
-/** Eyebrow, heading, description, in that order. */
+/** Eyebrow, heading, tags, description, in that order. */
 export const SectionTitle = part('title', 'SectionTitle');
+/**
+ * Badges or tags beside the heading — a count, a status — on its baseline.
+ * Outside the heading, so they are not read into the region's name.
+ */
+export const SectionTags = part('tags', 'SectionTags');
 /** The end of the header row: a Button, a Toolbar, a Link. */
 export const SectionActions = part('actions', 'SectionActions');
 

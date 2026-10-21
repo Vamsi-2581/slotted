@@ -2,6 +2,7 @@ import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-wo
 import type { ReferencePageConfig } from '@slotted/storybook-workbench';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
+import { Badge } from '../badge';
 import { Button } from '../button';
 import {
   Collapsible,
@@ -38,6 +39,7 @@ import {
   SectionEyebrow,
   SectionHeader,
   SectionHeading,
+  SectionTags,
   SectionTitle,
 } from './section-parts';
 import { REACT_SECTION_DOCS, REACT_SECTION_TOKENS } from './section.docs';
@@ -67,7 +69,7 @@ const meta = {
       page: createReferencePage({
         title: 'Section',
         description:
-          'One unit of content inside a page: a header — eyebrow, heading, description, actions — and a body one outline step deeper. A region when it has a heading, a sticky header under the page chrome when asked, and never a card.',
+          'One unit of content inside a page: a header — eyebrow, heading, tags, description, actions — and a body one outline step deeper. A region when it has a heading, a sticky header under the page chrome when asked, and never a card.',
         framework: 'React',
         ...REACT_SECTION_DOCS.section,
         tokens: REACT_SECTION_TOKENS,
@@ -87,6 +89,11 @@ function Items({ children, ...props }: Partial<SectionProps>) {
         <SectionTitle>
           <SectionEyebrow>{LINES.length} itens</SectionEyebrow>
           <SectionHeading>Itens do pedido</SectionHeading>
+          <SectionTags>
+            <Badge size="sm" tone="warning">
+              Pendente
+            </Badge>
+          </SectionTags>
           <SectionDescription>
             Quantidades e preços unitários conforme a cotação aceite em 2 de setembro.
           </SectionDescription>
@@ -144,12 +151,10 @@ export const Playground: Story = {
       <Page>
         <OrderHeader navigation={false} tabs={false} />
         <PageBody>
-          <Stack gap={9}>
-            <Items {...args}>
-              <OrderLines sticky={false} />
-            </Items>
-            <Conditions {...args} />
-          </Stack>
+          <Items {...args}>
+            <OrderLines sticky={false} />
+          </Items>
+          <Conditions {...args} />
         </PageBody>
       </Page>
     </Viewport>
@@ -162,7 +167,7 @@ export const Anatomy: Story = {
     <Grid columns={1}>
       <Scene
         label="Every part, written out"
-        note="The eyebrow with the count, the heading at h2 because the page steps the outline, the description under it, two actions at the end of the row, and the body with the first rows of the table."
+        note="The eyebrow with the count, the heading at h2 because the page steps the outline, a status tag beside it, the description under it, two actions at the end of the heading’s row — heading, tag and actions on one baseline — and the body with the first rows of the table."
       >
         <Viewport size="tall">
           <Page>
@@ -246,19 +251,19 @@ export const Size: Story = {
     <Grid columns={3}>
       <Scene
         label="sm"
-        note="A group inside a form or a pane: the heading on md, the description on sm, the eyebrow the same xs at every size."
+        note="A group inside a form or a pane: the label on xs, the description on sm, the eyebrow the same xs at every size."
       >
         <Conditions size="sm" />
       </Scene>
       <Scene
         label="md, the default"
-        note="A section of a page: the heading on lg. Size says nothing about rank — every one of these is an h1 here, outside a page."
+        note="A section of a page: the label on xs, the step validated in a drawer full of tables and lists. Size says nothing about rank — every one of these is an h1 here, outside a page."
       >
         <Conditions size="md" />
       </Scene>
       <Scene
         label="lg"
-        note="The one section a screen is about: the heading on xl, a step under a page header’s own title."
+        note="The one section a screen is about: the label on sm, still a label under a page header’s own title."
       >
         <Conditions size="lg" />
       </Scene>
@@ -272,36 +277,34 @@ export const Separation: Story = {
     <Grid columns={1}>
       <Scene
         label="Three sections, three separations"
-        note="On the sunken canvas: the first separated by the stack’s gap alone, the second by a divider under its header, the third by a surface with an edge and a radius — and no shadow, no hover, because a section is not a card."
+        note="On the sunken canvas: the first separated by the family’s own spacing and the label alone, the second by a divider under its header, the third by a surface with an edge and a radius — and no shadow, no hover, because a section is not a card."
       >
         <Viewport>
           <Page>
             <OrderHeader navigation={false} tabs={false} />
             <PageBody>
-              <Stack gap={9}>
-                <Conditions />
-                <Items divider />
-                <Section ground="surface" id="historico">
-                  <SectionHeader>
-                    <SectionTitle>
-                      <SectionEyebrow>{HISTORY.length} eventos</SectionEyebrow>
-                      <SectionHeading>Histórico de aprovações</SectionHeading>
-                    </SectionTitle>
-                  </SectionHeader>
-                  <SectionBody>
-                    <Stack gap={4}>
-                      {HISTORY.map(([when, who, what]) => (
-                        <Text key={when} size="sm">
-                          <strong>
-                            {when} · {who}
-                          </strong>{' '}
-                          — {what}
-                        </Text>
-                      ))}
-                    </Stack>
-                  </SectionBody>
-                </Section>
-              </Stack>
+              <Conditions />
+              <Items divider />
+              <Section ground="surface" id="historico">
+                <SectionHeader>
+                  <SectionTitle>
+                    <SectionEyebrow>{HISTORY.length} eventos</SectionEyebrow>
+                    <SectionHeading>Histórico de aprovações</SectionHeading>
+                  </SectionTitle>
+                </SectionHeader>
+                <SectionBody>
+                  <Stack gap={4}>
+                    {HISTORY.map(([when, who, what]) => (
+                      <Text key={when} size="sm">
+                        <strong>
+                          {when} · {who}
+                        </strong>{' '}
+                        — {what}
+                      </Text>
+                    ))}
+                  </Stack>
+                </SectionBody>
+              </Section>
             </PageBody>
           </Page>
         </Viewport>
@@ -402,7 +405,7 @@ export const Content: Story = {
     <Grid columns={2}>
       <Scene
         label="A nine-word heading and a long eyebrow"
-        note="The heading wraps to two lines and the eyebrow wraps in small capitals; the description keeps its measure of seventy characters and the actions wrap under the title."
+        note="The heading wraps to two lines and the eyebrow wraps in small capitals; the description keeps its measure of seventy characters and the actions take a row of their own on a narrow header."
       >
         <Section divider>
           <SectionHeader>

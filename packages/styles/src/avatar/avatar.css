@@ -423,7 +423,28 @@
    * standing in for the order.
    */
   [data-ui-avatar][data-part-root][data-status='loaded'] {
+    /* The picture is the avatar once it has loaded: the tone's ground stood
+       behind it, and a logo with transparency designed for a white ground
+       vanished on the dark tint. */
+    --_ground: transparent;
     --_edge: var(--slotted-border-subtle, ButtonBorder);
+  }
+
+  /**
+   * The ground, when the consumer chooses it. `none` paints none, the fallback
+   * included: initials standing on the page. `plate` paints a light plate in
+   * every scheme, for a logo designed for a white ground; the hairline keeps
+   * it apart from a light page, and the fallback's ink is dark on it.
+   */
+  [data-ui-avatar][data-part-root][data-surface='none'] {
+    --_ground: transparent;
+  }
+
+  [data-ui-avatar][data-part-root][data-surface='plate'] {
+    --_edge: var(--slotted-border-subtle, ButtonBorder);
+    --_ground: var(--slotted-avatar-plate-surface, #ffffff);
+
+    color: var(--slotted-avatar-plate-color, #1f2937);
   }
 
   /* ── Disabled ─────────────────────────────────────────────────────────── */

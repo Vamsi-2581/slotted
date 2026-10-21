@@ -311,3 +311,24 @@ export function centringOffset(node, options) {
     dy: round(VIEW_BOX / 2 - (ink.minY + ink.maxY) / 2),
   };
 }
+
+/**
+ * The optical correction: the offset that puts the glyph's main shape — the
+ * elements `body` names — on the centre, rather than its whole ink. The eye
+ * centres a calendar on its page and not on the rings above it: centred on
+ * the whole ink, the page sat 1 unit low, 0.6px beside a 14px label's
+ * cap-height centre. The move is held inside the box, so no protrusion is
+ * pushed past the viewBox.
+ */
+export function opticalOffset(node, body, options) {
+  const ink = inkBox(node, options);
+  const main = centringOffset(
+    body.map((index) => node[index]),
+    options,
+  );
+  const hold = (move, min, max) => Math.min(VIEW_BOX - max, Math.max(-min, move));
+  return {
+    dx: Number(hold(main.dx, ink.minX, ink.maxX).toFixed(3)),
+    dy: Number(hold(main.dy, ink.minY, ink.maxY).toFixed(3)),
+  };
+}

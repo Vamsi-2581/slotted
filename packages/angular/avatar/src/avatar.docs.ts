@@ -63,6 +63,13 @@ export const ANGULAR_AVATAR_DOCS = {
         'How that colour is painted: tinted, or filled',
       ],
       [
+        'surface',
+        "'tone' | 'none' | 'plate'",
+        'tone',
+        'slAvatar',
+        'The ground behind the avatar: the tone behind the fallback and nothing behind a loaded picture; nothing at all; or a light plate in every scheme, for a logo made for a white ground (--slotted-avatar-plate-surface)',
+      ],
+      [
         'size',
         "'xs' | 'sm' | 'md' | 'lg' | 'xl'",
         'md',

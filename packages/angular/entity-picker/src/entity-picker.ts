@@ -222,6 +222,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
             [initials]="initials(chosen)"
             [src]="chosen.avatar?.src"
             [shape]="chosen.avatar?.shape ?? 'circle'"
+            [surface]="chosen.avatar?.surface ?? 'tone'"
             [locale]="resolvedLocale()"
           ></span>
         </span>
@@ -260,6 +261,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                           [initials]="initials(entity)"
                           [src]="entity.avatar?.src"
                           [shape]="entity.avatar?.shape ?? 'circle'"
+                          [surface]="entity.avatar?.surface ?? 'tone'"
                           [locale]="resolvedLocale()"
                         ></span>
                       } @else if (resolution(id) === 'pending') {
@@ -612,6 +614,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               [initials]="initials(entity)"
               [src]="entity.avatar?.src"
               [shape]="entity.avatar?.shape ?? 'circle'"
+              [surface]="entity.avatar?.surface ?? 'tone'"
               [locale]="resolvedLocale()"
             ></span>
           </span>

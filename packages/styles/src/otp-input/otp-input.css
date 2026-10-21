@@ -124,16 +124,23 @@
   }
 
   /**
-   * Autofill. Chrome paints its own ground over the control's, and the classic
-   * repair — a hundred-pixel inset shadow — is the only way to reach it. The
-   * signal is kept rather than erased, as `text-field` keeps it: an autofilled
-   * code is a fact worth seeing, so the boxes sit on the accent surface the
-   * theme owns rather than on the browser's yellow.
+   * Autofill. The input lies over the boxes, so the classic repair — a
+   * hundred-pixel inset shadow in the tint — painted over every box, its edge
+   * and the gaps between them. The browser's own ground is held back instead,
+   * by a transition that never starts, and the boxes take the tint: an
+   * autofilled code is a fact worth seeing, on the accent surface the theme
+   * owns rather than on the browser's yellow.
    */
   [data-ui-otp-input] > [data-part-input]:autofill {
-    box-shadow: inset 0 0 0 100px
-      var(--slotted-otp-input-autofill-background, var(--slotted-tone-accent-surface));
+    transition: background-color 0s 600000s;
     -webkit-text-fill-color: transparent;
+  }
+
+  [data-ui-otp-input][data-part-root]:has(> [data-part-input]:autofill) [data-part-slot] {
+    background-color: var(
+      --slotted-otp-input-autofill-background,
+      var(--slotted-tone-accent-surface)
+    );
   }
 
   /* ── Groups and the separator ─────────────────────────────────────────

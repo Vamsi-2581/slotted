@@ -1,0 +1,34 @@
+import { render } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+
+import { Button } from '../button';
+import { Glyph, Icon } from './index';
+
+/**
+ * A glyph beside a label is centred on its main shape, not on its whole ink.
+ * The calendar's rings rise above its page: centred on the ink, the page sat
+ * one unit low, 0.6px under the cap-height centre of a 14px label trimmed to
+ * its caps.
+ */
+describe('a calendar beside a label', () => {
+  it('centres its page on the label’s cap height', () => {
+    render(
+      <Button
+        start={
+          <Icon size="sm">
+            <Glyph name="calendar" />
+          </Icon>
+        }
+      >
+        Outubro de 2026
+      </Button>,
+    );
+    const page = document.querySelectorAll('[data-glyph="calendar"] path')[2] as SVGPathElement;
+    const label = document.querySelector('[data-part="label"]') as HTMLElement;
+    const centre = (box: DOMRect) => box.top + box.height / 2;
+
+    expect(
+      Math.abs(centre(page.getBoundingClientRect()) - centre(label.getBoundingClientRect())),
+    ).toBeLessThanOrEqual(0.25);
+  });
+});

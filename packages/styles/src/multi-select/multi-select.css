@@ -347,11 +347,21 @@
   }
 
   /**
-   * Autofill. Chrome paints its own ground over the control's, and a
-   * hundred-pixel inset shadow is the only way to reach it. The signal is kept
-   * rather than erased, in the accent surface the theme owns — the repair
-   * `text-field` makes, for the same reason.
+   * Autofill. Chrome paints its own ground over the input, and a hundred-pixel
+   * inset shadow is the only way to reach it. The signal is kept rather than
+   * erased, in the accent surface the theme owns, and it is the whole
+   * control's: the frame takes the tint under its border and inside its
+   * corner, and the input repaints the browser's ground in the same colour.
+   * Painted on the input alone, the tint left the frame's padding, the slots
+   * and the buttons bare.
    */
+  [data-ui-multi-select][data-part-root]:has([data-part-input]:autofill) {
+    background-color: var(
+      --slotted-multi-select-autofill-background,
+      var(--slotted-tone-accent-surface)
+    );
+  }
+
   [data-ui-multi-select] [data-part-input]:autofill {
     box-shadow: inset 0 0 0 100px
       var(--slotted-multi-select-autofill-background, var(--slotted-tone-accent-surface));
@@ -611,7 +621,7 @@
 
   [data-ui-multi-select][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       [data-readonly]
-    ):not([data-invalid]) {
+    ):not([data-invalid]):not(:has([data-part-input]:autofill)) {
     background-color: var(
       --slotted-multi-select-subtle-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -620,7 +630,7 @@
 
   [data-ui-multi-select][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       [data-readonly]
-    ):not([data-invalid]) {
+    ):not([data-invalid]):not(:has([data-part-input]:autofill)) {
     background-color: var(
       --slotted-multi-select-plain-hover-background,
       var(--slotted-tone-secondary-subtle-hover)

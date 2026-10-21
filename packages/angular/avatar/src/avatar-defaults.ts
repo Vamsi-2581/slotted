@@ -13,6 +13,12 @@ export type AvatarResolvedTone = Exclude<AvatarTone, 'auto'>;
 
 /** How that colour is painted. `soft` is the tinted disc an avatar usually is. */
 export type AvatarVariant = 'soft' | 'solid';
+/**
+ * The ground behind the avatar. `tone` paints the tone behind the fallback and
+ * nothing behind a loaded picture; `none` paints nothing; `plate` paints a
+ * light plate in every scheme, for a logo designed for a white ground.
+ */
+export type AvatarSurface = 'tone' | 'none' | 'plate';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 

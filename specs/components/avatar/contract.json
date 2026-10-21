@@ -13,6 +13,7 @@
     "shape": ["circle", "square"],
     "tone": ["auto", "accent", "secondary", "info", "success", "warning", "danger"],
     "variant": ["soft", "solid"],
+    "surface": ["tone", "none", "plate"],
     "status": ["idle", "loading", "loaded", "error"]
   },
   "stateAttributes": {
@@ -26,6 +27,7 @@
         "shape": "circle",
         "tone": "auto",
         "variant": "soft",
+        "surface": "tone",
         "decorative": false,
         "disabled": false
       },

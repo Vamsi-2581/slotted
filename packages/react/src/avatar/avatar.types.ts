@@ -13,6 +13,12 @@ export type AvatarResolvedTone = Exclude<AvatarTone, 'auto'>;
 
 /** How that colour is painted. `soft` is the tinted disc an avatar usually is. */
 export type AvatarVariant = 'soft' | 'solid';
+/**
+ * The ground behind the avatar. `tone` paints the tone behind the fallback and
+ * nothing behind a loaded picture; `none` paints nothing; `plate` paints a
+ * light plate in every scheme, for a logo designed for a white ground.
+ */
+export type AvatarSurface = 'tone' | 'none' | 'plate';
 
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
@@ -48,6 +54,7 @@ export interface AvatarRootProps extends HTMLAttributes<HTMLElement> {
   'data-shape': AvatarShape;
   'data-size': AvatarSize;
   'data-status': AvatarStatus;
+  'data-surface': AvatarSurface;
   'data-tone': AvatarResolvedTone;
   'data-ui': string;
   'data-variant': AvatarVariant;
@@ -122,6 +129,8 @@ export interface AvatarProps extends Omit<ComponentPropsWithRef<'span'>, 'childr
   tone?: AvatarTone | undefined;
   /** Defaults to the provider, then to `soft`. */
   variant?: AvatarVariant | undefined;
+  /** The ground behind the avatar; `tone` by default. */
+  surface?: AvatarSurface | undefined;
 }
 
 export type AvatarGroupLayout = 'stack' | 'spread';

@@ -36,10 +36,21 @@ function currentFamilies() {
  * no custom property reaches; the sheet that carries one swaps the image
  * under reduced motion instead.
  */
+/**
+ * A delay that never elapses is no motion: it holds back the ground a browser
+ * paints over an autofilled input lying over a family's own paint, which no
+ * inset shadow can cover without covering the paint under it. Named one at a
+ * time, with the rule it is in.
+ */
+const HELD_BACK = new Map([['otp-input', 'background-color 0s 600000s']]);
+
 test('takes every duration from the motion scale', () => {
   for (const { name, stylesheets } of currentFamilies()) {
     for (const { file, css } of stylesheets) {
-      const outsideImages = css.replace(/url\("data:[^"]*"\)/g, '');
+      const held = HELD_BACK.get(name);
+      const outsideImages = css
+        .replace(/url\("data:[^"]*"\)/g, '')
+        .replace(held === undefined ? /$^/ : `transition: ${held};`, '');
       const literals = [...outsideImages.matchAll(TIME_LITERAL)].map(([literal]) => literal);
       assert.deepEqual(
         literals,

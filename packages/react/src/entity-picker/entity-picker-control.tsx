@@ -56,6 +56,7 @@ export function EntityFace({ entity, locale }: { entity: Entity; locale: string 
       locale={locale}
       name={entity.avatar?.name ?? entity.label}
       shape={entity.avatar?.shape ?? 'circle'}
+      surface={entity.avatar?.surface ?? 'tone'}
       size="xs"
       {...(entity.avatar?.src === undefined ? {} : { src: entity.avatar.src })}
     />

@@ -13,7 +13,7 @@ import {
   pathOf,
   renderGlyph,
 } from '../../../scripts/generate-icon-glyphs.mjs';
-import { centringOffset, inkBox, VIEW_BOX } from '../../../scripts/glyph-ink.mjs';
+import { centringOffset, inkBox, opticalOffset, VIEW_BOX } from '../../../scripts/glyph-ink.mjs';
 import defaultTheme from '../src/default/theme.mjs';
 
 const ROOT = new URL('../../../', import.meta.url).pathname;
@@ -200,14 +200,19 @@ test('centres the ink of every glyph in the box the mask is drawn in', () => {
       paint: entry.paint ?? 'stroke',
       strokeWidth: entry['stroke-width'] ?? DEFAULT_STROKE_WIDTH,
     };
-    const ink = inkBox(node, options);
-    const { dx, dy } = centringOffset(node, options);
-    for (const [axis, centre, offset] of [
-      ['x', (ink.minX + ink.maxX) / 2, dx],
-      ['y', (ink.minY + ink.maxY) / 2, dy],
+    /* A glyph that names its body is centred on its main shape, held inside the box. */
+    const body = entry.body?.map((index) => node[index]);
+    const ink = inkBox(body ?? node, options);
+    const whole = inkBox(node, options);
+    const { dx, dy } =
+      body === undefined ? centringOffset(node, options) : opticalOffset(node, entry.body, options);
+    for (const [axis, centre, offset, min, max] of [
+      ['x', (ink.minX + ink.maxX) / 2, dx, whole.minX, whole.maxX],
+      ['y', (ink.minY + ink.maxY) / 2, dy, whole.minY, whole.maxY],
     ]) {
+      const held = min + offset <= 0.0005 || max + offset >= VIEW_BOX - 0.0005;
       assert.ok(
-        Math.abs(centre + offset - VIEW_BOX / 2) <= 0.0005,
+        Math.abs(centre + offset - VIEW_BOX / 2) <= 0.0005 || (body !== undefined && held),
         `${name} sits ${(centre + offset - VIEW_BOX / 2).toFixed(4)} off centre on ${axis}`,
       );
     }
@@ -227,10 +232,13 @@ test('centres the ink of every glyph in the box the mask is drawn in', () => {
     moved,
     [
       '--slotted-icon-check',
+      '--slotted-icon-pin',
+      '--slotted-icon-calendar',
       '--slotted-icon-triangle-alert',
       '--slotted-icon-caps-lock',
       '--slotted-icon-paperclip',
       '--slotted-icon-pipette',
+      '--slotted-icon-trash',
       '--slotted-icon-play',
       '--slotted-icon-file-audio',
       '--slotted-icon-text-wrap',

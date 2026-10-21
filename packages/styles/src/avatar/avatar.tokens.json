@@ -6,6 +6,8 @@
   "--slotted-avatar-font-weight",
   "--slotted-avatar-glyph-size",
   "--slotted-avatar-initials-size",
+  "--slotted-avatar-plate-color",
+  "--slotted-avatar-plate-surface",
   "--slotted-avatar-radius",
   "--slotted-avatar-ring-color",
   "--slotted-avatar-ring-width",

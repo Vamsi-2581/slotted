@@ -124,7 +124,7 @@
   "entity": {
     "required": ["id", "label"],
     "optional": ["description", "meta", "avatar", "group", "scope", "disabled"],
-    "avatar": "{ src?, name?, shape? }; omitted, the avatar shows the initials of label; null takes the media column away from that entity",
+    "avatar": "{ src?, name?, shape?, surface? } — surface as avatar names it, plate for a logo made for a white ground; omitted, the avatar shows the initials of label; null takes the media column away from that entity",
     "reason": "Salesforce's display-info names a primary field and one additional field; Fluent's Persona a text and a secondary text. description is the additional field and the disambiguator, meta a short trailing fact that is not an identifier."
   },
   "value": {

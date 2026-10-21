@@ -68,6 +68,7 @@ export function Avatar({
   size,
   src,
   status,
+  surface = 'tone',
   tone,
   variant,
   ...nativeProps
@@ -162,6 +163,7 @@ export function Avatar({
     'data-shape': shape ?? defaults.shape,
     'data-size': resolvedSize,
     'data-status': resolvedStatus,
+    'data-surface': surface,
     'data-tone': resolvedTone,
     'data-ui': 'avatar',
     'data-variant': variant ?? defaults.variant,

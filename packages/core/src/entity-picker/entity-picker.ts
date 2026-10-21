@@ -16,6 +16,8 @@ export interface EntityAvatar {
   /** The name the initials are taken from, when it is not `label`. */
   readonly name?: string | undefined;
   readonly shape?: 'circle' | 'square' | undefined;
+  /** The ground behind the face, as `avatar` names it: `plate` for a logo made for a white ground. */
+  readonly surface?: 'tone' | 'none' | 'plate' | undefined;
 }
 
 /**

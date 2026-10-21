@@ -8,6 +8,7 @@ export type {
   AvatarSize,
   AvatarStatus,
   AvatarTone,
+  AvatarSurface,
   AvatarVariant,
 } from './avatar-defaults';
 export { SlAvatarFallback } from './avatar-fallback';

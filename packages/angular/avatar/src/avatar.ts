@@ -23,6 +23,7 @@ import {
   type AvatarSize,
   type AvatarStatus,
   type AvatarTone,
+  type AvatarSurface,
   type AvatarVariant,
 } from './avatar-defaults';
 import { SlAvatarFallback } from './avatar-fallback';
@@ -37,6 +38,7 @@ export type {
   AvatarSize,
   AvatarStatus,
   AvatarTone,
+  AvatarSurface,
   AvatarVariant,
 } from './avatar-defaults';
 
@@ -117,6 +119,7 @@ const INITIALS_MAX: Record<AvatarSize, number> = { xs: 1, sm: 2, md: 2, lg: 2, x
     '[attr.data-shape]': 'resolvedShape()',
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-variant]': 'resolvedVariant()',
+    '[attr.data-surface]': 'surface()',
     '[attr.data-status]': 'resolvedStatus()',
     '[attr.data-disabled]': "disabled() ? '' : null",
     '[attr.role]': 'role()',
@@ -152,6 +155,8 @@ export class SlAvatar {
   readonly tone = input<AvatarTone | undefined>(undefined);
   /** Defaults to the provider, then to `soft`. */
   readonly variant = input<AvatarVariant | undefined>(undefined);
+  /** The ground behind the avatar; `tone` by default. */
+  readonly surface = input<AvatarSurface>('tone');
   /** A deactivated account, or an avatar inside a control the page has turned off. */
   readonly disabled = input(false, { transform: booleanAttribute });
   /**

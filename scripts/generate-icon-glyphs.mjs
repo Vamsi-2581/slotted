@@ -30,7 +30,7 @@ import { pathToFileURL } from 'node:url';
 
 import { icons } from 'lucide';
 
-import { centringOffset } from './glyph-ink.mjs';
+import { centringOffset, opticalOffset } from './glyph-ink.mjs';
 
 export const GLYPH_PREFIX = '--slotted-icon-';
 export const DEFAULT_STROKE_WIDTH = 2;
@@ -91,6 +91,7 @@ export function renderGlyph({
   icon,
   'stroke-width': strokeWidth = DEFAULT_STROKE_WIDTH,
   paint = 'stroke',
+  body,
 }) {
   if (paint !== 'stroke' && paint !== 'fill') {
     throw new Error(`Unknown paint "${paint}" for "${icon}": expected "stroke" or "fill"`);
@@ -109,7 +110,10 @@ export function renderGlyph({
         };
   const node = lucideIcon(icon);
   const drawing = node.map(([tag, attributes]) => element(tag, attributes)).join('');
-  const { dx, dy } = centringOffset(node, { paint, strokeWidth });
+  const { dx, dy } =
+    body === undefined
+      ? centringOffset(node, { paint, strokeWidth })
+      : opticalOffset(node, body, { paint, strokeWidth });
   const children =
     dx === 0 && dy === 0 ? drawing : `<g transform='translate(${dx} ${dy})'>${drawing}</g>`;
   const svg = `<svg${Object.entries(root)
@@ -185,14 +189,20 @@ export function pathOf(tag, attributes) {
 /**
  * One glyph as the element draws it: the paint, the stroke width, the offset
  * that puts the ink on the centre (the one the mask applies), and the paths.
+ * A manifest entry that names its `body` — the indices of the elements that
+ * make the main shape — is centred on that shape instead (`opticalOffset`).
  */
 export function drawGlyph({
   icon,
   'stroke-width': strokeWidth = DEFAULT_STROKE_WIDTH,
   paint = 'stroke',
+  body,
 }) {
   const node = lucideIcon(icon);
-  const { dx, dy } = centringOffset(node, { paint, strokeWidth });
+  const { dx, dy } =
+    body === undefined
+      ? centringOffset(node, { paint, strokeWidth })
+      : opticalOffset(node, body, { paint, strokeWidth });
   return {
     paint,
     strokeWidth: paint === 'fill' ? 0 : strokeWidth,

@@ -26,6 +26,8 @@
  * modules answering one question is the failure this file avoids elsewhere.
  */
 
+import { afterLayout } from '../measure/after-layout';
+
 /** The subset of the closed reason vocabulary a layer can be dismissed for. */
 export type DismissReason = 'escape' | 'outsidePress' | 'blur' | 'back' | 'programmatic';
 
@@ -155,6 +157,8 @@ interface DocumentLock {
   count: number;
   overflow: string;
   padding: string;
+  /** Cancels the lock's write while it waits for the layout. */
+  pending?: (() => void) | undefined;
 }
 
 /** Per document, so two copies of the library on one page keep two stacks. */
@@ -428,19 +432,39 @@ export function createScrollLock(doc?: Document): ScrollLockHandle {
   let state = locks.get(target);
 
   if (!state) {
-    state = { count: 0, overflow: body.style.overflow, padding: body.style.paddingInlineEnd };
-    locks.set(target, state);
+    const created: DocumentLock = {
+      count: 0,
+      overflow: body.style.overflow,
+      padding: body.style.paddingInlineEnd,
+    };
+    state = created;
+    locks.set(target, created);
 
     /**
-     * A document that reports no client width has no scrollbar to take away,
-     * which is every server-rendered and every headless one.
+     * The scrollbar is read after the layout the opening layer causes, and
+     * written after the read: read in the commit that mounted the layer, it
+     * forced that layout early. A document that reports no client width has
+     * no scrollbar to take away, which is every server-rendered and every
+     * headless one.
      */
-    const view = target.defaultView;
-    const client = target.documentElement.clientWidth;
-    const gap = view && client > 0 ? view.innerWidth - client : 0;
-
-    body.style.overflow = 'hidden';
-    if (gap > 0) body.style.paddingInlineEnd = `${gap}px`;
+    let gap = 0;
+    let written = false;
+    const cancel = afterLayout(
+      target,
+      () => {
+        const view = target.defaultView;
+        const client = target.documentElement.clientWidth;
+        gap = view && client > 0 ? view.innerWidth - client : 0;
+      },
+      () => {
+        written = true;
+        created.pending = undefined;
+        body.style.overflow = 'hidden';
+        if (gap > 0) body.style.paddingInlineEnd = `${gap}px`;
+      },
+    );
+    /* A headless document writes at once, before `afterLayout` returns. */
+    if (!written) created.pending = cancel;
   }
 
   state.count += 1;
@@ -456,10 +480,12 @@ export function createScrollLock(doc?: Document): ScrollLockHandle {
       current.count -= 1;
       if (current.count > 0) return;
 
+      locks.delete(target);
+      /* Released before it was written: there is nothing to restore. */
+      if (current.pending) return current.pending();
       body.style.overflow = current.overflow;
       body.style.paddingInlineEnd = current.padding;
       if (body.getAttribute('style') === '') body.removeAttribute('style');
-      locks.delete(target);
     },
   };
 }

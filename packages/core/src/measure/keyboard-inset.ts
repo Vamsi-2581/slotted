@@ -1,3 +1,5 @@
+import { afterLayout } from './after-layout';
+
 /**
  * How much of the layout viewport the virtual keyboard covers, in pixels.
  *
@@ -22,20 +24,34 @@ export function observeKeyboardInset(
   }
 
   let last = -1;
-  const read = () => {
-    const inset = Math.max(
-      0,
-      Math.round(view.innerHeight - (viewport.height + viewport.offsetTop)),
-    );
+  const measure = () =>
+    Math.max(0, Math.round(view.innerHeight - (viewport.height + viewport.offsetTop)));
+  const report = (inset: number) => {
     if (inset === last) return;
     last = inset;
     onInset(inset);
   };
+  const read = () => report(measure());
 
-  read();
+  /* The first reading waits for the layout the opening layer causes: read in
+     the commit that mounted it, it forced that layout early. */
+  let first = 0;
+  const doc = view.document as Document | undefined;
+  let cancel = () => {};
+  if (doc === undefined) read();
+  else {
+    cancel = afterLayout(
+      doc,
+      () => {
+        first = measure();
+      },
+      () => report(first),
+    );
+  }
   viewport.addEventListener('resize', read);
   viewport.addEventListener('scroll', read);
   return () => {
+    cancel();
     viewport.removeEventListener('resize', read);
     viewport.removeEventListener('scroll', read);
   };

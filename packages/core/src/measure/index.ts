@@ -5,3 +5,4 @@ export type { WidthGateHandle, WidthGateOptions } from './width-gate';
 export { observeKeyboardInset } from './keyboard-inset';
 export { createIndicator } from './indicator';
 export type { IndicatorHandle, IndicatorOptions, IndicatorOrientation } from './indicator';
+export { afterLayout } from './after-layout';

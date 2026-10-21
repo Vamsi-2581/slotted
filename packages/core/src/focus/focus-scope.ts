@@ -23,6 +23,8 @@
  * `focusin` listener.
  */
 
+import { afterLayout } from '../measure/after-layout';
+
 /**
  * What the platform puts in the tab sequence. `[tabindex]` is matched with its
  * negative values filtered out below rather than excluded here, because
@@ -85,6 +87,12 @@ function view(node: Element): Window | null {
 /** Whether the browser draws it at all. A hidden control is not in the sequence. */
 function rendered(node: HTMLElement): boolean {
   if (node.hidden) return false;
+
+  /* One native call answers for the node and every ancestor; a computed style
+     per item and per ancestor cost a phone 80 ms on a sheet of twenty items. */
+  if (typeof node.checkVisibility === 'function') {
+    return node.checkVisibility({ visibilityProperty: true });
+  }
 
   const style = view(node)?.getComputedStyle(node);
   if (!style) return true;
@@ -178,11 +186,19 @@ export function createFocusScope(
   /** Whether the node was given a tabindex here, and therefore owes one back. */
   let borrowedTabindex = false;
   let destroyed = false;
+  /** Cancels an entry still waiting for the layout. */
+  let cancelEnter: (() => void) | undefined;
   /** Guards the pull-back, which focuses and so raises `focusin` again. */
   let recovering = false;
 
-  function send(target: HTMLElement) {
-    target.focus();
+  /**
+   * `scroll` is false for the focus a layer takes as it opens: the panel is
+   * still entering, and scrolling it into view would lay the page out inside
+   * the commit that mounted it. A Tab that wraps scrolls, as the browser's own
+   * Tab does.
+   */
+  function send(target: HTMLElement, scroll = true) {
+    target.focus(scroll ? undefined : { preventScroll: true });
     onFocus?.(target);
   }
 
@@ -191,7 +207,7 @@ export function createFocusScope(
       node.setAttribute('tabindex', '-1');
       borrowedTabindex = true;
     }
-    send(node);
+    send(node, false);
   }
 
   function handleKeyDown(event: KeyboardEvent) {
@@ -247,22 +263,32 @@ export function createFocusScope(
       return origin;
     },
 
+    /**
+     * Focus moves after the layout the opening layer causes, in the same
+     * frame: `focus()` lays the page out, and in the commit that mounted the
+     * layer it forced that layout early.
+     */
     enter() {
       if (destroyed || initial === false) return;
-
-      if (typeof initial === 'function') {
-        const named = initial();
-        if (named?.isConnected) return send(named);
-      } else if (initial === 'first') {
-        const items = tabbables(node);
-        if (items.length > 0) return send(items[0] as HTMLElement);
-      }
-      focusContainer();
+      cancelEnter?.();
+      cancelEnter = afterLayout(doc, () => {
+        cancelEnter = undefined;
+        if (destroyed) return;
+        if (typeof initial === 'function') {
+          const named = initial();
+          if (named?.isConnected) return send(named, false);
+        } else if (initial === 'first') {
+          const items = tabbables(node);
+          if (items.length > 0) return send(items[0] as HTMLElement, false);
+        }
+        focusContainer();
+      });
     },
 
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      cancelEnter?.();
 
       doc.removeEventListener('keydown', handleKeyDown, true);
       doc.removeEventListener('focusin', handleFocusIn, true);

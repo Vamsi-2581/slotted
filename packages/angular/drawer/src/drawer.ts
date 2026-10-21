@@ -554,8 +554,13 @@ export class SlDrawer implements OnInit {
         const own = inline ? panel.offsetWidth : panel.offsetHeight;
         this.rest.set(Math.round((own / span) * 1000) / 1000);
       };
-      read();
-      if (typeof ResizeObserver === 'undefined') return;
+      /* The observer's first report arrives after the layout that placed the
+         panel, so reading there lays nothing out; a read here, as the panel
+         mounts, forced that layout early. */
+      if (typeof ResizeObserver === 'undefined') {
+        read();
+        return;
+      }
       const observer = new ResizeObserver(read);
       observer.observe(panel);
       observer.observe(box);

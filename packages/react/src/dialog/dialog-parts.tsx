@@ -1,5 +1,6 @@
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
+import { observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
@@ -228,6 +229,26 @@ export function DialogContent({
       scope.destroy();
     };
   }, [content, dialog]);
+
+  /**
+   * The virtual keyboard, while the panel can cover the layer: the layer
+   * carries what the keys cover, and the stylesheet ends a full-screen panel's
+   * rows above them. A centred panel reads nothing from it.
+   */
+  const coversLayer = dialog.fullScreen !== 'never' || dialog.fullscreen;
+  useEffect(() => {
+    if (content === null || !dialog.open || !coversLayer) return;
+    const root = content.closest<HTMLElement>('[data-ui="dialog"]');
+    if (root === null) return;
+    const stop = observeKeyboardInset(root.ownerDocument.defaultView, (pixels) => {
+      if (pixels === 0) root.style.removeProperty('--slotted-keyboard-inset');
+      else root.style.setProperty('--slotted-keyboard-inset', `${pixels}px`);
+    });
+    return () => {
+      stop();
+      root.style.removeProperty('--slotted-keyboard-inset');
+    };
+  }, [content, coversLayer, dialog.open]);
 
   if (!dialog.mounted || layer === null) return null;
 

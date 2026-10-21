@@ -1,5 +1,5 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -844,5 +844,51 @@ describe('stacked layers that close in one change', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(document.activeElement).toBe(opener);
     expect(opener.closest('[inert]')).toBeNull();
+  });
+});
+
+/**
+ * The virtual keyboard covers the band of the layout viewport below the
+ * visual one. A layer whose panel can cover it carries that band as
+ * `--slotted-keyboard-inset`, and a centred panel reads nothing from it.
+ */
+describe('the virtual keyboard', () => {
+  const keyboard = (covered: number) => {
+    const viewport = Object.assign(new EventTarget(), {
+      height: window.innerHeight - covered,
+      offsetTop: 0,
+    });
+    vi.stubGlobal('visualViewport', viewport);
+    return viewport;
+  };
+  const inset = () => layer()?.style.getPropertyValue('--slotted-keyboard-inset') ?? '';
+
+  it('writes what the keys cover on a full-screen layer, and follows them', () => {
+    const viewport = keyboard(260);
+    const { unmount } = render(
+      <Dialog defaultOpen fullScreen="narrow">
+        <DialogContent aria-label="Search" />
+      </Dialog>,
+    );
+    expect(inset()).toBe('260px');
+
+    viewport.height = window.innerHeight;
+    act(() => {
+      viewport.dispatchEvent(new Event('resize'));
+    });
+    expect(inset()).toBe('');
+    unmount();
+    vi.unstubAllGlobals();
+  });
+
+  it('leaves a centred layer alone', () => {
+    keyboard(260);
+    render(
+      <Dialog defaultOpen fullScreen="never">
+        <DialogContent aria-label="Search" />
+      </Dialog>,
+    );
+    expect(inset()).toBe('');
+    vi.unstubAllGlobals();
   });
 });

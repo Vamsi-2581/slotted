@@ -4,6 +4,7 @@ import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
 import { dialogMessages, type DialogMessages, type PartialMessages } from '@slotted/core/i18n';
 import type { FocusScopeHandle } from '@slotted/core/focus';
+import { observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
 import type { PortalRootHandle } from '@slotted/core/portal';
 import { createPresence } from '@slotted/core/presence';
@@ -345,6 +346,25 @@ export abstract class SlDialogBase {
       this.engaged = true;
 
       onCleanup(() => this.takeDown());
+    });
+
+    /**
+     * The virtual keyboard, while the panel can cover the layer: the layer
+     * carries what the keys cover, and the stylesheet ends a full-screen
+     * panel's rows above them. A centred panel reads nothing from it.
+     */
+    effect((onCleanup) => {
+      const node = this.layerRef()?.nativeElement;
+      const coversLayer = this.resolvedFullScreen() !== 'never' || this.resolvedFullscreen();
+      if (!this.open() || node === undefined || !coversLayer) return;
+      const stop = observeKeyboardInset(node.ownerDocument.defaultView, (pixels) => {
+        if (pixels === 0) node.style.removeProperty('--slotted-keyboard-inset');
+        else node.style.setProperty('--slotted-keyboard-inset', `${pixels}px`);
+      });
+      onCleanup(() => {
+        stop();
+        node.style.removeProperty('--slotted-keyboard-inset');
+      });
     });
 
     this.destroyRef.onDestroy(() => {

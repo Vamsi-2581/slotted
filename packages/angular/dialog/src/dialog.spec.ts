@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SlButton } from '@slotted/angular/button';
 import { provideSlotted } from '@slotted/angular/i18n';
@@ -919,6 +919,61 @@ describe('stacked layers that close in one change', () => {
     expect(document.activeElement).toBe(trigger);
     expect(fixture.componentInstance.closed).toEqual(['inner', 'outer']);
     expect(trigger.closest('[inert]')).toBeNull();
+    fixture.destroy();
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlDialog],
+  template: `<sl-dialog [open]="true" [fullScreen]="fullScreen()" aria-label="Search"></sl-dialog>`,
+})
+class KeyboardHost {
+  readonly fullScreen = signal<'narrow' | 'never'>('narrow');
+}
+
+/**
+ * The virtual keyboard covers the band of the layout viewport below the
+ * visual one. A layer whose panel can cover it carries that band as
+ * `--slotted-keyboard-inset`, and a centred panel reads nothing from it.
+ */
+describe('SlDialog over the virtual keyboard', () => {
+  const keyboard = (covered: number) => {
+    const viewport = Object.assign(new EventTarget(), {
+      height: window.innerHeight - covered,
+      offsetTop: 0,
+    });
+    vi.stubGlobal('visualViewport', viewport);
+    return viewport;
+  };
+  const inset = () => layer()?.style.getPropertyValue('--slotted-keyboard-inset') ?? '';
+  const mount = (fullScreen: 'narrow' | 'never') => {
+    TestBed.resetTestingModule();
+    const fixture = TestBed.createComponent(KeyboardHost);
+    fixture.componentInstance.fullScreen.set(fullScreen);
+    fixture.detectChanges();
+    return fixture;
+  };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('writes what the keys cover on a full-screen layer, and follows them', () => {
+    const viewport = keyboard(260);
+    const fixture = mount('narrow');
+    expect(inset()).toBe('260px');
+
+    viewport.height = window.innerHeight;
+    viewport.dispatchEvent(new Event('resize'));
+    expect(inset()).toBe('');
+    fixture.destroy();
+  });
+
+  it('leaves a centred layer alone', () => {
+    keyboard(260);
+    const fixture = mount('never');
+    expect(inset()).toBe('');
     fixture.destroy();
   });
 });

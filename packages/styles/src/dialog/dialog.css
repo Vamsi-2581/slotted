@@ -932,6 +932,8 @@
       block-size: 100%;
       border-radius: 0;
       border: 0;
+      box-sizing: border-box;
+      padding-block-end: var(--slotted-keyboard-inset, 0px);
     }
   }
 
@@ -961,6 +963,16 @@
      * layer, which on a phone is a stray line under the browser chrome.
      */
     border: 0;
+    /**
+     * The virtual keyboard. `observeKeyboardInset` in `@slotted/core/measure`
+     * measures what the keyboard covers, the binding writes it on the open
+     * layer, and the panel's rows end above the keys: a full-screen panel is
+     * the layout viewport's height, and the keyboard shrinks only the visual
+     * one. Nought under `interactive-widget=resizes-content`, whose layout
+     * already shrank.
+     */
+    box-sizing: border-box;
+    padding-block-end: var(--slotted-keyboard-inset, 0px);
   }
 
   /* ── Forced colours ───────────────────────────────────────────────────── */

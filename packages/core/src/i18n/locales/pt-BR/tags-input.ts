@@ -15,4 +15,5 @@ export const ptBR: TagsInputMessages = {
   remove: 'Remover {label}',
   removed: '{label} removido, {count}',
   reorder: '{label}, posição {position} de {count}',
+  suggestions: 'Sugestões',
 };

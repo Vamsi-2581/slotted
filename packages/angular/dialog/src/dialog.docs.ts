@@ -373,6 +373,28 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'form',
+    title: 'A dialog that is a form',
+    note: 'A dialog that edits a record submits with Enter from any field and with the footer’s submit. A form written around the header, the body and the footer draws no box of its own, so the parts stay the panel’s rows and keep its inset.',
+    snippet: defineSnippet({
+      id: 'dialog-angular-form',
+      language: 'angular',
+      label: 'A form around the parts',
+      source: `<sl-dialog #dialog="slDialog" [(open)]="open">
+  <form [formGroup]="contact" (ngSubmit)="save(); dialog.close()">
+    <header slDialogHeader>
+      <h2 slDialogTitle>Edit contact</h2>
+      <button slDialogClose></button>
+    </header>
+    <div slDialogBody>
+      <input slTextField aria-label="Name" formControlName="name" />
+    </div>
+    <footer slDialogFooter><button slButton type="submit">Save</button></footer>
+  </form>
+</sl-dialog>`,
+    }),
+  },
+  {
     id: 'defaults',
     title: 'Deciding once for the application',
     note: 'Eight decisions an application takes once instead of eight props on every dialog in a product. Angular Material is the only surveyed library with an equivalent, and a dialog that states one itself still wins.',

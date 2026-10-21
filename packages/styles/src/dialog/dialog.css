@@ -386,6 +386,16 @@
     max-block-size: none;
   }
 
+  /**
+   * A form written around the header, the body and the footer, so Enter in
+   * any field and the footer's submit belong to one form. It draws no box:
+   * its children are the panel's rows, and every rule of a part is written a
+   * second time through it, so the parts keep the panel's inset and rows.
+   */
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form {
+    display: contents;
+  }
+
   /* ── The header ───────────────────────────────────────────────────────── */
 
   /**
@@ -409,6 +419,7 @@
    * `interpolate-size`. The cost is a rule over a footer that sometimes has
    * nothing above it to separate.
    */
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form > [data-part='header'],
   [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='header'] {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
@@ -434,6 +445,18 @@
    * where the mark would have gone, and moved as soon as a tone was set. Where
    * it goes is now a rule rather than an accident of the grid.
    */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > *:not(
+      [data-part='icon'],
+      [data-part='title'],
+      [data-part='description'],
+      [data-part='fullscreen'],
+      [data-part='close']
+    ),
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -466,6 +489,12 @@
    * colours every tone becomes one system colour and the silhouette is all
    * that is left.
    */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='icon'],
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -522,6 +551,12 @@
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='title'],
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='header']
     > [data-part='title'] {
     grid-column: 2;
@@ -542,6 +577,12 @@
     color: var(--slotted-dialog-title-color, var(--slotted-text, CanvasText));
   }
 
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='description'],
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -568,6 +609,13 @@
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='description']
+    :is(strong, b),
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='header']
     > [data-part='description']
     :is(strong, b) {
@@ -585,6 +633,12 @@
    * in an `icon` box, sized here through the icon token so the box and the
    * formula above read one length.
    */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='close'],
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -620,6 +674,12 @@
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='close']:not(:disabled):hover,
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='header']
     > [data-part='close']:not(:disabled):hover {
     /* The ground moves under the pointer and nothing else does (R2). */
@@ -632,6 +692,12 @@
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='close']:not(:disabled):active,
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='header']
     > [data-part='close']:not(:disabled):active {
     background-color: var(
@@ -640,6 +706,12 @@
     );
   }
 
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='close']:focus-visible,
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -665,6 +737,12 @@
    * glyph is the binding's, chosen from the state: the mark says what the
    * press does next, so it is the opposite of the state the panel is in.
    */
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='fullscreen'],
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -703,12 +781,25 @@
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='fullscreen']
+    + [data-part='close'],
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='header']
     > [data-part='fullscreen']
     + [data-part='close'] {
     margin-inline-start: 0;
   }
 
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='fullscreen']:not(:disabled):hover,
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -724,6 +815,12 @@
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='fullscreen']:not(:disabled):active,
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='header']
     > [data-part='fullscreen']:not(:disabled):active {
     background-color: var(
@@ -732,6 +829,12 @@
     );
   }
 
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='header']
+    > [data-part='fullscreen']:focus-visible,
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -751,11 +854,23 @@
     [data-ui='dialog']
       > [data-part='viewport']
       > [data-part='content']
+      > form
+      > [data-part='header']
+      > :is([data-part='close'], [data-part='fullscreen']),
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
       > [data-part='header']
       > :is([data-part='close'], [data-part='fullscreen']) {
       position: relative;
     }
 
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
+      > form
+      > [data-part='header']
+      > :is([data-part='close'], [data-part='fullscreen'])::before,
     [data-ui='dialog']
       > [data-part='viewport']
       > [data-part='content']
@@ -769,11 +884,24 @@
     [data-ui='dialog']
       > [data-part='viewport']
       > [data-part='content']
+      > form
+      > [data-part='header']
+      > [data-part='fullscreen']:has(+ [data-part='close'])::before,
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
       > [data-part='header']
       > [data-part='fullscreen']:has(+ [data-part='close'])::before {
       inset-inline-end: 0;
     }
 
+    [data-ui='dialog']
+      > [data-part='viewport']
+      > [data-part='content']
+      > form
+      > [data-part='header']
+      > [data-part='fullscreen']
+      + [data-part='close']::before,
     [data-ui='dialog']
       > [data-part='viewport']
       > [data-part='content']
@@ -795,11 +923,17 @@
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='body']:not(:first-child),
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='body']:not(:first-child) {
     border-block-start: var(--_rule-size) solid
       var(--slotted-dialog-rule-color, var(--slotted-border-subtle, ButtonBorder));
   }
 
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form > [data-part='body'],
   [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='body'] {
     min-block-size: 0;
     overflow-x: hidden;
@@ -817,6 +951,11 @@
   [data-ui='dialog'][data-scroll='viewport']
     > [data-part='viewport']
     > [data-part='content']
+    > form
+    > [data-part='body'],
+  [data-ui='dialog'][data-scroll='viewport']
+    > [data-part='viewport']
+    > [data-part='content']
     > [data-part='body'] {
     overflow: visible;
   }
@@ -828,6 +967,11 @@
    * header, the close button and Escape all stay operable: a loading dialog a
    * reader cannot leave is the worse failure of the two.
    */
+  [data-ui='dialog'][data-loading]
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='body'],
   [data-ui='dialog'][data-loading]
     > [data-part='viewport']
     > [data-part='content']
@@ -843,6 +987,7 @@
    * reason `content` is bounded — an unbounded panel pushes it past the fold,
    * which is the whole failure the three-row grid exists to prevent.
    */
+  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form > [data-part='footer'],
   [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='footer'] {
     display: flex;
     flex-wrap: wrap;
@@ -854,6 +999,11 @@
     background: var(--slotted-dialog-footer-surface, var(--slotted-surface-sunken, Canvas));
   }
 
+  [data-ui='dialog']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > [data-part='footer']:not(:first-child),
   [data-ui='dialog']
     > [data-part='viewport']
     > [data-part='content']
@@ -894,6 +1044,11 @@
     overflow: visible;
   }
 
+  [data-ui='dialog'][data-surface='plain']
+    > [data-part='viewport']
+    > [data-part='content']
+    > form
+    > :is([data-part='header'], [data-part='body'], [data-part='footer']),
   [data-ui='dialog'][data-surface='plain']
     > [data-part='viewport']
     > [data-part='content']

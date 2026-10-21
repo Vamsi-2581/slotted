@@ -2,9 +2,10 @@
   /**
    * ── A frame of typed values, with a field that adds more ────────────────
    *
-   * One subtree, where the consumer wrote it. Nothing is portalled and
-   * nothing opens: the input is a text box, and the values beside it are the
-   * texts the reader typed.
+   * One subtree, where the consumer wrote it. Nothing is portalled: the
+   * input is a text box, and the values beside it are the texts the reader
+   * typed. With `suggestions` the one thing that opens is the listbox of
+   * them, placed under the frame by the positioner with a fixed position.
    *
    *   ┌─ root ─ the frame ─────────────────────────────────────────┐
    *   │ ┌─ control ─ role="grid" ───────────────┐                  │
@@ -753,5 +754,58 @@
   [data-ui='tags-input'] > [data-part='clear']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
+  }
+
+  /* ── The suggestions ──────────────────────────────────────────────────── */
+
+  /**
+   * A raised surface as wide as the frame, written where the positioner puts
+   * it: `left` and `top` are its, and the width is the anchor's, which it
+   * publishes. Ten options are seen before the list scrolls.
+   */
+  [data-ui='tags-input'] > [data-part='suggestions'] {
+    background-color: var(--slotted-surface-raised, Canvas);
+    border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle, GrayText);
+    border-radius: var(--slotted-radius-lg, 8px);
+    box-shadow: var(--slotted-shadow-md);
+    box-sizing: border-box;
+    color: var(--slotted-text, CanvasText);
+    font-size: var(--_font-size);
+    /* No inset of its own: the positioner writes `left` and `top`, and an
+       inline inset would resolve to `right` in a right-to-left document. */
+    inline-size: var(--slotted-positioner-anchor-width, 100%);
+    max-block-size: calc(10 * var(--_height) + 2 * var(--slotted-space-2, 0.25rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--slotted-space-2, 0.25rem);
+    position: fixed;
+    z-index: calc(var(--slotted-z-index-popover, 1100) + var(--slotted-layer-depth, 0));
+  }
+
+  /* One option is one control row, so the list reads at the frame's own step. */
+  [data-ui='tags-input'] > [data-part='suggestions'] > [data-part='suggestion'] {
+    align-items: center;
+    border-radius: var(--slotted-control-radius, 4px);
+    cursor: default;
+    display: flex;
+    min-block-size: var(--_height);
+    overflow-wrap: anywhere;
+    padding-inline: var(--_padding-inline);
+  }
+
+  /**
+   * The highlight follows the arrow keys and the pointer alike. The `-active`
+   * step of the neutral tone, the one that lifts off a raised surface in every
+   * scheme, as `combobox.css` explains.
+   */
+  [data-ui='tags-input'] > [data-part='suggestions'] > [data-highlighted] {
+    background-color: var(--slotted-tone-secondary-subtle-active);
+  }
+
+  @media (forced-colors: active) {
+    [data-ui='tags-input'] > [data-part='suggestions'] > [data-highlighted] {
+      background-color: Highlight;
+      color: HighlightText;
+    }
   }
 }

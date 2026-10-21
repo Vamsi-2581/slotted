@@ -421,6 +421,41 @@ const scenes: ReferenceSceneMeta[] = [
     }),
   },
   {
+    id: 'form',
+    title: 'A dialog that is a form',
+    note: 'A dialog that edits a record submits with Enter from any field and with the footer’s submit. render makes the panel the form itself, so the header, the body and the footer stay its rows and keep its inset; a form written around them inside DialogContent keeps them too.',
+    snippet: defineSnippet({
+      id: 'dialog-react-form',
+      language: 'tsx',
+      label: 'The panel rendered as the form',
+      source: `<Dialog open={open} onOpenChange={setOpen}>
+  <DialogContent
+    render={(props) => (
+      <form
+        {...props}
+        onSubmit={(event) => {
+          event.preventDefault();
+          save(new FormData(event.currentTarget));
+          setOpen(false);
+        }}
+      />
+    )}
+  >
+    <DialogHeader>
+      <DialogTitle>Edit contact</DialogTitle>
+      <DialogClose />
+    </DialogHeader>
+    <DialogBody>
+      <TextField aria-label="Name" defaultValue="Ana Ribeiro" name="name" />
+    </DialogBody>
+    <DialogFooter>
+      <Button type="submit">Save</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>;`,
+    }),
+  },
+  {
     id: 'defaults',
     title: 'Deciding once for the application',
     note: 'Eight decisions an application takes once instead of eight props on every dialog in a product. Angular Material is the only surveyed library with an equivalent, and a dialog that states one itself still wins.',

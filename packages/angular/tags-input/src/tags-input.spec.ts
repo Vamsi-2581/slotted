@@ -390,3 +390,131 @@ describe('SlTagsInput', () => {
     expect(form.componentInstance.control.valid).toBe(true);
   });
 });
+
+describe('SlTagsInput suggestions', () => {
+  @Component({
+    standalone: true,
+    imports: [SlTagsInput],
+    template: `
+      <sl-tags-input
+        aria-label="To"
+        [defaultValue]="defaultValue()"
+        [max]="max()"
+        [normalize]="normalize()"
+        [suggestions]="suggestions()"
+        [validateValue]="validate()"
+        (valueChangeRequest)="reason.set($event.reason)"
+        (valueRefuse)="refused.set($event)"
+      />
+    `,
+  })
+  class SuggestHost {
+    readonly defaultValue = signal<readonly string[] | undefined>(undefined);
+    readonly max = signal<number | undefined>(undefined);
+    readonly normalize = signal<((text: string) => string) | undefined>(undefined);
+    readonly suggestions = signal<readonly string[]>(['travel', 'trip', 'work']);
+    readonly validate = signal<((text: string) => boolean | string) | undefined>(undefined);
+    readonly reason = signal<string | undefined>(undefined);
+    readonly refused = signal<{ values: readonly string[]; cause: TagsInputRefuseCause } | null>(
+      null,
+    );
+  }
+
+  let fixture: ComponentFixture<SuggestHost>;
+  const listbox = () => document.querySelector<HTMLElement>("[role='listbox']");
+  const options = () => [...document.querySelectorAll<HTMLElement>("[role='option']")];
+  const key = async (name: string) => {
+    press(field(), name);
+    await settle(fixture);
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [SuggestHost] }).compileComponents();
+    fixture = TestBed.createComponent(SuggestHost);
+    await settle(fixture);
+    field().focus();
+  });
+
+  it('lists the suggestions the typed text matches, and Enter on the first adds it', async () => {
+    expect(field().getAttribute('role')).toBe('combobox');
+    expect(field().getAttribute('aria-expanded')).toBe('false');
+    type(fixture, 'tr');
+    await settle(fixture);
+    expect(field().getAttribute('aria-expanded')).toBe('true');
+    expect(field().getAttribute('aria-controls')).toBe(listbox()!.id);
+    expect(listbox()!.getAttribute('aria-label')).toBe('Suggestions');
+    expect(options().map((option) => option.textContent?.trim())).toEqual(['travel', 'trip']);
+    expect(field().hasAttribute('aria-activedescendant')).toBe(false);
+
+    await key('ArrowDown');
+    expect(field().getAttribute('aria-activedescendant')).toBe(options()[0]!.id);
+    expect(options()[0]!.getAttribute('aria-selected')).toBe('true');
+    await key('Enter');
+
+    expect(chipValues()).toEqual(['travel']);
+    expect(fixture.componentInstance.reason()).toBe('submit');
+    expect(field().value).toBe('');
+    expect(listbox()).toBeNull();
+    expect(field().getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('matches by the locale’s collator and leaves out what is already chosen', async () => {
+    TestBed.resetTestingModule();
+    await TestBed.configureTestingModule({ imports: [SuggestHost] }).compileComponents();
+    fixture = TestBed.createComponent(SuggestHost);
+    fixture.componentInstance.defaultValue.set(['trip']);
+    fixture.componentInstance.suggestions.set(['Été', 'été 2026', 'trip', 'Trips']);
+    await settle(fixture);
+    field().focus();
+    type(fixture, 'ete');
+    expect(options().map((option) => option.textContent?.trim())).toEqual(['Été', 'été 2026']);
+    type(fixture, 'TRI');
+    expect(options().map((option) => option.textContent?.trim())).toEqual(['Trips']);
+  });
+
+  it('still commits the typed text, and Escape closes the list before it clears', async () => {
+    type(fixture, 'tr');
+    await key('Escape');
+    expect(listbox()).toBeNull();
+    expect(field().value).toBe('tr');
+    await key('Escape');
+    expect(field().value).toBe('');
+    type(fixture, 'train');
+    await key('Enter');
+    expect(chipValues()).toEqual(['train']);
+  });
+
+  it('opens on ArrowDown with nothing typed, wraps, and adds a suggestion on a press', async () => {
+    await key('ArrowDown');
+    expect(options()).toHaveLength(3);
+    expect(field().getAttribute('aria-activedescendant')).toBe(options()[0]!.id);
+    await key('ArrowUp');
+    expect(field().getAttribute('aria-activedescendant')).toBe(options()[2]!.id);
+    await key('ArrowDown');
+    expect(field().getAttribute('aria-activedescendant')).toBe(options()[0]!.id);
+    const pressed = options()[1]!;
+    expect(
+      pressed.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true })),
+    ).toBe(false);
+    pressed.click();
+    await settle(fixture);
+    expect(chipValues()).toEqual(['trip']);
+  });
+
+  it('runs a chosen suggestion through validate, normalize and max like typed text', async () => {
+    fixture.componentInstance.max.set(1);
+    fixture.componentInstance.normalize.set((text) => text.toUpperCase());
+    fixture.componentInstance.validate.set((text) => text !== 'TRIP' || 'No trips');
+    await settle(fixture);
+    type(fixture, 'trip');
+    await key('ArrowDown');
+    await key('Enter');
+    expect(chipValues()).toEqual(['TRIP']);
+    expect(chips()[0]!.getAttribute('data-tone')).toBe('danger');
+    type(fixture, 'trav');
+    await key('ArrowDown');
+    await key('Enter');
+    expect(chipValues()).toEqual(['TRIP']);
+    expect(fixture.componentInstance.refused()).toEqual({ values: ['TRAVEL'], cause: 'limit' });
+  });
+});

@@ -1,4 +1,4 @@
-import type { CurrencyChangeRequest } from '@slotted/core/currency';
+import type { CurrencyChangeRequest, CurrencyUnit } from '@slotted/core/currency';
 import type { CurrencyFieldMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
 
@@ -99,6 +99,7 @@ export interface CurrencyFieldDefaults {
   formatOn: CurrencyFieldFormatOn;
   size: CurrencyFieldSize;
   stepper: CurrencyFieldStepper;
+  unit: CurrencyUnit;
   variant: CurrencyFieldVariant;
 }
 
@@ -128,7 +129,7 @@ export interface CurrencyFieldRootProps extends HTMLAttributes<HTMLElement> {
 /**
  * `size` is omitted and redeclared: on an `input` it is the visible character
  * count, and this family's axis is a type step. `value`, `defaultValue`, `min`,
- * `max` and `step` are omitted and redeclared as numbers in major units.
+ * `max` and `step` are omitted and redeclared as numbers in `unit`.
  *
  * Everything else is the element's and reaches the element: `autoComplete` —
  * `transaction-amount` is the token a payment amount belongs to —`inputMode`,
@@ -167,7 +168,7 @@ export interface CurrencyFieldProps extends Omit<
   currency?: string | undefined;
   /** How the currency is written. Defaults to the provider, then `symbol`. */
   currencyDisplay?: CurrencyFieldDisplay | undefined;
-  /** The amount an uncontrolled control starts from, read once. `null` is empty. */
+  /** The amount an uncontrolled control starts from, read once, in `unit`. `null` is empty. */
   defaultValue?: number | null | undefined;
   /**
    * Unstated rather than `false`, so the control defers to the field around it.
@@ -212,7 +213,7 @@ export interface CurrencyFieldProps extends Omit<
    * `increment` and `decrement` buttons' accessible names.
    */
   messages?: PartialMessages<CurrencyFieldMessages> | undefined;
-  /** The largest amount the control holds, in major units. `End` goes here. */
+  /** The largest amount the control holds, in `unit`. `End` goes here. */
   max?: number | undefined;
   /** The smallest amount the control holds. `Home` goes here, and it is what refuses a negative. */
   min?: number | undefined;
@@ -231,12 +232,20 @@ export interface CurrencyFieldProps extends Omit<
   smallStep?: number | undefined;
   /** An adornment before the amount in the reading direction. */
   start?: ReactNode | undefined;
-  /** The amount the arrows and the buttons move by. One major unit by default. */
+  /** The amount the arrows and the buttons move by, in `unit`. One major unit by default. */
   step?: number | undefined;
   /** Where an empty control starts stepping from. Defaults to `min`, then to nought. */
   stepFrom?: number | undefined;
   /** Where the two steppers sit. Defaults to the provider, then `none`. */
   stepper?: CurrencyFieldStepper | undefined;
+  /**
+   * The unit `value`, `defaultValue`, `min`, `max`, the steps, `stepFrom`,
+   * `onValueChange` and the submitted amount are in. `major` is `12.34`;
+   * `minor` is the integer `1234` of the currency's minor unit, which
+   * `fractionDigits` decides when set. Entry, format and appearance do not
+   * change. Defaults to the provider, then `major`.
+   */
+  unit?: CurrencyUnit | undefined;
   /** Present means controlled, for the life of the component. `null` is empty. */
   value?: number | null | undefined;
   /** Defaults to the provider, then to `outline`. */

@@ -2,12 +2,15 @@ import { describe, expect, it } from 'vitest';
 
 import { createControllable } from '../state';
 import {
+  amountFromUnit,
   createCurrencyFormat,
   currencyAffix,
   MAX_AMOUNT_DIGITS,
+  requestInUnit,
   shiftIntoRun,
   withAmount,
 } from './index';
+import type { CurrencyChangeRequest } from './index';
 
 describe('createCurrencyFormat', () => {
   it('writes the symbol the currency names and the separators the locale writes', () => {
@@ -432,5 +435,37 @@ describe('currencyAffix', () => {
 
   it('has nothing to say under none', () => {
     expect(currencyAffix({ currency: 'BRL', currencyDisplay: 'none', locale: 'pt-BR' })).toBeNull();
+  });
+});
+
+describe('an amount held in minor units', () => {
+  const real = createCurrencyFormat({ currency: 'BRL', locale: 'pt-BR' });
+  const yen = createCurrencyFormat({ currency: 'JPY', locale: 'ja-JP' });
+
+  it('reads an integer of the minor unit as major units, by the currency’s own digits', () => {
+    expect(amountFromUnit(12345, 'minor', real)).toBe(123.45);
+    expect(amountFromUnit(12345, 'minor', yen)).toBe(12345);
+    expect(amountFromUnit(null, 'minor', real)).toBe(null);
+    expect(amountFromUnit(undefined, 'minor', real)).toBe(undefined);
+    expect(amountFromUnit(123.45, 'major', real)).toBe(123.45);
+  });
+
+  it('restates the request in minor units, and cancelling it still cancels', () => {
+    let seen: CurrencyChangeRequest | undefined;
+    const state = createControllable<number | null>({
+      initial: 0.1,
+      onRequest: (request) => {
+        seen = requestInUnit(withAmount(request, 'BRL', 30), 'minor', real);
+        seen.cancel();
+      },
+    });
+
+    expect(state.request(0.3, 'keyboard')).toBe(false);
+    expect(seen?.value).toBe(30);
+    expect(seen?.previous).toBe(10);
+    expect(seen?.minorUnits).toBe(30);
+    expect(seen?.currency).toBe('BRL');
+    expect(seen?.reason).toBe('keyboard');
+    expect(seen?.cancelled).toBe(true);
   });
 });

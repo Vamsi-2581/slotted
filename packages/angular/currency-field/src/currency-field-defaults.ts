@@ -1,6 +1,6 @@
 import { inject, InjectionToken } from '@angular/core';
 import type { Signal } from '@angular/core';
-import type { CurrencyAffix } from '@slotted/core/currency';
+import type { CurrencyAffix, CurrencyUnit } from '@slotted/core/currency';
 
 /** The type step the control sits at, matching the field around it. */
 export type CurrencyFieldSize = 'sm' | 'md' | 'lg';
@@ -82,6 +82,7 @@ export interface CurrencyFieldDefaults {
   formatOn: CurrencyFieldFormatOn;
   size: CurrencyFieldSize;
   stepper: CurrencyFieldStepper;
+  unit: CurrencyUnit;
   variant: CurrencyFieldVariant;
 }
 
@@ -94,6 +95,7 @@ const FALLBACK: CurrencyFieldDefaults = {
   formatOn: 'change',
   size: 'md',
   stepper: 'none',
+  unit: 'major',
   variant: 'outline',
 };
 
@@ -144,8 +146,10 @@ export abstract class SlCurrencyFieldControl {
   abstract readonly submissionName: Signal<string | null>;
   /** The form that hidden input belongs to, when it is not the ancestor one. */
   abstract readonly submissionForm: Signal<string | null>;
-  /** The amount in major units, for the hidden input the frame renders. */
+  /** The amount in major units. */
   abstract readonly numberValue: Signal<number | null>;
+  /** The amount in `unit`, for the hidden input the frame renders. */
+  abstract readonly submittedValue: Signal<number | null>;
   abstract readonly resolvedDisabled: Signal<boolean | undefined>;
   abstract readonly resolvedReadOnly: Signal<boolean | undefined>;
   abstract readonly resolvedInvalid: Signal<boolean | undefined>;

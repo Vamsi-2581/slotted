@@ -7,13 +7,16 @@
     "summary": "Text input that collects values as tags."
   },
   "pattern": "https://www.w3.org/WAI/ARIA/apg/patterns/grid/",
-  "patternStatus": "One page answers this family, read on 2026-09-14 from the rendered pattern page: the Grid pattern's Layout Grids for Grouping Widgets half, which names this exact control — \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" The combobox pattern is not cited: the input is a text box that opens nothing, and writing role=combobox on it would promise a popup that does not exist. The itemised comparison is in docs/history/designs/2026-09-14-tags-input-design.md §4, and the two departures are in `departures` below.",
+  "patternStatus": "One page answers this family, read on 2026-09-14 from the rendered pattern page: the Grid pattern's Layout Grids for Grouping Widgets half, which names this exact control — \"a list of recipients for a message may be a grid where each cell contains a link that represents a recipient. The grid may initially have a single row but then wrap into multiple rows as recipients are added.\" Without `suggestions` the combobox pattern is not cited: the input is a text box that opens nothing, and writing role=combobox on it would promise a popup that does not exist. With `suggestions` the input is the Combobox pattern's list autocomplete without automatic selection (https://www.w3.org/WAI/ARIA/apg/patterns/combobox/): role=combobox, aria-autocomplete=list, aria-expanded, aria-controls on the open listbox and aria-activedescendant on the highlighted option; Down and Up open and move with wrapping, Enter adds the highlighted option, Escape closes before it clears. The itemised comparison is in docs/history/designs/2026-09-14-tags-input-design.md §4, and the two departures are in `departures` below.",
   "roles": {
     "input": null,
     "control": "grid",
     "chips": "row",
     "chip": "gridcell",
-    "field": "gridcell"
+    "field": "gridcell",
+    "inputWithSuggestions": "combobox",
+    "suggestions": "listbox",
+    "suggestion": "option"
   },
   "nativeElement": {
     "considered": "input type=\"email\" multiple",
@@ -24,7 +27,7 @@
   "departures": [
     {
       "from": "Down Arrow and Up Arrow move a cell",
-      "instead": "Neither key is answered. The grid has one DOM row; the wrap onto several visual lines is CSS, so no cell is above or below any other.",
+      "instead": "Neither key moves a cell. The grid has one DOM row; the wrap onto several visual lines is CSS, so no cell is above or below any other. With `suggestions` the two keys belong to the combobox on the input and move through its listbox.",
       "cost": "A reader who has learnt the grid pattern reaches for Down on a wrapped row and nothing happens; Right and Left reach every chip in reading order.",
       "reason": "Binding Down to \"next\" would make the two arrows mean the same thing and contradict the pattern's own definition. One DOM row keeps the reading order linear and gives previous and next one meaning each — multi-select's decision, inherited, minus the popup that gave those keys a use there."
     },
@@ -35,7 +38,16 @@
       "reason": "The grid pattern gives two optimal combinations — one widget that does not need arrows, or text alone — and calls text plus a widget the case that \"adds complexity for authors or users or both\". React Aria's TagGroup, Angular Material's MatChipGrid and multi-select resolve it the same way."
     }
   ],
-  "composes": ["tags", "overflow", "measure", "focus", "live-announcer", "clipboard"],
+  "composes": [
+    "tags",
+    "overflow",
+    "measure",
+    "focus",
+    "live-announcer",
+    "clipboard",
+    "collection",
+    "positioner"
+  ],
   "adds": {
     "tags": {
       "module": "packages/core/src/tags",
@@ -175,7 +187,7 @@
     "reason": "A limit a reader cannot see is a limit that surprises them. A counter with no limit to count against would be furniture, so it is drawn only where it answers something."
   },
   "wiring": {
-    "role": "grid on the control, row on the chips, gridcell on each chip and on the field. The input carries no role: it is a text box and opens nothing",
+    "role": "grid on the control, row on the chips, gridcell on each chip and on the field. Without `suggestions` the input carries no role: it is a text box and opens nothing. With them it is a combobox controlling a listbox of options, written only while the list is open",
     "aria-label": "on the control, carrying the field's label and the count of values",
     "aria-describedby": "the input takes the field's description and error; the chips row names the hint part, which says Delete removes a value and, when editable, Enter edits it; an invalid chip names its message part",
     "aria-invalid": "on the input while the consumer says so or the list holds an invalid value; on an invalid chip's cell",
@@ -187,13 +199,13 @@
   "keyboard": [
     {
       "key": "Enter",
-      "effect": "on the input with text, commits the text as a value and never submits the form; on the input with no text, the platform's implicit submission, uncaptured; on a chip with editable set, opens or commits the chip's field",
+      "effect": "on the input with a suggestion highlighted, adds that suggestion; on the input with text, commits the text as a value and never submits the form; on the input with no text, the platform's implicit submission, uncaptured; on a chip with editable set, opens or commits the chip's field",
       "focus": "the input, or the chip's cell while it is being edited",
       "source": "family"
     },
     {
       "key": "Escape",
-      "effect": "on the input, clears the pending text; on a chip, returns to the input; while a chip is being edited, reverts it. It never clears the list",
+      "effect": "on the input with the suggestions open, closes them and keeps the text; on the input, clears the pending text; on a chip, returns to the input; while a chip is being edited, reverts it. It never clears the list",
       "focus": "the input, or the chip's cell after a reverted edit",
       "source": "pattern"
     },
@@ -223,13 +235,13 @@
     },
     {
       "key": "ArrowDown",
-      "effect": "not answered: there is one row, so there is no cell below any cell — the first departure",
+      "effect": "with `suggestions`, on the input: opens the listbox on its first option, or highlights the next one, round from the last to the first. Otherwise not answered: there is one row, so there is no cell below any cell — the first departure",
       "focus": "unchanged",
       "source": "pattern"
     },
     {
       "key": "ArrowUp",
-      "effect": "not answered: there is one row, so there is no cell above any cell",
+      "effect": "with `suggestions`, on the input: opens the listbox on its last option, or highlights the previous one, round from the first to the last. Otherwise not answered: there is one row, so there is no cell above any cell",
       "focus": "unchanged",
       "source": "pattern"
     },
@@ -440,7 +452,8 @@
     "invalid",
     "remove",
     "removed",
-    "reorder"
+    "reorder",
+    "suggestions"
   ],
   "stateAttributes": {
     "disabled": "data-disabled",
@@ -515,7 +528,19 @@
         "complete",
         "expanded"
       ],
-      "parts": ["root", "control", "chips", "field", "input", "message", "counter", "clear", "hint"]
+      "parts": [
+        "root",
+        "control",
+        "chips",
+        "field",
+        "input",
+        "message",
+        "counter",
+        "clear",
+        "hint",
+        "suggestions",
+        "suggestion"
+      ]
     }
   },
   "scenarios": {

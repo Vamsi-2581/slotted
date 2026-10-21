@@ -817,7 +817,7 @@ function contentWidth(cell: HTMLElement): number {
                 "
               >
                 <span data-ui="visually-hidden" data-part="root">{{
-                  t('selectRow', { row: entry.node.key })
+                  selectRowLabel(entry.node.key)
                 }}</span>
               </span>
             </div>
@@ -3493,6 +3493,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private measureEdges: (() => void) | null = null;
   private readonly rowDraggables = new Map<string, () => void>();
   private readonly rowDraggableNodes = new Map<string, HTMLElement>();
+  protected selectRowLabel(key: string) {
+    return this.t('selectRow', { row: this.rowLabelOf(key), key });
+  }
   protected rowHandleLabel(key: string) {
     return this.t('reorderRow', { row: this.rowLabelOf(key) });
   }

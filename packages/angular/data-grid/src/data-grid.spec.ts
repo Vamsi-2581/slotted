@@ -40,6 +40,7 @@ import {
   SlDataGridCellTemplate,
   SlDataGridColumnHelp,
   SlDataGridDetailTemplate,
+  SlDataGridEditorTemplate,
 } from './data-grid-templates';
 
 interface Shipment {
@@ -2055,5 +2056,101 @@ describe('SlDataGrid, explaining and arranging columns', () => {
     fixture.componentInstance.density.set(null);
     fixture.detectChanges();
     expect(root().hasAttribute('data-slotted-density')).toBe(false);
+  });
+});
+
+describe('SlDataGrid selection box name', () => {
+  interface Person {
+    id: string;
+    name: string;
+  }
+
+  @Component({
+    standalone: true,
+    imports: [SlDataGrid],
+    template: `
+      <sl-data-grid
+        aria-label="People"
+        rowKey="id"
+        selectionMode="multiple"
+        [rows]="rows"
+        [columns]="columns()"
+      />
+    `,
+  })
+  class PeopleHost {
+    readonly rows: readonly Person[] = [
+      { id: '01a15bae-5c1e-4f0b-9a57-0f3c2d9e7b11', name: 'Ada Lovelace' },
+    ];
+    readonly columns = signal<GridColumn<Person>[]>([
+      { id: 'name', label: 'Name', rowHeader: true },
+    ]);
+  }
+
+  it('is the row header text, and the key only without a row header', async () => {
+    await TestBed.configureTestingModule({ imports: [PeopleHost] }).compileComponents();
+    const fixture = TestBed.createComponent(PeopleHost);
+    fixture.detectChanges();
+    const name = () =>
+      (
+        fixture.nativeElement.querySelector(
+          '[data-part="body"] [data-part="selection"] input',
+        ) as HTMLInputElement
+      ).labels?.[0]?.textContent?.trim();
+    expect(name()).toBe('Select row Ada Lovelace');
+    fixture.componentInstance.columns.set([{ id: 'name', label: 'Name' }]);
+    fixture.detectChanges();
+    expect(name()).toBe('Select row 01a15bae-5c1e-4f0b-9a57-0f3c2d9e7b11');
+  });
+});
+
+describe('SlDataGrid editor template', () => {
+  @Component({
+    standalone: true,
+    imports: [SlDataGrid, SlDataGridEditorTemplate],
+    template: `
+      <sl-data-grid
+        aria-label="Shipments"
+        rowKey="id"
+        [rows]="rows"
+        [columns]="columns"
+        [current]="{ row: 'S1', column: 'customer' }"
+        (editCommit)="commits.push($event)"
+      >
+        <ng-template slDataGridEditor="customer" let-setDraft="setDraft" let-commit="commit">
+          <button type="button" (click)="setDraft('x'); commit()">Choose x</button>
+        </ng-template>
+      </sl-data-grid>
+    `,
+  })
+  class EditorHost {
+    readonly rows = ROWS;
+    readonly columns = COLUMNS;
+    readonly commits: DataGridEditCommit<Shipment>[] = [];
+  }
+
+  it('commits a draft set in the same handler as the commit', async () => {
+    await TestBed.configureTestingModule({ imports: [EditorHost] }).compileComponents();
+    const fixture = TestBed.createComponent(EditorHost);
+    fixture.detectChanges();
+    const customer = fixture.nativeElement.querySelector(
+      '[data-row="S1"] [data-column="customer"]',
+    ) as HTMLElement;
+    customer.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }),
+    );
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    customer.querySelector<HTMLButtonElement>('button')!.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.commits.at(-1)).toMatchObject({
+      key: 'S1',
+      column: 'customer',
+      value: 'x',
+      previous: 'Aurora',
+    });
+    expect(customer.hasAttribute('data-editing')).toBe(false);
   });
 });

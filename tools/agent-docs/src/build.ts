@@ -5,6 +5,7 @@ import { compileAngular } from './compile-angular.ts';
 import { compileReact } from './compile-react.ts';
 import { loadContent } from './content.ts';
 import { renderGuidelinesIndex, renderTopic } from './guidelines.ts';
+import { nonEnglishProse } from './language-report.ts';
 import { loadFamilies } from './load.ts';
 import {
   compileBlocks,
@@ -39,6 +40,16 @@ export async function buildDocs({
   if (!basename(out).startsWith('docs'))
     throw new Error(`refusing to empty ${out}: its name must start with "docs"`);
   const loaded = await loadFamilies(binding, root);
+  const portuguese = nonEnglishProse(loaded);
+  if (portuguese.length > 0)
+    throw new Error(
+      portuguese
+        .map(
+          (finding) =>
+            `${finding.binding} ${finding.family}: ${finding.location} is not in English: ${finding.text}`,
+        )
+        .join('\n'),
+    );
 
   // One compilation for every block of every family; keys are made unique per family.
   const all = loaded.flatMap((family) =>

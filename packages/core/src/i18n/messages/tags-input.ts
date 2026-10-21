@@ -20,6 +20,8 @@ export interface TagsInputMessages {
   readonly remove: Message<{ label: string }>;
   readonly removed: Message<{ label: string; count: number }>;
   readonly reorder: Message<{ label: string; position: number; count: number }>;
+  /** The name of the list of suggestions under the field. */
+  readonly suggestions: Message;
 }
 
 export const en: TagsInputMessages = {
@@ -37,6 +39,7 @@ export const en: TagsInputMessages = {
   remove: 'Remove {label}',
   removed: '{label} removed, {count}',
   reorder: '{label}, position {position} of {count}',
+  suggestions: 'Suggestions',
 };
 
 export const tagsInputMessages: MessageFamily<'tagsInput', TagsInputMessages> = {

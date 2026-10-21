@@ -14,6 +14,7 @@ const FALLBACK: CurrencyFieldDefaults = {
   formatOn: 'change',
   size: 'md',
   stepper: 'none',
+  unit: 'major',
   variant: 'outline',
 };
 
@@ -56,6 +57,7 @@ export function CurrencyFieldDefaultsProvider({
         formatOn: defaults.formatOn ?? inherited.formatOn,
         size: defaults.size ?? inherited.size,
         stepper: defaults.stepper ?? inherited.stepper,
+        unit: defaults.unit ?? inherited.unit,
         variant: defaults.variant ?? inherited.variant,
       }}
     >

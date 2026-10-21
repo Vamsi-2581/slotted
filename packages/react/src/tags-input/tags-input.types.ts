@@ -126,6 +126,16 @@ export interface TagsInputProps extends TagsInputNativeProps, Partial<TagsInputD
     | undefined;
   /** Renders the frame into another element. */
   render?: ((props: TagsInputRootProps) => ReactNode) | undefined;
+  /**
+   * Values the reader may choose instead of typing them whole. Present, the
+   * input is a combobox: a listbox under the field holds the suggestions the
+   * typed text matches by the locale's collator, minus the values already
+   * chosen; ArrowDown and ArrowUp move through it and Enter adds the
+   * highlighted one. A chosen suggestion is normalized, judged, deduplicated
+   * and capped like typed text, and typed text still commits as it does
+   * without suggestions.
+   */
+  suggestions?: readonly string[] | undefined;
   /** How a paste is split. The default splits on the delimiters and on line breaks. */
   split?: ((text: string) => readonly string[]) | undefined;
   type?: 'text' | 'email' | 'url' | 'tel' | 'search' | undefined;

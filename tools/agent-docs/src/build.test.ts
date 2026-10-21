@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import { buildDocs } from './build.ts';
 import { loadContent } from './content.ts';
-import { nonEnglishSnippets } from './language-report.ts';
+import { nonEnglishProse, nonEnglishSnippets } from './language-report.ts';
 import { loadFamilies } from './load.ts';
 import { THEME_SCOPE } from './skills.ts';
 
@@ -70,6 +70,50 @@ describe('nonEnglishSnippets', () => {
     };
     expect(nonEnglishSnippets([family]).map((entry) => entry.key)).toEqual(['b']);
   });
+});
+
+describe('nonEnglishProse', () => {
+  const family = (description: string) => ({
+    binding: 'react' as const,
+    contract: {
+      family: 'x',
+      ui: 'x',
+      catalog: { group: 'Forms', summary: 'X.' },
+      members: { x: { nativeElement: 'div' } },
+    },
+    docs: {
+      x: {
+        accessibility: [],
+        api: [{ name: 'fields', type: 'string', defaultValue: '—', appliesTo: 'x', description }],
+        snippets: [],
+      },
+    },
+    tokens: [],
+    examples: [],
+  });
+
+  it('reports prose written in Portuguese, with its location', () => {
+    expect(
+      nonEnglishProse([family('Os campos filtráveis, um por chave do registo')]).map(
+        (entry) => entry.location,
+      ),
+    ).toEqual(['x prop fields']);
+  });
+
+  it('accepts English prose that quotes one Portuguese word or a pt-BR value', () => {
+    expect(
+      nonEnglishProse([
+        family('Formats `R$ 1.234,56` under pt-BR; the label "Endereço" is the consumer’s'),
+      ]),
+    ).toEqual([]);
+  });
+
+  it.each(['react', 'angular'] as const)(
+    'finds every %s family page in English',
+    async (binding) => {
+      expect(nonEnglishProse(await loadFamilies(binding, root))).toEqual([]);
+    },
+  );
 });
 
 describe('buildDocs', () => {

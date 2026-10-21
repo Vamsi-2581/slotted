@@ -59,6 +59,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     content: Content,
     composition: Composition,
     layout: Layout,
+    form: Form,
     defaults: Defaults,
     accessibility: Accessibility,
   }) as never;
@@ -602,6 +603,31 @@ export const Layout: Story = {
             <input slTextField aria-label="Name" value="report-q3.pdf" />
           </div>
           <footer slDialogFooter><button slButton size="sm">Rename</button></footer>
+        </sl-dialog>`),
+    ),
+  }),
+};
+
+export const Form: Story = {
+  parameters: scenario('form'),
+  render: () => ({
+    template: scene(
+      'Enter in the field saves',
+      'A form around the header, the body and the footer: Enter in the field and the footer’s Save submit it, and the parts keep the panel’s inset and rows.',
+      layer(`<button slButton variant="outline" tone="secondary" [slDialogTrigger]="d">
+          Edit contact
+        </button>
+        <sl-dialog #d="slDialog" [container]="box" size="sm" fullScreen="never">
+          <form (submit)="$event.preventDefault(); d.close()">
+            <header slDialogHeader>
+              <h2 slDialogTitle>Edit contact</h2>
+              <button slDialogClose></button>
+            </header>
+            <div slDialogBody>
+              <input slTextField aria-label="Name" value="Ana Ribeiro" />
+            </div>
+            <footer slDialogFooter><button slButton size="sm" type="submit">Save</button></footer>
+          </form>
         </sl-dialog>`),
     ),
   }),

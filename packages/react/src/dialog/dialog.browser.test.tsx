@@ -1,7 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { userEvent } from 'vitest/browser';
 
-import { Dialog, DialogBody, DialogContent, DialogHeader, DialogTitle } from './index';
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './index';
 
 const ROWS = Array.from({ length: 60 }, (_, index) => `Row ${String(index + 1)}`);
 
@@ -48,5 +56,109 @@ describe('a full-screen dialog over the virtual keyboard', () => {
     expect(last.getBoundingClientRect().top).toBeGreaterThanOrEqual(
       body.getBoundingClientRect().top,
     );
+  });
+});
+
+/**
+ * A dialog that edits a record submits with Enter from any field and with the
+ * footer's submit. The form is the panel itself, through `render`, so the
+ * header, the body and the footer stay the panel's children and keep its
+ * inset and rows; a form wrapped around them inside the panel loses both.
+ */
+describe('a dialog that is a form', () => {
+  const parts = (
+    <>
+      <DialogHeader>
+        <DialogTitle>Edit contact</DialogTitle>
+      </DialogHeader>
+      <DialogBody>
+        <input aria-label="Name" defaultValue="Ana" />
+      </DialogBody>
+      <DialogFooter>
+        <button type="submit">Save</button>
+      </DialogFooter>
+    </>
+  );
+
+  /** `panel`: the form is the panel. `wrapper`: a form around the parts, inside it. */
+  function Record({
+    form,
+    onSubmit,
+  }: {
+    form: 'none' | 'panel' | 'wrapper';
+    onSubmit?: () => void;
+  }) {
+    const submit = (event: { preventDefault(): void }) => {
+      event.preventDefault();
+      onSubmit?.();
+    };
+    return (
+      <Dialog defaultOpen>
+        {form === 'panel' ? (
+          <DialogContent render={(props) => <form {...props} onSubmit={submit} />}>
+            {parts}
+          </DialogContent>
+        ) : (
+          <DialogContent>
+            {form === 'wrapper' ? <form onSubmit={submit}>{parts}</form> : parts}
+          </DialogContent>
+        )}
+      </Dialog>
+    );
+  }
+
+  const geometry = () => {
+    const panel = document.querySelector('[data-part="content"]') as HTMLElement;
+    const box = panel.getBoundingClientRect();
+    return ['header', 'body', 'footer'].map((part) => {
+      const rect = (
+        panel.querySelector(`[data-part="${part}"]`) as HTMLElement
+      ).getBoundingClientRect();
+      return [rect.left - box.left, rect.top - box.top, rect.width, rect.height].map(Math.round);
+    });
+  };
+
+  async function reference() {
+    const shown = render(<Record form="none" />);
+    await frame();
+    await frame();
+    const measured = geometry();
+    shown.unmount();
+    const header = measured[0]!;
+    expect(header[2]).toBeGreaterThan(0);
+    return measured;
+  }
+
+  it('is the panel through render, keeps its rows, and submits with Enter from a field', async () => {
+    const expected = await reference();
+    let submitted = 0;
+    render(<Record form="panel" onSubmit={() => (submitted += 1)} />);
+    await frame();
+    await frame();
+    const panel = document.querySelector('[data-part="content"]') as HTMLElement;
+    expect(panel.tagName).toBe('FORM');
+    expect(panel).toHaveAttribute('role', 'dialog');
+    expect(geometry()).toEqual(expected);
+    const header = panel.querySelector('[data-part="header"]') as HTMLElement;
+    expect(Number.parseFloat(getComputedStyle(header).paddingInlineStart)).toBeGreaterThan(0);
+
+    (screen.getByLabelText('Name') as HTMLInputElement).focus();
+    await userEvent.keyboard('{Enter}');
+    expect(submitted).toBe(1);
+  });
+
+  it('keeps the panel’s inset and rows for a form wrapped around the parts', async () => {
+    const expected = await reference();
+    let submitted = 0;
+    render(<Record form="wrapper" onSubmit={() => (submitted += 1)} />);
+    await frame();
+    await frame();
+    expect(geometry()).toEqual(expected);
+    const header = document.querySelector('[data-part="header"]') as HTMLElement;
+    expect(Number.parseFloat(getComputedStyle(header).paddingInlineStart)).toBeGreaterThan(0);
+
+    (screen.getByLabelText('Name') as HTMLInputElement).focus();
+    await userEvent.keyboard('{Enter}');
+    expect(submitted).toBe(1);
   });
 });

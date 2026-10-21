@@ -427,3 +427,103 @@ describe('TagsInput', () => {
     expect(chipLabels()).toEqual([]);
   });
 });
+
+describe('TagsInput suggestions', () => {
+  const listbox = () => screen.queryByRole('listbox');
+  const options = () => screen.queryAllByRole('option');
+
+  it('lists the suggestions the typed text matches, and Enter on the first adds it', () => {
+    const onValueChange = vi.fn();
+    render(<Basic onValueChange={onValueChange} suggestions={['travel', 'trip', 'work']} />);
+    input().focus();
+    expect(input()).toHaveAttribute('role', 'combobox');
+    expect(input()).toHaveAttribute('aria-expanded', 'false');
+
+    type('tr');
+    expect(input()).toHaveAttribute('aria-expanded', 'true');
+    expect(input()).toHaveAttribute('aria-controls', listbox()!.id);
+    expect(listbox()).toHaveAccessibleName('Suggestions');
+    expect(options().map((option) => option.textContent)).toEqual(['travel', 'trip']);
+    expect(input()).not.toHaveAttribute('aria-activedescendant');
+
+    press('ArrowDown');
+    expect(input()).toHaveAttribute('aria-activedescendant', options()[0]!.id);
+    expect(options()[0]).toHaveAttribute('aria-selected', 'true');
+    press('Enter');
+
+    expect(chipLabels()).toEqual(['travel']);
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      ['travel'],
+      expect.objectContaining({ reason: 'submit' }),
+    );
+    expect(input().value).toBe('');
+    expect(listbox()).toBeNull();
+    expect(input()).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('matches by the locale’s collator and leaves out what is already chosen', () => {
+    render(<Basic defaultValue={['trip']} suggestions={['Été', 'été 2026', 'trip', 'Trips']} />);
+    input().focus();
+    type('ete');
+    expect(options().map((option) => option.textContent)).toEqual(['Été', 'été 2026']);
+    type('TRI');
+    expect(options().map((option) => option.textContent)).toEqual(['Trips']);
+  });
+
+  it('still commits the typed text, and Escape closes the list before it clears', () => {
+    render(<Basic suggestions={['travel', 'trip']} />);
+    input().focus();
+    type('tr');
+    press('Escape');
+    expect(listbox()).toBeNull();
+    expect(input().value).toBe('tr');
+    press('Escape');
+    expect(input().value).toBe('');
+    type('train');
+    press('Enter');
+    expect(chipLabels()).toEqual(['train']);
+  });
+
+  it('opens on ArrowDown with nothing typed, wraps, and adds a suggestion on a press', () => {
+    render(<Basic suggestions={['travel', 'trip']} />);
+    input().focus();
+    press('ArrowDown');
+    expect(options()).toHaveLength(2);
+    expect(input()).toHaveAttribute('aria-activedescendant', options()[0]!.id);
+    press('ArrowUp');
+    expect(input()).toHaveAttribute('aria-activedescendant', options()[1]!.id);
+    press('ArrowDown');
+    expect(input()).toHaveAttribute('aria-activedescendant', options()[0]!.id);
+    fireEvent.pointerDown(options()[1]!);
+    fireEvent.click(options()[1]!);
+    expect(chipLabels()).toEqual(['trip']);
+    expect(document.activeElement).toBe(input());
+  });
+
+  it('runs a chosen suggestion through validate, normalize and max like typed text', () => {
+    const onValueRefuse = vi.fn();
+    render(
+      <Basic
+        max={1}
+        normalize={(text) => text.toUpperCase()}
+        onValueRefuse={onValueRefuse}
+        suggestions={['travel', 'trip']}
+        validate={(text) => text !== 'TRIP' || 'No trips'}
+      />,
+    );
+    input().focus();
+    type('trip');
+    press('ArrowDown');
+    press('Enter');
+    expect(chipLabels()).toEqual(['TRIP']);
+    expect(chips()[0]).toHaveAttribute('data-tone', 'danger');
+    type('trav');
+    press('ArrowDown');
+    press('Enter');
+    expect(chipLabels()).toEqual(['TRIP']);
+    expect(onValueRefuse).toHaveBeenCalledWith(
+      ['TRAVEL'],
+      expect.objectContaining({ cause: 'limit' }),
+    );
+  });
+});

@@ -445,6 +445,38 @@ describe('DataGrid, selection', () => {
     );
   });
 
+  it('names a selection box by the row header text, and by the key only without a row header', () => {
+    interface Person {
+      id: string;
+      name: string;
+    }
+    const people: Person[] = [{ id: '01a15bae-5c1e-4f0b-9a57-0f3c2d9e7b11', name: 'Ada Lovelace' }];
+    const { rerender } = render(
+      <DataGrid<Person>
+        aria-label="People"
+        columns={[{ id: 'name', label: 'Name', rowHeader: true }]}
+        rowKey="id"
+        rows={people}
+        selectionMode="multiple"
+      />,
+    );
+    const box = () =>
+      screen
+        .getByRole('grid', { name: 'People' })
+        .querySelector<HTMLElement>('[data-part="body"] [data-part="selection"] input')!;
+    expect(box()).toHaveAccessibleName('Select row Ada Lovelace');
+    rerender(
+      <DataGrid<Person>
+        aria-label="People"
+        columns={[{ id: 'name', label: 'Name' }]}
+        rowKey="id"
+        rows={people}
+        selectionMode="multiple"
+      />,
+    );
+    expect(box()).toHaveAccessibleName('Select row 01a15bae-5c1e-4f0b-9a57-0f3c2d9e7b11');
+  });
+
   it('toggles the row with Shift+Space from any cell, and selects everything with Ctrl+A', () => {
     const onValueChange = vi.fn();
     render(
@@ -524,6 +556,37 @@ describe('DataGrid, editing', () => {
     fireEvent.keyDown(cell('S2', 'customer'), { key: 'Escape' });
     expect(cell('S2', 'customer')).not.toHaveAttribute('data-editing');
     expect(onEditCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it('commits a draft set in the same handler as the commit', async () => {
+    const onEditCommit = vi.fn();
+    render(
+      <Shipments
+        defaultCurrent={{ row: 'S1', column: 'customer' }}
+        editorRenderers={{
+          customer: ({ setDraft, commit }) => (
+            <button
+              type="button"
+              onClick={() => {
+                setDraft('x');
+                commit();
+              }}
+            >
+              Choose x
+            </button>
+          ),
+        }}
+        onEditCommit={onEditCommit}
+      />,
+    );
+    fireEvent.keyDown(cell('S1', 'customer'), { key: 'Enter' });
+    fireEvent.click(within(cell('S1', 'customer')).getByRole('button', { name: 'Choose x' }));
+    await waitFor(() =>
+      expect(onEditCommit).toHaveBeenCalledWith(
+        expect.objectContaining({ key: 'S1', column: 'customer', value: 'x', previous: 'Aurora' }),
+      ),
+    );
+    expect(cell('S1', 'customer')).not.toHaveAttribute('data-editing');
   });
 
   it('opens the editor with the typed key as its first character', () => {

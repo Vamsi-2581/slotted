@@ -151,6 +151,63 @@ describe('CurrencyField', () => {
   });
 });
 
+describe('an amount held in minor units', () => {
+  it('reports the integer of the minor unit for what the reader types', () => {
+    const onValueChange = vi.fn();
+    render(
+      <CurrencyField currency="BRL" locale="pt-BR" onValueChange={onValueChange} unit="minor" />,
+    );
+
+    typeDigits('12345');
+
+    expect(plain(control().value)).toBe('R$ 123,45');
+    expect(onValueChange).toHaveBeenLastCalledWith(
+      12345,
+      expect.objectContaining({ value: 12345, previous: 1234, minorUnits: 12345 }),
+    );
+  });
+
+  it('reads the value, the range, the step and the submitted amount in minor units', () => {
+    const onValueChange = vi.fn();
+    render(
+      <CurrencyField
+        currency="BRL"
+        locale="pt-BR"
+        max={20000}
+        name="amount"
+        onValueChange={onValueChange}
+        step={50}
+        unit="minor"
+        value={12345}
+      />,
+    );
+
+    expect(plain(control().value)).toBe('R$ 123,45');
+    expect(control()).toHaveAttribute('aria-valuemax', '200');
+    expect(document.querySelector<HTMLInputElement>('input[name="amount"]')!.value).toBe('12345');
+    fireEvent.keyDown(control(), { key: 'ArrowUp' });
+    expect(onValueChange).toHaveBeenLastCalledWith(12395, expect.anything());
+  });
+
+  it('takes the minor unit from fractionDigits when it is set', () => {
+    const onValueChange = vi.fn();
+    render(
+      <CurrencyField
+        currency="BRL"
+        fractionDigits={3}
+        locale="pt-BR"
+        onValueChange={onValueChange}
+        unit="minor"
+      />,
+    );
+
+    typeDigits('1234');
+
+    expect(plain(control().value)).toBe('R$ 1,234');
+    expect(onValueChange).toHaveBeenLastCalledWith(1234, expect.anything());
+  });
+});
+
 describe('cents-first entry', () => {
   it('shifts each digit left by the currency minor units', () => {
     render(<CurrencyField currency="BRL" locale="pt-BR" />);

@@ -486,6 +486,13 @@ export const REACT_CURRENCY_FIELD_DOCS = {
         'Overrides how many fraction digits the amount is written with, for a unit price quoted finer than the currency’s cent',
       ],
       [
+        'unit',
+        "'major' | 'minor'",
+        'major',
+        'CurrencyField, CurrencyFieldDefaultsProvider',
+        'The unit value, defaultValue, min, max, the steps, stepFrom, onValueChange and the submitted amount are in: major is 12.34, minor the integer 1234 of the currency’s minor unit, which fractionDigits decides when set',
+      ],
+      [
         'min',
         'number',
         '—',

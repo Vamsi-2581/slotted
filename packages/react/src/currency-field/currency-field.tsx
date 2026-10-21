@@ -1,9 +1,11 @@
 import '@slotted/styles/currency-field/currency-field.css';
 
 import {
+  amountFromUnit,
   createCurrencyFormat,
   currencyAffix,
   MAX_AMOUNT_DIGITS,
+  requestInUnit,
   withAmount,
 } from '@slotted/core/currency';
 import { currencyFieldMessages } from '@slotted/core/i18n';
@@ -94,7 +96,7 @@ export function CurrencyField({
   clamp,
   currency,
   currencyDisplay,
-  defaultValue = null,
+  defaultValue: defaultValueInUnit = null,
   disabled,
   end,
   entry,
@@ -106,11 +108,11 @@ export function CurrencyField({
   id,
   inputMode,
   invalid,
-  largeStep,
+  largeStep: largeStepInUnit,
   locale,
-  max,
+  max: maxInUnit,
   messages,
-  min,
+  min: minInUnit,
   name,
   onBlur,
   onChange,
@@ -120,13 +122,14 @@ export function CurrencyField({
   ref,
   render,
   size,
-  smallStep,
+  smallStep: smallStepInUnit,
   start,
-  step = 1,
-  stepFrom,
+  step: stepInUnit,
+  stepFrom: stepFromInUnit,
   stepper,
   style,
-  value,
+  unit,
+  value: valueInUnit,
   variant,
   wheel = false,
   ...nativeProps
@@ -148,6 +151,7 @@ export function CurrencyField({
   const resolvedLocale = locale ?? appLocale;
   const resolvedDisplay = currencyDisplay ?? defaults.currencyDisplay;
   const resolvedCurrency = currency ?? defaults.currency;
+  const resolvedUnit = unit ?? defaults.unit;
   const resolvedDisabled = disabled ?? field?.disabled;
   const resolvedReadOnly = readOnly ?? field?.readOnly;
   const resolvedInvalid = invalid ?? field?.invalid;
@@ -196,6 +200,18 @@ export function CurrencyField({
        so an inline object is not a new format. */
     [resolvedCurrency, resolvedDisplay, resolvedLocale, fractionDigits, formatKey, format, affix],
   );
+
+  /* Everything below computes in major units; `unit` is converted here, on the way in. */
+  const inMajor = <T extends number | null | undefined>(amount: T) =>
+    amountFromUnit(amount, resolvedUnit, formatter);
+  const defaultValue = inMajor(defaultValueInUnit);
+  const value = inMajor(valueInUnit);
+  const min = inMajor(minInUnit);
+  const max = inMajor(maxInUnit);
+  const step = stepInUnit === undefined ? 1 : inMajor(stepInUnit);
+  const largeStep = inMajor(largeStepInUnit);
+  const smallStep = inMajor(smallStepInUnit);
+  const stepFrom = inMajor(stepFromInUnit);
 
   /**
    * The amount the family settles on when nothing is left in the control.
@@ -252,17 +268,21 @@ export function CurrencyField({
       const state = createControllable<number | null>({
         controlled: value,
         initial: current,
-        onRequest: (pending) =>
-          onValueChange?.(
-            pending.value,
+        onRequest: (pending) => {
+          if (onValueChange === undefined) return;
+          const amount = requestInUnit(
             withAmount(pending, formatter.currency, minorUnits ?? formatter.toMinorUnits(next)),
-          ),
+            resolvedUnit,
+            formatter,
+          );
+          onValueChange(amount.value, amount);
+        },
       });
       const moved = state.request(next, reason, source);
       if (moved) setOwn(next);
       return moved;
     },
-    [current, formatter, onValueChange, value],
+    [current, formatter, onValueChange, resolvedUnit, value],
   );
 
   /** What the element shows after a move that may not have been accepted. */
@@ -807,7 +827,15 @@ export function CurrencyField({
           type="hidden"
           /* What the control reads, so a form never submits nothing while the
              amount on screen says nought. */
-          value={settled(current) === null ? '' : String(settled(current))}
+          value={
+            settled(current) === null
+              ? ''
+              : String(
+                  resolvedUnit === 'minor'
+                    ? formatter.toMinorUnits(settled(current))
+                    : settled(current),
+                )
+          }
         />
       )}
     </CurrencyFieldScrubContext.Provider>

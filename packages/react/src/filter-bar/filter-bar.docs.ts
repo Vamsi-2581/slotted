@@ -20,7 +20,7 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
 
 export const REACT_FILTER_BAR_TOKENS = filterBarTokens.map((name) => ({
   name,
-  purpose: 'Decisão do tema sobre a barra de filtros',
+  purpose: 'Theme decision about the filter bar',
 }));
 
 const imports: ReferenceImport = {
@@ -34,226 +34,226 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'O landmark role="search" com o nome da família. Carrega data-ui="filter-bar", data-apply, data-size, data-dirty, data-open, data-sticky, data-readonly, data-disabled, data-loading. É o contentor de query; nada nele muda de grelha.',
+      'The role="search" landmark with the family name. Carries data-ui="filter-bar", data-apply, data-size, data-dirty, data-open, data-sticky, data-readonly, data-disabled, data-loading. It is the query container; nothing on it changes grid.',
   },
   {
     part: 'frame',
     element: 'div',
     required: true,
     purpose:
-      'A grelha, um elemento dentro da raiz, porque uma container query não restyla o elemento que mede. Acima de 36rem duas linhas: a busca, os controles do consumidor e a contagem; depois a barra, que quebra. Abaixo, a busca, a barra como uma linha que desliza, e a contagem.',
+      'The grid, an element inside the root, because a container query does not restyle the element it measures. Above 36rem, two rows: the search, the consumer’s controls and the count; then the bar, which wraps. Below, the search, the bar as a row that scrolls sideways, and the count.',
   },
   {
     part: 'search',
     element: 'div',
     required: true,
     purpose:
-      'O campo de busca global — um text-field embrulhado — a primeira parada de tabulação. Escape limpa a query; a tecla shortcut chega aqui.',
+      'The global search field — a wrapped text-field — the first tab stop. Escape clears the query; the shortcut key lands here.',
   },
   {
     part: 'bar',
     element: 'div',
     required: true,
     purpose:
-      'O role="toolbar" que segura tudo o que não é a busca: uma parada de tabulação, e as setas percorrem o summary, os pills, cada segmento de cada chip, more, add, clear e as ações, de linha em linha. data-revealed quando os chips dobrados estão à vista.',
+      'The role="toolbar" that holds everything that is not the search: one tab stop, and the arrows move through the summary, the pills, each segment of each chip, more, add, clear and the actions, from row to row. data-revealed while the folded chips are in view.',
   },
   {
     part: 'pill',
     element: 'button',
     required: false,
     purpose:
-      'Um campo fixado sem condição: aresta tracejada, glifo plus, o nome. Premido, dá lugar ao chip do campo, incompleto, com o popover do valor aberto; num telefone abre o construtor com o cartão da regra.',
+      'A pinned field without a condition: dashed edge, plus glyph, the name. Pressed, it gives way to the field’s chip, incomplete, with the value popover open; on a phone it opens the builder with the rule’s card.',
   },
   {
     part: 'add',
     element: 'button',
     required: true,
     purpose:
-      'O gatilho do menu com os campos ainda sem regra, agrupados por section e com o glifo de cada um. Com um chip na barra desenha só o glifo, num círculo, data-compact; o rótulo fica como nome e title.',
+      'The trigger of the menu with the fields that have no rule yet, grouped by section and with each one’s glyph. With a chip on the bar it draws only the glyph, in a circle, data-compact; the label stays as name and title.',
   },
   {
     part: 'clear',
     element: 'button',
     required: false,
     purpose:
-      'Desenhado enquanto algo está aplicado. Devolve um campo obrigatório ao seu defaultValue e apaga o resto, com a razão clear.',
+      'Drawn while something is applied. Returns a required field to its defaultValue and erases the rest, with the reason clear.',
   },
   {
     part: 'preset',
     element: 'div',
     required: false,
     purpose:
-      'Um select embrulhado com as vistas guardadas. Escolher uma substitui a árvore com a razão select.',
+      'A wrapped select with the saved views. Choosing one replaces the tree with the reason select.',
   },
   {
     part: 'actions',
     element: 'div',
     required: false,
     purpose:
-      'Sob apply="manual": reset e apply. Num grupo do construtor: add-rule, add-group, remove-group.',
+      'Under apply="manual": reset and apply. In a builder group: add-rule, add-group, remove-group.',
   },
   {
     part: 'apply',
     element: 'button',
     required: false,
     purpose:
-      'Aplica o rascunho com a razão submit. Recusa enquanto um campo obrigatório não tem valor.',
+      'Applies the draft with the reason submit. Refuses while a required field has no value.',
   },
-  { part: 'reset', element: 'button', required: false, purpose: 'Descarta o rascunho.' },
+  { part: 'reset', element: 'button', required: false, purpose: 'Discards the draft.' },
   {
     part: 'summary',
     element: 'button',
     required: true,
     purpose:
-      'Primeiro na barra, desenhado só abaixo de 36rem: "Filters (n)", que abre o construtor. Fora da largura estreita está escondido e fora do anel de foco.',
+      'First on the bar, drawn only below 36rem: "Filters (n)", which opens the builder. Outside the narrow width it is hidden and out of the focus ring.',
   },
   {
     part: 'end',
     element: 'div',
     required: true,
-    purpose:
-      'Os controles do consumidor — uma ordenação, um seletor de colunas — projetados como children.',
+    purpose: 'The consumer’s controls — a sort, a column picker — projected as children.',
   },
   {
     part: 'chip',
     element: 'div',
     required: false,
     purpose:
-      'Uma condição escrita em segmentos, role="group" com o nome "<campo>: <frase>". data-pinned num campo fixado, data-incomplete enquanto falta o operando, data-folded além de chipLimit, data-invalid num campo desconhecido ou obrigatório sem valor. Delete em qualquer segmento remove a condição.',
+      'A condition written in segments, role="group" named "<field>: <phrase>". data-pinned on a pinned field, data-incomplete while the operand is missing, data-folded beyond chipLimit, data-invalid on an unknown field or a required field without a value. Delete on any segment removes the condition.',
   },
   {
     part: 'chip-field',
     element: 'span',
     required: false,
-    purpose: 'O glifo do campo e o seu nome. Só se lê: o campo de uma condição é fixo.',
+    purpose: 'The field’s glyph and its name. Read only: the field of a condition is fixed.',
   },
   {
     part: 'chip-operator',
     element: 'button',
     required: false,
     purpose:
-      'O operador, mais leve que as pontas. Abre um menu com os operadores da espécie; um operador que pede um operando em falta passa ao valor.',
+      'The operator, lighter than the ends. Opens a menu with the operators of the kind; an operator that needs a missing operand moves on to the value.',
   },
   {
     part: 'chip-value',
     element: 'button',
     required: false,
     purpose:
-      'O valor: dois itens e o resto em número, a lista inteira no nome e no title. Abre um popover só com o operando; num telefone leva também as palavras do operador e abre o construtor.',
+      'The value: two items and the rest as a number, the whole list in the name and the title. Opens a popover with the operand only; on a phone it also carries the operator’s words and opens the builder.',
   },
   {
     part: 'chip-remove',
     element: 'button',
     required: false,
-    purpose: 'Remove a condição com a razão remove. Ausente num campo obrigatório e sob readOnly.',
+    purpose:
+      'Removes the condition with the reason remove. Absent on a required field and under readOnly.',
   },
   {
     part: 'more',
     element: 'button',
     required: false,
-    purpose: '"+n more" enquanto há chips dobrados; "Show less" quando revelados.',
+    purpose: '"+n more" while chips are folded; "Show less" when they are revealed.',
   },
   {
     part: 'count',
     element: 'p',
     required: false,
     purpose:
-      'A contagem, em aria-live="polite": count de total nas figuras da língua em vigor. Com loading, um spinner e aria-busy.',
+      'The count, in aria-live="polite": count of total in the figures of the current locale. With loading, a spinner and aria-busy.',
   },
   {
     part: 'builder',
     element: 'div',
     required: true,
     purpose:
-      'O editor da árvore inteira, dentro de um drawer. Leva data-ui próprio porque o drawer o portaliza.',
+      'The editor of the whole tree, inside a drawer. Carries its own data-ui because the drawer portals it.',
   },
   {
     part: 'group',
     element: 'fieldset',
     required: true,
     purpose:
-      'Um grupo da árvore: o cabeçalho, as linhas e os controles. A partir de data-depth 1 é uma caixa sobre a superfície afundada, com o seu próprio remover no cabeçalho.',
+      'A group of the tree: the header, the rows and the controls. From data-depth 1 on it is a box over the sunken surface, with its own remove in the header.',
   },
   {
     part: 'join',
     element: 'div',
     required: true,
     purpose:
-      'O cabeçalho do grupo: "Match", o segmented-control All/Any, "of the following" e, num grupo aninhado, Remove group na ponta.',
+      'The group header: "Match", the All/Any segmented-control, "of the following" and, in a nested group, Remove group at the end.',
   },
   {
     part: 'rules',
     element: 'div',
     required: true,
     purpose:
-      'As linhas do grupo numa grelha de duas colunas: a palavra que junta e a regra ou o grupo, para todos os campos alinharem.',
+      'The group’s rows in a two-column grid: the joining word and the rule or the group, so that every field aligns.',
   },
   {
     part: 'conjunction',
     element: 'span',
     required: true,
     purpose:
-      'A palavra antes de cada linha: "Where" na primeira, "and" ou "or" nas seguintes, a junção do grupo.',
+      'The word before each row: "Where" on the first, "and" or "or" on the following ones, the group’s join.',
   },
   {
     part: 'rule',
     element: 'div',
     required: false,
     purpose:
-      'Uma regra: campo, operador, operando, remover. data-kind e data-operands para a grelha; data-invalid num campo desconhecido; data-expanded no cartão aberto da forma estreita.',
+      'A rule: field, operator, operand, remove. data-kind and data-operands for the grid; data-invalid on an unknown field; data-expanded on the open card of the narrow form.',
   },
   {
     part: 'rule-summary',
     element: 'button',
     required: false,
     purpose:
-      'A frase da regra, cabeçalho do cartão quando o construtor tem menos de 30rem. Premida, abre ou fecha o cartão, um de cada vez; aria-expanded e aria-controls nos três controles.',
+      'The rule’s phrase, header of the card when the builder is narrower than 30rem. Pressed, it opens or closes the card, one at a time; aria-expanded and aria-controls on the three controls.',
   },
-  { part: 'field', element: 'div', required: false, purpose: 'O select do campo, embrulhado.' },
+  { part: 'field', element: 'div', required: false, purpose: 'The field select, wrapped.' },
   {
     part: 'operator',
     element: 'div',
     required: false,
-    purpose: 'O select do operador, com os nomes do mapa que table já traduz.',
+    purpose: 'The operator select, with the names of the map that table already translates.',
   },
   {
     part: 'operand',
     element: 'div',
     required: false,
     purpose:
-      'O controle por espécie — text-field, number-field, date-picker, time-picker, datetime-picker, select de verdadeiro/falso, multi-select — ou o que renderOperand devolver. Duas colunas para between.',
+      'The control for the kind — text-field, number-field, date-picker, time-picker, datetime-picker, true/false select, multi-select — or whatever renderOperand returns. Two columns for between.',
   },
   {
     part: 'remove',
     element: 'button',
     required: false,
-    purpose: 'Remove a regra do grupo. Ausente numa regra de campo obrigatório.',
+    purpose: 'Removes the rule from the group. Absent on a rule of a required field.',
   },
   {
     part: 'add-rule',
     element: 'button',
     required: true,
-    purpose: 'Acrescenta uma regra ao grupo, no primeiro campo.',
+    purpose: 'Adds a rule to the group, on the first field.',
   },
   {
     part: 'add-group',
     element: 'button',
     required: true,
-    purpose: 'Acrescenta um grupo com a junção oposta e uma regra dentro.',
+    purpose: 'Adds a group with the opposite join and one rule inside.',
   },
   {
     part: 'remove-group',
     element: 'button',
     required: false,
     purpose:
-      'O glifo do caixote, nomeado Remove group: remove um grupo aninhado com tudo o que tem dentro. A raiz não se remove.',
+      'The trash glyph, named Remove group: removes a nested group with everything inside it. The root cannot be removed.',
   },
   {
     part: 'save-preset',
     element: 'button',
     required: false,
     purpose:
-      'Pede à aplicação que guarde a árvore como vista, quando onPresetSave existe. O nome é a aplicação que pergunta.',
+      'Asks the application to save the tree as a view, when onPresetSave exists. The application asks for the name.',
   },
 ];
 
@@ -261,203 +261,203 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'playground',
     title: 'Playground',
-    note: 'Os eixos da barra sobre uma lista de pedidos, movidos pelos controlos por baixo do palco. Troque apply para manual e a barra passa a editar um rascunho.',
+    note: 'The bar’s axes over a list of orders, moved by the controls below the stage. Switch apply to manual and the bar edits a draft instead.',
     snippet: defineSnippet({
       id: 'filter-bar-react-playground',
       language: 'tsx',
-      label: 'A barra sobre uma lista de pedidos',
+      label: 'The bar over a list of orders',
       source:
         '<FilterBar\n  count={kept.length}\n  fields={FIELDS}\n  onValueChange={setFilter}\n  total={orders.length}\n  value={filter}\n/>;',
     }),
   },
   {
     id: 'listing',
-    title: 'A barra sobre a tabela, e a mesma regra nos dois sítios',
-    note: 'A árvore é aplicada pelo consumidor com createFilterGroupPredicate e createSearchPredicate; a tabela abaixo encolhe e a contagem diz quanto. O filtro de coluna de Status no cabeçalho edita o mesmo objeto que o chip de Status da barra.',
+    title: 'The bar over the table, and the same rule in both places',
+    note: 'The consumer applies the tree with createFilterGroupPredicate and createSearchPredicate; the table below shrinks and the count says by how much. The Status column filter in the header edits the same object as the bar’s Status chip.',
     snippet: defineSnippet({
       id: 'filter-bar-react-listing',
       language: 'tsx',
-      label: 'Aplicar a árvore e a query às linhas',
+      label: 'Applying the tree and the query to the rows',
       source:
         "const keep = createFilterGroupPredicate(filter, (row, field) => row[field]);\nconst find = createSearchPredicate(query, (row, field) => row[field], ['customer', 'id']);\nconst kept = orders.filter((row) => keep(row) && find(row));",
     }),
   },
   {
     id: 'pinned',
-    title: 'Campos fixados: um lugar tracejado que vira chip',
-    note: 'pinned deixa o campo sempre à vista. Sem condição é um pill tracejado com + e o nome — um lugar à espera de ser preenchido; premido, dá lugar ao chip do campo, no mesmo sítio, incompleto e com o popover do valor aberto. Remover a condição devolve o pill.',
+    title: 'Pinned fields: a dashed place that becomes a chip',
+    note: 'pinned keeps the field always in view. Without a condition it is a dashed pill with + and the name — a place waiting to be filled; pressed, it gives way to the field’s chip, in the same place, incomplete and with the value popover open. Removing the condition brings the pill back.',
     snippet: defineSnippet({
       id: 'filter-bar-react-pinned',
       language: 'tsx',
-      label: 'Dois campos sempre à vista',
+      label: 'Two fields always in view',
       source:
         "const FIELDS = [\n  {\n    icon: 'circle',\n    key: 'status',\n    kind: 'set',\n    label: 'Status',\n    options: STATUSES,\n    pinned: true,\n  },\n  { key: 'customer', kind: 'text', label: 'Customer', pinned: true },\n  { key: 'amount', kind: 'number', label: 'Amount' },\n];",
     }),
   },
   {
     id: 'chips',
-    title: 'Cada condição escrita em segmentos',
-    note: 'Um chip é a frase da condição em segmentos: o campo com o seu glifo, o operador mais leve, o valor, e o X. O operador abre um menu, o valor um popover só com o operando — mudar a comparação não reabre os valores. Uma lista longa escreve dois valores e o resto em número (Paid, Refunded +2), inteira no nome e no title; uma lista de um lê-se como igualdade. Add filter cria o chip de imediato, tracejado até ter valor, e fora do valor emitido até lá. Além de chipLimit os chips dobram atrás de +n more.',
+    title: 'Each condition written in segments',
+    note: 'A chip is the condition’s phrase in segments: the field with its glyph, the lighter operator, the value, and the X. The operator opens a menu, the value a popover with the operand only — changing the comparison does not reopen the values. A long list writes two values and the rest as a number (Paid, Refunded +2), whole in the name and the title; a list of one reads as equality. Add filter creates the chip at once, dashed until it has a value, and left out of the emitted value until then. Beyond chipLimit the chips fold behind +n more.',
     snippet: defineSnippet({
       id: 'filter-bar-react-chips',
       language: 'tsx',
-      label: 'Seis chips à vista e o resto dobrado',
+      label: 'Six chips in view and the rest folded',
       source: '<FilterBar chipLimit={6} defaultRevealed={false} fields={FIELDS} value={filter} />;',
     }),
   },
   {
     id: 'builder',
-    title: 'O construtor num drawer',
-    note: 'Add filter, um chip de grupo ou Filters (n) abrem a árvore inteira num drawer; num telefone o drawer sobe de baixo como uma folha. Com mais de 30rem cada regra é uma linha de campo, operador, operando e X; com menos, um cartão com a frase que se expande no lugar, um de cada vez. Apply pede a árvore com a razão submit, Cancel e Escape descartam.',
+    title: 'The builder in a drawer',
+    note: 'Add filter, a group chip or Filters (n) open the whole tree in a drawer; on a phone the drawer rises from the bottom as a sheet. Wider than 30rem each rule is a row of field, operator, operand and X; narrower, a card with the phrase that expands in place, one at a time. Apply requests the tree with the reason submit, Cancel and Escape discard.',
     snippet: defineSnippet({
       id: 'filter-bar-react-builder',
       language: 'tsx',
-      label: 'Abrir o construtor a partir de fora',
+      label: 'Opening the builder from outside',
       source:
         'const bar = useRef<FilterBarHandle>(null);\n<FilterBar\n  defaultOpen={false}\n  fields={FIELDS}\n  onOpenChange={(open, request) => log(request.reason)}\n  ref={bar}\n/>;\nbar.current?.open();',
     }),
   },
   {
     id: 'groups',
-    title: 'Grupos E/OU aninhados',
-    note: 'Um grupo dentro de um grupo é uma caixa sobre a superfície afundada, com a junção oposta e o caixote que o remove; num construtor estreito passa a um trilho na aresta inicial, que custa dez pixels por nível em vez de oitenta. Na barra aparece como um chip só, com a frase entre parênteses, que abre o construtor.',
+    title: 'Nested AND/OR groups',
+    note: 'A group inside a group is a box over the sunken surface, with the opposite join and the trash that removes it; in a narrow builder it becomes a rail on the start edge, which costs ten pixels per level instead of eighty. On the bar it appears as a single chip, with the phrase in parentheses, that opens the builder.',
     snippet: defineSnippet({
       id: 'filter-bar-react-groups',
       language: 'tsx',
-      label: 'A árvore que a barra segura',
+      label: 'The tree the bar holds',
       source:
         "const filter = {\n  join: 'and',\n  rules: [\n    { field: 'status', filter: setFilter(['paid']) },\n    {\n      join: 'or',\n      rules: [\n        {\n          field: 'amount',\n          filter: {\n            kind: 'number',\n            join: 'and',\n            conditions: [{ operator: 'greaterThan', value: 1000 }],\n          },\n        },\n        {\n          field: 'priority',\n          filter: { kind: 'boolean', join: 'and', conditions: [{ operator: 'is', value: true }] },\n        },\n      ],\n    },\n  ],\n};",
     }),
   },
   {
     id: 'manual',
-    title: 'Aplicar em lote',
-    note: 'Com apply="manual" cada edição vai a um rascunho: a raiz fica data-dirty, Reset descarta, Apply pede a árvore e a query com a razão submit. Enter num operando aplica. É o Go do Fiori e o batch do Carbon.',
+    title: 'Applying in a batch',
+    note: 'With apply="manual" each edit goes to a draft: the root becomes data-dirty, Reset discards, Apply requests the tree and the query with the reason submit. Enter on an operand applies. It is the Go of Fiori and the batch of Carbon.',
     snippet: defineSnippet({
       id: 'filter-bar-react-manual',
       language: 'tsx',
-      label: 'Um pedido por Apply, não por tecla',
+      label: 'One request per Apply, not per key',
       source:
         "<FilterBar\n  apply=\"manual\"\n  fields={FIELDS}\n  onQueryChange={(query, request) => request.reason === 'submit' && fetch(query)}\n  onValueChange={(filter, request) => request.reason === 'submit' && fetch(filter)}\n/>;",
     }),
   },
   {
     id: 'required',
-    title: 'Um campo obrigatório com default',
-    note: 'required fixa o campo e dá-lhe um defaultValue: Clear devolve-o ao default em vez de o apagar, o chip não tem X, e um Apply com o campo sem valor é recusado — o chip fica tracejado e data-invalid, a mensagem é anunciada.',
+    title: 'A required field with a default',
+    note: 'required pins the field and gives it a defaultValue: Clear returns it to the default instead of erasing it, the chip has no X, and an Apply with the field empty is refused — the chip stays dashed and data-invalid, and the message is announced.',
     snippet: defineSnippet({
       id: 'filter-bar-react-required',
       language: 'tsx',
-      label: 'Uma listagem sempre limitada a uma empresa',
+      label: 'A listing always limited to one company',
       source:
         "const company = {\n  key: 'company',\n  kind: 'set',\n  label: 'Company',\n  options: COMPANIES,\n  required: true,\n  defaultValue: setFilter(['acme']),\n};",
     }),
   },
   {
     id: 'presets',
-    title: 'Vistas guardadas',
-    note: 'presets aparece como um select no fim da barra: escolher uma substitui a árvore com a razão select; editar depois mantém a vista escolhida e marca a raiz data-dirty. Guardar é da aplicação — onPresetSave entrega a árvore, o nome é ela que pergunta.',
+    title: 'Saved views',
+    note: 'presets appears as a select at the end of the bar: choosing one replaces the tree with the reason select; editing afterwards keeps the chosen view and marks the root data-dirty. Saving belongs to the application — onPresetSave hands over the tree, and the application asks for the name.',
     snippet: defineSnippet({
       id: 'filter-bar-react-presets',
       language: 'tsx',
-      label: 'Escolher e guardar uma vista',
+      label: 'Choosing and saving a view',
       source:
         "<FilterBar\n  fields={FIELDS}\n  onPresetChange={(key) => setView(key)}\n  onPresetSave={(filter) => askForName(filter)}\n  preset={view}\n  presets={[{ key: 'overdue', label: 'Overdue this month', value: OVERDUE }]}\n/>;",
     }),
   },
   {
     id: 'query',
-    title: 'A busca global',
-    note: 'A query é o único campo que não pertence a nenhuma coluna. Debounced por queryDelay sob live; Escape limpa com a razão clear; shortcut é a tecla do documento que chega ao campo, desenhada dentro dele com kbd — e escondida onde a entrada primária é um ecrã táctil, onde não há tecla para carregar.',
+    title: 'The global search',
+    note: 'The query is the only field that belongs to no column. Debounced by queryDelay under live; Escape clears with the reason clear; shortcut is the document key that reaches the field, drawn inside it with kbd — and hidden where the primary input is a touch screen, where there is no key to press.',
     snippet: defineSnippet({
       id: 'filter-bar-react-query',
       language: 'tsx',
-      label: 'A busca com a barra a 120ms e um atalho',
+      label: 'The search with the bar at 120ms and a shortcut',
       source:
         '<FilterBar fields={FIELDS} onQueryChange={setQuery} query={query} queryDelay={120} shortcut="/" />;',
     }),
   },
   {
     id: 'url',
-    title: 'O estado numa URL',
-    note: 'toFilterBarParams escreve f=and(…) e q=; fromFilterBarParams lê-os de volta, e um f.<coluna> escrito por uma tabela sem barra vira um grupo de primeiro nível. parseFilterGroup é total: um marcador de uma versão antiga degrada para nenhum filtro.',
+    title: 'The state in a URL',
+    note: 'toFilterBarParams writes f=and(…) and q=; fromFilterBarParams reads them back, and an f.<column> written by a table without a bar becomes a top-level group. parseFilterGroup is total: a marker from an older version degrades to no filter.',
     snippet: defineSnippet({
       id: 'filter-bar-react-url',
       language: 'tsx',
-      label: 'Ida e volta pela query string',
+      label: 'Round trip through the query string',
       source:
         "const params = toFilterBarParams({ filter, query });\nhistory.replaceState(null, '', `?${params}`);\nconst restored = fromFilterBarParams(location.search);",
     }),
   },
   {
     id: 'count',
-    title: 'A contagem como região viva',
-    note: 'count e total são os números do consumidor, escritos nas figuras da língua em vigor. A parte é aria-live="polite", por isso uma mudança no filtro é ouvida como o seu efeito; com loading a contagem dá lugar a um spinner e aria-busy.',
+    title: 'The count as a live region',
+    note: 'count and total are the consumer’s numbers, written in the figures of the current locale. The part is aria-live="polite", so a change in the filter is heard as its effect; with loading the count gives way to a spinner and aria-busy.',
     snippet: defineSnippet({
       id: 'filter-bar-react-count',
       language: 'tsx',
-      label: 'Quantos ficaram, de quantos',
+      label: 'How many are left, out of how many',
       source: '<FilterBar count={128} fields={FIELDS} loading={fetching} total={3412} />;',
     }),
   },
   {
     id: 'narrow',
-    title: 'Num telefone: uma linha que desliza e uma folha',
-    note: 'Abaixo de 36rem a busca fica em cima e a barra passa a uma linha que desliza: Filters (n) primeiro, todos os chips — também os dobrados —, depois os pills vazios; o chip cortado na borda diz que a linha continua. Cada chip tem três alvos: o campo, o valor com as palavras do operador, o X. Tocar num valor, num pill ou em Filters abre o construtor como folha, com o cartão da regra aberto. Redimensione o palco.',
+    title: 'On a phone: a row that scrolls sideways and a sheet',
+    note: 'Below 36rem the search sits on top and the bar becomes a row that scrolls sideways: Filters (n) first, every chip — the folded ones too —, then the empty pills; the chip cut at the edge says the row continues. Each chip has three targets: the field, the value with the operator’s words, the X. Tapping a value, a pill or Filters opens the builder as a sheet, with the rule’s card open. Resize the stage.',
     snippet: defineSnippet({
       id: 'filter-bar-react-narrow',
       language: 'tsx',
-      label: 'A barra num contentor de telefone',
+      label: 'The bar in a phone-sized container',
       source:
         "<div style={{ inlineSize: '22rem' }}>\n  <FilterBar fields={FIELDS} value={filter} />\n</div>;",
     }),
   },
   {
     id: 'sticky',
-    title: 'Colada sob o cabeçalho da página',
-    note: 'sticky lê --slotted-page-sticky-top, cola a barra aí, e soma a própria altura à propriedade no elemento pai para o que vem a seguir — uma tabela com cabeçalho colado para debaixo da barra, não debaixo do título.',
+    title: 'Stuck under the page header',
+    note: 'sticky reads --slotted-page-sticky-top, sticks the bar there, and adds its own height to the property on the parent element for what comes next — a table with a sticky header sticks below the bar, not below the title.',
     snippet: defineSnippet({
       id: 'filter-bar-react-sticky',
       language: 'tsx',
-      label: 'A barra e a tabela coladas em cadeia',
+      label: 'The bar and the table stuck in a chain',
       source:
         '<>\n  <FilterBar fields={FIELDS} sticky value={filter} />\n  <Table stickyHeader>…</Table>\n</>;',
     }),
   },
   {
     id: 'states',
-    title: 'Desabilitada, a carregar, só leitura',
-    note: 'disabled desliga todos os controles e mantém a largura; loading mantém os controles, desliga Apply e põe o spinner no lugar da contagem; readOnly deixa cada condição alcançável e legível — os segmentos guardam a paragem com aria-disabled — e não desenha X, add, clear nem pills vazios.',
+    title: 'Disabled, loading, read only',
+    note: 'disabled turns off every control and keeps the width; loading keeps the controls, turns off Apply and puts the spinner in place of the count; readOnly leaves every condition reachable and readable — the segments keep their stop with aria-disabled — and draws no X, add, clear or empty pills.',
     snippet: defineSnippet({
       id: 'filter-bar-react-states',
       language: 'tsx',
-      label: 'Os três estados da barra inteira',
+      label: 'The three states of the whole bar',
       source:
         '<>\n  <FilterBar disabled fields={FIELDS} />\n  <FilterBar fields={FIELDS} loading />\n  <FilterBar fields={FIELDS} readOnly value={filter} />\n</>;',
     }),
   },
   {
     id: 'content',
-    title: 'Conteúdo que a família não escolheu',
-    note: 'Um valor de onze itens escreve dois e o resto em número, inteiro no title e no nome acessível; um valor longo trunca a 12rem; um rótulo árabe ao lado de uma data ISO não reordena a data, porque campo, operador e valor são corridas isoladas; um campo desconhecido é um chip inválido, removível.',
+    title: 'Content the family did not choose',
+    note: 'A value of eleven items writes two and the rest as a number, whole in the title and in the accessible name; a long value truncates at 12rem; an Arabic label next to an ISO date does not reorder the date, because field, operator and value are isolated runs; an unknown field is an invalid, removable chip.',
     snippet: defineSnippet({
       id: 'filter-bar-react-content',
       language: 'tsx',
-      label: 'Um chip longo, um rótulo RTL, um campo que já não existe',
+      label: 'A long chip, an RTL label, a field that no longer exists',
       source:
         "<FilterBar\n  dir=\"rtl\"\n  fields={[{ key: 'city', kind: 'set', label: 'المدينة', options: CITIES }]}\n  value={filter}\n/>;",
     }),
   },
   {
     id: 'keyboard',
-    title: 'Teclado',
-    note: 'Tab: a busca, depois a barra — duas paragens. As setas percorrem cada controle da barra, segmento a segmento, de linha em linha e espelhadas em RTL; Home e End nas pontas. Enter no operador abre o menu, no valor o popover; Delete em qualquer segmento remove a condição com a razão remove e o foco vai ao mesmo segmento do chip seguinte; Escape limpa a busca ou fecha a superfície.',
+    title: 'Keyboard',
+    note: 'Tab: the search, then the bar — two stops. The arrows move through every control of the bar, segment by segment, from row to row and mirrored in RTL; Home and End at the ends. Enter on the operator opens the menu, on the value the popover; Delete on any segment removes the condition with the reason remove and focus goes to the same segment of the next chip; Escape clears the search or closes the surface.',
     snippet: defineSnippet({
       id: 'filter-bar-react-keyboard',
       language: 'tsx',
-      label: 'O que se ouve ao remover um chip',
+      label: 'What is heard when a chip is removed',
       source:
-        '// "Amount filter removed" — e o foco segue para o chip seguinte, ou para\n// Add filter quando não sobra nenhum.\n<FilterBar fields={FIELDS} onValueChange={(next, request) => request.reason === \'remove\'} />;',
+        '// "Amount filter removed" — and focus moves to the next chip, or to\n// Add filter when none is left.\n<FilterBar fields={FIELDS} onValueChange={(next, request) => request.reason === \'remove\'} />;',
     }),
   },
 ];
@@ -466,32 +466,32 @@ const events: EventRow[] = [
   {
     name: 'onValueChange',
     payload: '(value: FilterGroup | null, request)',
-    when: 'Antes de a árvore mover. A razão é pointer, keyboard, clear, remove, select, submit ou programmatic; cancelar não move nada. A árvore chega normalizada: sem regras incompletas, null quando nada resta.',
+    when: 'Before the tree moves. The reason is pointer, keyboard, clear, remove, select, submit or programmatic; cancelling moves nothing. The tree arrives normalized: no incomplete rules, null when nothing is left.',
   },
   {
     name: 'onQueryChange',
     payload: '(query: string, request)',
-    when: 'Depois de queryDelay sob live, ou com submit sob manual; clear quando Escape ou o X do campo a limpam.',
+    when: 'After queryDelay under live, or with submit under manual; clear when Escape or the field’s X clears it.',
   },
   {
     name: 'onPresetChange',
     payload: '(preset: string | null, request)',
-    when: 'Quando uma vista é escolhida no select, com select; clear quando o select é esvaziado.',
+    when: 'When a view is chosen in the select, with select; clear when the select is emptied.',
   },
   {
     name: 'onPresetSave',
     payload: '(value: FilterGroup | null)',
-    when: 'Quando o leitor pressiona "Save as view…" no construtor. A família não guarda: pergunta.',
+    when: 'When the reader presses "Save as view…" in the builder. The family does not save: it asks.',
   },
   {
     name: 'onOpenChange',
     payload: '(open: boolean, request)',
-    when: 'Antes de o construtor abrir ou fechar: pointer, keyboard, escape, outsidePress, dismiss, submit, programmatic.',
+    when: 'Before the builder opens or closes: pointer, keyboard, escape, outsidePress, dismiss, submit, programmatic.',
   },
   {
     name: 'onRevealedChange',
     payload: '(revealed: boolean, request)',
-    when: 'Antes de os chips dobrados aparecerem ou voltarem a dobrar.',
+    when: 'Before the folded chips appear or fold again.',
   },
 ];
 
@@ -507,106 +507,100 @@ export const REACT_FILTER_BAR_DOCS = {
         'FilterBarField[]',
         '—',
         'FilterBar',
-        'Os campos filtráveis: key, label, kind, icon (nome de glifo ou nó), operators, pinned, required, defaultValue, section, options, searchable',
+        'The filterable fields: key, label, kind, icon (glyph name or node), operators, pinned, required, defaultValue, section, options, searchable',
       ],
       [
         'value',
         'FilterGroup | null',
         '—',
         'FilterBar',
-        'A árvore que o consumidor possui. Presente é controlado, para a vida da barra',
+        'The tree the consumer owns. Present means controlled, for the life of the bar',
       ],
       [
         'defaultValue',
         'FilterGroup | null',
         '—',
         'FilterBar',
-        'Onde uma barra não controlada começa, lida uma vez',
+        'Where an uncontrolled bar starts, read once',
       ],
-      ['query', 'string', '—', 'FilterBar', 'A busca global, controlada'],
-      [
-        'defaultQuery',
-        'string',
-        '',
-        'FilterBar',
-        'A busca com que uma barra não controlada começa',
-      ],
-      ['presets', 'FilterBarPreset[]', '—', 'FilterBar', 'As vistas guardadas: key, label, value'],
-      ['preset', 'string | null', '—', 'FilterBar', 'A vista corrente, controlada'],
-      ['defaultPreset', 'string | null', 'null', 'FilterBar', 'A vista com que começa'],
-      ['open', 'boolean', '—', 'FilterBar', 'Se o construtor está aberto, controlado'],
-      ['defaultOpen', 'boolean', 'false', 'FilterBar', 'Se começa aberto'],
-      ['revealed', 'boolean', '—', 'FilterBar', 'Se os chips dobrados estão à vista, controlado'],
-      ['defaultRevealed', 'boolean', 'false', 'FilterBar', 'Se começam à vista'],
+      ['query', 'string', '—', 'FilterBar', 'The global search, controlled'],
+      ['defaultQuery', 'string', '', 'FilterBar', 'The search an uncontrolled bar starts with'],
+      ['presets', 'FilterBarPreset[]', '—', 'FilterBar', 'The saved views: key, label, value'],
+      ['preset', 'string | null', '—', 'FilterBar', 'The current view, controlled'],
+      ['defaultPreset', 'string | null', 'null', 'FilterBar', 'The view it starts with'],
+      ['open', 'boolean', '—', 'FilterBar', 'Whether the builder is open, controlled'],
+      ['defaultOpen', 'boolean', 'false', 'FilterBar', 'Whether it starts open'],
+      ['revealed', 'boolean', '—', 'FilterBar', 'Whether the folded chips are in view, controlled'],
+      ['defaultRevealed', 'boolean', 'false', 'FilterBar', 'Whether they start in view'],
       [
         'apply',
         "'live' | 'manual'",
         'live',
         'FilterBar',
-        'Pede a cada edição, ou edita um rascunho até Apply',
+        'Requests on every edit, or edits a draft until Apply',
       ],
       [
         'sticky',
         'boolean',
         'false',
         'FilterBar',
-        'Cola sob o cabeçalho da página e soma a sua altura ao que segue',
+        'Sticks under the page header and adds its height to what follows',
       ],
       [
         'container',
         'Element | null',
         '—',
         'FilterBar',
-        'Um pai só para o drawer do construtor, em vez da raiz de portal partilhada',
+        'A parent for the builder drawer only, instead of the shared portal root',
       ],
-      ['size', "'sm' | 'md' | 'lg'", 'md', 'FilterBar', 'O passo dos controles'],
+      ['size', "'sm' | 'md' | 'lg'", 'md', 'FilterBar', 'The step of the controls'],
       [
         'queryDelay',
         'number',
         '320',
         'FilterBar',
-        'Milissegundos que a busca e um operando de texto esperam sob live',
+        'Milliseconds the search and a text operand wait under live',
       ],
-      ['chipLimit', 'number', '6', 'FilterBar', 'Chips à vista antes de dobrar'],
+      ['chipLimit', 'number', '6', 'FilterBar', 'Chips in view before folding'],
       [
         'shortcut',
         'string | null',
         'null',
         'FilterBar',
-        'A tecla do documento que foca a busca, fora de um campo editável',
+        'The document key that focuses the search, outside an editable field',
       ],
-      ['disabled', 'boolean', 'false', 'FilterBar', 'Desliga todos os controles'],
+      ['disabled', 'boolean', 'false', 'FilterBar', 'Turns off every control'],
       [
         'readOnly',
         'boolean',
         'false',
         'FilterBar',
-        'Cada condição alcançável e legível, nenhuma alterável: sem X, add, clear nem pills vazios',
+        'Every condition reachable and readable, none changeable: no X, add, clear or empty pills',
       ],
       [
         'loading',
         'boolean',
         'false',
         'FilterBar',
-        'Mantém a largura, desliga Apply, spinner no lugar da contagem',
+        'Keeps the width, turns off Apply, spinner in place of the count',
       ],
-      ['count', 'number', '—', 'FilterBar', 'Quantas linhas o filtro manteve'],
-      ['total', 'number', '—', 'FilterBar', 'Quantas há'],
+      ['count', 'number', '—', 'FilterBar', 'How many rows the filter kept'],
+      ['total', 'number', '—', 'FilterBar', 'How many there are'],
       [
         'messages',
         'Partial<FilterBarMessages>',
         '—',
         'FilterBar',
-        'Palavras sobre as da língua em vigor, chave a chave: o nome do landmark (bar), os controles, os nomes dos chips, a contagem e os anúncios',
+        'Words over those of the current locale, key by key: the landmark name (bar), the controls, the chip names, the count and the announcements',
       ],
       [
         'renderOperand',
         '(props: FilterBarOperandProps) => ReactNode',
         '—',
         'FilterBar',
-        'Substitui o controle do operando; undefined mantém o da espécie',
+        'Replaces the operand control; undefined keeps the one for the kind',
       ],
-      ['children', 'ReactNode', '—', 'FilterBar', 'Os controles do consumidor no slot end'],
+      ['children', 'ReactNode', '—', 'FilterBar', 'The consumer’s controls in the end slot'],
     ]),
     composition: apiRows([
       [
@@ -614,57 +608,57 @@ export const REACT_FILTER_BAR_DOCS = {
         '(props) => ReactNode',
         '—',
         'FilterBar',
-        'A costura que a rodada 12 usa em table: date-range-picker num between, tags-input num conjunto grande',
+        'The seam table uses: date-range-picker on a between, tags-input on a large set',
       ],
       [
         'children',
         'ReactNode',
         '—',
         'FilterBar',
-        'O slot end: uma ordenação, um seletor de colunas, fora do anel da toolbar',
+        'The end slot: a sort, a column picker, outside the toolbar ring',
       ],
       [
         'ref',
         'Ref<FilterBarHandle>',
         '—',
         'FilterBar',
-        'focusSearch(), open(), root — as ações que uma prop não exprime',
+        'focusSearch(), open(), root — the actions a prop does not express',
       ],
       [
         'FilterBarDefaultsProvider',
         'apply | chipLimit | queryDelay | shortcut | size',
         '—',
-        'Aplicação',
-        'Decide uma vez para tudo por baixo; uma prop na barra ganha',
+        'Application',
+        'Decides once for everything below; a prop on the bar wins',
       ],
       [
         'onKeyDown, id, aria-*, data-*',
-        'props nativas',
+        'native props',
         '—',
         'FilterBar',
-        'Chegam à raiz; o handler do consumidor corre antes do da família',
+        'Reach the root; the consumer’s handler runs before the family’s',
       ],
     ]),
     accessibility: [
-      'A raiz é role="search", não role="toolbar": o padrão Toolbar do APG pede que uma toolbar evite controles que precisam das setas, e o campo de busca é um. A busca é a primeira parada de tabulação e a toolbar a segunda — duas paradas sejam quantos forem os campos; a nota do APG para toolbars de várias linhas deixa as setas passar de linha em linha.',
-      'Um chip é role="group" com o nome "<campo>: <frase>", a mesma frase que describeFilter dá ao anúncio de table, e ", incomplete" enquanto falta o valor. O operador tem aria-haspopup="menu", o valor aria-haspopup="dialog" e o nome com a lista inteira, o X "Remove <campo>". Delete e Backspace em qualquer segmento removem com a razão remove e o foco vai ao segmento do mesmo papel no chip seguinte, ao anterior, ou ao Add filter.',
-      'Um pill tem aria-haspopup="dialog"; sob readOnly a toolbar leva aria-description="Read only" e os segmentos guardam a paragem com aria-disabled, e um valor bloqueado nomeia a lista inteira que o popover já não mostra.',
-      'A contagem é a própria região viva, em polite, por isso o efeito de um filtro é ouvido; aplicar, limpar, remover um chip e escolher uma vista são anunciados pelo live-announcer partilhado.',
-      'O construtor é um drawer: modal, Escape fecha e descarta, o foco volta ao gatilho. Cada grupo é um fieldset com legend, cada regra três controles nomeados — Field, Operator, Value ou From e To.',
-      'Abaixo de 36rem o operador, more, add e clear saem do anel de foco com visibility hidden, não só do desenho: uma parada onde nada se vê é uma parada que não existe. Os cartões fechados do construtor tiram os três controles do anel da mesma forma; a frase do cartão tem aria-expanded e aria-controls.',
+      'The root is role="search", not role="toolbar": the APG Toolbar pattern asks a toolbar to avoid controls that need the arrows, and the search field is one. The search is the first tab stop and the toolbar the second — two stops however many fields there are; the APG note on multi-row toolbars lets the arrows move from row to row.',
+      'A chip is role="group" named "<field>: <phrase>", the same phrase describeFilter gives to the table announcement, and ", incomplete" while the value is missing. The operator has aria-haspopup="menu", the value aria-haspopup="dialog" and the name with the whole list, the X "Remove <field>". Delete and Backspace on any segment remove with the reason remove and focus goes to the segment of the same role on the next chip, the previous one, or Add filter.',
+      'A pill has aria-haspopup="dialog"; under readOnly the toolbar carries aria-description="Read only" and the segments keep their stop with aria-disabled, and a locked value names the whole list the popover no longer shows.',
+      'The count is itself the live region, in polite, so the effect of a filter is heard; applying, clearing, removing a chip and choosing a view are announced by the shared live-announcer.',
+      'The builder is a drawer: modal, Escape closes and discards, focus returns to the trigger. Each group is a fieldset with a legend, each rule three named controls — Field, Operator, Value or From and To.',
+      'Below 36rem the operator, more, add and clear leave the focus ring with visibility hidden, not only the drawing: a stop where nothing is seen is a stop that does not exist. The builder’s closed cards take the three controls out of the ring the same way; the card’s phrase has aria-expanded and aria-controls.',
     ],
     snippets: [
       defineSnippet({
         id: 'filter-bar-react-anatomy',
         language: 'tsx',
-        label: 'Anatomia, como chega ao DOM',
+        label: 'Anatomy, as it reaches the DOM',
         source:
           '<div\n  aria-label="Filter"\n  data-apply="live"\n  data-part="root"\n  data-size="md"\n  data-ui="filter-bar"\n  role="search"\n>\n  <div data-part="frame">\n    <div data-part="search">…</div>\n    <div aria-label="Filters" data-part="bar" role="toolbar">\n      <button data-part="summary">Filters (2)</button>\n      <div aria-label="Status: any of Paid, Refunded" data-part="chip" role="group">\n        <span data-part="chip-field">Status</span>\n        <button aria-haspopup="menu" data-part="chip-operator">\n          any of\n        </button>\n        <button aria-haspopup="dialog" data-part="chip-value">\n          Paid, Refunded\n        </button>\n        <button aria-label="Remove Status" data-part="chip-remove" />\n      </div>\n      <button aria-haspopup="dialog" data-part="pill">\n        Owner\n      </button>\n      <button aria-label="Add filter" data-compact="" data-part="add" />\n    </div>\n    <p aria-live="polite" data-part="count">\n      128 of 3,412\n    </p>\n  </div>\n</div>;',
       }),
       defineSnippet({
         id: 'filter-bar-theming',
         language: 'css',
-        label: 'Retunar a família para uma aplicação',
+        label: 'Retuning the family for an application',
         source:
           "[data-ui='filter-bar'] {\n  --slotted-filter-bar-pill-radius: var(--slotted-radius-md);\n  --slotted-filter-bar-value-max: 16rem;\n  --slotted-filter-bar-search-max: 36rem;\n}",
       }),

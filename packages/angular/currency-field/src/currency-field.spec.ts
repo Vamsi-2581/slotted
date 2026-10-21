@@ -521,6 +521,75 @@ describe('natural entry', () => {
   });
 });
 
+describe('an amount held in minor units', () => {
+  it('reports the integer of the minor unit for what the reader types', () => {
+    const fixture = renderTemplate(`
+      <div slCurrencyField>
+        <input
+          slCurrencyFieldInput
+          currency="BRL"
+          locale="pt-BR"
+          unit="minor"
+          (valueChange)="record($event)"
+        />
+      </div>`);
+
+    typeDigits(fixture, '12345');
+
+    expect(plain(input(fixture).value)).toBe('R$ 123,45');
+    const [last] = fixture.componentInstance.seen().slice(-1);
+    expect(last?.value).toBe(12345);
+    expect(last?.previous).toBe(1234);
+    expect(last?.minorUnits).toBe(12345);
+  });
+
+  it('reads the value, the range, the step, the form model and the submitted amount in minor units', () => {
+    const fixture = renderTemplate(`
+      <div slCurrencyField>
+        <input
+          slCurrencyFieldInput
+          currency="BRL"
+          locale="pt-BR"
+          max="20000"
+          name="total"
+          step="50"
+          unit="minor"
+          [formControl]="control"
+          (valueChange)="record($event)"
+        />
+      </div>`);
+    fixture.componentInstance.control.setValue(12345);
+    fixture.detectChanges();
+
+    expect(plain(input(fixture).value)).toBe('R$ 123,45');
+    expect(input(fixture).getAttribute('aria-valuemax')).toBe('200');
+    expect((query(fixture, 'input[name="total"]') as HTMLInputElement).value).toBe('12345');
+    key(input(fixture), { key: 'ArrowUp' });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.seen().at(-1)?.value).toBe(12395);
+    expect(fixture.componentInstance.control.value).toBe(12395);
+  });
+
+  it('takes the minor unit from fractionDigits when it is set', () => {
+    const fixture = renderTemplate(`
+      <div slCurrencyField>
+        <input
+          slCurrencyFieldInput
+          currency="BRL"
+          fractionDigits="3"
+          locale="pt-BR"
+          unit="minor"
+          (valueChange)="record($event)"
+        />
+      </div>`);
+
+    typeDigits(fixture, '1234');
+
+    expect(plain(input(fixture).value)).toBe('R$ 1,234');
+    expect(fixture.componentInstance.seen().at(-1)?.value).toBe(1234);
+  });
+});
+
 describe('the request an amount carries', () => {
   it('carries the reason, the currency and the exact integer of minor units', () => {
     const fixture = renderTemplate(`

@@ -1,5 +1,5 @@
 import { writeToClipboard } from '@slotted/core/clipboard';
-import { createFilter } from '@slotted/core/collection';
+import { createFilter, revealWithin } from '@slotted/core/collection';
 import type { Filter } from '@slotted/core/collection';
 import { createArrowNavigation, createRemovalFocus } from '@slotted/core/focus';
 import type { ArrowNavigationHandle, RemovalFocusHandle } from '@slotted/core/focus';
@@ -13,6 +13,8 @@ import { createWidthGate } from '@slotted/core/measure';
 import type { WidthGateHandle } from '@slotted/core/measure';
 import { createCollapse } from '@slotted/core/overflow';
 import type { CollapseHandle } from '@slotted/core/overflow';
+import { createPositioner } from '@slotted/core/positioner';
+import type { PositionerHandle } from '@slotted/core/positioner';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeRequest } from '@slotted/core/state';
 import { admitValues, constraintVerdict, joinValues, splitValues } from '@slotted/core/tags';
@@ -101,6 +103,12 @@ function longDuration(element: HTMLElement) {
  *
  * **What is refused is reported, not dropped.** `valueRefuse` carries the
  * values that did not get in and the cause.
+ *
+ * **Suggestions make the input a combobox.** With `suggestions` the input
+ * takes the APG combobox's list autocomplete without automatic selection: the
+ * listbox under the frame holds what the typed text matches, nothing is
+ * highlighted until an arrow key moves, and the text the reader typed still
+ * commits as it does without them.
  */
 @Component({
   selector: 'sl-tags-input',
@@ -253,6 +261,11 @@ function longDuration(element: HTMLElement) {
             [attr.aria-label]="ariaLabel() ?? null"
             [attr.aria-describedby]="describedBy()"
             [attr.aria-invalid]="isInvalid() ? true : null"
+            [attr.role]="suggestions() === undefined ? null : 'combobox'"
+            [attr.aria-autocomplete]="suggestions() === undefined ? null : 'list'"
+            [attr.aria-expanded]="suggestions() === undefined ? null : popup()"
+            [attr.aria-controls]="popup() ? listboxId : null"
+            [attr.aria-activedescendant]="active() < 0 ? null : optionId(active())"
             (input)="onInput($event)"
             (keydown)="onKeyDown($event)"
             (paste)="onPaste($event)"
@@ -276,6 +289,31 @@ function longDuration(element: HTMLElement) {
       </button>
     }
     <span data-part="hint" [id]="hintId">{{ hintText() }}</span>
+    @if (popup()) {
+      <div
+        #suggestionList
+        data-part="suggestions"
+        role="listbox"
+        [id]="listboxId"
+        [attr.aria-label]="t('suggestions')"
+      >
+        @for (entry of matches(); track $index) {
+          <!-- Focus stays in the input: the option is chosen, not focused. -->
+          <div
+            data-part="suggestion"
+            role="option"
+            [id]="optionId($index)"
+            [attr.aria-selected]="$index === active()"
+            [attr.data-highlighted]="$index === active() ? '' : null"
+            (pointerdown)="$event.preventDefault()"
+            (pointermove)="highlight.set($index)"
+            (click)="choose(entry, $event)"
+          >
+            {{ labelFor(entry) }}
+          </div>
+        }
+      </div>
+    }
 
     <!--
       One hidden input per value, all under the same name: that is how a plain
@@ -326,6 +364,16 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   readonly validateValue = input<TagsInputValidator | undefined>(undefined);
   /** Runs before a value is judged. Trim by default. */
   readonly normalize = input<((text: string) => string) | undefined>(undefined);
+  /**
+   * Values the reader may choose instead of typing them whole. Present, the
+   * input is a combobox: a listbox under the field holds the suggestions the
+   * typed text matches by the locale's collator, minus the values already
+   * chosen; ArrowDown and ArrowUp move through it and Enter adds the
+   * highlighted one. A chosen suggestion is normalized, judged, deduplicated
+   * and capped like typed text, and typed text still commits as it does
+   * without suggestions.
+   */
+  readonly suggestions = input<readonly string[] | undefined>(undefined);
   /** How a paste is split. The default splits on the delimiters and on line breaks. */
   readonly split = input<((text: string) => readonly string[]) | undefined>(undefined);
   /** The chip's text for a value. */
@@ -367,12 +415,14 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   private readonly controlRef = viewChild.required<{ nativeElement: HTMLInputElement }>('control');
   private readonly rowRef = viewChild.required<{ nativeElement: HTMLElement }>('row');
   private readonly countRef = viewChild<{ nativeElement: HTMLElement }>('count');
+  private readonly listRef = viewChild<{ nativeElement: HTMLElement }>('suggestionList');
 
   readonly field = inject(SlField, { optional: true });
 
   private readonly identifier = Math.random().toString(36).slice(2, 8);
   private readonly ownId = `sl-tags-input-${this.identifier}`;
   readonly hintId = `${this.ownId}-hint`;
+  readonly listboxId = `${this.ownId}-suggestions`;
 
   readonly hiddenCount = signal(1);
   readonly narrow = signal(false);
@@ -381,12 +431,18 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   readonly current = signal<string | null>(null);
   readonly editingIndex = signal<number | null>(null);
   readonly editingText = signal('');
+  /** Whether the reader asked for the suggestions, by typing or by an arrow key. */
+  private readonly suggesting = signal(false);
+  /** The highlighted suggestion's index, or -1 while none is. */
+  readonly highlight = signal(-1);
 
   private ring: ArrowNavigationHandle | null = null;
   private removal: RemovalFocusHandle | null = null;
   private collapse: CollapseHandle | null = null;
   private gate: WidthGateHandle | null = null;
   private currentTimer: ReturnType<typeof setTimeout> | null = null;
+  private placement: PositionerHandle | null = null;
+  private placedOn: HTMLElement | null = null;
   private reverting = false;
   private disabledByForm = signal<boolean | undefined>(undefined);
 
@@ -442,6 +498,28 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
 
   private readonly collator = computed<Filter>(() =>
     createFilter({ locale: this.locale() ?? this.inForceLocale() }),
+  );
+
+  /** What the typed text matches, by the locale's collator, minus what is already chosen. */
+  readonly matches = computed<readonly string[]>(() => {
+    const suggestions = this.suggestions();
+    if (suggestions === undefined) return [];
+    const { contains, equals } = this.collator();
+    const query = this.inputValue().trim();
+    const held = this.value();
+    return suggestions.filter(
+      (entry) => contains(entry, query) && !held.some((chosen) => equals(chosen, entry)),
+    );
+  });
+  readonly popup = computed(
+    () =>
+      this.suggestions() !== undefined &&
+      this.suggesting() &&
+      !this.frozen() &&
+      this.matches().length > 0,
+  );
+  readonly active = computed(() =>
+    this.popup() && this.highlight() < this.matches().length ? this.highlight() : -1,
   );
 
   /**
@@ -541,6 +619,35 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
       untracked(() => this.controlRef().nativeElement.setCustomValidity(message));
     });
 
+    /* Under the frame and as wide as it, flipped above when there is no room. */
+    afterRenderEffect(() => {
+      const list = this.listRef()?.nativeElement ?? null;
+      untracked(() => {
+        if (list === this.placedOn) return;
+        this.placement?.destroy();
+        this.placement = null;
+        this.placedOn = list;
+        if (list === null) return;
+        this.placement = createPositioner(this.host.nativeElement, list, {
+          side: 'bottom',
+          align: 'start',
+          sideOffset: 4,
+          matchWidth: true,
+          strategy: 'fixed',
+        });
+        void this.placement.update();
+      });
+    });
+
+    /* The highlighted suggestion is kept in sight inside a list that scrolls. */
+    afterRenderEffect(() => {
+      const active = this.active();
+      const list = this.listRef()?.nativeElement;
+      if (active < 0 || list === undefined) return;
+      const option = list.querySelector<HTMLElement>(`[id="${this.optionId(active)}"]`);
+      if (option !== null) revealWithin(option, list);
+    });
+
     /* A Reactive Form is told when what the family judges has changed. */
     effect(() => {
       this.verdicts();
@@ -554,6 +661,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
       this.removal?.destroy();
       this.collapse?.destroy();
       this.gate?.destroy();
+      this.placement?.destroy();
       if (this.currentTimer !== null) clearTimeout(this.currentTimer);
     });
   }
@@ -584,6 +692,10 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
 
   protected chipFrozen(value: string): boolean {
     return this.frozen() || this.isLocked(value);
+  }
+
+  protected optionId(index: number) {
+    return `${this.listboxId}-${index}`;
   }
 
   protected messageId(index: number) {
@@ -782,6 +894,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
 
   /** The typed text, committed as one or several values. */
   private commitText(source?: Event) {
+    this.closeSuggestions();
     const text = this.inputValue();
     if (text.trim() === '') return false;
     this.admit(this.splitText(text), source);
@@ -790,7 +903,22 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
   }
 
   protected onInput(event: Event) {
-    this.setInputValue((event.target as HTMLInputElement).value, 'keyboard', event);
+    const text = (event.target as HTMLInputElement).value;
+    this.suggesting.set(text.trim() !== '');
+    this.highlight.set(-1);
+    this.setInputValue(text, 'keyboard', event);
+  }
+
+  private closeSuggestions() {
+    this.suggesting.set(false);
+    this.highlight.set(-1);
+  }
+
+  /** A suggestion, through the same door as typed text. */
+  protected choose(entry: string, source?: Event) {
+    this.admit([entry], source);
+    this.setInputValue('', 'submit', source);
+    this.closeSuggestions();
   }
 
   protected onEditInput(event: Event) {
@@ -917,13 +1045,46 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
     }
 
     switch (event.key) {
-      case 'Enter':
+      case 'ArrowDown':
+      case 'ArrowUp': {
+        if (this.suggestions() === undefined || this.frozen()) return;
+        event.preventDefault();
+        const down = event.key === 'ArrowDown';
+        const count = this.matches().length;
+        const active = this.active();
+        if (!this.popup()) {
+          this.suggesting.set(true);
+          this.highlight.set(down ? 0 : count - 1);
+          return;
+        }
+        /* The APG's list autocomplete: past either end, round to the other. */
+        if (active < 0) this.highlight.set(down ? 0 : count - 1);
+        else this.highlight.set((active + (down ? 1 : count - 1)) % count);
+        return;
+      }
+      case 'Tab':
+        this.closeSuggestions();
+        return;
+      case 'Enter': {
         /* With text, commits and never submits; with none, the platform's
            implicit submission is left alone. */
         if (this.frozen()) return;
+        const active = this.active();
+        if (active >= 0) {
+          event.preventDefault();
+          this.choose(this.matches()[active] as string, event);
+          return;
+        }
         if (this.commitText(event)) event.preventDefault();
         return;
+      }
       case 'Escape':
+        /* An open list closes first, and the text stays. */
+        if (this.popup()) {
+          event.preventDefault();
+          this.closeSuggestions();
+          return;
+        }
         if (this.inputValue() === '') return;
         event.preventDefault();
         this.setInputValue('', 'clear', event);
@@ -967,6 +1128,7 @@ export class SlTagsInput implements ControlValueAccessor, OnInit, Validator {
 
   protected onBlur(event: FocusEvent) {
     this.onTouched();
+    this.closeSuggestions();
     const next = event.relatedTarget;
     if (next instanceof Node && this.host.nativeElement.contains(next)) return;
     if (this.frozen()) return;

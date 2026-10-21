@@ -17,12 +17,19 @@ import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
 import {
+  amountFromUnit,
   createCurrencyFormat,
   currencyAffix,
   MAX_AMOUNT_DIGITS,
+  requestInUnit,
   withAmount,
 } from '@slotted/core/currency';
-import type { CurrencyAffix, CurrencyChangeRequest, CurrencyFormat } from '@slotted/core/currency';
+import type {
+  CurrencyAffix,
+  CurrencyChangeRequest,
+  CurrencyFormat,
+  CurrencyUnit,
+} from '@slotted/core/currency';
 import { clamp as clampNumber } from '@slotted/core/measure';
 import { stepNumber } from '@slotted/core/number';
 import { createControllable } from '@slotted/core/state';
@@ -124,13 +131,23 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
    * `null` is empty, and `undefined` is the absence that makes the control
    * uncontrolled — the two are different answers.
    */
-  readonly value = input<number | null | undefined, unknown>(undefined, {
+  protected readonly valueInUnit = input<number | null | undefined, unknown>(undefined, {
+    alias: 'value',
     transform: (raw) => (raw === undefined ? undefined : (optionalNumber(raw) ?? null)),
   });
-  /** The amount the control starts from when nobody else writes one. */
-  readonly defaultValue = input<number | null, unknown>(null, {
+  /** The amount the control starts from when nobody else writes one, in `unit`. */
+  protected readonly defaultValueInUnit = input<number | null, unknown>(null, {
+    alias: 'defaultValue',
     transform: (raw) => (raw === undefined ? null : (optionalNumber(raw) ?? null)),
   });
+  /**
+   * The unit `value`, `defaultValue`, `min`, `max`, the steps, `stepFrom`,
+   * `valueChange`, the form model and the submitted amount are in. `major` is
+   * `12.34`; `minor` is the integer `1234` of the currency's minor unit, which
+   * `fractionDigits` decides when set. Entry, format and appearance do not
+   * change. Defaults to the token, then `major`.
+   */
+  readonly unit = input<CurrencyUnit | undefined>(undefined);
 
   /** How the reader types. Defaults to the token, then `cents`. */
   readonly entry = input<CurrencyFieldEntry | undefined>(undefined);
@@ -141,16 +158,36 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
    */
   readonly formatOn = input<CurrencyFieldFormatOn | undefined>(undefined);
 
-  readonly min = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
-  readonly max = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
-  /** What the arrows and the two buttons move by, in major units. */
-  readonly step = input<number, unknown>(1, { transform: (raw) => optionalNumber(raw) ?? 1 });
+  /** The smallest amount, in `unit`. */
+  protected readonly minInUnit = input<number | undefined, unknown>(undefined, {
+    alias: 'min',
+    transform: optionalNumber,
+  });
+  /** The largest amount, in `unit`. */
+  protected readonly maxInUnit = input<number | undefined, unknown>(undefined, {
+    alias: 'max',
+    transform: optionalNumber,
+  });
+  /** What the arrows and the two buttons move by, in `unit`. One major unit by default. */
+  protected readonly stepInUnit = input<number | undefined, unknown>(undefined, {
+    alias: 'step',
+    transform: optionalNumber,
+  });
   /** The amount `Shift` and the page keys move by. Defaults to `step * 10`. */
-  readonly largeStep = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
+  protected readonly largeStepInUnit = input<number | undefined, unknown>(undefined, {
+    alias: 'largeStep',
+    transform: optionalNumber,
+  });
   /** The amount `Alt` moves by. Defaults to `step / 10`. */
-  readonly smallStep = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
+  protected readonly smallStepInUnit = input<number | undefined, unknown>(undefined, {
+    alias: 'smallStep',
+    transform: optionalNumber,
+  });
   /** Where an empty control starts stepping from. Defaults to `min`, then nought. */
-  readonly stepFrom = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
+  protected readonly stepFromInUnit = input<number | undefined, unknown>(undefined, {
+    alias: 'stepFrom',
+    transform: optionalNumber,
+  });
   /** Where an amount outside the range goes, and when. Defaults to the token, then `blur`. */
   readonly clamp = input<CurrencyFieldClamp | undefined>(undefined);
   /** Any other `Intl.NumberFormatOptions`. Every key here wins over the family's own. */
@@ -280,6 +317,29 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
     });
   });
 
+  readonly resolvedUnit = computed(() => this.unit() ?? this.defaults.unit);
+  /* Everything below computes in major units; `unit` is converted here, on the way in. */
+  private inMajor<T extends number | null | undefined>(amount: T): T {
+    return this.resolvedUnit() === 'minor'
+      ? amountFromUnit(amount, 'minor', this.formatter())
+      : amount;
+  }
+  /** On the way out. */
+  private inUnit(amount: number | null): number | null {
+    return this.resolvedUnit() === 'minor' ? this.formatter().toMinorUnits(amount) : amount;
+  }
+  readonly value = computed(() => this.inMajor(this.valueInUnit()));
+  readonly defaultValue = computed(() => this.inMajor(this.defaultValueInUnit()));
+  readonly min = computed(() => this.inMajor(this.minInUnit()));
+  readonly max = computed(() => this.inMajor(this.maxInUnit()));
+  readonly step = computed(() => {
+    const step = this.stepInUnit();
+    return step === undefined ? 1 : this.inMajor(step);
+  });
+  readonly largeStep = computed(() => this.inMajor(this.largeStepInUnit()));
+  readonly smallStep = computed(() => this.inMajor(this.smallStepInUnit()));
+  readonly stepFrom = computed(() => this.inMajor(this.stepFromInUnit()));
+
   /** Present means the consumer owns it; absent means the directive does. */
   private readonly controlled = computed(() => this.value() !== undefined);
   readonly numberValue = computed(() => {
@@ -290,6 +350,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
        hidden input submits alike, so the three never disagree. */
     return this.allowEmpty() ? held : (held ?? 0);
   });
+  readonly submittedValue = computed(() => this.inUnit(this.numberValue()));
   readonly valueText = computed(() => {
     const shown = this.text();
     if (shown === '') return null;
@@ -430,8 +491,9 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
   }
 
   writeValue(value: number | null) {
-    this.own.set(value ?? null);
-    this.write(this.formatter().format(this.settledAmount(value ?? null)));
+    const amount = this.inMajor(value ?? null);
+    this.own.set(amount);
+    this.write(this.formatter().format(this.settledAmount(amount)));
   }
 
   registerOnChange(fn: (value: number | null) => void) {
@@ -709,7 +771,11 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
       initial: current,
       onRequest: (pending) => {
         this.valueChange.emit(
-          withAmount(pending, formatter.currency, minorUnits ?? formatter.toMinorUnits(next)),
+          requestInUnit(
+            withAmount(pending, formatter.currency, minorUnits ?? formatter.toMinorUnits(next)),
+            this.resolvedUnit(),
+            formatter,
+          ),
         );
         cancelled = pending.cancelled;
       },
@@ -717,7 +783,7 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
     state.request(next, reason, source);
     if (cancelled) return false;
 
-    this.onChangeFn(next);
+    this.onChangeFn(this.inUnit(next));
     /* A controlled control never moves its own amount: it asks, and waits for
        the consumer's next value. */
     if (this.controlled()) return false;

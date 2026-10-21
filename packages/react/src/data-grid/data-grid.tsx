@@ -1715,11 +1715,13 @@ export function DataGrid<Row>({
     [rowOf, columns, isEditable, resolvedEditMode, onEditStart],
   );
   const setDraft = useCallback((columnId: string, draft: unknown) => {
-    setEdit((session) =>
+    const withDraft = (session: EditSession | null): EditSession | null =>
       session
         ? { ...session, drafts: { ...session.drafts, [columnId]: draft }, status: 'editing' }
-        : session,
-    );
+        : session;
+    // The ref too: an editor whose choice is the commit calls commit() before the next render.
+    editRef.current = withDraft(editRef.current);
+    setEdit(withDraft);
   }, []);
   const cancelEdit = useCallback(() => {
     const session = editRef.current;

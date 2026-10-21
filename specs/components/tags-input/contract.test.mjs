@@ -20,10 +20,11 @@ test('names the identifier a consumer selects the family by', () => {
 });
 
 /**
- * One pattern, not two. The input is a text box that opens nothing, so the
- * combobox pattern is not cited and no role is written that would claim it.
+ * The layout grid always; the combobox only with `suggestions`. Without them
+ * the input is a text box that opens nothing, so no role is written that
+ * would claim a popup.
  */
-test('cites the layout-grid pattern, and gives the input no role', () => {
+test('cites the layout-grid pattern, and gives the input a role only with suggestions', () => {
   assert.equal(contract.pattern, 'https://www.w3.org/WAI/ARIA/apg/patterns/grid/');
   assert.match(contract.patternStatus, /2026-09-14/);
   assert.match(contract.patternStatus, /layout grid/i);
@@ -33,8 +34,12 @@ test('cites the layout-grid pattern, and gives the input no role', () => {
     chips: 'row',
     chip: 'gridcell',
     field: 'gridcell',
+    inputWithSuggestions: 'combobox',
+    suggestions: 'listbox',
+    suggestion: 'option',
   });
-  assert.doesNotMatch(contract.wiring.role, /combobox/);
+  assert.match(contract.patternStatus, /patterns\/combobox\//);
+  assert.match(contract.wiring.role, /Without `suggestions` the input carries no role/);
 });
 
 test('keeps a real input, and says what the platform still owns because of it', () => {
@@ -228,11 +233,13 @@ test('declares the anatomy the harness and both bindings answer', () => {
     'counter',
     'clear',
     'hint',
+    'suggestions',
+    'suggestion',
   ]);
   assert.equal(member.nativeElement, 'div');
 });
 
-test('holds the capabilities the inventory justified, and composes no overlay', () => {
+test('holds the capabilities the inventory justified, and composes no layer', () => {
   for (const capability of [
     'value',
     'overflow',
@@ -255,8 +262,11 @@ test('holds the capabilities the inventory justified, and composes no overlay', 
     'focus',
     'live-announcer',
     'clipboard',
+    'collection',
+    'positioner',
   ]);
-  for (const module of ['positioner', 'portal', 'presence', 'dismissable-layer', 'collection']) {
+  /* The suggestions are placed, not layered: no portal, no stack, no presence. */
+  for (const module of ['portal', 'presence', 'dismissable-layer']) {
     assert.ok(!contract.composes.includes(module), module);
   }
   assert.equal(contract.adds.tags.module, 'packages/core/src/tags');

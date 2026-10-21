@@ -225,7 +225,9 @@ function SelectionCell<Row>({ rowKey }: { rowKey: string }) {
         }}
         tabIndex={current ? 0 : -1}
       >
-        <VisuallyHidden>{grid.t('selectRow', { row: rowKey })}</VisuallyHidden>
+        <VisuallyHidden>
+          {grid.t('selectRow', { row: grid.rowLabelOf(rowKey), key: rowKey })}
+        </VisuallyHidden>
       </Checkbox>
     </div>
   );

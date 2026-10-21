@@ -91,6 +91,20 @@ const anatomy: AnatomyRow[] = [
     purpose:
       'What the row answers to, for a reader who cannot see the remove buttons: Delete removes a value, and — while editable — Enter edits it. The row names it as its description.',
   },
+  {
+    part: 'suggestions',
+    element: 'div[role="listbox"]',
+    required: false,
+    purpose:
+      'With suggestions, the list under the frame of the ones the typed text matches, minus the values already chosen. Rendered only while open; the input controls it and names its highlighted option by aria-activedescendant.',
+  },
+  {
+    part: 'suggestion',
+    element: 'div[role="option"]',
+    required: false,
+    purpose:
+      'One suggestion. data-highlighted and aria-selected on the one Enter adds; a press adds it and keeps focus in the input.',
+  },
 ];
 
 const scenes: ReferenceSceneMeta[] = [
@@ -449,6 +463,13 @@ const api: ApiRow[] = apiRows([
     '—',
     'TagsInput',
     'How a paste is split. The default splits on the delimiters and on every line break.',
+  ],
+  [
+    'suggestions',
+    'readonly string[]',
+    '—',
+    'TagsInput',
+    'Values the reader may choose instead of typing them whole. The input becomes a combobox: the typed text filters them by the locale’s collator, ArrowDown and ArrowUp move through them, Enter adds the highlighted one. A chosen suggestion is normalized, judged, deduplicated and capped like typed text, and typed text still commits.',
   ],
   [
     'formatLabel',

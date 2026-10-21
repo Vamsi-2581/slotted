@@ -7,10 +7,11 @@ import '@slotted/styles/tags-input/tags-input.css';
 import '@slotted/styles/tag/tag.css';
 
 import { writeToClipboard } from '@slotted/core/clipboard';
-import { createFilter } from '@slotted/core/collection';
+import { createFilter, revealWithin } from '@slotted/core/collection';
 import { tagsInputMessages } from '@slotted/core/i18n';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createWidthGate } from '@slotted/core/measure';
+import { createPositioner } from '@slotted/core/positioner';
 import { createControllable } from '@slotted/core/state';
 import { admitValues, joinValues, judgeValue, splitValues } from '@slotted/core/tags';
 import type { TagsVerdict } from '@slotted/core/tags';
@@ -19,6 +20,7 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -105,6 +107,12 @@ function longDuration(element: HTMLElement | null) {
  * **What is refused is reported, not dropped.** A duplicate, a value past the
  * limit, and — under `refuse` — an invalid one each leave through
  * `onValueRefuse` with the cause.
+ *
+ * **Suggestions make the input a combobox.** With `suggestions` the input
+ * takes the APG combobox's list autocomplete without automatic selection: the
+ * listbox under the frame holds what the typed text matches, nothing is
+ * highlighted until an arrow key moves, and the text the reader typed still
+ * commits as it does without them.
  */
 export function TagsInput({
   className,
@@ -125,6 +133,7 @@ export function TagsInput({
   render,
   split,
   style,
+  suggestions,
   type = 'text',
   validate,
   value,
@@ -147,6 +156,7 @@ export function TagsInput({
   const generated = useId();
   const inputId = `${generated}input`;
   const hintId = `${generated}hint`;
+  const listboxId = `${generated}suggestions`;
 
   const [ownValue, setOwnValue] = useState<readonly string[]>(defaultValue);
   const [ownInput, setOwnInput] = useState(defaultInputValue);
@@ -154,6 +164,9 @@ export function TagsInput({
   const [narrow, setNarrow] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [duplicate, setDuplicate] = useState<string | null>(null);
+  const [suggesting, setSuggesting] = useState(false);
+  const [highlight, setHighlight] = useState(-1);
+  const [listNode, setListNode] = useState<HTMLDivElement | null>(null);
   const frame = useRef<HTMLDivElement | null>(null);
 
   const resolved: TagsInputDefaults = { ...defaults };
@@ -174,6 +187,40 @@ export function TagsInput({
 
   const collator = useMemo(() => createFilter({ locale }), [locale]);
   const normalise = normalize ?? ((text: string) => text.trim());
+
+  /* What the typed text matches, by the locale's collator, minus what is already chosen. */
+  const matches = useMemo(() => {
+    if (suggestions === undefined) return [];
+    const query = currentInput.trim();
+    return suggestions.filter(
+      (entry) =>
+        collator.contains(entry, query) &&
+        !currentValue.some((chosen) => collator.equals(chosen, entry)),
+    );
+  }, [suggestions, currentInput, currentValue, collator]);
+  const popup = suggestions !== undefined && suggesting && !frozen && matches.length > 0;
+  const active = popup && highlight < matches.length ? highlight : -1;
+  const optionId = (index: number) => `${listboxId}-${index}`;
+
+  /* Under the frame and as wide as it, flipped above when there is no room. */
+  useLayoutEffect(() => {
+    if (!popup || listNode === null || frame.current === null) return;
+    const handle = createPositioner(frame.current, listNode, {
+      side: 'bottom',
+      align: 'start',
+      sideOffset: 4,
+      matchWidth: true,
+      strategy: 'fixed',
+    });
+    void handle.update();
+    return () => handle.destroy();
+  }, [popup, listNode]);
+
+  useEffect(() => {
+    if (active < 0 || listNode === null) return;
+    const option = listNode.querySelector<HTMLElement>(`[id="${optionId(active)}"]`);
+    if (option !== null) revealWithin(option, listNode);
+  });
 
   const judge = useCallback(
     (text: string): TagsVerdict => judgeValue(text, validate, inputNode),
@@ -414,6 +461,8 @@ export function TagsInput({
   /** The typed text, committed as one or several values. */
   const commitText = useCallback(
     (source?: unknown) => {
+      setSuggesting(false);
+      setHighlight(-1);
       const text = latest.current.currentInput;
       if (text.trim() === '') return false;
       admit(split === undefined ? splitValues(text, resolved.delimiters) : split(text), source);
@@ -421,6 +470,17 @@ export function TagsInput({
       return true;
     },
     [admit, resolved.delimiters, setInputValue, split],
+  );
+
+  /** A suggestion, through the same door as typed text. */
+  const choose = useCallback(
+    (entry: string, source?: unknown) => {
+      admit([entry], source);
+      setInputValue('', 'submit', source);
+      setSuggesting(false);
+      setHighlight(-1);
+    },
+    [admit, setInputValue],
   );
 
   useImperativeHandle(
@@ -446,13 +506,43 @@ export function TagsInput({
     }
 
     switch (event.key) {
+      case 'ArrowDown':
+      case 'ArrowUp': {
+        if (suggestions === undefined || frozen) return;
+        event.preventDefault();
+        const down = event.key === 'ArrowDown';
+        if (!popup) {
+          setSuggesting(true);
+          setHighlight(down ? 0 : matches.length - 1);
+          return;
+        }
+        /* The APG's list autocomplete: past either end, round to the other. */
+        if (active < 0) setHighlight(down ? 0 : matches.length - 1);
+        else setHighlight((active + (down ? 1 : matches.length - 1)) % matches.length);
+        return;
+      }
+      case 'Tab':
+        setSuggesting(false);
+        return;
       case 'Enter':
         /* With text, commits and never submits; with none, the platform's
            implicit submission is left alone. */
         if (frozen) return;
+        if (active >= 0) {
+          event.preventDefault();
+          choose(matches[active] as string, event.nativeEvent);
+          return;
+        }
         if (commitText(event.nativeEvent)) event.preventDefault();
         return;
       case 'Escape':
+        /* An open list closes first, and the text stays. */
+        if (popup) {
+          event.preventDefault();
+          setSuggesting(false);
+          setHighlight(-1);
+          return;
+        }
         if (currentInput === '') return;
         event.preventDefault();
         setInputValue('', 'clear', event.nativeEvent);
@@ -483,6 +573,8 @@ export function TagsInput({
   };
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSuggesting(event.currentTarget.value.trim() !== '');
+    setHighlight(-1);
     setInputValue(event.currentTarget.value, 'keyboard', event.nativeEvent);
   };
 
@@ -498,6 +590,8 @@ export function TagsInput({
   };
 
   const onBlur = (event: FocusEvent<HTMLInputElement>) => {
+    setSuggesting(false);
+    setHighlight(-1);
     const next = event.relatedTarget;
     if (next instanceof Node && frame.current?.contains(next) === true) return;
     if (frozen) return;
@@ -605,6 +699,15 @@ export function TagsInput({
               {...native}
               aria-describedby={describedBy === '' ? undefined : describedBy}
               aria-invalid={invalid ? true : undefined}
+              {...(suggestions === undefined
+                ? {}
+                : {
+                    role: 'combobox',
+                    'aria-autocomplete': 'list' as const,
+                    'aria-expanded': popup,
+                    'aria-controls': popup ? listboxId : undefined,
+                    'aria-activedescendant': active < 0 ? undefined : optionId(active),
+                  })}
               data-part="input"
               disabled={resolved.disabled}
               id={native.id ?? field?.ids.control ?? inputId}
@@ -636,6 +739,32 @@ export function TagsInput({
       <span data-part="hint" id={hintId}>
         {hint}
       </span>
+      {popup ? (
+        <div
+          aria-label={t('suggestions')}
+          data-part="suggestions"
+          id={listboxId}
+          ref={setListNode}
+          role="listbox"
+        >
+          {matches.map((entry, index) => (
+            <div
+              aria-selected={index === active}
+              data-part="suggestion"
+              {...(index === active ? { 'data-highlighted': '' } : {})}
+              id={optionId(index)}
+              key={`${index}-${entry}`}
+              /* Focus stays in the input: the option is chosen, not focused. */
+              onPointerDown={(event) => event.preventDefault()}
+              onPointerMove={() => setHighlight(index)}
+              onClick={(event) => choose(entry, event.nativeEvent)}
+              role="option"
+            >
+              {labelFor(entry)}
+            </div>
+          ))}
+        </div>
+      ) : null}
       {/*
         One hidden input per value, all under the same name: that is how a plain
         `FormData` receives several values under one key.

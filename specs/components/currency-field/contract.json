@@ -185,6 +185,7 @@
     "stepper": ["prop", "defaults", "none"],
     "clamp": ["prop", "defaults", "blur"],
     "formatOn": ["prop", "defaults", "change"],
+    "unit": ["prop", "defaults", "major"],
     "currency": ["prop", "defaults"],
     "currencyDisplay": ["prop", "defaults", "symbol"],
     "locale": ["prop", "slotted", "en-US"],
@@ -200,6 +201,7 @@
       "formatOn",
       "size",
       "stepper",
+      "unit",
       "variant"
     ]
   },

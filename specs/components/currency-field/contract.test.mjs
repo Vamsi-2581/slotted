@@ -343,9 +343,11 @@ test('lets an application decide once what its currency fields are', () => {
     'formatOn',
     'size',
     'stepper',
+    'unit',
     'variant',
   ]);
   assert.deepEqual(contract.resolution.currency, ['prop', 'defaults']);
+  assert.deepEqual(contract.resolution.unit, ['prop', 'defaults', 'major']);
 });
 
 test('exposes only the imperative actions the platform does not already give', () => {

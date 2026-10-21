@@ -236,7 +236,7 @@ export class SlCurrencyField {
   );
 
   protected readonly hiddenValue = computed(() => {
-    const value = this.control()?.numberValue() ?? null;
+    const value = this.control()?.submittedValue() ?? null;
     return value === null ? '' : String(value);
   });
 

@@ -290,8 +290,12 @@ export interface DialogTriggerProps
   children?: ReactNode | undefined;
 }
 
+/**
+ * `render` receives props written against `HTMLElement`, so the panel can be
+ * any element: a `form` that submits, a `section` that is a landmark.
+ */
 export interface DialogContentProps
-  extends ComponentPropsWithRef<'div'>, WithRender<PartProps<HTMLDivElement>> {}
+  extends ComponentPropsWithRef<'div'>, WithRender<PartProps<HTMLElement>> {}
 
 export interface DialogHeaderProps
   extends ComponentPropsWithRef<'header'>, WithRender<PartProps<HTMLElement>> {}

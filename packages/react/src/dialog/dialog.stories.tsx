@@ -45,6 +45,7 @@ const referenceScenes: ReferencePageConfig['scenes'] = () =>
     content: Content,
     composition: Composition,
     layout: Layout,
+    form: Form,
     defaults: Defaults,
     accessibility: Accessibility,
   }) as never;
@@ -741,6 +742,46 @@ export const Layout: Story = {
               </OwnLayout>
               <DialogFooter>
                 <Button size="sm">Rename</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+      </Layer>
+    </Scene>
+  ),
+};
+
+export const Form: Story = {
+  parameters: scenario('form'),
+  render: () => (
+    <Scene
+      label="Enter in the field saves"
+      note="The panel is the form, through render: Enter in the field and the footer’s Save submit it, and the header, the body and the footer keep the panel’s inset and rows."
+    >
+      <Layer>
+        {(container) => (
+          <Dialog container={container} fullScreen="never" size="sm">
+            <DialogTrigger
+              render={(props) => (
+                <Button {...props} tone="secondary" variant="outline">
+                  Edit contact
+                </Button>
+              )}
+            />
+            <DialogContent
+              render={(props) => <form {...props} onSubmit={(event) => event.preventDefault()} />}
+            >
+              <DialogHeader>
+                <DialogTitle>Edit contact</DialogTitle>
+                <DialogClose />
+              </DialogHeader>
+              <DialogBody>
+                <TextField aria-label="Name" defaultValue="Ana Ribeiro" />
+              </DialogBody>
+              <DialogFooter>
+                <Button size="sm" type="submit">
+                  Save
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

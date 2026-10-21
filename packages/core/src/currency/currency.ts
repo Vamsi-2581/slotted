@@ -142,6 +142,46 @@ export function withAmount(
 }
 
 /**
+ * The unit a consumer holds an amount in. `major` is a number of whole
+ * currency units, `12.34`; `minor` is an integer of the currency's minor unit,
+ * `1234`, the shape a ledger stores so that no sum goes through a float.
+ */
+export type CurrencyUnit = 'major' | 'minor';
+
+/**
+ * An amount, a bound or a step the consumer wrote in `unit`, in the major units
+ * the family computes in. The minor unit is the format's, so `fractionDigits`
+ * decides it when set.
+ */
+export function amountFromUnit<T extends number | null | undefined>(
+  amount: T,
+  unit: CurrencyUnit,
+  format: CurrencyFormat,
+): T {
+  return (
+    unit === 'minor' && typeof amount === 'number' ? amount / 10 ** format.minorUnits : amount
+  ) as T;
+}
+
+/**
+ * The request in the consumer's unit: under `minor`, `value` is the exact
+ * integer the request already carries and `previous` the integer of the amount
+ * it replaces. Built on the original like `withAmount`, so `cancel()` still
+ * cancels it.
+ */
+export function requestInUnit(
+  request: CurrencyChangeRequest,
+  unit: CurrencyUnit,
+  format: CurrencyFormat,
+): CurrencyChangeRequest {
+  if (unit === 'major') return request;
+  return Object.defineProperties(Object.create(request) as CurrencyChangeRequest, {
+    value: { enumerable: true, value: request.minorUnits },
+    previous: { enumerable: true, value: format.toMinorUnits(request.previous) },
+  });
+}
+
+/**
  * The fraction digits ISO 4217 gives this currency, read through `Intl` rather
  * than through a table this module would have to maintain.
  */

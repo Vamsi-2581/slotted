@@ -108,7 +108,8 @@ export interface DataGridMessages {
   readonly selectAll: Message;
   readonly selectAllFiltered: Message<{ count: number }>;
   readonly selectAllPage: Message<{ count: number }>;
-  readonly selectRow: Message<{ row: string }>;
+  /** `row` is the row header's text, `key` the row key; `row` falls back to the key without a row header. */
+  readonly selectRow: Message<{ row: string; key: string }>;
   readonly sortAscending: Message<{ column: string }>;
   readonly sortAscendingAction: Message;
   readonly sortClearAction: Message;

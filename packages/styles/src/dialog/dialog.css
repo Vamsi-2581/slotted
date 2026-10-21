@@ -532,6 +532,10 @@
     --_tone-color: var(--slotted-tone-success-text, CanvasText);
   }
 
+  [data-ui-dialog][data-tone='info'] {
+    --_tone-color: var(--slotted-tone-info-text, CanvasText);
+  }
+
   [data-ui-dialog][data-tone='warning'] {
     --_tone-color: var(--slotted-tone-warning-text, CanvasText);
   }

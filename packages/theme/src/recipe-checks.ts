@@ -14,7 +14,7 @@ const HIGHLIGHT_STEP = 0.02;
 /** The lightness a dark scheme's raised layer stands above the page: a shadow does not read there. */
 const LAYER_STEP = 0.04;
 const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
-const TONES = ['accent', 'secondary', 'neutral', 'success', 'warning', 'danger'];
+const TONES = ['accent', 'secondary', 'neutral', 'success', 'info', 'warning', 'danger'];
 const DATA_SLOTS = Array.from({ length: 8 }, (_, index) => `--slotted-data-${index + 1}`);
 
 /**
@@ -72,9 +72,13 @@ export function checkScheme(values: Readonly<Record<string, Oklch>>, scheme: Sch
     }
     pair(`--slotted-tone-${tone}-text`, `--slotted-tone-${tone}-surface`, text);
   }
-  pair('--slotted-tone-accent-border', '--slotted-surface', NON_TEXT);
-  pair('--slotted-tone-accent-border', '--slotted-tone-accent-surface', NON_TEXT);
+  for (const tone of ['accent', 'info']) {
+    pair(`--slotted-tone-${tone}-border`, '--slotted-surface', NON_TEXT);
+    pair(`--slotted-tone-${tone}-border`, `--slotted-tone-${tone}-surface`, NON_TEXT);
+  }
   pair('--slotted-disabled-foreground', '--slotted-disabled-background', NON_TEXT);
+  /* An icon on a slot used as a ground: a mark, at the non-text ratio. */
+  for (const slot of DATA_SLOTS) pair(`${slot}-on`, slot, NON_TEXT);
   return failures;
 }
 

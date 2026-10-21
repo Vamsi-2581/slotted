@@ -53,7 +53,7 @@ export type DialogFullScreen = 'never' | 'narrow' | 'always';
 export type DialogDismissPolicy = 'close' | 'none';
 
 /** The five semantic tones. An alert dialog draws its mark from this. */
-export type DialogTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type DialogTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /** Where focus goes when the layer opens. */
 export type DialogInitialFocus = 'first' | 'container' | 'cancel' | HTMLElement | false;

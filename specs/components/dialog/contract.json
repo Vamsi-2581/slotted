@@ -138,7 +138,7 @@
     "escape": ["close", "none"],
     "outsidePress": ["close", "none"],
     "back": ["close", "none"],
-    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "initialFocus": ["first", "container", "cancel"]
   },
   "resolution": {

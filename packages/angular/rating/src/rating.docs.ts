@@ -26,7 +26,7 @@ export const ANGULAR_RATING_TOKENS = ratingTokens.map((name) => ({
 }));
 
 const SIZE = "'sm' | 'md' | 'lg'";
-const TONE = "'accent' | 'success' | 'warning' | 'danger'";
+const TONE = "'accent' | 'info' | 'success' | 'warning' | 'danger'";
 
 const IMPORT_SOURCE =
   "import {\n  provideRating,\n  SlRating,\n  SlRatingCaption,\n  SlRatingDisplay,\n  SlRatingSummary,\n  SlRatingSymbol,\n} from '@slotted/angular/rating';";

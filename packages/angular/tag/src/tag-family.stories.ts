@@ -13,7 +13,7 @@ import { SlTagGroup } from './tag-group';
 import { SlTagRemove } from './tag-remove';
 import { SlTagToggle } from './tag-toggle';
 
-const TONES = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const TONES = ['accent', 'secondary', 'info', 'success', 'warning', 'danger'];
 const VARIANTS = ['solid', 'soft', 'outline'];
 const SIZES = ['sm', 'md', 'lg'];
 

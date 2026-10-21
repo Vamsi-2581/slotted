@@ -207,6 +207,15 @@
     --_text: var(--slotted-tone-success-text);
   }
 
+  [data-ui-avatar][data-part-root][data-tone='info'] {
+    --_solid: var(--slotted-tone-info-solid);
+    --_solid-edge: var(--slotted-tone-info-solid);
+    --_on-solid: var(--slotted-tone-info-on-solid);
+    --_surface: var(--slotted-tone-info-surface);
+    --_border: var(--slotted-tone-info-border);
+    --_text: var(--slotted-tone-info-text);
+  }
+
   [data-ui-avatar][data-part-root][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_solid-edge: var(--slotted-tone-warning-solid);

@@ -219,7 +219,7 @@
     "growing": ["none", "button", "scroll"],
     "arrivals": ["hold", "show"],
     "timeFormat": ["relative", "absolute"],
-    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "controls": ["both", "read", "dismiss", "none"]
   },
   "resolution": "the consumer's explicit prop, then the family's defaults provider, then the fallback",
@@ -324,6 +324,7 @@
   "toneGlyph": {
     "accent": "circle-info",
     "secondary": "bell",
+    "info": "circle-info",
     "success": "circle-check",
     "warning": "circle-alert",
     "danger": "circle-x",

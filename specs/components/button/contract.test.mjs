@@ -43,6 +43,7 @@ test('separates the tone from the way it is painted', () => {
     'accent',
     'secondary',
     'neutral',
+    'info',
     'success',
     'warning',
     'danger',

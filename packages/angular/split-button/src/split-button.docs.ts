@@ -289,7 +289,7 @@ export const ANGULAR_SPLIT_BUTTON_DOCS = {
     api: apiRows([
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'accent',
         'slSplitButton',
         'The tone both halves are painted in. Resolved from the prop, then SplitButtonDefaultsProvider, then button’s own provider, then the contract',

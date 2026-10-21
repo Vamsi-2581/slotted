@@ -1000,6 +1000,12 @@ export const contract: TokenContract = {
       "type": "length"
     },
     {
+      "name": "--slotted-control-focus-ring-offset",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length"
+    },
+    {
       "name": "--slotted-target-min",
       "layer": "semantic",
       "axis": "base",
@@ -1544,6 +1550,78 @@ export const contract: TokenContract = {
       "forcedColor": "Canvas"
     },
     {
+      "name": "--slotted-tone-info-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-tone-info-surface",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-info-solid-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-tone-info-solid-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-tone-info-on-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonText"
+    },
+    {
+      "name": "--slotted-tone-info-border",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonBorder"
+    },
+    {
+      "name": "--slotted-tone-info-text",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-info-subtle-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-info-subtle-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
       "name": "--slotted-shadow-xs",
       "layer": "semantic",
       "axis": "scheme",
@@ -1782,6 +1860,70 @@ export const contract: TokenContract = {
       "type": "color",
       "root": true,
       "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-1-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-2-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-3-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-4-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-5-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-6-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-7-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-8-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
     },
     {
       "name": "--slotted-control-height-sm",
@@ -2293,6 +2435,7 @@ export type BaseToken =
   | '--slotted-focus-ring-width'
   | '--slotted-control-invalid-edge-width'
   | '--slotted-focus-ring-offset'
+  | '--slotted-control-focus-ring-offset'
   | '--slotted-target-min'
   | '--slotted-target-comfortable'
   | '--slotted-selection-size-sm'
@@ -2365,6 +2508,15 @@ export type SchemeToken =
   | '--slotted-tone-danger-text'
   | '--slotted-tone-danger-subtle-hover'
   | '--slotted-tone-danger-subtle-active'
+  | '--slotted-tone-info-solid'
+  | '--slotted-tone-info-surface'
+  | '--slotted-tone-info-solid-hover'
+  | '--slotted-tone-info-solid-active'
+  | '--slotted-tone-info-on-solid'
+  | '--slotted-tone-info-border'
+  | '--slotted-tone-info-text'
+  | '--slotted-tone-info-subtle-hover'
+  | '--slotted-tone-info-subtle-active'
   | '--slotted-shadow-xs'
   | '--slotted-shadow-sm'
   | '--slotted-shadow-md'
@@ -2394,6 +2546,14 @@ export type SchemeToken =
   | '--slotted-data-6'
   | '--slotted-data-7'
   | '--slotted-data-8'
+  | '--slotted-data-1-on'
+  | '--slotted-data-2-on'
+  | '--slotted-data-3-on'
+  | '--slotted-data-4-on'
+  | '--slotted-data-5-on'
+  | '--slotted-data-6-on'
+  | '--slotted-data-7-on'
+  | '--slotted-data-8-on'
   | '--slotted-upload-kind-pdf'
   | '--slotted-upload-kind-document'
   | '--slotted-upload-kind-spreadsheet'
@@ -2515,6 +2675,15 @@ export type ColorToken =
   | '--slotted-tone-danger-text'
   | '--slotted-tone-danger-subtle-hover'
   | '--slotted-tone-danger-subtle-active'
+  | '--slotted-tone-info-solid'
+  | '--slotted-tone-info-surface'
+  | '--slotted-tone-info-solid-hover'
+  | '--slotted-tone-info-solid-active'
+  | '--slotted-tone-info-on-solid'
+  | '--slotted-tone-info-border'
+  | '--slotted-tone-info-text'
+  | '--slotted-tone-info-subtle-hover'
+  | '--slotted-tone-info-subtle-active'
   | '--slotted-surface'
   | '--slotted-surface-raised'
   | '--slotted-surface-sunken'
@@ -2539,6 +2708,14 @@ export type ColorToken =
   | '--slotted-data-6'
   | '--slotted-data-7'
   | '--slotted-data-8'
+  | '--slotted-data-1-on'
+  | '--slotted-data-2-on'
+  | '--slotted-data-3-on'
+  | '--slotted-data-4-on'
+  | '--slotted-data-5-on'
+  | '--slotted-data-6-on'
+  | '--slotted-data-7-on'
+  | '--slotted-data-8-on'
   | '--slotted-upload-kind-pdf'
   | '--slotted-upload-kind-document'
   | '--slotted-upload-kind-spreadsheet'

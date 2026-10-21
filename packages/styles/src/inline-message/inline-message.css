@@ -103,6 +103,10 @@
     --_text: var(--slotted-tone-success-text);
   }
 
+  [data-ui-inline-message][data-part-root][data-tone='info'] {
+    --_text: var(--slotted-tone-info-text);
+  }
+
   [data-ui-inline-message][data-part-root][data-tone='warning'] {
     --_text: var(--slotted-tone-warning-text);
   }

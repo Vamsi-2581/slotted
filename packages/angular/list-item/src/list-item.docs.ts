@@ -281,7 +281,7 @@ export const ANGULAR_LIST_ITEM_DOCS = {
     api: apiRows([
       [
         'tone',
-        "'secondary' | 'accent' | 'success' | 'warning' | 'danger'",
+        "'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'danger'",
         'secondary',
         'slListItem',
         'The row ink, the wash under the pointer and the ground of a selected row. It never fills a resting row',

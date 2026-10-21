@@ -615,7 +615,7 @@ const shared = {
   ],
   tone: [
     'tone',
-    "'accent' | 'success' | 'warning' | 'danger'",
+    "'accent' | 'info' | 'success' | 'warning' | 'danger'",
     'warning',
     'all members, RatingProvider',
     'The colour a lit symbol takes. secondary is declined: its solid step is a ground, and a star lit in it reads as unlit',

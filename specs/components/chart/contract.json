@@ -187,7 +187,7 @@
     "renderer": ["auto", "svg", "canvas"],
     "scale": ["linear", "log"],
     "xType": ["category", "time", "value"],
-    "tone": ["neutral", "accent", "secondary", "success", "warning", "danger"],
+    "tone": ["neutral", "accent", "secondary", "info", "success", "warning", "danger"],
     "slot": ["1", "2", "3", "4", "5", "6", "7", "8"],
     "variant": ["plain", "card"],
     "toolbar": ["visible", "hover", "none"],

@@ -7,6 +7,7 @@ export const BUTTON_TONES = [
   'accent',
   'secondary',
   'neutral',
+  'info',
   'success',
   'warning',
   'danger',

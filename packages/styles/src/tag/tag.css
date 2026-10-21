@@ -185,6 +185,18 @@
     --_text: var(--slotted-tone-success-text);
   }
 
+  [data-ui-tag][data-part-root][data-tone='info'] {
+    --_solid: var(--slotted-tone-info-solid);
+    --_solid-hover: var(--slotted-tone-info-solid-hover);
+    --_solid-active: var(--slotted-tone-info-solid-active);
+    --_on-solid: var(--slotted-tone-info-on-solid);
+    --_surface: var(--slotted-tone-info-surface);
+    --_subtle-hover: var(--slotted-tone-info-subtle-hover);
+    --_subtle-active: var(--slotted-tone-info-subtle-active);
+    --_border: var(--slotted-tag-border-color, var(--slotted-tone-info-border));
+    --_text: var(--slotted-tone-info-text);
+  }
+
   [data-ui-tag][data-part-root][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_solid-hover: var(--slotted-tone-warning-solid-hover);

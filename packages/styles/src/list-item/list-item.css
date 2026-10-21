@@ -248,6 +248,20 @@
     --_selected-active: var(--_subtle-active);
   }
 
+  [data-ui-list-item][data-tone='info'] {
+    --_text: var(--slotted-tone-info-text, CanvasText);
+    --_subtle-hover: var(--slotted-tone-info-subtle-hover, ButtonFace);
+    --_subtle-active: var(--slotted-tone-info-subtle-active, ButtonFace);
+    --_solid-hover: var(--slotted-tone-info-solid-hover, ButtonFace);
+    --_solid-active: var(--slotted-tone-info-solid-active, ButtonFace);
+    --_surface: var(--slotted-tone-info-surface, Canvas);
+    --_selected-edge: var(--slotted-tone-info-border, ButtonBorder);
+    --_selected-surface: var(--slotted-list-item-background-selected, var(--_surface));
+    --_selected-text: var(--slotted-tone-info-text, CanvasText);
+    --_selected-hover: var(--_subtle-hover);
+    --_selected-active: var(--_subtle-active);
+  }
+
   [data-ui-list-item][data-tone='warning'] {
     --_text: var(--slotted-tone-warning-text, CanvasText);
     --_subtle-hover: var(--slotted-tone-warning-subtle-hover, ButtonFace);

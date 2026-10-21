@@ -17,7 +17,7 @@ export const REACT_TAG_TOKENS = tagTokens.map((name) => ({
   purpose: 'Theme-owned Tag decision',
 }));
 
-const TONE = "'accent' | 'secondary' | 'success' | 'warning' | 'danger'";
+const TONE = "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'";
 const VARIANT = "'solid' | 'soft' | 'outline'";
 const SIZE = "'sm' | 'md' | 'lg'";
 const SHAPE = "'pill' | 'square'";

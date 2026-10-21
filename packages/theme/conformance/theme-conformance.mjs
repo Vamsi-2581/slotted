@@ -10,7 +10,7 @@ import { LAYER_ORDER_STATEMENT, parseSeed, resolveTokens } from '../dist/index.j
  * that is the theme's identity, and it belongs to the theme's own tests.
  */
 
-const VARIANTS = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const VARIANTS = ['accent', 'secondary', 'success', 'info', 'warning', 'danger'];
 const SOLID_STATES = ['solid', 'solid-hover', 'solid-active'];
 const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
 

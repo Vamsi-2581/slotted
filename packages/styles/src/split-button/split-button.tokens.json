@@ -6,6 +6,7 @@
   "--slotted-split-button-radius",
   "--slotted-tone-accent-solid-active",
   "--slotted-tone-danger-solid-active",
+  "--slotted-tone-info-solid-active",
   "--slotted-tone-secondary-solid-active",
   "--slotted-tone-success-solid-active",
   "--slotted-tone-warning-solid-active"

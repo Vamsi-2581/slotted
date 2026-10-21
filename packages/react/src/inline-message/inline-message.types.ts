@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 /** Which of the five semantic colours the message speaks in. */
-export type InlineMessageTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type InlineMessageTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /**
  * The type step the message sits at. `sm` is the message of a field; `md` is

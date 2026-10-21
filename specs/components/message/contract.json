@@ -213,7 +213,7 @@
     "actionsVisibility": ["always", "hover"],
     "status": ["sending", "sent", "delivered", "read", "failed", "streaming"],
     "variant": ["solid", "soft", "outline", "plain"],
-    "tone": ["accent", "secondary", "success", "warning", "danger"]
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"]
   },
   "resolution": {
     "align": ["prop", "start"],

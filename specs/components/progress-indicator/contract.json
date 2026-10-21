@@ -15,7 +15,7 @@
   "measured": ["progressBar", "progressCircle"],
   "axes": {
     "size": ["sm", "md", "lg"],
-    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "placement": ["inline", "page", "edge-start", "edge-end"]
   },
   "edge": {

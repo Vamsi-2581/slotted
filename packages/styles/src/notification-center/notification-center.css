@@ -420,6 +420,12 @@
     --_tone-text: var(--slotted-tone-success-text, ButtonText);
     --_tone-surface: var(--slotted-tone-success-surface, Canvas);
   }
+
+  [data-ui-notification-center] > [data-part-feed] [data-part-item][data-tone='info'] {
+    --_tone-solid: var(--slotted-tone-info-solid, ButtonText);
+    --_tone-text: var(--slotted-tone-info-text, ButtonText);
+    --_tone-surface: var(--slotted-tone-info-surface, Canvas);
+  }
   [data-ui-notification-center] > [data-part-feed] [data-part-item][data-tone='warning'] {
     --_tone-solid: var(--slotted-tone-warning-solid, ButtonText);
     --_tone-text: var(--slotted-tone-warning-text, ButtonText);

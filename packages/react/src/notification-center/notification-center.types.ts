@@ -22,7 +22,8 @@ export type NotificationCenterTimeFormat = 'relative' | 'absolute';
 export type NotificationCenterControls = 'both' | 'read' | 'dismiss' | 'none';
 
 /** The item's tone: the family's visual and the wash an unread item stands on. */
-export type NotificationCenterTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type NotificationCenterTone =
+  'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /** Why the view moved. */
 export type NotificationCenterViewReason = Extract<

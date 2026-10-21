@@ -10,7 +10,7 @@ import type {
 import type { ListMarker, ListSize, ListVariant } from '../list';
 
 /** The five the theme carries. `secondary` is the library's neutral. */
-export type ListItemTone = 'secondary' | 'accent' | 'success' | 'warning' | 'danger';
+export type ListItemTone = 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'danger';
 
 export type ListItemSize = ListSize;
 

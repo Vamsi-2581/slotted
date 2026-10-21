@@ -43,7 +43,7 @@ export const ANGULAR_AVATAR_DOCS = {
       ],
       [
         'tone',
-        "'auto' | 'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'auto' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'auto',
         'slAvatar',
         'Which of the five semantic colours the fallback is painted in. auto derives it from the name',

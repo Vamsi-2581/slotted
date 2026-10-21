@@ -261,7 +261,7 @@ export const ANGULAR_SPARKLINE_DOCS = {
       ['max', 'number', '—', 'Sparkline', 'The highest value the extent must hold'],
       [
         'tone',
-        "'neutral' | 'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'neutral' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         '—',
         'Sparkline',
         'How the series is doing. Wins over series; unset, a container may decide',

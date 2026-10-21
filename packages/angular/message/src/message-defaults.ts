@@ -6,7 +6,7 @@ export type MessageLayout = 'bubble' | 'thread';
 export type MessageActionsVisibility = 'always' | 'hover';
 export type MessageStatus = 'sending' | 'sent' | 'delivered' | 'read' | 'failed' | 'streaming';
 export type BubbleVariant = 'solid' | 'soft' | 'outline' | 'plain';
-export type BubbleTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type BubbleTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 export type MessageActivityStepStatus = 'complete' | 'current' | 'pending';
 
 /** Why a version, a reaction or a clamp moved. */

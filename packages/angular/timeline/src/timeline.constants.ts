@@ -12,7 +12,7 @@ import type {
 export type TimelineMode = 'list' | 'feed';
 export type TimelineOrientation = 'vertical' | 'horizontal';
 export type TimelineVariant = 'solid' | 'outline' | 'subtle' | 'plain';
-export type TimelineTone = 'secondary' | 'accent' | 'success' | 'warning' | 'danger';
+export type TimelineTone = 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'danger';
 export type TimelineSize = 'sm' | 'md' | 'lg';
 export type TimelineLevel = 2 | 3 | 4 | 5 | 6;
 export type TimelineOpenReason = 'pointer' | 'keyboard' | 'programmatic';

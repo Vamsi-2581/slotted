@@ -134,6 +134,13 @@ test('offers two sizes, three ranks and the five tones on the item', () => {
   assert.equal(member.defaults.size, 'md');
   assert.deepEqual(contract.axes.level, ['2', '3', '4']);
   assert.equal(member.defaults.level, '2');
-  assert.deepEqual(contract.axes.tone, ['accent', 'secondary', 'success', 'warning', 'danger']);
+  assert.deepEqual(contract.axes.tone, [
+    'accent',
+    'secondary',
+    'info',
+    'success',
+    'warning',
+    'danger',
+  ]);
   assert.ok(!('tone' in member.defaults), 'the tone is the item’s, accent when unstated');
 });

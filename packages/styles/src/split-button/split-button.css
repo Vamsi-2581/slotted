@@ -160,6 +160,10 @@
     --_seam: var(--slotted-tone-success-solid-active);
   }
 
+  [data-ui-split-button][data-part-root] > [data-tone='info'] {
+    --_seam: var(--slotted-tone-info-solid-active);
+  }
+
   [data-ui-split-button][data-part-root] > [data-tone='warning'] {
     --_seam: var(--slotted-tone-warning-solid-active);
   }

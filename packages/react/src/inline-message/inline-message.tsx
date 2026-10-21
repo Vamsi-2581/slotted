@@ -20,6 +20,7 @@ import type {
 const TONE_GLYPH: Record<InlineMessageTone, GlyphName | null> = {
   accent: 'circle-info',
   secondary: null,
+  info: 'circle-info',
   success: 'circle-check',
   warning: 'triangle-alert',
   danger: 'circle-alert',

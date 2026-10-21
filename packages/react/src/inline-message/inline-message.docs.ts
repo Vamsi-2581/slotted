@@ -188,7 +188,7 @@ export const REACT_INLINE_MESSAGE_DOCS = {
     api: apiRows([
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'secondary',
         'InlineMessage',
         'What the message is about, and therefore which mark it draws and which word a reader hears first. secondary is help: no mark, no word, and the neutral muted ink',

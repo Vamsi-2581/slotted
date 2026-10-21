@@ -5,7 +5,8 @@ import type { ComponentPropsWithRef, HTMLAttributes, ImgHTMLAttributes, ReactNod
  * it from the name, so the same person keeps the same colour in a list that is
  * re-sorted and in a table that is paged.
  */
-export type AvatarTone = 'auto' | 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type AvatarTone =
+  'auto' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /** The palette `auto` chooses from, in the order the hash indexes it. */
 export type AvatarResolvedTone = Exclude<AvatarTone, 'auto'>;

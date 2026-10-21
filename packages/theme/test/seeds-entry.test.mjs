@@ -34,7 +34,10 @@ test('the seeds entry carries the seed names and seedStyle, and none of the them
   assert.ok(existsSync(entry), 'dist/seeds.js exists');
   const seeds = await import(entry);
   const index = await import(join(DIST, 'index.js'));
-  assert.deepEqual([...seeds.SEED_NAMES], ['accent', 'neutral', 'success', 'warning', 'danger']);
+  assert.deepEqual(
+    [...seeds.SEED_NAMES],
+    ['accent', 'neutral', 'success', 'info', 'warning', 'danger'],
+  );
   assert.equal(seeds.seedStyle, index.seedStyle);
   assert.equal(seeds.SEED_NAMES, index.SEED_NAMES);
   assert.deepEqual(seeds.seedStyle({ accent: '#7c3aed' }), { '--slotted-seed-accent': '#7c3aed' });

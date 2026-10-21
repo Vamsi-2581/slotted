@@ -411,7 +411,7 @@ test('keeps every code scope legible against the fence ground for every neutral 
  */
 test('keeps every data slot legible against every surface a chart is drawn on', () => {
   const slots = contract.tokens
-    .filter((token) => token.name.startsWith('--slotted-data-'))
+    .filter((token) => /^--slotted-data-\d+$/.test(token.name))
     .map((token) => token.name);
 
   assert.deepEqual(
@@ -452,7 +452,7 @@ test('keeps every data slot legible against every ground for every neutral seed 
   for (const scheme of SCHEMES) {
     const floor = scheme === 'high-contrast' ? 4.5 : 3;
     const slots = Object.keys(theme.schemes[scheme])
-      .filter((token) => token.startsWith('--slotted-data-'))
+      .filter((token) => /^--slotted-data-\d+$/.test(token))
       .map((token) => [token, parseSeed(theme.schemes[scheme][token])]);
     for (const neutral of seedGrid()) {
       const values = evaluateRecipe(defaultTheme.recipe, { ...seeds, neutral }, scheme);
@@ -475,11 +475,40 @@ test('keeps every data slot legible against every ground for every neutral seed 
   );
 });
 
+/**
+ * `info` is a tone of its own: the nine roles every tone carries, its text
+ * readable on its own surface at the scheme's text ratio. An application whose
+ * accent is green had no tone left for a note or a transfer.
+ */
+test('carries an info tone with every role, its text readable on its surface', () => {
+  const roles = [
+    'solid',
+    'solid-hover',
+    'solid-active',
+    'on-solid',
+    'surface',
+    'subtle-hover',
+    'subtle-active',
+    'border',
+    'text',
+  ];
+  for (const [scheme, values] of Object.entries(theme.schemes)) {
+    for (const role of roles)
+      assert.ok(values[`--slotted-tone-info-${role}`], `${scheme} info ${role}`);
+    const floor = scheme === 'high-contrast' ? 7 : 4.5;
+    const ratio = contrast(
+      values['--slotted-tone-info-text'],
+      values['--slotted-tone-info-surface'],
+    );
+    assert.ok(ratio >= floor, `${scheme} info text on its surface is ${ratio.toFixed(2)}:1`);
+  }
+});
+
 /** Eight series a reader tells apart; two slots painted alike are one series drawn twice. */
 test('gives every data slot a colour of its own in every scheme', () => {
   for (const [scheme, values] of Object.entries(theme.schemes)) {
     const painted = contract.tokens
-      .filter((token) => token.name.startsWith('--slotted-data-'))
+      .filter((token) => /^--slotted-data-\d+$/.test(token.name))
       .map((token) => values[token.name]);
     assert.equal(new Set(painted).size, painted.length, `${scheme} paints two slots alike`);
   }

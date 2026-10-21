@@ -1,7 +1,7 @@
 import { inject, InjectionToken } from '@angular/core';
 
 /** The five the theme carries. `secondary` is the library's neutral. */
-export type ListItemTone = 'secondary' | 'accent' | 'success' | 'warning' | 'danger';
+export type ListItemTone = 'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'danger';
 
 /** The room the row gets. Density is the application's choice; this is not. */
 export type ListItemSize = 'sm' | 'md' | 'lg';

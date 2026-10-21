@@ -326,7 +326,7 @@ export const REACT_PROGRESS_INDICATOR_DOCS = {
       ],
       [
         'tone',
-        'accent | secondary | success | warning | danger',
+        'accent | secondary | info | success | warning | danger',
         'accent',
         'all three',
         'The five the theme owns. The indicator is the tone’s text role and the track is a computed tint of it',

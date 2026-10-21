@@ -349,6 +349,14 @@
     --_tone-text: var(--slotted-tone-success-text);
   }
 
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-tone='info'] {
+    --_solid: var(--slotted-tone-info-solid);
+    --_on-solid: var(--slotted-tone-info-on-solid);
+    --_tone-surface: var(--slotted-tone-info-surface);
+    --_tone-border: var(--slotted-tone-info-border);
+    --_tone-text: var(--slotted-tone-info-text);
+  }
+
   [data-ui-toast] > [data-part-list] > [data-part-item][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_on-solid: var(--slotted-tone-warning-on-solid);

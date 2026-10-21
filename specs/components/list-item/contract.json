@@ -115,7 +115,7 @@
     }
   },
   "axes": {
-    "tone": ["secondary", "accent", "success", "warning", "danger"],
+    "tone": ["secondary", "accent", "info", "success", "warning", "danger"],
     "size": ["sm", "md", "lg"],
     "align": ["center", "start"]
   },

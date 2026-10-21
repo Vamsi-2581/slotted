@@ -142,6 +142,7 @@
   "toneGlyphs": {
     "accent": "circle-info",
     "secondary": null,
+    "info": "circle-info",
     "success": "circle-check",
     "warning": "circle-alert",
     "danger": "circle-x"
@@ -219,7 +220,7 @@
     "placement": ["top-start", "top", "top-end", "bottom-start", "bottom", "bottom-end"],
     "attach": ["portal", "viewport", "inline"],
     "stacking": ["list", "stack"],
-    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "variant": ["raised", "soft", "solid"],
     "priority": ["polite", "assertive"],
     "dismissible": [true, false],

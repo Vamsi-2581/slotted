@@ -547,6 +547,14 @@
     --_soft-ink: var(--slotted-tone-success-text);
   }
 
+  [data-ui-message][data-part-bubble][data-tone='info'] {
+    --_solid: var(--slotted-tone-info-solid);
+    --_on-solid: var(--slotted-tone-info-on-solid);
+    --_surface: var(--slotted-tone-info-surface);
+    --_border: var(--slotted-tone-info-border);
+    --_soft-ink: var(--slotted-tone-info-text);
+  }
+
   [data-ui-message][data-part-bubble][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_on-solid: var(--slotted-tone-warning-on-solid);

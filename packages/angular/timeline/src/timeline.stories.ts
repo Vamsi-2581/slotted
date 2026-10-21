@@ -273,7 +273,10 @@ export const Playground: Story = {
     placement: { control: 'radio', options: ['end', 'start', 'alternate'] },
     size: { control: 'radio', options: ['sm', 'md', 'lg'] },
     timeFormat: { control: 'radio', options: ['absolute', 'relative'] },
-    tone: { control: 'select', options: ['secondary', 'accent', 'success', 'warning', 'danger'] },
+    tone: {
+      control: 'select',
+      options: ['secondary', 'accent', 'info', 'success', 'warning', 'danger'],
+    },
     variant: { control: 'radio', options: ['solid', 'outline', 'subtle', 'plain'] },
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
@@ -429,7 +432,7 @@ export const Statuses: Story = {
   }),
 };
 
-const TONES = ['secondary', 'accent', 'success', 'warning', 'danger'];
+const TONES = ['secondary', 'accent', 'info', 'success', 'warning', 'danger'];
 const swatches = (variant: string) =>
   `<div slTimeline label="Variante ${variant}" variant="${variant}"><ol slTimelineList>${TONES.map(
     (tone) => `<li slTimelineItem title="${tone}" tone="${tone}"></li>`,

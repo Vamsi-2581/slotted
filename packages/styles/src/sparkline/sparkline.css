@@ -143,6 +143,10 @@
     --_color: var(--slotted-tone-success-text);
   }
 
+  [data-ui-sparkline][data-tone='info'] {
+    --_color: var(--slotted-tone-info-text);
+  }
+
   [data-ui-sparkline][data-tone='warning'] {
     --_color: var(--slotted-tone-warning-text);
   }

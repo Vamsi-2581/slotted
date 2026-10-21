@@ -556,6 +556,10 @@
     :scope [data-part-delta][data-tone='success'] {
       --_tone-text: var(--slotted-tone-success-text);
     }
+
+    :scope [data-part-delta][data-tone='info'] {
+      --_tone-text: var(--slotted-tone-info-text);
+    }
   }
 
   @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
@@ -637,6 +641,10 @@
   @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
     :scope[data-tone='success'] [data-part-trend] {
       --slotted-sparkline-color: var(--slotted-tone-success-text);
+    }
+
+    :scope[data-tone='info'] [data-part-trend] {
+      --slotted-sparkline-color: var(--slotted-tone-info-text);
     }
   }
 

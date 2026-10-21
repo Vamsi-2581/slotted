@@ -16,7 +16,7 @@ import { BadgeDefaultsProvider } from './badge-defaults';
 import { REACT_BADGE_DOCS, REACT_BADGE_TOKENS } from './badge.docs';
 import type { BadgePlacement, BadgeShape, BadgeSize, BadgeTone, BadgeVariant } from './badge.types';
 
-const TONES: readonly BadgeTone[] = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const TONES: readonly BadgeTone[] = ['accent', 'secondary', 'info', 'success', 'warning', 'danger'];
 const VARIANTS: readonly BadgeVariant[] = ['solid', 'soft', 'outline'];
 const SIZES: readonly BadgeSize[] = ['sm', 'md', 'lg'];
 const SHAPES: readonly BadgeShape[] = ['pill', 'square', 'dot'];
@@ -207,7 +207,7 @@ export const Shapes: Story = {
         </header>
         <div className="slotted-demo-stage">
           <div className="slotted-demo-row">
-            {(['success', 'warning', 'danger', 'secondary'] as const).map((tone) => (
+            {(['info', 'success', 'warning', 'danger', 'secondary'] as const).map((tone) => (
               <Inline align="center" gap={3} key={tone}>
                 <Badge shape="dot" tone={tone} variant={tone === 'secondary' ? 'outline' : 'solid'}>
                   <VisuallyHidden>{tone}</VisuallyHidden>

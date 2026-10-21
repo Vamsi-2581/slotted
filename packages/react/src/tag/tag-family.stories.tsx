@@ -13,7 +13,7 @@ import { TagLink } from './tag-link';
 import { TagToggle } from './tag-toggle';
 import type { TagSize, TagTone, TagVariant } from './tag.types';
 
-const TONES: readonly TagTone[] = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const TONES: readonly TagTone[] = ['accent', 'secondary', 'info', 'success', 'warning', 'danger'];
 const VARIANTS: readonly TagVariant[] = ['solid', 'soft', 'outline'];
 const SIZES: readonly TagSize[] = ['sm', 'md', 'lg'];
 

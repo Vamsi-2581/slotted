@@ -78,6 +78,7 @@ function Control({ text, ...props }: TooltipTriggerProps & { text: string }) {
 const TONE_GLYPH: Record<NotificationCenterTone, GlyphName> = {
   accent: 'circle-info',
   secondary: 'bell',
+  info: 'circle-info',
   success: 'circle-check',
   warning: 'circle-alert',
   danger: 'circle-x',

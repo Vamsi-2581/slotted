@@ -26,7 +26,7 @@ const imports = (selector: string, exportAs: string): ReferenceImport => ({
   exportAs,
 });
 
-const TONE = 'accent | secondary | neutral | success | warning | danger';
+const TONE = 'accent | secondary | neutral | info | success | warning | danger';
 const VARIANT = 'solid | outline | ghost';
 const SIZE = 'sm | md | lg';
 

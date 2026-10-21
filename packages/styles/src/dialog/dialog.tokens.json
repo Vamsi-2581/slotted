@@ -61,6 +61,7 @@
   "--slotted-text-muted",
   "--slotted-tone-accent-text",
   "--slotted-tone-danger-text",
+  "--slotted-tone-info-text",
   "--slotted-tone-secondary-subtle-active",
   "--slotted-tone-secondary-subtle-hover",
   "--slotted-tone-secondary-text",

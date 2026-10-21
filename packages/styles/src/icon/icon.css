@@ -111,6 +111,10 @@
     color: var(--slotted-tone-success-text, CanvasText);
   }
 
+  [data-ui-icon][data-tone='info'] {
+    color: var(--slotted-tone-info-text, CanvasText);
+  }
+
   [data-ui-icon][data-tone='warning'] {
     color: var(--slotted-tone-warning-text, CanvasText);
   }

@@ -68,6 +68,7 @@ test('gives every severity a mark, so colour is never the only signal', () => {
   assert.deepEqual(contract.toneGlyphs, {
     accent: 'circle-info',
     secondary: null,
+    info: 'circle-info',
     success: 'circle-check',
     warning: 'triangle-alert',
     danger: 'circle-alert',
@@ -110,6 +111,7 @@ test('says the severity in words as well as in colour and geometry', () => {
   assert.deepEqual(contract.tonePrefixes, {
     accent: null,
     secondary: null,
+    info: null,
     success: 'Success:',
     warning: 'Warning:',
     danger: 'Error:',

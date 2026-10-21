@@ -222,7 +222,7 @@ export const ANGULAR_ALERT_DOCS = {
     api: apiRows([
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'accent',
         'slAlert',
         'Which of the five semantic colours the message speaks in, and which mark it draws: circle-info, none for secondary, circle-check, circle-alert, circle-x',

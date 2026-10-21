@@ -8,7 +8,7 @@ import { SlRatingDisplay } from './rating-display';
 import { SlRatingSummary } from './rating-summary';
 
 const SIZES = ['sm', 'md', 'lg'];
-const TONES = ['accent', 'success', 'warning', 'danger'];
+const TONES = ['accent', 'info', 'success', 'warning', 'danger'];
 const WORDS = ['Toque numa estrela', 'Péssimo', 'Ruim', 'Regular', 'Bom', 'Excelente'];
 
 const meta: Meta = {

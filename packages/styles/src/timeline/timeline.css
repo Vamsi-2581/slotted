@@ -179,6 +179,16 @@
     --_tone-text: var(--slotted-tone-success-text, CanvasText);
   }
 
+  [data-ui-timeline][data-tone='info'],
+  [data-ui-timeline] [data-tone='info'] {
+    --_tone-solid: var(--slotted-tone-info-solid, ButtonFace);
+    --_tone-on-solid: var(--slotted-tone-info-on-solid, ButtonText);
+    --_tone-surface: var(--slotted-tone-info-surface, Canvas);
+    --_tone-border: var(--slotted-tone-info-border, ButtonBorder);
+    --_tone-mark: var(--slotted-tone-info-border, ButtonBorder);
+    --_tone-text: var(--slotted-tone-info-text, CanvasText);
+  }
+
   [data-ui-timeline][data-tone='warning'],
   [data-ui-timeline] [data-tone='warning'] {
     --_tone-solid: var(--slotted-tone-warning-solid, ButtonFace);

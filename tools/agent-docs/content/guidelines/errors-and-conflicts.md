@@ -25,7 +25,7 @@ families: [inline-message, toast, result-state, button, dialog]
 # Errors and conflicts
 
 What a screen does with an answer that is not the one it asked for. The
-library gives `inline-message` five tones, `result-state` four statuses and
+library gives `inline-message` six tones, `result-state` four statuses and
 `toast` a place for what is passing; it does not say which of them a refusal
 belongs in, or that two refusals a reader must answer differently should not
 look the same.

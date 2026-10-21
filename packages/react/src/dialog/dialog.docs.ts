@@ -932,7 +932,7 @@ export const REACT_DIALOG_DOCS = {
       ),
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'danger',
         'AlertDialog',
         'The kind of decision. It sets the mark AlertDialogIcon draws and its colour.',

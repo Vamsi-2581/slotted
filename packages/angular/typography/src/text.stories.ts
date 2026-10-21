@@ -14,7 +14,16 @@ interface TextStoryArgs {
 }
 
 const SIZES: readonly TypographySize[] = ['3xl', '2xl', 'xl', 'lg', 'md', 'sm', 'xs'];
-const TONES = ['inherit', 'default', 'muted', 'accent', 'success', 'warning', 'danger'] as const;
+const TONES = [
+  'inherit',
+  'default',
+  'muted',
+  'accent',
+  'info',
+  'success',
+  'warning',
+  'danger',
+] as const;
 
 const referenceStories: ReferencePageConfig['stories'] = () => ({
   essential: Playground as never,

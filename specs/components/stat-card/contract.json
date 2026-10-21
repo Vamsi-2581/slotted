@@ -12,7 +12,7 @@
     "layout": ["inline", "stacked"],
     "status": ["ready", "empty", "error"],
     "goodWhen": ["up", "down", "none"],
-    "tone": ["neutral", "accent", "secondary", "success", "warning", "danger"],
+    "tone": ["neutral", "accent", "secondary", "info", "success", "warning", "danger"],
     "trend": ["up", "down", "flat"]
   },
   "members": {

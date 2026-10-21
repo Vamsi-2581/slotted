@@ -350,7 +350,7 @@ export const ANGULAR_TOAST_DOCS = {
       ],
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'accent',
         'SlToastService.show',
         'Which of the five semantic colours the message speaks in, and which mark it draws',

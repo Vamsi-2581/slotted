@@ -5,7 +5,8 @@ import type { ComponentPropsWithRef, ReactNode } from 'react';
 export type SparklineType = 'line' | 'bar';
 export type SparklineSize = 'sm' | 'md' | 'lg';
 export type SparklineCurve = 'linear' | 'monotone';
-export type SparklineTone = 'neutral' | 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type SparklineTone =
+  'neutral' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 export type SparklineSeries = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 /**

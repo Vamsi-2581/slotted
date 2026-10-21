@@ -37,6 +37,10 @@ const DECORATIVE = new Map([
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
   [
+    'progress-indicator/indicator',
+    'the travelling bar of an indeterminate linear indicator: an empty box, never text, scaled along the track so the compositor runs it while the main thread is busy',
+  ],
+  [
     'carousel/previous',
     'the round previous control: one aria-hidden Glyph named by aria-label, settled to 0.94 under the press',
   ],

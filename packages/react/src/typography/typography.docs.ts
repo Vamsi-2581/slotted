@@ -21,7 +21,7 @@ export const REACT_TYPOGRAPHY_TOKENS = typographyTokens.map((name) => ({
 
 const SIZE = "'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'";
 const TONE =
-  "'inherit' | 'default' | 'muted' | 'accent' | 'success' | 'warning' | 'danger' | 'inverse'";
+  "'inherit' | 'default' | 'muted' | 'accent' | 'info' | 'success' | 'warning' | 'danger' | 'inverse'";
 const WRAP = "'normal' | 'nowrap' | 'balance' | 'pretty'";
 
 export const REACT_TYPOGRAPHY_DOCS = {

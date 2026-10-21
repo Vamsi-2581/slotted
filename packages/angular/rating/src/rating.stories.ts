@@ -108,7 +108,7 @@ export const Playground: Story = {
   argTypes: {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     step: { control: 'inline-radio', options: [1, 0.5] },
-    tone: { control: 'inline-radio', options: ['accent', 'success', 'warning', 'danger'] },
+    tone: { control: 'inline-radio', options: ['accent', 'info', 'success', 'warning', 'danger'] },
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },
   render: (args) => ({

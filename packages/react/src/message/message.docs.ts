@@ -789,7 +789,7 @@ export const REACT_MESSAGE_DOCS = {
       ],
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'secondary',
         'Bubble',
         'The tone. Falls back to the row (end is accent), then the provider',

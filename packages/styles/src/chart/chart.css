@@ -51,6 +51,7 @@
     --_chart-tone-accent: var(--slotted-tone-accent-text, CanvasText);
     --_chart-tone-secondary: var(--slotted-tone-secondary-text, CanvasText);
     --_chart-tone-success: var(--slotted-tone-success-text, CanvasText);
+    --_chart-tone-info: var(--slotted-tone-info-text, CanvasText);
     --_chart-tone-warning: var(--slotted-tone-warning-text, CanvasText);
     --_chart-tone-danger: var(--slotted-tone-danger-text, CanvasText);
     --_chart-overflow: var(--slotted-text-muted, GrayText);
@@ -502,6 +503,10 @@
   }
   [data-ui-chart] [data-tone='success'] {
     --_series: var(--_chart-tone-success);
+  }
+
+  [data-ui-chart] [data-tone='info'] {
+    --_series: var(--_chart-tone-info);
   }
   [data-ui-chart] [data-tone='warning'] {
     --_series: var(--_chart-tone-warning);

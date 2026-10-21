@@ -26,6 +26,7 @@ import type {
 const TONE_GLYPH: Record<ToastTone, GlyphName | null> = {
   accent: 'circle-info',
   secondary: null,
+  info: 'circle-info',
   success: 'circle-check',
   warning: 'circle-alert',
   danger: 'circle-x',

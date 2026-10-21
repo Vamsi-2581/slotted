@@ -83,7 +83,13 @@ test('draws itself round for a person and square for everything else', () => {
 test('colours itself from the name, out of the palette the library already speaks', () => {
   assert.deepEqual(contract.axes.tone, ['auto', ...TONES]);
   assert.equal(contract.members.avatar.defaults.tone, 'auto');
-  assert.deepEqual(contract.autoTonePalette, TONES);
+  /* `info` is a tone a reader picks, not one a name is hashed to: its default
+     seed is a blue beside the accent's, and two blues in a palette of six
+     collide twice as often as any other pair. */
+  assert.deepEqual(
+    contract.autoTonePalette,
+    TONES.filter((tone) => tone !== 'info'),
+  );
 });
 
 /**

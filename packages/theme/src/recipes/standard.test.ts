@@ -9,6 +9,7 @@ const DEFAULT_SEEDS: Record<SeedName, string> = {
   accent: '#1d4ed8',
   neutral: '#64748b',
   success: '#15803d',
+  info: 'oklch(0.6 0.15 255)',
   warning: '#facc15',
   danger: '#dc2626',
 };
@@ -17,8 +18,8 @@ const base = Object.fromEntries(
 ) as Record<SeedName, NonNullable<ReturnType<typeof parseSeed>>>;
 
 describe('recipes.standard', () => {
-  it('derives the same 80 tokens in every scheme', () => {
-    for (const scheme of SCHEMES) expect(Object.keys(standard[scheme])).toHaveLength(80);
+  it('derives the same 97 tokens in every scheme', () => {
+    for (const scheme of SCHEMES) expect(Object.keys(standard[scheme])).toHaveLength(97);
   });
 
   it('meets every ratio for every seed of the grid, one seed varied at a time', () => {

@@ -10,7 +10,8 @@
 
 export type ChartKind = 'line' | 'area' | 'bar' | 'pie' | 'scatter';
 
-export type ChartTone = 'neutral' | 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type ChartTone =
+  'neutral' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 export type ChartSlot = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 

@@ -104,6 +104,7 @@ test('gives every tone with a severity a mark, so colour is never the only signa
   assert.deepEqual(contract.toneGlyphs, {
     accent: 'circle-info',
     secondary: null,
+    info: 'circle-info',
     success: 'circle-check',
     warning: 'circle-alert',
     danger: 'circle-x',

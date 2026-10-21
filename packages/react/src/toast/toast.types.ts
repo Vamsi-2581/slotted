@@ -10,7 +10,7 @@ import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 /** Which of the five semantic colours the message speaks in. */
-export type ToastTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type ToastTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /**
  * How that colour is painted. `raised` is the neutral surface with the tone in

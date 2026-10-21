@@ -1,7 +1,7 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
 
 /** Which of the five semantic colours the message speaks in. */
-export type InlineMessageTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type InlineMessageTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /**
  * The type step the message sits at. `sm` is the message of a field; `md` is
@@ -41,13 +41,14 @@ export type InlineMessagePrefixes = Record<InlineMessageTone, string | null>;
  * GOV.UK's Error message component publishes the idea and hard-codes the word;
  * this table generalises it to every tone that is a severity and puts it behind
  * the token below, which is the only translation surface this library has
- * today. `accent` and `secondary` carry none: information and help announce
+ * today. `accent`, `secondary` and `info` carry none: information and help announce
  * themselves by their sentence, and a reader told “Information:” before every
  * hint hears one more word per field for nothing.
  */
 export const INLINE_MESSAGE_PREFIXES: InlineMessagePrefixes = {
   accent: null,
   secondary: null,
+  info: null,
   success: 'Success:',
   warning: 'Warning:',
   danger: 'Error:',

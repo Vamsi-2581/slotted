@@ -5,7 +5,7 @@ import { parseSeed } from './color';
  * module is the entry `@slotted/theme/seeds`, which writes a reader's seeds
  * without loading the contract, the validator or the renderer.
  */
-export const SEED_NAMES = ['accent', 'neutral', 'success', 'warning', 'danger'] as const;
+export const SEED_NAMES = ['accent', 'neutral', 'success', 'info', 'warning', 'danger'] as const;
 export type SeedName = (typeof SEED_NAMES)[number];
 
 /** The `style` object that gives an element its own seeds, for React `style` and Angular `[style]`. */

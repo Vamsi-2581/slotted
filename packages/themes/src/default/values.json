@@ -60,6 +60,7 @@
     "--slotted-focus-ring-width": "var(--slotted-border-width-thick)",
     "--slotted-control-invalid-edge-width": "var(--slotted-border-width-thin)",
     "--slotted-focus-ring-offset": "var(--slotted-border-width-thick)",
+    "--slotted-control-focus-ring-offset": "var(--slotted-focus-ring-offset)",
     "--slotted-duration-instant": "1ms",
     "--slotted-duration-short": "120ms",
     "--slotted-duration-medium": "200ms",

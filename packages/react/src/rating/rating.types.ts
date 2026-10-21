@@ -10,7 +10,7 @@ export type RatingSize = 'sm' | 'md' | 'lg';
  * The colour a lit symbol takes. `secondary` is not among them: its solid step
  * is a ground, and a star lit in it reads as an unlit one.
  */
-export type RatingTone = 'accent' | 'success' | 'warning' | 'danger';
+export type RatingTone = 'accent' | 'info' | 'success' | 'warning' | 'danger';
 
 /** The smallest move of the input member: a whole symbol, or half of one. */
 export type RatingStep = 1 | 0.5;

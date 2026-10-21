@@ -7,7 +7,7 @@
     "summary": "Short status message next to content."
   },
   "axes": {
-    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "size": ["sm", "md"],
     "mark": ["glyph", "dot", "none"],
     "live": ["off", "polite", "assertive"]
@@ -15,6 +15,7 @@
   "toneGlyphs": {
     "accent": "circle-info",
     "secondary": null,
+    "info": "circle-info",
     "success": "circle-check",
     "warning": "triangle-alert",
     "danger": "circle-alert"
@@ -22,6 +23,7 @@
   "tonePrefixes": {
     "accent": null,
     "secondary": null,
+    "info": null,
     "success": "Success:",
     "warning": "Warning:",
     "danger": "Error:"

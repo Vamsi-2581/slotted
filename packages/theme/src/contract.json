@@ -213,13 +213,14 @@
     {
       "id": "tone",
       "reader": "application",
-      "purpose": "What an element carrying an intent is painted with: six tones, each with the same nine roles.",
+      "purpose": "What an element carrying an intent is painted with: seven tones, each with the same nine roles.",
       "pattern": "--slotted-tone-{tone}-{role}",
       "dimensions": {
         "tone": {
           "accent": "The product's intent: the primary action, the chosen option, the current place.",
           "secondary": "A second intent beside accent, for an action or a mark that must not compete with it.",
           "neutral": "Ink: the inverse surface as a fill and the text colour as a label, for a primary action in a product that keeps the accent for data.",
+          "info": "A fact the reader is told with no judgement of it: a note, a transfer, a change of state that is neither good nor bad. Its own seed, so it stays apart from an accent that shares a hue with success.",
           "success": "A result that completed or a state that is healthy.",
           "warning": "A state that needs attention before it becomes a failure.",
           "danger": "A failure, an error or an action that destroys data."
@@ -243,7 +244,34 @@
       "purpose": "What a series of data is painted with: a line, a bar, a slice. Slots are assigned in order and never skipped.",
       "pattern": "--slotted-data-{slot}",
       "dimensions": {
-        "slot": "open"
+        "slot": {
+          "1": "The first series.",
+          "2": "The second series.",
+          "3": "The third series.",
+          "4": "The fourth series.",
+          "5": "The fifth series.",
+          "6": "The sixth series.",
+          "7": "The seventh series.",
+          "8": "The eighth series."
+        }
+      }
+    },
+    {
+      "id": "data-on",
+      "reader": "application",
+      "purpose": "The ink drawn on a data slot used as a ground — an icon on a category tile — at the non-text ratio (3:1, WCAG 1.4.11) against its slot in every scheme.",
+      "pattern": "--slotted-data-{slot}-on",
+      "dimensions": {
+        "slot": {
+          "1": "Ink on the first slot.",
+          "2": "Ink on the second slot.",
+          "3": "Ink on the third slot.",
+          "4": "Ink on the fourth slot.",
+          "5": "Ink on the fifth slot.",
+          "6": "Ink on the sixth slot.",
+          "7": "Ink on the seventh slot.",
+          "8": "Ink on the eighth slot."
+        }
       }
     },
     {
@@ -258,6 +286,7 @@
         "--slotted-control-border-width": "The edge width of a control at rest.",
         "--slotted-control-radius": "The corner of a control.",
         "--slotted-control-shadow-focus-geometry": "Offset, blur and spread of the shadow a focused control draws, with no colour; drawn with `--slotted-focus-ring-color`.",
+        "--slotted-control-focus-ring-offset": "The distance between a field's frame and its focus outline; set to the negative of `--slotted-control-border-width`, a field's ring lies flush over its border while a button keeps `--slotted-focus-ring-offset`.",
         "--slotted-control-transition-duration": "How long a control takes to change state.",
         "--slotted-control-transition-easing": "The curve of a control's change of state.",
         "--slotted-control-invalid-edge-width": "The edge an invalid control adds inside its border, so the state reads where colour cannot.",
@@ -1355,6 +1384,12 @@
       "type": "length"
     },
     {
+      "name": "--slotted-control-focus-ring-offset",
+      "layer": "semantic",
+      "axis": "base",
+      "type": "length"
+    },
+    {
       "name": "--slotted-target-min",
       "layer": "semantic",
       "axis": "base",
@@ -1899,6 +1934,78 @@
       "forcedColor": "Canvas"
     },
     {
+      "name": "--slotted-tone-info-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-tone-info-surface",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-info-solid-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-tone-info-solid-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonFace"
+    },
+    {
+      "name": "--slotted-tone-info-on-solid",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonText"
+    },
+    {
+      "name": "--slotted-tone-info-border",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "ButtonBorder"
+    },
+    {
+      "name": "--slotted-tone-info-text",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-tone-info-subtle-hover",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-tone-info-subtle-active",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
       "name": "--slotted-shadow-xs",
       "layer": "semantic",
       "axis": "scheme",
@@ -2137,6 +2244,70 @@
       "type": "color",
       "root": true,
       "forcedColor": "CanvasText"
+    },
+    {
+      "name": "--slotted-data-1-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-2-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-3-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-4-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-5-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-6-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-7-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
+    },
+    {
+      "name": "--slotted-data-8-on",
+      "layer": "semantic",
+      "axis": "scheme",
+      "type": "color",
+      "root": true,
+      "forcedColor": "Canvas"
     },
     {
       "name": "--slotted-control-height-sm",

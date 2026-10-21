@@ -94,6 +94,10 @@
     --_on: var(--slotted-rating-lit-color, var(--slotted-tone-success-solid));
   }
 
+  [data-ui-rating][data-part-root][data-tone='info'] {
+    --_on: var(--slotted-rating-lit-color, var(--slotted-tone-info-solid));
+  }
+
   [data-ui-rating][data-part-root][data-tone='danger'] {
     --_on: var(--slotted-rating-lit-color, var(--slotted-tone-danger-solid));
   }

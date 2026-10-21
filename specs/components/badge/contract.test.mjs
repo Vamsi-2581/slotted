@@ -79,7 +79,14 @@ test('renders the element that claims nothing and fits anywhere text fits', () =
  * the rename is written in the design's break table.
  */
 test('separates the colour it speaks in from the way that colour is painted', () => {
-  assert.deepEqual(contract.axes.tone, ['accent', 'secondary', 'success', 'warning', 'danger']);
+  assert.deepEqual(contract.axes.tone, [
+    'accent',
+    'secondary',
+    'info',
+    'success',
+    'warning',
+    'danger',
+  ]);
   assert.deepEqual(contract.axes.variant, ['solid', 'soft', 'outline']);
   assert.ok(!('fill' in contract.axes), 'fill is the word button retired');
 });

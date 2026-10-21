@@ -1,5 +1,5 @@
 export type ProgressSize = 'sm' | 'md' | 'lg';
-export type ProgressTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type ProgressTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 export type ProgressPlacement = 'inline' | 'page' | 'edge-start' | 'edge-end';
 /** The geometry a component draws. Written to `data-shape`, never chosen. */
 export type ProgressShape = 'linear' | 'circular' | 'morph';

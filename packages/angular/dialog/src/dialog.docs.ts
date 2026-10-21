@@ -846,7 +846,7 @@ export const ANGULAR_DIALOG_DOCS = {
       ),
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'danger',
         'sl-alert-dialog',
         'The kind of decision. It sets the mark slAlertDialogIcon draws and its colour.',

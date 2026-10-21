@@ -27,7 +27,7 @@ interface BadgeStoryArgs {
   variant: BadgeVariant;
 }
 
-const TONES = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const TONES = ['accent', 'secondary', 'info', 'success', 'warning', 'danger'];
 const VARIANTS = ['solid', 'soft', 'outline'];
 const SIZES = ['sm', 'md', 'lg'];
 const PLACEMENTS = ['top-end', 'top-start', 'bottom-end', 'bottom-start'];

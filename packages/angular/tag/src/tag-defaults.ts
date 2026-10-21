@@ -1,7 +1,7 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
 
 /** Which of the five semantic colours the tag speaks in. */
-export type TagTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type TagTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /** How that colour is painted. `soft` is the tinted chip a tag usually is. */
 export type TagVariant = 'solid' | 'soft' | 'outline';

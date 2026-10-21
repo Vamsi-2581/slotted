@@ -1,7 +1,7 @@
 import { inject, Injectable, InjectionToken } from '@angular/core';
 
 /** Which of the five semantic colours the message speaks in. */
-export type AlertTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type AlertTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /** How that colour is painted. `soft` is the tinted box an alert usually is. */
 export type AlertVariant = 'soft' | 'outline' | 'solid';

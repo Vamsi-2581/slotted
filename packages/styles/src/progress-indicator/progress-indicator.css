@@ -257,6 +257,10 @@
     --_ink: var(--slotted-progress-indicator-indicator-color, var(--slotted-tone-success-text));
   }
 
+  [data-ui-progress-indicator][data-part-root][data-tone='info'] {
+    --_ink: var(--slotted-progress-indicator-indicator-color, var(--slotted-tone-info-text));
+  }
+
   [data-ui-progress-indicator][data-part-root][data-tone='warning'] {
     --_ink: var(--slotted-progress-indicator-indicator-color, var(--slotted-tone-warning-text));
   }

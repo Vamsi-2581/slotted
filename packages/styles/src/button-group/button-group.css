@@ -345,6 +345,10 @@
     --_seam: var(--slotted-tone-success-solid-active);
   }
 
+  [data-ui-button-group] > [data-tone='info'] {
+    --_seam: var(--slotted-tone-info-solid-active);
+  }
+
   [data-ui-button-group] > [data-tone='warning'] {
     --_seam: var(--slotted-tone-warning-solid-active);
   }

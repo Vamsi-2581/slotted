@@ -28,6 +28,7 @@
   "--slotted-cascader-surface",
   "--slotted-control-border-color",
   "--slotted-control-border-width",
+  "--slotted-control-focus-ring-offset",
   "--slotted-control-font-family",
   "--slotted-control-font-size-lg",
   "--slotted-control-font-size-md",

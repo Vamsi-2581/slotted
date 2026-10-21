@@ -12,13 +12,14 @@ import type {
  * GOV.UK's Error message component publishes the idea and hard-codes the word;
  * this table generalises it to every tone that is a severity and puts it behind
  * the provider below, which is the only translation surface this library has
- * today. `accent` and `secondary` carry none: information and help announce
+ * today. `accent`, `secondary` and `info` carry none: information and help announce
  * themselves by their sentence, and a reader told “Information:” before every
  * hint hears one more word per field for nothing.
  */
 export const INLINE_MESSAGE_PREFIXES: InlineMessagePrefixes = {
   accent: null,
   secondary: null,
+  info: null,
   success: 'Success:',
   warning: 'Warning:',
   danger: 'Error:',

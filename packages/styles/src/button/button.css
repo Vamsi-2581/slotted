@@ -179,6 +179,14 @@
     --_text: var(--slotted-tone-success-text);
   }
 
+  [data-ui-button][data-tone='info'] {
+    --_solid: var(--slotted-tone-info-solid);
+    --_solid-hover: var(--slotted-tone-info-solid-hover);
+    --_solid-active: var(--slotted-tone-info-solid-active);
+    --_on-solid: var(--slotted-tone-info-on-solid);
+    --_text: var(--slotted-tone-info-text);
+  }
+
   [data-ui-button][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_solid-hover: var(--slotted-tone-warning-solid-hover);

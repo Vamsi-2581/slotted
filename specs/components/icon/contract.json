@@ -8,7 +8,17 @@
   },
   "axes": {
     "size": ["text", "sm", "md", "lg"],
-    "tone": ["inherit", "default", "muted", "accent", "success", "warning", "danger", "inverse"]
+    "tone": [
+      "inherit",
+      "default",
+      "muted",
+      "accent",
+      "info",
+      "success",
+      "warning",
+      "danger",
+      "inverse"
+    ]
   },
   "members": {
     "icon": {

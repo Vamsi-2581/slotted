@@ -4,9 +4,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { format, resolveConfig } from 'prettier';
 
 import {
+  contrast,
   deltaE,
   evaluateRecipe,
   fitBound,
+  fitGamut,
+  gamutChroma,
   parseSeed,
   relativeLuminance,
   SCHEMES,
@@ -32,7 +35,10 @@ import {
  *    seed's chroma, the grounds' share, achromatic reference or not;
  * 4. the neutral grounds and the light neutral highlight take `GROUNDS` in
  *    place of the fit;
- * 5. each solid, hover, active, tone text and the accent edge gets one bound
+ * 5. the `info` tone, which the reference predates, takes the accent's rules
+ *    on its own seed with no hue offset;
+ * 6. the data ladder, which the reference held as literals, is `DATA`;
+ * 7. each solid, hover, active, tone text and the accent edge gets one bound
  *    per side, against the worst ground or ink of its scheme over `seedGrid()`.
  *
  * Run after `pnpm --filter @slotted/theme build`; rebuild afterwards. The
@@ -44,8 +50,19 @@ export const DEFAULT_SEEDS = {
   accent: '#1d4ed8',
   neutral: '#64748b',
   success: '#15803d',
+  info: 'oklch(0.6 0.15 255)',
   warning: '#facc15',
   danger: '#dc2626',
+};
+
+/**
+ * Tokens that keep their seed's hue although the reference turns from it. The
+ * dark accent edge and ink were 10° and 13° from the seed, the drift of the
+ * palette the default theme was matched to, and every other seed took that
+ * turn toward blue: a violet accent drew a periwinkle edge.
+ */
+const KEEP_HUE = {
+  dark: new Set(['--slotted-tone-accent-border', '--slotted-tone-accent-text']),
 };
 
 /** The share the hover moves toward white, per scheme — the rule the JSON pipeline applied before the recipe. */
@@ -106,13 +123,126 @@ export const GROUNDS = {
     '--slotted-surface-sunken': { l: 0.97, c: { scale: 0.22, max: 0.012 } },
     '--slotted-tone-secondary-subtle-hover': { l: 0.959 },
   },
+  /* The page and the sunken ground sit below the raised one by 0.05 and
+     0.075: at 0.017 a card read apart from the page by its border alone, and a
+     shadow does not read on a dark ground. The subtle border and the control
+     edge step down with them. */
   dark: {
-    '--slotted-surface': { l: 0.188, c: { scale: 0.22, max: 0.03 } },
+    '--slotted-surface': { l: 0.155, c: { scale: 0.22, max: 0.025 } },
     '--slotted-surface-raised': { l: 0.205, c: { scale: 0.22, max: 0.03 } },
-    '--slotted-surface-sunken': { l: 0.155, c: { scale: 0.22, max: 0.025 } },
+    '--slotted-surface-sunken': { l: 0.13, c: { scale: 0.22, max: 0.021 } },
     '--slotted-surface-inverse': { l: 0.985, c: { scale: 0.22, max: 0.006 } },
+    '--slotted-border-subtle': { l: 0.275 },
+    '--slotted-control-border-color': { l: 0.36 },
   },
 };
+
+/**
+ * The categorical ladder, turned from the accent: slot 1 at its hue, each slot
+ * after it 45° back. Odd and even slots alternate between two lightness steps,
+ * because at one lightness a reader without red or green cones tells apart two
+ * hues on the red-green axis by nothing. The chroma asks for `max` and is
+ * capped where sRGB stops holding it at that lightness and hue.
+ */
+const DATA = {
+  light: [
+    { l: 0.42, max: 0.15 },
+    { l: 0.6, max: 0.15 },
+  ],
+  dark: [
+    { l: 0.82, max: 0.14 },
+    { l: 0.6, max: 0.15 },
+  ],
+  'high-contrast': [
+    { l: 0.3, max: 0.12 },
+    { l: 0.5, max: 0.14 },
+  ],
+};
+
+/**
+ * The ink drawn on a slot used as a ground: white or a near-black, whichever
+ * reads further from the slot's step at its worst hue. A neutral ink, because
+ * the slot is the colour and the mark on it says nothing of its own; it keeps
+ * the neutral seed's share of chroma, as every neutral token does.
+ */
+const DATA_INKS = [
+  { l: 0.985, c: { scale: NEUTRAL_SHARE, max: 0.006 } },
+  { l: 0.2, c: { scale: NEUTRAL_SHARE, max: 0.03 } },
+];
+
+function dataInk(l, max, gamut) {
+  const worst = (ink) => {
+    let low = Infinity;
+    for (let h = 0; h < 360; h += 1) {
+      const slot = { l, c: Math.max(0, Math.min(max, gamutChroma(gamut, h))), h };
+      low = Math.min(low, contrast(slot, { l: ink.l, c: 0, h: 0 }));
+    }
+    return low;
+  };
+  const [light, dark] = DATA_INKS;
+  return worst(light) >= worst(dark) ? light : dark;
+}
+
+function dataLadder(scheme) {
+  const ladder = {};
+  const inks = {};
+  for (let slot = 0; slot < 8; slot += 1) {
+    const { l, max } = DATA[scheme][slot % 2];
+    const gamut = fitGamut(l);
+    ladder[`--slotted-data-${slot + 1}`] = {
+      seed: 'accent',
+      l,
+      c: { max, gamut },
+      ...(slot === 0 ? {} : { h: 360 - 45 * slot }),
+    };
+    inks[`--slotted-data-${slot + 1}-on`] = { seed: 'neutral', ...dataInk(l, max, gamut) };
+  }
+  return { ...ladder, ...inks };
+}
+
+/**
+ * The `neutral` tone, which the reference predates: ink, the inverse surface
+ * as a fill and the text colour as a label, each an alias of a neutral token,
+ * and the inverse surface's own pointer states.
+ */
+const NEUTRAL_TONE = {
+  '--slotted-tone-neutral-solid': { alias: '--slotted-surface-inverse' },
+  '--slotted-tone-neutral-solid-hover': { alias: '--slotted-surface-inverse-hover' },
+  '--slotted-tone-neutral-solid-active': { alias: '--slotted-surface-inverse-active' },
+  '--slotted-tone-neutral-on-solid': { alias: '--slotted-text-inverse' },
+  '--slotted-tone-neutral-surface': { alias: '--slotted-tone-secondary-surface' },
+  '--slotted-tone-neutral-subtle-hover': { alias: '--slotted-tone-secondary-subtle-hover' },
+  '--slotted-tone-neutral-subtle-active': { alias: '--slotted-tone-secondary-subtle-active' },
+  '--slotted-tone-neutral-border': { alias: '--slotted-border-strong' },
+  '--slotted-tone-neutral-text': { alias: '--slotted-text' },
+  '--slotted-surface-inverse-hover': { mix: '--slotted-surface-inverse', share: 0.08 },
+  '--slotted-surface-inverse-active': { mix: '--slotted-surface-inverse', share: 0.15 },
+};
+
+const TONE_ROLES = [
+  'solid',
+  'solid-hover',
+  'solid-active',
+  'on-solid',
+  'surface',
+  'subtle-hover',
+  'subtle-active',
+  'border',
+  'text',
+];
+
+/** The accent's nine roles on the `info` seed, with no hue offset. */
+function infoTone(rules) {
+  const tone = {};
+  for (const role of TONE_ROLES) {
+    const rule = { ...rules[`--slotted-tone-accent-${role}`] };
+    if ('mix' in rule) rule.mix = rule.mix.replace('-accent-', '-info-');
+    if ('seed' in rule) rule.seed = 'info';
+    delete rule.h;
+    tone[`--slotted-tone-info-${role}`] = rule;
+  }
+  return tone;
+}
 
 function seedOf(token) {
   const match = TONE.exec(token);
@@ -150,6 +280,7 @@ function fit(reference, seeds) {
             : { scale, max: scale === 0 ? 0 : Math.min(0.06, gamutCeiling(l)) },
           ...ground,
         };
+        if (token === '--slotted-surface-inverse') Object.assign(recipe[scheme], NEUTRAL_TONE);
         continue;
       }
       const follows = !token.endsWith('-on-solid') && FOLLOWS_SEED.test(token) && target.c > 0.03;
@@ -158,13 +289,15 @@ function fit(reference, seeds) {
       let shift = target.h - seed.h;
       if (shift > 180) shift -= 360;
       if (shift < -180) shift += 360;
+      const turned = target.c >= 0.02 && Math.abs(shift) > 3 && !KEEP_HUE[scheme]?.has(token);
       recipe[scheme][token] = {
         seed: name,
         l: follows ? { offset: round(target.l - seed.l, 3) } : round(target.l, 3),
         c: { scale: target.c < 0.004 ? 0 : scale, max },
-        ...(target.c >= 0.02 && Math.abs(shift) > 3 ? { h: Math.round(shift) } : {}),
+        ...(turned ? { h: Math.round(shift) } : {}),
       };
     }
+    Object.assign(recipe[scheme], infoTone(recipe[scheme]), dataLadder(scheme));
     recipe[scheme]['--slotted-focus-ring-color'] = { alias: '--slotted-tone-accent-border' };
     recipe[scheme]['--slotted-focus-ring-color-invalid'] = {
       alias: '--slotted-tone-danger-border',
@@ -213,7 +346,7 @@ function addBounds(recipe, seeds) {
         want(token, 'floor', ratio * (highest + 0.05) - 0.05);
       }
     };
-    for (const tone of ['accent', 'success', 'warning', 'danger']) {
+    for (const tone of ['accent', 'success', 'info', 'warning', 'danger']) {
       const [inkLow, inkHigh] = range(`tone-${tone}-on-solid`);
       const whiteInk = inkLow > 0.5;
       for (const state of ['solid', 'solid-hover', 'solid-active']) {
@@ -226,11 +359,13 @@ function addBounds(recipe, seeds) {
         required,
       );
     }
-    against(
-      'tone-accent-border',
-      ['surface', 'surface-raised', 'surface-sunken', 'tone-accent-surface'],
-      3,
-    );
+    for (const tone of ['accent', 'info']) {
+      against(
+        `tone-${tone}-border`,
+        ['surface', 'surface-raised', 'surface-sunken', `tone-${tone}-surface`],
+        3,
+      );
+    }
     for (const [key, target] of Object.entries(targets)) {
       const [token, side] = key.split('|');
       const rule = recipe[scheme][`--slotted-${token}`];

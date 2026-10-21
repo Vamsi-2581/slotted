@@ -319,7 +319,7 @@ export const ANGULAR_STAT_CARD_DOCS = {
       ],
       [
         'tone',
-        "'neutral' | 'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'neutral' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         '—',
         'slStatCard, slStatCardDelta',
         'An explicit tone, which wins over the derived one. On the root it is what the trend hands its sparkline',

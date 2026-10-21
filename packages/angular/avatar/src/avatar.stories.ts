@@ -23,7 +23,7 @@ const GRACE = portrait();
 const MISSING = '/there-is-no-such-picture.png';
 
 const SIZES = ['xs', 'sm', 'md', 'lg', 'xl'];
-const TONES = ['accent', 'secondary', 'success', 'warning', 'danger'];
+const TONES = ['accent', 'secondary', 'info', 'success', 'warning', 'danger'];
 const VARIANTS = ['soft', 'solid'];
 const PEOPLE = [
   'Ada Lovelace',

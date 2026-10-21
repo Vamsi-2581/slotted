@@ -7,7 +7,7 @@
     "summary": "Button, link button, icon button and toggle button."
   },
   "axes": {
-    "tone": ["accent", "secondary", "neutral", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "neutral", "info", "success", "warning", "danger"],
     "variant": ["solid", "outline", "ghost"],
     "size": ["sm", "md", "lg"],
     "shape": ["square", "circle"],

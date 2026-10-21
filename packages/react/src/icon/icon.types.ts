@@ -9,7 +9,15 @@ import type { ComponentPropsWithRef } from 'react';
 export type IconSize = 'text' | 'sm' | 'md' | 'lg';
 
 export type IconTone =
-  'inherit' | 'default' | 'muted' | 'accent' | 'success' | 'warning' | 'danger' | 'inverse';
+  | 'inherit'
+  | 'default'
+  | 'muted'
+  | 'accent'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'inverse';
 
 export interface IconProps extends ComponentPropsWithRef<'span'> {
   /**

@@ -22,7 +22,7 @@ const imports: ReferenceImport = {
     "import {\n  Button,\n  ButtonDefaultsProvider,\n  ButtonLink,\n  IconButton,\n  ToggleButton,\n} from '@slotted/react';",
 };
 
-const TONE = 'accent | secondary | neutral | success | warning | danger';
+const TONE = 'accent | secondary | neutral | info | success | warning | danger';
 const VARIANT = 'solid | outline | ghost';
 const SIZE = 'sm | md | lg';
 

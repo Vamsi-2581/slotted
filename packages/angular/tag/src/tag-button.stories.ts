@@ -61,7 +61,7 @@ export const Playground: Story = {
     size: { control: 'inline-radio', options: ['sm', 'md', 'lg'] },
     tone: {
       control: 'inline-radio',
-      options: ['accent', 'secondary', 'success', 'warning', 'danger'],
+      options: ['accent', 'secondary', 'info', 'success', 'warning', 'danger'],
     },
     variant: { control: 'inline-radio', options: ['solid', 'soft', 'outline'] },
   },

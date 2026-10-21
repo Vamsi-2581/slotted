@@ -411,7 +411,7 @@ export const REACT_TIMELINE_DOCS = {
       ],
       [
         'tone',
-        "'secondary' | 'accent' | 'success' | 'warning' | 'danger'",
+        "'secondary' | 'accent' | 'info' | 'success' | 'warning' | 'danger'",
         'secondary',
         'Timeline',
         'The marker tone, inherited by the events',

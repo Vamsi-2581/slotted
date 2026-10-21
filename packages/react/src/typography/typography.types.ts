@@ -3,7 +3,15 @@ import type { ComponentPropsWithoutRef, CSSProperties, HTMLAttributes, ReactNode
 export type TypographySize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
 export type TypographyWeight = 'regular' | 'medium' | 'semibold';
 export type TypographyTone =
-  'inherit' | 'default' | 'muted' | 'accent' | 'success' | 'warning' | 'danger' | 'inverse';
+  | 'inherit'
+  | 'default'
+  | 'muted'
+  | 'accent'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'inverse';
 export type TypographyAlign = 'start' | 'center' | 'end';
 export type TypographyWrap = 'normal' | 'nowrap' | 'balance' | 'pretty';
 export type TypographyTransform = 'none' | 'uppercase' | 'capitalize';

@@ -65,6 +65,7 @@ const TONES: readonly ChartTone[] = [
   'neutral',
   'accent',
   'secondary',
+  'info',
   'success',
   'warning',
   'danger',

@@ -10,7 +10,7 @@ import { RatingSummary } from './rating-summary';
 import type { RatingSize, RatingTone } from './rating.types';
 
 const SIZES: readonly RatingSize[] = ['sm', 'md', 'lg'];
-const TONES: readonly RatingTone[] = ['accent', 'success', 'warning', 'danger'];
+const TONES: readonly RatingTone[] = ['accent', 'info', 'success', 'warning', 'danger'];
 const COUNTS = [9, 18, 47, 158, 1052];
 
 function LabSection({

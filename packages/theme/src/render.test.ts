@@ -21,6 +21,7 @@ const theme = defineTheme({
     accent: '#1d4ed8',
     neutral: '#64748b',
     success: '#15803d',
+    info: 'oklch(0.6 0.15 255)',
     warning: '#facc15',
     danger: '#dc2626',
   },

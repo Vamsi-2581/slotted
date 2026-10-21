@@ -7,7 +7,7 @@
     "summary": "Short label or count attached to an element."
   },
   "axes": {
-    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "variant": ["solid", "soft", "outline"],
     "size": ["sm", "md", "lg"],
     "shape": ["pill", "square", "dot"],

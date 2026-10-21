@@ -217,7 +217,7 @@
     "placement": ["end", "start", "alternate"],
     "order": ["oldest-first", "newest-first"],
     "variant": ["solid", "outline", "subtle", "plain"],
-    "tone": ["secondary", "accent", "success", "warning", "danger"],
+    "tone": ["secondary", "accent", "info", "success", "warning", "danger"],
     "size": ["sm", "md", "lg"],
     "connector": ["solid", "dashed", "none"],
     "growing": ["none", "button", "scroll"],

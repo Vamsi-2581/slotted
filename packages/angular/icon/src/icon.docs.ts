@@ -20,7 +20,7 @@ export const ANGULAR_ICON_TOKENS = iconTokens.map((name) => ({
 }));
 
 const TONE =
-  "'inherit' | 'default' | 'muted' | 'accent' | 'success' | 'warning' | 'danger' | 'inverse'";
+  "'inherit' | 'default' | 'muted' | 'accent' | 'info' | 'success' | 'warning' | 'danger' | 'inverse'";
 
 export const ANGULAR_ICON_DOCS = {
   icon: {

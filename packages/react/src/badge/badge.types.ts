@@ -1,7 +1,7 @@
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
 /** Which of the five semantic colours the badge speaks in. */
-export type BadgeTone = 'accent' | 'secondary' | 'success' | 'warning' | 'danger';
+export type BadgeTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /** How that colour is painted. `soft` is the tinted chip a badge usually is. */
 export type BadgeVariant = 'solid' | 'soft' | 'outline';

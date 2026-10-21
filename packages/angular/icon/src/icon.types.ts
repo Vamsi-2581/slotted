@@ -6,7 +6,15 @@
 export type IconSize = 'text' | 'sm' | 'md' | 'lg';
 
 export type IconTone =
-  'inherit' | 'default' | 'muted' | 'accent' | 'success' | 'warning' | 'danger' | 'inverse';
+  | 'inherit'
+  | 'default'
+  | 'muted'
+  | 'accent'
+  | 'info'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'inverse';
 
 /**
  * `inherit` is the absence of a colour rather than a colour of its own, so it

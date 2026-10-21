@@ -11,7 +11,7 @@
   "axes": {
     "size": ["xs", "sm", "md", "lg", "xl"],
     "shape": ["circle", "square"],
-    "tone": ["auto", "accent", "secondary", "success", "warning", "danger"],
+    "tone": ["auto", "accent", "secondary", "info", "success", "warning", "danger"],
     "variant": ["soft", "solid"],
     "status": ["idle", "loading", "loaded", "error"]
   },

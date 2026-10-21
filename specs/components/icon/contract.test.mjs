@@ -51,6 +51,7 @@ test('takes the colour of its context before it takes a tone', () => {
     'default',
     'muted',
     'accent',
+    'info',
     'success',
     'warning',
     'danger',

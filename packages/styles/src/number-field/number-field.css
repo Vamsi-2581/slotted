@@ -633,7 +633,7 @@
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
-    outline-offset: var(--slotted-focus-ring-offset, 2px);
+    outline-offset: var(--slotted-control-focus-ring-offset, var(--slotted-focus-ring-offset, 2px));
   }
 
   /**
@@ -721,7 +721,10 @@
     [data-ui-number-field][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
-      outline-offset: var(--slotted-focus-ring-offset, 2px);
+      outline-offset: var(
+        --slotted-control-focus-ring-offset,
+        var(--slotted-focus-ring-offset, 2px)
+      );
     }
 
     [data-ui-number-field][data-part-root][data-variant='plain'][data-invalid]:has(

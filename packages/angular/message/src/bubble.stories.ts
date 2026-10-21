@@ -124,7 +124,7 @@ export const Playground: Story = {
     variant: { control: 'inline-radio', options: ['solid', 'soft', 'outline', 'plain'] },
     tone: {
       control: 'inline-radio',
-      options: ['accent', 'secondary', 'success', 'warning', 'danger'],
+      options: ['accent', 'secondary', 'info', 'success', 'warning', 'danger'],
     },
   },
   parameters: { ...scenario('playground'), controls: { disable: false } },

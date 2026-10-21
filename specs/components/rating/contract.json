@@ -148,7 +148,7 @@
   },
   "axes": {
     "size": ["sm", "md", "lg"],
-    "tone": ["accent", "success", "warning", "danger"],
+    "tone": ["accent", "info", "success", "warning", "danger"],
     "variant": ["full", "compact", "histogram"],
     "summaryVariant": ["bars", "spectrum"]
   },

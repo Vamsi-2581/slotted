@@ -14,6 +14,7 @@ export default defineTheme({
     accent: 'oklch(0.55 0.2 300)',
     neutral: '#78716c',
     success: '#15803d',
+    info: 'oklch(0.6 0.15 255)',
     warning: '#facc15',
     danger: '#dc2626',
   },

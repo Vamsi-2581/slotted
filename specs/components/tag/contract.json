@@ -7,7 +7,7 @@
     "summary": "Label for a category, removable or selectable."
   },
   "axes": {
-    "tone": ["accent", "secondary", "success", "warning", "danger"],
+    "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "variant": ["solid", "soft", "outline"],
     "size": ["sm", "md", "lg"],
     "shape": ["pill", "square"],

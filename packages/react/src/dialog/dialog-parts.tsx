@@ -544,6 +544,7 @@ export function DialogClose({
 const TONE_GLYPH: Record<DialogTone, GlyphName> = {
   accent: 'circle-info',
   secondary: 'circle-info',
+  info: 'circle-info',
   success: 'circle-check',
   warning: 'triangle-alert',
   danger: 'circle-alert',

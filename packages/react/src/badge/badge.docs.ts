@@ -22,7 +22,7 @@ export const REACT_BADGE_DOCS = {
     api: apiRows([
       [
         'tone',
-        "'accent' | 'secondary' | 'success' | 'warning' | 'danger'",
+        "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'secondary',
         'Badge',
         'Which of the five semantic colours the badge speaks in',

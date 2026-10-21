@@ -175,7 +175,7 @@ export const STATE_PRECEDENCE = [
  * the axis under the other two, and two tests failed for a family neither of
  * them is about.
  */
-export const TONES = ['accent', 'secondary', 'success', 'warning', 'danger'];
+export const TONES = ['accent', 'secondary', 'info', 'success', 'warning', 'danger'];
 
 /** Why a change was requested. A boolean cannot say, so every request does. */
 export const CHANGE_REASONS = [

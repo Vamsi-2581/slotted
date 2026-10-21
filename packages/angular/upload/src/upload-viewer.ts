@@ -99,9 +99,8 @@ export interface UploadViewingRequest {
                 data-part-viewertitle=""
                 [attr.data-part-title]="null"
                 slDialogTitle
-              >
-                {{ file.name }}
-              </h2>
+                [textContent]="file.name"
+              ></h2>
               <span data-part="viewerMeta" data-part-viewermeta="">{{ metaText() }}</span>
             </div>
             <span data-part="viewerActions" data-part-vieweractions="">

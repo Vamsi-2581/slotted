@@ -61,7 +61,7 @@ const bundledStyles = readFileSync(join(distDirectory, 'styles.css'), 'utf8');
  * contract, and the minifier drops the quotes an authored selector keeps, so
  * both sides are normalised the same way.
  */
-const requiredSelectors = ['[data-ui=button]{', '[data-ui=divider]{', '@layer slotted.components{'];
+const requiredSelectors = ['[data-ui-button]{', '[data-ui-divider]{', '@layer slotted.components{'];
 const normalize = (css) => css.replace(/\s+/g, '').replace(/['"]/g, '');
 const normalizedStyles = normalize(bundledStyles);
 const missingSelectors = requiredSelectors.filter(

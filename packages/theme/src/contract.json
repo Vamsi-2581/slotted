@@ -916,6 +916,20 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-chevron-left",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-chevron-up",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-calendar",
       "layer": "primitive",
       "axis": "base",
@@ -1029,6 +1043,20 @@
     },
     {
       "name": "--slotted-icon-arrow-up",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-arrow-right",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-arrow-down",
       "layer": "primitive",
       "axis": "base",
       "type": "image",

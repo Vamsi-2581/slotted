@@ -40,8 +40,8 @@ function identity({ legacy, name }) {
   return legacy
     ? { pattern: new RegExp(`\\.slotted-${name}\\b`), described: `.slotted-${name}` }
     : {
-        pattern: new RegExp(`\\[data-ui=['"]?${name}['"]?\\]`),
-        described: `[data-ui="${name}"]`,
+        pattern: new RegExp(`\\[data-ui-${name}\\]`),
+        described: `[data-ui-${name}]`,
       };
 }
 

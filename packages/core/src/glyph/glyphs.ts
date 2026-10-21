@@ -90,18 +90,6 @@ export const GLYPHS = {
     offset: [0, 0],
     paths: ['m12 19-7-7 7-7', 'M19 12H5'],
   },
-  'arrow-right': {
-    paint: 'stroke',
-    strokeWidth: 2,
-    offset: [0, 0],
-    paths: ['M5 12h14', 'm12 5 7 7-7 7'],
-  },
-  'arrow-down': {
-    paint: 'stroke',
-    strokeWidth: 2,
-    offset: [0, 0],
-    paths: ['M12 5v14', 'm19 12-7 7-7-7'],
-  },
   pin: {
     paint: 'stroke',
     strokeWidth: 2,
@@ -250,6 +238,18 @@ export const GLYPHS = {
     strokeWidth: 2,
     offset: [0, 0],
     paths: ['m5 12 7-7 7 7', 'M12 19V5'],
+  },
+  'arrow-right': {
+    paint: 'stroke',
+    strokeWidth: 2,
+    offset: [0, 0],
+    paths: ['M5 12h14', 'm12 5 7 7-7 7'],
+  },
+  'arrow-down': {
+    paint: 'stroke',
+    strokeWidth: 2,
+    offset: [0, 0],
+    paths: ['M12 5v14', 'm19 12-7 7-7-7'],
   },
   stop: {
     paint: 'fill',

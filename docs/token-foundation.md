@@ -20,7 +20,7 @@ convention.
 
 | Layer       | Holds                                                          | Tokens |
 | ----------- | -------------------------------------------------------------- | ------ |
-| `primitive` | A value with no meaning attached: a step on a scale.           | 123    |
+| `primitive` | A value with no meaning attached: a step on a scale.           | 127    |
 | `semantic`  | What a value is for: a surface, a border, a control, a target. | 133    |
 | `component` | One family adjusting a semantic value for itself.              | 28     |
 
@@ -272,6 +272,8 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-eye-off`          | `eye-off`              | stroke 2   |
 | `--slotted-icon-chevron-right`    | `chevron-right`        | stroke 2   |
 | `--slotted-icon-chevron-down`     | `chevron-down`         | stroke 2   |
+| `--slotted-icon-chevron-left`     | `chevron-left`         | stroke 2   |
+| `--slotted-icon-chevron-up`       | `chevron-up`           | stroke 2   |
 | `--slotted-icon-chevrons-right`   | `chevrons-right`       | stroke 2   |
 | `--slotted-icon-panel-open`       | `panel-left-open`      | stroke 2   |
 | `--slotted-icon-panel-close`      | `panel-left-close`     | stroke 2   |
@@ -295,6 +297,8 @@ otherwise; `fill` is the same geometry painted solid, with no stroke.
 | `--slotted-icon-lock`             | `lock`                 | stroke 2   |
 | `--slotted-icon-caps-lock`        | `arrow-big-up-dash`    | stroke 2   |
 | `--slotted-icon-arrow-up`         | `arrow-up`             | stroke 2   |
+| `--slotted-icon-arrow-right`      | `arrow-right`          | stroke 2   |
+| `--slotted-icon-arrow-down`       | `arrow-down`           | stroke 2   |
 | `--slotted-icon-stop`             | `square`               | fill       |
 | `--slotted-icon-paperclip`        | `paperclip`            | stroke 2   |
 | `--slotted-icon-pipette`          | `pipette`              | stroke 2   |

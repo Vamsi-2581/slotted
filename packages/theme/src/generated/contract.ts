@@ -561,6 +561,20 @@ export const contract: TokenContract = {
       "root": true
     },
     {
+      "name": "--slotted-icon-chevron-left",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-chevron-up",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-calendar",
       "layer": "primitive",
       "axis": "base",
@@ -674,6 +688,20 @@ export const contract: TokenContract = {
     },
     {
       "name": "--slotted-icon-arrow-up",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-arrow-right",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
+      "name": "--slotted-icon-arrow-down",
       "layer": "primitive",
       "axis": "base",
       "type": "image",
@@ -2201,6 +2229,8 @@ export type BaseToken =
   | '--slotted-icon-pin'
   | '--slotted-icon-pin-off'
   | '--slotted-icon-chevron-down'
+  | '--slotted-icon-chevron-left'
+  | '--slotted-icon-chevron-up'
   | '--slotted-icon-calendar'
   | '--slotted-icon-clock'
   | '--slotted-icon-external'
@@ -2218,6 +2248,8 @@ export type BaseToken =
   | '--slotted-icon-lock'
   | '--slotted-icon-caps-lock'
   | '--slotted-icon-arrow-up'
+  | '--slotted-icon-arrow-right'
+  | '--slotted-icon-arrow-down'
   | '--slotted-icon-stop'
   | '--slotted-icon-paperclip'
   | '--slotted-icon-pipette'

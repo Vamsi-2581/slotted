@@ -141,7 +141,15 @@ export function hooksSource() {
       const css = readFileSync(join(STYLES, family, file), 'utf8');
       // A `data-ui` a stylesheet selects without a contract (spinner) is a family with no parts.
       for (const [, name] of css.matchAll(/\[data-ui=['"]([\w-]+)['"]\]/g)) addParts(name, []);
-      for (const [, attribute] of css.matchAll(/\[(data-[a-z0-9-]+)/g)) attributes.add(attribute);
+      for (const [, name] of css.matchAll(/\[data-ui-([\w-]+)\]/g)) addParts(name, []);
+      /* `data-part-<part>` and `data-ui-<family>` are the selector keys the
+         stylesheet matches; a theme rule names the public `data-part` and
+         `data-ui`, so the keys are not hooks. */
+      for (const [, attribute] of css.matchAll(/\[(data-[a-z0-9-]+)/g)) {
+        if (!attribute.startsWith('data-part-') && !attribute.startsWith('data-ui-')) {
+          attributes.add(attribute);
+        }
+      }
     }
   }
   const sorted = Object.fromEntries(

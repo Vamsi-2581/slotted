@@ -35,6 +35,7 @@ import type {
   PromptComposerSubmitOn,
   PromptComposerSubmitReason,
   PromptComposerVariant,
+  PromptComposerEmphasis,
 } from './prompt-composer-defaults';
 
 /** Whether a drag carries files, rather than a selection of text. */
@@ -56,7 +57,11 @@ function carriesFiles(event: DragEvent): boolean {
   selector: 'form[slPromptComposer]',
   standalone: true,
   exportAs: 'slPromptComposer',
-  template: '<ng-content />',
+  template: `<ng-content />
+    @if (resolvedEmphasis() === 'ring') {
+      <span aria-hidden="true" data-part="glow" data-part-glow=""></span>
+      <span aria-hidden="true" data-part="ring" data-part-ring=""></span>
+    }`,
   styleUrl: '../../../styles/src/prompt-composer/prompt-composer.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -68,6 +73,7 @@ function carriesFiles(event: DragEvent): boolean {
     novalidate: '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
+    '[attr.data-emphasis]': "resolvedEmphasis() === 'ring' ? 'ring' : null",
     '[attr.data-status]': 'status()',
     '[attr.data-loading]': "busy() ? '' : null",
     '[attr.data-disabled]': "control()?.resolvedDisabled() === true ? '' : null",
@@ -84,6 +90,8 @@ function carriesFiles(event: DragEvent): boolean {
 export class SlPromptComposer {
   readonly size = input<PromptComposerSize | undefined>(undefined);
   readonly variant = input<PromptComposerVariant | undefined>(undefined);
+  /** Defaults to the token, then to `none`. */
+  readonly emphasis = input<PromptComposerEmphasis | undefined>(undefined);
   /** Where the request stands. The application owns it. */
   readonly status = input<PromptComposerStatus>('ready');
   readonly submitOn = input<PromptComposerSubmitOn | undefined>(undefined);
@@ -128,6 +136,7 @@ export class SlPromptComposer {
     () => this.size() ?? this.field?.resolvedSize() ?? this.defaults.size,
   );
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
+  readonly resolvedEmphasis = computed(() => this.emphasis() ?? this.defaults.emphasis);
   readonly resolvedSubmitOn = computed(() => this.submitOn() ?? this.defaults.submitOn);
   readonly busy = computed(() => this.status() === 'submitted' || this.status() === 'streaming');
   readonly resolvedCanSubmit = computed(() => {

@@ -24,7 +24,18 @@ triggers:
     action,
   ]
 families:
-  [skeleton, button, popover, list, list-item, notification-center, tabs, pagination, result-state]
+  [
+    skeleton,
+    button,
+    popover,
+    list,
+    list-item,
+    notification-center,
+    tabs,
+    pagination,
+    result-state,
+    page-header,
+  ]
 ---
 
 # Async feedback
@@ -63,7 +74,7 @@ Check: Open the region twice with the network throttled to a slow profile: place
 ### AF-03 · The control that starts a request waits on it
 
 Level: MUST
-Applies to: any `button` member — button, icon button, toggle button — whose activation runs a request — mark as read, archive, approve, save, submit
+Applies to: any `button` member — button, icon button, toggle button — whose activation runs a request — mark as read, archive, approve, save, submit — except a control whose request reloads the whole page; the page header's progress bar answers that wait (AF-07)
 Rule: From activation until the answer, the control is in its `loading` state: it refuses a second activation and shows the family's indicator.
 Why: A control that looks idle invites a second press, and the second request is a duplicate the backend has to refuse or the reader has to undo.
 Do: Keep, beside the data, the identity of what is in flight — the row's key for a row action, one fact for a list-wide action — and bind the control's `loading` to it. The family refuses activation on its own and names the wait for assistive technology through its loading label.
@@ -111,11 +122,11 @@ Level: SHOULD
 Applies to: a record page, or a list, whose data another person or process can change while it is open — an order, an invoice, a customer another writer edits
 Rule: The page offers Refresh among the header's actions, and a refresh keeps the values on screen, marks the page busy and replaces them when the answer arrives.
 Why: Without it the reader reloads the browser, which loses the scroll, the open tab and any draft, and a refresh that blanks the record flickers what was already read.
-Do: Put an icon button named "Refresh" in the header's actions toolbar with its menu counterpart, in its `loading` state until the answer (AF-03); bind the page's `loading` to "reading again while a record is shown", so the body takes `aria-busy` and draws no placeholder.
+Do: Put an icon button named "Refresh" in the header's actions toolbar with its menu counterpart. The wait is the page's, not the button's: the `page-header` progress part shows it, with `loading` bound to "reading again while data is shown", over the header's closing line; the button draws no indicator of its own, and a second press while the read runs starts nothing — the read in flight answers it. The body keeps its rows and draws no placeholder.
 Don't: Offer Refresh on a record nothing else writes, or clear the record and draw its skeleton on every read after the first.
 Seen in: Nexora · customer, quote, purchase order, order, invoice and cycle count records · corrected
-Verified in: Press Refresh on an order: the values stay, the page body is busy until the answer, and the button waits on it
-Check: Press Refresh on a record another writer changes: the values stay, the page body is busy until the answer, and the button waits on it.
+Verified in: Press Refresh on an order: the header's bar runs over the closing line, the button shows no spinner and ignores a second press, the values stay
+Check: Press Refresh: the header's bar runs over the closing line, the button shows no spinner and ignores a second press, the values stay.
 
 ### AF-08 · A write refreshes every view it changed
 

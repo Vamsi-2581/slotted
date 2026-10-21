@@ -14,6 +14,7 @@ export type {
   PromptComposerSubmitOn,
   PromptComposerSubmitReason,
   PromptComposerVariant,
+  PromptComposerEmphasis,
 } from './prompt-composer-defaults';
 export { SlPromptComposerInput } from './prompt-composer-input';
 export {

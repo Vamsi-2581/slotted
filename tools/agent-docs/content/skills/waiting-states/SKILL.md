@@ -19,13 +19,14 @@ named here has its page: `{{docsDir}}/<family>.md`.
 
 Answer in order and stop at the first row that decides.
 
-| The wait                                                                           | The indicator                                     |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Structure is known before the data arrives — a list, a table, a card, a form       | `skeleton` placeholders                           |
-| A control started the request and stays on screen — a button, a field, a menu item | that family's own `loading` state                 |
-| A region already painted is being replaced and must not be touched meanwhile       | `loading-overlay`                                 |
-| The work reports how much is done                                                  | `progress-indicator` with a value                 |
-| Nothing above: duration unknown, structure unknown, area small                     | `progress-indicator` in its `indeterminate` state |
+| The wait                                                                                                         | The indicator                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Structure is known before the data arrives — a list, a table, a card, a form                                     | `skeleton` placeholders                                                                                               |
+| Data already on screen is read again for the whole page — a Refresh, a refetch after a write, a refetch on focus | the `page-header` progress part in the page header; the region keeps its items and no control draws its own indicator |
+| A control started the request and stays on screen — a button, a field, a menu item                               | that family's own `loading` state                                                                                     |
+| A region already painted is being replaced and must not be touched meanwhile                                     | `loading-overlay`                                                                                                     |
+| The work reports how much is done                                                                                | `progress-indicator` with a value                                                                                     |
+| Nothing above: duration unknown, structure unknown, area small                                                   | `progress-indicator` in its `indeterminate` state                                                                     |
 
 Two indicators never answer the same wait in the same region. Placeholders
 under an overlay, an indeterminate indicator inside placeholders, and a

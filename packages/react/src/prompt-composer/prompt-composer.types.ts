@@ -40,8 +40,15 @@ export interface PromptComposerAttachDetail {
   source: unknown;
 }
 
+/**
+ * `ring` marks an AI input with a ring of turning hues and a soft glow, which
+ * replace its border, its focus outline and its raised shadow.
+ */
+export type PromptComposerEmphasis = 'none' | 'ring';
+
 /** What an application sets once for every composer under it. */
 export interface PromptComposerDefaults {
+  emphasis: PromptComposerEmphasis;
   size: PromptComposerSize;
   submitOn: PromptComposerSubmitOn;
   variant: PromptComposerVariant;
@@ -55,6 +62,7 @@ export interface PromptComposerDefaultsProviderProps extends Partial<PromptCompo
 export interface PromptComposerRootProps extends ComponentPropsWithRef<'form'> {
   'data-disabled'?: '' | undefined;
   'data-drop-target'?: '' | undefined;
+  'data-emphasis'?: 'ring' | undefined;
   'data-invalid'?: '' | undefined;
   'data-loading'?: '' | undefined;
   'data-part': 'root';
@@ -123,6 +131,8 @@ export interface PromptComposerProps extends Omit<
   value?: string | undefined;
   /** Defaults to the provider, then to `raised`. */
   variant?: PromptComposerVariant | undefined;
+  /** Defaults to the provider, then to `none`. */
+  emphasis?: PromptComposerEmphasis | undefined;
 }
 
 /**

@@ -569,6 +569,131 @@
     outline-offset: var(--slotted-control-focus-ring-offset, var(--slotted-focus-ring-offset, 2px));
   }
 
+  /* ── Emphasis: the ring ──────────────────────────────────────────────
+   *
+   * An AI input marked by a ring of turning hues and a soft glow, as Gemini
+   * and AI Studio mark theirs. The ring replaces the frame's border, its focus
+   * outline and its raised shadow; the controls inside keep their own focus
+   * rings. Two marks the binding draws, both `aria-hidden`: the ring, a band
+   * the width of `--slotted-prompt-composer-ring-width` cut out of a turning
+   * conic gradient, and the glow, the same gradient blurred and cut to what
+   * lies outside the frame. Each turns a square larger than its box by a
+   * `transform`, which the compositor runs at a constant speed.
+   */
+  [data-ui-prompt-composer][data-part-root][data-emphasis='ring'] {
+    --_ring-width: var(
+      --slotted-prompt-composer-ring-width,
+      var(--slotted-border-width-thick, 2px)
+    );
+    --_ring-reach: var(--slotted-prompt-composer-ring-glow-reach, var(--slotted-space-8, 1.5rem));
+    --_glow: var(--slotted-prompt-composer-ring-glow-opacity, 0.3);
+
+    border-color: transparent;
+    box-shadow: none;
+    isolation: isolate;
+  }
+
+  [data-ui-prompt-composer][data-part-root][data-emphasis='ring']:has(
+      > [data-part-input]:focus-visible
+    ) {
+    --_glow: var(--slotted-prompt-composer-ring-glow-opacity-focus, 0.55);
+
+    box-shadow: none;
+    outline: none;
+  }
+
+  [data-ui-prompt-composer][data-part-root][data-emphasis='ring']:is(
+      [data-loading],
+      [data-status='submitted'],
+      [data-status='streaming']
+    ) {
+    --_glow: var(--slotted-prompt-composer-ring-glow-opacity-busy, 0.75);
+  }
+
+  [data-ui-prompt-composer] > :is([data-part-ring], [data-part-glow]) {
+    border-radius: var(--_radius);
+    container-type: size;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+  }
+
+  [data-ui-prompt-composer] > [data-part-ring] {
+    inset: calc(-1 * var(--slotted-control-border-width, 1px));
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    padding: var(--_ring-width);
+    z-index: 1;
+  }
+
+  [data-ui-prompt-composer] > [data-part-glow] {
+    border-radius: calc(var(--_radius) + var(--_ring-reach));
+    filter: blur(calc(var(--_ring-reach) / 2));
+    inset: calc(-1 * var(--_ring-reach));
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    opacity: var(--_glow);
+    padding: var(--_ring-reach);
+    transition: opacity var(--slotted-duration-medium) var(--slotted-easing-standard);
+    z-index: -1;
+  }
+
+  [data-ui-prompt-composer] > :is([data-part-ring], [data-part-glow])::before {
+    animation: slotted-prompt-composer-turn
+      var(--slotted-prompt-composer-ring-duration, var(--slotted-duration-loop-slow)) linear
+      infinite;
+    aspect-ratio: 1;
+    background: conic-gradient(
+      var(
+        --slotted-prompt-composer-ring-colors,
+        var(--slotted-data-1),
+        var(--slotted-data-3),
+        var(--slotted-data-5),
+        var(--slotted-data-2),
+        var(--slotted-data-1)
+      )
+    );
+    content: '';
+    inline-size: 150cqmax;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%) rotate(0turn);
+  }
+
+  @keyframes slotted-prompt-composer-turn {
+    to {
+      transform: translate(-50%, -50%) rotate(1turn);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-ui-prompt-composer] > :is([data-part-ring], [data-part-glow])::before {
+      animation: none;
+    }
+  }
+
+  /* The system's colours draw no gradient: the marks go, and the frame's own
+     border and focus outline return. */
+  @media (forced-colors: active) {
+    [data-ui-prompt-composer] > :is([data-part-ring], [data-part-glow]) {
+      display: none;
+    }
+
+    [data-ui-prompt-composer][data-part-root][data-emphasis='ring'] {
+      border-color: ButtonBorder;
+    }
+
+    [data-ui-prompt-composer][data-part-root][data-emphasis='ring']:has(
+        > [data-part-input]:focus-visible
+      ) {
+      outline: var(--slotted-focus-ring-width, 2px) solid Highlight;
+      outline-offset: var(--slotted-focus-ring-offset, 2px);
+    }
+  }
+
   /**
    * Files held over the frame. The frame answers in the accent — a wash of
    * its surface, and a dashed edge drawn inside it at half the bands' inset,

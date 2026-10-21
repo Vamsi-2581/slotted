@@ -8,6 +8,11 @@ export type PromptComposerSize = 'sm' | 'md' | 'lg';
  * `subtle` are a composer inside a form, with a one-line control's geometry.
  */
 export type PromptComposerVariant = 'raised' | 'outline' | 'subtle';
+/**
+ * `ring` marks an AI input with a ring of turning hues and a soft glow, which
+ * replace its border, its focus outline and its raised shadow.
+ */
+export type PromptComposerEmphasis = 'none' | 'ring';
 /** Whether Enter sends, or only Mod+Enter does. Shift+Enter always breaks a line. */
 export type PromptComposerSubmitOn = 'enter' | 'mod-enter';
 /** Where the request stands. The application owns it. */
@@ -31,12 +36,14 @@ export interface PromptComposerDefaults {
   size: PromptComposerSize;
   submitOn: PromptComposerSubmitOn;
   variant: PromptComposerVariant;
+  emphasis: PromptComposerEmphasis;
 }
 
 const FALLBACK: PromptComposerDefaults = {
   size: 'md',
   submitOn: 'enter',
   variant: 'raised',
+  emphasis: 'none',
 };
 
 export const PROMPT_COMPOSER_DEFAULTS = new InjectionToken<PromptComposerDefaults>(

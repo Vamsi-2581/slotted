@@ -47,9 +47,20 @@ describe('PromptComposer', () => {
     expect(root()).toHaveAttribute('data-ui', 'prompt-composer');
     expect(root()).toHaveAttribute('data-variant', 'raised');
     expect(root()).toHaveAttribute('data-status', 'ready');
-    for (const name of contract.members.promptComposer.parts) {
+    /* The ring and the glow are drawn with emphasis="ring" alone. */
+    for (const name of contract.members.promptComposer.parts.filter(
+      (part) => part !== 'ring' && part !== 'glow',
+    )) {
       expect(root().matches(`[data-part="${name}"]`) || part(name) !== null).toBe(true);
     }
+    expect(part('ring')).toBeNull();
+  });
+
+  it('draws the ring and the glow, hidden from assistive technology, when asked', () => {
+    render(<Composer emphasis="ring" />);
+    expect(root()).toHaveAttribute('data-emphasis', 'ring');
+    expect(part('ring')).toHaveAttribute('aria-hidden', 'true');
+    expect(part('glow')).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('asks before the value moves, with the reason keyboard', () => {

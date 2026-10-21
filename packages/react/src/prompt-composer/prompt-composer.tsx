@@ -124,6 +124,7 @@ export function PromptComposer({
   style,
   submitOn,
   value,
+  emphasis,
   variant,
   ...nativeProps
 }: PromptComposerProps) {
@@ -228,13 +229,23 @@ export function PromptComposer({
     value: current,
   };
 
+  const ringed = (emphasis ?? defaults.emphasis) === 'ring';
   const rootProps: PromptComposerRootProps = keyedProps({
     ...nativeProps,
-    children,
+    children: ringed ? (
+      <>
+        {children}
+        <span aria-hidden="true" data-part="glow" data-part-glow="" />
+        <span aria-hidden="true" data-part="ring" data-part-ring="" />
+      </>
+    ) : (
+      children
+    ),
     className,
     style,
     ...(resolvedDisabled === true ? { 'data-disabled': '' } : {}),
     ...(dropTarget ? { 'data-drop-target': '' } : {}),
+    ...(ringed ? { 'data-emphasis': 'ring' as const } : {}),
     ...(resolvedInvalid === true ? { 'data-invalid': '' } : {}),
     ...(busy ? { 'data-loading': '' } : {}),
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),

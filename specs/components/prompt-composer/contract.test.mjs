@@ -37,6 +37,8 @@ test('is a form holding a textarea, a band above, a band below and their buttons
     'action',
     'attach',
     'submit',
+    'ring',
+    'glow',
   ]);
 });
 
@@ -110,7 +112,12 @@ test('offers a raised surface by default and the two control frames beside it', 
 });
 
 test('lets an application decide once how its composers look', () => {
-  assert.deepEqual(contract.provides.promptComposerDefaults, ['size', 'variant', 'submitOn']);
+  assert.deepEqual(contract.provides.promptComposerDefaults, [
+    'size',
+    'variant',
+    'submitOn',
+    'emphasis',
+  ]);
 });
 
 test('declares one scenario per demonstration the reference page owes', () => {

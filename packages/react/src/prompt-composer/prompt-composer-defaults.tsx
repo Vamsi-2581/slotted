@@ -6,6 +6,7 @@ import type {
 } from './prompt-composer.types';
 
 const FALLBACK: PromptComposerDefaults = {
+  emphasis: 'none',
   size: 'md',
   submitOn: 'enter',
   variant: 'raised',

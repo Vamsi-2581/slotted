@@ -92,12 +92,25 @@ describe('SlPromptComposer', () => {
     expect(root(fixture).tagName).toBe('FORM');
     expect(root(fixture).getAttribute('data-variant')).toBe('raised');
     expect(root(fixture).getAttribute('data-status')).toBe('ready');
-    for (const part of contract.members.promptComposer.parts) {
+    /* The ring and the glow are drawn with emphasis="ring" alone. */
+    for (const part of contract.members.promptComposer.parts.filter(
+      (name) => name !== 'ring' && name !== 'glow',
+    )) {
       const found =
         root(fixture).getAttribute('data-part') === part ||
         root(fixture).querySelector(`[data-part="${part}"]`) !== null;
       expect(found, part).toBe(true);
     }
+    expect(root(fixture).querySelector('[data-part="ring"]')).toBeNull();
+  });
+
+  it('draws the ring and the glow, hidden from assistive technology, when asked', () => {
+    const fixture = renderTemplate(
+      COMPOSER.replace('slPromptComposer [status]', 'slPromptComposer emphasis="ring" [status]'),
+    );
+    expect(root(fixture).getAttribute('data-emphasis')).toBe('ring');
+    expect(query(fixture, '[data-part="ring"]').getAttribute('aria-hidden')).toBe('true');
+    expect(query(fixture, '[data-part="glow"]').getAttribute('aria-hidden')).toBe('true');
   });
 
   it('sends on Enter and clears the value with the reason submit', () => {

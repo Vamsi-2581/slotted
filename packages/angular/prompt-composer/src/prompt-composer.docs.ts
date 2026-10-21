@@ -80,6 +80,20 @@ const anatomy: AnatomyRow[] = [
     purpose:
       'The send: a round accent disc named by the label for its status — Send, Sending, Stop, Retry — or a pill named by the words given to it. A busy ring while submitted, a stop square inside the ring while streaming, a retry turn after an error.',
   },
+  {
+    part: 'ring',
+    element: 'span, aria-hidden',
+    required: false,
+    purpose:
+      'With emphasis="ring": the frame\'s edge, a band cut from a turning conic gradient of --slotted-prompt-composer-ring-colors. It replaces the border, the focus outline and the raised shadow; the buttons keep their own focus rings.',
+  },
+  {
+    part: 'glow',
+    element: 'span, aria-hidden',
+    required: false,
+    purpose:
+      'With emphasis="ring": the same gradient blurred outside the frame, at --slotted-prompt-composer-ring-glow-opacity at rest, -focus while the input holds focus, -busy while loading, submitted or streaming.',
+  },
 ];
 
 const scenes: ReferenceSceneMeta[] = [
@@ -358,6 +372,13 @@ export const ANGULAR_PROMPT_COMPOSER_DOCS = {
         'raised',
         'slPromptComposer, providePromptComposerDefaults',
         'raised is the chat surface; outline and subtle sit inside a form',
+      ],
+      [
+        'emphasis',
+        "'none' | 'ring'",
+        'none',
+        'sl-prompt-composer',
+        'A ring of turning hues and a soft glow in place of the border, the focus outline and the raised shadow. Reduced motion stops the turn; forced colours bring the border back',
       ],
       [
         'canSubmit',

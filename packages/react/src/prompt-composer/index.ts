@@ -18,6 +18,7 @@ export type {
   PromptComposerBandProps,
   PromptComposerDefaults,
   PromptComposerDefaultsProviderProps,
+  PromptComposerEmphasis,
   PromptComposerInputProps,
   PromptComposerProps,
   PromptComposerRootProps,

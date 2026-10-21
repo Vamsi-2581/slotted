@@ -60,19 +60,21 @@ function styleRecalculation(): number {
 }
 
 /**
- * The stylesheet's cost of one full style recalculation, at the 1 440 × 900
- * frame the finding was measured in.
+ * The selectors' cost of one full style recalculation, at the 1 440 × 900
+ * frame the finding was measured in, against the same rules keyed the way they
+ * were before.
  *
  * With every rule keyed on `[data-part='…']` and `[data-ui='…']`, Blink tested
  * each element that carried the attribute against the 4 800 rules filed under
  * its name, and a full recalculation of a data-grid page cost 357 to 470 ms.
  * Keyed on `[data-part-…]` and `[data-ui-…]` (`@slotted/core/selector-key`),
- * this page measures 29 ms above the bare document in Chromium headless. The
- * budget leaves room for a slower runner and fails long before value selectors
- * come back.
+ * the page measured 29 ms above the bare document. A budget in milliseconds is
+ * the runner's speed: the same stylesheet measured 60 ms on CI. The page's own
+ * rules, written back to the value selectors in the same run, are the measure,
+ * and the keyed rules stay a fifth of them or less.
  */
 describe('the library stylesheet', () => {
-  it('adds under 45 ms to a full style recalculation of a data-grid page', async () => {
+  it('costs a fifth of the value selectors in a full style recalculation of a data-grid page', async () => {
     await page.viewport(1440, 900);
     const host = document.createElement('div');
     document.body.append(host);
@@ -107,6 +109,18 @@ describe('the library stylesheet', () => {
     styleRecalculation();
     const styled = styleRecalculation();
 
+    const styles = [...document.querySelectorAll('style')];
+    const keyed = styles.map((style) => style.textContent ?? '');
+    for (const style of styles) {
+      style.textContent = (style.textContent ?? '').replace(
+        /\[data-(part|ui)-([a-z0-9-]+)\]/g,
+        "[data-$1='$2']",
+      );
+    }
+    styleRecalculation();
+    const byValue = styleRecalculation();
+    for (const [index, style] of styles.entries()) style.textContent = keyed[index]!;
+
     const sheets = [...document.styleSheets];
     for (const sheet of sheets) sheet.disabled = true;
     styleRecalculation();
@@ -117,6 +131,6 @@ describe('the library stylesheet', () => {
     host.remove();
 
     expect(elements).toBeGreaterThan(1400);
-    expect(styled - bare).toBeLessThan(45);
+    expect(styled - bare).toBeLessThan((byValue - bare) / 5);
   });
 });

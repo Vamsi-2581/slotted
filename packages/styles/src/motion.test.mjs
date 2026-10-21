@@ -31,10 +31,16 @@ function currentFamilies() {
     }));
 }
 
+/**
+ * A duration inside an inline SVG image is the image's own animation, which
+ * no custom property reaches; the sheet that carries one swaps the image
+ * under reduced motion instead.
+ */
 test('takes every duration from the motion scale', () => {
   for (const { name, stylesheets } of currentFamilies()) {
     for (const { file, css } of stylesheets) {
-      const literals = [...css.matchAll(TIME_LITERAL)].map(([literal]) => literal);
+      const outsideImages = css.replace(/url\("data:[^"]*"\)/g, '');
+      const literals = [...outsideImages.matchAll(TIME_LITERAL)].map(([literal]) => literal);
       assert.deepEqual(
         literals,
         [],

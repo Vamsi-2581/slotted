@@ -46,80 +46,45 @@ test('is selected by the identifier the contract declares', () => {
 });
 
 /**
- * The ring is drawn here, in gradients over `currentColor`, so it takes the
- * ink its host is writing with and no host draws a circle of its own. Three
- * layers under one mask: a track at a fifth of the ink, an arc from the tail
- * angle to the head angle, and a dot at each end for the round caps a conic
- * gradient cannot draw. The glyph it replaced was one shape turned.
+ * The ring is vector: the host's ink under two SVG masks, a track at a fifth
+ * of its strength and an arc with round caps. No gradient draws any part of
+ * it, because a conic gradient's hard stop steps from frame to frame and a
+ * half-pixel radial stop blurs a ring this small.
  */
-test('draws the ring from gradients over the ink around it', () => {
-  const base = rule(ui).replace(/\s+/g, '');
-  assert.doesNotMatch(css, /--slotted-icon-|mask-size|border-radius/, 'the ring is still a glyph');
-  assert.match(base, /--_track:color-mix\(inoklab,currentColor20%,transparent\)/);
-  assert.match(base, /conic-gradient\(var\(--_track\)0100%\)/, 'no track');
-  assert.match(
-    base,
-    /conic-gradient\(fromvar\(--_start\),currentColor0deg,currentColorcalc\(var\(--_head\)-var\(--_tail\)\),transparentcalc\(var\(--_head\)-var\(--_tail\)\)\)/,
-    'the arc is not the distance from tail to head',
-  );
-  assert.equal(
-    (
-      base.match(
-        /radial-gradient\(circleatcalc\(50%\+var\(--_radius\)\*sin\(var\(--_(?:end|start)\)\)\)/g,
-      ) ?? []
-    ).length,
-    2,
-    'an end has no cap',
-  );
-  assert.match(
-    base,
-    /mask-image:radial-gradient\(circle,transparentcalc\(var\(--_ring\)\/2-var\(--_stroke\)-0\.5px\)/,
-  );
-  assert.doesNotMatch(declarations, /calc\(100%\s*-/, 'a mask stop is a percentage of the ray');
+test('draws the ring from two vector masks over the ink', () => {
+  const base = rule(ui);
+  assert.doesNotMatch(declarations, /gradient\(/, 'a gradient draws the ring');
+  assert.match(base, /background-color:currentColor/);
+  assert.match(base, /mask-image:var\(--_arc\),var\(--_track\)/);
+  assert.match(base, /mask-size:100% 100%/);
+  assert.match(base, /--_track:url\("data:image\/svg\+xml,[^"]*stroke-opacity='0\.2'/);
+  assert.match(base, /--_arc:url\("data:image\/svg\+xml,[^"]*stroke-linecap='round'/);
 });
 
 /**
- * The stroke is the icon set's own at this size, two units of twenty-four,
- * and never under the medium hairline; the ring keeps the set's inset inside
- * its box, so the swap with a glyph is between two shapes of one measure.
+ * The icon set's measure: a ring of twenty units in a box of twenty-four and
+ * a stroke of two and a quarter, so the swap with a glyph keeps one size.
  */
 test('is drawn to the measure of the glyph it stands in for', () => {
-  const base = rule(ui).replace(/\s+/g, '');
-  assert.match(base, /--_ring:calc\(var\(--_size\)\*5\/6\)/);
-  assert.match(
-    base,
-    /--_stroke:max\(var\(--slotted-border-width-medium,1\.5px\),calc\(var\(--_size\)\/12\)\)/,
-  );
-  assert.match(base, /padding:calc\(\(var\(--_size\)-var\(--_ring\)\)\/2\)/);
-  assert.match(base, /background-origin:content-box/);
+  for (const image of ['--_track', '--_arc']) {
+    const url = rule(ui).split(`${image}:`)[1]?.split('");')[0] ?? '';
+    assert.match(url, /viewBox='0 0 24 24'/, `${image} is not on the icon grid`);
+    assert.match(url, /r='8\.875'/, `${image} is not the glyph's ring`);
+    assert.match(url, /stroke-width='2\.25'/, `${image} has another stroke`);
+  }
 });
 
 /**
- * Three angles, none a rotation of the box: a turned box is a bitmap spun,
- * a gradient by angle is repainted. Head and tail each run one turn in
- * halves so the arc opens from the front and closes from behind, and the
- * linear turn under them is a turn and the hundred degrees the two resets
- * leave, so a cycle ends on the angle the next begins on.
+ * The motion is inside the drawing: the dash opens and travels and the circle
+ * turns as SVG animation, so every frame is rasterised as a vector. The box
+ * itself is not animated.
  */
-test('chases its own tail rather than turning a shape', () => {
-  const base = rule(ui).replace(/\s+/g, '');
-  assert.doesNotMatch(declarations, /rotate|transform/, 'the box is turned');
-  for (const angle of ['turn', 'head', 'tail']) {
-    assert.match(
-      css,
-      new RegExp(`@property --_${angle}\\s*\\{[^}]*syntax: '<angle>'`),
-      `${angle} flips`,
-    );
-    assert.match(
-      base,
-      new RegExp(`slotted-spinner-${angle}var\\(--slotted-duration-loop-slow\\)linearinfinite`),
-    );
-  }
-  assert.match(css, /@keyframes slotted-spinner-turn\s*\{\s*to\s*\{\s*--_turn: 460deg/);
-  assert.match(css, /--_head: 20deg;\s*animation-timing-function: ease-in-out/);
-  assert.match(css, /--_tail: 0deg;\s*animation-timing-function: ease-in-out/);
-  assert.match(css, /--_head: 280deg/);
-  assert.match(css, /--_tail: 260deg/);
+test('chases its own tail inside the drawing, not by turning the box', () => {
+  const arc = rule(ui).split('--_arc:')[1]?.split('");')[0] ?? '';
+  assert.match(arc, /animate attributeName='stroke-dasharray' values='1 150;70 150;70 150'/);
+  assert.match(arc, /animate attributeName='stroke-dashoffset' values='0;-28;-99'/);
+  assert.match(arc, /animateTransform attributeName='transform' type='rotate'/);
+  assert.doesNotMatch(declarations, /@keyframes|@property|animation:/, 'the box is animated');
 });
 
 test('arrives on a fade rather than a cut', () => {
@@ -143,12 +108,18 @@ test('is the size its host says, and the medium glyph box otherwise', () => {
 });
 
 test('stands still under reduced motion, as a track with an arc resting on it', () => {
-  assert.ok(
-    normalized.includes(
-      `@media (prefers-reduced-motion:reduce){${ui}{--_head:270deg;animation:none;}}`,
-    ),
-    'the ring keeps turning under reduced motion',
+  const reduced = normalized.split('@media (prefers-reduced-motion:reduce){')[1] ?? '';
+  assert.match(reduced, /--_arc:url\("data:image\/svg\+xml,[^"]*stroke-dasharray='75 150'/);
+  assert.doesNotMatch(
+    reduced.split('}}')[0],
+    /animate/,
+    'the ring keeps moving under reduced motion',
   );
+});
+
+/** Forced colours keep the ink, which they have already set, instead of erasing the background. */
+test('keeps its ink under forced colours', () => {
+  assert.match(rule(ui), /forced-color-adjust:none/);
 });
 
 /**

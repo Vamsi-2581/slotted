@@ -68,6 +68,21 @@ const missingSelectors = requiredSelectors.filter(
   (selector) => !normalizedStyles.includes(normalize(selector)),
 );
 
+/**
+ * Lightning CSS lowers `light-dark()` for engines older than the build target
+ * into `var(--lightningcss-light, …) var(--lightningcss-dark, …)`, and declares
+ * the pair only beside a `color-scheme` it compiles. The theme writes its
+ * `color-scheme` at runtime, so a read of the pair here resolves to nothing.
+ */
+const lowered = [...new Set(bundledStyles.match(/--lightningcss-[a-z-]+/g) ?? [])];
+
+if (lowered.length > 0) {
+  console.error(
+    `The bundled stylesheet reads variables no shipped stylesheet declares: ${lowered.join(', ')}`,
+  );
+  process.exitCode = 1;
+}
+
 if (!bundledStyles.startsWith(LAYER_ORDER_STATEMENT)) {
   console.error('The bundled stylesheet does not open with the published layer order.');
   process.exitCode = 1;

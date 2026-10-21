@@ -57,6 +57,7 @@ function recordingSource(fail = false) {
       [createEntity]="maker()"
       [openOn]="openOn()"
       [readOnly]="readOnly()"
+      [spellcheck]="spellcheck()"
       (valueChangeRequest)="requests.push($event)"
       (openChangeRequest)="openRequests.push($event)"
     />
@@ -73,6 +74,7 @@ class Host {
   readonly maker = signal<((query: string) => Promise<Entity>) | undefined>(undefined);
   readonly openOn = signal<EntityPickerOpenOn | undefined>(undefined);
   readonly readOnly = signal<boolean | undefined>(undefined);
+  readonly spellcheck = signal(false);
   readonly requests: EntityPickerValueRequest[] = [];
   readonly openRequests: ChangeRequest<boolean>[] = [];
 }
@@ -103,6 +105,16 @@ const expanded = () => input().getAttribute('aria-expanded');
 const options = () => [...document.querySelectorAll<HTMLElement>("[role='option']")];
 
 describe('SlEntityPicker', () => {
+  it('leaves the query and the chosen name without a spelling check unless asked', async () => {
+    const fixture = await mount();
+    expect(input().getAttribute('spellcheck')).toBe('false');
+    expect(input().getAttribute('autocorrect')).toBe('off');
+
+    fixture.componentInstance.spellcheck.set(true);
+    fixture.detectChanges();
+    expect(input().getAttribute('spellcheck')).toBe('true');
+  });
+
   it('opens on focus with favorites and searches the empty query', async () => {
     const { asked, source } = recordingSource();
     const fixture = await mount((host) => {

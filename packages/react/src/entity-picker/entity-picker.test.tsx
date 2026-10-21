@@ -50,6 +50,15 @@ const pressInput = () => {
 };
 
 describe('EntityPicker', () => {
+  it('leaves the query and the chosen name without a spelling check unless asked', () => {
+    const { rerender } = render(<Picker items={PEOPLE} defaultValue="ana" />);
+    expect(input()).toHaveAttribute('spellcheck', 'false');
+    expect(input()).toHaveAttribute('autocorrect', 'off');
+
+    rerender(<Picker items={PEOPLE} defaultValue="ana" spellCheck />);
+    expect(input()).toHaveAttribute('spellcheck', 'true');
+  });
+
   it('draws every part it declares somewhere in its states', async () => {
     const { source } = recordingSource();
     render(<Picker defaultValue="ana" favorites={[PEOPLE[2]!]} source={source} />);

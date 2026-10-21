@@ -342,8 +342,13 @@ export function EntityPickerControl() {
     !picker.readOnly &&
     (chosen.length > 0 || picker.inputValue !== '');
 
+  /* A picker searches names, and a proper name is a misspelling to a
+     dictionary: the query and the chosen label carry no underline unless the
+     consumer asks for one. */
   const input = (
     <input
+      autoCorrect="off"
+      spellCheck={false}
       {...nativeProps}
       aria-activedescendant={
         picker.open && picker.highlighted !== null ? picker.optionId(picker.highlighted) : undefined

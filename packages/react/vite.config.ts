@@ -19,6 +19,13 @@ function entries(): Record<string, string> {
 export default defineConfig({
   plugins: [react()],
   build: {
+    /* The oldest engines that run the stylesheet as written: `@scope` from the
+       theme, native `light-dark()` in the families. A lower target makes
+       Lightning CSS rewrite `light-dark()` into `--lightningcss-light/-dark`
+       pairs that only its own `color-scheme` output declares, and the theme's
+       `color-scheme` is written at runtime, so the property resolved to its
+       initial value. */
+    cssTarget: ['chrome123', 'edge123', 'firefox128', 'safari17.5'],
     lib: {
       cssFileName: 'styles',
       entry: entries(),

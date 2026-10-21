@@ -62,7 +62,7 @@
     "values": "multiple: role=grid, carrying the field's label and the count of chips; the frame's buttons stay outside it, because a grid owns rows and nothing else",
     "chips": "multiple: the row of chosen entities, role=row. Each chip is a tag root (data-ui=tag, data-part=root, role=gridcell) — the chip is tag's, as in multi-select — with an avatar in tag's start part, the label, and tag's remove button at tabindex=-1; data-loading while its id resolves, data-unresolved when the source did not return it",
     "field": "multiple: the gridcell that holds the input",
-    "input": "the text field, role=combobox",
+    "input": "the text field, role=combobox; spellcheck=false and autocorrect=off unless the consumer asks for the check (React spellCheck, Angular spellcheck), since it searches names",
     "clear": "the button that empties the choice and the text",
     "trigger": "the button that opens and closes the popup, tabindex=-1",
     "arrow": "the chevron inside trigger",

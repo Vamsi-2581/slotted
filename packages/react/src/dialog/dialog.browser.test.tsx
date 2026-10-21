@@ -1,11 +1,14 @@
 import { render, screen } from '@testing-library/react';
+import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 import { userEvent } from 'vitest/browser';
 
 import {
+  AlertDialog,
   Dialog,
   DialogBody,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -161,4 +164,58 @@ describe('a dialog that is a form', () => {
     await userEvent.keyboard('{Enter}');
     expect(submitted).toBe(1);
   });
+});
+
+/**
+ * A consumer that writes `onOpenChange` inline hands the root a new handler on
+ * every render of the component that holds the dialog, and that component
+ * re-renders on each keystroke typed inside it. The layer's lifecycle runs on
+ * `open` alone: a new handler moved focus back to the opener after the first
+ * character.
+ */
+describe('a dialog whose owner re-renders while it is open', () => {
+  it.each(['dialog', 'alertDialog'] as const)(
+    'keeps focus in the %s input across keystrokes',
+    async (member) => {
+      const Root = member === 'dialog' ? Dialog : AlertDialog;
+      function Owned({ open, setOpen }: { open: boolean; setOpen: (open: boolean) => void }) {
+        const [value, setValue] = useState('');
+        return (
+          <Root open={open} onOpenChange={(next) => setOpen(next)}>
+            <DialogContent>
+              <DialogTitle>T</DialogTitle>
+              <DialogDescription>D</DialogDescription>
+              <DialogBody>
+                <input
+                  aria-label="R"
+                  value={value}
+                  onChange={(event) => setValue(event.target.value)}
+                />
+              </DialogBody>
+            </DialogContent>
+          </Root>
+        );
+      }
+      function Page() {
+        const [open, setOpen] = useState(false);
+        return (
+          <>
+            <button type="button" onClick={() => setOpen(true)}>
+              Open
+            </button>
+            <Owned open={open} setOpen={setOpen} />
+          </>
+        );
+      }
+      render(<Page />);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Open' }));
+      const input = screen.getByRole('textbox', { name: 'R' });
+      await userEvent.click(input);
+      await userEvent.keyboard('Duplicated');
+
+      expect(input).toHaveValue('Duplicated');
+      expect(document.activeElement).toBe(input);
+    },
+  );
 });

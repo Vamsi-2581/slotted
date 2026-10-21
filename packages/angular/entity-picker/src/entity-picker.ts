@@ -387,7 +387,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         data-part="input"
         data-part-input=""
         autocomplete="off"
+        autocorrect="off"
         aria-autocomplete="list"
+        [attr.spellcheck]="spellcheck() ? 'true' : 'false'"
         [id]="controlId()"
         [value]="inputValue()"
         [disabled]="resolvedDisabled()"
@@ -694,6 +696,8 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
 
   readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   readonly placeholder = input<string>('');
+  /** A picker searches names, which a dictionary underlines; on only when asked for. */
+  readonly spellcheck = input(false, { transform: booleanAttribute });
   readonly name = input<string | undefined>(undefined);
   readonly form = input<string | undefined>(undefined);
   /** BCP 47, for the local filter and the mark. The language in force when absent. */

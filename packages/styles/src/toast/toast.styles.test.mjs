@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/toast/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./toast.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./toast.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./toast.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace collapsed rather than removed: a descendant selector and a
@@ -22,9 +35,9 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
-const item = `${ui}>[data-part='list']>[data-part='item']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
+const item = `${ui}>[data-part-list]>[data-part-item]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -43,13 +56,13 @@ test('is selected by the identifier the contract declares', () => {
  * The defect this test was written from. A message holds other families —
  * a `button` in its actions, a `progress-indicator` in its mark — and three of
  * those families name a part `root`, `icon`, `label` or `indicator`. Written as
- * a descendant of the family, `[data-ui='toast'] [data-part='icon']` masked an
- * icon button's own icon and `[data-part='root']` resized a spinner into a
+ * a descendant of the family, `[data-ui-toast] [data-part-icon]` masked an
+ * icon button's own icon and `[data-part-root]` resized a spinner into a
  * fixed region. Every inner part is therefore reached through the element that
  * owns it, and nothing in this sheet is a bare descendant of the family.
  */
 test('never reaches a part that belongs to a family nested inside it', () => {
-  const bare = [...normalized.matchAll(/\[data-ui='toast'\](?![>[])\s?\[data-part='([a-z-]+)'\]/g)];
+  const bare = [...normalized.matchAll(/\[data-ui-toast\](?![>[])\s?\[data-part-([a-z-]+)\]/g)];
   assert.deepEqual(
     bare.map(([, part]) => part),
     [],
@@ -64,7 +77,7 @@ test('never reaches a part that belongs to a family nested inside it', () => {
  */
 test('lets a press through the region and not through a message', () => {
   assert.match(rule(root), /pointer-events:none/);
-  assert.match(rule(`${ui}>[data-part='list']`), /pointer-events:none/);
+  assert.match(rule(`${ui}>[data-part-list]`), /pointer-events:none/);
   assert.match(rule(item), /pointer-events:auto/);
 });
 
@@ -75,7 +88,7 @@ test('lets a press through the region and not through a message', () => {
  * collapses durations under reduced motion.
  */
 test('draws the countdown from the duration the message was given', () => {
-  const bar = rule(`${item}>[data-part='progress']`);
+  const bar = rule(`${item}>[data-part-progress]`);
   assert.match(bar, /animation-duration:var\(--slotted-toast-duration/);
   assert.match(bar, /animation-play-state:var\(--slotted-toast-play-state/);
   assert.ok(contract.runtimeProperties.includes('--slotted-toast-duration'));
@@ -112,10 +125,8 @@ test('answers every placement the contract declares', () => {
  * style is the `opacity: 0` a message arrives from and leaves into.
  */
 test('draws the pile from the index rather than from a rule per message', () => {
-  const stacked = rule(`${ui}[data-stacking='stack']>[data-part='list']>[data-part='item']`);
-  const open = rule(
-    `${ui}[data-stacking='stack']>[data-part='list']>[data-part='item'][data-open]`,
-  );
+  const stacked = rule(`${ui}[data-stacking='stack']>[data-part-list]>[data-part-item]`);
+  const open = rule(`${ui}[data-stacking='stack']>[data-part-list]>[data-part-item][data-open]`);
   assert.ok(!/scale/.test(stacked), 'a box of words may not be scaled (R7)');
   assert.match(open, /opacity:calc\(1 - min\(var\(--slotted-toast-index/);
   assert.match(stacked, /z-index:calc\(var\(--slotted-toast-count/);
@@ -128,7 +139,7 @@ test('draws the pile from the index rather than from a rule per message', () => 
 /** Every part the contract declares is drawn, and every scene can show it. */
 test('draws every part the contract declares, and shows it in the harness', () => {
   for (const part of contract.members.toast.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `${part} is never styled`);
+    assert.ok(normalized.includes(`[data-part-${part.toLowerCase()}]`), `${part} is never styled`);
     assert.ok(fragment.includes(`data-part="${part}"`), `${part} appears in no scene`);
   }
 });
@@ -142,18 +153,18 @@ test('draws every part the contract declares, and shows it in the harness', () =
  */
 test('places the mark on the title’s first line, as alert does', () => {
   assert.match(rule(item), /--_mark-size:round\(nearest,1\.2em,2px\)/);
-  const mark = rule(`${item}>[data-part='icon']`);
+  const mark = rule(`${item}>[data-part-icon]`);
   assert.match(mark, /align-self:baseline/);
   assert.match(mark, /block-size:var\(--_mark-size\)/);
   assert.match(mark, /inline-size:var\(--_mark-size\)/);
   assert.match(mark, /inset-block-start:round\(nearest,\(var\(--_mark-size\) - 1cap\) \/ 2,1px\)/);
   assert.match(mark, /margin-block-start:calc\(-1 \* var\(--_mark-size\)\)/);
-  assert.match(rule(`${item}>[data-part='content']`), /align-self:baseline/);
+  assert.match(rule(`${item}>[data-part-content]`), /align-self:baseline/);
   /* The glyph is the binding's solid `Glyph`, whose ring reaches radius 11 of
      24, so the icon box is 12/11 of the disc; the sheet paints no mark. */
   assert.match(mark, /--slotted-icon-size:calc\(var\(--_mark-size\) \* 12 \/ 11\)/);
   assert.doesNotMatch(normalized, /mask-image/);
-  assert.ok(!normalized.includes(`[data-part='icon']::before`), 'the mark is a pseudo-element');
+  assert.ok(!normalized.includes(`[data-part-icon]::before`), 'the mark is a pseudo-element');
   for (const [, glyph] of fragment.matchAll(
     /<svg data-part="glyph" data-glyph="(circle[a-z-]*)"(?! data-solid)/g,
   ))
@@ -183,11 +194,11 @@ test('steps the close control by at least a surface step on every ground', () =>
  * pointer crossing one left the region, cleared the pause and closed the pile.
  */
 test('keeps the pointer in the region across the gap between two messages', () => {
-  assert.match(rule(`${ui}[data-expanded]>[data-part='list']`), /pointer-events:auto/);
+  assert.match(rule(`${ui}[data-expanded]>[data-part-list]`), /pointer-events:auto/);
   /* A pile's messages are positioned, so its list is given the open pile's
      measured height or it covers no gap at all. */
   assert.match(
-    rule(`${ui}[data-stacking='stack'][data-expanded]>[data-part='list']`),
+    rule(`${ui}[data-stacking='stack'][data-expanded]>[data-part-list]`),
     /block-size:var\(--slotted-toast-stack-height/,
   );
   assert.ok(contract.runtimeProperties.includes('--slotted-toast-stack-height'));
@@ -199,7 +210,7 @@ test('keeps the pointer in the region across the gap between two messages', () =
  * answers are one silhouette on every variant.
  */
 test('sizes and inks the loader in the mark’s box', () => {
-  const mark = rule(`${item}>[data-part='icon']`);
+  const mark = rule(`${item}>[data-part-icon]`);
   assert.match(mark, /--slotted-progress-indicator-size:var\(--_mark-size\)/);
   assert.match(mark, /--slotted-progress-indicator-indicator-color:var\(--_mark\)/);
   assert.match(
@@ -223,7 +234,7 @@ test('draws no mark on a secondary message', () => {
  */
 test('draws the countdown as a full rule under reduced motion', () => {
   const reduced = normalized.split('@media (prefers-reduced-motion:reduce){')[1] ?? '';
-  const bar = reduced.split(`${item}>[data-part='progress']{`)[1]?.split('}')[0] ?? '';
+  const bar = reduced.split(`${item}>[data-part-progress]{`)[1]?.split('}')[0] ?? '';
   assert.match(bar, /animation-name:none/);
   assert.match(bar, /inline-size:100%/);
 });
@@ -234,14 +245,14 @@ test('draws the countdown as a full rule under reduced motion', () => {
  * forced colours.
  */
 test('lets one colour reach the mark, so forced colours can replace it', () => {
-  assert.match(rule(`${item}>[data-part='icon']`), /color:var\(--_mark\)/);
+  assert.match(rule(`${item}>[data-part-icon]`), /color:var\(--_mark\)/);
   assert.match(rule(`${item}[data-variant='solid']`), /--_mark:var\(--_on-solid\)/);
-  assert.match(normalized, /forced-colors[^@]*\[data-part='icon'\]\{color:CanvasText/);
+  assert.match(normalized, /forced-colors[^@]*\[data-part-icon\]\{color:CanvasText/);
 });
 
 /** A mark a page supplies takes the same box: it is an icon on the same line. */
 test('gives a supplied mark the box the family draws its own in', () => {
-  const mark = rule(`${item}>[data-part='icon']`);
+  const mark = rule(`${item}>[data-part-icon]`);
   assert.match(mark, /display:flex/);
   assert.match(mark, /align-items:center/);
   assert.match(mark, /justify-content:center/);
@@ -255,9 +266,9 @@ test('gives a supplied mark the box the family draws its own in', () => {
  * grid reads, and the clamped track is the other half.
  */
 test('breaks an unbreakable title inside the message rather than growing it', () => {
-  assert.match(rule(`${item}>[data-part='content']`), /grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(rule(`${item}>[data-part-content]`), /grid-template-columns:minmax\(0,1fr\)/);
   for (const part of ['title', 'description']) {
-    const words = rule(`${item}>[data-part='content']>[data-part='${part}']`);
+    const words = rule(`${item}>[data-part-content]>[data-part-${part.toLowerCase()}]`);
     assert.match(words, /overflow-wrap:anywhere/, `${part} keeps break-word`);
     assert.match(words, /min-inline-size:0/, `${part} does not shrink`);
   }

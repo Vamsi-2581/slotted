@@ -356,7 +356,7 @@ export const Header: Story = {
         <sl-menu #account [open]="pictured" [portal]="false">
           <div slMenuHeader>
             <span slAvatar name="Ada Lovelace" size="md" decorative></span>
-            <span data-part="label">Ada Lovelace</span>
+            <span data-part="label" data-part-label="">Ada Lovelace</span>
             <span slMenuItemDescription>ada@analytical.engine</span>
           </div>
           <hr slMenuSeparator />

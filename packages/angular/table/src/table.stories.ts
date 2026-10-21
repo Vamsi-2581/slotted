@@ -1871,7 +1871,7 @@ export const Listing: Story = {
           <th slTableColumnHeader text="nowrap">Collected</th>
           <th slTableColumnHeader column="amount" numeric text="nowrap"><button slTableSort>Amount</button></th>
           <th slTableColumnHeader sticky="end" align="center">
-            <span data-ui="visually-hidden" data-part="root">Actions</span>
+            <span data-ui="visually-hidden" data-ui-visually-hidden="" data-part="root" data-part-root="">Actions</span>
           </th>
         </tr>
       </thead>

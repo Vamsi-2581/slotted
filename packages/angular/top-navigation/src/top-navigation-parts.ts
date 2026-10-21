@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import {
   provideTooltipDefaults,
   SlTooltip,
@@ -164,7 +165,7 @@ const HINT_PROVIDERS = [provideTooltipDefaults({ openOn: 'hover', side: 'bottom'
 @Directive({
   selector: '[slTopNavigationBrand]',
   standalone: true,
-  host: { 'data-part': 'brand' },
+  host: { 'data-part': 'brand', 'data-part-brand': '' },
 })
 export class SlTopNavigationBrand {}
 
@@ -176,7 +177,7 @@ export class SlTopNavigationBrand {}
 @Directive({
   selector: '[slTopNavigationHome]',
   standalone: true,
-  host: { 'data-part': 'home' },
+  host: { 'data-part': 'home', 'data-part-home': '' },
 })
 export class SlTopNavigationHome {}
 
@@ -184,7 +185,7 @@ export class SlTopNavigationHome {}
 @Directive({
   selector: '[slTopNavigationMark]',
   standalone: true,
-  host: { 'data-part': 'mark', 'aria-hidden': 'true' },
+  host: { 'data-part': 'mark', 'data-part-mark': '', 'aria-hidden': 'true' },
 })
 export class SlTopNavigationMark {}
 
@@ -192,7 +193,7 @@ export class SlTopNavigationMark {}
 @Directive({
   selector: '[slTopNavigationName]',
   standalone: true,
-  host: { 'data-part': 'name' },
+  host: { 'data-part': 'name', 'data-part-name': '' },
 })
 export class SlTopNavigationName {}
 
@@ -206,7 +207,7 @@ export class SlTopNavigationName {}
 @Directive({
   selector: '[slTopNavigationContext]',
   standalone: true,
-  host: { 'data-part': 'context' },
+  host: { 'data-part': 'context', 'data-part-context': '' },
 })
 export class SlTopNavigationContext {
   private readonly navigation = inject(SlTopNavigation);
@@ -258,6 +259,9 @@ export class SlTopNavigationContext {
   ],
   host: {
     'data-part': 'nav',
+    'data-part-nav': '',
+    /* The menu's root key goes with the menu's part. */
+    '[attr.data-part-root]': 'null',
     '[attr.aria-label]': 'ariaLabel()',
   },
 })
@@ -274,10 +278,10 @@ export class SlTopNavigationNav {
   constructor() {
     const document = this.native.ownerDocument;
     const panel = document.createElement('div');
-    panel.setAttribute('data-part', 'panel');
+    writeSelectorKey(panel, 'part', 'panel');
     panel.id = this.navigation.ids.panelId;
     const list = document.createElement('ul');
-    list.setAttribute('data-part', 'panel-list');
+    writeSelectorKey(list, 'part', 'panel-list');
     panel.appendChild(list);
 
     afterNextRender(() => {
@@ -328,6 +332,7 @@ export class SlTopNavigationNav {
   host: {
     ...HINT_HOST,
     'data-part': 'more',
+    'data-part-more': '',
     type: 'button',
     '[attr.id]': 'navigation.ids.moreId',
     '[attr.aria-controls]': 'navigation.ids.panelId',
@@ -370,10 +375,12 @@ export class SlTopNavigationMore extends TopNavigationControl {
   exportAs: 'slTopNavigationList',
   imports: [SlTopNavigationMore],
   template: `<ng-content />
-    <li data-part="item"><button slTopNavigationMore type="button"></button></li>`,
+    <li data-part="item" data-part-item="">
+      <button slTopNavigationMore type="button"></button>
+    </li>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'list' },
+  host: { 'data-part': 'list', 'data-part-list': '' },
 })
 export class SlTopNavigationList {}
 
@@ -395,6 +402,7 @@ export class SlTopNavigationList {}
   ],
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-open]': "open() ? '' : null",
     '[attr.data-value]': 'value()',
     '[attr.data-priority]': 'resolvedPriority()',
@@ -494,6 +502,7 @@ export class SlTopNavigationItem implements NavigationMenuSection {
   exportAs: 'slTopNavigationLink',
   host: {
     'data-part': 'link',
+    'data-part-link': '',
     '[attr.aria-current]': "resolvedCurrent() ? 'page' : null",
     '[attr.aria-disabled]': "item.resolvedDisabled() ? 'true' : null",
     '[attr.data-current]': "resolvedCurrent() ? '' : null",
@@ -552,7 +561,7 @@ export class SlTopNavigationLink {
   standalone: true,
   exportAs: 'slTopNavigationTrigger',
   imports: [SlGlyph, SlIcon],
-  template: `<ng-content /><span data-part="indicator" aria-hidden="true"
+  template: `<ng-content /><span data-part="indicator" data-part-indicator="" aria-hidden="true"
       ><span slIcon><svg slGlyph name="chevron-down"></svg></span
     ></span>`,
   styleUrl: '../../../styles/src/navigation-menu/navigation-menu.css',
@@ -577,6 +586,7 @@ export class SlTopNavigationTrigger {}
   host: {
     ...HINT_HOST,
     'data-part': 'search-close',
+    'data-part-search-close': '',
     type: 'button',
     '[attr.aria-label]': 'text()',
     '(click)': 'onClick($event)',
@@ -604,6 +614,7 @@ export class SlTopNavigationSearchClose extends TopNavigationControl {
   host: {
     ...HINT_HOST,
     'data-part': 'search-toggle',
+    'data-part-search-toggle': '',
     type: 'button',
     '[attr.aria-label]': 'text()',
     '(click)': 'onClick($event)',
@@ -641,6 +652,7 @@ export class SlTopNavigationSearchToggle extends TopNavigationControl {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'search',
+    'data-part-search': '',
     '(keydown)': 'onKeyDown($event)',
     '(focusout)': 'onFocusOut($event)',
   },
@@ -711,7 +723,7 @@ export class SlTopNavigationSearch {
     <ng-content />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlTopNavigationActions {
   protected readonly navigation = inject(SlTopNavigation);
@@ -743,6 +755,7 @@ export class SlTopNavigationActions {
   host: {
     ...HINT_HOST,
     'data-part': 'help',
+    'data-part-help': '',
   },
 })
 export class SlTopNavigationHelp extends TopNavigationControl {
@@ -763,7 +776,7 @@ export class SlTopNavigationHelp extends TopNavigationControl {
   constructor() {
     super();
     this.navigation.hasHelp.set(true);
-    afterNextRender(() => this.native.setAttribute('data-part', 'help'));
+    afterNextRender(() => writeSelectorKey(this.native, 'part', 'help'));
     effect(() => {
       const panel = this.navigation.panelNode();
       if (this.inPanel() && panel !== null) this.home.moveTo(panel, null);
@@ -790,6 +803,7 @@ export class SlTopNavigationHelp extends TopNavigationControl {
   host: {
     ...HINT_HOST,
     'data-part': 'notifications',
+    'data-part-notifications': '',
     type: 'button',
     '[attr.aria-label]': 'text()',
   },
@@ -799,7 +813,7 @@ export class SlTopNavigationNotifications extends TopNavigationControl {
 
   constructor() {
     super();
-    afterNextRender(() => this.native.setAttribute('data-part', 'notifications'));
+    afterNextRender(() => writeSelectorKey(this.native, 'part', 'notifications'));
   }
 }
 
@@ -824,6 +838,7 @@ export class SlTopNavigationNotifications extends TopNavigationControl {
   host: {
     ...HINT_HOST,
     'data-part': 'action',
+    'data-part-action': '',
     '[attr.type]': 'type',
     '[attr.aria-label]': 'text() || null',
   },
@@ -838,7 +853,7 @@ export class SlTopNavigationAction extends TopNavigationControl {
 
   constructor() {
     super();
-    afterNextRender(() => this.native.setAttribute('data-part', 'action'));
+    afterNextRender(() => writeSelectorKey(this.native, 'part', 'action'));
   }
 }
 
@@ -846,7 +861,7 @@ export class SlTopNavigationAction extends TopNavigationControl {
 @Directive({
   selector: '[slTopNavigationCount]',
   standalone: true,
-  host: { 'data-part': 'count' },
+  host: { 'data-part': 'count', 'data-part-count': '' },
 })
 export class SlTopNavigationCount {}
 
@@ -864,6 +879,7 @@ export class SlTopNavigationCount {}
   host: {
     ...HINT_HOST,
     'data-part': 'account',
+    'data-part-account': '',
     type: 'button',
     '[attr.aria-label]': 'text()',
   },
@@ -873,6 +889,6 @@ export class SlTopNavigationAccount extends TopNavigationControl {
 
   constructor() {
     super();
-    afterNextRender(() => this.native.setAttribute('data-part', 'account'));
+    afterNextRender(() => writeSelectorKey(this.native, 'part', 'account'));
   }
 }

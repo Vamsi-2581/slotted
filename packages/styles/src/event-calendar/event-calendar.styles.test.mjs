@@ -43,11 +43,11 @@ test('keeps the lane pitch at the minimum target', () => {
 /** A press is its own state, instant, and never the hover again. */
 test('answers the press on every control that answers the hover', () => {
   for (const fragment of [
-    "[data-part='day-number']:active",
-    "[data-part='event']:not([data-bar]):active",
-    "[data-part='more']:active",
-    "[data-part='list-events'][data-part='event']:active",
-    "[data-part='event'][data-bar][data-open]:active",
+    '[data-part-day-number]:active',
+    '[data-part-event]:not([data-bar]):active',
+    '[data-part-more]:active',
+    '[data-part-list-events][data-part-event]:active',
+    '[data-part-event][data-bar][data-open]:active',
   ]) {
     const bodies = rulesNaming(fragment);
     assert.ok(bodies.length > 0, `no rule for ${fragment}`);
@@ -69,7 +69,7 @@ test('eases the resize grip in and out on the motion curves', () => {
 
 test('transitions every colour the "+N" hover paints', () => {
   const [body] = [...normalized.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-    .filter(([, selector]) => selector.trim() === "[data-ui='event-calendar'][data-part='more']")
+    .filter(([, selector]) => selector.trim() === '[data-ui-event-calendar][data-part-more]')
     .map(([, , declarations]) => declarations);
   for (const property of ['background-color', 'border-color', 'color']) {
     assert.match(body, new RegExp(`[:,]${property}var\\(--slotted-control-transition-duration`));
@@ -92,7 +92,7 @@ test('keeps today and the timed lines readable in forced colours', () => {
  * disagree.
  */
 test('takes the ground it is placed on, and mixes its fills over that ground', () => {
-  const root = rulesNaming("[data-ui='event-calendar'][data-part='root']").join('');
+  const root = rulesNaming('[data-ui-event-calendar][data-part-root]').join('');
   assert.ok(
     root.includes('background-color:var(--slotted-event-calendar-background,transparent);'),
     'the root paints nothing unless the consumer names a ground',

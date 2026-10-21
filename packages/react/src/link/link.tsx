@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/link/link.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -83,7 +84,7 @@ export function Link({
     return true;
   };
 
-  const rootProps: LinkRootProps = {
+  const rootProps: LinkRootProps = keyedProps({
     ...nativeProps,
     'aria-disabled': disabled || undefined,
     children: (
@@ -92,14 +93,19 @@ export function Link({
         {newTab ? (
           <>
             {WORD_JOINER}
-            <span aria-hidden="true" data-part="external-icon">
+            <span aria-hidden="true" data-part="external-icon" data-part-external-icon="">
               {/* An arrow that means "away from here" points the other way in a
                   right-to-left document. */}
               <Icon directional>
                 <Glyph name="external" />
               </Icon>
             </span>
-            <span data-part="external-hint" data-ui="visually-hidden">
+            <span
+              data-part="external-hint"
+              data-part-external-hint=""
+              data-ui="visually-hidden"
+              data-ui-visually-hidden=""
+            >
               {` ${t('externalHint')}`}
             </span>
             {WORD_JOINER}
@@ -148,7 +154,7 @@ export function Link({
       if (event.key === 'Enter' && block(event)) return;
       onKeyDownCapture?.(event);
     },
-  };
+  });
 
   return render === undefined ? <a {...rootProps} /> : render(rootProps);
 }

@@ -57,7 +57,7 @@
     "kbd": "--slotted-kbd-radius"
   },
   "guard": {
-    "selector": "[data-ui='prose'] :where(<element>):not(:where([data-part='exclude'], [data-part='exclude'] *))",
+    "selector": "[data-ui-prose] :where(<element>):not(:where([data-part='exclude'], [data-part='exclude'] *))",
     "reason": "Every content rule has to lose to two other things: a Slotted family placed inside the region, selected at 0-1-0, and the consumer's own rule. :where() costs nothing in specificity and :not(:where()) takes the specificity of its argument, which is zero, so the whole content stylesheet weighs exactly what the root selector weighs.",
     "alternative": {
       "feature": "@scope ([data-ui='prose']) to ([data-part='exclude'])",
@@ -90,7 +90,7 @@
     "appliesWhen": "overflowing",
     "measuredBy": "@slotted/core/overflow",
     "name": ["labelledBy", "aria-label", "messages.scroll"],
-    "focusSelector": "[data-part='scroll'][tabindex]",
+    "focusSelector": "[data-part-scroll][tabindex]",
     "reason": "A pre or a table wider than the column scrolls sideways, and none of the four surveyed implementations lets a keyboard reach it. Anything that takes focus needs a name and a role or it fails SC 4.1.2, and a block that fits needs neither: a tab stop on it is a tab stop that does nothing. The ring is painted on the markup that is actually operable, which is Adrian Roselli's own selector trick, and it answers :focus-visible rather than :focus because a pointer press inside a tabindex box focuses it.",
     "source": "https://adrianroselli.com/2020/11/under-engineered-responsive-tables.html"
   },

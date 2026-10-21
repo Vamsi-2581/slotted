@@ -415,7 +415,7 @@ describe('EntityPicker', () => {
       <Picker
         items={PEOPLE}
         renderOption={(entity, state) => (
-          <span data-part="label">
+          <span data-part="label" data-part-label="">
             {entity.label}
             {state.selected ? ' ✓' : ''}
           </span>

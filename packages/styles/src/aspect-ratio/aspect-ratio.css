@@ -27,7 +27,7 @@
    * does not grow the frame to 4000 pixels. Only content with a height of its
    * own — text, a control, a card — can.
    */
-  [data-ui='aspect-ratio'][data-part='root'] {
+  [data-ui-aspect-ratio][data-part-root] {
     /**
      * The proportion, as the public token. A named ratio writes it below; a
      * number the consumer stated is written on the instance, as `w / h`, and
@@ -61,23 +61,23 @@
    * the decision reads in the DOM. Written as the public token so a theme
    * that disagrees about what `wide` means retunes it in one place.
    */
-  [data-ui='aspect-ratio'][data-part='root'][data-ratio='square'] {
+  [data-ui-aspect-ratio][data-part-root][data-ratio='square'] {
     --slotted-aspect-ratio: 1 / 1;
   }
 
-  [data-ui='aspect-ratio'][data-part='root'][data-ratio='landscape'] {
+  [data-ui-aspect-ratio][data-part-root][data-ratio='landscape'] {
     --slotted-aspect-ratio: 4 / 3;
   }
 
-  [data-ui='aspect-ratio'][data-part='root'][data-ratio='portrait'] {
+  [data-ui-aspect-ratio][data-part-root][data-ratio='portrait'] {
     --slotted-aspect-ratio: 3 / 4;
   }
 
-  [data-ui='aspect-ratio'][data-part='root'][data-ratio='video'] {
+  [data-ui-aspect-ratio][data-part-root][data-ratio='video'] {
     --slotted-aspect-ratio: 16 / 9;
   }
 
-  [data-ui='aspect-ratio'][data-part='root'][data-ratio='wide'] {
+  [data-ui-aspect-ratio][data-part-root][data-ratio='wide'] {
     --slotted-aspect-ratio: 21 / 9;
   }
 
@@ -94,7 +94,7 @@
    * shrink with the frame; the block minimum is left alone on purpose, so a
    * child taller than the ratio still grows the box.
    */
-  [data-ui='aspect-ratio'][data-part='root'] > * {
+  [data-ui-aspect-ratio][data-part-root] > * {
     grid-area: 1 / 1;
     min-inline-size: 0;
   }
@@ -118,14 +118,14 @@
    * replaced element has nothing to say about the frame's height; the text
    * child above keeps its automatic minimum, and the growth rule with it.
    */
-  [data-ui='aspect-ratio'][data-part='root'] > :is(img, video, canvas, svg, iframe, picture) {
+  [data-ui-aspect-ratio][data-part-root] > :is(img, video, canvas, svg, iframe, picture) {
     block-size: 100%;
     display: block;
     inline-size: 100%;
     min-block-size: 0;
   }
 
-  [data-ui='aspect-ratio'][data-part='root'] > :is(img, video) {
+  [data-ui-aspect-ratio][data-part-root] > :is(img, video) {
     object-fit: contain;
   }
 }

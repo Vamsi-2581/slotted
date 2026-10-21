@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/toggle-group/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./toggle-group.css', import.meta.url), 'utf8');
-const harness = readFileSync(new URL('./toggle-group.harness.html', import.meta.url), 'utf8');
+const harness = withoutSelectorKeys(
+  readFileSync(new URL('./toggle-group.harness.html', import.meta.url), 'utf8'),
+);
 /** The sheet with its prose removed: a comment is not a rule. */
 const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
@@ -20,9 +33,7 @@ const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const dense = rules.replace(/\s+/g, '');
 
 test('paints every part the contract declares, and no part it does not', () => {
-  const painted = new Set(
-    [...rules.matchAll(/\[data-part=['"]([a-z-]+)['"]\]/g)].map(([, part]) => part),
-  );
+  const painted = new Set([...rules.matchAll(/\[data-part-([a-z-]+)\]/g)].map(([, part]) => part));
   for (const part of contract.members.toggleGroup.parts) {
     assert.ok(painted.has(part), `the stylesheet never selects the ${part} part`);
     assert.match(harness, new RegExp(`data-part="${part}"`), `no scene renders the ${part} part`);
@@ -71,12 +82,12 @@ test('paints an item that is on with the foundation pair and not with a fill', (
  * that was one pixel in places and two in others.
  */
 test('leaves the frame to the items, so the bar is one control tall', () => {
-  const rootRule = dense.match(/\[data-ui='toggle-group'\]\[data-part='root'\]\{([^}]*)\}/);
+  const rootRule = dense.match(/\[data-ui-toggle-group\]\[data-part-root\]\{([^}]*)\}/);
   assert.ok(rootRule, 'no rule sets up the root');
   assert.ok(!/(^|;)border:/.test(rootRule[1]), 'the root frames itself again');
   assert.ok(!/(^|;)padding:/.test(rootRule[1]), 'the root insets itself again');
   assert.ok(!/border-radius:/.test(rootRule[1]), 'the root rounds itself again');
-  assert.match(dense, /\[data-part='item'\]\{[^}]*block-size:var\(--_height\)/);
+  assert.match(dense, /\[data-part-item\]\{[^}]*block-size:var\(--_height\)/);
 });
 
 /**
@@ -96,19 +107,19 @@ test('joins the items by overlapping one edge and painting one of them', () => {
   assert.match(dense, /margin-block-start:var\(--_overlap\)/);
   assert.match(
     dense,
-    /\[data-part='item'\]:not\(:last-child\):not\(\[data-pressed\]\)\{border-inline-end-color:transparent/,
+    /\[data-part-item\]:not\(:last-child\):not\(\[data-pressed\]\)\{border-inline-end-color:transparent/,
   );
   assert.match(
     dense,
-    /\[data-part='item'\]:not\(:last-child\):not\(\[data-pressed\]\)\{border-block-end-color:transparent/,
+    /\[data-part-item\]:not\(:last-child\):not\(\[data-pressed\]\)\{border-block-end-color:transparent/,
   );
   assert.match(
     dense,
-    /\[data-part='item'\]\[data-pressed\]\+\[data-part='item'\]\{border-inline-start-color:transparent/,
+    /\[data-part-item\]\[data-pressed\]\+\[data-part-item\]\{border-inline-start-color:transparent/,
   );
   assert.match(
     dense,
-    /\[data-part='item'\]\[data-pressed\]\+\[data-part='item'\]\{border-block-start-color:transparent/,
+    /\[data-part-item\]\[data-pressed\]\+\[data-part-item\]\{border-block-start-color:transparent/,
   );
 });
 
@@ -119,12 +130,12 @@ test('joins the items by overlapping one edge and painting one of them', () => {
  * paints over the edge it just stated.
  */
 test('never changes the presence of an edge, only its colour', () => {
-  assert.match(dense, /\[data-part='item'\]\{[^}]*border:var\(--_border-width\)solidtransparent/);
+  assert.match(dense, /\[data-part-item\]\{[^}]*border:var\(--_border-width\)solidtransparent/);
   assert.ok(
     !/box-shadow:inset/.test(dense),
     'the pressed edge is an inset ring again, which leaves a hairline against the frame',
   );
-  assert.match(dense, /\[data-part='item'\]\[data-pressed\]\{z-index:1;\}/);
+  assert.match(dense, /\[data-part-item\]\[data-pressed\]\{z-index:1;\}/);
 });
 
 /**
@@ -140,7 +151,7 @@ test('draws the focus ring inside the item in a joined bar, and outside it other
   assert.match(dense, /:focus-visible\{[^}]*outline-offset:var\(--slotted-focus-ring-offset/);
   assert.match(
     dense,
-    /\[data-attached\]\[data-part='item'\]:focus-visible\{outline-offset:calc\(-1\*var\(--slotted-focus-ring-width/,
+    /\[data-attached\]\[data-part-item\]:focus-visible\{outline-offset:calc\(-1\*var\(--slotted-focus-ring-width/,
   );
 });
 
@@ -172,13 +183,13 @@ test('answers every density through the control scale', () => {
  */
 test('keeps saying which item is on when the group is unavailable', () => {
   const disabledPressed = dense.match(
-    /\[data-part='item'\]\[data-pressed\]:disabled,[^{]*\{([^}]*)\}/,
+    /\[data-part-item\]\[data-pressed\]:disabled,[^{]*\{([^}]*)\}/,
   );
   assert.ok(disabledPressed, 'no rule paints an item that is on and unavailable');
   assert.match(disabledPressed[1], /background:var\([^)]*disabled-pressed-background/);
 
   const disabledEdge = dense.match(
-    /\[data-variant='outline'\]\[data-part='item'\]:disabled,[^{]*\{([^}]*)\}/,
+    /\[data-variant='outline'\]\[data-part-item\]:disabled,[^{]*\{([^}]*)\}/,
   );
   assert.ok(disabledEdge, 'an unavailable item states no edge');
   assert.match(disabledEdge[1], /border-color:var\([^)]*disabled-border-color/);
@@ -187,11 +198,11 @@ test('keeps saying which item is on when the group is unavailable', () => {
 test('clips a long label rather than dropping it', () => {
   assert.match(
     dense,
-    /\[data-part='label'\]\{overflow:hidden;text-overflow:ellipsis;white-space:nowrap/,
+    /\[data-part-label\]\{overflow:hidden;text-overflow:ellipsis;white-space:nowrap/,
   );
 });
 
 test('states no distance between joined items and one between separated ones', () => {
-  assert.match(dense, /\[data-part='root'\]:not\(\[data-attached\]\)\{gap:var\(--_separation\)/);
+  assert.match(dense, /\[data-part-root\]:not\(\[data-attached\]\)\{gap:var\(--_separation\)/);
   assert.match(dense, /--_separation:calc\(var\(--_gap\)\*2\)/);
 });

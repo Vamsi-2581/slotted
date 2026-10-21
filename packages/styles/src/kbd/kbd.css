@@ -19,7 +19,7 @@
    * The same length is the minimum inline size, which is what makes a
    * one-letter cap square instead of a slot.
    */
-  [data-ui='kbd'] {
+  [data-ui-kbd] {
     /**
      * The height comes from the space scale — 16, 20, 24, 28 — and not from
      * the control geometry. A cap on its own is a glyph box, not a control,
@@ -73,7 +73,7 @@
     --_color: var(--slotted-text, CanvasText);
   }
 
-  [data-ui='kbd'][data-part='root'] {
+  [data-ui-kbd][data-part-root] {
     background-color: var(--_background);
     background-image: var(--_face);
     /**
@@ -167,7 +167,7 @@
    * so the trim moves the ink and never the box.
    */
   @supports (text-box: trim-both cap alphabetic) {
-    [data-ui='kbd'] [data-part='legend'] {
+    [data-ui-kbd] [data-part-legend] {
       text-box: trim-both cap alphabetic;
     }
 
@@ -179,7 +179,7 @@
      * three sat visibly high in the cap. Left untrimmed, what gets centred is
      * the em box, which is where a mark is drawn.
      */
-    [data-ui='kbd'] [data-part='legend'][data-legend='symbol'] {
+    [data-ui-kbd] [data-part-legend][data-legend='symbol'] {
       text-box: normal;
     }
   }
@@ -193,7 +193,7 @@
    * below the cap height of `K`, and at 1.15em `⌫` stood wider than the
    * `Esc` beside it.
    */
-  [data-ui='kbd'] [data-part='legend'][data-legend='symbol'] {
+  [data-ui-kbd] [data-part-legend][data-legend='symbol'] {
     font-family: var(--slotted-kbd-symbol-font-family, var(--slotted-font-family-sans, sans-serif));
     font-size: 1.1em;
   }
@@ -208,7 +208,7 @@
    * whose accessible name disappears when a consumer forgets an import has no
    * accessible name.
    */
-  [data-ui='kbd'] [data-part='name'] {
+  [data-ui-kbd] [data-part-name] {
     block-size: 1px;
     border: 0;
     clip-path: inset(50%);
@@ -233,7 +233,7 @@
    * pinned. A key legend written in Arabic still renders right-to-left within
    * its own cap, because that is a run of its own.
    */
-  [data-ui='kbd'][data-part='shortcut'] {
+  [data-ui-kbd][data-part-shortcut] {
     align-items: center;
     direction: ltr;
     display: inline-flex;
@@ -266,11 +266,11 @@
    * `⌥⇧⌘P` and `⌘K` read as one run of six keys. One step tighter is what says
    * these caps are one shortcut. Everywhere else the `+` says it instead.
    */
-  [data-ui='kbd'][data-part='shortcut'][data-platform='mac'] {
+  [data-ui-kbd][data-part-shortcut][data-platform='mac'] {
     --_gap: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='kbd'][data-part='shortcut'][data-platform='mac'][data-size='inherit'] {
+  [data-ui-kbd][data-part-shortcut][data-platform='mac'][data-size='inherit'] {
     --_gap: 0.125em;
   }
 
@@ -281,7 +281,7 @@
    * announce for the same shortcut. The word is not hidden: it is the only
    * thing that tells a sequence from a combination.
    */
-  [data-ui='kbd'] [data-part='separator'] {
+  [data-ui-kbd] [data-part-separator] {
     color: var(--slotted-text-muted, GrayText);
     flex: none;
     font-family: var(--slotted-kbd-font-family, var(--slotted-control-font-family, sans-serif));
@@ -289,7 +289,7 @@
     line-height: 1;
   }
 
-  [data-ui='kbd'] [data-part='separator'][data-separator='then'] {
+  [data-ui-kbd] [data-part-separator][data-separator='then'] {
     font-family: var(--slotted-control-font-family, sans-serif);
     /**
      * A step boundary is a bigger break than a key join, so it gets more air
@@ -311,7 +311,7 @@
    * scale starts at 12px, and 12px in a 16-pixel cap left one pixel of air
    * above an ascender, so this step writes the one size the scale lacks.
    */
-  [data-ui='kbd'][data-size='xs'] {
+  [data-ui-kbd][data-size='xs'] {
     --_size: var(--slotted-space-6, 1rem);
     --_font-size: 0.6875rem;
     --_inset-inline: var(--slotted-space-2, 0.25rem);
@@ -319,13 +319,13 @@
     --_gap: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='kbd'][data-size='sm'] {
+  [data-ui-kbd][data-size='sm'] {
     --_size: var(--slotted-space-7, 1.25rem);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_inset-inline: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='kbd'][data-size='lg'] {
+  [data-ui-kbd][data-size='lg'] {
     --_size: calc(var(--slotted-space-8, 1.5rem) + var(--slotted-space-2, 0.25rem));
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_inset-inline: var(--slotted-space-4, 0.5rem);
@@ -345,7 +345,7 @@
    * insets plus edges, made 25.8px on 16px text set at 24px lines. The radius
    * is a quarter of that height, the proportion of the absolute steps.
    */
-  [data-ui='kbd'][data-size='inherit'] {
+  [data-ui-kbd][data-size='inherit'] {
     --_size: 1.5em;
     --_font-size: 0.8em;
     --_inset-inline: 0.4em;
@@ -355,7 +355,7 @@
 
   /* A fractional height puts both horizontal edges between pixels. */
   @supports (inline-size: round(nearest, 1.5em, 1px)) {
-    [data-ui='kbd'][data-size='inherit'] {
+    [data-ui-kbd][data-size='inherit'] {
       --_size: round(nearest, 1.5em, 1px);
     }
   }
@@ -367,7 +367,7 @@
    * outlined one, and it is why `raised` is the default: it is the only value
    * that reads as an object rather than as a box drawn round a word.
    */
-  [data-ui='kbd'][data-variant='raised'] {
+  [data-ui-kbd][data-variant='raised'] {
     --_base-width: var(--slotted-kbd-base-width, var(--slotted-border-width-thick, 2px));
     /**
      * The skirt. The lower part of the face turns a tenth of the way toward
@@ -394,7 +394,7 @@
    * survive an unknown surface was the one variant that could not. A box that
    * borrows its ground borrows its foreground with it.
    */
-  [data-ui='kbd'][data-variant='outline'] {
+  [data-ui-kbd][data-variant='outline'] {
     --_background: transparent;
     /* The edge is all this variant draws, so it is the strong one all round. */
     --_border: var(--slotted-border-strong, ButtonBorder);
@@ -407,7 +407,7 @@
    * panel, where a key painted with it would disappear; the neutral tone's
    * surface is the step `badge` calibrated to read on both.
    */
-  [data-ui='kbd'][data-variant='soft'] {
+  [data-ui-kbd][data-variant='soft'] {
     --_background: var(--slotted-tone-secondary-surface);
     /**
      * The tinted key draws the tone's own edge, as every `badge` variant does,
@@ -435,14 +435,14 @@
    * also what makes the row work: a menu item that dims dims its shortcut with
    * it, with no state to set and nothing left bright at the end of a grey row.
    */
-  [data-ui='kbd'][data-variant='plain'] {
+  [data-ui-kbd][data-variant='plain'] {
     --_background: transparent;
     --_border: transparent;
     --_base: transparent;
     --_color: inherit;
   }
 
-  [data-ui='kbd'][data-part='root'][data-variant='plain'] {
+  [data-ui-kbd][data-part-root][data-variant='plain'] {
     min-inline-size: 0;
     padding-inline: 0;
   }
@@ -455,7 +455,7 @@
    * belongs to owns the semantics: `kbd` may carry only the global ARIA
    * attributes, and `aria-disabled` is not one of them.
    */
-  [data-ui='kbd'][data-disabled] {
+  [data-ui-kbd][data-disabled] {
     --_background: var(--slotted-disabled-background, Canvas);
     --_face: none;
     --_border: var(--slotted-disabled-border, GrayText);
@@ -463,7 +463,7 @@
     --_color: var(--slotted-disabled-foreground, GrayText);
   }
 
-  [data-ui='kbd'][data-disabled] [data-part='separator'] {
+  [data-ui-kbd][data-disabled] [data-part-separator] {
     color: var(--slotted-disabled-foreground, GrayText);
   }
 
@@ -472,12 +472,12 @@
    * that filled itself grey would be a grey rectangle on whatever surface it
    * was placed over, which is the one thing the variant exists to avoid.
    */
-  [data-ui='kbd'][data-variant='outline'][data-disabled],
-  [data-ui='kbd'][data-variant='plain'][data-disabled] {
+  [data-ui-kbd][data-variant='outline'][data-disabled],
+  [data-ui-kbd][data-variant='plain'][data-disabled] {
     --_background: transparent;
   }
 
-  [data-ui='kbd'][data-variant='plain'][data-disabled] {
+  [data-ui-kbd][data-variant='plain'][data-disabled] {
     --_border: transparent;
     --_base: transparent;
   }

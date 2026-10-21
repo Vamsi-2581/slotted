@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import { createWidthGate } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -345,8 +346,10 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
     ref: frame,
     'data-overflow': multiSelect.overflow,
     'data-part': 'root',
+    ...selectorKeyProps('part', 'root'),
     'data-size': multiSelect.size,
     'data-ui': 'multi-select',
+    ...selectorKeyProps('ui', 'multi-select'),
     'data-variant': multiSelect.variant,
     ...(multiSelect.fullWidth ? { 'data-full-width': '' } : {}),
     ...(multiSelect.open ? { 'data-open': '' } : {}),
@@ -377,11 +380,11 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
       <span hidden id={chosenId}>
         {chosen}
       </span>
-      <div {...gridName} data-part="control" role="grid">
+      <div {...withSelectorKey(gridName, 'part', 'control')} role="grid">
         <ChipRow>
-          <span data-part="field" role="gridcell">
+          <span data-part="field" data-part-field="" role="gridcell">
             <input
-              {...nativeProps}
+              {...withSelectorKey(nativeProps, 'part', 'input')}
               aria-activedescendant={
                 multiSelect.open && multiSelect.highlighted !== null
                   ? multiSelect.optionId(multiSelect.highlighted)
@@ -393,7 +396,7 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
               aria-expanded={multiSelect.open}
               aria-invalid={multiSelect.invalid ? true : undefined}
               aria-readonly={multiSelect.readOnly ? true : undefined}
-              data-part="input"
+
               disabled={multiSelect.disabled}
               id={nativeProps.id ?? field?.ids.control ?? multiSelect.inputId}
               onBlur={compose(nativeProps.onBlur, onBlur)}
@@ -417,29 +420,42 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
         </ChipRow>
       </div>
       {counter === null ? null : (
-        <span aria-hidden="true" data-part="counter">
+        <span aria-hidden="true" data-part="counter" data-part-counter="">
           {counter}
         </span>
       )}
       {showClear ? (
-        <button aria-label={multiSelect.t('clear')} data-part="clear" onClick={clear} type="button">
+        <button
+          aria-label={multiSelect.t('clear')}
+          data-part="clear"
+          data-part-clear=""
+          onClick={clear}
+          type="button"
+        >
           <Icon>
             <Glyph name="x" />
           </Icon>
         </button>
       ) : null}
       {multiSelect.loading ? (
-        <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+        <span
+          aria-hidden="true"
+          data-part="busy"
+          data-part-busy=""
+          data-ui="spinner"
+          data-ui-spinner=""
+        />
       ) : (
         <button
           aria-label={multiSelect.t('trigger')}
           data-part="trigger"
+          data-part-trigger=""
           disabled={multiSelect.disabled}
           onClick={toggleOpen}
           tabIndex={-1}
           type="button"
         >
-          <span data-part="arrow">
+          <span data-part="arrow" data-part-arrow="">
             <Icon>
               <Glyph name="chevron-down" />
             </Icon>
@@ -756,14 +772,14 @@ export function MultiSelectContent({
 
   if (!mounted) return null;
 
-  const rootProps: MultiSelectPositionerProps = {
+  const rootProps: MultiSelectPositionerProps = keyedProps({
     'data-align': align,
     ...(multiSelect.open ? {} : { inert: true }),
     'data-part': 'positioner',
     'data-size': multiSelect.size,
     'data-ui': 'multi-select',
     'data-width': multiSelect.width,
-  };
+  });
 
   const message = (() => {
     if (statusMessage !== undefined) return statusMessage;
@@ -791,11 +807,11 @@ export function MultiSelectContent({
       }}
     >
       <div
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'content')}
         aria-busy={multiSelect.loading ? true : undefined}
         aria-multiselectable="true"
         data-loading={multiSelect.loading ? '' : undefined}
-        data-part="content"
+
         id={multiSelect.contentId}
         ref={setSurfaceNode}
         role="listbox"
@@ -808,11 +824,21 @@ export function MultiSelectContent({
           would be reachable by pointer and by nothing else.
         */}
         {chosen && multiSelect.value.length > 0 ? (
-          <div data-part="chosen">
+          <div data-part="chosen" data-part-chosen="">
             {multiSelect.value.map((value) => (
-              <span data-part="root" data-size="sm" data-ui="tag" data-variant="soft" key={value}>
-                <span data-part="body">
-                  <span data-part="label">{multiSelect.labelFor(value) ?? value}</span>
+              <span
+                data-part="root"
+                data-part-root=""
+                data-size="sm"
+                data-ui="tag"
+                data-ui-tag=""
+                data-variant="soft"
+                key={value}
+              >
+                <span data-part="body" data-part-body="">
+                  <span data-part="label" data-part-label="">
+                    {multiSelect.labelFor(value) ?? value}
+                  </span>
                 </span>
               </span>
             ))}
@@ -824,6 +850,7 @@ export function MultiSelectContent({
           <div
             data-create=""
             data-part="item"
+            data-part-item=""
             data-value={multiSelect.query}
             id={multiSelect.optionId(multiSelect.query)}
             onClick={(event) => {
@@ -842,9 +869,11 @@ export function MultiSelectContent({
             aria-selected={false}
             {...(multiSelect.highlighted === multiSelect.query ? { 'data-current': '' } : {})}
           >
-            <span data-part="icon" />
-            <span data-part="label">{multiSelect.t('create', { query: multiSelect.query })}</span>
-            <span data-part="indicator">
+            <span data-part="icon" data-part-icon="" />
+            <span data-part="label" data-part-label="">
+              {multiSelect.t('create', { query: multiSelect.query })}
+            </span>
+            <span data-part="indicator" data-part-indicator="">
               <Icon>
                 <Glyph name="plus" />
               </Icon>
@@ -852,13 +881,22 @@ export function MultiSelectContent({
           </div>
         ) : null}
         {!multiSelect.loading && count === 0 && !offering ? (
-          <div data-part="empty">{empty ?? multiSelect.t('empty')}</div>
+          <div data-part="empty" data-part-empty="">
+            {empty ?? multiSelect.t('empty')}
+          </div>
         ) : null}
         {multiSelect.loading ? (
-          <div aria-hidden="true" data-part="placeholder">
+          <div aria-hidden="true" data-part="placeholder" data-part-placeholder="">
             {[0, 1, 2].map((row) => (
               <div key={row}>
-                <span data-part="root" data-shape="text" data-ui="skeleton" data-loading="" />
+                <span
+                  data-part="root"
+                  data-part-root=""
+                  data-shape="text"
+                  data-ui="skeleton"
+                  data-ui-skeleton=""
+                  data-loading=""
+                />
               </div>
             ))}
           </div>
@@ -866,6 +904,7 @@ export function MultiSelectContent({
         <div
           aria-live="polite"
           data-part="status"
+          data-part-status=""
           {...(multiSelect.loading ? { 'data-loading': '' } : {})}
           role="status"
         >

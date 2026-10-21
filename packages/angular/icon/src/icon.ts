@@ -34,7 +34,9 @@ import type { IconSize, IconTone } from './icon.types';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'icon',
+    'data-ui-icon': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'size() ?? null',
     '[attr.data-tone]': 'toneAttribute()',
     '[attr.data-directional]': 'directional() ? "" : null',

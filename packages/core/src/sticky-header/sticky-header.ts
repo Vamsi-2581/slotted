@@ -58,13 +58,13 @@ export interface StickyHeaderOptions {
   onScrollRequest: (expanded: boolean) => void;
   /**
    * The header is too much of the screen to hold: expanded, it would take
-   * more than `TALL_AREA_FRACTION` of the scrollport, or it is narrower than
-   * `COMPACT_BELOW` — a phone. The binding writes `data-tall`, the stylesheet
+   * more than `TALL_AREA_FRACTION` of the scrollport, or the frame is narrower
+   * than `COMPACT_BELOW` — a phone. The binding writes `data-tall`, the stylesheet
    * hides the pin, and a held header is let go through `onPinRequest`.
    */
   onTall?: (tall: boolean) => void;
   /**
-   * The root is narrower than `COMPACT_BELOW`. The binding writes
+   * The frame is narrower than `COMPACT_BELOW`: a phone. The binding writes
    * `data-compact` and the stylesheet takes the root out of `sticky`; the
    * engine stops collapsing, revealing and publishing a sticky offset, and
    * opens an area a scroll had shut.
@@ -99,7 +99,7 @@ export interface StickyHeaderHandle {
   stuck: () => boolean;
   /** Whether the header is too much of the screen to hold; see `onTall`. */
   tall: () => boolean;
-  /** Whether the root is narrower than the compact size class; see `onCompact`. */
+  /** Whether the frame is narrower than the compact size class; see `onCompact`. */
   compact: () => boolean;
   /**
    * `expanded` moved. `by` says who moved it: the toggle (`control`), the pin
@@ -406,8 +406,11 @@ export function createStickyHeader(options: StickyHeaderOptions): StickyHeaderHa
     /* A floating header holds its title area an inset below the edge. */
     const title = options.chrome()[0];
     const inset = title === undefined ? 0 : offset(title);
-    const width = root.clientWidth;
-    const narrow = width > 0 && width < COMPACT_BELOW;
+    /* The compact class is a phone's, read from the frame: a header narrower
+       than the class in a wider frame — a pane beside a list — still sticks
+       inside the scroller it stands in. */
+    const frame = view?.innerWidth ?? root.clientWidth;
+    const narrow = frame > 0 && frame < COMPACT_BELOW;
     if (narrow !== compact) setCompact(narrow);
     const held = pinned || revealed || collapse === 'manual';
     /* Compact, nothing of the header stays at the top for anything to stop under. */

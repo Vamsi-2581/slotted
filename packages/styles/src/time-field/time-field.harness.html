@@ -14,18 +14,26 @@
 -->
 
 <section data-scene="default">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -37,9 +45,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -52,21 +61,35 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
-      <input data-part="hidden-input" type="hidden" name="inicio" value="14:30:00" />
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
+      <input
+        data-part="hidden-input"
+        data-part-hidden-input=""
+        type="hidden"
+        name="inicio"
+        value="14:30:00"
+      />
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, vazia">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, vazia"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           data-placeholder
           role="spinbutton"
@@ -76,9 +99,10 @@
         >
           hh
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           data-placeholder
           role="spinbutton"
@@ -89,24 +113,33 @@
           mm
         </div>
       </div>
-      <input data-part="hidden-input" type="hidden" name="inicio" value="" />
+      <input
+        data-part="hidden-input"
+        data-part-hidden-input=""
+        type="hidden"
+        name="inicio"
+        value=""
+      />
     </div>
   </div>
 </section>
 
 <section data-scene="cycles">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="12"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Start time, 2:30 PM">
+      <div data-part="segments" data-part-segments="" role="group" aria-label="Start time, 2:30 PM">
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -118,9 +151,10 @@
         >
           02
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -132,9 +166,10 @@
         >
           30
         </div>
-        <span data-part="literal" aria-hidden="true"> </span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true"> </span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="dayPeriod"
           role="spinbutton"
           tabindex="-1"
@@ -147,20 +182,23 @@
           PM
         </div>
       </div>
-      <span data-part="value-text" hidden>2:30 PM</span>
+      <span data-part="value-text" data-part-value-text="" hidden>2:30 PM</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="12"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="開始時刻、午後2:30">
+      <div data-part="segments" data-part-segments="" role="group" aria-label="開始時刻、午後2:30">
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="dayPeriod"
           role="spinbutton"
           tabindex="0"
@@ -174,6 +212,7 @@
         </div>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="-1"
@@ -185,9 +224,10 @@
         >
           02
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -200,20 +240,28 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>午後2:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>午後2:30</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="12"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de inicio, 2:30 p.m.">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de inicio, 2:30 p.m."
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -225,9 +273,10 @@
         >
           02
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -239,9 +288,10 @@
         >
           30
         </div>
-        <span data-part="literal" aria-hidden="true"> </span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true"> </span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="dayPeriod"
           role="spinbutton"
           tabindex="-1"
@@ -254,20 +304,23 @@
           p.m.
         </div>
       </div>
-      <span data-part="value-text" hidden>2:30 p.m.</span>
+      <span data-part="value-text" data-part-value-text="" hidden>2:30 p.m.</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="وقت البدء، ١٤:٣٠">
+      <div data-part="segments" data-part-segments="" role="group" aria-label="وقت البدء، ١٤:٣٠">
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -279,9 +332,10 @@
         >
           ١٤
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -294,24 +348,32 @@
           ٣٠
         </div>
       </div>
-      <span data-part="value-text" hidden>١٤:٣٠</span>
+      <span data-part="value-text" data-part-value-text="" hidden>١٤:٣٠</span>
     </div>
   </div>
 </section>
 
 <section data-scene="granularity">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="hour"
     >
-      <div data-part="segments" role="group" aria-label="Hora da reserva, 14:00">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora da reserva, 14:00"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -324,20 +386,28 @@
           14
         </div>
       </div>
-      <span data-part="value-text" hidden>14:00</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:00</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora da reserva, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora da reserva, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -349,9 +419,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -364,20 +435,28 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="second"
     >
-      <div data-part="segments" role="group" aria-label="Marca do vídeo, 14:30:15">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Marca do vídeo, 14:30:15"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -389,9 +468,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -403,9 +483,10 @@
         >
           30
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="second"
           role="spinbutton"
           tabindex="-1"
@@ -418,7 +499,7 @@
           15
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30:15</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30:15</span>
     </div>
   </div>
 </section>
@@ -431,10 +512,12 @@
   hold and therefore says out loud.
 -->
 <section data-scene="relative">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -443,21 +526,30 @@
     >
       <input
         data-part="duration"
+        data-part-duration=""
         type="text"
         aria-label="Hora de início, como duração a partir de agora"
         value="+40m"
         placeholder="+40m"
       />
-      <span data-part="preview" role="status" aria-live="polite" data-resolved
-        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+      <span data-part="preview" data-part-preview="" role="status" aria-live="polite" data-resolved
+        ><span
+          data-ui="icon"
+          data-ui-icon=""
+          data-part="root"
+          data-part-root=""
+          data-directional
+          aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg></span
         >15:20</span
       >
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -466,21 +558,36 @@
     >
       <input
         data-part="duration"
+        data-part-duration=""
         type="text"
         aria-label="Hora de início, como duração a partir de agora"
         value="+90m"
         placeholder="+40m"
       />
-      <span data-part="preview" role="status" aria-live="polite" data-resolved data-crosses-midnight
-        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+      <span
+        data-part="preview"
+        data-part-preview=""
+        role="status"
+        aria-live="polite"
+        data-resolved
+        data-crosses-midnight
+        ><span
+          data-ui="icon"
+          data-ui-icon=""
+          data-part="root"
+          data-part-root=""
+          data-directional
+          aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg></span
         >00:30 no dia seguinte</span
       >
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -489,32 +596,47 @@
     >
       <input
         data-part="duration"
+        data-part-duration=""
         type="text"
         aria-label="Hora de início, como duração a partir de agora"
         value="1h30x"
         placeholder="+40m"
       />
-      <span data-part="preview" role="status" aria-live="polite"
-        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+      <span data-part="preview" data-part-preview="" role="status" aria-live="polite"
+        ><span
+          data-ui="icon"
+          data-ui-icon=""
+          data-part="root"
+          data-part-root=""
+          data-directional
+          aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg></span
       ></span>
     </div>
   </div>
 </section>
 
 <section data-scene="sizes">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -526,9 +648,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -541,25 +664,33 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -571,9 +702,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -586,25 +718,33 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="lg"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -616,9 +756,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -631,10 +772,10 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
@@ -642,18 +783,26 @@
 </section>
 
 <section data-scene="variants">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -665,9 +814,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -680,20 +830,28 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="subtle"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -705,9 +863,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -720,20 +879,28 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="plain"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -745,9 +912,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -760,25 +928,33 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
     </div>
   </div>
 </section>
 
 <section data-scene="states">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
       data-disabled
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30, desativada">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30, desativada"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -790,9 +966,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -805,21 +982,29 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
       data-readonly
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30, só de leitura">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30, só de leitura"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -831,9 +1016,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -846,21 +1032,29 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
       data-invalid
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 23:45, fora do intervalo">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 23:45, fora do intervalo"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -872,9 +1066,10 @@
         >
           23
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -887,21 +1082,29 @@
           45
         </div>
       </div>
-      <span data-part="value-text" hidden>23:45</span>
+      <span data-part="value-text" data-part-value-text="" hidden>23:45</span>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
       data-required
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30, obrigatória">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30, obrigatória"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -913,9 +1116,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -928,7 +1132,7 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
     </div>
   </div>
 </section>
@@ -939,24 +1143,32 @@
   the digits begin from it.
 -->
 <section data-scene="adornments">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <span data-part="start" aria-hidden="true">
+      <span data-part="start" data-part-start="" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="8.5" />
           <path d="M12 7.5V12l3 1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </span>
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -968,9 +1180,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -983,25 +1196,33 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 14:30">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 14:30"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -1013,9 +1234,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -1028,8 +1250,8 @@
           30
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30</span>
-      <span data-part="end"><span>BRT</span></span>
+      <span data-part="value-text" data-part-value-text="" hidden>14:30</span>
+      <span data-part="end" data-part-end=""><span>BRT</span></span>
     </div>
   </div>
 </section>
@@ -1040,18 +1262,26 @@
   every column count.
 -->
 <section data-scene="content">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="12"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Hora de início, 2:30 da tarde">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Hora de início, 2:30 da tarde"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -1063,9 +1293,10 @@
         >
           02
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -1077,9 +1308,10 @@
         >
           30
         </div>
-        <span data-part="literal" aria-hidden="true"> </span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true"> </span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="dayPeriod"
           role="spinbutton"
           tabindex="-1"
@@ -1092,25 +1324,33 @@
           da tarde
         </div>
       </div>
-      <span data-part="value-text" hidden>2:30 da tarde</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="value-text" data-part-value-text="" hidden>2:30 da tarde</span>
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
 
     <div
       data-ui="time-field"
+      data-ui-time-field=""
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-variant="outline"
       data-cycle="24"
       data-granularity="second"
     >
-      <div data-part="segments" role="group" aria-label="Marca do vídeo, 14:30:15">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Marca do vídeo, 14:30:15"
+      >
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="hour"
           role="spinbutton"
           tabindex="0"
@@ -1122,9 +1362,10 @@
         >
           14
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="minute"
           role="spinbutton"
           tabindex="-1"
@@ -1136,9 +1377,10 @@
         >
           30
         </div>
-        <span data-part="literal" aria-hidden="true">:</span>
+        <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
         <div
           data-part="segment"
+          data-part-segment=""
           data-field="second"
           role="spinbutton"
           tabindex="-1"
@@ -1151,10 +1393,10 @@
           15
         </div>
       </div>
-      <span data-part="value-text" hidden>14:30:15</span>
-      <button data-part="clear" type="button" aria-label="Limpar a hora">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="value-text" data-part-value-text="" hidden>14:30:15</span>
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar a hora">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>

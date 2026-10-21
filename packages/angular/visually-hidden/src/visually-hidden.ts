@@ -25,7 +25,9 @@ import {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'visually-hidden',
+    'data-ui-visually-hidden': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-focusable]': "focusable() ? '' : null",
   },
 })

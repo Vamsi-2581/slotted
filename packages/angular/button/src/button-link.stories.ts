@@ -133,9 +133,9 @@ export const Accessibility: Story = {
   render: () => ({
     template: `<div class="slotted-demo-stack">
       <a slButtonLink href="/settings" aria-describedby="settings-help">Open settings</a>
-      <span data-ui="visually-hidden" id="settings-help">Opens account settings.</span>
+      <span data-ui="visually-hidden" data-ui-visually-hidden="" id="settings-help">Opens account settings.</span>
       <a slButtonLink href="https://example.com" rel="noreferrer" target="_blank">
-        Documentation<span data-ui="visually-hidden"> (opens in a new tab)</span>${external}
+        Documentation<span data-ui="visually-hidden" data-ui-visually-hidden=""> (opens in a new tab)</span>${external}
       </a>
     </div>`,
   }),

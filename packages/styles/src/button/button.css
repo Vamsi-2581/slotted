@@ -20,7 +20,7 @@
    * outline. The rebuild that preceded this one thickened the border on a
    * pressed toggle, which moved every control beside it by two pixels.
    */
-  [data-ui='button'] {
+  [data-ui-button] {
     --_solid: var(--slotted-tone-accent-solid);
     --_solid-hover: var(--slotted-tone-accent-solid-hover);
     --_solid-active: var(--slotted-tone-accent-solid-active);
@@ -135,7 +135,7 @@
 
   /* ── Tone: which of the five semantic colours the control speaks in ───── */
 
-  [data-ui='button'][data-tone='secondary'] {
+  [data-ui-button][data-tone='secondary'] {
     --_solid: var(--slotted-tone-secondary-solid);
     --_solid-hover: var(--slotted-tone-secondary-solid-hover);
     --_solid-active: var(--slotted-tone-secondary-solid-active);
@@ -163,7 +163,7 @@
    * with the inverse text. A product that keeps the accent for data draws its
    * primary action in it.
    */
-  [data-ui='button'][data-tone='neutral'] {
+  [data-ui-button][data-tone='neutral'] {
     --_solid: var(--slotted-tone-neutral-solid);
     --_solid-hover: var(--slotted-tone-neutral-solid-hover);
     --_solid-active: var(--slotted-tone-neutral-solid-active);
@@ -171,7 +171,7 @@
     --_text: var(--slotted-tone-neutral-text);
   }
 
-  [data-ui='button'][data-tone='success'] {
+  [data-ui-button][data-tone='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_solid-hover: var(--slotted-tone-success-solid-hover);
     --_solid-active: var(--slotted-tone-success-solid-active);
@@ -179,7 +179,7 @@
     --_text: var(--slotted-tone-success-text);
   }
 
-  [data-ui='button'][data-tone='warning'] {
+  [data-ui-button][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_solid-hover: var(--slotted-tone-warning-solid-hover);
     --_solid-active: var(--slotted-tone-warning-solid-active);
@@ -187,7 +187,7 @@
     --_text: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='button'][data-tone='danger'] {
+  [data-ui-button][data-tone='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_solid-hover: var(--slotted-tone-danger-solid-hover);
     --_solid-active: var(--slotted-tone-danger-solid-active);
@@ -197,7 +197,7 @@
 
   /* ── Size: the control scale, one step of it per member instance ──────── */
 
-  [data-ui='button'][data-size='sm'] {
+  [data-ui-button][data-size='sm'] {
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
@@ -205,7 +205,7 @@
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='button'][data-size='lg'] {
+  [data-ui-button][data-size='lg'] {
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
@@ -247,7 +247,7 @@
    * sheet carried the shadow on the base rule for one release and every
    * member inherited it, which is the defect this split exists to close.
    */
-  [data-ui='button'][data-variant='solid'] {
+  [data-ui-button][data-variant='solid'] {
     background: var(--_solid, ButtonFace);
     border-color: var(--_edge, ButtonBorder);
     box-shadow: var(--slotted-control-shadow, none);
@@ -263,14 +263,14 @@
    * button the darkest line on the form, and the foundation now keeps that
    * step for the line between two surfaces.
    */
-  [data-ui='button'][data-variant='outline'] {
+  [data-ui-button][data-variant='outline'] {
     background: transparent;
     border-color: var(--slotted-control-border-color, ButtonBorder);
     box-shadow: var(--slotted-control-shadow, none);
     color: var(--_text, ButtonText);
   }
 
-  [data-ui='button'][data-variant='ghost'] {
+  [data-ui-button][data-variant='ghost'] {
     background: transparent;
     border-color: transparent;
     color: var(--_text, ButtonText);
@@ -282,9 +282,9 @@
    * rule: its solid step is the page's own colour, so it takes the band the way
    * a bare control does.
    */
-  [data-ui='button'][data-variant='outline'],
-  [data-ui='button'][data-variant='ghost'],
-  [data-ui='button'][data-variant='solid'][data-tone='secondary'] {
+  [data-ui-button][data-variant='outline'],
+  [data-ui-button][data-variant='ghost'],
+  [data-ui-button][data-variant='solid'][data-tone='secondary'] {
     --_sweep-strength: 0.18;
   }
 
@@ -306,7 +306,7 @@
    * It sits above hover and below loading and disabled, which is the order
    * `STATE_PRECEDENCE` sets.
    */
-  [data-ui='button'][data-pressed]:not(:disabled):not([data-disabled]) {
+  [data-ui-button][data-pressed]:not(:disabled):not([data-disabled]) {
     background: var(--slotted-tone-accent-subtle-active, Highlight);
     border-color: var(--slotted-tone-accent-border, Highlight);
     /* A ghost toggle that is on has taken a fill and an edge, so it is a framed
@@ -340,13 +340,13 @@
    * and nothing moves.
    */
 
-  [data-ui='button'][data-variant='solid']:hover:not(:disabled):not([data-disabled]):not(
+  [data-ui-button][data-variant='solid']:hover:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]) {
     background: var(--_solid-hover, Highlight);
   }
 
-  [data-ui='button'][data-variant='solid']:active:not(:disabled):not([data-disabled]):not(
+  [data-ui-button][data-variant='solid']:active:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]) {
     background: var(--_solid-active, Highlight);
@@ -355,19 +355,19 @@
     transition-duration: var(--slotted-duration-instant);
   }
 
-  [data-ui='button'][data-variant='outline']:hover:not(:disabled):not([data-disabled]):not(
+  [data-ui-button][data-variant='outline']:hover:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]),
-  [data-ui='button'][data-variant='ghost']:hover:not(:disabled):not([data-disabled]):not(
+  [data-ui-button][data-variant='ghost']:hover:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]) {
     background: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
   }
 
-  [data-ui='button'][data-variant='outline']:active:not(:disabled):not([data-disabled]):not(
+  [data-ui-button][data-variant='outline']:active:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]),
-  [data-ui='button'][data-variant='ghost']:active:not(:disabled):not([data-disabled]):not(
+  [data-ui-button][data-variant='ghost']:active:not(:disabled):not([data-disabled]):not(
       [data-loading]
     ):not([data-pressed]) {
     background: var(--slotted-tone-secondary-subtle-active, ButtonFace);
@@ -379,18 +379,18 @@
    * ground's own hover step and never on the neutral one a toggle that is off
    * hovers with — the two states share no surface in any of theirs.
    */
-  [data-ui='button'][data-pressed]:hover:not(:disabled):not([data-disabled]):not([data-loading]) {
+  [data-ui-button][data-pressed]:hover:not(:disabled):not([data-disabled]):not([data-loading]) {
     background: var(--slotted-tone-accent-subtle-hover, Highlight);
   }
 
-  [data-ui='button'][data-pressed]:active:not(:disabled):not([data-disabled]):not([data-loading]) {
+  [data-ui-button][data-pressed]:active:not(:disabled):not([data-disabled]):not([data-loading]) {
     background: var(--slotted-tone-accent-subtle-active, Highlight);
     transition-duration: var(--slotted-duration-instant);
   }
 
   /* ── Focus ────────────────────────────────────────────────────────────── */
 
-  [data-ui='button']:focus-visible {
+  [data-ui-button]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -408,8 +408,8 @@
    * is always there.
    */
 
-  [data-ui='button']:disabled,
-  [data-ui='button'][data-disabled] {
+  [data-ui-button]:disabled,
+  [data-ui-button][data-disabled] {
     /* Nothing a person cannot reach is lifted off the page — the rule
        `text-field` states for the same shadow. */
     box-shadow: none;
@@ -417,8 +417,8 @@
     cursor: not-allowed;
   }
 
-  [data-ui='button'][data-variant='solid']:disabled,
-  [data-ui='button'][data-variant='solid'][data-disabled] {
+  [data-ui-button][data-variant='solid']:disabled,
+  [data-ui-button][data-variant='solid'][data-disabled] {
     background: var(--slotted-disabled-background, ButtonFace);
     /**
      * The disabled border rather than the disabled surface, because in the
@@ -428,8 +428,8 @@
     border-color: var(--slotted-disabled-border, ButtonBorder);
   }
 
-  [data-ui='button'][data-variant='outline']:disabled,
-  [data-ui='button'][data-variant='outline'][data-disabled] {
+  [data-ui-button][data-variant='outline']:disabled,
+  [data-ui-button][data-variant='outline'][data-disabled] {
     background: transparent;
     border-color: var(--slotted-disabled-border, GrayText);
   }
@@ -440,8 +440,8 @@
    * is `aria-pressed`, which the platform announces whether or not the control
    * can be operated.
    */
-  [data-ui='button'][data-pressed]:disabled,
-  [data-ui='button'][data-pressed][data-disabled] {
+  [data-ui-button][data-pressed]:disabled,
+  [data-ui-button][data-pressed][data-disabled] {
     background: var(--slotted-disabled-background, ButtonFace);
     border-color: var(--slotted-disabled-border, GrayText);
     color: var(--slotted-disabled-foreground, GrayText);
@@ -469,18 +469,18 @@
    * a natively disabled control keeps the disabled tokens above, and a ghost
    * stays flat and takes only the text.
    */
-  [data-ui='button'][data-disabled]:not(:disabled) {
+  [data-ui-button][data-disabled]:not(:disabled) {
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='button'][data-variant='solid'][data-disabled]:not(:disabled),
-  [data-ui='button'][data-pressed][data-disabled]:not(:disabled) {
+  [data-ui-button][data-variant='solid'][data-disabled]:not(:disabled),
+  [data-ui-button][data-pressed][data-disabled]:not(:disabled) {
     background: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
     border-color: var(--slotted-border-subtle, GrayText);
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='button'][data-variant='outline'][data-disabled]:not(:disabled) {
+  [data-ui-button][data-variant='outline'][data-disabled]:not(:disabled) {
     border-color: var(--slotted-border-subtle, GrayText);
   }
 
@@ -505,11 +505,11 @@
    * supplies survives the wait and combines with the indicator's own.
    */
 
-  [data-ui='button'][data-loading] {
+  [data-ui-button][data-loading] {
     cursor: progress;
   }
 
-  [data-ui='button'][data-loading]:has(> [data-part='indicator']) > :not([data-part='indicator']) {
+  [data-ui-button][data-loading]:has(> [data-part-indicator]) > :not([data-part-indicator]) {
     opacity: 0;
   }
 
@@ -518,14 +518,35 @@
    * that waits. This family only says how big it is — the glyph box of its
    * own step — and where it sits.
    */
-  [data-ui='button'] [data-part='indicator'] {
+  [data-ui-button] [data-part-indicator] {
     --slotted-spinner-size: var(--_icon-size);
 
     flex: none;
   }
 
+  /**
+   * The ring that stands in for a glyph takes the glyph's box. The glyph stays
+   * in the DOM, so the slot keeps its width, and is not drawn: the slot hides
+   * what it holds and the ring alone shows again. `IconButton` drew both side
+   * by side in a square of one glyph.
+   */
+  [data-ui-button] [data-part-start]:has(> [data-part-indicator]),
+  [data-ui-button] [data-part-end]:has(> [data-part-indicator]),
+  [data-ui-button] [data-part-icon]:has(> [data-part-indicator]) {
+    visibility: hidden;
+  }
+
+  [data-ui-button] [data-part-start] > [data-part-indicator],
+  [data-ui-button] [data-part-end] > [data-part-indicator],
+  [data-ui-button] [data-part-icon] > [data-part-indicator] {
+    inset: 0;
+    margin: auto;
+    position: absolute;
+    visibility: visible;
+  }
+
   /* Only the ring that has no visual slot to sit in is placed against the box. */
-  [data-ui='button'] > [data-part='indicator'] {
+  [data-ui-button] > [data-part-indicator] {
     inset: 0;
     /* `inset: 0` with a definite size and automatic margins centres on both
        axes without naming a physical side. */
@@ -564,7 +585,7 @@
    */
   @media (prefers-reduced-motion: no-preference) {
     @media not (forced-colors: active) {
-      [data-ui='button']:not([data-shape])[data-loading]:has([data-part='indicator'])::after {
+      [data-ui-button]:not([data-shape])[data-loading]:has([data-part-indicator])::after {
         /**
          * The tile is crossed once per cycle, so the pair sets the speed the
          * band travels rather than the time it takes: two heights per loop
@@ -588,19 +609,17 @@
        * A band that travels against the reading direction reads as undoing
        * rather than as progressing, so it is mirrored rather than reused.
        */
-      [data-ui='button']:not([data-shape])[data-loading]:has([data-part='indicator']):dir(
-          rtl
-        )::after {
+      [data-ui-button]:not([data-shape])[data-loading]:has([data-part-indicator]):dir(rtl)::after {
         animation-direction: reverse;
         background-image: linear-gradient(to left, transparent, currentColor 40%, transparent 80%);
       }
 
-      [data-ui='button']:not([data-shape])[data-loading]:has(> [data-part='indicator'])
-        > :not([data-part='indicator']) {
+      [data-ui-button]:not([data-shape])[data-loading]:has(> [data-part-indicator])
+        > :not([data-part-indicator]) {
         opacity: 1;
       }
 
-      [data-ui='button']:not([data-shape])[data-loading] [data-part='indicator'] {
+      [data-ui-button]:not([data-shape])[data-loading] [data-part-indicator] {
         opacity: 0;
         position: absolute;
       }
@@ -609,9 +628,9 @@
 
   /* ── Parts ────────────────────────────────────────────────────────────── */
 
-  [data-ui='button'] [data-part='start'],
-  [data-ui='button'] [data-part='end'],
-  [data-ui='button'] [data-part='icon'] {
+  [data-ui-button] [data-part-start],
+  [data-ui-button] [data-part-end],
+  [data-ui-button] [data-part-icon] {
     align-items: center;
     block-size: var(--_icon-size);
     box-sizing: border-box;
@@ -625,9 +644,9 @@
     position: relative;
   }
 
-  [data-ui='button'] [data-part='start'] > *:not([data-part='indicator'], [data-ui='kbd']),
-  [data-ui='button'] [data-part='end'] > *:not([data-part='indicator'], [data-ui='kbd']),
-  [data-ui='button'] [data-part='icon'] > *:not([data-part='indicator']) {
+  [data-ui-button] [data-part-start] > *:not([data-part-indicator], [data-ui-kbd]),
+  [data-ui-button] [data-part-end] > *:not([data-part-indicator], [data-ui-kbd]),
+  [data-ui-button] [data-part-icon] > *:not([data-part-indicator]) {
     block-size: 100%;
     display: block;
     inline-size: 100%;
@@ -642,7 +661,7 @@
    * below it. Here the slot takes the key's measure and the label's type, and
    * the flex container centres the key on the label.
    */
-  [data-ui='button'] :is([data-part='start'], [data-part='end']):has(> [data-ui='kbd']) {
+  [data-ui-button] :is([data-part-start], [data-part-end]):has(> [data-ui-kbd]) {
     block-size: auto;
     font-size: inherit;
     inline-size: auto;
@@ -653,7 +672,7 @@
    * height is 1, which centres a single line inside the box and crushes the
    * second one. A token longer than the container breaks instead of escaping.
    */
-  [data-ui='button'] [data-part='label'] {
+  [data-ui-button] [data-part-label] {
     line-height: var(--slotted-line-height-sm, 1.45);
     min-inline-size: 0;
     overflow-wrap: anywhere;
@@ -684,7 +703,7 @@
    * of a pixel, which is the only thing the term governs.
    */
   @supports (text-box: trim-both cap alphabetic) {
-    [data-ui='button'] [data-part='label'] {
+    [data-ui-button] [data-part-label] {
       padding-block: calc((var(--slotted-line-height-sm, 1.45) * 1em - 0.75em) / 2);
       text-box: trim-both cap alphabetic;
     }
@@ -695,17 +714,17 @@
    * letter. An icon-only control is exempt, because both of its sides hold
    * the same glyph and its inset is zero.
    */
-  [data-ui='button']:not([data-shape]):has(> [data-part='start']) {
+  [data-ui-button]:not([data-shape]):has(> [data-part-start]) {
     padding-inline-start: var(--_padding-inline-visual);
   }
 
-  [data-ui='button']:not([data-shape]):has(> [data-part='end']) {
+  [data-ui-button]:not([data-shape]):has(> [data-part-end]) {
     padding-inline-end: var(--_padding-inline-visual);
   }
 
   /* ── Inline size ──────────────────────────────────────────────────────── */
 
-  [data-ui='button'][data-full-width] {
+  [data-ui-button][data-full-width] {
     inline-size: 100%;
   }
 
@@ -714,17 +733,17 @@
    * label takes the free space, so `start` stays beside it and the end slot is
    * pushed to the edge; flex follows the writing direction, so it mirrors.
    */
-  [data-ui='button'][data-justify='between'] {
+  [data-ui-button][data-justify='between'] {
     justify-content: space-between;
   }
 
-  [data-ui='button'][data-justify='between'] > [data-part='label'] {
+  [data-ui-button][data-justify='between'] > [data-part-label] {
     flex: 1 1 auto;
     text-align: start;
   }
 
   /* What a trigger holds at its end — a shortcut, a count — is as wide as it is. */
-  [data-ui='button'][data-justify='between'] > [data-part='end'] {
+  [data-ui-button][data-justify='between'] > [data-part-end] {
     inline-size: auto;
     min-inline-size: var(--_icon-size);
   }
@@ -736,7 +755,7 @@
    * small in one axis is the family's to correct, and theme validation only
    * guarantees the block axis.
    */
-  [data-ui='button'][data-shape] {
+  [data-ui-button][data-shape] {
     aspect-ratio: 1;
     inline-size: var(--_height);
     min-block-size: max(var(--_height), var(--slotted-target-min, 24px));
@@ -745,7 +764,7 @@
     padding-inline: 0;
   }
 
-  [data-ui='button'][data-shape='circle'] {
+  [data-ui-button][data-shape='circle'] {
     border-radius: var(--slotted-radius-full, 9999px);
   }
 
@@ -759,16 +778,16 @@
    * for a fill the system has flattened.
    */
   @media (forced-colors: active) {
-    [data-ui='button'] {
+    [data-ui-button] {
       border-color: ButtonBorder;
     }
 
-    [data-ui='button'][data-pressed] {
+    [data-ui-button][data-pressed] {
       border-color: Highlight;
     }
 
-    [data-ui='button']:disabled,
-    [data-ui='button'][data-disabled] {
+    [data-ui-button]:disabled,
+    [data-ui-button][data-disabled] {
       border-color: GrayText;
       color: GrayText;
     }
@@ -779,7 +798,7 @@
    * shows the wait, and the sweep above is the loop this sheet owns.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='button'] [data-part='indicator'] {
+    [data-ui-button] [data-part-indicator] {
       animation: none;
     }
   }

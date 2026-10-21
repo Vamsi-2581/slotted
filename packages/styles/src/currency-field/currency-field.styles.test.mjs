@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/currency-field/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./currency-field.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./currency-field.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./currency-field.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.currencyField;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
@@ -36,7 +49,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -46,7 +62,7 @@ test('gives the frame the box and the control the value', () => {
   assert.match(frame, /display:flex/);
   assert.match(frame, /min-inline-size:0/);
 
-  const input = rule(`${ui}>[data-part='input']`);
+  const input = rule(`${ui}>[data-part-input]`);
   assert.match(input, /border:0/);
   assert.match(input, /background-color:transparent/);
   assert.match(input, /outline:none/);
@@ -60,7 +76,7 @@ test('gives the frame the box and the control the value', () => {
  * on every keystroke.
  */
 test('sets the value in tabular figures without an axis to ask for it', () => {
-  assert.match(rule(`${ui}>[data-part='input']`), /font-variant-numeric:tabular-nums/);
+  assert.match(rule(`${ui}>[data-part-input]`), /font-variant-numeric:tabular-nums/);
 });
 
 /**
@@ -69,7 +85,7 @@ test('sets the value in tabular figures without an axis to ask for it', () => {
  * document.
  */
 test('orders the value by its own content rather than by the paragraph', () => {
-  assert.match(rule(`${ui}>[data-part='input']`), /unicode-bidi:plaintext/);
+  assert.match(rule(`${ui}>[data-part-input]`), /unicode-bidi:plaintext/);
 });
 
 /**
@@ -79,10 +95,10 @@ test('orders the value by its own content rather than by the paragraph', () => {
  * makes it the right one.
  */
 test('names a physical side for each alignment, under the direction guard', () => {
-  assert.match(rule(`${ui}[data-align='end']>[data-part='input']`), /text-align:right/);
-  assert.match(rule(`${ui}[data-align='end']:dir(rtl)>[data-part='input']`), /text-align:left/);
-  assert.match(rule(`${ui}[data-align='start']>[data-part='input']`), /text-align:left/);
-  assert.match(rule(`${ui}[data-align='start']:dir(rtl)>[data-part='input']`), /text-align:right/);
+  assert.match(rule(`${ui}[data-align='end']>[data-part-input]`), /text-align:right/);
+  assert.match(rule(`${ui}[data-align='end']:dir(rtl)>[data-part-input]`), /text-align:left/);
+  assert.match(rule(`${ui}[data-align='start']>[data-part-input]`), /text-align:left/);
+  assert.match(rule(`${ui}[data-align='start']:dir(rtl)>[data-part-input]`), /text-align:right/);
 });
 
 /**
@@ -121,13 +137,13 @@ test('gives the plain variant an edge under forced colours', () => {
 test('recovers the split stepper hit area outside its paint', () => {
   for (const part of ['decrement', 'increment']) {
     assert.ok(
-      normalized.includes(`${ui}[data-stepper='split']>[data-part='${part}']::after`),
+      normalized.includes(`${ui}[data-stepper='split']>[data-part-${part.toLowerCase()}]::after`),
       `the split ${part} button has no recovered hit area`,
     );
   }
   assert.match(
     rule(
-      `${ui}[data-stepper='split']>[data-part='decrement']::after,${ui}[data-stepper='split']>[data-part='increment']::after`,
+      `${ui}[data-stepper='split']>[data-part-decrement]::after,${ui}[data-stepper='split']>[data-part-increment]::after`,
     ),
     /inset:min\(0px,calc\(\(100% - var\(--slotted-target-min,24px\)\) \/ 2\)\)/,
   );
@@ -140,23 +156,23 @@ test('recovers the split stepper hit area outside its paint', () => {
 test('insets a stacked stepper and returns the inset to the pointer', () => {
   assert.match(rule(`${root}[data-stepper='stacked']`), /padding-inline-end:0/);
 
-  const column = rule(`${ui}>[data-part='stepper']`);
+  const column = rule(`${ui}>[data-part-stepper]`);
   assert.match(column, /padding-block:var\(--_column-inset\)/);
   assert.match(column, /padding-inline-end:var\(--_column-inset\)/);
   assert.doesNotMatch(column, /border/);
 
   assert.match(
-    rule(`${ui}>[data-part='stepper']>[data-part='increment']::after`),
+    rule(`${ui}>[data-part-stepper]>[data-part-increment]::after`),
     /inset-block:calc\(var\(--_column-inset\) \* -1\) 0/,
   );
   assert.match(
-    rule(`${ui}>[data-part='stepper']>[data-part='decrement']::after`),
+    rule(`${ui}>[data-part-stepper]>[data-part-decrement]::after`),
     /inset-block:0 calc\(var\(--_column-inset\) \* -1\)/,
   );
 });
 
 test('splits the column into two concentric halves with no line between them', () => {
-  const half = rule(`${ui}>[data-part='stepper']>button`);
+  const half = rule(`${ui}>[data-part-stepper]>button`);
   assert.match(half, /block-size:50%/);
   assert.match(half, /border-radius:var\(--_column-radius\)/);
   assert.doesNotMatch(declarations, /--slotted-currency-field-stepper-border-color/);
@@ -166,7 +182,7 @@ test('splits the column into two concentric halves with no line between them', (
 test('insets the split buttons concentrically', () => {
   assert.match(rule(`${root}[data-stepper='split']`), /padding-inline:var\(--_inset\)/);
   const button = rule(
-    `${ui}[data-stepper='split']>[data-part='decrement'],${ui}[data-stepper='split']>[data-part='increment']`,
+    `${ui}[data-stepper='split']>[data-part-decrement],${ui}[data-stepper='split']>[data-part-increment]`,
   );
   assert.match(button, /block-size:var\(--_action-size\)/);
   assert.match(button, /inline-size:var\(--_action-size\)/);
@@ -181,7 +197,7 @@ test('insets the split buttons concentrically', () => {
 test('keeps the amount aligned between two split steppers rather than centring it', () => {
   assert.doesNotMatch(normalized, /text-align:center/);
   assert.match(
-    rule(`${ui}[data-stepper='split']>[data-part='input']`),
+    rule(`${ui}[data-stepper='split']>[data-part-input]`),
     /padding-inline:var\(--_padding-inline\)/,
     'the digits sit at a different inset from every other arrangement',
   );
@@ -196,11 +212,11 @@ test('sizes the stepper glyph element and paints none itself', () => {
   assert.doesNotMatch(declarations, /content:\s*'[^']+'/, 'a rule draws a character as an icon');
   assert.doesNotMatch(declarations, /mask-image/);
   assert.match(
-    rule(`${ui} [data-part='decrement'],${ui} [data-part='increment']`),
+    rule(`${ui} [data-part-decrement],${ui} [data-part-increment]`),
     /--slotted-icon-size:var\(--_icon-size\)/,
   );
   assert.match(
-    rule(`${ui}[data-stepper='stacked'] [data-part='increment']>[data-ui='icon']`),
+    rule(`${ui}[data-stepper='stacked'] [data-part-increment]>[data-ui-icon]`),
     /rotate:0\.5turn/,
   );
 });
@@ -222,11 +238,11 @@ test('retargets the ring rather than repainting every rule that draws it', () =>
  */
 test('paints a control disabled by an ancestor as well as by its own attribute', () => {
   assert.ok(
-    normalized.includes(`${root}[data-disabled],${root}:has(>[data-part='input']:disabled){`),
+    normalized.includes(`${root}[data-disabled],${root}:has(>[data-part-input]:disabled){`),
     'the frame answers only its own attribute',
   );
   assert.match(
-    rule(`${root}[data-disabled],${root}:has(>[data-part='input']:disabled)`),
+    rule(`${root}[data-disabled],${root}:has(>[data-part-input]:disabled)`),
     /box-shadow:none/,
   );
 });
@@ -325,13 +341,13 @@ test('renders the amounts the family exists to hold', () => {
  * needed: the mark is a bidi run of its own, so `R$` stays `R$` in rtl.
  */
 test('draws the scrub mark as a horizontal drag that keeps its own reading order', () => {
-  const mark = rule(`${ui} [data-part='scrub']`);
+  const mark = rule(`${ui} [data-part-scrub]`);
   assert.match(mark, /cursor:ew-resize/);
   assert.match(mark, /touch-action:none/);
   assert.match(mark, /unicode-bidi:plaintext/);
   assert.match(mark, /user-select:none/);
   assert.match(
-    rule(`${ui}:is([data-disabled],[data-readonly]) [data-part='scrub']`),
+    rule(`${ui}:is([data-disabled],[data-readonly]) [data-part-scrub]`),
     /cursor:default/,
   );
 });

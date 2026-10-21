@@ -15,7 +15,7 @@
    *
    * `touch-action: none` so a drag is not read as a scroll on the way past.
    */
-  [data-ui='splitter'] {
+  [data-ui-splitter] {
     /**
      * The track is what the pointer sees and `--slotted-target-min` is what it
      * gets: `::before` below is a transparent box centred on the track, which
@@ -111,9 +111,9 @@
    * `data-dragging` and rest as the same picture. Closing the gap hands those
    * pixels to the lines, and the pair roughly doubles instead.
    */
-  [data-ui='splitter']:not([data-disabled]):hover,
-  [data-ui='splitter']:not([data-disabled]):focus-visible,
-  [data-ui='splitter'][data-dragging] {
+  [data-ui-splitter]:not([data-disabled]):hover,
+  [data-ui-splitter]:not([data-disabled]):focus-visible,
+  [data-ui-splitter][data-dragging] {
     --_gap: var(--slotted-space-4, 0.5rem);
   }
 
@@ -124,14 +124,14 @@
    * other. A container that packs its children instead of stretching them
    * would otherwise size the bar from its content.
    */
-  [data-ui='splitter'][data-orientation='vertical'] {
+  [data-ui-splitter][data-orientation='vertical'] {
     flex-direction: column;
     inline-size: var(--_track);
     align-self: stretch;
     cursor: col-resize;
   }
 
-  [data-ui='splitter'][data-orientation='horizontal'] {
+  [data-ui-splitter][data-orientation='horizontal'] {
     flex-direction: row;
     block-size: var(--_track);
     justify-self: stretch;
@@ -142,18 +142,18 @@
    * The reach. Transparent, centred on the track, and the reason a sixteen-pixel
    * picture is a twenty-four-pixel target.
    */
-  [data-ui='splitter']::before {
+  [data-ui-splitter]::before {
     content: '';
     position: absolute;
     --_overhang: calc((var(--_reach) - var(--_track)) / -2);
   }
 
-  [data-ui='splitter'][data-orientation='vertical']::before {
+  [data-ui-splitter][data-orientation='vertical']::before {
     inset-block: 0;
     inset-inline: var(--_overhang);
   }
 
-  [data-ui='splitter'][data-orientation='horizontal']::before {
+  [data-ui-splitter][data-orientation='horizontal']::before {
     inset-inline: 0;
     inset-block: var(--_overhang);
   }
@@ -181,7 +181,7 @@
    * A proportion leaves slack at every track length. That slack is what the
    * hand claims.
    */
-  [data-ui='splitter'] > [data-part='line'] {
+  [data-ui-splitter] > [data-part-line] {
     flex: 0 1 min(var(--_line-length), 20%);
     min-block-size: 0;
     min-inline-size: 0;
@@ -193,28 +193,28 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='splitter'][data-orientation='vertical'] > [data-part='line'] {
+  [data-ui-splitter][data-orientation='vertical'] > [data-part-line] {
     inline-size: var(--_line);
   }
 
-  [data-ui='splitter'][data-orientation='horizontal'] > [data-part='line'] {
+  [data-ui-splitter][data-orientation='horizontal'] > [data-part-line] {
     block-size: var(--_line);
   }
 
   /* Solid at the grip, gone at the far end. Four rules, one per direction. */
-  [data-ui='splitter'][data-orientation='vertical'] > [data-part='line']:first-child {
+  [data-ui-splitter][data-orientation='vertical'] > [data-part-line]:first-child {
     background: linear-gradient(to bottom, transparent, var(--_rest));
   }
 
-  [data-ui='splitter'][data-orientation='vertical'] > [data-part='line']:last-child {
+  [data-ui-splitter][data-orientation='vertical'] > [data-part-line]:last-child {
     background: linear-gradient(to top, transparent, var(--_rest));
   }
 
-  [data-ui='splitter'][data-orientation='horizontal'] > [data-part='line']:first-child {
+  [data-ui-splitter][data-orientation='horizontal'] > [data-part-line]:first-child {
     background: linear-gradient(to right, transparent, var(--_rest));
   }
 
-  [data-ui='splitter'][data-orientation='horizontal'] > [data-part='line']:last-child {
+  [data-ui-splitter][data-orientation='horizontal'] > [data-part-line]:last-child {
     background: linear-gradient(to left, transparent, var(--_rest));
   }
 
@@ -227,9 +227,9 @@
    * Hover is held back for `data-disabled`, which is the shared rule from
    * `packages/styles/src/states.test.mjs`.
    */
-  [data-ui='splitter']:not([data-disabled]):hover > [data-part='line'],
-  [data-ui='splitter']:not([data-disabled]):focus-visible > [data-part='line'],
-  [data-ui='splitter'][data-dragging] > [data-part='line'] {
+  [data-ui-splitter]:not([data-disabled]):hover > [data-part-line],
+  [data-ui-splitter]:not([data-disabled]):focus-visible > [data-part-line],
+  [data-ui-splitter][data-dragging] > [data-part-line] {
     flex-basis: 100%;
     background: var(--_active);
   }
@@ -245,7 +245,7 @@
    * pixels, and the second saying cost the first its shape.
    */
 
-  [data-ui='splitter']:focus-visible {
+  [data-ui-splitter]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -259,7 +259,7 @@
    * are one mark and have to move together, and `currentColor` is the one place
    * that says so.
    */
-  [data-ui='splitter'] > [data-part='grip'] {
+  [data-ui-splitter] > [data-part-grip] {
     flex: none;
     color: var(--_rest);
     background-image: radial-gradient(circle at center, currentColor 40%, transparent 42%);
@@ -269,19 +269,19 @@
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='splitter'][data-orientation='vertical'] > [data-part='grip'] {
+  [data-ui-splitter][data-orientation='vertical'] > [data-part-grip] {
     inline-size: calc(2 * var(--_dot));
     block-size: calc(3 * var(--_dot));
   }
 
-  [data-ui='splitter'][data-orientation='horizontal'] > [data-part='grip'] {
+  [data-ui-splitter][data-orientation='horizontal'] > [data-part-grip] {
     inline-size: calc(3 * var(--_dot));
     block-size: calc(2 * var(--_dot));
   }
 
-  [data-ui='splitter']:not([data-disabled]):hover > [data-part='grip'],
-  [data-ui='splitter']:not([data-disabled]):focus-visible > [data-part='grip'],
-  [data-ui='splitter'][data-dragging] > [data-part='grip'] {
+  [data-ui-splitter]:not([data-disabled]):hover > [data-part-grip],
+  [data-ui-splitter]:not([data-disabled]):focus-visible > [data-part-grip],
+  [data-ui-splitter][data-dragging] > [data-part-grip] {
     color: var(--_active);
   }
 
@@ -290,7 +290,7 @@
    * separator can still read its value — so this changes the picture and the
    * cursor and nothing about the focus.
    */
-  [data-ui='splitter'][data-disabled] {
+  [data-ui-splitter][data-disabled] {
     cursor: default;
     --_rest: var(--slotted-splitter-disabled-line-color, var(--slotted-disabled-border, GrayText));
   }
@@ -301,23 +301,23 @@
    * grip's gradient is replaced for the same reason.
    */
   @media (forced-colors: active) {
-    [data-ui='splitter'] > [data-part='line'] {
+    [data-ui-splitter] > [data-part-line] {
       background: ButtonBorder;
       forced-color-adjust: none;
     }
 
-    [data-ui='splitter']:not([data-disabled]):hover > [data-part='line'],
-    [data-ui='splitter'][data-dragging] > [data-part='line'] {
+    [data-ui-splitter]:not([data-disabled]):hover > [data-part-line],
+    [data-ui-splitter][data-dragging] > [data-part-line] {
       background: ButtonText;
     }
 
-    [data-ui='splitter'] > [data-part='grip'] {
+    [data-ui-splitter] > [data-part-grip] {
       background-image: none;
       background-color: ButtonBorder;
     }
 
-    [data-ui='splitter'][data-disabled] > [data-part='line'],
-    [data-ui='splitter'][data-disabled] > [data-part='grip'] {
+    [data-ui-splitter][data-disabled] > [data-part-line],
+    [data-ui-splitter][data-disabled] > [data-part-grip] {
       background: GrayText;
     }
   }
@@ -328,8 +328,8 @@
    * without travelling.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='splitter'] > [data-part='line'],
-    [data-ui='splitter'] > [data-part='grip'] {
+    [data-ui-splitter] > [data-part-line],
+    [data-ui-splitter] > [data-part-grip] {
       transition-duration: var(--slotted-duration-instant);
     }
   }

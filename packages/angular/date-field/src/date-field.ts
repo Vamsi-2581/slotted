@@ -111,6 +111,7 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
   template: `<ng-content select="[slDateFieldStart]" />
     <div
       data-part="segments"
+      data-part-segments=""
       role="group"
       [attr.id]="controlId()"
       [attr.aria-label]="label() ?? writtenLabel"
@@ -124,10 +125,11 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
     >
       @for (part of pattern(); track $index) {
         @if (part.type === 'literal') {
-          <span data-part="literal" aria-hidden="true">{{ part.value }}</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">{{ part.value }}</span>
         } @else {
           <div
             data-part="segment"
+            data-part-segment=""
             role="spinbutton"
             [attr.data-field]="part.type"
             [attr.data-placeholder]="valueOf(part.type) === null ? '' : null"
@@ -148,10 +150,13 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
         }
       }
     </div>
-    <span data-part="value-text" hidden [attr.id]="valueTextId">{{ spokenDate() }}</span>
+    <span data-part="value-text" data-part-value-text="" hidden [attr.id]="valueTextId">{{
+      spokenDate()
+    }}</span>
     @if (showClear()) {
       <button
         data-part="clear"
+        data-part-clear=""
         type="button"
         [attr.aria-label]="t('clear')"
         (click)="clear($event)"
@@ -160,7 +165,14 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
       </button>
     }
     <ng-content select="[slDateFieldEnd]" />
-    <input data-part="hidden-input" type="hidden" readonly [attr.name]="name()" [value]="iso()" />`,
+    <input
+      data-part="hidden-input"
+      data-part-hidden-input=""
+      type="hidden"
+      readonly
+      [attr.name]="name()"
+      [value]="iso()"
+    />`,
   styleUrl: '../../../styles/src/date-field/date-field.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -170,7 +182,9 @@ export interface DateFieldChangeRequest extends ChangeRequest<PlainDate | null> 
   ],
   host: {
     'data-ui': 'date-field',
+    'data-ui-date-field': '',
     'data-part': 'root',
+    'data-part-root': '',
     '(mousedown)': 'onRootMouseDown($event)',
     '(keydown)': 'onKeyDown($event)',
     '[attr.data-size]': 'resolvedSize()',

@@ -64,6 +64,7 @@ export type {
   template: `@if (resolvedStepper() === 'split') {
       <button
         data-part="decrement"
+        data-part-decrement=""
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
@@ -83,6 +84,7 @@ export type {
     @if (resolvedStepper() === 'split') {
       <button
         data-part="increment"
+        data-part-increment=""
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
@@ -96,9 +98,10 @@ export type {
         <span slIcon><svg slGlyph name="plus"></svg></span>
       </button>
     } @else if (resolvedStepper() === 'stacked') {
-      <span data-part="stepper">
+      <span data-part="stepper" data-part-stepper="">
         <button
           data-part="increment"
+          data-part-increment=""
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
@@ -115,6 +118,7 @@ export type {
         </button>
         <button
           data-part="decrement"
+          data-part-decrement=""
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
@@ -142,7 +146,9 @@ export type {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'number-field',
+    'data-ui-number-field': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-stepper]': 'resolvedStepper()',

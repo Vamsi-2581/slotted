@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/stat-card/stat-card.css';
 
 import { useMemo } from 'react';
@@ -45,23 +46,23 @@ export function StatCardDelta({
   }, [change, card.locale, card.formatOptions, format, formatOptions]);
 
   if (card.loading) {
-    const props: StatCardDeltaRootProps = {
+    const props: StatCardDeltaRootProps = keyedProps({
       ...nativeProps,
       children: <Skeleton inlineSize="3.5em" />,
       'data-part': 'delta',
       'data-tone': 'neutral',
       'data-trend': 'flat',
-    };
+    });
     return render === undefined ? <span {...props} /> : render(props);
   }
   if (card.status !== 'ready' || (children === undefined && formatted === undefined)) return null;
 
-  const props: StatCardDeltaRootProps = {
+  const props: StatCardDeltaRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
         {/* One glyph for a rise and a fall, turned over by the sheet for a fall. */}
-        <span aria-hidden="true" data-part="indicator">
+        <span aria-hidden="true" data-part="indicator" data-part-indicator="">
           <Icon directional={trend !== 'flat'}>
             <Glyph name={trend === 'flat' ? 'minus' : 'trending-up'} />
           </Icon>
@@ -73,6 +74,6 @@ export function StatCardDelta({
     'data-part': 'delta',
     'data-tone': resolvedTone,
     'data-trend': trend,
-  };
+  });
   return render === undefined ? <span {...props} /> : render(props);
 }

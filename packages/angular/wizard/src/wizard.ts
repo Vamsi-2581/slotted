@@ -154,7 +154,7 @@ export class SlWizardActions {
 @Directive({
   selector: '[slWizardActionsStart]',
   standalone: true,
-  host: { 'data-part': 'actions-start' },
+  host: { 'data-part': 'actions-start', 'data-part-actions-start': '' },
 })
 export class SlWizardActionsStart {}
 
@@ -162,7 +162,7 @@ export class SlWizardActionsStart {}
 @Directive({
   selector: '[slWizardActionsEnd]',
   standalone: true,
-  host: { 'data-part': 'actions-end' },
+  host: { 'data-part': 'actions-end', 'data-part-actions-end': '' },
 })
 export class SlWizardActionsEnd {}
 
@@ -285,26 +285,31 @@ export class SlWizardForm {
     SlWizardActionsEnd,
   ],
   template: `
-    <div data-part="layout">
+    <div data-part="layout" data-part-layout="">
       @if (resolvedProgress() !== 'none') {
         <div
           data-part="progress"
+          data-part-progress=""
           [attr.data-open]="progressOpen() ? '' : null"
           (keydown)="onProgressKeydown($event)"
         >
           <button
             #toggle
             data-part="progress-toggle"
+            data-part-progress-toggle=""
             type="button"
             [attr.aria-controls]="listId"
             [attr.aria-expanded]="progressOpen()"
             (click)="toggleProgress($event)"
           >
-            <span data-part="progress-position">{{ positionText() }}</span>
-            <span aria-hidden="true" data-part="progress-track">
+            <span data-part="progress-position" data-part-progress-position="">{{
+              positionText()
+            }}</span>
+            <span aria-hidden="true" data-part="progress-track" data-part-progress-track="">
               @for (entry of entries(); track entry.name) {
                 <span
                   data-part="progress-segment"
+                  data-part-progress-segment=""
                   [attr.data-complete]="
                     finished() || (entry.name !== current() && isComplete(entry.name)) ? '' : null
                   "
@@ -340,9 +345,9 @@ export class SlWizardForm {
         </div>
       }
 
-      <div data-part="main">
+      <div data-part="main" data-part-main="">
         @if (errorShown()) {
-          <div data-part="error">
+          <div data-part="error" data-part-error="">
             <section #alert slAlert live="off" reach="section" tone="danger">
               <div slAlertContent>
                 <div slAlertTitle>{{ error() ?? t('submitFailed') }}</div>
@@ -355,25 +360,36 @@ export class SlWizardForm {
         }
 
         @if (phase() === 'complete') {
-          <div #complete data-part="complete" tabindex="-1">
+          <div #complete data-part="complete" data-part-complete="" tabindex="-1">
             @if (completeTemplate(); as done) {
               <ng-container *ngTemplateOutlet="done.template"></ng-container>
             }
           </div>
         } @else {
-          <div data-part="step" [attr.aria-busy]="restoring() ? 'true' : null">
+          <div data-part="step" data-part-step="" [attr.aria-busy]="restoring() ? 'true' : null">
             @if (restoring()) {
               @if (skeleton()) {
-                <div aria-hidden="true" data-part="step-header">
-                  <div data-part="step-title">
-                    <span data-part="position"><span slSkeleton inlineSize="5.5rem"></span></span>
+                <div aria-hidden="true" data-part="step-header" data-part-step-header="">
+                  <div data-part="step-title" data-part-step-title="">
+                    <span data-part="position" data-part-position=""
+                      ><span slSkeleton inlineSize="5.5rem"></span
+                    ></span>
                     <span slSkeleton inlineSize="13rem"></span>
                   </div>
                 </div>
-                <div aria-hidden="true" data-part="skeleton">
-                  <div data-label-placement="top" data-part="root" data-size="md" data-ui="field">
-                    <span data-part="label"><span slSkeleton inlineSize="7rem"></span></span>
-                    <div data-part="control">
+                <div aria-hidden="true" data-part="skeleton" data-part-skeleton="">
+                  <div
+                    data-label-placement="top"
+                    data-part="root"
+                    data-part-root=""
+                    data-size="md"
+                    data-ui="field"
+                    data-ui-field=""
+                  >
+                    <span data-part="label" data-part-label=""
+                      ><span slSkeleton inlineSize="7rem"></span
+                    ></span>
+                    <div data-part="control" data-part-control="">
                       <span
                         slSkeleton
                         shape="block"
@@ -384,26 +400,46 @@ export class SlWizardForm {
                 </div>
               }
             } @else if (currentStep(); as step) {
-              <div data-part="step-header">
+              <div data-part="step-header" data-part-step-header="">
                 @switch (resolvedLevel()) {
                   @case (3) {
-                    <h3 #title data-part="step-title" tabindex="-1" [id]="titleId">
+                    <h3
+                      #title
+                      data-part="step-title"
+                      data-part-step-title=""
+                      tabindex="-1"
+                      [id]="titleId"
+                    >
                       <ng-container *ngTemplateOutlet="heading; context: { $implicit: step }" />
                     </h3>
                   }
                   @case (4) {
-                    <h4 #title data-part="step-title" tabindex="-1" [id]="titleId">
+                    <h4
+                      #title
+                      data-part="step-title"
+                      data-part-step-title=""
+                      tabindex="-1"
+                      [id]="titleId"
+                    >
                       <ng-container *ngTemplateOutlet="heading; context: { $implicit: step }" />
                     </h4>
                   }
                   @default {
-                    <h2 #title data-part="step-title" tabindex="-1" [id]="titleId">
+                    <h2
+                      #title
+                      data-part="step-title"
+                      data-part-step-title=""
+                      tabindex="-1"
+                      [id]="titleId"
+                    >
                       <ng-container *ngTemplateOutlet="heading; context: { $implicit: step }" />
                     </h2>
                   }
                 }
                 @if (step.description()) {
-                  <p data-part="step-description">{{ step.description() }}</p>
+                  <p data-part="step-description" data-part-step-description="">
+                    {{ step.description() }}
+                  </p>
                 }
               </div>
               @for (key of [renderKey()]; track key) {
@@ -412,7 +448,7 @@ export class SlWizardForm {
             }
           </div>
           @if (!restoring()) {
-            <div data-part="actions">
+            <div data-part="actions" data-part-actions="">
               @if (actionsTemplate(); as custom) {
                 <ng-container *ngTemplateOutlet="custom.template"></ng-container>
               } @else {
@@ -490,10 +526,10 @@ export class SlWizardForm {
     </div>
 
     <ng-template #heading let-step>
-      <span data-part="position">{{ positionText() }}</span>
+      <span data-part="position" data-part-position="">{{ positionText() }}</span>
       {{ step.label() }}
       @if (step.optional()) {
-        <span data-part="optional"
+        <span data-part="optional" data-part-optional=""
           >{{ ' '
           }}<span slTag shape="pill" size="sm" tone="secondary" variant="soft">{{
             t('optional')
@@ -511,7 +547,9 @@ export class SlWizardForm {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'wizard',
+    'data-ui-wizard': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-progress]': 'resolvedProgress()',
     '[attr.data-scroll]': 'resolvedScroll()',
     '[attr.data-loading]': "phase() === 'submitting' || restoring() ? '' : null",
@@ -1363,6 +1401,9 @@ export class SlWizard implements AfterContentInit {
   standalone: true,
   host: {
     '[attr.data-part]': "wizard.isFinal() && !wizard.returning() ? 'submit' : 'next'",
+    '[attr.data-part-root]': 'null',
+    '[attr.data-part-submit]': "wizard.isFinal() && !wizard.returning() ? '' : null",
+    '[attr.data-part-next]': "wizard.isFinal() && !wizard.returning() ? null : ''",
     '[attr.data-final]': "wizard.isFinal() && !wizard.returning() ? '' : null",
     '[attr.form]': 'wizard.hasForm() ? wizard.formId : null',
     '(click)': 'onClick($event)',
@@ -1385,7 +1426,12 @@ export class SlWizardNext {
 @Directive({
   selector: 'button[slWizardPrevious]',
   standalone: true,
-  host: { '[attr.data-part]': "'previous'", '(click)': 'onClick($event)' },
+  host: {
+    '[attr.data-part]': "'previous'",
+    '[attr.data-part-root]': 'null',
+    '[attr.data-part-previous]': "''",
+    '(click)': 'onClick($event)',
+  },
 })
 export class SlWizardPrevious {
   private readonly wizard = inject(SlWizard);
@@ -1397,7 +1443,12 @@ export class SlWizardPrevious {
 @Directive({
   selector: 'button[slWizardCancel]',
   standalone: true,
-  host: { '[attr.data-part]': "'cancel'", '(click)': 'onClick($event)' },
+  host: {
+    '[attr.data-part]': "'cancel'",
+    '[attr.data-part-root]': 'null',
+    '[attr.data-part-cancel]': "''",
+    '(click)': 'onClick($event)',
+  },
 })
 export class SlWizardCancel {
   private readonly wizard = inject(SlWizard);
@@ -1409,7 +1460,12 @@ export class SlWizardCancel {
 @Directive({
   selector: 'button[slWizardSaveDraft]',
   standalone: true,
-  host: { '[attr.data-part]': "'save-draft'", '(click)': 'onClick($event)' },
+  host: {
+    '[attr.data-part]': "'save-draft'",
+    '[attr.data-part-root]': 'null',
+    '[attr.data-part-save-draft]': "''",
+    '(click)': 'onClick($event)',
+  },
 })
 export class SlWizardSaveDraft {
   private readonly wizard = inject(SlWizard);
@@ -1421,7 +1477,12 @@ export class SlWizardSaveDraft {
 @Directive({
   selector: 'button[slWizardSkip]',
   standalone: true,
-  host: { '[attr.data-part]': "'skip'", '(click)': 'onClick($event)' },
+  host: {
+    '[attr.data-part]': "'skip'",
+    '[attr.data-part-root]': 'null',
+    '[attr.data-part-skip]': "''",
+    '(click)': 'onClick($event)',
+  },
 })
 export class SlWizardSkip {
   private readonly wizard = inject(SlWizard);
@@ -1436,7 +1497,7 @@ export class SlWizardSkip {
   standalone: true,
   template: '{{ text() }}',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'data-part': 'draft-status', role: 'status' },
+  host: { 'data-part': 'draft-status', 'data-part-draft-status': '', role: 'status' },
 })
 export class SlWizardDraftStatus {
   private readonly wizard = inject(SlWizard);
@@ -1467,11 +1528,12 @@ export class SlWizardDraftStatus {
   standalone: true,
   template: `<ng-content>{{ wizard.t('edit') }}</ng-content>
     @if (target(); as step) {
-      {{ ' ' }}<span data-ui="visually-hidden">{{ step.label() }}</span>
+      {{ ' ' }}<span data-ui="visually-hidden" data-ui-visually-hidden="">{{ step.label() }}</span>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'edit',
+    'data-part-edit': '',
     type: 'button',
     '[attr.aria-disabled]': "unavailable() ? 'true' : null",
     '(click)': 'onClick($event)',

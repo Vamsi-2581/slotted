@@ -25,7 +25,7 @@ import { SlTag } from './tag';
  */
 export const TAG_BODY_TEMPLATE =
   '<ng-content select="[slTagStart]"></ng-content>' +
-  '<span data-part="label" [id]="tag.labelId"><ng-content></ng-content></span>' +
+  '<span data-part="label" data-part-label="" [id]="tag.labelId"><ng-content></ng-content></span>' +
   '<ng-content select="[slTagEnd]"></ng-content>';
 
 /**
@@ -48,6 +48,7 @@ export const TAG_BODY_TEMPLATE =
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'body',
+    'data-part-body': '',
     '[attr.disabled]': 'nativelyDisabled()',
     '[attr.aria-disabled]': 'ariaDisabled()',
     '[attr.role]': 'anchorRole()',

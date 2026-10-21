@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/timeline/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./timeline.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./timeline.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./timeline.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations.replace(/\s+/g, '');
 
@@ -19,7 +32,7 @@ test('lives in the component layer', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.timeline.parts) {
-    const selector = part === 'root' ? "[data-ui='timeline']{" : `[data-part='${part}']`;
+    const selector = part === 'root' ? '[data-ui-timeline]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
 });
@@ -54,34 +67,32 @@ test('answers every value of every painted axis', () => {
 test('separates the statuses by shape as well as by colour', () => {
   assert.ok(
     normalized.includes(
-      "[data-current][data-part='marker']{box-shadow:000var(--slotted-border-width-thick,2px)var(--_surface),000var(--_reach)var(--_tone-mark),",
+      '[data-current][data-part-marker]{box-shadow:000var(--slotted-border-width-thick,2px)var(--_surface),000var(--_reach)var(--_tone-mark),',
     ),
     'the current marker is ringed',
   );
   assert.ok(
     normalized.includes(
-      "[data-current]:not([data-loading])[data-part='marker']{outline:var(--_edge)solidCanvasText;",
+      '[data-current]:not([data-loading])[data-part-marker]{outline:var(--_edge)solidCanvasText;',
     ),
     'forced colours get the ring back',
   );
   assert.ok(
     normalized.includes(
-      "[data-complete]:not([data-current])[data-part='marker']:has(>[data-check]){background-color:var(--_tone-mark);border-width:0;",
+      '[data-complete]:not([data-current])[data-part-marker]:has(>[data-check]){background-color:var(--_tone-mark);border-width:0;',
     ),
     'a finished dot fills the whole disc',
   );
   assert.ok(
     normalized.includes(
-      "[data-part='marker']>[data-ui='icon'][data-check]{--slotted-icon-size:calc(var(--_marker)-2*var(--slotted-space-1,0.125rem));color:var(--_surface);",
+      '[data-part-marker]>[data-ui-icon][data-check]{--slotted-icon-size:calc(var(--_marker)-2*var(--slotted-space-1,0.125rem));color:var(--_surface);',
     ),
     'and knocks the check out of it in the ground',
   );
   assert.ok(
-    normalized.includes(
-      "[data-part='marker']>[data-ui='spinner']{--slotted-spinner-size:var(--_dot);",
-    ),
+    normalized.includes('[data-part-marker]>[data-ui-spinner]{--slotted-spinner-size:var(--_dot);'),
   );
-  assert.ok(normalized.includes("[data-complete][data-part='connector']"));
+  assert.ok(normalized.includes('[data-complete][data-part-connector]'));
 });
 
 /**
@@ -105,17 +116,17 @@ test('keeps every marker width on the line parity', () => {
   assert.ok(normalized.includes('--_badge:calc(var(--_rule)+round(up,'));
   assert.ok(
     normalized.includes(
-      "[data-ui='timeline']:has([data-part='marker']>:not([data-ui='spinner'],[data-check])){--_rail:var(--_badge);}",
+      '[data-ui-timeline]:has([data-part-marker]>:not([data-ui-spinner],[data-check])){--_rail:var(--_badge);}',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='marker']:not(:empty,:has(>[data-ui='spinner'],>[data-check])){--_marker:var(--_badge);",
+      '[data-part-marker]:not(:empty,:has(>[data-ui-spinner],>[data-check])){--_marker:var(--_badge);',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='marker']:empty::after{background-color:var(--_tone-mark);border-radius:inherit;content:'';inset:calc((var(--_marker)-var(--_core))/2);",
+      "[data-part-marker]:empty::after{background-color:var(--_tone-mark);border-radius:inherit;content:'';inset:calc((var(--_marker)-var(--_core))/2);",
     ),
   );
   assert.ok(!/radial-gradient/.test(declarations), 'no gradient stands in for the dot');
@@ -131,14 +142,14 @@ test('keeps every marker width on the line parity', () => {
 test('runs the line from centre to centre as a border', () => {
   assert.match(
     declarations,
-    /\[data-part='connector'\] \{[^}]*border-inline-start: var\(--_rule\) solid var\(--_line\)/,
+    /\[data-part-connector\] \{[^}]*border-inline-start: var\(--_rule\) solid var\(--_line\)/,
   );
   assert.ok(normalized.includes('inset-block-start:0.5lh'));
   assert.ok(normalized.includes('inset-block-end:calc(-0.5lh-var(--_item-gap))'));
   assert.ok(normalized.includes('box-shadow:000var(--_line-gap)var(--_surface)'));
   assert.ok(
     normalized.includes(
-      "[data-connector='dashed'][data-part='connector']{border-block-start-style:dashed;border-inline-start-style:dashed;}",
+      "[data-connector='dashed'][data-part-connector]{border-block-start-style:dashed;border-inline-start-style:dashed;}",
     ),
   );
   assert.ok(!/linear-gradient/.test(declarations), 'no gradient stands in for a dash');
@@ -186,12 +197,12 @@ test('draws an avatar marker at the smallest avatar', () => {
   );
   assert.ok(
     normalized.includes(
-      "[data-part='marker']>[data-ui='avatar']{--slotted-avatar-size:var(--_avatar);}",
+      '[data-part-marker]>[data-ui-avatar]{--slotted-avatar-size:var(--_avatar);}',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-ui='timeline']:has([data-part='marker']>[data-ui='avatar']){--_rail:max(var(--_badge),var(--_avatar));}",
+      '[data-ui-timeline]:has([data-part-marker]>[data-ui-avatar]){--_rail:max(var(--_badge),var(--_avatar));}',
     ),
   );
 });
@@ -204,18 +215,18 @@ test('draws an avatar marker at the smallest avatar', () => {
 test('steps the fresh pill by state layer and presses the group heading in place', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='fresh']:enabled:hover{background-color:color-mix(inoklab,var(--_tone-surface),currentColorvar(--slotted-timeline-state-layer-hover,8%));}",
+      '[data-part-fresh]:enabled:hover{background-color:color-mix(inoklab,var(--_tone-surface),currentColorvar(--slotted-timeline-state-layer-hover,8%));}',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='fresh']:enabled:active{background-color:color-mix(inoklab,var(--_tone-surface),currentColorvar(--slotted-timeline-state-layer-active,14%));}",
+      '[data-part-fresh]:enabled:active{background-color:color-mix(inoklab,var(--_tone-surface),currentColorvar(--slotted-timeline-state-layer-active,14%));}',
     ),
   );
   assert.ok(!normalized.includes('--slotted-tone-accent-subtle-'), 'no tinted role under fresh');
   assert.ok(
     normalized.includes(
-      "[data-part='group-trigger']:enabled:active{color:var(--_strong);translate:0var(--slotted-border-width-thin,1px);}",
+      '[data-part-group-trigger]:enabled:active{color:var(--_strong);translate:0var(--slotted-border-width-thin,1px);}',
     ),
   );
   assert.ok(
@@ -236,12 +247,12 @@ test('steps the fresh pill by state layer and presses the group heading in place
 test('folds a group as one movement, with the page below sliding', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='group']{--_fold:var(--slotted-duration-medium)var(--slotted-control-transition-easing,var(--slotted-easing-standard));}",
+      '[data-part-group]{--_fold:var(--slotted-duration-medium)var(--slotted-control-transition-easing,var(--slotted-easing-standard));}',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='group-indicator']>[data-ui='icon']{rotate:-90deg;transition:rotatevar(--_fold);}",
+      '[data-part-group-indicator]>[data-ui-icon]{rotate:-90deg;transition:rotatevar(--_fold);}',
     ),
   );
   assert.ok(
@@ -251,11 +262,11 @@ test('folds a group as one movement, with the page below sliding', () => {
   );
   assert.ok(
     normalized.includes(
-      "[data-part='group-list'][hidden]{block-size:0;display:flex;opacity:0;visibility:hidden;}",
+      '[data-part-group-list][hidden]{block-size:0;display:flex;opacity:0;visibility:hidden;}',
     ),
   );
   assert.ok(
-    normalized.includes("[data-part='group-label']{transition:margin-block-endvar(--_fold);}"),
+    normalized.includes('[data-part-group-label]{transition:margin-block-endvar(--_fold);}'),
   );
   assert.ok(!/group-list'\]:not\(\[hidden\]\)/.test(normalized), 'no starting style on a group');
 });
@@ -269,12 +280,12 @@ test('folds a group as one movement, with the page below sliding', () => {
 test('folds the fresh pill it keeps in and out, the events below sliding', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='fresh'][hidden]{block-size:0;border-block-width:0;display:none;margin-block-end:0;min-block-size:0;opacity:0;",
+      '[data-part-fresh][hidden]{block-size:0;border-block-width:0;display:none;margin-block-end:0;min-block-size:0;opacity:0;',
     ),
   );
   assert.ok(
     normalized.includes(
-      "@starting-style{[data-ui='timeline'][data-part='fresh']:not([hidden]){block-size:0;border-block-width:0;margin-block-end:0;min-block-size:0;opacity:0;}}",
+      '@starting-style{[data-ui-timeline][data-part-fresh]:not([hidden]){block-size:0;border-block-width:0;margin-block-end:0;min-block-size:0;opacity:0;}}',
     ),
   );
   assert.ok(
@@ -292,7 +303,7 @@ test('folds the fresh pill it keeps in and out, the events below sliding', () =>
 test('centres a badge glyph on whole pixels', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='marker']>[data-ui='icon']{--slotted-icon-size:calc(var(--_badge)-2*round(down,(var(--_badge)-var(--_glyph))/2,1px));",
+      '[data-part-marker]>[data-ui-icon]{--slotted-icon-size:calc(var(--_badge)-2*round(down,(var(--_badge)-var(--_glyph))/2,1px));',
     ),
   );
 });
@@ -302,7 +313,7 @@ test('centres a badge glyph on whole pixels', () => {
  * are literals because a container condition cannot read a custom property.
  */
 test('reflows by container query with the breakpoints the contract records', () => {
-  assert.ok(normalized.includes("[data-ui='timeline']{"));
+  assert.ok(normalized.includes('[data-ui-timeline]{'));
   assert.match(declarations, /container-name: slotted-timeline;\s*container-type: inline-size;/);
   assert.ok(normalized.includes('@containerslotted-timeline(max-width:30rem)'));
   assert.ok(normalized.includes('@containerslotted-timeline(max-width:20rem)'));
@@ -312,7 +323,7 @@ test('reflows by container query with the breakpoints the contract records', () 
 
 test('lets the opposite column exist only when an item projects it', () => {
   assert.ok(
-    normalized.includes(":has([data-part='opposite']){--_opposite-column:var(--_opposite);}"),
+    normalized.includes(':has([data-part-opposite]){--_opposite-column:var(--_opposite);}'),
   );
 });
 
@@ -321,11 +332,11 @@ test('lets the opposite column exist only when an item projects it', () => {
  * controls the family paints hold hover and press back behind `:enabled`.
  */
 test('draws focus on the article and guards the controls', () => {
-  assert.ok(normalized.includes("[data-part='item'][tabindex]:focus-visible{"));
+  assert.ok(normalized.includes('[data-part-item][tabindex]:focus-visible{'));
   for (const control of [
-    "[data-part='group-trigger']",
-    "[data-part='fresh']",
-    "button[data-part='more']",
+    '[data-part-group-trigger]',
+    '[data-part-fresh]',
+    'button[data-part-more]',
   ]) {
     assert.ok(normalized.includes(`${control}:enabled:hover`), `${control} hover`);
     assert.ok(normalized.includes(`${control}:enabled:active`), `${control} press`);
@@ -341,10 +352,10 @@ test('draws focus on the article and guards the controls', () => {
 test('borrows the ring and turns the chevron glyph', () => {
   assert.ok(!/animation:/.test(declarations), 'the family animates nothing itself');
   assert.ok(!/mask/.test(declarations), 'no mask stands in for a glyph');
-  assert.ok(normalized.includes("[data-part='group-indicator']>[data-ui='icon']{rotate:-90deg;"));
+  assert.ok(normalized.includes('[data-part-group-indicator]>[data-ui-icon]{rotate:-90deg;'));
   assert.ok(
     normalized.includes(
-      "[data-open]>[data-part='group-label'][data-part='group-indicator']>[data-ui='icon']{rotate:0deg;",
+      '[data-open]>[data-part-group-label][data-part-group-indicator]>[data-ui-icon]{rotate:0deg;',
     ),
   );
   for (const indicator of fragment.matchAll(

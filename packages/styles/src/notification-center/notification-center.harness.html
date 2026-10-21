@@ -9,7 +9,9 @@
 <section data-scene="page">
   <section
     data-ui="notification-center"
+    data-ui-notification-center=""
     data-part="root"
+    data-part-root=""
     data-size="md"
     data-level="2"
     data-growing="none"
@@ -19,27 +21,31 @@
     data-controls="both"
     aria-labelledby="nc-title"
   >
-    <div data-part="header">
-      <h2 data-part="title" id="nc-title">
+    <div data-part="header" data-part-header="">
+      <h2 data-part="title" data-part-title="" id="nc-title">
         Notificações
-        <span data-part="count">3</span>
+        <span data-part="count" data-part-count="">3</span>
       </h2>
-      <span data-part="mark-all">
+      <span data-part="mark-all" data-part-mark-all="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="ghost"
           data-tone="secondary"
           data-size="sm"
           type="button"
         >
-          <span data-part="label">Marcar tudo como lido</span>
+          <span data-part="label" data-part-label="">Marcar tudo como lido</span>
         </button>
       </span>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <a
           data-ui="link"
+          data-ui-link=""
           data-part="root"
+          data-part-root=""
           data-underline="hover"
           data-variant="accent"
           href="#preferencias"
@@ -47,10 +53,12 @@
         >
       </div>
     </div>
-    <div data-part="views">
+    <div data-part="views" data-part-views="">
       <div
         data-ui="tabs"
+        data-ui-tabs=""
         data-part="root"
+        data-part-root=""
         data-variant="line"
         data-orientation="horizontal"
         data-size="md"
@@ -58,51 +66,64 @@
         data-track="none"
         data-activation-direction="none"
       >
-        <div data-part="list" role="tablist" aria-label="Vistas">
-          <div data-part="item" role="presentation" data-selected>
+        <div data-part="list" data-part-list="" role="tablist" aria-label="Vistas">
+          <div data-part="item" data-part-item="" role="presentation" data-selected>
             <button
               data-part="tab"
+              data-part-tab=""
               role="tab"
               aria-selected="true"
               tabindex="0"
               type="button"
               aria-controls="nc-feed"
             >
-              <span data-part="label">Todas</span>
+              <span data-part="label" data-part-label="">Todas</span>
             </button>
           </div>
-          <div data-part="item" role="presentation">
+          <div data-part="item" data-part-item="" role="presentation">
             <button
               data-part="tab"
+              data-part-tab=""
               role="tab"
               aria-selected="false"
               tabindex="-1"
               type="button"
               aria-controls="nc-feed"
             >
-              <span data-part="label">Não lidas <span data-part="count">3</span></span>
+              <span data-part="label" data-part-label=""
+                >Não lidas <span data-part="count" data-part-count="">3</span></span
+              >
             </button>
           </div>
-          <div data-part="item" role="presentation">
+          <div data-part="item" data-part-item="" role="presentation">
             <button
               data-part="tab"
+              data-part-tab=""
               role="tab"
               aria-selected="false"
               tabindex="-1"
               type="button"
               aria-controls="nc-feed"
             >
-              <span data-part="label">Menções</span>
+              <span data-part="label" data-part-label="">Menções</span>
             </button>
           </div>
         </div>
       </div>
     </div>
-    <div data-part="feed" role="feed" id="nc-feed" aria-labelledby="nc-title" aria-busy="false">
-      <div data-part="group">
-        <h3 data-part="group-label">Hoje</h3>
+    <div
+      data-part="feed"
+      data-part-feed=""
+      role="feed"
+      id="nc-feed"
+      aria-labelledby="nc-title"
+      aria-busy="false"
+    >
+      <div data-part="group" data-part-group="">
+        <h3 data-part="group-label" data-part-group-label="">Hoje</h3>
         <article
           data-part="item"
+          data-part-item=""
           tabindex="0"
           data-tone="warning"
           aria-labelledby="n1-t"
@@ -110,10 +131,12 @@
           aria-posinset="1"
           aria-setsize="5"
         >
-          <span data-part="visual">
+          <span data-part="visual" data-part-visual="">
             <span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-shape="circle"
               data-size="sm"
               data-tone="secondary"
@@ -121,46 +144,66 @@
               data-status="idle"
               role="img"
               aria-label="Expedições"
-              ><span data-part="fallback">EX</span></span
+              ><span data-part="fallback" data-part-fallback="">EX</span></span
             >
           </span>
-          <div data-part="content">
-            <a data-part="title" id="n1-t" href="#SO-2026-01842"
+          <div data-part="content" data-part-content="">
+            <a data-part="title" data-part-title="" id="n1-t" href="#SO-2026-01842"
               >SO-2026-01842 parcialmente atendido: 6 unidades do Servo Motor MX-240 em pendência</a
             >
-            <p data-part="description" id="n1-d">
+            <p data-part="description" data-part-description="" id="n1-d">
               A expedição SHP-009841 saiu de Columbus com 3 volumes. O restante fica para a próxima
               janela de embarque, a 24 de setembro.
             </p>
-            <time data-part="time" datetime="2026-09-17T08:20:00Z">há 2 horas</time>
-            <div data-part="actions">
+            <time data-part="time" data-part-time="" datetime="2026-09-17T08:20:00Z"
+              >há 2 horas</time
+            >
+            <div data-part="actions" data-part-actions="">
               <button
                 data-ui="button"
+                data-ui-button=""
                 data-part="root"
+                data-part-root=""
                 data-variant="outline"
                 data-tone="secondary"
                 data-size="sm"
                 type="button"
               >
-                <span data-part="label">Ver expedição</span>
+                <span data-part="label" data-part-label="">Ver expedição</span>
               </button>
             </div>
           </div>
-          <div data-part="controls">
-            <button data-part="read-toggle" type="button" aria-label="Marcar como lida">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg
+          <div data-part="controls" data-part-controls="">
+            <button
+              data-part="read-toggle"
+              data-part-read-toggle=""
+              type="button"
+              aria-label="Marcar como lida"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg
               ></span>
             </button>
-            <button data-part="dismiss" type="button" aria-label="Dispensar">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </div>
         </article>
         <article
           data-part="item"
+          data-part-item=""
           tabindex="0"
           data-tone="danger"
           aria-labelledby="n2-t"
@@ -168,10 +211,12 @@
           aria-posinset="2"
           aria-setsize="5"
         >
-          <span data-part="visual">
+          <span data-part="visual" data-part-visual="">
             <span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-shape="circle"
               data-size="sm"
               data-tone="accent"
@@ -179,44 +224,64 @@
               data-status="idle"
               role="img"
               aria-label="Marta Silva"
-              ><span data-part="fallback">MS</span></span
+              ><span data-part="fallback" data-part-fallback="">MS</span></span
             >
           </span>
-          <div data-part="content">
-            <a data-part="title" id="n2-t" href="#INV-2026-02891"
+          <div data-part="content" data-part-content="">
+            <a data-part="title" data-part-title="" id="n2-t" href="#INV-2026-02891"
               >Marta Silva registou um pagamento parcial em INV-2026-02891</a
             >
-            <p data-part="description" id="n2-d">
+            <p data-part="description" data-part-description="" id="n2-d">
               US$ 44.560,00 por transferência. Ficam US$ 41.860,00 em aberto, 14 dias após o
               vencimento.
             </p>
-            <time data-part="time" datetime="2026-09-17T07:05:00Z">há 3 horas</time>
+            <time data-part="time" data-part-time="" datetime="2026-09-17T07:05:00Z"
+              >há 3 horas</time
+            >
           </div>
-          <div data-part="controls">
-            <button data-part="read-toggle" type="button" aria-label="Marcar como lida">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg
+          <div data-part="controls" data-part-controls="">
+            <button
+              data-part="read-toggle"
+              data-part-read-toggle=""
+              type="button"
+              aria-label="Marcar como lida"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg
               ></span>
             </button>
-            <button data-part="dismiss" type="button" aria-label="Dispensar">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </div>
         </article>
         <article
           data-part="item"
+          data-part-item=""
           tabindex="0"
           data-read
           aria-labelledby="n3-t"
           aria-posinset="3"
           aria-setsize="5"
         >
-          <span data-part="visual">
+          <span data-part="visual" data-part-visual="">
             <span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-shape="circle"
               data-size="sm"
               data-tone="accent"
@@ -224,33 +289,51 @@
               data-status="idle"
               role="img"
               aria-label="Daniel Okafor"
-              ><span data-part="fallback">DO</span></span
+              ><span data-part="fallback" data-part-fallback="">DO</span></span
             >
           </span>
-          <div data-part="content">
-            <a data-part="title" id="n3-t" href="#TCK-10492"
+          <div data-part="content" data-part-content="">
+            <a data-part="title" data-part-title="" id="n3-t" href="#TCK-10492"
               >Daniel Okafor atribuiu-lhe o ticket TCK-10492 · Atraso na expedição</a
             >
-            <time data-part="time" datetime="2026-09-17T06:40:00Z">há 4 horas</time>
+            <time data-part="time" data-part-time="" datetime="2026-09-17T06:40:00Z"
+              >há 4 horas</time
+            >
           </div>
-          <div data-part="controls">
-            <button data-part="read-toggle" type="button" aria-label="Marcar como não lida">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="dot"></svg
+          <div data-part="controls" data-part-controls="">
+            <button
+              data-part="read-toggle"
+              data-part-read-toggle=""
+              type="button"
+              aria-label="Marcar como não lida"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg
               ></span>
             </button>
-            <button data-part="dismiss" type="button" aria-label="Dispensar">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </div>
         </article>
       </div>
-      <div data-part="group">
-        <h3 data-part="group-label">Ontem</h3>
+      <div data-part="group" data-part-group="">
+        <h3 data-part="group-label" data-part-group-label="">Ontem</h3>
         <article
           data-part="item"
+          data-part-item=""
           tabindex="0"
           data-tone="success"
           aria-labelledby="n4-t"
@@ -258,32 +341,58 @@
           aria-posinset="4"
           aria-setsize="5"
         >
-          <span data-part="visual" data-tone="success"
-            ><span data-ui="icon" data-part="root" data-tone-glyph="" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="circle-check"></svg></span
+          <span data-part="visual" data-part-visual="" data-tone="success"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-tone-glyph=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-check"></svg></span
           ></span>
-          <div data-part="content">
-            <span data-part="title" id="n4-t">SO-2026-01841 aprovado dentro da alçada</span>
-            <p data-part="description" id="n4-d">
+          <div data-part="content" data-part-content="">
+            <span data-part="title" data-part-title="" id="n4-t"
+              >SO-2026-01841 aprovado dentro da alçada</span
+            >
+            <p data-part="description" data-part-description="" id="n4-d">
               Northwind Fabrication · US$ 12.480,00 · entrega pedida para 15 de setembro.
             </p>
-            <time data-part="time" datetime="2026-09-16T15:12:00Z">ontem, 12:12</time>
+            <time data-part="time" data-part-time="" datetime="2026-09-16T15:12:00Z"
+              >ontem, 12:12</time
+            >
           </div>
-          <div data-part="controls">
-            <button data-part="read-toggle" type="button" aria-label="Marcar como lida">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg
+          <div data-part="controls" data-part-controls="">
+            <button
+              data-part="read-toggle"
+              data-part-read-toggle=""
+              type="button"
+              aria-label="Marcar como lida"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg
               ></span>
             </button>
-            <button data-part="dismiss" type="button" aria-label="Dispensar">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </div>
         </article>
         <article
           data-part="item"
+          data-part-item=""
           tabindex="0"
           data-read
           aria-labelledby="n5-t"
@@ -291,24 +400,41 @@
           aria-posinset="5"
           aria-setsize="5"
         >
-          <div data-part="content">
-            <a data-part="title" id="n5-t" href="#SO-2026-01843"
+          <div data-part="content" data-part-content="">
+            <a data-part="title" data-part-title="" id="n5-t" href="#SO-2026-01843"
               >Aprovação pedida para SO-2026-01843 · Helios Automation GmbH</a
             >
-            <p data-part="description" id="n5-d">
+            <p data-part="description" data-part-description="" id="n5-d">
               Pré-pago, US$ 4.120,00. A aprovação está com Contas-chave.
             </p>
-            <time data-part="time" datetime="2026-09-16T09:30:00Z">ontem, 06:30</time>
+            <time data-part="time" data-part-time="" datetime="2026-09-16T09:30:00Z"
+              >ontem, 06:30</time
+            >
           </div>
-          <div data-part="controls">
-            <button data-part="read-toggle" type="button" aria-label="Marcar como não lida">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="dot"></svg
+          <div data-part="controls" data-part-controls="">
+            <button
+              data-part="read-toggle"
+              data-part-read-toggle=""
+              type="button"
+              aria-label="Marcar como não lida"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg
               ></span>
             </button>
-            <button data-part="dismiss" type="button" aria-label="Dispensar">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </div>
@@ -325,7 +451,9 @@
 <section data-scene="popover">
   <section
     data-ui="notification-center"
+    data-ui-notification-center=""
     data-part="root"
+    data-part-root=""
     data-size="sm"
     data-level="3"
     data-growing="none"
@@ -334,28 +462,32 @@
     data-view="unread"
     aria-labelledby="nc-p-title"
   >
-    <div data-part="header">
-      <h3 data-part="title" id="nc-p-title">
+    <div data-part="header" data-part-header="">
+      <h3 data-part="title" data-part-title="" id="nc-p-title">
         Notificações
-        <span data-part="count">2</span>
+        <span data-part="count" data-part-count="">2</span>
       </h3>
-      <span data-part="mark-all">
+      <span data-part="mark-all" data-part-mark-all="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="ghost"
           data-tone="secondary"
           data-size="sm"
           type="button"
         >
-          <span data-part="label">Marcar tudo como lido</span>
+          <span data-part="label" data-part-label="">Marcar tudo como lido</span>
         </button>
       </span>
     </div>
-    <div data-part="views">
+    <div data-part="views" data-part-views="">
       <div
         data-ui="tabs"
+        data-ui-tabs=""
         data-part="root"
+        data-part-root=""
         data-variant="line"
         data-orientation="horizontal"
         data-size="sm"
@@ -363,103 +495,158 @@
         data-track="none"
         data-activation-direction="none"
       >
-        <div data-part="list" role="tablist" aria-label="Vistas">
-          <div data-part="item" role="presentation">
+        <div data-part="list" data-part-list="" role="tablist" aria-label="Vistas">
+          <div data-part="item" data-part-item="" role="presentation">
             <button
               data-part="tab"
+              data-part-tab=""
               role="tab"
               aria-selected="false"
               tabindex="-1"
               type="button"
               aria-controls="nc-p-feed"
             >
-              <span data-part="label">Todas</span>
+              <span data-part="label" data-part-label="">Todas</span>
             </button>
           </div>
-          <div data-part="item" role="presentation" data-selected>
+          <div data-part="item" data-part-item="" role="presentation" data-selected>
             <button
               data-part="tab"
+              data-part-tab=""
               role="tab"
               aria-selected="true"
               tabindex="0"
               type="button"
               aria-controls="nc-p-feed"
             >
-              <span data-part="label">Não lidas</span>
+              <span data-part="label" data-part-label="">Não lidas</span>
             </button>
           </div>
         </div>
       </div>
     </div>
-    <button data-part="fresh" type="button">2 novas notificações</button>
-    <div data-part="feed" role="feed" id="nc-p-feed" aria-labelledby="nc-p-title" aria-busy="false">
+    <button data-part="fresh" data-part-fresh="" type="button">2 novas notificações</button>
+    <div
+      data-part="feed"
+      data-part-feed=""
+      role="feed"
+      id="nc-p-feed"
+      aria-labelledby="nc-p-title"
+      aria-busy="false"
+    >
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         data-tone="warning"
         aria-labelledby="p1-t"
         aria-posinset="1"
         aria-setsize="2"
       >
-        <span data-part="visual" data-tone="warning"
-          ><span data-ui="icon" data-part="root" data-tone-glyph="" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-alert"></svg></span
+        <span data-part="visual" data-part-visual="" data-tone="warning"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-tone-glyph=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-alert"></svg></span
         ></span>
-        <div data-part="content">
-          <a data-part="title" id="p1-t" href="#SO-2026-01842"
+        <div data-part="content" data-part-content="">
+          <a data-part="title" data-part-title="" id="p1-t" href="#SO-2026-01842"
             >SO-2026-01842 parcialmente atendido</a
           >
-          <time data-part="time" datetime="2026-09-17T08:20:00Z">há 2 horas</time>
+          <time data-part="time" data-part-time="" datetime="2026-09-17T08:20:00Z">há 2 horas</time>
         </div>
-        <div data-part="controls">
-          <button data-part="read-toggle" type="button" aria-label="Marcar como lida">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg
+        <div data-part="controls" data-part-controls="">
+          <button
+            data-part="read-toggle"
+            data-part-read-toggle=""
+            type="button"
+            aria-label="Marcar como lida"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg
             ></span>
           </button>
-          <button data-part="dismiss" type="button" aria-label="Dispensar">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
       </article>
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         data-tone="danger"
         aria-labelledby="p2-t"
         aria-posinset="2"
         aria-setsize="2"
       >
-        <span data-part="visual" data-tone="danger"
-          ><span data-ui="icon" data-part="root" data-tone-glyph="" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-x"></svg></span
+        <span data-part="visual" data-part-visual="" data-tone="danger"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-tone-glyph=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-x"></svg></span
         ></span>
-        <div data-part="content">
-          <a data-part="title" id="p2-t" href="#INV-2026-02891"
+        <div data-part="content" data-part-content="">
+          <a data-part="title" data-part-title="" id="p2-t" href="#INV-2026-02891"
             >Pagamento parcial em INV-2026-02891</a
           >
-          <time data-part="time" datetime="2026-09-17T07:05:00Z">há 3 horas</time>
+          <time data-part="time" data-part-time="" datetime="2026-09-17T07:05:00Z">há 3 horas</time>
         </div>
-        <div data-part="controls">
-          <button data-part="read-toggle" type="button" aria-label="Marcar como lida">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg
+        <div data-part="controls" data-part-controls="">
+          <button
+            data-part="read-toggle"
+            data-part-read-toggle=""
+            type="button"
+            aria-label="Marcar como lida"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg
             ></span>
           </button>
-          <button data-part="dismiss" type="button" aria-label="Dispensar">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
       </article>
     </div>
-    <div data-part="footer">
+    <div data-part="footer" data-part-footer="">
       <a
         data-ui="link"
+        data-ui-link=""
         data-part="root"
+        data-part-root=""
         data-underline="hover"
         data-variant="accent"
         href="#notificacoes"
@@ -473,7 +660,9 @@
 <section data-scene="growing">
   <section
     data-ui="notification-center"
+    data-ui-notification-center=""
     data-part="root"
+    data-part-root=""
     data-size="md"
     data-level="2"
     data-growing="button"
@@ -482,81 +671,130 @@
     data-view="all"
     aria-labelledby="nc-g-title"
   >
-    <div data-part="header">
-      <h2 data-part="title" id="nc-g-title">Notificações</h2>
-      <span data-part="mark-all">
+    <div data-part="header" data-part-header="">
+      <h2 data-part="title" data-part-title="" id="nc-g-title">Notificações</h2>
+      <span data-part="mark-all" data-part-mark-all="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="ghost"
           data-tone="secondary"
           data-size="sm"
           type="button"
           disabled
         >
-          <span data-part="label">Marcar tudo como lido</span>
+          <span data-part="label" data-part-label="">Marcar tudo como lido</span>
         </button>
       </span>
     </div>
-    <div data-part="feed" role="feed" id="nc-g-feed" aria-labelledby="nc-g-title" aria-busy="false">
+    <div
+      data-part="feed"
+      data-part-feed=""
+      role="feed"
+      id="nc-g-feed"
+      aria-labelledby="nc-g-title"
+      aria-busy="false"
+    >
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         data-read
         aria-labelledby="g1-t"
         aria-posinset="1"
         aria-setsize="-1"
       >
-        <div data-part="content">
-          <span data-part="title" id="g1-t">Relatório semanal de vendas disponível</span>
-          <time data-part="time" datetime="2026-09-15T12:00:00Z">15 de set. de 2026, 09:00</time>
+        <div data-part="content" data-part-content="">
+          <span data-part="title" data-part-title="" id="g1-t"
+            >Relatório semanal de vendas disponível</span
+          >
+          <time data-part="time" data-part-time="" datetime="2026-09-15T12:00:00Z"
+            >15 de set. de 2026, 09:00</time
+          >
         </div>
-        <div data-part="controls">
-          <button data-part="read-toggle" type="button" aria-label="Marcar como não lida">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="dot"></svg
+        <div data-part="controls" data-part-controls="">
+          <button
+            data-part="read-toggle"
+            data-part-read-toggle=""
+            type="button"
+            aria-label="Marcar como não lida"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg
             ></span>
           </button>
-          <button data-part="dismiss" type="button" aria-label="Dispensar">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
       </article>
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         data-read
         aria-labelledby="g2-t"
         aria-posinset="2"
         aria-setsize="-1"
       >
-        <div data-part="content">
-          <span data-part="title" id="g2-t"
+        <div data-part="content" data-part-content="">
+          <span data-part="title" data-part-title="" id="g2-t"
             >A janela de manutenção de Columbus (OH-1) terminou</span
           >
-          <time data-part="time" datetime="2026-09-14T22:00:00Z">14 de set. de 2026, 19:00</time>
+          <time data-part="time" data-part-time="" datetime="2026-09-14T22:00:00Z"
+            >14 de set. de 2026, 19:00</time
+          >
         </div>
-        <div data-part="controls">
-          <button data-part="read-toggle" type="button" aria-label="Marcar como não lida">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="dot"></svg
+        <div data-part="controls" data-part-controls="">
+          <button
+            data-part="read-toggle"
+            data-part-read-toggle=""
+            type="button"
+            aria-label="Marcar como não lida"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg
             ></span>
           </button>
-          <button data-part="dismiss" type="button" aria-label="Dispensar">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
       </article>
     </div>
-    <button data-part="more" type="button">Carregar mais</button>
+    <button data-part="more" data-part-more="" type="button">Carregar mais</button>
   </section>
   <section
     data-ui="notification-center"
+    data-ui-notification-center=""
     data-part="root"
+    data-part-root=""
     data-size="md"
     data-level="2"
     data-growing="scroll"
@@ -566,37 +804,64 @@
     aria-labelledby="nc-s-title"
     data-loading
   >
-    <div data-part="header">
-      <h2 data-part="title" id="nc-s-title">Notificações</h2>
+    <div data-part="header" data-part-header="">
+      <h2 data-part="title" data-part-title="" id="nc-s-title">Notificações</h2>
     </div>
-    <div data-part="feed" role="feed" id="nc-s-feed" aria-labelledby="nc-s-title" aria-busy="true">
+    <div
+      data-part="feed"
+      data-part-feed=""
+      role="feed"
+      id="nc-s-feed"
+      aria-labelledby="nc-s-title"
+      aria-busy="true"
+    >
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         data-read
         aria-labelledby="s1-t"
         aria-posinset="1"
         aria-setsize="-1"
       >
-        <div data-part="content">
-          <span data-part="title" id="s1-t">Relatório semanal de vendas disponível</span>
-          <time data-part="time" datetime="2026-09-15T12:00:00Z">15 de set. de 2026, 09:00</time>
+        <div data-part="content" data-part-content="">
+          <span data-part="title" data-part-title="" id="s1-t"
+            >Relatório semanal de vendas disponível</span
+          >
+          <time data-part="time" data-part-time="" datetime="2026-09-15T12:00:00Z"
+            >15 de set. de 2026, 09:00</time
+          >
         </div>
-        <div data-part="controls">
-          <button data-part="read-toggle" type="button" aria-label="Marcar como não lida">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="dot"></svg
+        <div data-part="controls" data-part-controls="">
+          <button
+            data-part="read-toggle"
+            data-part-read-toggle=""
+            type="button"
+            aria-label="Marcar como não lida"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg
             ></span>
           </button>
-          <button data-part="dismiss" type="button" aria-label="Dispensar">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
       </article>
     </div>
-    <div data-part="more" aria-live="polite">A carregar notificações</div>
+    <div data-part="more" data-part-more="" aria-live="polite">A carregar notificações</div>
   </section>
 </section>
 
@@ -604,7 +869,9 @@
 <section data-scene="loading">
   <section
     data-ui="notification-center"
+    data-ui-notification-center=""
     data-part="root"
+    data-part-root=""
     data-size="md"
     data-level="2"
     data-growing="none"
@@ -614,71 +881,106 @@
     data-loading
     aria-labelledby="nc-l-title"
   >
-    <div data-part="header">
-      <h2 data-part="title" id="nc-l-title">Notificações</h2>
-      <span data-part="mark-all">
+    <div data-part="header" data-part-header="">
+      <h2 data-part="title" data-part-title="" id="nc-l-title">Notificações</h2>
+      <span data-part="mark-all" data-part-mark-all="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="ghost"
           data-tone="secondary"
           data-size="sm"
           type="button"
           disabled
         >
-          <span data-part="label">Marcar tudo como lido</span>
+          <span data-part="label" data-part-label="">Marcar tudo como lido</span>
         </button>
       </span>
     </div>
-    <div data-part="feed" role="feed" aria-labelledby="nc-l-title" aria-busy="true">
-      <div data-part="item" aria-hidden="true">
-        <span data-part="visual"
+    <div
+      data-part="feed"
+      data-part-feed=""
+      role="feed"
+      aria-labelledby="nc-l-title"
+      aria-busy="true"
+    >
+      <div data-part="item" data-part-item="" aria-hidden="true">
+        <span data-part="visual" data-part-visual=""
           ><span
             data-ui="skeleton"
+            data-ui-skeleton=""
             data-part="root"
+            data-part-root=""
             data-shape="circle"
             data-size="sm"
             data-animation="shimmer"
             data-loading
           ></span
         ></span>
-        <div data-part="content">
-          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
-            ><span data-part="line"></span><span data-part="line"></span
+        <div data-part="content" data-part-content="">
+          <span
+            data-ui="skeleton"
+            data-ui-skeleton=""
+            data-part="text"
+            data-part-text=""
+            data-animation="shimmer"
+            data-loading
+            ><span data-part="line" data-part-line=""></span
+            ><span data-part="line" data-part-line=""></span
           ></span>
         </div>
       </div>
-      <div data-part="item" aria-hidden="true">
-        <span data-part="visual"
+      <div data-part="item" data-part-item="" aria-hidden="true">
+        <span data-part="visual" data-part-visual=""
           ><span
             data-ui="skeleton"
+            data-ui-skeleton=""
             data-part="root"
+            data-part-root=""
             data-shape="circle"
             data-size="sm"
             data-animation="shimmer"
             data-loading
           ></span
         ></span>
-        <div data-part="content">
-          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
-            ><span data-part="line"></span><span data-part="line"></span
+        <div data-part="content" data-part-content="">
+          <span
+            data-ui="skeleton"
+            data-ui-skeleton=""
+            data-part="text"
+            data-part-text=""
+            data-animation="shimmer"
+            data-loading
+            ><span data-part="line" data-part-line=""></span
+            ><span data-part="line" data-part-line=""></span
           ></span>
         </div>
       </div>
-      <div data-part="item" aria-hidden="true">
-        <span data-part="visual"
+      <div data-part="item" data-part-item="" aria-hidden="true">
+        <span data-part="visual" data-part-visual=""
           ><span
             data-ui="skeleton"
+            data-ui-skeleton=""
             data-part="root"
+            data-part-root=""
             data-shape="circle"
             data-size="sm"
             data-animation="shimmer"
             data-loading
           ></span
         ></span>
-        <div data-part="content">
-          <span data-ui="skeleton" data-part="text" data-animation="shimmer" data-loading
-            ><span data-part="line"></span><span data-part="line"></span
+        <div data-part="content" data-part-content="">
+          <span
+            data-ui="skeleton"
+            data-ui-skeleton=""
+            data-part="text"
+            data-part-text=""
+            data-animation="shimmer"
+            data-loading
+            ><span data-part="line" data-part-line=""></span
+            ><span data-part="line" data-part-line=""></span
           ></span>
         </div>
       </div>
@@ -690,7 +992,9 @@
 <section data-scene="empty">
   <section
     data-ui="notification-center"
+    data-ui-notification-center=""
     data-part="root"
+    data-part-root=""
     data-size="sm"
     data-level="3"
     data-growing="none"
@@ -699,26 +1003,30 @@
     data-view="unread"
     aria-labelledby="nc-e-title"
   >
-    <div data-part="header">
-      <h3 data-part="title" id="nc-e-title">Notificações</h3>
-      <span data-part="mark-all">
+    <div data-part="header" data-part-header="">
+      <h3 data-part="title" data-part-title="" id="nc-e-title">Notificações</h3>
+      <span data-part="mark-all" data-part-mark-all="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="ghost"
           data-tone="secondary"
           data-size="sm"
           type="button"
           disabled
         >
-          <span data-part="label">Marcar tudo como lido</span>
+          <span data-part="label" data-part-label="">Marcar tudo como lido</span>
         </button>
       </span>
     </div>
-    <div data-part="views">
+    <div data-part="views" data-part-views="">
       <div
         data-ui="tabs"
+        data-ui-tabs=""
         data-part="root"
+        data-part-root=""
         data-variant="line"
         data-orientation="horizontal"
         data-size="sm"
@@ -726,40 +1034,58 @@
         data-track="none"
         data-activation-direction="none"
       >
-        <div data-part="list" role="tablist" aria-label="Vistas">
-          <div data-part="item" role="presentation">
-            <button data-part="tab" role="tab" aria-selected="false" tabindex="-1" type="button">
-              <span data-part="label">Todas</span>
+        <div data-part="list" data-part-list="" role="tablist" aria-label="Vistas">
+          <div data-part="item" data-part-item="" role="presentation">
+            <button
+              data-part="tab"
+              data-part-tab=""
+              role="tab"
+              aria-selected="false"
+              tabindex="-1"
+              type="button"
+            >
+              <span data-part="label" data-part-label="">Todas</span>
             </button>
           </div>
-          <div data-part="item" role="presentation" data-selected>
-            <button data-part="tab" role="tab" aria-selected="true" tabindex="0" type="button">
-              <span data-part="label">Não lidas</span>
+          <div data-part="item" data-part-item="" role="presentation" data-selected>
+            <button
+              data-part="tab"
+              data-part-tab=""
+              role="tab"
+              aria-selected="true"
+              tabindex="0"
+              type="button"
+            >
+              <span data-part="label" data-part-label="">Não lidas</span>
             </button>
           </div>
         </div>
       </div>
     </div>
-    <div data-part="empty">
+    <div data-part="empty" data-part-empty="">
       <section
         data-ui="result-state"
+        data-ui-result-state=""
         data-part="root"
+        data-part-root=""
         data-status="success"
         data-reach="inline"
         data-align="center"
         data-live="off"
       >
-        <div data-part="media" aria-hidden="true"></div>
-        <div data-part="content">
-          <div data-part="title">Tudo lido</div>
-          <p data-part="description">Nada aguarda a sua atenção.</p>
+        <div data-part="media" data-part-media="" aria-hidden="true"></div>
+        <div data-part="content" data-part-content="">
+          <div data-part="title" data-part-title="">Tudo lido</div>
+          <p data-part="description" data-part-description="">Nada aguarda a sua atenção.</p>
         </div>
       </section>
     </div>
-    <div data-part="footer">
+    <div data-part="footer" data-part-footer="">
       <a
         data-ui="link"
+        data-ui-link=""
         data-part="root"
+        data-part-root=""
         data-underline="hover"
         data-variant="accent"
         href="#notificacoes"
@@ -773,7 +1099,9 @@
 <section data-scene="long">
   <section
     data-ui="notification-center"
+    data-ui-notification-center=""
     data-part="root"
+    data-part-root=""
     data-size="md"
     data-level="2"
     data-growing="none"
@@ -782,41 +1110,50 @@
     data-view="all"
     aria-labelledby="nc-x-title"
   >
-    <div data-part="header">
-      <h2 data-part="title" id="nc-x-title">
+    <div data-part="header" data-part-header="">
+      <h2 data-part="title" data-part-title="" id="nc-x-title">
         Notificações
-        <span data-part="count">312</span>
+        <span data-part="count" data-part-count="">312</span>
       </h2>
-      <span data-part="mark-all">
+      <span data-part="mark-all" data-part-mark-all="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="ghost"
           data-tone="secondary"
           data-size="sm"
           type="button"
         >
-          <span data-part="label">Marcar tudo como lido</span>
+          <span data-part="label" data-part-label="">Marcar tudo como lido</span>
         </button>
       </span>
     </div>
-    <div data-part="feed" role="feed" aria-labelledby="nc-x-title" aria-busy="false">
+    <div
+      data-part="feed"
+      data-part-feed=""
+      role="feed"
+      aria-labelledby="nc-x-title"
+      aria-busy="false"
+    >
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         aria-labelledby="x1-t"
         aria-describedby="x1-d"
         aria-posinset="1"
         aria-setsize="2"
       >
-        <div data-part="content">
-          <a data-part="title" id="x1-t" href="#PO-2026-00731"
+        <div data-part="content" data-part-content="">
+          <a data-part="title" data-part-title="" id="x1-t" href="#PO-2026-00731"
             >A ordem de compra PO-2026-00731 de reposição de servomotores, controladores e cablagem
             blindada para a linha 3 da unidade de Columbus foi devolvida pelo jurídico com ressalvas
             sobre a cláusula de reajuste e aguarda uma nova versão do fornecedor antes do fim do
             trimestre</a
           >
-          <p data-part="description" id="x1-d">
+          <p data-part="description" data-part-description="" id="x1-d">
             Helios Automation GmbH respondeu à ressalva com uma proposta de reajuste indexado ao
             IPCA a partir do sexto mês, o que o jurídico considera aceitável desde que o teto anual
             fique escrito; a Marta Silva pede que a nova versão seja anexada ao pedido até
@@ -824,33 +1161,53 @@
             janela de embarque de outubro não seja perdida. Referência do fornecedor:
             HA-DE-2026-Q3-00092817-COLUMBUS-L3-SERVO-PLC-REPL-REVISAO-2.
           </p>
-          <time data-part="time" datetime="2026-09-17T09:58:00Z">há 12 minutos</time>
+          <time data-part="time" data-part-time="" datetime="2026-09-17T09:58:00Z"
+            >há 12 minutos</time
+          >
         </div>
-        <div data-part="controls">
-          <button data-part="read-toggle" type="button" aria-label="Marcar como lida">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg
+        <div data-part="controls" data-part-controls="">
+          <button
+            data-part="read-toggle"
+            data-part-read-toggle=""
+            type="button"
+            aria-label="Marcar como lida"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg
             ></span>
           </button>
-          <button data-part="dismiss" type="button" aria-label="Dispensar">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
       </article>
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         data-read
         aria-labelledby="x2-t"
         aria-posinset="2"
         aria-setsize="2"
       >
-        <span data-part="visual">
+        <span data-part="visual" data-part-visual="">
           <span
             data-ui="avatar"
+            data-ui-avatar=""
             data-part="root"
+            data-part-root=""
             data-shape="circle"
             data-size="sm"
             data-tone="secondary"
@@ -858,22 +1215,37 @@
             data-status="idle"
             role="img"
             aria-label="Sistema"
-            ><span data-part="fallback">NX</span></span
+            ><span data-part="fallback" data-part-fallback="">NX</span></span
           >
         </span>
-        <div data-part="content">
-          <span data-part="title" id="x2-t">Exportação concluída</span>
-          <time data-part="time" datetime="2026-09-17T09:00:00Z">há 1 hora</time>
+        <div data-part="content" data-part-content="">
+          <span data-part="title" data-part-title="" id="x2-t">Exportação concluída</span>
+          <time data-part="time" data-part-time="" datetime="2026-09-17T09:00:00Z">há 1 hora</time>
         </div>
-        <div data-part="controls">
-          <button data-part="read-toggle" type="button" aria-label="Marcar como não lida">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="dot"></svg
+        <div data-part="controls" data-part-controls="">
+          <button
+            data-part="read-toggle"
+            data-part-read-toggle=""
+            type="button"
+            aria-label="Marcar como não lida"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg
             ></span>
           </button>
-          <button data-part="dismiss" type="button" aria-label="Dispensar">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="dismiss" data-part-dismiss="" type="button" aria-label="Dispensar">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>

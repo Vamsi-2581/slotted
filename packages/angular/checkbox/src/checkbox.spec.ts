@@ -77,14 +77,14 @@ describe('SlCheckbox', () => {
    */
   it('marks a label whose only content is hidden text', async () => {
     const hidden = renderTemplate(
-      `<div slCheckbox><span data-ui="visually-hidden">Select Acme Logistics</span></div>`,
+      `<div slCheckbox><span data-ui="visually-hidden" data-ui-visually-hidden="">Select Acme Logistics</span></div>`,
     );
     await hidden.whenStable();
     hidden.detectChanges();
     expect(root(hidden).hasAttribute('data-label-hidden')).toBe(true);
 
     const mixed = renderTemplate(
-      `<div slCheckbox>Delete <span data-ui="visually-hidden">invoice 42</span></div>`,
+      `<div slCheckbox>Delete <span data-ui="visually-hidden" data-ui-visually-hidden="">invoice 42</span></div>`,
     );
     await mixed.whenStable();
     mixed.detectChanges();

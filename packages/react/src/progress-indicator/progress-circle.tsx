@@ -90,11 +90,23 @@ export function ProgressCircle({
             what M3 draws: only the active indicator morphs, and the wave is
             wound on the same radius the track is drawn at.
           */}
-          <circle cx="24" cy="24" data-part="track" pathLength="100" r="20" />
+          <circle cx="24" cy="24" data-part="track" data-part-track="" pathLength="100" r="20" />
           {wave ? (
-            <path d={PROGRESS_WAVE_RING_PATH} data-part="indicator" pathLength="100" />
+            <path
+              d={PROGRESS_WAVE_RING_PATH}
+              data-part="indicator"
+              data-part-indicator=""
+              pathLength="100"
+            />
           ) : (
-            <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20" />
+            <circle
+              cx="24"
+              cy="24"
+              data-part="indicator"
+              data-part-indicator=""
+              pathLength="100"
+              r="20"
+            />
           )}
         </svg>
         {progressLabel(resolved)}

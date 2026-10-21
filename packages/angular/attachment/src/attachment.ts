@@ -51,7 +51,9 @@ let nextId = 0;
   exportAs: 'slAttachmentGroup',
   host: {
     'data-ui': 'attachment',
+    'data-ui-attachment': '',
     'data-part': 'group',
+    'data-part-group': '',
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'resolvedOrientation()',
@@ -109,7 +111,9 @@ export class SlAttachmentGroup {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'attachment',
+    'data-ui-attachment': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-kind]': 'kind()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'resolvedOrientation()',

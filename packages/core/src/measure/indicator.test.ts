@@ -13,7 +13,7 @@ function place(element: Element, left: number, top: number, width: number, heigh
 
 function row() {
   document.body.innerHTML =
-    '<div id="list"><div data-part="item" data-selected><button>A</button></div><div data-part="item"><button>B</button></div></div>';
+    '<div id="list"><div data-part="item" data-part-item="" data-selected><button>A</button></div><div data-part="item" data-part-item=""><button>B</button></div></div>';
   const list = document.getElementById('list')!;
   const [a, b] = [...list.querySelectorAll('button')];
   place(list, 100, 50, 400, 40);

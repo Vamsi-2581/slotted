@@ -1,3 +1,4 @@
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import { progressGeometry, progressValueText } from '@slotted/core/progress';
 import type { ProgressGeometry } from '@slotted/core/progress';
 import { useId } from 'react';
@@ -194,10 +195,12 @@ export function useProgressIndicator({
       'data-complete': geometry.complete ? '' : undefined,
       'data-indeterminate': measure === undefined || geometry.indeterminate ? '' : undefined,
       'data-part': 'root',
+      ...selectorKeyProps('part', 'root'),
       'data-shape': shape,
       'data-size': size ?? defaults.size ?? PROGRESS_DEFAULT_SIZE,
       'data-tone': tone ?? defaults.tone ?? PROGRESS_DEFAULT_TONE,
       'data-ui': 'progress-indicator',
+      ...selectorKeyProps('ui', 'progress-indicator'),
       hidden: painted ? undefined : true,
       role: decorative ? undefined : 'progressbar',
     },

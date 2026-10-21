@@ -25,7 +25,7 @@ function declarationsFor(selector) {
  */
 test('takes a hidden option and a hidden group out of the list', () => {
   for (const part of ['item', 'group']) {
-    const selector = `[data-ui='select'] [data-part='${part}'][hidden]`;
+    const selector = `[data-ui-select] [data-part-${part.toLowerCase()}][hidden]`;
     assert.match(declarationsFor(selector), /display:none/, `${part}[hidden] is still drawn`);
   }
 });

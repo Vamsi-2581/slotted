@@ -52,12 +52,14 @@ import {
 @Component({
   selector: 'button[slIconButton]',
   standalone: true,
-  template: `<span data-part="icon"
+  template: `<span data-part="icon" data-part-icon=""
     ><ng-content></ng-content>
     @if (waiting()) {
       <span
         data-part="indicator"
+        data-part-indicator=""
         data-ui="spinner"
+        data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="t('loading')"
       ></span>
@@ -69,7 +71,9 @@ import {
   exportAs: 'slIconButton',
   host: {
     'data-ui': 'button',
+    'data-ui-button': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-disabled]': 'inert.ariaDisabled()',
     '[attr.aria-pressed]': 'toggles() ? isPressed() : null',
     '[attr.data-tone]': 'appearance.tone()',

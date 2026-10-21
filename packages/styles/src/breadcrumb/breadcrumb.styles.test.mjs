@@ -18,17 +18,18 @@ test('lives in the component layer', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.breadcrumb.parts) {
-    const selector = part === 'root' ? "[data-ui='breadcrumb']{" : `[data-part='${part}']`;
+    const selector =
+      part === 'root' ? '[data-ui-breadcrumb]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
 });
 
 test('reacts to every state the contract declares', () => {
-  const crumbs = ":is([data-part='link'],[data-part='trigger'])";
+  const crumbs = ':is([data-part-link],[data-part-trigger])';
   assert.ok(normalized.includes(`${crumbs}:not([data-disabled]):hover`));
   assert.ok(normalized.includes(`${crumbs}:not([data-disabled]):is(:active,[data-open])`));
   assert.ok(normalized.includes(`${crumbs}:focus-visible`));
-  assert.ok(normalized.includes("[data-part='item'][hidden]{display:none"));
+  assert.ok(normalized.includes('[data-part-item][hidden]{display:none'));
 });
 
 /**
@@ -39,15 +40,13 @@ test('reacts to every state the contract declares', () => {
 test('dresses a switcher as a crumb and keeps the page on the current one', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='trigger']{appearance:none;background-color:transparent;border:0;",
+      '[data-part-trigger]{appearance:none;background-color:transparent;border:0;',
     ),
   );
-  assert.ok(
-    normalized.includes("[data-part='trigger'][aria-current='page']{color:var(--_strong);"),
-  );
+  assert.ok(normalized.includes("[data-part-trigger][aria-current='page']{color:var(--_strong);"));
   assert.ok(
     normalized.includes(
-      "[data-part='trigger'][aria-current='page']:not([data-disabled]):is(:active,[data-open]){color:var(--_hover);",
+      "[data-part-trigger][aria-current='page']:not([data-disabled]):is(:active,[data-open]){color:var(--_hover);",
     ),
   );
 });
@@ -82,20 +81,20 @@ test('hands the ellipsis box its air back to the gap', () => {
 test('fades the revealed crumbs in and folds them back at once', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='breadcrumb'][data-expanded][data-part='item']{transition:opacityvar(--slotted-duration-medium)var(--slotted-easing-enter);",
+      '[data-ui-breadcrumb][data-expanded][data-part-item]{transition:opacityvar(--slotted-duration-medium)var(--slotted-easing-enter);',
     ),
   );
   assert.ok(
     normalized.includes(
-      "@starting-style{[data-ui='breadcrumb'][data-expanded][data-part='item']{opacity:0;",
+      '@starting-style{[data-ui-breadcrumb][data-expanded][data-part-item]{opacity:0;',
     ),
   );
   assert.ok(!/\[hidden\][^{]*\{[^}]*transition/.test(normalized));
 });
 
 test('spaces what a crumb carries beside its label', () => {
-  assert.ok(normalized.includes(":is([data-ui='icon'],[data-ui='avatar']){margin-inline-end:"));
-  assert.ok(normalized.includes(">[data-ui='badge']{margin-inline-start:"));
+  assert.ok(normalized.includes(':is([data-ui-icon],[data-ui-avatar]){margin-inline-end:'));
+  assert.ok(normalized.includes('>[data-ui-badge]{margin-inline-start:'));
 });
 
 /**
@@ -108,13 +107,13 @@ test('spaces what a crumb carries beside its label', () => {
  * is the Glyph element the binding renders, not a mask.
  */
 test('draws the separator as geometry and yields to the consumer content', () => {
-  assert.ok(normalized.includes("[data-part='separator']:empty{"));
+  assert.ok(normalized.includes('[data-part-separator]:empty{'));
   assert.ok(normalized.includes('rotate:var(--slotted-breadcrumb-separator-skew,20deg)'));
   assert.ok(!declarations.includes('mask'), 'the stylesheet paints no glyph');
 });
 
 test('mirrors the separator with the direction that applies to it', () => {
-  assert.ok(normalized.includes("[data-part='separator']:empty:dir(rtl)"));
+  assert.ok(normalized.includes('[data-part-separator]:empty:dir(rtl)'));
   assert.ok(
     !/\[dir=/.test(declarations),
     'an ancestor attribute is not the element directionality',
@@ -144,7 +143,7 @@ test('truncates against the trail rather than against a measure it chose', () =>
  * the paint completes the minimum where the line is shorter than it.
  */
 test('sets the ellipsis on the crumbs’ line, with a whole target and a glyph', () => {
-  const ellipsis = normalized.slice(normalized.indexOf("[data-part='ellipsis']{"));
+  const ellipsis = normalized.slice(normalized.indexOf('[data-part-ellipsis]{'));
   assert.ok(ellipsis.includes('block-size:1lh;'));
   assert.ok(
     ellipsis.includes(
@@ -154,13 +153,13 @@ test('sets the ellipsis on the crumbs’ line, with a whole target and a glyph',
   assert.ok(ellipsis.includes('font:inherit;'), 'the box keeps the trail’s own line');
   assert.ok(!ellipsis.includes('translate:'), 'nothing lifts the mark off its own centre');
   assert.ok(
-    ellipsis.startsWith("[data-part='ellipsis']{--slotted-icon-size:var(--_icon-size);"),
+    ellipsis.startsWith('[data-part-ellipsis]{--slotted-icon-size:var(--_icon-size);'),
     'the box inside is sized at the glyph scale’s own size',
   );
-  assert.ok(!normalized.includes("[data-part='ellipsis']::before"), 'no pseudo-element icon');
+  assert.ok(!normalized.includes('[data-part-ellipsis]::before'), 'no pseudo-element icon');
   assert.ok(
     normalized.includes(
-      "[data-part='ellipsis']::after{content:'';inset:min(0px,calc((100%-var(--slotted-target-min,24px))/2));position:absolute",
+      "[data-part-ellipsis]::after{content:'';inset:min(0px,calc((100%-var(--slotted-target-min,24px))/2));position:absolute",
     ),
     'the target is completed behind the mark, not by it',
   );
@@ -180,7 +179,7 @@ test('hugs a crumb at one pixel and rings the ellipsis inward', () => {
 });
 
 test('paints the current page from the platform attribute, without a mirror', () => {
-  assert.ok(normalized.includes("[data-part='page']{"));
+  assert.ok(normalized.includes('[data-part-page]{'));
   assert.ok(!normalized.includes('data-current'), 'the family declares no current mirror');
 });
 
@@ -192,7 +191,7 @@ test('paints the current page from the platform attribute, without a mirror', ()
 test('restates only what forced colours would take away', () => {
   assert.ok(normalized.includes('@media(forced-colors:active)'));
   assert.ok(
-    /@media\(forced-colors:active\)\{\[data-ui='breadcrumb'\]\[data-part='separator'\]:empty\{background-color:GrayText/.test(
+    /@media\(forced-colors:active\)\{\[data-ui-breadcrumb\]\[data-part-separator\]:empty\{background-color:GrayText/.test(
       normalized,
     ),
   );

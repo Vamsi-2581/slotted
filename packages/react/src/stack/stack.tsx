@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/stack/stack.css';
 
 import type { StackProps, StackRootProps } from './stack.types';
@@ -16,14 +17,14 @@ import type { StackProps, StackRootProps } from './stack.types';
  * the order they are read in, by a screen reader and by the Tab key alike.
  */
 export function Stack({ align, gap, justify, render, ...nativeProps }: StackProps) {
-  const rootProps: StackRootProps = {
+  const rootProps: StackRootProps = keyedProps({
     ...nativeProps,
     ...(align === undefined ? {} : { 'data-align': align }),
     ...(gap === undefined ? {} : { 'data-gap': String(gap) }),
     ...(justify === undefined ? {} : { 'data-justify': justify }),
     'data-part': 'root',
     'data-ui': 'stack',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

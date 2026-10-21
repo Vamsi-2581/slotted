@@ -144,7 +144,9 @@ function directionOf(node: Element): 'ltr' | 'rtl' {
   host: { style: 'display: contents' },
   template: `<div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     [attr.data-open]="tour.visible() && tour.arrived() ? '' : null"
     [attr.data-modal]="tour.modal() ? '' : null"
     [attr.data-spot]="tour.spot().move"
@@ -156,14 +158,15 @@ function directionOf(node: Element): 'ltr' | 'rtl' {
     [attr.data-align]="tour.anchored() ? tour.resolvedAlign() : null"
   >
     @if (tour.modal() || tour.spotlightOn()) {
-      <div data-part="backdrop" aria-hidden="true">
+      <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
         @if (tour.spotlightOn()) {
-          <div data-part="spotlight"></div>
+          <div data-part="spotlight" data-part-spotlight=""></div>
         }
       </div>
     }
     <div
       data-part="surface"
+      data-part-surface=""
       [attr.data-placement]="tour.anchored() ? 'anchored' : 'centered'"
       [attr.data-ready]="tour.ready() ? '' : null"
       [attr.data-leaving]="tour.leaving() ? '' : null"
@@ -171,13 +174,14 @@ function directionOf(node: Element): 'ltr' | 'rtl' {
       @if (!tour.modal()) {
         <span
           data-part="focus-guard"
+          data-part-focus-guard=""
           tabindex="0"
           aria-hidden="true"
           (focus)="tour.onGuardFocus()"
         ></span>
       }
       @if (tour.anchored() && tour.resolvedArrow()) {
-        <div data-part="arrow"></div>
+        <div data-part="arrow" data-part-arrow=""></div>
       }
       @if (tour.card(); as custom) {
         <ng-container [ngTemplateOutlet]="custom.template" />
@@ -215,6 +219,7 @@ function directionOf(node: Element): 'ltr' | 'rtl' {
       @if (!tour.modal()) {
         <span
           data-part="focus-guard"
+          data-part-focus-guard=""
           tabindex="0"
           aria-hidden="true"
           (focus)="tour.onGuardFocus()"

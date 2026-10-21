@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -430,10 +431,16 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
   if (!mounted || (popover.portal && container === null)) return null;
 
   const guard = (
-    <span aria-hidden="true" data-part="focus-guard" onFocus={onGuardFocus} tabIndex={0} />
+    <span
+      aria-hidden="true"
+      data-part="focus-guard"
+      data-part-focus-guard=""
+      onFocus={onGuardFocus}
+      tabIndex={0}
+    />
   );
 
-  const rootProps: PopoverLayerRootProps = {
+  const rootProps: PopoverLayerRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -447,7 +454,7 @@ export function PopoverLayer({ children, ref, render, ...nativeProps }: PopoverL
     'data-size': popover.size,
     'data-ui': 'popover',
     'data-width': popover.width,
-  };
+  });
 
   const element =
     render === undefined ? (
@@ -478,7 +485,7 @@ export function PopoverContent({ children, ref, render, ...nativeProps }: Popove
     [ref, popover.setContentNode],
   );
 
-  const rootProps: PopoverContentRootProps = {
+  const rootProps: PopoverContentRootProps = keyedProps({
     ...nativeProps,
     children,
     ...(popover.hasTitle ? { 'aria-labelledby': popover.titleId } : {}),
@@ -489,7 +496,7 @@ export function PopoverContent({ children, ref, render, ...nativeProps }: Popove
        is `presentation`, not a dialog nobody is told about. */
     role: nativeProps.role ?? 'dialog',
     tabIndex: -1,
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref: setNode });
   return <div {...rootProps} ref={setNode} />;
@@ -500,7 +507,7 @@ export function PopoverHeader({ children, ref, render, ...nativeProps }: Popover
   const rootProps: HTMLAttributes<HTMLElement> = {
     ...nativeProps,
     children,
-    ...{ 'data-part': 'header' },
+    ...{ 'data-part': 'header', ...selectorKeyProps('part', 'header') },
   };
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
@@ -521,7 +528,12 @@ export function PopoverTitle({ children, ref, render, ...nativeProps }: PopoverT
     return () => setHasTitle(false);
   }, [setHasTitle]);
 
-  const rootProps = { ...nativeProps, children, 'data-part': 'title', id: popover.titleId };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    'data-part': 'title',
+    id: popover.titleId,
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -541,12 +553,12 @@ export function PopoverDescription({
     return () => setHasDescription(false);
   }, [setHasDescription]);
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'description',
     id: popover.descriptionId,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <p {...rootProps} ref={ref} />;
 }
@@ -561,7 +573,7 @@ export function PopoverBody({ children, ref, render, ...nativeProps }: PopoverBo
   const rootProps: HTMLAttributes<HTMLElement> = {
     ...nativeProps,
     children,
-    ...{ 'data-part': 'body' },
+    ...{ 'data-part': 'body', ...selectorKeyProps('part', 'body') },
   };
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
@@ -572,7 +584,7 @@ export function PopoverFooter({ children, ref, render, ...nativeProps }: Popover
   const rootProps: HTMLAttributes<HTMLElement> = {
     ...nativeProps,
     children,
-    ...{ 'data-part': 'footer' },
+    ...{ 'data-part': 'footer', ...selectorKeyProps('part', 'footer') },
   };
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
@@ -609,7 +621,7 @@ export function PopoverClose({ children, ref, render, ...nativeProps }: PopoverC
     [ref],
   );
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-label': nativeProps['aria-label'] ?? (hasText ? undefined : popover.t('close')),
     children: children ?? (
@@ -619,7 +631,7 @@ export function PopoverClose({ children, ref, render, ...nativeProps }: PopoverC
     ),
     'data-part': 'close',
     onClick: compose(nativeProps.onClick, onClick),
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref: setNode });
   return <button type="button" {...rootProps} ref={setNode} />;
@@ -651,7 +663,11 @@ export function PopoverArrow({ ref, render, ...nativeProps }: PopoverArrowProps)
 
   if (!popover.showArrow) return null;
 
-  const rootProps = { ...nativeProps, 'aria-hidden': true as const, 'data-part': 'arrow' };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    'aria-hidden': true as const,
+    'data-part': 'arrow',
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={setNode} />;
 }

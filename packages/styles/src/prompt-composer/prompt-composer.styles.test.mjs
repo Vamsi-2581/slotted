@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/prompt-composer/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./prompt-composer.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./prompt-composer.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./prompt-composer.harness.html', import.meta.url), 'utf8'),
+);
 const normalized = css
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = css
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.promptComposer;
 
 function rule(selector) {
@@ -32,7 +45,7 @@ test('lives in the component layer and is keyed on the identifier', () => {
 
 test('styles every part the contract declares, and renders each in a scene', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches ${part}`);
+    assert.ok(normalized.includes(`[data-part-${part.toLowerCase()}]`), `no rule reaches ${part}`);
     assert.match(fragment, new RegExp(`data-part="${part}"`), `${part} is in no scene`);
   }
 });
@@ -51,7 +64,7 @@ test('renders every state the contract declares in at least one scene', () => {
  * mechanism, the rule `textarea` set: no script measures a line.
  */
 test('grows the value with field-sizing between a floor and a ceiling', () => {
-  const input = rule(`${ui}>[data-part='input']`);
+  const input = rule(`${ui}>[data-part-input]`);
   assert.match(input, /field-sizing:content/);
   assert.match(input, /min-block-size:calc\(var\(--_rows\) \* 1lh/);
   assert.match(input, /max-block-size:calc\(var\(--_max-rows\) \* 1lh/);
@@ -61,17 +74,17 @@ test('grows the value with field-sizing between a floor and a ceiling', () => {
 
 test('rings the frame for the value, and each button for itself', () => {
   assert.match(
-    rule(`${root}:has(>[data-part='input']:focus-visible)`),
+    rule(`${root}:has(>[data-part-input]:focus-visible)`),
     /outline:var\(--slotted-focus-ring-width,2px\) solid/,
   );
   assert.match(
     rule(
-      `${ui}>:is([data-part='header'],[data-part='footer'])>:is([data-part='action'],[data-part='attach']):focus-visible`,
+      `${ui}>:is([data-part-header],[data-part-footer])>:is([data-part-action],[data-part-attach]):focus-visible`,
     ),
     /outline-offset:calc\(var\(--slotted-focus-ring-offset,2px\) \* -1\)/,
   );
   assert.match(
-    rule(`${ui}>[data-part='footer']>[data-part='submit']:focus-visible`),
+    rule(`${ui}>[data-part-footer]>[data-part-submit]:focus-visible`),
     /outline-offset:var\(--slotted-focus-ring-offset,2px\)/,
   );
 });
@@ -94,7 +107,7 @@ test('insets the bands by the air a button has inside a control', () => {
 });
 
 test('holds the send at the end of the footer without a spacer', () => {
-  assert.match(rule(`${ui}>[data-part='footer']>[data-part='submit']`), /margin-inline-start:auto/);
+  assert.match(rule(`${ui}>[data-part-footer]>[data-part-submit]`), /margin-inline-start:auto/);
 });
 
 test('paints no glyph itself', () => {

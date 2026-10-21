@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/checkbox-group/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./checkbox-group.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./checkbox-group.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./checkbox-group.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.checkboxGroup;
 
 function rule(selector) {
@@ -44,13 +57,13 @@ test('renders its one part, and the family it arranges, in at least one scene', 
 
 /**
  * The group arranges and the boxes draw themselves. A rule reaching
- * `[data-ui='checkbox']` from here would make one family's DOM part of
+ * `[data-ui-checkbox]` from here would make one family's DOM part of
  * another's contract, so moving a box inside a wrapper would change its
  * appearance with no test to notice — the descendant-selector defect the
  * field-aware controls design records for exactly this reason.
  */
 test('never selects into the family it arranges', () => {
-  assert.doesNotMatch(declarations, /\[data-ui=['"]checkbox['"]\]/);
+  assert.doesNotMatch(declarations, /\[data-ui-checkbox\]/);
 });
 
 test('wraps a horizontal group rather than clipping or scrolling it', () => {
@@ -88,7 +101,7 @@ test('writes every rule in logical properties and states no duration', () => {
  * public override still wins.
  */
 test('separates two described choices by twice the distance it separates bare ones', () => {
-  const described = rule(`${root}:has([data-part='description'])`);
+  const described = rule(`${root}:has([data-part-description])`);
   assert.match(described, /row-gap:var\(--slotted-checkbox-group-gap,calc\(var\(--_gap\) \* 2\)\)/);
   assert.match(rule(root), /gap:var\(--slotted-checkbox-group-gap,var\(--_gap\)\)/);
 });

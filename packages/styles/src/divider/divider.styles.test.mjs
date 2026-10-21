@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/divider/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./divider.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./divider.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./divider.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -17,7 +30,7 @@ const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
  * an assertion about `flex: 1 0 <basis>` comes to read `flex:10var(`.
  */
 const normalized = declarations.replace(/\s+/g, ' ').replace(/\s*([{};,:])\s*/g, '$1');
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -122,14 +135,14 @@ test('drops the half a label at one end does not need', () => {
 });
 
 test('reads the label from the type scale rather than deciding a size of its own', () => {
-  const label = rule(`${ui} [data-part='label']`);
+  const label = rule(`${ui} [data-part-label]`);
   assert.ok(label.includes('font-size:var(--slotted-font-size-xs'));
   assert.ok(label.includes('line-height:var(--slotted-line-height-xs'));
   assert.ok(label.includes('color:var(--slotted-divider-label-color'));
 });
 
 test('breaks a label that is longer than the container it stands in', () => {
-  assert.ok(rule(`${ui} [data-part='label']`).includes('overflow-wrap:anywhere'));
+  assert.ok(rule(`${ui} [data-part-label]`).includes('overflow-wrap:anywhere'));
 });
 
 test('lets unthemed decoration disappear rather than reach for a system colour', () => {

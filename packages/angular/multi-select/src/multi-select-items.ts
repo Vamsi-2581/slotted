@@ -47,6 +47,7 @@ import type { MultiSelectOptionValue } from './multi-select-defaults';
   imports: [SlGlyph, SlHighlight, SlIcon],
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     role: 'option',
     '[id]': 'optionId()',
     '[hidden]': '!visible()',
@@ -65,11 +66,11 @@ import type { MultiSelectOptionValue } from './multi-select-defaults';
   },
   template: `
     @if (icon(); as glyph) {
-      <span data-part="icon"
+      <span data-part="icon" data-part-icon=""
         ><span slIcon><svg slGlyph [name]="glyph"></svg></span
       ></span>
     }
-    <span data-part="label">
+    <span data-part="label" data-part-label="">
       @if (ranges().length > 0) {
         <span slHighlight [text]="label()" [ranges]="ranges()"></span>
       } @else {
@@ -77,9 +78,9 @@ import type { MultiSelectOptionValue } from './multi-select-defaults';
       }
     </span>
     @if (description()) {
-      <span data-part="description">{{ description() }}</span>
+      <span data-part="description" data-part-description="">{{ description() }}</span>
     }
-    <span data-part="indicator"
+    <span data-part="indicator" data-part-indicator=""
       ><span slIcon><svg slGlyph name="check"></svg></span
     ></span>
   `,
@@ -185,12 +186,13 @@ export class SlMultiSelectItem {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     role: 'group',
     '[attr.aria-labelledby]': 'labelId',
     '[hidden]': 'empty()',
   },
   template: `
-    <div data-part="group-label" [id]="labelId">{{ label() }}</div>
+    <div data-part="group-label" data-part-group-label="" [id]="labelId">{{ label() }}</div>
     <ng-content />
   `,
 })
@@ -226,7 +228,7 @@ export class SlMultiSelectGroup {
   exportAs: 'slMultiSelectSeparator',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'separator', role: 'separator' },
+  host: { 'data-part': 'separator', 'data-part-separator': '', role: 'separator' },
   template: '',
 })
 export class SlMultiSelectSeparator {}

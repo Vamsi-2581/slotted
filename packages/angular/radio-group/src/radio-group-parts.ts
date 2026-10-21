@@ -33,6 +33,7 @@ import type { RadioGroupSelectionReason, SlRadioGroupItem } from './radio-group'
   exportAs: 'slRadioDescription',
   host: {
     'data-part': 'description',
+    'data-part-description': '',
     '[attr.id]': 'id',
   },
 })
@@ -70,6 +71,7 @@ function activationReason(event: Event): RadioGroupSelectionReason {
   template: `<input
       #control
       data-part="control"
+      data-part-control=""
       type="radio"
       [attr.id]="controlId"
       [attr.name]="group.resolvedName()"
@@ -80,15 +82,16 @@ function activationReason(event: Event): RadioGroupSelectionReason {
       (click)="onClick($event)"
       (blur)="onBlur()"
     />
-    <span data-part="indicator"
+    <span data-part="indicator" data-part-indicator=""
       ><span slIcon><svg slGlyph name="dot"></svg></span
     ></span>
-    <label data-part="label" [attr.for]="controlId"><ng-content /></label>
+    <label data-part="label" data-part-label="" [attr.for]="controlId"><ng-content /></label>
     <ng-content select="[slRadioDescription]" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-checked]': "checked() ? '' : null",
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
   },

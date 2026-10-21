@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useButtonGroupShape } from './button-group-shape';
 import type {
   ButtonGroupSeparatorProps,
@@ -23,7 +24,7 @@ export function ButtonGroupSeparator({
 }: ButtonGroupSeparatorProps) {
   const { orientation } = useButtonGroupShape();
 
-  const rootProps: ButtonGroupSeparatorRootProps = {
+  const rootProps: ButtonGroupSeparatorRootProps = keyedProps({
     ...(decorative
       ? { 'aria-hidden': true, role: 'none' }
       : {
@@ -32,7 +33,7 @@ export function ButtonGroupSeparator({
         }),
     ...nativeProps,
     'data-part': 'separator',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

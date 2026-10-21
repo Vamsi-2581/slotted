@@ -187,7 +187,9 @@ function focusVisible(element: Element) {
   exportAs: 'slChart',
   host: {
     'data-ui': 'chart',
+    'data-ui-chart': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.title]': 'null',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',

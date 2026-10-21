@@ -37,7 +37,7 @@ import {
   selector: '[slSkeletonText]',
   standalone: true,
   template: `@for (row of rows(); track row) {
-    <span data-part="line"></span>
+    <span data-part="line" data-part-line=""></span>
   }`,
   styleUrl: '../../../styles/src/skeleton/skeleton.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,7 +45,9 @@ import {
   exportAs: 'slSkeletonText',
   host: {
     'data-ui': 'skeleton',
+    'data-ui-skeleton': '',
     'data-part': 'text',
+    'data-part-text': '',
     '[attr.data-animation]': 'animationValue()',
     '[attr.data-loading]': 'painted() ? "" : null',
     '[attr.aria-hidden]': 'painted() ? "true" : null',

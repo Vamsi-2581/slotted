@@ -22,7 +22,7 @@
    * Every part is reached with a child combinator, except the rows of the
    * list, which a group may hold one level down.
    */
-  [data-ui='action-sheet'] {
+  [data-ui-action-sheet] {
     /** The row's inset, which the header, every item and the footer share. */
     --_inset: var(--slotted-control-padding-inline-lg, 16px);
     --_gap: var(--slotted-control-gap-lg, 8px);
@@ -93,7 +93,7 @@
   }
 
   @media (pointer: coarse) {
-    [data-ui='action-sheet'] {
+    [data-ui-action-sheet] {
       --_label-size: var(--slotted-font-size-lg, 1rem);
     }
   }
@@ -105,7 +105,7 @@
    * set small and the actions large — the hierarchy UIKit and Ionic draw, and
    * the reverse of `drawer`, whose title names a task the body carries out.
    */
-  [data-ui='action-sheet'] > [data-part='header'] {
+  [data-ui-action-sheet] > [data-part-header] {
     border-block-end: var(--_rule-size) solid var(--_rule);
     display: grid;
     padding-block: var(--slotted-space-6, 1rem) var(--slotted-space-5, 0.75rem);
@@ -113,7 +113,7 @@
     row-gap: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='action-sheet'] [data-part='title'] {
+  [data-ui-action-sheet] [data-part-title] {
     color: var(--slotted-text, CanvasText);
     font-family: var(
       --slotted-font-family-heading,
@@ -126,7 +126,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='action-sheet'] [data-part='message'] {
+  [data-ui-action-sheet] [data-part-message] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     line-height: var(--slotted-line-height-sm, 1.45);
@@ -147,7 +147,7 @@
    * row was 44 pixels and a three-line label was painted over the two items
    * below it.
    */
-  [data-ui='action-sheet'] > [data-part='list'] {
+  [data-ui-action-sheet] > [data-part-list] {
     --_mark: 0px;
     --_column-gap: 0px;
 
@@ -170,7 +170,7 @@
     padding-inline: var(--_list-inset);
   }
 
-  [data-ui='action-sheet'] > [data-part='list']:has([data-part='icon']) {
+  [data-ui-action-sheet] > [data-part-list]:has([data-part-icon]) {
     --_mark: var(--_icon-size);
     --_column-gap: var(--_gap);
   }
@@ -179,17 +179,17 @@
    * The home indicator sits under the last row of a sheet with no footer, so
    * that row carries the bottom inset instead.
    */
-  [data-ui='action-sheet']:not(:has(> [data-part='footer'])) > [data-part='list'] {
+  [data-ui-action-sheet]:not(:has(> [data-part-footer])) > [data-part-list] {
     padding-block-end: calc(var(--slotted-space-2, 0.25rem) + env(safe-area-inset-bottom, 0px));
   }
 
-  [data-ui='action-sheet'] [data-part='group'] {
+  [data-ui-action-sheet] [data-part-group] {
     display: grid;
     grid-auto-rows: max-content;
     grid-template-columns: minmax(0, 1fr);
   }
 
-  [data-ui='action-sheet'] [data-part='group-label'] {
+  [data-ui-action-sheet] [data-part-group-label] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -198,7 +198,7 @@
     padding-inline: calc(var(--_inset) - var(--_list-inset));
   }
 
-  [data-ui='action-sheet'] [data-part='separator'] {
+  [data-ui-action-sheet] [data-part-separator] {
     background-color: var(--_rule);
     block-size: var(--_rule-size);
     border: 0;
@@ -215,7 +215,7 @@
    * `min-block-size` rather than a height, because an item with a description
    * is two lines tall and still has to clear the target.
    */
-  [data-ui='action-sheet'] [data-part='item'] {
+  [data-ui-action-sheet] [data-part-item] {
     align-content: center;
     appearance: none;
     background: transparent;
@@ -251,13 +251,13 @@
    * pointer that has not moved focus yet, before the script has run, still
    * gets the hover.
    */
-  [data-ui='action-sheet'] [data-part='item']:focus {
+  [data-ui-action-sheet] [data-part-item]:focus {
     background-color: var(--_highlight);
     outline: none;
   }
 
   @media (hover: hover) {
-    [data-ui='action-sheet'] [data-part='item']:hover:not([data-disabled]):not([data-loading]) {
+    [data-ui-action-sheet] [data-part-item]:hover:not([data-disabled]):not([data-loading]) {
       background-color: var(--_highlight);
     }
   }
@@ -266,12 +266,12 @@
    * Inset, so the ring follows the row's own corner and never meets the
    * neighbour's edge.
    */
-  [data-ui='action-sheet'] [data-part='item']:focus-visible {
+  [data-ui-action-sheet] [data-part-item]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
-  [data-ui='action-sheet'] [data-part='item']:active:not([data-disabled]):not([data-loading]) {
+  [data-ui-action-sheet] [data-part-item]:active:not([data-disabled]):not([data-loading]) {
     background-color: var(--_highlight-active);
   }
 
@@ -279,16 +279,16 @@
    * Focusable and inert, as the menu pattern requires, and legible rather than
    * faded: the words keep the theme's disabled ink at its contrast.
    */
-  [data-ui='action-sheet'] [data-part='item'][data-disabled] {
+  [data-ui-action-sheet] [data-part-item][data-disabled] {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: not-allowed;
   }
 
-  [data-ui='action-sheet'] [data-part='item'][data-disabled]:focus {
+  [data-ui-action-sheet] [data-part-item][data-disabled]:focus {
     background-color: var(--slotted-disabled-background, ButtonFace);
   }
 
-  [data-ui='action-sheet'] [data-part='item'][data-loading] {
+  [data-ui-action-sheet] [data-part-item][data-loading] {
     cursor: progress;
   }
 
@@ -298,7 +298,7 @@
    * The mark sits on the label's first line rather than on the middle of a
    * two-line item: the line box is the item's, and the box is one line tall.
    */
-  [data-ui='action-sheet'] [data-part='icon'] {
+  [data-ui-action-sheet] [data-part-icon] {
     --slotted-icon-size: var(--_icon-size);
     --slotted-spinner-size: var(--_icon-size);
 
@@ -311,19 +311,19 @@
     justify-content: center;
   }
 
-  [data-ui='action-sheet'] [data-part='icon'] > * {
+  [data-ui-action-sheet] [data-part-icon] > * {
     flex: none;
     font-size: var(--_icon-size);
   }
 
-  [data-ui='action-sheet'] [data-part='label'] {
+  [data-ui-action-sheet] [data-part-label] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;
     overflow-wrap: anywhere;
   }
 
-  [data-ui='action-sheet'] [data-part='description'] {
+  [data-ui-action-sheet] [data-part-description] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     grid-column: 2;
@@ -333,7 +333,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='action-sheet'] [data-part='item'][data-disabled] > [data-part='description'] {
+  [data-ui-action-sheet] [data-part-item][data-disabled] > [data-part-description] {
     color: inherit;
   }
 
@@ -344,31 +344,31 @@
    * The tone paints the words, the mark and the highlight together; `danger`
    * is the destructive action.
    */
-  [data-ui='action-sheet'] [data-part='item'][data-tone='accent'] {
+  [data-ui-action-sheet] [data-part-item][data-tone='accent'] {
     --_accent: var(--slotted-tone-accent-text);
     --_highlight: var(--slotted-tone-accent-surface);
     --_highlight-active: var(--slotted-tone-accent-subtle-active);
   }
 
-  [data-ui='action-sheet'] [data-part='item'][data-tone='secondary'] {
+  [data-ui-action-sheet] [data-part-item][data-tone='secondary'] {
     --_accent: var(--slotted-tone-secondary-text);
     --_highlight: var(--slotted-tone-secondary-surface);
     --_highlight-active: var(--slotted-tone-secondary-subtle-active);
   }
 
-  [data-ui='action-sheet'] [data-part='item'][data-tone='success'] {
+  [data-ui-action-sheet] [data-part-item][data-tone='success'] {
     --_accent: var(--slotted-tone-success-text);
     --_highlight: var(--slotted-tone-success-surface);
     --_highlight-active: var(--slotted-tone-success-subtle-active);
   }
 
-  [data-ui='action-sheet'] [data-part='item'][data-tone='warning'] {
+  [data-ui-action-sheet] [data-part-item][data-tone='warning'] {
     --_accent: var(--slotted-tone-warning-text);
     --_highlight: var(--slotted-tone-warning-surface);
     --_highlight-active: var(--slotted-tone-warning-subtle-active);
   }
 
-  [data-ui='action-sheet'] [data-part='item'][data-tone='danger'] {
+  [data-ui-action-sheet] [data-part-item][data-tone='danger'] {
     --_accent: var(--slotted-tone-danger-text);
     --_highlight: var(--slotted-tone-danger-surface);
     --_highlight-active: var(--slotted-tone-danger-subtle-active);
@@ -381,7 +381,7 @@
    * more action. It carries the bottom safe-area inset, which is where a
    * phone's home indicator sits.
    */
-  [data-ui='action-sheet'] > [data-part='footer'] {
+  [data-ui-action-sheet] > [data-part-footer] {
     background: var(--slotted-action-sheet-footer-surface, var(--slotted-surface-sunken, Canvas));
     border-block-start: var(--_rule-size) solid var(--_rule);
     display: grid;
@@ -395,7 +395,7 @@
    * A button with a face, on the band: the one control of the sheet that is
    * not an item, and the one that always works — it is never disabled.
    */
-  [data-ui='action-sheet'] [data-part='cancel'] {
+  [data-ui-action-sheet] [data-part-cancel] {
     appearance: none;
     background: var(--slotted-control-surface, ButtonFace);
     border: var(--slotted-control-border-width, 1px) solid
@@ -421,7 +421,7 @@
   }
 
   @media (hover: hover) {
-    [data-ui='action-sheet'] [data-part='cancel']:hover:not(:disabled) {
+    [data-ui-action-sheet] [data-part-cancel]:hover:not(:disabled) {
       background: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
     }
   }
@@ -430,13 +430,13 @@
    * `button`'s press: the face settles a hairline and gives up its lift. It is
    * instant, as a press is, and the ground eases back on release.
    */
-  [data-ui='action-sheet'] [data-part='cancel']:active:not(:disabled) {
+  [data-ui-action-sheet] [data-part-cancel]:active:not(:disabled) {
     background: var(--slotted-tone-secondary-subtle-active, ButtonFace);
     box-shadow: none;
     translate: 0 var(--slotted-border-width-thin, 1px);
   }
 
-  [data-ui='action-sheet'] [data-part='cancel']:focus-visible {
+  [data-ui-action-sheet] [data-part-cancel]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -448,13 +448,13 @@
    * so the focused row would lose its highlight.
    */
   @media (forced-colors: active) {
-    [data-ui='action-sheet'] [data-part='item']:focus {
+    [data-ui-action-sheet] [data-part-item]:focus {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='action-sheet'] [data-part='item'][data-disabled]:focus {
+    [data-ui-action-sheet] [data-part-item][data-disabled]:focus {
       background-color: Highlight;
       color: GrayText;
     }

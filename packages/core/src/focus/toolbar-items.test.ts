@@ -24,8 +24,8 @@ describe('TOOLBAR_ITEM_SELECTOR', () => {
   it('finds every focusable control, including the ones inside a group', () => {
     const { items } = mount(
       `<button>a</button>
-       <div data-part="group"><a href="#x">b</a><input type="checkbox" /></div>
-       <span data-part="separator"></span>
+       <div data-part="group" data-part-group=""><a href="#x">b</a><input type="checkbox" /></div>
+       <span data-part="separator" data-part-separator=""></span>
        <div role="menuitem" tabindex="-1">c</div>`,
     );
 
@@ -38,7 +38,9 @@ describe('TOOLBAR_ITEM_SELECTOR', () => {
   });
 
   it('finds nothing that cannot hold focus', () => {
-    const { items } = mount('<span>a</span><div data-part="spacer"></div><a>b</a>');
+    const { items } = mount(
+      '<span>a</span><div data-part="spacer" data-part-spacer=""></div><a>b</a>',
+    );
 
     expect(items).toEqual([]);
   });

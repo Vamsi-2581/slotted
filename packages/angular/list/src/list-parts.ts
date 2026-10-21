@@ -28,7 +28,7 @@ export type ListSectionLabelVariant = 'caption' | 'ruled';
   selector: 'li[slListSection]',
   standalone: true,
   exportAs: 'slListSection',
-  host: { 'data-part': 'section' },
+  host: { 'data-part': 'section', 'data-part-section': '' },
 })
 export class SlListSection {
   /**
@@ -50,6 +50,7 @@ export class SlListSection {
   exportAs: 'slListSectionLabel',
   host: {
     'data-part': 'section-label',
+    'data-part-section-label': '',
     '[attr.id]': 'id',
     '[attr.data-sticky]': "sticky() ? '' : null",
     '[attr.data-variant]': 'variant()',
@@ -86,7 +87,7 @@ export class SlListSectionLabel {
 @Directive({
   selector: '[slListSectionEnd]',
   standalone: true,
-  host: { 'data-part': 'section-end' },
+  host: { 'data-part': 'section-end', 'data-part-section-end': '' },
 })
 export class SlListSectionEnd {}
 
@@ -101,6 +102,7 @@ export class SlListSectionEnd {}
   exportAs: 'slListSectionList',
   host: {
     'data-part': 'section-list',
+    'data-part-section-list': '',
     '[attr.role]': 'role',
     '[attr.aria-labelledby]': 'labelledBy()',
   },
@@ -131,6 +133,6 @@ export class SlListSectionList {
   selector: 'li[slListEmpty]',
   standalone: true,
   exportAs: 'slListEmpty',
-  host: { 'data-part': 'empty' },
+  host: { 'data-part': 'empty', 'data-part-empty': '' },
 })
 export class SlListEmpty {}

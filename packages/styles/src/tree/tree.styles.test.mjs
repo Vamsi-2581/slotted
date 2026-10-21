@@ -2,11 +2,24 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/tree/contract.json', import.meta.url), 'utf8'),
 );
 const css = readFileSync(new URL('./tree.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./tree.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./tree.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -14,8 +27,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const part = (name) => `${ui} [data-part='${name}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const part = (name) => `${ui} [data-part-${name.toLowerCase()}]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -29,7 +42,7 @@ test('draws every part the contract declares', () => {
     const styled =
       name === 'root'
         ? normalized.includes(`${ui}{`)
-        : normalized.includes(`[data-part='${name}']`);
+        : normalized.includes(`[data-part-${name.toLowerCase()}]`);
     assert.ok(styled, `${name} is declared and never styled`);
     assert.ok(
       fragment.includes(`data-part="${name}"`),
@@ -69,7 +82,7 @@ test('retunes the indent on the canvas, because the root is not its own descenda
   assert.ok(queries.length >= 2, 'the family declares no container query');
   for (const body of queries) {
     assert.ok(
-      !/\[data-ui='tree'\]\s*\{/.test(body),
+      !/\[data-ui-tree\]\s*\{/.test(body),
       'a container query targets the container itself, which matches nothing',
     );
   }
@@ -108,12 +121,12 @@ test('draws the chevron and the mark with the Glyph element, never a mask', () =
  */
 test('says a selection without a bar on the start edge', () => {
   const selected = rule(
-    `${ui} [data-part='node'][data-selected]:not([data-disabled])>[data-part='row']`,
+    `${ui} [data-part-node][data-selected]:not([data-disabled])>[data-part-row]`,
   );
   assert.match(selected, /background-color:var\(--_selected-surface\)/);
   assert.match(selected, /color:var\(--_selected-text\)/);
   const within = rule(
-    `${ui} [data-part='node'][data-selected-within]:not([data-selected]):not([data-disabled])>[data-part='row']`,
+    `${ui} [data-part-node][data-selected-within]:not([data-selected]):not([data-disabled])>[data-part-row]`,
   );
   assert.match(within, /color:var\(--_selected-text\)/);
   assert.ok(!within.includes('background-color'), 'the fact shouts as loudly as the state');
@@ -127,7 +140,7 @@ test('says a selection without a bar on the start edge', () => {
  */
 test('paints the band square, so a cascade reads as one block', () => {
   const selected = rule(
-    `${ui} [data-part='node'][data-selected]:not([data-disabled])>[data-part='row']`,
+    `${ui} [data-part-node][data-selected]:not([data-disabled])>[data-part-row]`,
   );
   assert.ok(!selected.includes('border-radius'), 'the selected band carries a radius');
 });
@@ -155,7 +168,7 @@ test('lets each piece of consumer text take its own direction', () => {
   assert.equal(carriers.length, 1, 'the direction rule is written more than once, or not at all');
   for (const name of ['label', 'description', 'meta', 'empty']) {
     assert.ok(
-      carriers[0].includes(`[data-part='${name}']`),
+      carriers[0].includes(`[data-part-${name.toLowerCase()}]`),
       `${name} takes the document's direction`,
     );
   }
@@ -184,7 +197,7 @@ test('places the guide on the chevron, not on the middle of the indent', () => {
  */
 test('draws one straight line per level, with nothing shortened', () => {
   assert.ok(
-    !normalized.includes(":last-child>[data-part='row'] [data-part='guide']"),
+    !normalized.includes(':last-child>[data-part-row] [data-part-guide]'),
     'a last child shortens its line, which reads as a break rather than as an end',
   );
   assert.match(rule(part('guide')), /inset-block:0/);
@@ -211,7 +224,7 @@ test('gives each cell its own margin, so an absent cell costs nothing', () => {
 test('draws no cell for a mark in the modes that have none', () => {
   assert.match(
     normalized,
-    /\[data-ui='tree'\]:is\(\[data-indicator='highlight'\],\[data-indicator='none'\]\) \[data-part='indicator'\]\{display:none/,
+    /\[data-ui-tree\]:is\(\[data-indicator='highlight'\],\[data-indicator='none'\]\) \[data-part-indicator\]\{display:none/,
   );
 });
 
@@ -223,7 +236,7 @@ test('draws no cell for a mark in the modes that have none', () => {
 test('keeps the names in one column when only some nodes have a picture', () => {
   assert.match(
     normalized,
-    /:has\(\[data-part='icon'\]\) \[data-part='row'\]:not\(:has\(\[data-part='icon'\]\)\) \[data-part='label'\]\{margin-inline-start:calc\(var\(--_icon-size\)\s*\+\s*var\(--_gap\)\)/,
+    /:has\(\[data-part-icon\]\) \[data-part-row\]:not\(:has\(\[data-part-icon\]\)\) \[data-part-label\]\{margin-inline-start:calc\(var\(--_icon-size\)\s*\+\s*var\(--_gap\)\)/,
   );
 });
 
@@ -240,7 +253,7 @@ test('draws the checkbox the checkbox family draws', () => {
     .replace(/\s+/g, ' ')
     .replace(/\s*([{};,:>])\s*/g, '$1');
   const box = rule(part('indicator'));
-  const mark = rule(`${part('indicator')}>[data-ui='icon']`);
+  const mark = rule(`${part('indicator')}>[data-ui-icon]`);
 
   for (const token of [
     '--slotted-selection-size-md',
@@ -264,7 +277,7 @@ test('draws the checkbox the checkbox family draws', () => {
   assert.match(mark, /(?:^|;)color:var\(--slotted-tone-accent-on-solid\)/);
 
   const chosen = rule(
-    `${ui} [data-part='node']:is([data-selected],[data-indeterminate])>[data-part='row'] [data-part='indicator']`,
+    `${ui} [data-part-node]:is([data-selected],[data-indeterminate])>[data-part-row] [data-part-indicator]`,
   );
   assert.match(chosen, /background-color:var\(--slotted-tone-accent-solid\)/);
   assert.match(chosen, /border-color:var\(--slotted-tone-accent-solid\)/);
@@ -344,7 +357,7 @@ test("states its own list geometry rather than inheriting the page's", () => {
   }
   /* The normaliser strips the space before a `:`, so the selector is looked up
      in the shape it takes after normalising rather than as it is authored. */
-  const lists = rule(`${ui}:is([data-part='canvas'],[data-part='group'])`);
+  const lists = rule(`${ui}:is([data-part-canvas],[data-part-group])`);
   assert.match(lists, /list-style:none/);
   assert.match(lists, /margin-block:0/);
   assert.match(lists, /padding-inline:0/);
@@ -359,7 +372,7 @@ test("states its own list geometry rather than inheriting the page's", () => {
 test('draws one focus ring, on the row, and none on the node', () => {
   assert.match(rule(part('node')), /outline:none/);
   const ring = rule(
-    `${ui} [data-part='node']:focus-visible>[data-part='row'],${ui} [data-part='canvas']:focus-visible [data-part='node'][data-current]>[data-part='row']`,
+    `${ui} [data-part-node]:focus-visible>[data-part-row],${ui} [data-part-canvas]:focus-visible [data-part-node][data-current]>[data-part-row]`,
   );
   assert.match(
     ring,
@@ -370,8 +383,8 @@ test('draws one focus ring, on the row, and none on the node', () => {
 
 /** Both directions are drawn, because the guide is the one part with a physical gradient. */
 test('mirrors the guide and the chevron for a right-to-left document', () => {
-  assert.match(normalized, /\[data-part='guide'\]:dir\(rtl\)\{/);
-  assert.match(normalized, /\[data-part='expander'\]:dir\(rtl\)>\[data-ui='icon'\]\{rotate:180deg/);
+  assert.match(normalized, /\[data-part-guide\]:dir\(rtl\)\{/);
+  assert.match(normalized, /\[data-part-expander\]:dir\(rtl\)>\[data-ui-icon\]\{rotate:180deg/);
 });
 
 /**

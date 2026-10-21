@@ -17,8 +17,8 @@ test('answers every underline value the contract names', () => {
   for (const underline of contract.axes.underline) {
     const styled =
       underline === 'always'
-        ? normalized.includes("[data-ui='link']{")
-        : normalized.includes(`[data-ui='link'][data-underline='${underline}']`);
+        ? normalized.includes('[data-ui-link]{')
+        : normalized.includes(`[data-ui-link][data-underline='${underline}']`);
     assert.ok(styled, `Missing underline ${underline}`);
   }
 });
@@ -27,8 +27,8 @@ test('answers every variant the contract names', () => {
   for (const variant of contract.axes.variant) {
     const styled =
       variant === 'accent'
-        ? normalized.includes("[data-ui='link']{")
-        : normalized.includes(`[data-ui='link'][data-variant='${variant}']`);
+        ? normalized.includes('[data-ui-link]{')
+        : normalized.includes(`[data-ui-link][data-variant='${variant}']`);
     assert.ok(styled, `Missing variant ${variant}`);
   }
 });
@@ -38,9 +38,9 @@ test('reacts to every state the contract declares', () => {
     if (state === 'default') continue;
     const selector =
       state === 'disabled'
-        ? "[data-ui='link'][data-disabled]"
-        : `[data-ui='link']:not([data-disabled]):${state}`;
-    const focus = `[data-ui='link']:${state}`;
+        ? '[data-ui-link][data-disabled]'
+        : `[data-ui-link]:not([data-disabled]):${state}`;
+    const focus = `[data-ui-link]:${state}`;
     assert.ok(
       normalized.includes(selector.replace(/\s+/g, '')) || normalized.includes(focus),
       `Missing state ${state}`,
@@ -55,7 +55,7 @@ test('reacts to every state the contract declares', () => {
  * its own mirror would paint nothing for the consumer who never adopted one.
  */
 test('paints the current link from the platform attribute', () => {
-  assert.ok(normalized.includes("[data-ui='link'][aria-current]:not([aria-current='false'])"));
+  assert.ok(normalized.includes("[data-ui-link][aria-current]:not([aria-current='false'])"));
   assert.ok(!normalized.includes('data-current'));
 });
 
@@ -75,7 +75,7 @@ test('paints no marker of its own: the arrow is the Glyph element in an icon box
   assert.ok(!normalized.includes('--slotted-icon-external'));
   assert.ok(
     normalized.includes(
-      "[data-part='external-icon']{--slotted-icon-size:var(--slotted-link-external-icon-size,1em);",
+      '[data-part-external-icon]{--slotted-icon-size:var(--slotted-link-external-icon-size,1em);',
     ),
     'The part sizes the box inside it at the size of the text',
   );
@@ -84,7 +84,7 @@ test('paints no marker of its own: the arrow is the Glyph element in an icon box
 test('restores the underline under forced colours', () => {
   assert.ok(normalized.includes('@media(forced-colors:active)'), 'Missing the query');
   assert.ok(
-    /@media\(forced-colors:active\)\{\[data-ui='link'\]\{text-decoration-line:underline/.test(
+    /@media\(forced-colors:active\)\{\[data-ui-link\]\{text-decoration-line:underline/.test(
       normalized,
     ),
     'A link with no underline is unrecognizable once the palette flattens colour',
@@ -97,5 +97,5 @@ test('restores the underline under forced colours', () => {
  * the gate for the same reason.
  */
 test('paints a visited link only where the application asked for it', () => {
-  assert.ok(normalized.includes("[data-ui='link'][data-visited]:visited{color:var(--_visited)"));
+  assert.ok(normalized.includes('[data-ui-link][data-visited]:visited{color:var(--_visited)'));
 });

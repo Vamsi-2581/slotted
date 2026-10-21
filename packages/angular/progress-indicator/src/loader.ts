@@ -34,9 +34,18 @@ import type { ProgressShape } from './progress-indicator.constants';
 @Component({
   selector: '[slLoader]',
   standalone: true,
-  template: `<div data-part="track"><div data-part="indicator"></div></div>
+  template: `<div data-part="track" data-part-track="">
+      <div data-part="indicator" data-part-indicator=""></div>
+    </div>
     @if (labelText(); as text) {
-      <span data-part="label" [id]="labelId" [attr.data-ui]="labelUi()">{{ text }}</span>
+      <span
+        data-part="label"
+        data-part-label=""
+        [id]="labelId"
+        [attr.data-ui]="labelUi()"
+        [attr.data-ui-visually-hidden]="labelUi() ? '' : null"
+        >{{ text }}</span
+      >
     }
     <ng-content />`,
   styleUrls: [
@@ -48,7 +57,9 @@ import type { ProgressShape } from './progress-indicator.constants';
   exportAs: 'slLoader',
   host: {
     'data-ui': 'progress-indicator',
+    'data-ui-progress-indicator': '',
     'data-part': 'root',
+    'data-part-root': '',
     'data-shape': 'morph',
     '[attr.role]': 'roleAttribute()',
     '[attr.aria-hidden]': 'hiddenFromTree()',

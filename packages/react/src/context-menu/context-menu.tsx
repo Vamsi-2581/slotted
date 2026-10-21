@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/context-menu/context-menu.css';
 
 import type { PositionerAnchor } from '@slotted/core/positioner';
@@ -273,7 +274,7 @@ export function ContextMenuTrigger({
     [ref],
   );
 
-  const rootProps: ContextMenuTriggerRootProps = {
+  const rootProps: ContextMenuTriggerRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-ui': 'context-menu',
@@ -290,7 +291,7 @@ export function ContextMenuTrigger({
     onPointerDown: compose(nativeProps.onPointerDown, onPointerDown),
     onPointerMove: compose(nativeProps.onPointerMove, onPointerMove),
     onPointerUp: compose(nativeProps.onPointerUp, cancelPress),
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref: setRoot });
   return <div {...rootProps} ref={setRoot} />;

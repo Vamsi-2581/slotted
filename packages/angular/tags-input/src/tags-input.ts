@@ -125,7 +125,9 @@ function longDuration(element: HTMLElement) {
   ],
   host: {
     'data-ui': 'tags-input',
+    'data-ui-tags-input': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-overflow]': 'resolvedOverflow()',
@@ -143,12 +145,14 @@ function longDuration(element: HTMLElement) {
   template: `
     <div
       data-part="control"
+      data-part-control=""
       role="grid"
       [attr.aria-label]="gridLabel()"
       [attr.aria-labelledby]="gridLabelledBy()"
     >
       <div
         data-part="chips"
+        data-part-chips=""
         role="row"
         #row
         [attr.aria-label]="countText()"
@@ -160,12 +164,14 @@ function longDuration(element: HTMLElement) {
               role="gridcell"
               tabindex="-1"
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               [attr.data-value]="chip"
             >
-              <span data-part="body">
+              <span data-part="body" data-part-body="">
                 <input
                   type="text"
                   [attr.aria-label]="labelFor(chip)"
@@ -182,7 +188,9 @@ function longDuration(element: HTMLElement) {
               role="gridcell"
               tabindex="-1"
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               [attr.data-value]="chip"
@@ -197,22 +205,25 @@ function longDuration(element: HTMLElement) {
               (keydown)="onChipKeyDown(chip, index, $event)"
               (dblclick)="onChipDoubleClick(chip, index)"
             >
-              <span data-part="body">
+              <span data-part="body" data-part-body="">
                 @if (messageFor(index); as message) {
-                  <span data-part="start"
+                  <span data-part="start" data-part-start=""
                     ><span slIcon><svg slGlyph name="circle-alert"></svg></span
                   ></span>
                 }
-                <span data-part="label">{{ labelFor(chip) }}</span>
+                <span data-part="label" data-part-label="">{{ labelFor(chip) }}</span>
               </span>
               @if (messageFor(index); as message) {
-                <span data-part="message" [id]="messageId(index)">{{ message }}</span>
+                <span data-part="message" data-part-message="" [id]="messageId(index)">{{
+                  message
+                }}</span>
               }
               @if (!chipFrozen(chip)) {
                 <button
                   type="button"
                   tabindex="-1"
                   data-part="remove"
+                  data-part-remove=""
                   [attr.aria-label]="removeLabelFor(chip)"
                   (click)="onRemoveClick(index, $event)"
                 >
@@ -230,20 +241,23 @@ function longDuration(element: HTMLElement) {
             tabindex="-1"
             data-count
             data-ui="tag"
+            data-ui-tag=""
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-variant="outline"
             (click)="focus()"
           >
-            <span data-part="body">
-              <span data-part="label">+{{ hiddenCount() }}</span>
+            <span data-part="body" data-part-body="">
+              <span data-part="label" data-part-label="">+{{ hiddenCount() }}</span>
             </span>
           </span>
         }
-        <span data-part="field" role="gridcell">
+        <span data-part="field" data-part-field="" role="gridcell">
           <input
             #control
             data-part="input"
+            data-part-input=""
             [type]="type()"
             [id]="controlId()"
             [value]="inputValue()"
@@ -276,23 +290,25 @@ function longDuration(element: HTMLElement) {
     </div>
 
     @if (counterText(); as counter) {
-      <span data-part="counter" aria-hidden="true">{{ counter }}</span>
+      <span data-part="counter" data-part-counter="" aria-hidden="true">{{ counter }}</span>
     }
     @if (showClear()) {
       <button
         type="button"
         data-part="clear"
+        data-part-clear=""
         [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
         <span slIcon><svg slGlyph name="x"></svg></span>
       </button>
     }
-    <span data-part="hint" [id]="hintId">{{ hintText() }}</span>
+    <span data-part="hint" data-part-hint="" [id]="hintId">{{ hintText() }}</span>
     @if (popup()) {
       <div
         #suggestionList
         data-part="suggestions"
+        data-part-suggestions=""
         role="listbox"
         [id]="listboxId"
         [attr.aria-label]="t('suggestions')"
@@ -301,6 +317,7 @@ function longDuration(element: HTMLElement) {
           <!-- Focus stays in the input: the option is chosen, not focused. -->
           <div
             data-part="suggestion"
+            data-part-suggestion=""
             role="option"
             [id]="optionId($index)"
             [attr.aria-selected]="$index === active()"

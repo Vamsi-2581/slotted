@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import { matchRanges } from '@slotted/core/highlight';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
@@ -128,12 +129,12 @@ export function SelectItem({
 
   return (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'item')}
       aria-disabled={disabled ? true : undefined}
       aria-posinset={position}
       aria-setsize={position === undefined ? undefined : select.total}
       aria-selected={selected}
-      data-part="item"
+
       data-value={value}
       /* The element `aria-activedescendant` names. Built from the select's own
          identifier and this option's value, so the control can name an option
@@ -154,10 +155,20 @@ export function SelectItem({
       }}
       role="option"
     >
-      {icon === undefined ? null : <span data-part="icon">{icon}</span>}
-      <span data-part="label">{marked}</span>
-      {description === undefined ? null : <span data-part="description">{description}</span>}
-      <span data-part="indicator">
+      {icon === undefined ? null : (
+        <span data-part="icon" data-part-icon="">
+          {icon}
+        </span>
+      )}
+      <span data-part="label" data-part-label="">
+        {marked}
+      </span>
+      {description === undefined ? null : (
+        <span data-part="description" data-part-description="">
+          {description}
+        </span>
+      )}
+      <span data-part="indicator" data-part-indicator="">
         <Icon>
           <Glyph name="check" />
         </Icon>
@@ -204,14 +215,14 @@ export function SelectGroup({ children, label, ...nativeProps }: SelectGroupProp
 
   return (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'group')}
       aria-labelledby={labelId}
-      data-part="group"
+
       hidden={empty}
       ref={setNode}
       role="group"
     >
-      <div data-part="group-label" id={labelId}>
+      <div data-part="group-label" data-part-group-label="" id={labelId}>
         {label}
       </div>
       {children}
@@ -226,5 +237,5 @@ export function SelectGroup({ children, label, ...nativeProps }: SelectGroupProp
  * disagree about which axis the word names.
  */
 export function SelectSeparator(props: { ref?: Ref<HTMLDivElement> }) {
-  return <div data-part="separator" ref={props.ref} role="separator" />;
+  return <div data-part="separator" data-part-separator="" ref={props.ref} role="separator" />;
 }

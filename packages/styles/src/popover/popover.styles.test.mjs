@@ -23,7 +23,7 @@ function rule(selector) {
  * moving inside it cannot drag the panel off its own frame.
  */
 test('clips the panel at its radius, so the scrolling body keeps the corners', () => {
-  const content = rule("[data-ui='popover'] > [data-part='content'] {");
+  const content = rule('[data-ui-popover] > [data-part-content] {');
   assert.match(content, /border-radius:\s*var\(--_radius\)/);
   assert.match(content, /overflow:\s*clip/);
   assert.doesNotMatch(content, /overflow:\s*hidden/);
@@ -40,7 +40,7 @@ test('clips the panel at its radius, so the scrolling body keeps the corners', (
  */
 test('bounds a lone composition to the body row', () => {
   const lone = rule(
-    "> :only-child:not([data-part='header'], [data-part='body'], [data-part='footer']) {",
+    '> :only-child:not([data-part-header], [data-part-body], [data-part-footer]) {',
   );
   assert.match(lone, /grid-row:\s*2/);
   assert.match(lone, /min-block-size:\s*0/);

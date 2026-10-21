@@ -70,6 +70,7 @@ export type {
   template: `@if (resolvedStepper() === 'split') {
       <button
         data-part="decrement"
+        data-part-decrement=""
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
@@ -86,19 +87,20 @@ export type {
     <ng-content select="[slCurrencyFieldStart]" />
     @if (control()?.affix(); as affix) {
       @if (affix.position === 'start') {
-        <span data-part="symbol">{{ affix.text }}</span>
+        <span data-part="symbol" data-part-symbol="">{{ affix.text }}</span>
       }
     }
     <ng-content />
     @if (control()?.affix(); as affix) {
       @if (affix.position === 'end') {
-        <span data-part="symbol">{{ affix.text }}</span>
+        <span data-part="symbol" data-part-symbol="">{{ affix.text }}</span>
       }
     }
     <ng-content select="[slCurrencyFieldEnd]" />
     @if (resolvedStepper() === 'split') {
       <button
         data-part="increment"
+        data-part-increment=""
         type="button"
         tabindex="-1"
         [attr.aria-controls]="control()?.controlId()"
@@ -112,9 +114,10 @@ export type {
         <span slIcon><svg slGlyph name="plus"></svg></span>
       </button>
     } @else if (resolvedStepper() === 'stacked') {
-      <span data-part="stepper">
+      <span data-part="stepper" data-part-stepper="">
         <button
           data-part="increment"
+          data-part-increment=""
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
@@ -131,6 +134,7 @@ export type {
         </button>
         <button
           data-part="decrement"
+          data-part-decrement=""
           type="button"
           tabindex="-1"
           [attr.aria-controls]="control()?.controlId()"
@@ -158,7 +162,9 @@ export type {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'currency-field',
+    'data-ui-currency-field': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-align]': 'resolvedAlign()',

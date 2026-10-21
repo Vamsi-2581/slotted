@@ -118,7 +118,9 @@ function ruleBetween(from: Element, to: Element) {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'toolbar',
+    'data-ui-toolbar': '',
     'data-part': 'root',
+    'data-part-root': '',
     role: 'toolbar',
     '[attr.data-orientation]': 'resolvedOrientation()',
     '[attr.data-size]': 'resolvedSize()',
@@ -294,7 +296,12 @@ export class SlToolbar {
   selector: '[slToolbarGroup]',
   standalone: true,
   exportAs: 'slToolbarGroup',
-  host: { 'data-part': 'group', role: 'group', '[attr.data-unit]': 'unit.id()' },
+  host: {
+    'data-part': 'group',
+    'data-part-group': '',
+    role: 'group',
+    '[attr.data-unit]': 'unit.id()',
+  },
 })
 export class SlToolbarGroup {
   /**
@@ -324,7 +331,7 @@ export class SlToolbarGroup {
   selector: '[slToolbarItem]',
   standalone: true,
   exportAs: 'slToolbarItem',
-  host: { 'data-part': 'item', '[attr.data-unit]': 'unit.id()' },
+  host: { 'data-part': 'item', 'data-part-item': '', '[attr.data-unit]': 'unit.id()' },
 })
 export class SlToolbarItem {
   /**
@@ -382,6 +389,7 @@ function declareUnit(counterpart: () => TemplateRef<unknown> | undefined) {
   exportAs: 'slToolbarSeparator',
   host: {
     'data-part': 'separator',
+    'data-part-separator': '',
     role: 'separator',
     '[attr.aria-orientation]': 'ariaOrientation()',
   },
@@ -405,6 +413,6 @@ export class SlToolbarSeparator {
   selector: '[slToolbarSpacer]',
   standalone: true,
   exportAs: 'slToolbarSpacer',
-  host: { 'data-part': 'spacer', 'aria-hidden': 'true' },
+  host: { 'data-part': 'spacer', 'data-part-spacer': '', 'aria-hidden': 'true' },
 })
 export class SlToolbarSpacer {}

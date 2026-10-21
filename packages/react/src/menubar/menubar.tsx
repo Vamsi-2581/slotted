@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/menubar/menubar.css';
 
 import { createRovingTabindex } from '@slotted/core/focus';
@@ -210,7 +211,7 @@ export function Menubar({
     }
   };
 
-  const rootProps: MenubarRootProps = {
+  const rootProps: MenubarRootProps = keyedProps({
     ...nativeProps,
     children: <MenubarSurfaceProvider value={surface}>{children}</MenubarSurfaceProvider>,
     ...(resolvedOrientation === 'vertical' ? { 'aria-orientation': 'vertical' } : {}),
@@ -221,7 +222,7 @@ export function Menubar({
     'data-ui': 'menubar',
     onKeyDown: compose(nativeProps.onKeyDown, onKeyDown),
     role: 'menubar',
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref: setNode });
   return <div {...rootProps} ref={setNode} />;

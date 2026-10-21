@@ -80,6 +80,7 @@ export function activationReason(activation: { detail: number; isTrusted: boolea
   template: `<input
       #control
       data-part="control"
+      data-part-control=""
       type="checkbox"
       role="switch"
       [attr.id]="controlId"
@@ -97,13 +98,13 @@ export function activationReason(activation: { detail: number; isTrusted: boolea
       (click)="onClick($event)"
       (blur)="onBlur()"
     />
-    <span data-part="track"
-      ><span data-part="thumb">
+    <span data-part="track" data-part-track=""
+      ><span data-part="thumb" data-part-thumb="">
         @if (resolvedIndicator() === 'mark') {
           <span slIcon><svg slGlyph name="check"></svg></span>
         }</span
     ></span>
-    <label data-part="label" [attr.for]="controlId"><ng-content /></label>
+    <label data-part="label" data-part-label="" [attr.for]="controlId"><ng-content /></label>
     <ng-content select="[slSwitchDescription]" />
     <span slVisuallyHidden role="status" [attr.id]="pendingId">{{ announcement() }}</span>`,
   styleUrl: '../../../styles/src/switch/switch.css',
@@ -112,7 +113,9 @@ export function activationReason(activation: { detail: number; isTrusted: boolea
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlSwitch), multi: true }],
   host: {
     'data-ui': 'switch',
+    'data-ui-switch': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-indicator]': 'resolvedIndicator()',
     '[attr.data-label-placement]': 'resolvedLabelPlacement()',

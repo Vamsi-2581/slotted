@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/segmented-control/segmented-control.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -168,7 +169,7 @@ export function SegmentedControl({
     value: current,
   };
 
-  const rootProps: SegmentedControlRootProps = {
+  const rootProps: SegmentedControlRootProps = keyedProps({
     ...nativeProps,
     'aria-describedby': [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined,
     'aria-invalid': ariaInvalid ?? (resolvedInvalid === true ? true : undefined),
@@ -197,7 +198,9 @@ export function SegmentedControl({
         {/* Absent while nothing is checked, so the first selection fades the
             thumb in where it belongs rather than sliding it from an edge the
             reader has never seen. */}
-        {index < 0 ? null : <span aria-hidden="true" data-part="indicator" />}
+        {index < 0 ? null : (
+          <span aria-hidden="true" data-part="indicator" data-part-indicator="" />
+        )}
         {children}
       </SegmentedControlContext.Provider>
     ),
@@ -223,7 +226,7 @@ export function SegmentedControl({
       '--slotted-segmented-control-count': values.length,
       ...(index < 0 ? {} : { '--slotted-segmented-control-index': index }),
     } as SegmentedControlRootProps['style'],
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }

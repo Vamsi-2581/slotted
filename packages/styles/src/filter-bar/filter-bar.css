@@ -15,7 +15,7 @@
    * gap — so a theme that retunes a text field retunes this bar with it, and
    * the three densities move every control together.
    */
-  [data-ui='filter-bar'] {
+  [data-ui-filter-bar] {
     --_gap: var(--slotted-filter-bar-gap, var(--slotted-control-gap-md, 8px));
     --_gap-sm: var(--slotted-control-gap-sm, 6px);
     --_height: var(--slotted-control-height-md, 34px);
@@ -68,7 +68,7 @@
    * start-justified grid or flex parent measured the root at zero pixels and
    * drew every pill and chip outside it.
    */
-  [data-ui='filter-bar'][data-part='root'] {
+  [data-ui-filter-bar][data-part-root] {
     container-name: slotted-filter-bar;
     container-type: inline-size;
     display: block;
@@ -83,7 +83,7 @@
    * and a select shrink-wrapped to its value is a control that changes width
    * when the value does.
    */
-  [data-ui='filter-bar'][data-part='rule'] {
+  [data-ui-filter-bar][data-part-rule] {
     display: grid;
     gap: var(--_gap);
     inline-size: var(--slotted-filter-bar-editor-size, 18rem);
@@ -96,17 +96,17 @@
    * own at `display: contents`, which leaves the two parts as grid items of
    * the rule and out of reach of a child combinator.
    */
-  [data-ui='filter-bar'][data-part='rule'] [data-part='operand'] {
+  [data-ui-filter-bar][data-part-rule] [data-part-operand] {
     display: grid;
     gap: var(--_gap-sm);
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'][data-part='rule'][data-kind='boolean'] [data-part='operand']:empty {
+  [data-ui-filter-bar][data-part-rule][data-kind='boolean'] [data-part-operand]:empty {
     display: none;
   }
 
-  [data-ui='filter-bar'][data-part='rule'] > [data-part='actions'] {
+  [data-ui-filter-bar][data-part-rule] > [data-part-actions] {
     align-items: center;
     display: flex;
     gap: var(--_gap-sm);
@@ -131,7 +131,7 @@
    * Every member of the first line starts at its top and is a control tall,
    * so the count centres its text against the search whatever wraps.
    */
-  [data-ui='filter-bar'] > [data-part='frame'] {
+  [data-ui-filter-bar] > [data-part-frame] {
     align-items: start;
     column-gap: var(--_gap);
     display: grid;
@@ -142,31 +142,31 @@
     row-gap: var(--_gap);
   }
 
-  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='search'] {
+  [data-ui-filter-bar] > [data-part-frame] > [data-part-search] {
     grid-area: search;
     max-inline-size: var(--slotted-filter-bar-search-max, 28rem);
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='bar'] {
+  [data-ui-filter-bar] > [data-part-frame] > [data-part-bar] {
     grid-area: bar;
   }
 
-  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='end'] {
+  [data-ui-filter-bar] > [data-part-frame] > [data-part-end] {
     grid-area: end;
   }
 
-  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='count'] {
+  [data-ui-filter-bar] > [data-part-frame] > [data-part-count] {
     grid-area: count;
     justify-self: end;
   }
 
   /** A member that is absent collapses: the grid's gap is what would remain, and it is taken away. */
-  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='end']:empty {
+  [data-ui-filter-bar] > [data-part-frame] > [data-part-end]:empty {
     display: none;
   }
 
-  [data-ui='filter-bar'][data-size='sm'] {
+  [data-ui-filter-bar][data-size='sm'] {
     --_height: var(--slotted-control-height-sm, 30px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_pad: var(--slotted-control-padding-inline-sm, 10px);
@@ -176,7 +176,7 @@
     --_gap-sm: var(--slotted-control-gap-sm, 4px);
   }
 
-  [data-ui='filter-bar'][data-size='lg'] {
+  [data-ui-filter-bar][data-size='lg'] {
     --_height: var(--slotted-control-height-lg, 38px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_pad: var(--slotted-control-padding-inline-lg, 16px);
@@ -192,9 +192,9 @@
    * the query is an `icon` in the field's start adornment, which the field
    * sizes as it sizes every adornment.
    */
-  [data-ui='filter-bar'] [data-part='search'] > [data-ui='text-field'],
-  [data-ui='filter-bar'] [data-part='preset'] > [data-ui='select'],
-  [data-ui='filter-bar'] :is([data-part='field'], [data-part='operator']) > [data-ui='select'] {
+  [data-ui-filter-bar] [data-part-search] > [data-ui-text-field],
+  [data-ui-filter-bar] [data-part-preset] > [data-ui-select],
+  [data-ui-filter-bar] :is([data-part-field], [data-part-operator]) > [data-ui-select] {
     inline-size: 100%;
   }
 
@@ -203,7 +203,7 @@
    * to line, which the toolbar pattern allows for a toolbar of several rows.
    * The row gap is the column gap, so two lines of chips read as one set.
    */
-  [data-ui='filter-bar'] [data-part='bar'] {
+  [data-ui-filter-bar] [data-part-bar] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -211,14 +211,14 @@
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'] [data-part='end'] {
+  [data-ui-filter-bar] [data-part-end] {
     align-items: center;
     display: flex;
     gap: var(--_gap);
   }
 
   /** The count is the answer to the filters, and it takes the far end of its line — PatternFly's rule for an item count. */
-  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='count'] {
+  [data-ui-filter-bar] > [data-part-frame] > [data-part-count] {
     color: var(--_muted);
     font-variant-numeric: tabular-nums;
     margin: 0;
@@ -240,7 +240,7 @@
    * that holds something. The plus before the name says what pressing it
    * does. Given a condition, the same place in the bar becomes a chip.
    */
-  [data-ui='filter-bar'] [data-part='pill'] {
+  [data-ui-filter-bar] [data-part-pill] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -268,36 +268,36 @@
     white-space: nowrap;
   }
 
-  [data-ui='filter-bar'] [data-part='pill'] > span:not([data-ui='icon']) {
+  [data-ui-filter-bar] [data-part-pill] > span:not([data-ui-icon]) {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     unicode-bidi: isolate;
   }
 
-  [data-ui='filter-bar'] [data-part='pill'] > [data-ui='icon'] {
+  [data-ui-filter-bar] [data-part-pill] > [data-ui-icon] {
     --slotted-icon-size: var(--_icon);
   }
 
-  [data-ui='filter-bar'] [data-part='pill'][data-invalid] {
+  [data-ui-filter-bar] [data-part-pill][data-invalid] {
     border-color: var(--_invalid);
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='filter-bar'] [data-part='pill']:enabled:hover {
+  [data-ui-filter-bar] [data-part-pill]:enabled:hover {
     background-color: var(--_hover);
     border-color: var(--slotted-border-strong, ButtonBorder);
     color: var(--_ink);
   }
 
-  [data-ui='filter-bar'] [data-part='pill']:enabled:active,
-  [data-ui='filter-bar'] [data-part='pill']:enabled[aria-expanded='true'] {
+  [data-ui-filter-bar] [data-part-pill]:enabled:active,
+  [data-ui-filter-bar] [data-part-pill]:enabled[aria-expanded='true'] {
     background-color: var(--_active);
     border-color: var(--slotted-border-strong, ButtonBorder);
     color: var(--_ink);
   }
 
-  [data-ui='filter-bar'] [data-part='pill']:focus-visible {
+  [data-ui-filter-bar] [data-part-pill]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -319,7 +319,7 @@
    * so a hover ground and a focus ring follow its curve rather than being
    * clipped by it.
    */
-  [data-ui='filter-bar'] [data-part='chip'] {
+  [data-ui-filter-bar] [data-part-chip] {
     align-items: stretch;
     background-color: var(--_surface);
     block-size: var(--_height);
@@ -347,13 +347,13 @@
    * held for an exit would be a stop of the arrows that no longer exists.
    */
   @starting-style {
-    [data-ui='filter-bar'] :is([data-part='chip'], [data-part='pill']) {
+    [data-ui-filter-bar] :is([data-part-chip], [data-part-pill]) {
       opacity: 0;
       translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
     }
   }
 
-  [data-ui='filter-bar'] [data-part='chip'] > * {
+  [data-ui-filter-bar] [data-part-chip] > * {
     align-items: center;
     background-color: transparent;
     border: 0;
@@ -371,52 +371,52 @@
     white-space: nowrap;
   }
 
-  [data-ui='filter-bar'] [data-part='chip'] > * + * {
+  [data-ui-filter-bar] [data-part-chip] > * + * {
     border-inline-start: var(--_border-width) solid var(--_seam);
   }
 
-  [data-ui='filter-bar'] [data-part='chip'] > :first-child {
+  [data-ui-filter-bar] [data-part-chip] > :first-child {
     border-end-start-radius: var(--_radius);
     border-start-start-radius: var(--_radius);
     /* The capsule's curve takes air from the first letter, so the start inset is the control's, not the segment's. */
     padding-inline-start: var(--_pad);
   }
 
-  [data-ui='filter-bar'] [data-part='chip'] > :last-child {
+  [data-ui-filter-bar] [data-part-chip] > :last-child {
     border-end-end-radius: var(--_radius);
     border-start-end-radius: var(--_radius);
   }
 
-  [data-ui='filter-bar'] [data-part='chip'] [data-ui='icon'] {
+  [data-ui-filter-bar] [data-part-chip] [data-ui-icon] {
     --slotted-icon-size: var(--_icon);
   }
 
-  [data-ui='filter-bar'] [data-part='chip-field'] {
+  [data-ui-filter-bar] [data-part-chip-field] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='filter-bar'] [data-part='chip-field'] > [data-ui='icon'] {
+  [data-ui-filter-bar] [data-part-chip-field] > [data-ui-icon] {
     color: var(--_muted);
   }
 
   /** The field's name, the operator and the value are isolated runs, so a right-to-left name beside an ISO date reorders nothing. */
-  [data-ui='filter-bar'] [data-part='chip'] > * > span:not([data-ui]),
-  [data-ui='filter-bar'] [data-part='chip-operator'] {
+  [data-ui-filter-bar] [data-part-chip] > * > span:not([data-ui]),
+  [data-ui-filter-bar] [data-part-chip-operator] {
     unicode-bidi: isolate;
   }
 
-  [data-ui='filter-bar'] [data-part='chip-operator'] {
+  [data-ui-filter-bar] [data-part-chip-operator] {
     color: var(--_muted);
     font-weight: var(--slotted-font-weight-regular, 400);
   }
 
-  [data-ui='filter-bar'] [data-part='chip-value'] {
+  [data-ui-filter-bar] [data-part-chip-value] {
     font-weight: var(--slotted-font-weight-medium, 500);
     min-inline-size: 0;
   }
 
   /* The value truncates and the whole list stays in the segment's name and title. */
-  [data-ui='filter-bar'] [data-part='chip-value'] > [data-value] {
+  [data-ui-filter-bar] [data-part-chip-value] > [data-value] {
     max-inline-size: var(--slotted-filter-bar-value-max, 12rem);
     min-inline-size: 0;
     overflow: hidden;
@@ -427,21 +427,21 @@
    * The operator's words inside the value segment are drawn only where the
    * operator segment is not — under the narrow breakpoint, below.
    */
-  [data-ui='filter-bar'] [data-part='chip-value'] > [data-operator] {
+  [data-ui-filter-bar] [data-part-chip-value] > [data-operator] {
     color: var(--_muted);
     display: none;
     font-weight: var(--slotted-font-weight-regular, 400);
   }
 
   /** The remove control is square in the capsule's height, and its glyph reads quiet until it is aimed at. */
-  [data-ui='filter-bar'] [data-part='chip-remove'] {
+  [data-ui-filter-bar] [data-part-chip-remove] {
     aspect-ratio: 1;
     color: var(--_muted);
     justify-content: center;
     padding-inline: 0;
   }
 
-  [data-ui='filter-bar'] [data-part='chip'] > :is(button, [role='button']) {
+  [data-ui-filter-bar] [data-part-chip] > :is(button, [role='button']) {
     cursor: pointer;
     transition:
       background-color var(--_duration) var(--_easing),
@@ -453,17 +453,17 @@
    * open segment holds the press ground while its surface is up, so the
    * reader sees which segment the menu or the popover belongs to.
    */
-  [data-ui='filter-bar']
-    [data-part='chip']
+  [data-ui-filter-bar]
+    [data-part-chip]
     > :is(button, [role='button']):enabled:not([aria-disabled='true']):hover {
     background-color: var(--_hover);
     color: var(--_ink);
   }
 
-  [data-ui='filter-bar']
-    [data-part='chip']
+  [data-ui-filter-bar]
+    [data-part-chip]
     > :is(button, [role='button']):enabled:not([aria-disabled='true']):active,
-  [data-ui='filter-bar'] [data-part='chip'] > :is(button, [role='button'])[aria-expanded='true'] {
+  [data-ui-filter-bar] [data-part-chip] > :is(button, [role='button'])[aria-expanded='true'] {
     background-color: var(--_active);
     color: var(--_ink);
   }
@@ -473,7 +473,7 @@
    * neighbouring segments, and inward it stays inside the capsule and follows
    * its curve on the end segments — the rule every inner control follows.
    */
-  [data-ui='filter-bar'] [data-part='chip'] > :focus-visible {
+  [data-ui-filter-bar] [data-part-chip] > :focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
   }
@@ -483,43 +483,40 @@
    * says the same thing, and the value segment writes the prompt in the
    * muted ink. The condition is not applied until the value is there.
    */
-  [data-ui='filter-bar'] [data-part='chip'][data-incomplete] {
+  [data-ui-filter-bar] [data-part-chip][data-incomplete] {
     border-style: dashed;
     box-shadow: none;
   }
 
-  [data-ui='filter-bar'] [data-part='chip'][data-incomplete] > [data-part='chip-value'] {
+  [data-ui-filter-bar] [data-part-chip][data-incomplete] > [data-part-chip-value] {
     color: var(--_muted);
     font-weight: var(--slotted-font-weight-regular, 400);
   }
 
-  [data-ui='filter-bar'] [data-part='chip'][data-invalid] {
+  [data-ui-filter-bar] [data-part-chip][data-invalid] {
     border-color: var(--_invalid);
     box-shadow: var(--_invalid-edge);
   }
 
   /** The field's glyph and name turn to the danger ink with the edge, so the fault is read on the segment it is about. */
-  [data-ui='filter-bar'] [data-part='chip'][data-invalid] > [data-part='chip-field'],
-  [data-ui='filter-bar']
-    [data-part='chip'][data-invalid]
-    > [data-part='chip-field']
-    > [data-ui='icon'] {
+  [data-ui-filter-bar] [data-part-chip][data-invalid] > [data-part-chip-field],
+  [data-ui-filter-bar] [data-part-chip][data-invalid] > [data-part-chip-field] > [data-ui-icon] {
     color: var(--slotted-tone-danger-text, CanvasText);
   }
 
-  [data-ui='filter-bar'] [data-part='chip'][data-folded] {
+  [data-ui-filter-bar] [data-part-chip][data-folded] {
     display: none;
     visibility: hidden;
   }
 
-  [data-ui='filter-bar'] [data-part='bar'][data-revealed] [data-part='chip'][data-folded] {
+  [data-ui-filter-bar] [data-part-bar][data-revealed] [data-part-chip][data-folded] {
     display: inline-flex;
     visibility: visible;
   }
 
   /* ── More ───────────────────────────────────────────────────────────── */
 
-  [data-ui='filter-bar'] [data-part='more'] {
+  [data-ui-filter-bar] [data-part-more] {
     align-items: center;
     appearance: none;
     background: none;
@@ -540,17 +537,17 @@
     white-space: nowrap;
   }
 
-  [data-ui='filter-bar'] [data-part='more']:enabled:hover {
+  [data-ui-filter-bar] [data-part-more]:enabled:hover {
     background-color: var(--_hover);
     color: var(--_ink);
   }
 
-  [data-ui='filter-bar'] [data-part='more']:enabled:active {
+  [data-ui-filter-bar] [data-part-more]:enabled:active {
     background-color: var(--_active);
     color: var(--_ink);
   }
 
-  [data-ui='filter-bar'] [data-part='more']:focus-visible {
+  [data-ui-filter-bar] [data-part-more]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -564,18 +561,18 @@
    * conditions are what the bar is about, and a control that empties them is
    * not the loudest word on the line. Apply keeps the weight of a commit.
    */
-  [data-ui='filter-bar'] [data-part='bar'] :is([data-part='clear'], [data-part='reset']) {
+  [data-ui-filter-bar] [data-part-bar] :is([data-part-clear], [data-part-reset]) {
     --slotted-control-font-weight: var(--slotted-font-weight-medium, 500);
   }
 
   /* ── The summary, drawn only when the bar is narrow ─────────────────── */
 
-  [data-ui='filter-bar'] [data-part='summary'] {
+  [data-ui-filter-bar] [data-part-summary] {
     display: none;
     visibility: hidden;
   }
 
-  [data-ui='filter-bar'] [data-part='summary'] > [data-part='label'] > span {
+  [data-ui-filter-bar] [data-part-summary] > [data-part-label] > span {
     /* The count in the summary is a figure, and figures line up. */
     font-variant-numeric: tabular-nums;
   }
@@ -588,7 +585,7 @@
    * and Clear there would make the control that empties the filter the
    * neighbour of the one that commits it.
    */
-  [data-ui='filter-bar'] > [data-part='frame'] > [data-part='bar'] > [data-part='actions'] {
+  [data-ui-filter-bar] > [data-part-frame] > [data-part-bar] > [data-part-actions] {
     align-items: center;
     display: flex;
     gap: var(--_gap-sm);
@@ -597,7 +594,7 @@
 
   /* ── States of the whole bar ────────────────────────────────────────── */
 
-  [data-ui='filter-bar'][data-disabled] {
+  [data-ui-filter-bar][data-disabled] {
     --_ink: var(--slotted-disabled-foreground, GrayText);
     --_muted: var(--slotted-disabled-foreground, GrayText);
     --_edge: var(--slotted-disabled-border, GrayText);
@@ -605,11 +602,11 @@
     --_surface: var(--slotted-disabled-background, Canvas);
   }
 
-  [data-ui='filter-bar'][data-disabled] :is([data-part='pill'], [data-part='chip']) {
+  [data-ui-filter-bar][data-disabled] :is([data-part-pill], [data-part-chip]) {
     box-shadow: none;
   }
 
-  [data-ui='filter-bar'][data-disabled] :is([data-part='pill'], [data-part='chip'] > *) {
+  [data-ui-filter-bar][data-disabled] :is([data-part-pill], [data-part-chip] > *) {
     cursor: not-allowed;
   }
 
@@ -618,12 +615,12 @@
    * invites a press — the segments keep their stop and lose the pointer, and
    * the binding draws no remove, add or clear control.
    */
-  [data-ui='filter-bar'][data-readonly] [data-part='chip'] > * {
+  [data-ui-filter-bar][data-readonly] [data-part-chip] > * {
     cursor: default;
   }
 
   /** A loading bar keeps its width and its controls, and says so in the count's place. */
-  [data-ui='filter-bar'][data-loading] > [data-part='frame'] > [data-part='count'] {
+  [data-ui-filter-bar][data-loading] > [data-part-frame] > [data-part-count] {
     align-items: center;
     display: inline-flex;
     gap: var(--_gap-sm);
@@ -639,7 +636,7 @@
    * and writes the value it read back on the root itself, so the bar keeps
    * sticking where it did while everything after it stops under the bar.
    */
-  [data-ui='filter-bar'][data-sticky] {
+  [data-ui-filter-bar][data-sticky] {
     background-color: var(--_surface);
     inset-block-start: var(--slotted-page-sticky-top, 0px);
     padding-block: var(--slotted-space-3, 0.375rem);
@@ -657,7 +654,7 @@
    * header and its own remove. A rule is one row: field, operator, operand,
    * remove; it stacks when the drawer is narrow, and the leading word stays.
    */
-  [data-ui='filter-bar'][data-part='builder'] {
+  [data-ui-filter-bar][data-part-builder] {
     --_join-col: var(--slotted-filter-bar-join-size, 3.5rem);
     --_group-surface: var(
       --slotted-filter-bar-group-surface,
@@ -679,7 +676,7 @@
    * builder's, because the card form below is the builder's decision and
    * every group in one builder takes the same form.
    */
-  [data-ui='filter-bar'][data-part='builder'] [data-part='group'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-group] {
     border: 0;
     container-name: slotted-filter-bar-group;
     container-type: inline-size;
@@ -690,7 +687,7 @@
     padding: 0;
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='group']:not([data-depth='0']) {
+  [data-ui-filter-bar][data-part-builder] [data-part-group]:not([data-depth='0']) {
     background-color: var(--_group-surface);
     border: var(--slotted-border-width-thin, 1px) solid var(--_group-edge);
     border-radius: var(--slotted-radius-md, 6px);
@@ -698,12 +695,12 @@
   }
 
   /* A box inside a box alternates its ground, so the third level reads as a level and not as a border. */
-  [data-ui='filter-bar'][data-part='builder']
-    [data-part='group']:is([data-depth='2'], [data-depth='4'], [data-depth='6']) {
+  [data-ui-filter-bar][data-part-builder]
+    [data-part-group]:is([data-depth='2'], [data-depth='4'], [data-depth='6']) {
     background-color: var(--_surface);
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='group'] > legend {
+  [data-ui-filter-bar][data-part-builder] [data-part-group] > legend {
     /* The legend names the group to a reader and draws nothing. */
     block-size: 1px;
     clip-path: inset(50%);
@@ -714,7 +711,7 @@
   }
 
   /** The header: the words, the All | Any control between them, and, in a nested group, its remove at the end. */
-  [data-ui='filter-bar'][data-part='builder'] [data-part='join'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-join] {
     align-items: center;
     color: var(--_ink);
     display: flex;
@@ -723,7 +720,7 @@
     gap: var(--_gap-sm);
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='join'] > [data-part='remove-group'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-join] > [data-part-remove-group] {
     margin-inline-start: auto;
   }
 
@@ -731,7 +728,7 @@
    * The rows: a two-column grid, the joining word then the rule or the group,
    * so every field lines up under the first whatever word stands before it.
    */
-  [data-ui='filter-bar'][data-part='builder'] [data-part='rules'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-rules] {
     align-items: start;
     column-gap: var(--_gap-sm);
     display: grid;
@@ -740,7 +737,7 @@
     row-gap: var(--_gap);
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='conjunction'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-conjunction] {
     color: var(--_muted);
     /* Centred on the first control of its row, whatever the row stacks to. */
     line-height: var(--_height);
@@ -750,7 +747,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-rule] {
     align-items: center;
     display: grid;
     gap: var(--_gap-sm);
@@ -764,38 +761,34 @@
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > *,
-  [data-ui='filter-bar'][data-part='builder']
-    [data-part='rule']
-    :is([data-part='operator'], [data-part='operand']) {
+  [data-ui-filter-bar][data-part-builder] [data-part-rule] > *,
+  [data-ui-filter-bar][data-part-builder]
+    [data-part-rule]
+    :is([data-part-operator], [data-part-operand]) {
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'][data-part='builder']
-    [data-part='rule'][data-operands='0']
-    [data-part='operand'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-rule][data-operands='0'] [data-part-operand] {
     display: none;
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-operands='0'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-rule][data-operands='0'] {
     /* The operator takes the operand's tracks too, so the field keeps the width it has on every other row. */
     grid-template-columns: minmax(0, 1fr) minmax(0, 2.5fr) var(--slotted-target-min, 24px);
   }
 
-  [data-ui='filter-bar'][data-part='builder'] [data-part='operand'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-operand] {
     display: grid;
     gap: var(--_gap-sm);
     min-inline-size: 0;
   }
 
-  [data-ui='filter-bar'][data-part='builder']
-    [data-part='rule'][data-operands='2']
-    [data-part='operand'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-rule][data-operands='2'] [data-part-operand] {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   /** The group's own controls, under its rows and aligned with them. */
-  [data-ui='filter-bar'][data-part='builder'] [data-part='group'] > [data-part='actions'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-group] > [data-part-actions] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -811,22 +804,17 @@
    * as view is a different act — it leaves the builder for the application's
    * dialog — so it stands apart at the far end, at the weight of the words.
    */
-  [data-ui='filter-bar'][data-part='builder']
-    [data-part='group']
-    > [data-part='actions']
-    > :is(
-      [data-part='add-rule'],
-      [data-part='add-group'],
-      [data-part='clear'],
-      [data-part='save-preset']
-    ) {
+  [data-ui-filter-bar][data-part-builder]
+    [data-part-group]
+    > [data-part-actions]
+    > :is([data-part-add-rule], [data-part-add-group], [data-part-clear], [data-part-save-preset]) {
     --slotted-control-font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='filter-bar'][data-part='builder']
-    [data-part='group']
-    > [data-part='actions']
-    > [data-part='save-preset'] {
+  [data-ui-filter-bar][data-part-builder]
+    [data-part-group]
+    > [data-part-actions]
+    > [data-part-save-preset] {
     margin-inline-start: auto;
   }
 
@@ -835,23 +823,23 @@
        operator and the operand span both tracks, and a spanning item hands
        its size to the non-flexible track first — `auto` took the operand's
        whole width and left the field 34 pixels wide, a chevron with no name. */
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'],
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-operands='0'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule],
+    [data-ui-filter-bar][data-part-builder] [data-part-rule][data-operands='0'] {
       grid-template-columns: minmax(0, 1fr) var(--slotted-target-min, 24px);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > [data-part='field'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule] > [data-part-field] {
       grid-column: 1;
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > [data-part='remove'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule] > [data-part-remove] {
       grid-column: 2;
       grid-row: 1;
     }
 
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='rule']
-      :is([data-part='operator'], [data-part='operand']) {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-rule]
+      :is([data-part-operator], [data-part-operand]) {
       grid-column: 1 / -1;
     }
   }
@@ -860,7 +848,7 @@
    * The sentence of a rule is the card form's header, and a row that already
    * shows its three controls does not draw it.
    */
-  [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary'] {
+  [data-ui-filter-bar][data-part-builder] [data-part-rule-summary] {
     display: none;
     visibility: hidden;
   }
@@ -877,32 +865,32 @@
    * the joining word stands on its own line between two cards.
    */
   @container slotted-filter-bar-builder (max-width: 30rem) {
-    [data-ui='filter-bar'][data-part='builder'] {
+    [data-ui-filter-bar][data-part-builder] {
       gap: var(--_gap);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rules'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rules] {
       grid-template-columns: minmax(0, 1fr);
       row-gap: var(--_gap-sm);
     }
 
     /* The joining word, small and on a line of its own; "Where" says nothing a list of cards does not. */
-    [data-ui='filter-bar'][data-part='builder'] [data-part='conjunction'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-conjunction] {
       font-size: var(--slotted-font-size-xs, 12px);
       line-height: var(--slotted-line-height-xs, 1.5);
       padding-inline-start: var(--_seg-pad);
       text-align: start;
     }
 
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='rules']
-      > [data-part='conjunction']:first-child {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-rules]
+      > [data-part-conjunction]:first-child {
       display: none;
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='group']:not([data-depth='0']),
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='group']:is([data-depth='2'], [data-depth='4'], [data-depth='6']) {
+    [data-ui-filter-bar][data-part-builder] [data-part-group]:not([data-depth='0']),
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-group]:is([data-depth='2'], [data-depth='4'], [data-depth='6']) {
       background-color: transparent;
       border: 0;
       /* The rail carries the nesting alone here, so it takes the edge the cards have rather than the box's subtler one. */
@@ -912,8 +900,8 @@
       padding-inline: var(--slotted-space-4, 0.5rem) 0;
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'],
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-operands='0'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule],
+    [data-ui-filter-bar][data-part-builder] [data-part-rule][data-operands='0'] {
       background-color: var(--_surface);
       border: var(--_border-width) solid var(--_edge);
       border-radius: var(--slotted-radius-md, 6px);
@@ -925,26 +913,26 @@
       transition: border-color var(--_duration) var(--_easing);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-expanded] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule][data-expanded] {
       border-color: var(--slotted-border-strong, ButtonBorder);
       padding-block-end: var(--_seg-pad);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-invalid] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule][data-invalid] {
       border-color: var(--_invalid);
       box-shadow: var(--_invalid-edge);
     }
 
     /* Forced colours remove the shadow; the edge comes back as an outline. */
     @media (forced-colors: active) {
-      [data-ui='filter-bar'][data-part='builder'] [data-part='rule'][data-invalid] {
+      [data-ui-filter-bar][data-part-builder] [data-part-rule][data-invalid] {
         outline: var(--_invalid-edge-width) solid CanvasText;
         outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
       }
     }
 
     /* The sentence: the field at the weight of a name, the operator quiet, the value back at weight. It wraps rather than truncates — on a phone the sentence is what is read. */
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary] {
       /* The chevron stands in the middle of the card's header, whether the sentence takes one line or two. */
       align-items: center;
       appearance: none;
@@ -968,26 +956,26 @@
     }
 
     /* The words wrap inside their own run, so the chevron keeps the end of the first line however long the value is. */
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary'] > [data-sentence] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary] > [data-sentence] {
       flex: 1 1 auto;
       min-inline-size: 0;
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary'] [data-field] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary] [data-field] {
       font-weight: var(--slotted-font-weight-medium, 500);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary'] [data-operator] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary] [data-operator] {
       color: var(--_muted);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary'] [data-value] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary] [data-value] {
       font-weight: var(--slotted-font-weight-medium, 500);
       min-inline-size: 0;
       overflow-wrap: anywhere;
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary'] > [data-ui='icon'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary] > [data-ui-icon] {
       --slotted-icon-size: var(--_icon);
 
       color: var(--_muted);
@@ -996,21 +984,21 @@
       transition: rotate var(--_duration) var(--_easing);
     }
 
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='rule-summary'][aria-expanded='true']
-      > [data-ui='icon'] {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-rule-summary][aria-expanded='true']
+      > [data-ui-icon] {
       rotate: 180deg;
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary']:enabled:hover {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary]:enabled:hover {
       background-color: var(--_hover);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary']:enabled:active {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary]:enabled:active {
       background-color: var(--_active);
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule-summary']:focus-visible {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule-summary]:focus-visible {
       outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
       outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
     }
@@ -1021,7 +1009,7 @@
      * with the summary is centred on it, and an expanded card's controls
      * below do not pull it down.
      */
-    [data-ui='filter-bar'][data-part='builder'] [data-part='rule'] > [data-part='remove'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-rule] > [data-part-remove] {
       align-self: center;
       grid-area: remove;
       grid-row: 1;
@@ -1034,16 +1022,16 @@
      * arrive from a step above, so the eye follows the card opening; closing
      * snaps, because the reader has already looked away to the next card.
      */
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='rule']:not([data-expanded])
-      :is([data-part='field'], [data-part='operator'], [data-part='operand']) {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-rule]:not([data-expanded])
+      :is([data-part-field], [data-part-operator], [data-part-operand]) {
       display: none;
       visibility: hidden;
     }
 
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='rule'][data-expanded]
-      :is([data-part='field'], [data-part='operator'], [data-part='operand']) {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-rule][data-expanded]
+      :is([data-part-field], [data-part-operator], [data-part-operand]) {
       grid-column: 1 / -1;
       margin-inline: var(--_seg-pad);
       transition:
@@ -1052,15 +1040,15 @@
     }
 
     @starting-style {
-      [data-ui='filter-bar'][data-part='builder']
-        [data-part='rule'][data-expanded]
-        :is([data-part='field'], [data-part='operator'], [data-part='operand']) {
+      [data-ui-filter-bar][data-part-builder]
+        [data-part-rule][data-expanded]
+        :is([data-part-field], [data-part-operator], [data-part-operand]) {
         opacity: 0;
         translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
       }
     }
 
-    [data-ui='filter-bar'][data-part='builder'] [data-part='group'] > [data-part='actions'] {
+    [data-ui-filter-bar][data-part-builder] [data-part-group] > [data-part-actions] {
       padding-inline-start: 0;
     }
 
@@ -1070,31 +1058,31 @@
      * nested group's pair stays a quiet line at the start of its rail: three
      * lines of full-width buttons read as three copies of one control.
      */
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='group'][data-depth='0']
-      > [data-part='actions'] {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-group][data-depth='0']
+      > [data-part-actions] {
       display: grid;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='group'][data-depth='0']
-      > [data-part='actions']
-      > :is([data-part='add-rule'], [data-part='add-group']) {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-group][data-depth='0']
+      > [data-part-actions]
+      > :is([data-part-add-rule], [data-part-add-group]) {
       inline-size: 100%;
     }
 
-    [data-ui='filter-bar'][data-part='builder']
-      [data-part='group']
-      > [data-part='actions']
-      > :is([data-part='clear'], [data-part='save-preset']) {
+    [data-ui-filter-bar][data-part-builder]
+      [data-part-group]
+      > [data-part-actions]
+      > :is([data-part-clear], [data-part-save-preset]) {
       margin-inline-start: 0;
     }
   }
 
   /* ── A builder row's remove control ─────────────────────────────────── */
 
-  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove'] {
+  [data-ui-filter-bar] [data-part-rule] > [data-part-remove] {
     align-items: center;
     appearance: none;
     background: none;
@@ -1113,21 +1101,21 @@
       color var(--_duration) var(--_easing);
   }
 
-  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove'] > [data-ui='icon'] {
+  [data-ui-filter-bar] [data-part-rule] > [data-part-remove] > [data-ui-icon] {
     --slotted-icon-size: var(--_icon);
   }
 
-  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove']:enabled:hover {
+  [data-ui-filter-bar] [data-part-rule] > [data-part-remove]:enabled:hover {
     background-color: var(--_hover);
     color: var(--_ink);
   }
 
-  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove']:enabled:active {
+  [data-ui-filter-bar] [data-part-rule] > [data-part-remove]:enabled:active {
     background-color: var(--_active);
     color: var(--_ink);
   }
 
-  [data-ui='filter-bar'] [data-part='rule'] > [data-part='remove']:focus-visible {
+  [data-ui-filter-bar] [data-part-rule] > [data-part-remove]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -1149,7 +1137,7 @@
    * answer.
    */
   @container slotted-filter-bar (max-width: 36rem) {
-    [data-ui='filter-bar'] > [data-part='frame'] {
+    [data-ui-filter-bar] > [data-part-frame] {
       grid-template-areas:
         'search'
         'bar'
@@ -1157,7 +1145,7 @@
       grid-template-columns: minmax(0, 1fr);
     }
 
-    [data-ui='filter-bar'] > [data-part='frame']:has(> [data-part='end']:not(:empty)) {
+    [data-ui-filter-bar] > [data-part-frame]:has(> [data-part-end]:not(:empty)) {
       grid-template-areas:
         'search'
         'bar'
@@ -1165,7 +1153,7 @@
         'count';
     }
 
-    [data-ui='filter-bar'] > [data-part='frame'] > [data-part='search'] {
+    [data-ui-filter-bar] > [data-part-frame] > [data-part-search] {
       max-inline-size: none;
     }
 
@@ -1177,63 +1165,60 @@
      * control gives (`focus-ring.test.mjs`) — so the row takes no room it
      * would have to give back as a negative margin.
      */
-    [data-ui='filter-bar'] > [data-part='frame'] > [data-part='bar'] {
+    [data-ui-filter-bar] > [data-part-frame] > [data-part-bar] {
       flex-wrap: nowrap;
       overflow-x: auto;
       overscroll-behavior-inline: contain;
       scrollbar-width: none;
     }
 
-    [data-ui='filter-bar']
-      > [data-part='frame']
-      > [data-part='bar']
-      > :is([data-part='summary'], [data-part='pill']):focus-visible {
+    [data-ui-filter-bar]
+      > [data-part-frame]
+      > [data-part-bar]
+      > :is([data-part-summary], [data-part-pill]):focus-visible {
       outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
     }
 
-    [data-ui='filter-bar'] > [data-part='frame'] > [data-part='bar']::-webkit-scrollbar {
+    [data-ui-filter-bar] > [data-part-frame] > [data-part-bar]::-webkit-scrollbar {
       display: none;
     }
 
-    [data-ui='filter-bar']
-      > [data-part='frame']
-      > [data-part='bar']
-      > :is([data-part='summary'], [data-part='chip'], [data-part='pill']) {
+    [data-ui-filter-bar]
+      > [data-part-frame]
+      > [data-part-bar]
+      > :is([data-part-summary], [data-part-chip], [data-part-pill]) {
       flex: none;
     }
 
-    [data-ui='filter-bar']
-      > [data-part='frame']
-      > [data-part='bar']
-      > :is([data-part='more'], [data-part='add'], [data-part='clear'], [data-part='actions']),
-    [data-ui='filter-bar'] [data-part='chip'] > [data-part='chip-operator'] {
+    [data-ui-filter-bar]
+      > [data-part-frame]
+      > [data-part-bar]
+      > :is([data-part-more], [data-part-add], [data-part-clear], [data-part-actions]),
+    [data-ui-filter-bar] [data-part-chip] > [data-part-chip-operator] {
       display: none;
       visibility: hidden;
     }
 
-    [data-ui='filter-bar']
-      > [data-part='frame']
-      > [data-part='bar']
-      > [data-part='chip'][data-folded] {
+    [data-ui-filter-bar] > [data-part-frame] > [data-part-bar] > [data-part-chip][data-folded] {
       display: inline-flex;
       visibility: visible;
     }
 
-    [data-ui='filter-bar'] [data-part='chip-value'] > [data-operator] {
+    [data-ui-filter-bar] [data-part-chip-value] > [data-operator] {
       display: inline;
     }
 
-    [data-ui='filter-bar'] [data-part='chip-value'] > [data-value] {
+    [data-ui-filter-bar] [data-part-chip-value] > [data-value] {
       max-inline-size: var(--slotted-filter-bar-value-max-narrow, 9rem);
     }
 
-    [data-ui='filter-bar'] [data-part='summary'] {
+    [data-ui-filter-bar] [data-part-summary] {
       display: inline-flex;
       visibility: visible;
     }
 
     /* A line of its own here, with nothing to line up with. */
-    [data-ui='filter-bar'] > [data-part='frame'] > [data-part='count'] {
+    [data-ui-filter-bar] > [data-part-frame] > [data-part-count] {
       justify-self: start;
       padding-block: 0;
     }
@@ -1246,7 +1231,7 @@
    * keyboard is attached.
    */
   @media (hover: none) and (pointer: coarse) {
-    [data-ui='filter-bar'] [data-part='search'] [data-ui='kbd'] {
+    [data-ui-filter-bar] [data-part-search] [data-ui-kbd] {
       display: none;
     }
   }
@@ -1259,12 +1244,11 @@
    * control height, which the theme already raises to the comfortable target.
    */
   @media (pointer: coarse) {
-    [data-ui='filter-bar'] :is([data-part='more'], [data-part='rule'] > [data-part='remove']) {
+    [data-ui-filter-bar] :is([data-part-more], [data-part-rule] > [data-part-remove]) {
       position: relative;
     }
 
-    [data-ui='filter-bar']
-      :is([data-part='more'], [data-part='rule'] > [data-part='remove'])::before {
+    [data-ui-filter-bar] :is([data-part-more], [data-part-rule] > [data-part-remove])::before {
       content: '';
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
       position: absolute;
@@ -1275,31 +1259,31 @@
     /* Forced colours remove the invalid edge's shadow; it comes back as an
        outline inside the border, and a focused invalid pill draws its ring
        double. A chip's ring belongs to a segment and leaves it alone. */
-    [data-ui='filter-bar'] [data-part='pill'][data-invalid],
-    [data-ui='filter-bar'] [data-part='chip'][data-invalid] {
+    [data-ui-filter-bar] [data-part-pill][data-invalid],
+    [data-ui-filter-bar] [data-part-chip][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
     }
 
-    [data-ui='filter-bar'] [data-part='pill'][data-invalid]:focus-visible {
+    [data-ui-filter-bar] [data-part-pill][data-invalid]:focus-visible {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
     /* The seams would read as a second edge in the system palette; the segments keep one line each. */
-    [data-ui='filter-bar'] [data-part='chip'] > * + * {
+    [data-ui-filter-bar] [data-part-chip] > * + * {
       border-inline-start-color: GrayText;
     }
 
-    [data-ui='filter-bar'] [data-part='chip'] > [aria-expanded='true'] {
+    [data-ui-filter-bar] [data-part-chip] > [aria-expanded='true'] {
       background-color: Highlight;
       color: HighlightText;
     }
   }
 
   @media print {
-    [data-ui='filter-bar'][data-sticky] {
+    [data-ui-filter-bar][data-sticky] {
       position: static;
     }
   }

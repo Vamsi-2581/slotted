@@ -2,11 +2,24 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/card/contract.json', import.meta.url), 'utf8'),
 );
 const css = readFileSync(new URL('./card.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./card.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./card.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -22,7 +35,7 @@ const normalized = declarations
   .replace(/\s*([{};,:])\s*/g, '$1')
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -40,7 +53,10 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part the contract declares', () => {
   for (const part of contract.members.card.parts) {
     if (part === 'root') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -131,8 +147,8 @@ test('never lets a state value depend on the value that state sets', () => {
  */
 test('says with the pointer that the whole surface is a target', () => {
   const interactive = normalized.split('{cursor:pointer;')[0].split('}').pop();
-  assert.ok(interactive?.includes("[data-part='selection']"), 'a choice card shows no pointer');
-  assert.ok(interactive?.includes("[data-part='link']"), 'a destination card shows no pointer');
+  assert.ok(interactive?.includes('[data-part-selection]'), 'a choice card shows no pointer');
+  assert.ok(interactive?.includes('[data-part-link]'), 'a destination card shows no pointer');
   assert.ok(
     interactive?.includes(':not([data-disabled])'),
     'a disabled card still invites a click',
@@ -145,17 +161,17 @@ test('says with the pointer that the whole surface is a target', () => {
  */
 test('never clips its own content', () => {
   assert.ok(!rule(ui).includes('overflow:'), 'the root clips, and an overlay inside it would too');
-  assert.ok(rule(`${ui} > [data-part='media']`).includes('overflow:hidden'));
+  assert.ok(rule(`${ui} > [data-part-media]`).includes('overflow:hidden'));
 });
 
 test('rounds only the corners the media actually touches', () => {
   assert.ok(
-    rule(`${ui} > [data-part='media']:first-child`).includes(
+    rule(`${ui} > [data-part-media]:first-child`).includes(
       'border-start-start-radius:var(--_card-radius)',
     ),
   );
   assert.ok(
-    rule(`${ui} > [data-part='media']:last-child`).includes(
+    rule(`${ui} > [data-part-media]:last-child`).includes(
       'border-end-end-radius:var(--_card-radius)',
     ),
   );
@@ -168,7 +184,7 @@ test('rounds only the corners the media actually touches', () => {
 test('carries the vertical rhythm in each region rather than in a gap', () => {
   assert.ok(!rule(ui).includes('row-gap:'), 'a gap would survive the region it separated');
   assert.ok(
-    rule(`${ui} >:is([data-part='header'],[data-part='body'],[data-part='footer'])`).includes(
+    rule(`${ui} >:is([data-part-header],[data-part-body],[data-part-footer])`).includes(
       'padding-block:var(--_card-region-gap)',
     ),
   );
@@ -176,18 +192,14 @@ test('carries the vertical rhythm in each region rather than in a gap', () => {
 
 test('gives a region at either end the padding its missing neighbour would carry', () => {
   assert.ok(
-    normalized.includes(
-      ":is([data-part='header'],[data-part='body'],[data-part='footer']):first-child",
-    ),
+    normalized.includes(':is([data-part-header],[data-part-body],[data-part-footer]):first-child'),
+  );
+  assert.ok(
+    normalized.includes(':is([data-part-header],[data-part-body],[data-part-footer]):last-child'),
   );
   assert.ok(
     normalized.includes(
-      ":is([data-part='header'],[data-part='body'],[data-part='footer']):last-child",
-    ),
-  );
-  assert.ok(
-    normalized.includes(
-      "> [data-part='media'] +:is([data-part='header'],[data-part='body'],[data-part='footer'])",
+      '> [data-part-media] +:is([data-part-header],[data-part-body],[data-part-footer])',
     ),
     'the region beside a bleeding media is at an end too',
   );
@@ -208,7 +220,7 @@ test('lays the media beside the regions in the orientation that says so', () => 
   assert.deepEqual(contract.axes.orientation, ['vertical', 'horizontal']);
   assert.ok(rule(`${ui}[data-orientation='horizontal']`).includes('display:grid'));
   assert.ok(
-    rule(`${ui}[data-orientation='horizontal'] > [data-part='media']`).includes(
+    rule(`${ui}[data-orientation='horizontal'] > [data-part-media]`).includes(
       'grid-area:1 / 1 / -1 / 2',
     ),
     'the media has to span every row of the content column',
@@ -216,13 +228,13 @@ test('lays the media beside the regions in the orientation that says so', () => 
 });
 
 test('stretches the hit area of the one link a card resolves to', () => {
-  const overlay = rule(`${ui} [data-part='link']::after`);
+  const overlay = rule(`${ui} [data-part-link]::after`);
   assert.ok(overlay.includes('position:absolute'));
   assert.ok(overlay.includes('inset:0'));
 });
 
 test('keeps the footer above that hit area, so a secondary action stays operable', () => {
-  assert.ok(rule(`${ui} > [data-part='footer']`).includes('position:relative'));
+  assert.ok(rule(`${ui} > [data-part-footer]`).includes('position:relative'));
 });
 
 /**
@@ -233,15 +245,15 @@ test('keeps the footer above that hit area, so a secondary action stays operable
 test('suppresses the action ring only where it can draw the card ring instead', () => {
   const suppressed = normalized.split('{outline:none;')[0].split('}').pop() ?? '';
   assert.ok(
-    suppressed.includes(`${ui}:has([data-part='link']) [data-part='link']:focus-visible`),
+    suppressed.includes(`${ui}:has([data-part-link]) [data-part-link]:focus-visible`),
     'the link keeps a ring of its own inside the card ring',
   );
   assert.ok(
-    suppressed.includes(`${ui}:has([data-part='selection'])`),
+    suppressed.includes(`${ui}:has([data-part-selection])`),
     'the choice control keeps a ring of its own inside the card ring',
   );
   const ring = rule(
-    `${ui}:has(:is([data-part='link'],[data-part='selection']:is(input,button)):focus-visible)`,
+    `${ui}:has(:is([data-part-link],[data-part-selection]:is(input,button)):focus-visible)`,
   );
   assert.ok(
     ring.includes('outline:var(--slotted-focus-ring-width'),
@@ -253,7 +265,7 @@ test('answers a choice card, not only a card that resolves somewhere', () => {
   for (const selector of normalized.split('}')) {
     if (!/:hover|:active/.test(selector)) continue;
     assert.ok(
-      selector.includes("[data-part='selection']"),
+      selector.includes('[data-part-selection]'),
       `"${selector}" answers the pointer only for a card that holds a link`,
     );
   }
@@ -308,11 +320,11 @@ test('says selected with the accent ground and a hairline accent edge', () => {
 test('keeps a column for the control that makes the card a choice', () => {
   assert.ok(
     normalized.includes(
-      `${ui} > [data-part='header']:has([data-part='selection']){grid-template-columns:auto minmax(0,1fr) auto`,
+      `${ui} > [data-part-header]:has([data-part-selection]){grid-template-columns:auto minmax(0,1fr) auto`,
     ),
     'the header does not open a column for the selection control',
   );
-  const selection = rule(`${ui} > [data-part='header'] > [data-part='selection']`);
+  const selection = rule(`${ui} > [data-part-header] > [data-part-selection]`);
   assert.ok(selection.includes('grid-column:1'), 'the control does not lead');
   assert.ok(selection.includes('grid-row:1'), 'the control leaves the title row');
   /* On the title's first line (C1, R5): a slot one line of the title's step
@@ -332,7 +344,7 @@ test('keeps a column for the control that makes the card a choice', () => {
  * in, fixed across densities (C1 after CK1).
  */
 test('sizes that control from the selection scale', () => {
-  const control = rule(`${ui} > [data-part='header'] > [data-part='selection'] >:is(input,button)`);
+  const control = rule(`${ui} > [data-part-header] > [data-part-selection] >:is(input,button)`);
   assert.ok(control.includes('var(--slotted-selection-size-md,16px)'));
   assert.ok(!control.includes('--slotted-control-icon-size'));
   assert.ok(
@@ -347,13 +359,13 @@ test('sizes that control from the selection scale', () => {
  */
 test('keeps the corner in the last column at either header width', () => {
   assert.ok(
-    rule(`${ui} > [data-part='header'] > [data-part='actions']`).includes('grid-column:-2 / -1'),
+    rule(`${ui} > [data-part-header] > [data-part-actions]`).includes('grid-column:-2 / -1'),
   );
 });
 
 test('withdraws the hit area it added when the card is marked disabled', () => {
   assert.ok(
-    rule(`${ui}[data-disabled] [data-part='link']::after`).includes('display:none'),
+    rule(`${ui}[data-disabled] [data-part-link]::after`).includes('display:none'),
     'a card that says disabled must not keep behaving like a destination',
   );
 });
@@ -395,11 +407,11 @@ test('adds elevation to the edge rather than replacing it', () => {
 });
 
 test('keeps a corner in the header for a badge, a status or a menu', () => {
-  const header = rule(`${ui} > [data-part='header']`);
+  const header = rule(`${ui} > [data-part-header]`);
   assert.ok(header.includes('display:grid'));
   assert.ok(header.includes('grid-template-columns:minmax(0,1fr) auto'));
 
-  const actions = rule(`${ui} > [data-part='header'] > [data-part='actions']`);
+  const actions = rule(`${ui} > [data-part-header] > [data-part-actions]`);
   assert.ok(actions.includes('grid-row:1'), 'a title wrapping to two lines drags the corner down');
   assert.ok(actions.includes('position:relative'), 'the corner sits under the stretched hit area');
 });
@@ -410,9 +422,9 @@ test('keeps a corner in the header for a badge, a status or a menu', () => {
  * of a horizontal card.
  */
 test('lets a Divider stand between two regions', () => {
-  assert.ok(rule(`${ui} > [data-ui='divider']`).includes('flex-shrink:0'));
+  assert.ok(rule(`${ui} > [data-ui-divider]`).includes('flex-shrink:0'));
   assert.ok(
-    rule(`${ui}[data-orientation='horizontal'] > [data-ui='divider']`).includes('grid-column:2'),
+    rule(`${ui}[data-orientation='horizontal'] > [data-ui-divider]`).includes('grid-column:2'),
   );
 });
 

@@ -559,7 +559,7 @@ export const Composition: Story = {
              <ng-template slDateTimeRangePickerOption let-label="label" let-duration="duration">
                {{ label }}
                @if (duration) {
-                 <span data-part="option-duration">{{ duration }}</span>
+                 <span data-part="option-duration" data-part-option-duration="">{{ duration }}</span>
                }
              </ng-template>
            </div>`,

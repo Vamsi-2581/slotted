@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -86,7 +87,7 @@ export function SideNavigationSection({
   render,
   ...nativeProps
 }: SideNavigationPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'section' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'section' });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -98,7 +99,7 @@ export function SideNavigationSectionLabel({
   render,
   ...nativeProps
 }: SideNavigationPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'section-label' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'section-label' });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -110,7 +111,7 @@ export function SideNavigationList({
   render,
   ...nativeProps
 }: SideNavigationListProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'list' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'list' });
   if (render !== undefined) return render(rootProps);
   return <ul {...rootProps} ref={ref} />;
 }
@@ -220,7 +221,7 @@ export function SideNavigationItem({
 
   const marked = current || (holdsCurrent && (!expanded || navigation.compact));
 
-  const rootProps: SideNavigationItemRootProps = {
+  const rootProps: SideNavigationItemRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -231,7 +232,7 @@ export function SideNavigationItem({
     'data-part': 'item',
     'data-value': value,
     style,
-  };
+  });
 
   return (
     <ItemContext.Provider value={context}>
@@ -314,7 +315,7 @@ export function SideNavigationLink({
     }
   };
 
-  const rootProps: SideNavigationLinkRootProps = {
+  const rootProps: SideNavigationLinkRootProps = keyedProps({
     ...nativeProps,
     ...(resolvedCurrent ? { 'aria-current': 'page' as const } : {}),
     ...(item.disabled ? { 'aria-disabled': 'true' as const } : {}),
@@ -326,7 +327,7 @@ export function SideNavigationLink({
     ...(href !== undefined ? { href } : {}),
     onClick: handleClick,
     style,
-  };
+  });
 
   /**
    * The tooltip's trigger composes the row's own handlers with its hover and
@@ -388,7 +389,7 @@ export function SideNavigationTrigger({
     navigation.toggleExpanded(item.value, !item.expanded, reason, event.nativeEvent);
   };
 
-  const rootProps: SideNavigationTriggerRootProps = {
+  const rootProps: SideNavigationTriggerRootProps = keyedProps({
     ...nativeProps,
     'aria-controls': item.ids.groupId,
     'aria-expanded': item.flyoutOpen || item.expanded,
@@ -396,7 +397,7 @@ export function SideNavigationTrigger({
     children: (
       <>
         {children}
-        <span aria-hidden="true" data-part="indicator">
+        <span aria-hidden="true" data-part="indicator" data-part-indicator="">
           <Icon directional>
             <Glyph name="chevron-right" />
           </Icon>
@@ -410,7 +411,7 @@ export function SideNavigationTrigger({
     onClick: handleClick,
     style,
     type: 'button',
-  };
+  });
 
   const setNode = useCallback(
     (node: HTMLElement | null) => {
@@ -447,7 +448,12 @@ export function SideNavigationIcon({
   render,
   ...nativeProps
 }: SideNavigationSpanPartProps) {
-  const rootProps = { ...nativeProps, 'aria-hidden': true, children, 'data-part': 'icon' };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    'aria-hidden': true,
+    children,
+    'data-part': 'icon',
+  });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }
@@ -507,12 +513,12 @@ export function SideNavigationLabel({
     text,
   ]);
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children: display ?? children,
     'data-part': 'label',
     id: item.ids.labelId,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return (
     <span
@@ -540,7 +546,7 @@ export function SideNavigationDescription({
     item.setDescriptionText(node.textContent ?? '');
   }, [children, item.setDescriptionText, node]);
 
-  const rootProps = { ...nativeProps, children, 'data-part': 'description' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'description' });
   if (render !== undefined) return render(rootProps);
   return (
     <span
@@ -560,7 +566,7 @@ export function SideNavigationCount({
   render,
   ...nativeProps
 }: SideNavigationSpanPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'count' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'count' });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }
@@ -572,7 +578,7 @@ export function SideNavigationEnd({
   render,
   ...nativeProps
 }: SideNavigationSpanPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'end' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'end' });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }
@@ -584,14 +590,18 @@ export function SideNavigationActions({
   render,
   ...nativeProps
 }: SideNavigationPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'actions' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'actions' });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
 
 /** A rule between items that keeps the list a list. */
 export function SideNavigationDivider({ ref, render, ...nativeProps }: SideNavigationDividerProps) {
-  const rootProps = { ...nativeProps, 'data-part': 'divider', role: 'separator' as const };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    'data-part': 'divider',
+    role: 'separator' as const,
+  });
   if (render !== undefined) return render(rootProps);
   return <li {...rootProps} ref={ref} />;
 }
@@ -603,11 +613,11 @@ export function SideNavigationSkeleton({
   ...nativeProps
 }: SideNavigationSkeletonProps) {
   return (
-    <li {...nativeProps} aria-hidden="true" data-part="skeleton" ref={ref}>
-      <span data-part="icon">
+    <li {...withSelectorKey(nativeProps, 'part', 'skeleton')} aria-hidden="true" ref={ref}>
+      <span data-part="icon" data-part-icon="">
         <Skeleton shape="square" size="xs" />
       </span>
-      <span data-part="label">
+      <span data-part="label" data-part-label="">
         <Skeleton inlineSize={labelSize} shape="text" />
       </span>
     </li>
@@ -750,11 +760,12 @@ function FlyoutLayer({
 
   return createPortal(
     <div
-      {...(navigation.guides ? { 'data-guides': '' } : {})}
-      data-part="flyout"
+      {...withSelectorKey(navigation.guides ? { 'data-guides': '' } : {}, 'part', 'flyout')}
+
       data-size={navigation.size}
       data-truncate={navigation.truncate}
       data-ui="side-navigation"
+      data-ui-side-navigation=""
       onBlur={onBlur}
       ref={setNode}
     >
@@ -789,7 +800,7 @@ export function SideNavigationGroup({
     if (item.flyoutOpen) setPresented(true);
   }, [item.flyoutOpen]);
 
-  const rootProps: SideNavigationGroupRootProps = {
+  const rootProps: SideNavigationGroupRootProps = keyedProps({
     ...nativeProps,
     'aria-labelledby': item.ids.labelId,
     children,
@@ -797,7 +808,7 @@ export function SideNavigationGroup({
     'data-part': 'group',
     id: item.ids.groupId,
     style,
-  };
+  });
 
   const list = render === undefined ? <ul {...rootProps} ref={ref} /> : render(rootProps);
 

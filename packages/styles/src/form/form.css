@@ -14,10 +14,10 @@
    * Both stand anywhere inside the form, and so do other families' parts of
    * the same names — a `table`'s summary row, a `section`'s actions. The two
    * carry the family's identifier, and every rule names them by it: a rule
-   * that reached `[data-part='summary']` as any descendant painted a table's
+   * that reached `[data-part-summary]` as any descendant painted a table's
    * totals as an error panel.
    */
-  [data-ui='form'][data-part='root'] {
+  [data-ui-form][data-part-root] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
 
     /**
@@ -48,7 +48,7 @@
    * with `aria-busy`, because the pointer is where a reader who just pressed
    * the button already is.
    */
-  [data-ui='form'][data-part='root'][data-loading] {
+  [data-ui-form][data-part-root][data-loading] {
     cursor: progress;
   }
 
@@ -63,7 +63,7 @@
    * they read it. The tone tokens are the theme's, so the panel answers the
    * scheme switch instead of being a red box that turns black.
    */
-  [data-ui='form'][data-part='summary'] {
+  [data-ui-form][data-part-summary] {
     background-color: var(--slotted-form-summary-background, var(--slotted-tone-danger-surface));
     border: var(--slotted-control-border-width, 1px) solid
       var(--slotted-form-summary-border-color, var(--slotted-tone-danger-border));
@@ -88,12 +88,12 @@
    * announced, and the ring is the family's own: a `tabindex="-1"` target that
    * showed nothing on focus would move a reader somewhere they cannot see.
    */
-  [data-ui='form'][data-part='summary']:focus-visible {
+  [data-ui-form][data-part-summary]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='form'][data-part='summary'] > [data-part='summary-title'] {
+  [data-ui-form][data-part-summary] > [data-part-summary-title] {
     font-family: var(
       --slotted-font-family-heading,
       var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
@@ -104,7 +104,7 @@
     margin: 0;
   }
 
-  [data-ui='form'][data-part='summary'] > [data-part='summary-list'] {
+  [data-ui-form][data-part-summary] > [data-part-summary-list] {
     display: flex;
     flex-direction: column;
     gap: var(--slotted-space-2, 0.25rem);
@@ -130,26 +130,23 @@
     padding-inline-start: 0;
   }
 
-  [data-ui='form'][data-part='summary']
-    > [data-part='summary-list']
-    > li
-    > [data-part='summary-item'] {
+  [data-ui-form][data-part-summary] > [data-part-summary-list] > li > [data-part-summary-item] {
     color: inherit;
     text-decoration-line: underline;
     text-underline-offset: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='form'][data-part='summary']
-    > [data-part='summary-list']
+  [data-ui-form][data-part-summary]
+    > [data-part-summary-list]
     > li
-    > [data-part='summary-item']:hover:not(:disabled) {
+    > [data-part-summary-item]:hover:not(:disabled) {
     text-decoration-thickness: var(--slotted-border-width-thick, 2px);
   }
 
-  [data-ui='form'][data-part='summary']
-    > [data-part='summary-list']
+  [data-ui-form][data-part-summary]
+    > [data-part-summary-list]
     > li
-    > [data-part='summary-item']:focus-visible {
+    > [data-part-summary-item]:focus-visible {
     border-radius: var(--slotted-radius-xs, 2px);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
@@ -162,7 +159,7 @@
    * forbids a custom property in a container condition, which
    * `docs/token-foundation.md` rule 4 records.
    */
-  [data-ui='form'][data-part='actions'] {
+  [data-ui-form][data-part-actions] {
     display: flex;
     flex-wrap: wrap;
     gap: var(--slotted-space-4, 0.5rem);
@@ -170,15 +167,15 @@
     margin-block-start: var(--slotted-space-8, 1.5rem);
   }
 
-  [data-ui='form'][data-part='actions'][data-align='start'] {
+  [data-ui-form][data-part-actions][data-align='start'] {
     justify-content: flex-start;
   }
 
-  [data-ui='form'][data-part='actions'][data-align='between'] {
+  [data-ui-form][data-part-actions][data-align='between'] {
     justify-content: space-between;
   }
 
-  [data-ui='form'][data-part='actions'][data-align='stretch'] > * {
+  [data-ui-form][data-part-actions][data-align='stretch'] > * {
     flex: 1 1 0;
   }
 
@@ -194,11 +191,11 @@
    * action they came to take belongs first.
    */
   @container slotted-form (max-width: 360px) {
-    [data-ui='form'][data-part='actions'] {
+    [data-ui-form][data-part-actions] {
       flex-direction: column-reverse;
     }
 
-    [data-ui='form'][data-part='actions'] > * {
+    [data-ui-form][data-part-actions] > * {
       inline-size: 100%;
     }
   }
@@ -210,7 +207,7 @@
    * panel with nothing but its border.
    */
   @media (forced-colors: active) {
-    [data-ui='form'][data-part='summary'] {
+    [data-ui-form][data-part-summary] {
       border-color: CanvasText;
       border-inline-start-color: Highlight;
     }

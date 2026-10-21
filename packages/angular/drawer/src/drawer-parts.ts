@@ -1,3 +1,4 @@
+import { hostSelectorKey } from '@slotted/core/selector-key';
 import {
   EXTENT_LARGE_STEP_PX,
   EXTENT_STEP_PX,
@@ -84,9 +85,11 @@ export class SlDrawerTrigger implements OnInit, OnDestroy {
    * two directives write one attribute, and the family the element is drawn by
    * keeps it, as React's `render` does by spreading the button's props last.
    */
-  protected readonly part = this.native.hasAttribute('data-ui')
-    ? this.native.getAttribute('data-part')
-    : 'trigger';
+  protected readonly part = hostSelectorKey(
+    this.native,
+    'part',
+    this.native.hasAttribute('data-ui') ? this.native.getAttribute('data-part') : 'trigger',
+  );
 
   protected readonly controls = computed(() =>
     this.drawer().mounted() ? this.drawer().panelId : null,
@@ -116,7 +119,7 @@ export class SlDrawerTrigger implements OnInit, OnDestroy {
   selector: '[slDrawerHeader]',
   standalone: true,
   exportAs: 'slDrawerHeader',
-  host: { 'data-part': 'header' },
+  host: { 'data-part': 'header', 'data-part-header': '' },
 })
 export class SlDrawerHeader {}
 
@@ -128,7 +131,7 @@ export class SlDrawerHeader {}
   selector: '[slDrawerTitle]',
   standalone: true,
   exportAs: 'slDrawerTitle',
-  host: { 'data-part': 'title', '[id]': 'drawer.titleId' },
+  host: { 'data-part': 'title', 'data-part-title': '', '[id]': 'drawer.titleId' },
 })
 export class SlDrawerTitle implements OnInit, OnDestroy {
   protected readonly drawer = inject(SlDrawer);
@@ -147,7 +150,7 @@ export class SlDrawerTitle implements OnInit, OnDestroy {
   selector: '[slDrawerDescription]',
   standalone: true,
   exportAs: 'slDrawerDescription',
-  host: { 'data-part': 'description', '[id]': 'drawer.descriptionId' },
+  host: { 'data-part': 'description', 'data-part-description': '', '[id]': 'drawer.descriptionId' },
 })
 export class SlDrawerDescription implements OnInit, OnDestroy {
   protected readonly drawer = inject(SlDrawer);
@@ -173,6 +176,7 @@ export class SlDrawerDescription implements OnInit, OnDestroy {
   exportAs: 'slDrawerBody',
   host: {
     'data-part': 'body',
+    'data-part-body': '',
     '[attr.aria-busy]': "drawer.loading() ? 'true' : null",
     '[attr.data-inset]': 'inset() ?? null',
   },
@@ -187,7 +191,7 @@ export class SlDrawerBody {
   selector: '[slDrawerFooter]',
   standalone: true,
   exportAs: 'slDrawerFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlDrawerFooter {}
 
@@ -208,6 +212,7 @@ export class SlDrawerFooter {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'close',
+    'data-part-close': '',
     type: 'button',
     '[attr.aria-label]': 'label()',
     '(click)': 'press($event)',
@@ -260,14 +265,15 @@ const TAP_SLOP_PX = 3;
    * resort. The selector is unchanged, so no consumer's template moves.
    */
   template: `
-    <span data-part="line" aria-hidden="true"></span>
-    <span data-part="grip" aria-hidden="true"></span>
-    <span data-part="line" aria-hidden="true"></span>
+    <span data-part="line" data-part-line="" aria-hidden="true"></span>
+    <span data-part="grip" data-part-grip="" aria-hidden="true"></span>
+    <span data-part="line" data-part-line="" aria-hidden="true"></span>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'resizer',
+    'data-part-resizer': '',
     role: 'separator',
     tabindex: '0',
     '[attr.aria-controls]': 'drawer.panelId',

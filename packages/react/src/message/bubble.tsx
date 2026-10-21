@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createControllable } from '@slotted/core/state';
 import {
   advanceStream,
@@ -103,6 +104,7 @@ export function Bubble({
         aria-controls={contentId}
         aria-expanded={shown}
         data-part="more"
+        data-part-more=""
         onClick={(event: MouseEvent<HTMLButtonElement>) =>
           requestRevealed(!shown, reasonOf(event), event)
         }
@@ -115,7 +117,7 @@ export function Bubble({
       </button>
     ) : null;
 
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -132,7 +134,7 @@ export function Bubble({
     style: clamped
       ? ({ ...style, '--slotted-message-max-lines': maxLines } as CSSProperties)
       : style,
-  };
+  });
 
   return (
     <BubbleContext.Provider value={context}>
@@ -171,12 +173,12 @@ export function BubbleContent({ id, ref, render, ...nativeProps }: BubbleContent
     [ref],
   );
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'data-part': 'content',
     id: id ?? bubble.contentId,
     ref: attach,
-  } as MessageRootProps;
+  }) as MessageRootProps;
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -187,7 +189,7 @@ export function BubbleContent({ id, ref, render, ...nativeProps }: BubbleContent
  * its mark here and keeps its word for assistive technology.
  */
 export function BubbleMeta({ render, ...nativeProps }: MessageSpanProps) {
-  const rootProps: MessageRootProps = { ...nativeProps, 'data-part': 'meta' };
+  const rootProps: MessageRootProps = keyedProps({ ...nativeProps, 'data-part': 'meta' });
   return (
     <BubbleMetaContext.Provider value={true}>
       {render === undefined ? <span {...rootProps} /> : render(rootProps)}
@@ -209,11 +211,19 @@ export function BubbleQuote({
 }: BubbleQuoteProps) {
   const body = (
     <>
-      {author === undefined ? null : <span data-part="quote-author">{author}</span>}
+      {author === undefined ? null : (
+        <span data-part="quote-author" data-part-quote-author="">
+          {author}
+        </span>
+      )}
       {children}
     </>
   );
-  const rootProps: MessageRootProps = { ...nativeProps, children: body, 'data-part': 'quote' };
+  const rootProps: MessageRootProps = keyedProps({
+    ...nativeProps,
+    children: body,
+    'data-part': 'quote',
+  });
   if (render !== undefined) return render(rootProps);
   if (onJump !== undefined) {
     return (
@@ -258,7 +268,7 @@ export function BubbleStream({ text, animate, render, ...nativeProps }: BubbleSt
     });
     setCurrent({ stream, streaming });
   }
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     ...nativeProps,
     'data-part': 'stream',
     children: (
@@ -267,6 +277,7 @@ export function BubbleStream({ text, animate, render, ...nativeProps }: BubbleSt
         {stream.chunks.map((chunk) => (
           <span
             data-part="stream-chunk"
+            data-part-stream-chunk=""
             key={chunk.key}
             onAnimationEnd={() =>
               setCurrent((previous) => ({
@@ -281,14 +292,18 @@ export function BubbleStream({ text, animate, render, ...nativeProps }: BubbleSt
         ))}
       </>
     ),
-  };
+  });
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }
 
 /** The caret at the end of the words that have arrived while a reply streams. */
 export function BubbleCaret(props: MessageSpanProps) {
   const { render, ...nativeProps } = props;
-  const rootProps: MessageRootProps = { 'aria-hidden': true, ...nativeProps, 'data-part': 'caret' };
+  const rootProps: MessageRootProps = keyedProps({
+    'aria-hidden': true,
+    ...nativeProps,
+    'data-part': 'caret',
+  });
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }
 
@@ -296,7 +311,7 @@ export function BubbleCaret(props: MessageSpanProps) {
 export function BubbleTyping(props: BubbleTypingProps) {
   const t = useMessageWords();
   return (
-    <span aria-label={t('typing')} role="img" {...props} data-part="typing">
+    <span aria-label={t('typing')} role="img" {...withSelectorKey(props, 'part', 'typing')}>
       <span />
       <span />
       <span />
@@ -312,7 +327,7 @@ export function BubbleTyping(props: BubbleTypingProps) {
 export function BubbleRetry({ children, onClick, render, ...nativeProps }: BubbleRetryProps) {
   const message = useOptionalMessage();
   const t = useMessageWords();
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-label': t('retry'),
     type: 'button',
     ...nativeProps,
@@ -327,7 +342,7 @@ export function BubbleRetry({ children, onClick, render, ...nativeProps }: Bubbl
       if (event.defaultPrevented) return;
       message?.onRetry?.({ reason: reasonOf(event), source: event });
     },
-  } as MessageRootProps;
+  }) as MessageRootProps;
   return render === undefined ? (
     <button {...(rootProps as ButtonHTMLAttributes<HTMLButtonElement>)} />
   ) : (
@@ -338,12 +353,12 @@ export function BubbleRetry({ children, onClick, render, ...nativeProps }: Bubbl
 /** The row of reactions straddling the surface's lower edge; in a thread, a row under the words. */
 export function BubbleReactions({ render, ...nativeProps }: MessagePartProps) {
   const t = useMessageWords();
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     'aria-label': t('reactions'),
     role: 'group',
     ...nativeProps,
     'data-part': 'reactions',
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -380,15 +395,19 @@ export function BubbleReaction({
     <button
       aria-pressed={current}
       type="button"
-      {...nativeProps}
-      data-part="reaction"
+      {...withSelectorKey(nativeProps, 'part', 'reaction')}
+
       {...(current ? { 'data-pressed': '' } : {})}
       {...(disabled ? { 'data-disabled': '' } : {})}
       disabled={disabled}
       onClick={toggle}
     >
       {children}
-      {count === undefined ? null : <span data-part="reaction-count">{count}</span>}
+      {count === undefined ? null : (
+        <span data-part="reaction-count" data-part-reaction-count="">
+          {count}
+        </span>
+      )}
     </button>
   );
 }

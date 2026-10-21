@@ -23,23 +23,43 @@ function message(): SlMessage {
 }
 
 /** The box the sender's avatar stands in: at the foot of a run, or beside the name in a thread. */
-@Directive({ selector: '[slMessageAvatar]', standalone: true, host: { 'data-part': 'avatar' } })
+@Directive({
+  selector: '[slMessageAvatar]',
+  standalone: true,
+  host: { 'data-part': 'avatar', 'data-part-avatar': '' },
+})
 export class SlMessageAvatar {}
 
 /** The column of the words: the header, the bubbles, the attachments and the footer. */
-@Directive({ selector: '[slMessageBody]', standalone: true, host: { 'data-part': 'body' } })
+@Directive({
+  selector: '[slMessageBody]',
+  standalone: true,
+  host: { 'data-part': 'body', 'data-part-body': '' },
+})
 export class SlMessageBody {}
 
 /** The name and, in a thread, the hour, over the words. */
-@Directive({ selector: '[slMessageHeader]', standalone: true, host: { 'data-part': 'header' } })
+@Directive({
+  selector: '[slMessageHeader]',
+  standalone: true,
+  host: { 'data-part': 'header', 'data-part-header': '' },
+})
 export class SlMessageHeader {}
 
 /** What is said about the message under it: a receipt outside a bubble, the actions, the versions. */
-@Directive({ selector: '[slMessageFooter]', standalone: true, host: { 'data-part': 'footer' } })
+@Directive({
+  selector: '[slMessageFooter]',
+  standalone: true,
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
+})
 export class SlMessageFooter {}
 
 /** The hour, on the `time` element the page wrote with its `datetime`. */
-@Directive({ selector: 'time[slMessageTime]', standalone: true, host: { 'data-part': 'time' } })
+@Directive({
+  selector: 'time[slMessageTime]',
+  standalone: true,
+  host: { 'data-part': 'time', 'data-part-time': '' },
+})
 export class SlMessageTime {}
 
 /**
@@ -50,7 +70,7 @@ export class SlMessageTime {}
 @Directive({
   selector: '[slMessageAuthor]',
   standalone: true,
-  host: { 'data-part': 'author', '[attr.id]': 'id' },
+  host: { 'data-part': 'author', 'data-part-author': '', '[attr.id]': 'id' },
 })
 export class SlMessageAuthor {
   private readonly owner = message();
@@ -68,7 +88,11 @@ export class SlMessageAuthor {
  * last line. A receipt inside it draws its mark and keeps its word for
  * assistive technology.
  */
-@Directive({ selector: '[slBubbleMeta]', standalone: true, host: { 'data-part': 'meta' } })
+@Directive({
+  selector: '[slBubbleMeta]',
+  standalone: true,
+  host: { 'data-part': 'meta', 'data-part-meta': '' },
+})
 export class SlBubbleMeta {}
 
 const RECEIPT_GLYPH = {
@@ -95,7 +119,7 @@ const RECEIPT_GLYPH = {
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'receipt', '[attr.data-status]': 'resolved()' },
+  host: { 'data-part': 'receipt', 'data-part-receipt': '', '[attr.data-status]': 'resolved()' },
 })
 export class SlMessageReceipt {
   /** Falls back to the row's status. */
@@ -121,6 +145,7 @@ export class SlMessageReceipt {
   standalone: true,
   host: {
     'data-part': 'actions',
+    'data-part-actions': '',
     role: 'toolbar',
     '[attr.aria-label]': 'label()',
   },
@@ -135,7 +160,7 @@ export class SlMessageActions {
 @Directive({
   selector: '[slMessageActivity]',
   standalone: true,
-  host: { 'data-part': 'activity', role: 'status' },
+  host: { 'data-part': 'activity', 'data-part-activity': '', role: 'status' },
 })
 export class SlMessageActivity {}
 
@@ -149,7 +174,9 @@ export class SlMessageActivity {}
         <span slIcon><svg slGlyph name="check"></svg></span>
       }
       @case ('current') {
-        <span aria-hidden="true"><span aria-hidden="true" data-ui="spinner"></span></span>
+        <span aria-hidden="true"
+          ><span aria-hidden="true" data-ui="spinner" data-ui-spinner=""></span
+        ></span>
       }
       @default {
         <span aria-hidden="true"></span>
@@ -160,6 +187,7 @@ export class SlMessageActivity {}
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'activity-step',
+    'data-part-activity-step': '',
     '[attr.data-complete]': "status() === 'complete' ? '' : null",
     '[attr.data-current]': "status() === 'current' ? '' : null",
     '[attr.aria-current]': "status() === 'current' ? 'step' : null",
@@ -183,16 +211,20 @@ export class SlMessageActivityStep {
     <button
       type="button"
       data-part="version-previous"
+      data-part-version-previous=""
       [attr.aria-label]="owner.t('previousVersion')"
       [disabled]="owner.version() <= 0"
       (click)="step(-1, $event)"
     >
       <span slIcon><svg slGlyph name="chevron-right"></svg></span>
     </button>
-    <span data-part="version-label" aria-live="polite">{{ label() }}</span>
+    <span data-part="version-label" data-part-version-label="" aria-live="polite">{{
+      label()
+    }}</span>
     <button
       type="button"
       data-part="version-next"
+      data-part-version-next=""
       [attr.aria-label]="owner.t('nextVersion')"
       [disabled]="owner.version() >= owner.versionCount() - 1"
       (click)="step(1, $event)"
@@ -204,6 +236,7 @@ export class SlMessageActivityStep {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'versions',
+    'data-part-versions': '',
     role: 'group',
     '[attr.aria-label]': "owner.t('versions')",
     '[attr.hidden]': "owner.versionCount() > 1 ? null : ''",

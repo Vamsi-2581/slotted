@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import {
   anchorsAtStart,
   EXTENT_LARGE_STEP_PX,
@@ -91,7 +92,13 @@ export function AppShellBanner({
   ...nativeProps
 }: AppShellBannerProps) {
   const attach = useNode('banner', ref as never);
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'banner', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'banner',
+    style,
+  });
   return part(rootProps, render) ?? <header {...rootProps} ref={attach} />;
 }
 
@@ -104,7 +111,13 @@ export function AppShellBrand({
   style,
   ...nativeProps
 }: AppShellBrandProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'brand', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'brand',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -120,7 +133,13 @@ export function AppShellCentre({
   style,
   ...nativeProps
 }: AppShellCentreProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'centre', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'centre',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -133,7 +152,13 @@ export function AppShellActions({
   style,
   ...nativeProps
 }: AppShellActionsProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'actions', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'actions',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -159,7 +184,7 @@ export function AppShellNav({
   const attach = useNode('nav', ref as never);
   useRegion('nav');
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel ?? shell.t('nav'),
     children,
@@ -167,7 +192,7 @@ export function AppShellNav({
     'data-part': 'nav',
     id: id ?? shell.navId,
     style,
-  };
+  });
   return part(rootProps, render) ?? <nav {...rootProps} ref={attach} />;
 }
 
@@ -184,7 +209,13 @@ export function AppShellNavRail({
   style,
   ...nativeProps
 }: AppShellNavSectionProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'nav-rail', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'nav-rail',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -197,7 +228,13 @@ export function AppShellNavHeader({
   style,
   ...nativeProps
 }: AppShellNavSectionProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'nav-header', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'nav-header',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -210,7 +247,13 @@ export function AppShellNavBody({
   style,
   ...nativeProps
 }: AppShellNavSectionProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'nav-body', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'nav-body',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -223,7 +266,13 @@ export function AppShellNavFooter({
   style,
   ...nativeProps
 }: AppShellNavSectionProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'nav-footer', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'nav-footer',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -249,7 +298,7 @@ export function AppShellMain({
   const attach = useNode('main', ref as never);
   useRegion('main');
 
-  const rootProps = {
+  const rootProps = keyedProps({
     /** The wait on this region's edge; an `aria-busy` the consumer wrote wins. */
     ...(shell.busy ? { 'aria-busy': true } : {}),
     ...nativeProps,
@@ -258,7 +307,7 @@ export function AppShellMain({
     'data-part': 'main',
     id: id ?? shell.mainId,
     style,
-  };
+  });
   return part(rootProps, render) ?? <main {...rootProps} ref={attach} />;
 }
 
@@ -298,7 +347,7 @@ export function AppShellProgress({
   useEffect(() => () => setBusy(false), [setBusy]);
 
   return (
-    <div data-part="progress">
+    <div data-part="progress" data-part-progress="">
       <ProgressBar
         {...barProps}
         delay={0}
@@ -338,7 +387,7 @@ export function AppShellAside({
   /* The extent as the column's width: a fraction of the shell in `cqi`, which
      the stylesheet reads in the column alone. */
   const extent = shell.asideExtent;
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel ?? shell.t('aside'),
     children,
@@ -353,7 +402,7 @@ export function AppShellAside({
             ...style,
             '--slotted-app-shell-aside-extent': `${Math.round(extent * 10000) / 100}cqi`,
           } as CSSProperties),
-  };
+  });
   return part(rootProps, render) ?? <aside {...rootProps} ref={attach} />;
 }
 
@@ -366,7 +415,13 @@ export function AppShellAsideHeader({
   style,
   ...nativeProps
 }: AppShellAsideSectionProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'aside-header', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'aside-header',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -383,14 +438,14 @@ export function AppShellAsideBody({
   style,
   ...nativeProps
 }: AppShellAsideBodyProps) {
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children,
     className,
     ...(inset === undefined ? {} : { 'data-inset': inset }),
     'data-part': 'aside-body',
     style,
-  };
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -596,7 +651,7 @@ export function AppShellAsideResizer({
     else if (ref) ref.current = element;
   };
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-controls': shell.asideId,
     'aria-label': ariaLabel ?? shell.t('resizeAside'),
@@ -614,7 +669,7 @@ export function AppShellAsideResizer({
     role: 'separator' as const,
     style,
     tabIndex: 0,
-  };
+  });
   if (render !== undefined) return render({ ...rootProps, ref: attach } as never);
   return <div {...rootProps} ref={attach} />;
 }
@@ -628,7 +683,13 @@ export function AppShellAsideFooter({
   style,
   ...nativeProps
 }: AppShellAsideSectionProps) {
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'aside-footer', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'aside-footer',
+    style,
+  });
   return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
 }
 
@@ -642,7 +703,13 @@ export function AppShellFooter({
   ...nativeProps
 }: AppShellFooterProps) {
   const attach = useNode('footer', ref as never);
-  const rootProps = { ...nativeProps, children, className, 'data-part': 'footer', style };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children,
+    className,
+    'data-part': 'footer',
+    style,
+  });
   return part(rootProps, render) ?? <footer {...rootProps} ref={attach} />;
 }
 
@@ -685,7 +752,7 @@ export function AppShellNavToggle({
     [onClick, shell],
   );
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-controls': ariaControls ?? shell.navId,
     'aria-expanded': shell.open,
@@ -702,7 +769,7 @@ export function AppShellNavToggle({
     onClick: press,
     style,
     type: type ?? ('button' as const),
-  };
+  });
   return part(rootProps, render) ?? <button {...rootProps} ref={attach} />;
 }
 
@@ -738,7 +805,7 @@ export function AppShellAsideToggle({
     [onClick, shell],
   );
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-controls': ariaControls ?? shell.asideId,
     'aria-expanded': shell.asideOpen,
@@ -754,6 +821,6 @@ export function AppShellAsideToggle({
     onClick: press,
     style,
     type: type ?? ('button' as const),
-  };
+  });
   return part(rootProps, render) ?? <button {...rootProps} ref={attach} />;
 }

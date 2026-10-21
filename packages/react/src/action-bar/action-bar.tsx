@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/action-bar/action-bar.css';
 
 import { createCollapse } from '@slotted/core/overflow';
@@ -293,7 +294,7 @@ export function ActionBar({
   if (status === 'unmounted') return null;
 
   const hidden = collapsed.current.length;
-  const rootProps: ActionBarRootProps = {
+  const rootProps: ActionBarRootProps = keyedProps({
     role: 'group',
     ...nativeProps,
     children: <ButtonDefaultsProvider size={resolvedSize}>{children}</ButtonDefaultsProvider>,
@@ -307,7 +308,7 @@ export function ActionBar({
     'data-ui': 'action-bar',
     'data-variant': resolvedVariant,
     style,
-  };
+  });
 
   return (
     <ActionBarOverflowContext.Provider value={overflowValue}>

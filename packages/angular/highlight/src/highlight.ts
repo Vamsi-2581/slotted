@@ -38,13 +38,15 @@ import type { HighlightOccurrences, HighlightSensitivity } from './highlight-def
   standalone: true,
   exportAs: 'slHighlight',
   // prettier-ignore
-  template: `@for (run of runs(); track $index) {@if (run.matched) {<mark data-part="match" [attr.data-current]="run.index === current() ? '' : null">{{ run.text }}</mark>} @else {{{ run.text }}}}`,
+  template: `@for (run of runs(); track $index) {@if (run.matched) {<mark data-part="match" data-part-match="" [attr.data-current]="run.index === current() ? '' : null">{{ run.text }}</mark>} @else {{{ run.text }}}}`,
   styleUrl: '../../../styles/src/highlight/highlight.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'highlight',
+    'data-ui-highlight': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-disabled]': 'disabled() ? "" : null',
   },
 })

@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/tag/tag.css';
 
 import { tagMessages } from '@slotted/core/i18n';
@@ -83,7 +84,9 @@ export function rootData(
 ) {
   return {
     'data-ui': 'tag',
+    ...selectorKeyProps('ui', 'tag'),
     'data-part': 'root',
+    ...selectorKeyProps('part', 'root'),
     'data-tone': appearance.tone,
     'data-variant': appearance.variant,
     'data-size': appearance.size,
@@ -178,11 +181,19 @@ export function TagContent({ children, end, indicator, labelId, start }: TagCont
   return (
     <>
       {indicator}
-      {start === undefined ? null : <span data-part="start">{start}</span>}
-      <span data-part="label" id={labelId}>
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
+      <span data-part="label" data-part-label="" id={labelId}>
         {children}
       </span>
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
     </>
   );
 }
@@ -208,6 +219,7 @@ export function TagRemove({ labelId, removal, wordId }: TagRemoveOptions) {
     <button
       aria-labelledby={`${wordId} ${labelId}`}
       data-part="remove"
+      data-part-remove=""
       disabled={removal.removeDisabled}
       onClick={(event: MouseEvent<HTMLButtonElement>) => {
         /* The X is its own target. A handler the consumer put on the chip is
@@ -253,7 +265,7 @@ export function TagFrame({
   selected,
 }: TagFrameOptions) {
   const itemRole = useTagItemRole();
-  const props: TagRootProps = {
+  const props: TagRootProps = keyedProps({
     ...rootProps,
     ...rootData(appearance, { disabled: disabled === true, selected }),
     children,
@@ -262,7 +274,7 @@ export function TagFrame({
       rootProps?.onKeyDown?.(event);
       removalKeydown(removal)(event);
     },
-  };
+  });
 
   return render === undefined ? <span {...props} /> : render(props);
 }

@@ -173,6 +173,7 @@ function sameKeys(a: readonly string[], b: readonly string[]) {
       @if (windowed()) {
         <div
           data-part="canvas"
+          data-part-canvas=""
           role="presentation"
           [style.--_canvas-size]="slice().totalSize + 'px'"
           [style.--_canvas-offset]="slice().startOffset + 'px'"
@@ -234,7 +235,9 @@ function sameKeys(a: readonly string[], b: readonly string[]) {
     </ng-template>`,
   host: {
     'data-ui': 'listbox',
+    'data-ui-listbox': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'writtenRole ?? "listbox"',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',

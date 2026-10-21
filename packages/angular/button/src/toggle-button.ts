@@ -55,12 +55,14 @@ import {
   selector: 'button[slToggleButton]',
   standalone: true,
   template: `<ng-content select="[slButtonStart]"></ng-content
-    ><span data-part="label"><ng-content></ng-content></span
+    ><span data-part="label" data-part-label=""><ng-content></ng-content></span
     ><ng-content select="[slButtonEnd]"></ng-content>
     @if (waiting() && !hasVisualSlot()) {
       <span
         data-part="indicator"
+        data-part-indicator=""
         data-ui="spinner"
+        data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="t('loading')"
       ></span>
@@ -72,7 +74,9 @@ import {
   providers: [{ provide: BUTTON_WAIT, useExisting: forwardRef(() => SlToggleButton) }],
   host: {
     'data-ui': 'button',
+    'data-ui-button': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-disabled]': 'inert.ariaDisabled()',
     '[attr.aria-pressed]': 'isPressed()',
     '[attr.data-tone]': 'appearance.tone()',

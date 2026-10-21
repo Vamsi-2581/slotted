@@ -210,34 +210,34 @@ export class SlNotificationActions {
     SlTabs,
   ],
   template: `
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       @switch (levelValue()) {
         @case ('3') {
-          <h3 data-part="title" [id]="titleId">
+          <h3 data-part="title" data-part-title="" [id]="titleId">
             {{ t('title') }}
             @if (unread() > 0) {
-              <span data-part="count">{{ unread() }}</span>
+              <span data-part="count" data-part-count="">{{ unread() }}</span>
             }
           </h3>
         }
         @case ('4') {
-          <h4 data-part="title" [id]="titleId">
+          <h4 data-part="title" data-part-title="" [id]="titleId">
             {{ t('title') }}
             @if (unread() > 0) {
-              <span data-part="count">{{ unread() }}</span>
+              <span data-part="count" data-part-count="">{{ unread() }}</span>
             }
           </h4>
         }
         @default {
-          <h2 data-part="title" [id]="titleId">
+          <h2 data-part="title" data-part-title="" [id]="titleId">
             {{ t('title') }}
             @if (unread() > 0) {
-              <span data-part="count">{{ unread() }}</span>
+              <span data-part="count" data-part-count="">{{ unread() }}</span>
             }
           </h2>
         }
       }
-      <span data-part="mark-all">
+      <span data-part="mark-all" data-part-mark-all="">
         <button
           slButton
           size="sm"
@@ -253,7 +253,7 @@ export class SlNotificationActions {
       <ng-content select="[slNotificationCenterActions]" />
     </div>
     @if (viewList().length > 1) {
-      <div data-part="views">
+      <div data-part="views" data-part-views="">
         <div
           slTabs
           track="none"
@@ -266,7 +266,7 @@ export class SlNotificationActions {
               <div slTab [value]="entry.value" [controls]="feedId">
                 {{ entry.label }}
                 @if (entry.count !== undefined && entry.count > 0) {
-                  &ngsp;<span data-part="count">{{ entry.count }}</span>
+                  &ngsp;<span data-part="count" data-part-count="">{{ entry.count }}</span>
                 }
               </div>
             }
@@ -275,13 +275,20 @@ export class SlNotificationActions {
       </div>
     }
     @if (held().length > 0) {
-      <button #fresh data-part="fresh" type="button" (click)="reveal(pressReason($event), $event)">
+      <button
+        #fresh
+        data-part="fresh"
+        data-part-fresh=""
+        type="button"
+        (click)="reveal(pressReason($event), $event)"
+      >
         {{ t('fresh', { count: held().length }) }}
       </button>
     }
     <div
       #feed
       data-part="feed"
+      data-part-feed=""
       role="feed"
       [id]="feedId"
       [attr.aria-labelledby]="titleId"
@@ -290,9 +297,13 @@ export class SlNotificationActions {
     >
       @if (waiting()) {
         @for (row of waitingRows; track row) {
-          <div data-part="item" aria-hidden="true">
-            <span data-part="visual"><span slSkeleton shape="circle" size="sm"></span></span>
-            <div data-part="content"><span slSkeletonText [lines]="2"></span></div>
+          <div data-part="item" data-part-item="" aria-hidden="true">
+            <span data-part="visual" data-part-visual=""
+              ><span slSkeleton shape="circle" size="sm"></span
+            ></span>
+            <div data-part="content" data-part-content="">
+              <span slSkeletonText [lines]="2"></span>
+            </div>
           </div>
         }
       } @else if (groupBy() === undefined) {
@@ -304,16 +315,16 @@ export class SlNotificationActions {
         }
       } @else {
         @for (group of groups(); track group.label; let offset = $index) {
-          <div data-part="group">
+          <div data-part="group" data-part-group="">
             @switch (levelValue()) {
               @case ('3') {
-                <h4 data-part="group-label">{{ group.label }}</h4>
+                <h4 data-part="group-label" data-part-group-label="">{{ group.label }}</h4>
               }
               @case ('4') {
-                <h5 data-part="group-label">{{ group.label }}</h5>
+                <h5 data-part="group-label" data-part-group-label="">{{ group.label }}</h5>
               }
               @default {
-                <h3 data-part="group-label">{{ group.label }}</h3>
+                <h3 data-part="group-label" data-part-group-label="">{{ group.label }}</h3>
               }
             }
             @for (item of group.items; track item.key; let index = $index) {
@@ -327,18 +338,18 @@ export class SlNotificationActions {
       }
     </div>
     @if (showEmpty()) {
-      <div data-part="empty">
+      <div data-part="empty" data-part-empty="">
         <ng-content select="[slNotificationCenterEmpty]">{{ emptyWords() }}</ng-content>
       </div>
     } @else if (growingValue() !== 'none') {
       @if (loading()) {
-        <div #more aria-live="polite" data-part="more">{{ t('loading') }}</div>
+        <div #more aria-live="polite" data-part="more" data-part-more="">{{ t('loading') }}</div>
       } @else if (growingValue() === 'button') {
-        <button #more data-part="more" type="button" (click)="loadMore($event)">
+        <button #more data-part="more" data-part-more="" type="button" (click)="loadMore($event)">
           {{ t('loadMore') }}
         </button>
       } @else {
-        <div #more data-part="more"></div>
+        <div #more data-part="more" data-part-more=""></div>
       }
     }
     <ng-content select="[slNotificationCenterFooter]" />
@@ -347,6 +358,7 @@ export class SlNotificationActions {
       @let context = contextOf(item, position);
       <article
         data-part="item"
+        data-part-item=""
         tabindex="0"
         [attr.data-key]="item.key"
         [attr.data-tone]="context.tone"
@@ -357,26 +369,29 @@ export class SlNotificationActions {
         [attr.aria-setsize]="setSize()"
       >
         @if (visualTemplate(); as visual) {
-          <span data-part="visual" [attr.data-tone]="item.tone ?? null">
+          <span data-part="visual" data-part-visual="" [attr.data-tone]="item.tone ?? null">
             <ng-container
               [ngTemplateOutlet]="visual.template"
               [ngTemplateOutletContext]="context"
             />
           </span>
         } @else if (item.tone !== undefined) {
-          <span data-part="visual" [attr.data-tone]="item.tone"
+          <span data-part="visual" data-part-visual="" [attr.data-tone]="item.tone"
             ><span slIcon data-tone-glyph=""><svg slGlyph [name]="toneGlyph(item.tone)"></svg></span
           ></span>
         }
-        <div data-part="content">
+        <div data-part="content" data-part-content="">
           @if (itemTemplate(); as own) {
             <ng-container [ngTemplateOutlet]="own.template" [ngTemplateOutletContext]="context" />
           } @else {
             @if (item.href === undefined) {
-              <span data-part="title" [id]="context.ids.title">{{ item.title }}</span>
+              <span data-part="title" data-part-title="" [id]="context.ids.title">{{
+                item.title
+              }}</span>
             } @else {
               <a
                 data-part="title"
+                data-part-title=""
                 [id]="context.ids.title"
                 [attr.href]="item.href"
                 (click)="open(item.key, $event)"
@@ -384,16 +399,19 @@ export class SlNotificationActions {
               >
             }
             @if (item.description) {
-              <p data-part="description" [id]="context.ids.description">{{ item.description }}</p>
+              <p data-part="description" data-part-description="" [id]="context.ids.description">
+                {{ item.description }}
+              </p>
             }
             <time
               data-part="time"
+              data-part-time=""
               [attr.datetime]="context.time.dateTime"
               [attr.title]="context.time.title"
               >{{ context.time.text }}</time
             >
             @if (actionsTemplate(); as actions) {
-              <div data-part="actions">
+              <div data-part="actions" data-part-actions="">
                 <ng-container
                   [ngTemplateOutlet]="actions.template"
                   [ngTemplateOutletContext]="context"
@@ -403,11 +421,12 @@ export class SlNotificationActions {
           }
         </div>
         @if (controlsValue() !== 'none') {
-          <div data-part="controls">
+          <div data-part="controls" data-part-controls="">
             @if (controlsValue() !== 'dismiss') {
               <button
                 slNotificationControl
                 data-part="read-toggle"
+                data-part-read-toggle=""
                 [text]="item.read ? t('markUnread') : t('markRead')"
                 (click)="requestRead([item.key], !item.read, pressReason($event), $event)"
               >
@@ -418,6 +437,7 @@ export class SlNotificationActions {
               <button
                 slNotificationControl
                 data-part="dismiss"
+                data-part-dismiss=""
                 [text]="t('dismiss')"
                 (click)="remove(item.key, pressReason($event), $event)"
               >
@@ -435,7 +455,9 @@ export class SlNotificationActions {
   exportAs: 'slNotificationCenter',
   host: {
     'data-ui': 'notification-center',
+    'data-ui-notification-center': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'sizeValue()',
     '[attr.data-level]': 'levelValue()',
     '[attr.data-growing]': 'growingValue()',
@@ -851,7 +873,7 @@ export class SlNotificationCenter {
 @Directive({
   selector: '[slNotificationCenterActions]',
   standalone: true,
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlNotificationCenterActions {}
 
@@ -859,7 +881,7 @@ export class SlNotificationCenterActions {}
 @Directive({
   selector: '[slNotificationCenterFooter]',
   standalone: true,
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlNotificationCenterFooter {}
 

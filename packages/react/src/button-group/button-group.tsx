@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/button-group/button-group.css';
 
 import { ButtonDefaultsProvider } from '../button/button-defaults';
@@ -49,7 +50,7 @@ export function ButtonGroup({
     </ButtonGroupShapeProvider>
   );
 
-  const rootProps: ButtonGroupRootProps = {
+  const rootProps: ButtonGroupRootProps = keyedProps({
     role: 'group',
     ...nativeProps,
     ...(align === undefined ? {} : { 'data-align': align }),
@@ -59,7 +60,7 @@ export function ButtonGroup({
     'data-part': 'root',
     'data-ui': 'button-group',
     children: content,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

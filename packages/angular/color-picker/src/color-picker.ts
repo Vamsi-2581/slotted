@@ -12,6 +12,7 @@ import {
   signal,
   ViewEncapsulation,
 } from '@angular/core';
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
 import { SlField } from '@slotted/angular/field';
@@ -113,6 +114,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
   template: `
     <div
       data-part="area"
+      data-part-area=""
       [attr.data-dragging]="dragging() === 'area' ? '' : null"
       (pointerdown)="down($event, 'area')"
       (pointermove)="move($event, 'area')"
@@ -121,6 +123,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
     >
       <div
         data-part="area-thumb"
+        data-part-area-thumb=""
         role="slider"
         [attr.aria-roledescription]="t('areaRoleDescription')"
         [attr.aria-label]="t('area')"
@@ -133,6 +136,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
     @for (channel of channels(); track channel) {
       <div
         data-part="channel"
+        data-part-channel=""
         [attr.data-channel]="channel"
         [attr.data-dragging]="dragging() === channel ? '' : null"
         (pointerdown)="down($event, channel)"
@@ -142,6 +146,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       >
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           role="slider"
           [attr.data-channel]="channel"
           [attr.aria-label]="channel === 'hue' ? t('hue') : t('alpha')"
@@ -155,10 +160,11 @@ const optionalBoolean = (value: boolean | string | undefined) =>
         ></div>
       </div>
     }
-    <div data-part="row">
-      <span data-part="swatch" role="img" [attr.aria-label]="current()"></span>
+    <div data-part="row" data-part-row="">
+      <span data-part="swatch" data-part-swatch="" role="img" [attr.aria-label]="current()"></span>
       <button
         data-part="previous"
+        data-part-previous=""
         type="button"
         [attr.aria-label]="t('previous', { color: previous() ?? current() })"
         [disabled]="off()"
@@ -168,7 +174,9 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       </button>
       <div
         data-ui="text-field"
+        data-ui-text-field=""
         data-part="root"
+        data-part-root=""
         data-size="sm"
         data-variant="outline"
         data-mono=""
@@ -178,6 +186,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       >
         <input
           data-part="input"
+          data-part-input=""
           dir="ltr"
           autocomplete="off"
           spellcheck="false"
@@ -193,6 +202,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       </div>
       <button
         data-part="format"
+        data-part-format=""
         type="button"
         [attr.aria-label]="t('format', { format: resolvedFormat() })"
         [disabled]="off()"
@@ -213,6 +223,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       @if (eyedropper()) {
         <button
           data-part="eyedropper"
+          data-part-eyedropper=""
           type="button"
           [attr.aria-label]="t('eyedropper')"
           [disabled]="off()"
@@ -223,15 +234,21 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       }
     </div>
     @if (outOfGamut()) {
-      <p data-part="gamut" role="status">
+      <p data-part="gamut" data-part-gamut="" role="status">
         <span slIcon><svg slGlyph name="circle-alert"></svg></span>{{ t('gamut') }}
       </p>
     }
     @if (resolvedPresets().length > 0) {
-      <div data-part="presets" role="radiogroup" [attr.aria-label]="t('presets')">
+      <div
+        data-part="presets"
+        data-part-presets=""
+        role="radiogroup"
+        [attr.aria-label]="t('presets')"
+      >
         @for (preset of resolvedPresets(); track preset; let index = $index) {
           <button
             data-part="preset"
+            data-part-preset=""
             type="button"
             role="radio"
             [attr.aria-label]="preset"
@@ -247,10 +264,17 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       </div>
     }
     @if (contrast(); as measured) {
-      <div data-part="contrast" aria-live="polite" [attr.data-level]="measured.level">
-        <span data-part="contrast-sample" aria-hidden="true">{{ t('contrastSample') }}</span>
-        <span data-part="contrast-ratio">{{ measured.ratio }}:1</span>
-        <span data-part="contrast-level">{{ t(measured.key) }}</span>
+      <div
+        data-part="contrast"
+        data-part-contrast=""
+        aria-live="polite"
+        [attr.data-level]="measured.level"
+      >
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">{{
+          t('contrastSample')
+        }}</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">{{ measured.ratio }}:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">{{ t(measured.key) }}</span>
       </div>
     }
   `,
@@ -262,7 +286,9 @@ const optionalBoolean = (value: boolean | string | undefined) =>
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'color-picker',
+    'data-ui-color-picker': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'size() ?? field?.resolvedSize() ?? defaults.size',
     '[attr.data-format]': 'resolvedFormat()',
     '[attr.data-disabled]': "resolvedDisabled() ? '' : null",
@@ -405,7 +431,8 @@ export class SlColorPicker implements ControlValueAccessor {
       /* slMenuTriggerFor binds data-part to null outside a bar, and the
          binding is a constant: the part is written back once, the rule
          menu records for its own trigger. */
-      this.element.querySelector('[aria-haspopup="menu"]')?.setAttribute('data-part', 'format');
+      const format = this.element.querySelector('[aria-haspopup="menu"]');
+      if (format !== null) writeSelectorKey(format, 'part', 'format');
     });
   }
 

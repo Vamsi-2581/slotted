@@ -13,7 +13,7 @@
  */
 
 @layer slotted.components {
-  [data-ui='markdown'][data-part='root'] {
+  [data-ui-markdown][data-part-root] {
     display: block;
     min-inline-size: 0;
   }
@@ -31,7 +31,7 @@
    * which is the height its lift already centres the square in.
    */
 
-  [data-ui='markdown'] [data-part='task'] {
+  [data-ui-markdown] [data-part-task] {
     display: grid;
     grid-template-columns:
       calc(var(--slotted-prose-list-inset, 1.5em) + var(--slotted-prose-marker-gap, 0.25em))
@@ -42,7 +42,7 @@
   }
 
   /* The box ends where an ordinary item's marker ends, one step before the text. */
-  [data-ui='markdown'] [data-part='task'] > :first-child {
+  [data-ui-markdown] [data-part-task] > :first-child {
     justify-self: end;
     margin-block-start: calc(
       (1lh - var(--slotted-control-font-size-md, 13px) * var(--slotted-line-height-md, 1.5)) / 2
@@ -50,7 +50,7 @@
     margin-inline-end: var(--slotted-markdown-task-gap, var(--slotted-space-3));
   }
 
-  [data-ui='markdown'] [data-part='task-body'] {
+  [data-ui-markdown] [data-part-task-body] {
     min-inline-size: 0;
   }
 
@@ -62,20 +62,20 @@
    * gap on the block that arrives, the one direction `prose` spaces in.
    */
 
-  [data-ui='markdown'] [data-part='embed'] {
+  [data-ui-markdown] [data-part-embed] {
     margin-block: var(--slotted-prose-flow-normal, 1.15em) 0;
   }
 
-  [data-ui='markdown'][data-flow='tight'] [data-part='embed'] {
+  [data-ui-markdown][data-flow='tight'] [data-part-embed] {
     margin-block-start: var(--slotted-prose-flow-tight, 0.75em);
   }
 
-  [data-ui='markdown'][data-flow='loose'] [data-part='embed'] {
+  [data-ui-markdown][data-flow='loose'] [data-part-embed] {
     margin-block-start: var(--slotted-prose-flow-loose, 1.6em);
   }
 
-  [data-ui='markdown'] [data-part='embed']:first-child,
-  [data-ui='markdown'] [data-part='alert-body'] > :first-child {
+  [data-ui-markdown] [data-part-embed]:first-child,
+  [data-ui-markdown] [data-part-alert-body] > :first-child {
     margin-block-start: 0;
   }
 
@@ -87,15 +87,15 @@
    * reader's eye ends on.
    */
 
-  [data-ui='markdown'] :where(th, td)[data-align='start'] {
+  [data-ui-markdown] :where(th, td)[data-align='start'] {
     text-align: start;
   }
 
-  [data-ui='markdown'] :where(th, td)[data-align='center'] {
+  [data-ui-markdown] :where(th, td)[data-align='center'] {
     text-align: center;
   }
 
-  [data-ui='markdown'] :where(th, td)[data-align='end'] {
+  [data-ui-markdown] :where(th, td)[data-align='end'] {
     text-align: end;
   }
 
@@ -106,7 +106,7 @@
    * quarter, which reads the same in either direction and so is not mirrored.
    */
 
-  [data-ui='markdown'] [data-part='backref'] {
+  [data-ui-markdown] [data-part-backref] {
     --_glyph: var(--slotted-markdown-backref-size, 0.9em);
     --_box: var(--slotted-target-min, 24px);
     --slotted-icon-size: var(--_glyph);
@@ -123,7 +123,7 @@
   }
 
   /* Out of flow, so the box keeps the baseline of a box with nothing in it. */
-  [data-ui='markdown'] [data-part='backref'] > [data-ui='icon'] {
+  [data-ui-markdown] [data-part-backref] > [data-ui-icon] {
     inset: 0;
     margin: auto;
     position: absolute;
@@ -137,7 +137,7 @@
    * paragraph's worth of space rather than as a banner.
    */
 
-  [data-ui='markdown'] [data-part='empty'] {
+  [data-ui-markdown] [data-part-empty] {
     color: var(--slotted-text-muted);
     font-family: var(--slotted-font-family-sans);
     font-size: var(--slotted-font-size-md);
@@ -145,7 +145,7 @@
     margin: 0;
   }
 
-  [data-ui='markdown'] [data-part='error'] {
+  [data-ui-markdown] [data-part-error] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -159,7 +159,7 @@
    */
 
   @media print {
-    [data-ui='markdown'] a[href^='http']::after {
+    [data-ui-markdown] a[href^='http']::after {
       content: ' (' attr(href) ')';
       font-size: 0.875em;
       overflow-wrap: anywhere;

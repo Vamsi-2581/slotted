@@ -117,6 +117,10 @@
       "types": "./dist/types/highlight/index.d.ts",
       "import": "./dist/highlight.js"
     },
+    "./selector-key": {
+      "types": "./dist/types/selector-key/index.d.ts",
+      "import": "./dist/selector-key.js"
+    },
     "./identity": {
       "types": "./dist/types/identity/index.d.ts",
       "import": "./dist/identity.js"

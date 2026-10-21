@@ -92,6 +92,7 @@ export interface DataGridMessages {
   readonly groupCount: Message<{ count: number }>;
   readonly hide: Message;
   readonly loadMore: Message;
+  readonly loadingMore: Message;
   readonly manageColumns: Message;
   readonly noResults: Message;
   readonly pinEnd: Message;
@@ -208,6 +209,7 @@ export const en: DataGridMessages = {
   groupCount: '{count, plural, one {# row} other {# rows}}',
   hide: 'Hide column',
   loadMore: 'Load more',
+  loadingMore: 'Loading more rows…',
   manageColumns: 'Manage columns…',
   noResults: 'No rows match the current filters',
   pinEnd: 'Pin to end',

@@ -45,14 +45,16 @@ let nextId = 0;
 @Component({
   selector: '[slStatCard]',
   standalone: true,
-  template: '<div data-part="body"><ng-content /></div>',
+  template: '<div data-part="body" data-part-body=""><ng-content /></div>',
   styleUrl: '../../../styles/src/stat-card/stat-card.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slStatCard',
   host: {
     'data-ui': 'stat-card',
+    'data-ui-stat-card': '',
     'data-part': 'root',
+    'data-part-root': '',
     role: 'group',
     '[attr.aria-labelledby]': 'labelledBy()',
     '[attr.aria-busy]': 'loading() ? "true" : null',

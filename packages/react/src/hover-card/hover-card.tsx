@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/hover-card/hover-card.css';
 
 import { tabbables } from '@slotted/core/focus';
@@ -329,7 +330,7 @@ export function HoverCardTrigger({ children, ref, render, ...nativeProps }: Hove
 
   const open = card.open && anchors;
 
-  const rootProps: HoverCardTriggerRootProps = {
+  const rootProps: HoverCardTriggerRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-ui': 'hover-card',
@@ -349,7 +350,7 @@ export function HoverCardTrigger({ children, ref, render, ...nativeProps }: Hove
     onPointerDown: compose(nativeProps.onPointerDown, onPointerDown),
     onPointerEnter: compose(nativeProps.onPointerEnter, onPointerEnter),
     onPointerLeave: compose(nativeProps.onPointerLeave, onPointerLeave),
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref: setRoot });
   return <a {...rootProps} ref={setRoot} />;

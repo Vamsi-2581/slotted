@@ -58,4 +58,18 @@ describe('Glyph', () => {
       [...(mask?.querySelectorAll('path') ?? [])].map((path) => path.getAttribute('d')),
     ).toEqual(GLYPHS['circle-alert'].paths.slice(1));
   });
+  /**
+   * A previous and next pair — a month, a period, a page — is drawn from one
+   * set: every chevron and every arrow exists in all four directions, at the
+   * same weight.
+   */
+  it('draws chevrons and arrows in all four directions, at one weight', () => {
+    for (const shape of ['chevron', 'arrow'] as const) {
+      for (const direction of ['left', 'right', 'up', 'down'] as const) {
+        const glyph = GLYPHS[`${shape}-${direction}`];
+        expect(glyph.paint).toBe('stroke');
+        expect(glyph.strokeWidth).toBe(GLYPHS[`${shape}-right`].strokeWidth);
+      }
+    }
+  });
 });

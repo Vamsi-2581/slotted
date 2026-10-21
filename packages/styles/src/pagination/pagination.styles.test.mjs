@@ -18,7 +18,8 @@ test('lives in the component layer', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.pagination.parts) {
-    const selector = part === 'root' ? "[data-ui='pagination']{" : `[data-part='${part}']`;
+    const selector =
+      part === 'root' ? '[data-ui-pagination]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
 });
@@ -48,7 +49,7 @@ test('holds hover and press back for loading as well as for disabled', () => {
        * the platform's own: a paginator waiting for a page disables it, and
        * `:disabled` is what that leaves in the DOM.
        */
-      const guard = selector.includes("[data-part='page-size']")
+      const guard = selector.includes('[data-part-page-size]')
         ? ':not(:disabled)'
         : '[data-disabled],[data-loading]';
       assert.ok(
@@ -79,13 +80,13 @@ test('leaves the current page alone under the pointer', () => {
 test('mutes the current chip while the row is inert, and keeps its shape', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='page'][aria-current]:not([aria-current='false']):is([data-disabled],[data-loading]){background-color:var(--slotted-disabled-background",
+      "[data-part-page][aria-current]:not([aria-current='false']):is([data-disabled],[data-loading]){background-color:var(--slotted-disabled-background",
     ),
   );
 });
 
 test('paints the current page from the platform attribute, without a mirror', () => {
-  assert.ok(normalized.includes("[data-part='page'][aria-current]:not([aria-current='false'])"));
+  assert.ok(normalized.includes("[data-part-page][aria-current]:not([aria-current='false'])"));
   assert.ok(!normalized.includes('data-current'), 'the family declares no current mirror');
 });
 
@@ -102,7 +103,7 @@ test("keeps the air around the two sentences, and resets only the paragraph's bl
   /* `status` is a `<p>`: resetting its whole margin after the text-gap rule
      took the inline air away, and "1–8 of 50" stood against the trigger. */
   const reset = css.slice(
-    css.indexOf("[data-ui='pagination'] :is([data-part='status'], [data-part='summary']) {"),
+    css.indexOf('[data-ui-pagination] :is([data-part-status], [data-part-summary]) {'),
   );
   assert.match(reset.slice(0, reset.indexOf('}')), /margin-block: 0;/);
   assert.doesNotMatch(reset.slice(0, reset.indexOf('}')), /\n\s*margin: 0;/);
@@ -115,7 +116,7 @@ test("keeps the air around the two sentences, and resets only the paragraph's bl
 test('paints no chevron of its own', () => {
   assert.ok(!declarations.includes('mask'), 'a chevron is an svg, not a mask');
   assert.ok(!declarations.includes('::before') && !declarations.includes('::after'));
-  assert.ok(normalized.includes("[data-part='last']){--slotted-icon-size:var(--_glyph);}"));
+  assert.ok(normalized.includes('[data-part-last]){--slotted-icon-size:var(--_glyph);}'));
 });
 
 /**
@@ -125,9 +126,7 @@ test('paints no chevron of its own', () => {
  */
 test('mirrors each trigger with the direction that applies to it', () => {
   assert.ok(
-    normalized.includes(
-      "[data-part='first'],[data-part='previous'])>[data-ui='icon']{rotate:0.5turn;",
-    ),
+    normalized.includes('[data-part-first],[data-part-previous])>[data-ui-icon]{rotate:0.5turn;'),
   );
   assert.ok(
     !/\[dir=/.test(declarations),
@@ -155,7 +154,7 @@ test('compacts from its own container', () => {
 test('hides the range only where a summary exists to replace it', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='pagination']:has([data-part='summary'])[data-part='status']{display:none",
+      '[data-ui-pagination]:has([data-part-summary])[data-part-status]{display:none',
     ),
   );
 });

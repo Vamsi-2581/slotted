@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import { GLYPH_VIEW_BOX, GLYPHS } from '@slotted/core/glyph';
 import type { GlyphDrawing } from '@slotted/core/glyph';
 import { useId } from 'react';
@@ -38,9 +39,9 @@ export function Glyph({ name, solid = false, ...nativeProps }: GlyphProps) {
       focusable="false"
       viewBox={GLYPH_VIEW_BOX}
       {...(solid ? {} : paint)}
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'glyph')}
       data-glyph={name}
-      data-part="glyph"
+
       data-solid={solid ? '' : undefined}
     >
       {solid ? (

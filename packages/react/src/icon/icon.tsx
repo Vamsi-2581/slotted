@@ -40,7 +40,9 @@ export function Icon({ directional, label, size, tone, ...nativeProps }: IconPro
           }
         : { 'aria-hidden': true })}
       data-part="root"
+      data-part-root=""
       data-ui="icon"
+      data-ui-icon=""
     />
   );
 }

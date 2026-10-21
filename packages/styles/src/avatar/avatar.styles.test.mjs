@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/avatar/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./avatar.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./avatar.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./avatar.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -23,8 +36,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 
 /** Every rule in the sheet, as a selector list and the declarations it carries. */
 const rules = [...normalized.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
@@ -54,14 +67,17 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.avatar.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
 test('names the family and the part together, so a rule for the box stays on the box', () => {
   for (const selector of normalized.matchAll(/(^|\})([^{}]+)\{/g)) {
     for (const part of (selector[2] ?? '').split(',')) {
-      if (!part.includes(`[data-part='root']`)) continue;
+      if (!part.includes(`[data-part-root]`)) continue;
       assert.ok(part.includes(ui), `"${part.trim()}" reaches the root without naming the family`);
     }
   }
@@ -184,13 +200,13 @@ test('scales through the token a container and an instance can both reach', () =
  * collapses under `prefers-reduced-motion`.
  */
 test('crosses the picture over the letters instead of swapping them', () => {
-  const image = rule(`${ui} [data-part='image']`);
+  const image = rule(`${ui} [data-part-image]`);
   assert.ok(image.includes('position:absolute'));
   assert.ok(image.includes('opacity:0'));
   assert.ok(image.includes('object-fit:cover'));
   assert.ok(image.includes('transition:opacity var(--slotted-duration-short)'));
-  assert.ok(rule(`${ui}[data-status='loaded'] [data-part='image']`).includes('opacity:1'));
-  assert.ok(rule(`${ui}[data-status='loaded'] [data-part='fallback']`).includes('opacity:0'));
+  assert.ok(rule(`${ui}[data-status='loaded'] [data-part-image]`).includes('opacity:1'));
+  assert.ok(rule(`${ui}[data-status='loaded'] [data-part-fallback]`).includes('opacity:0'));
   assert.ok(
     rule(root).includes('transition:border-color'),
     'the edge changes colour when the picture arrives and must cross with it',
@@ -203,9 +219,7 @@ test('crosses the picture over the letters instead of swapping them', () => {
  * the icon from the slot, and paints nothing of its own.
  */
 test('sizes the person glyph from the slot, and paints no icon of its own', () => {
-  assert.ok(
-    rule(`${ui} [data-part='fallback']`).includes('--slotted-icon-size:var(--_glyph-size)'),
-  );
+  assert.ok(rule(`${ui} [data-part-fallback]`).includes('--slotted-icon-size:var(--_glyph-size)'));
   assert.ok(!normalized.includes('mask-image'), 'the glyph is an element, not a mask');
 });
 
@@ -224,7 +238,7 @@ test('centres the ink of the initials rather than their line box, where the engi
   const guarded = normalized.split('@supports (text-box:trim-both cap alphabetic){')[1] ?? '';
   const trimmed = guarded.split('}')[0];
   assert.ok(
-    trimmed.startsWith(`${ui} [data-part='fallback']:not(:has(> *)){`),
+    trimmed.startsWith(`${ui} [data-part-fallback]:not(:has(> *)){`),
     'the trim applies to the fallback, and only to one holding text alone',
   );
   assert.ok(trimmed.includes('text-box:trim-both cap alphabetic'), 'the trim is not guarded');
@@ -254,7 +268,7 @@ test('grows the hit area of an interactive avatar to the target minimum', () => 
   assert.ok(hit.includes('inset:min(0px,calc((100% - var(--slotted-target-min'));
   assert.ok(hit.includes('position:absolute'));
   assert.ok(!hit.includes('margin:auto'), 'an over-constrained box is not centred by auto margins');
-  for (const selector of [`button${ui}[data-part='root']::after`, `${root}[tabindex]::after`]) {
+  for (const selector of [`button${ui}[data-part-root]::after`, `${root}[tabindex]::after`]) {
     assert.ok(selects(selector), `${selector} does not grow its hit area`);
   }
 });
@@ -270,11 +284,7 @@ test('grows the hit area of an interactive avatar to the target minimum', () => 
  * plain.
  */
 test('clips the interactive box rather than letting the target read as content', () => {
-  for (const selector of [
-    `${root}:any-link`,
-    `button${ui}[data-part='root']`,
-    `${root}[tabindex]`,
-  ]) {
+  for (const selector of [`${root}:any-link`, `button${ui}[data-part-root]`, `${root}[tabindex]`]) {
     const interactive = rule(selector);
     assert.ok(interactive.includes('overflow:clip'), `${selector} does not clip its content`);
     assert.ok(
@@ -296,7 +306,7 @@ test('clips the interactive box rather than letting the target read as content',
 test('answers hover only where the element is interactive, and never when disabled', () => {
   for (const selector of [
     `${root}:any-link:not([data-disabled]):hover`,
-    `button${ui}[data-part='root']:not([data-disabled]):hover`,
+    `button${ui}[data-part-root]:not([data-disabled]):hover`,
     `${root}[tabindex]:not([data-disabled]):hover`,
   ]) {
     assert.ok(selects(selector), `${selector} is missing`);
@@ -345,7 +355,7 @@ test('switches a disabled avatar off without making it illegible', () => {
   assert.ok(body.includes('--_text:var(--slotted-disabled-foreground'));
   assert.ok(body.includes('--_edge:var(--slotted-disabled-border'));
   assert.ok(
-    rule(`${root}[data-disabled] [data-part='image']`).includes(
+    rule(`${root}[data-disabled] [data-part-image]`).includes(
       'filter:var(--slotted-avatar-disabled-image-filter,grayscale(1) opacity(0.5))',
     ),
   );

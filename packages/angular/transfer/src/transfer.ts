@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterEveryRender,
@@ -164,7 +165,7 @@ export class SlTransferPart {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   constructor() {
-    afterNextRender(() => this.host.nativeElement.setAttribute('data-part', this.part()));
+    afterNextRender(() => writeSelectorKey(this.host.nativeElement, 'part', this.part()));
   }
 }
 
@@ -204,7 +205,7 @@ export class SlTransferPart {
     SlTransferPart,
   ],
   template: `
-    <div data-part="switch">
+    <div data-part="switch" data-part-switch="">
       <div
         slSegmentedControl
         [attr.aria-label]="t('panes')"
@@ -219,12 +220,12 @@ export class SlTransferPart {
         }
       </div>
     </div>
-    <div data-part="body">
+    <div data-part="body" data-part-body="">
       <ng-container
         [ngTemplateOutlet]="paneTemplate"
         [ngTemplateOutletContext]="{ $implicit: 'source' }"
       />
-      <div data-part="actions" role="group" [attr.aria-label]="t('actions')">
+      <div data-part="actions" data-part-actions="" role="group" [attr.aria-label]="t('actions')">
         <button
           slButton
           slTransferPart="move-to-target"
@@ -286,7 +287,12 @@ export class SlTransferPart {
           >{{ t('moveAllToSource') }}
         </button>
         @if (resolvedReorderable()) {
-          <div data-part="reorder" role="group" [attr.aria-label]="t('reorder')">
+          <div
+            data-part="reorder"
+            data-part-reorder=""
+            role="group"
+            [attr.aria-label]="t('reorder')"
+          >
             <button
               slButton
               slTransferPart="move-up"
@@ -334,15 +340,16 @@ export class SlTransferPart {
     <ng-template #paneTemplate let-side>
       <div
         data-part="pane"
+        data-part-pane=""
         role="group"
         [attr.data-side]="side"
         [attr.aria-labelledby]="titleId(side)"
         [attr.data-current]="currentPane() === side ? '' : null"
         [attr.data-drop-target]="dropTarget(side) ? '' : null"
       >
-        <div data-part="pane-header">
+        <div data-part="pane-header" data-part-pane-header="">
           @if (resolvedSelectAll()) {
-            <span data-part="select-all">
+            <span data-part="select-all" data-part-select-all="">
               <div
                 slCheckbox
                 [size]="resolvedSize()"
@@ -353,14 +360,16 @@ export class SlTransferPart {
               ></div>
             </span>
           }
-          <span data-part="title" [attr.id]="titleId(side)">{{ title(side) }}</span>
-          <span data-part="count">{{ countText(side) }}</span>
+          <span data-part="title" data-part-title="" [attr.id]="titleId(side)">{{
+            title(side)
+          }}</span>
+          <span data-part="count" data-part-count="">{{ countText(side) }}</span>
         </div>
         @if (resolvedSearchable()) {
-          <div data-part="search">
+          <div data-part="search" data-part-search="">
             <div slTextField [clearable]="true" [size]="innerSize()">
               <span slTextFieldStart aria-hidden="true"
-                ><span data-part="search-icon"
+                ><span data-part="search-icon" data-part-search-icon=""
                   ><span slIcon><svg slGlyph name="search"></svg></span></span
               ></span>
               <input
@@ -375,7 +384,12 @@ export class SlTransferPart {
             </div>
           </div>
         }
-        <div data-part="list" [attr.data-side]="side" (focusin)="onListFocus(side, $event)">
+        <div
+          data-part="list"
+          data-part-list=""
+          [attr.data-side]="side"
+          (focusin)="onListFocus(side, $event)"
+        >
           <div
             slListbox
             variant="plain"
@@ -423,7 +437,11 @@ export class SlTransferPart {
             </ng-template>
             @if (isEmpty(side)) {
               <div slListboxEmpty>
-                <div data-part="empty" [attr.data-query]="typed(side) ? '' : null">
+                <div
+                  data-part="empty"
+                  data-part-empty=""
+                  [attr.data-query]="typed(side) ? '' : null"
+                >
                   <span slIcon
                     ><svg slGlyph [name]="typed(side) ? 'search-x' : 'inbox'"></svg
                   ></span>
@@ -438,13 +456,14 @@ export class SlTransferPart {
           @if (side === 'target' && dropOffset() !== null) {
             <div
               data-part="drop-indicator"
+              data-part-drop-indicator=""
               aria-hidden="true"
               [style.--_drop-offset]="dropOffset() + 'px'"
             ></div>
           }
         </div>
         @if (footerTemplate(); as footer) {
-          <div data-part="pane-footer">
+          <div data-part="pane-footer" data-part-pane-footer="">
             <ng-container
               [ngTemplateOutlet]="footer"
               [ngTemplateOutletContext]="{ $implicit: side }"
@@ -463,7 +482,9 @@ export class SlTransferPart {
   ],
   host: {
     'data-ui': 'transfer',
+    'data-ui-transfer': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'writtenRole ?? "group"',
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-size]': 'resolvedSize()',

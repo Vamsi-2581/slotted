@@ -495,7 +495,7 @@ describe('PageHeader parts', () => {
    * Too much of the screen to hold: on a phone the pin is not offered, and a
    * header held when the fact turns true is let go.
    */
-  it('writes data-tall on a phone-wide header and lets a held one go', () => {
+  it('writes data-tall in a phone-wide frame and lets a held one go', () => {
     /* The engine publishes on the next frame; every frame runs at once here,
        from the first, or a frame the mount scheduled would still be pending. */
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
@@ -511,7 +511,7 @@ describe('PageHeader parts', () => {
     expect(pin).toHaveAttribute('aria-pressed', 'true');
     expect(root()).not.toHaveAttribute('data-tall');
 
-    Object.defineProperty(root(), 'clientWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
     act(() => {
       for (const observer of FakeResizeObserver.all) observer.callback([], {} as ResizeObserver);
     });
@@ -521,6 +521,7 @@ describe('PageHeader parts', () => {
       false,
       expect.objectContaining({ reason: 'programmatic' }),
     );
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
 
   /**
@@ -550,7 +551,7 @@ describe('PageHeader parts', () => {
     expect(root()).not.toHaveAttribute('data-stuck');
   });
 
-  it('writes data-compact below the compact size class, and takes it off above it', () => {
+  it('writes data-compact in a frame below the compact size class, and takes it off above it', () => {
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
       callback(0);
       return 0;
@@ -562,7 +563,7 @@ describe('PageHeader parts', () => {
     expect(root()).not.toHaveAttribute('data-compact');
 
     const width = { value: 390 };
-    Object.defineProperty(root(), 'clientWidth', { configurable: true, get: () => width.value });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => width.value });
     const resize = () =>
       act(() => {
         for (const observer of FakeResizeObserver.all) observer.callback([], {} as ResizeObserver);
@@ -576,6 +577,7 @@ describe('PageHeader parts', () => {
     width.value = 1024;
     resize();
     expect(root()).not.toHaveAttribute('data-compact');
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
 });
 

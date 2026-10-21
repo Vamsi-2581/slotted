@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/otp-input/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./otp-input.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./otp-input.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./otp-input.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.otpInput;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
@@ -36,7 +49,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -47,7 +63,7 @@ test('styles every part the contract declares', () => {
  * so everything it would paint is made transparent one property at a time.
  */
 test('lays the control over the boxes and makes everything it paints transparent', () => {
-  const input = rule(`${ui}>[data-part='input']`);
+  const input = rule(`${ui}>[data-part-input]`);
   assert.match(input, /position:absolute/);
   assert.match(input, /inset:0/);
   assert.match(input, /color:transparent/);
@@ -59,11 +75,11 @@ test('lays the control over the boxes and makes everything it paints transparent
   assert.doesNotMatch(input, /opacity:0/, 'an invisible control loses the iOS paste menu');
   /* Important, so a page's own unlayered `::selection` cannot paint the
      selected character in its ink beside the boxes. */
-  const selection = rule(`${ui}>[data-part='input']::selection`);
+  const selection = rule(`${ui}>[data-part-input]::selection`);
   assert.match(selection, /background-color:transparent !important/);
   assert.match(selection, /color:transparent !important/);
   assert.match(selection, /-webkit-text-fill-color:transparent !important/);
-  assert.match(normalized, /\[data-part='input'\]\{-webkit-user-drag:none/);
+  assert.match(normalized, /\[data-part-input\]\{-webkit-user-drag:none/);
 });
 
 /**
@@ -83,7 +99,7 @@ test('keeps the row left-to-right and no wider than its boxes', () => {
  * same tokens, and it shrinks before the row overflows.
  */
 test('draws each box as a framed square on the control height that can shrink', () => {
-  const slot = rule(`${ui} [data-part='slot']`);
+  const slot = rule(`${ui} [data-part-slot]`);
   assert.match(slot, /block-size:var\(--_height\)/);
   assert.match(slot, /inline-size:var\(--_height\)/);
   assert.match(slot, /flex:0 1 auto/);
@@ -100,7 +116,7 @@ test('draws each box as a framed square on the control height that can shrink', 
 
 /** The placeholder is paint on an empty box, so `:empty` keeps reading the DOM. */
 test('paints the placeholder as a pseudo-element on an empty box', () => {
-  assert.match(rule(`${ui} [data-part='slot']:empty::before`), /content:attr\(data-placeholder\)/);
+  assert.match(rule(`${ui} [data-part-slot]:empty::before`), /content:attr\(data-placeholder\)/);
 });
 
 /**
@@ -110,7 +126,7 @@ test('paints the placeholder as a pseudo-element on an empty box', () => {
  */
 test('draws a caret in the current empty box and stops it under reduced motion', () => {
   const caret = rule(
-    `${root}:has(>[data-part='input']:focus) [data-part='slot'][data-current]:empty::after`,
+    `${root}:has(>[data-part-input]:focus) [data-part-slot][data-current]:empty::after`,
   );
   assert.match(caret, /animation:slotted-otp-input-blink var\(--slotted-duration-loop\)/);
   assert.match(caret, /background-color:currentcolor/);
@@ -124,9 +140,7 @@ test('draws a caret in the current empty box and stops it under reduced motion',
  * every field family inherits from `text-field`.
  */
 test('rings the current box in the theme colour and retargets it when invalid', () => {
-  const ring = rule(
-    `${root}:has(>[data-part='input']:focus-visible) [data-part='slot'][data-current]`,
-  );
+  const ring = rule(`${root}:has(>[data-part-input]:focus-visible) [data-part-slot][data-current]`);
   assert.match(
     ring,
     /outline:var\(--slotted-focus-ring-width,2px\) solid var\(--slotted-focus-ring-color,Highlight\)/,
@@ -149,17 +163,17 @@ test('rings the current box in the theme colour and retargets it when invalid', 
 test('holds the current edge back for invalid and reads disabled from the control too', () => {
   assert.ok(
     normalized.includes(
-      `${root}:not([data-invalid]):has(>[data-part='input']:focus) [data-part='slot'][data-current]{`,
+      `${root}:not([data-invalid]):has(>[data-part-input]:focus) [data-part-slot][data-current]{`,
     ),
   );
-  assert.ok(normalized.includes(`${root}:has(>[data-part='input']:disabled) [data-part='slot']{`));
+  assert.ok(normalized.includes(`${root}:has(>[data-part-input]:disabled) [data-part-slot]{`));
 });
 
 /** The transparent control stays transparent when the system owns the palette. */
 test('keeps the control invisible under forced colours', () => {
   assert.match(
     normalized,
-    /@media \(forced-colors:active\)\{\[data-ui='otp-input'\]>\[data-part='input'\]\{forced-color-adjust:none/,
+    /@media \(forced-colors:active\)\{\[data-ui-otp-input\]>\[data-part-input\]\{forced-color-adjust:none/,
   );
 });
 

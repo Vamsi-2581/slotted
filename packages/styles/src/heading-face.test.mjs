@@ -22,116 +22,113 @@ const HEADINGS = [
   {
     family: 'typography',
     part: 'root',
-    selector: "[data-ui='typography']:is(h1, h2, h3, h4, h5, h6)",
+    selector: '[data-ui-typography]:is(h1, h2, h3, h4, h5, h6)',
   },
-  { family: 'alert', part: 'title', selector: "[data-ui='alert'] [data-part='title']", hook: true },
+  { family: 'alert', part: 'title', selector: '[data-ui-alert] [data-part-title]', hook: true },
   {
     family: 'dialog',
     part: 'title',
     selector:
-      "[data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='header'] > [data-part='title']",
+      '[data-ui-dialog] > [data-part-viewport] > [data-part-content] > [data-part-header] > [data-part-title]',
     hook: true,
   },
   {
     family: 'drawer',
     part: 'title',
-    selector:
-      "[data-ui='drawer'] > [data-part='panel'] > [data-part='header'] > [data-part='title']",
+    selector: '[data-ui-drawer] > [data-part-panel] > [data-part-header] > [data-part-title]',
     hook: true,
   },
   {
     family: 'popover',
     part: 'title',
-    selector:
-      "[data-ui='popover'] > [data-part='content'] > [data-part='header'] > [data-part='title']",
+    selector: '[data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-title]',
   },
   {
     family: 'toast',
     part: 'title',
     selector:
-      "[data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='content'] > [data-part='title']",
+      '[data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-content] > [data-part-title]',
     hook: true,
   },
   {
     family: 'tour',
     part: 'title',
-    selector: "[data-ui='tour'] [data-part='content'] > [data-part='title']",
+    selector: '[data-ui-tour] [data-part-content] > [data-part-title]',
   },
   {
     family: 'action-sheet',
     part: 'title',
-    selector: "[data-ui='action-sheet'] [data-part='title']",
+    selector: '[data-ui-action-sheet] [data-part-title]',
   },
   {
     family: 'result-state',
     part: 'title',
-    selector: "[data-ui='result-state'] [data-part='title']",
+    selector: '[data-ui-result-state] [data-part-title]',
     hook: true,
   },
   {
     family: 'page-header',
     part: 'heading',
     selector:
-      "[data-ui='page-header'] > * > [data-part='title-area'] > [data-part='title-row'] > [data-part='title'] > [data-part='heading']",
+      '[data-ui-page-header] > * > [data-part-title-area] > [data-part-title-row] > [data-part-title] > [data-part-heading]',
   },
   {
     family: 'section',
     part: 'heading',
-    selector:
-      "[data-ui='section'] > [data-part='header'] > [data-part='title'] > [data-part='heading']",
+    selector: '[data-ui-section] > [data-part-header] > [data-part-title] > [data-part-heading]',
   },
   {
     family: 'dashboard-grid',
     part: 'title',
-    selector: "[data-ui='dashboard-grid'] [data-part='widget'] [data-part='title']",
+    selector: '[data-ui-dashboard-grid] [data-part-widget] [data-part-title]',
     hook: true,
   },
   {
     family: 'notification-center',
     part: 'title',
-    selector: "[data-ui='notification-center'] > [data-part='header'] > [data-part='title']",
+    selector: '[data-ui-notification-center] > [data-part-header] > [data-part-title]',
   },
   {
     family: 'import-export-center',
     part: 'title',
-    selector: "[data-ui='import-export-center'] > [data-part='header'] > [data-part='title']",
+    selector: '[data-ui-import-export-center] > [data-part-header] > [data-part-title]',
   },
   {
     family: 'column-manager',
     part: 'title',
-    selector: "[data-ui='column-manager'] > [data-part='header'] > [data-part='title']",
+    selector: '[data-ui-column-manager] > [data-part-header] > [data-part-title]',
   },
   {
     family: 'form',
     part: 'summary-title',
-    selector: "[data-ui='form'][data-part='summary'] > [data-part='summary-title']",
+    selector: '[data-ui-form][data-part-summary] > [data-part-summary-title]',
   },
   {
     family: 'wizard',
     part: 'step-title',
     selector:
-      "[data-ui='wizard'] > [data-part='layout'] > [data-part='main'] > [data-part='step'] > [data-part='step-header'] > [data-part='step-title']",
+      '[data-ui-wizard] > [data-part-layout] > [data-part-main] > [data-part-step] > [data-part-step-header] > [data-part-step-title]',
   },
   {
     family: 'chart',
     part: 'title',
-    selector: "[data-ui='chart'] > [data-part='header'] [data-part='title']",
+    selector: '[data-ui-chart] > [data-part-header] [data-part-title]',
   },
   {
     family: 'event-calendar',
     part: 'title',
-    selector: "[data-ui='event-calendar'] > [data-part='header'] > [data-part='title']",
+    selector: '[data-ui-event-calendar] > [data-part-header] > [data-part-title]',
   },
   {
     family: 'field-group',
     part: 'legend',
-    selector: "[data-ui='field-group'] > [data-part='legend'] > :is(h1, h2, h3, h4, h5, h6)",
+    selector: '[data-ui-field-group] > [data-part-legend] > :is(h1, h2, h3, h4, h5, h6)',
   },
   {
     family: 'prose',
     part: 'root',
     selector:
-      "[data-ui='prose'] :where(h1, h2, h3, h4, h5, h6):not(:where([data-part='exclude'], [data-part='exclude'] *))",
+      "[data-ui-prose] :where(h1, h2, h3, h4, h5, h6):not(:where([data-part='exclude'], [data-part='exclude'] *))",
   },
 ];
 

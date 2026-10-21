@@ -84,7 +84,9 @@ function provideHalvesPaint() {
   providers: [provideHalvesPaint()],
   host: {
     'data-ui': 'split-button',
+    'data-ui-split-button': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'role',
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-variant]': 'resolvedVariant()',

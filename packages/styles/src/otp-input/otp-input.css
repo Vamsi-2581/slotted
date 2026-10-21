@@ -13,7 +13,7 @@
    * mirrors its state onto the root rather than styling through, so a control
    * used outside a field looks the same as one inside it.
    */
-  [data-ui='otp-input'][data-part='root'] {
+  [data-ui-otp-input][data-part-root] {
     /**
      * A box is a square on the control's height at this density, so a code
      * beside a text field in the same form sits on the same row height. Its
@@ -71,7 +71,7 @@
    * native attribute a consumer wrote. `opacity: 1` rather than 0, because iOS
    * shows no paste menu on an invisible control (input-otp, `input.tsx`).
    */
-  [data-ui='otp-input'] > [data-part='input'] {
+  [data-ui-otp-input] > [data-part-input] {
     appearance: none;
     background-color: transparent;
     block-size: 100%;
@@ -104,7 +104,7 @@
    * selected at every press, so the drag is refused — here for the engines
    * that read the property, and in both bindings on `dragstart`.
    */
-  [data-ui='otp-input'] > [data-part='input']::selection {
+  [data-ui-otp-input] > [data-part-input]::selection {
     /**
      * `!important`, the only one in the library. An application that styles
      * its own `::selection` — and the workbench does, unlayered — outranks a
@@ -119,7 +119,7 @@
     -webkit-text-fill-color: transparent !important;
   }
 
-  [data-ui='otp-input'] > [data-part='input'] {
+  [data-ui-otp-input] > [data-part-input] {
     -webkit-user-drag: none;
   }
 
@@ -130,7 +130,7 @@
    * code is a fact worth seeing, so the boxes sit on the accent surface the
    * theme owns rather than on the browser's yellow.
    */
-  [data-ui='otp-input'] > [data-part='input']:autofill {
+  [data-ui-otp-input] > [data-part-input]:autofill {
     box-shadow: inset 0 0 0 100px
       var(--slotted-otp-input-autofill-background, var(--slotted-tone-accent-surface));
     -webkit-text-fill-color: transparent;
@@ -142,14 +142,14 @@
    * group is a row of boxes, and between two groups a short rule is drawn —
    * never a character, which would be read by nothing and mirrored by nothing.
    */
-  [data-ui='otp-input'] > [data-part='group'] {
+  [data-ui-otp-input] > [data-part-group] {
     align-items: center;
     display: flex;
     gap: var(--_gap);
     min-inline-size: 0;
   }
 
-  [data-ui='otp-input'] > [data-part='separator'] {
+  [data-ui-otp-input] > [data-part-separator] {
     background-color: var(
       --slotted-otp-input-separator-color,
       var(--slotted-control-border-color, ButtonBorder)
@@ -167,7 +167,7 @@
    * framed control carries. It shrinks before the row overflows — a code in a
    * 240-pixel column loses width, not boxes.
    */
-  [data-ui='otp-input'] [data-part='slot'] {
+  [data-ui-otp-input] [data-part-slot] {
     align-items: center;
     background-color: var(--slotted-otp-input-background, var(--slotted-control-surface, Field));
     block-size: var(--_height);
@@ -205,7 +205,7 @@
    * so the caret and the filled state keep reading the DOM rather than the
    * paint.
    */
-  [data-ui='otp-input'] [data-part='slot']:empty::before {
+  [data-ui-otp-input] [data-part-slot]:empty::before {
     color: var(--slotted-otp-input-placeholder-color, var(--slotted-text-muted));
     content: attr(data-placeholder);
   }
@@ -218,7 +218,7 @@
    * four-pixel speck in a thirty-four-pixel box, and a PIN pad draws its dots
    * larger than its digits.
    */
-  [data-ui='otp-input'][data-mask] [data-part='slot']:not(:empty) {
+  [data-ui-otp-input][data-mask] [data-part-slot]:not(:empty) {
     font-size: var(--slotted-otp-input-mask-size, var(--slotted-font-size-2xl, 1.25rem));
   }
 
@@ -230,29 +230,29 @@
    * rather than two, and the raised box — hovered, current, focused — comes
    * forward so its whole edge is seen.
    */
-  [data-ui='otp-input'][data-attached] > [data-part='group'] {
+  [data-ui-otp-input][data-attached] > [data-part-group] {
     gap: 0;
   }
 
-  [data-ui='otp-input'][data-attached] [data-part='slot'] {
+  [data-ui-otp-input][data-attached] [data-part-slot] {
     border-radius: 0;
   }
 
-  [data-ui='otp-input'][data-attached] [data-part='slot']:not(:first-child) {
+  [data-ui-otp-input][data-attached] [data-part-slot]:not(:first-child) {
     margin-inline-start: calc(var(--slotted-control-border-width, 1px) * -1);
   }
 
-  [data-ui='otp-input'][data-attached] [data-part='slot']:first-child {
+  [data-ui-otp-input][data-attached] [data-part-slot]:first-child {
     border-start-start-radius: var(--_radius);
     border-end-start-radius: var(--_radius);
   }
 
-  [data-ui='otp-input'][data-attached] [data-part='slot']:last-child {
+  [data-ui-otp-input][data-attached] [data-part-slot]:last-child {
     border-start-end-radius: var(--_radius);
     border-end-end-radius: var(--_radius);
   }
 
-  [data-ui='otp-input'][data-attached] [data-part='slot'][data-current] {
+  [data-ui-otp-input][data-attached] [data-part-slot][data-current] {
     z-index: 1;
   }
 
@@ -263,19 +263,19 @@
    * same name, so a `lg` code is a `lg` word's size and one step larger than
    * a `lg` field's text.
    */
-  [data-ui='otp-input'][data-part='root'][data-size='sm'] {
+  [data-ui-otp-input][data-part-root][data-size='sm'] {
     --_height: var(--slotted-control-height-sm, 30px);
     --_font-size: var(--slotted-font-size-sm, 0.8125rem);
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='otp-input'][data-part='root'][data-size='md'] {
+  [data-ui-otp-input][data-part-root][data-size='md'] {
     --_height: var(--slotted-control-height-md, 34px);
     --_font-size: var(--slotted-font-size-md, 0.875rem);
     --_gap: var(--slotted-control-gap-md, 8px);
   }
 
-  [data-ui='otp-input'][data-part='root'][data-size='lg'] {
+  [data-ui-otp-input][data-part-root][data-size='lg'] {
     --_height: var(--slotted-control-height-lg, 38px);
     --_font-size: var(--slotted-font-size-lg, 1rem);
     --_gap: var(--slotted-control-gap-lg, 8px);
@@ -287,7 +287,7 @@
    * The same two steps `text-field` draws, with the same tokens behind them,
    * so a code under a text field in one form is one form.
    */
-  [data-ui='otp-input'][data-variant='subtle'] [data-part='slot'] {
+  [data-ui-otp-input][data-variant='subtle'] [data-part-slot] {
     background-color: var(
       --slotted-otp-input-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -309,8 +309,8 @@
    * rather than blinking faster: an endless animation stops, it does not
    * hurry.
    */
-  [data-ui='otp-input'][data-part='root']:has(> [data-part='input']:focus)
-    [data-part='slot'][data-current]:empty::after {
+  [data-ui-otp-input][data-part-root]:has(> [data-part-input]:focus)
+    [data-part-slot][data-current]:empty::after {
     animation: slotted-otp-input-blink var(--slotted-duration-loop) step-end infinite;
     background-color: currentcolor;
     block-size: 1em;
@@ -332,8 +332,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='otp-input'][data-part='root']:has(> [data-part='input']:focus)
-      [data-part='slot'][data-current]:empty::after {
+    [data-ui-otp-input][data-part-root]:has(> [data-part-input]:focus)
+      [data-part-slot][data-current]:empty::after {
       animation: none;
     }
   }
@@ -345,17 +345,17 @@
    * is always over the input, never over a box, so hover is the root's and it
    * lights the whole row: the row is one control.
    */
-  [data-ui='otp-input'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-otp-input][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     )
-    [data-part='slot'] {
+    [data-part-slot] {
     border-color: var(--slotted-otp-input-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='otp-input'][data-part='root'][data-variant='subtle']:hover:not([data-disabled]):not(
+  [data-ui-otp-input][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid])
-    [data-part='slot'] {
+    [data-part-slot] {
     background-color: var(
       --slotted-otp-input-subtle-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -372,13 +372,13 @@
    * keeps its danger edge on every box, and the ring says where the cursor
    * is — while the tint survives, because it says what the next key does.
    */
-  [data-ui='otp-input'][data-part='root']:not([data-invalid]):has(> [data-part='input']:focus)
-    [data-part='slot'][data-current] {
+  [data-ui-otp-input][data-part-root]:not([data-invalid]):has(> [data-part-input]:focus)
+    [data-part-slot][data-current] {
     border-color: var(--slotted-otp-input-current-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='otp-input'][data-part='root']:has(> [data-part='input']:focus)
-    [data-part='slot'][data-current]:not(:empty) {
+  [data-ui-otp-input][data-part-root]:has(> [data-part-input]:focus)
+    [data-part-slot][data-current]:not(:empty) {
     background-color: var(
       --slotted-otp-input-selection-background,
       var(--slotted-tone-accent-surface)
@@ -392,8 +392,8 @@
    * whose caret is the thing that moved. A ring around the whole row would sit
    * still while the cursor moved inside it.
    */
-  [data-ui='otp-input'][data-part='root']:has(> [data-part='input']:focus-visible)
-    [data-part='slot'][data-current] {
+  [data-ui-otp-input][data-part-root]:has(> [data-part-input]:focus-visible)
+    [data-part-slot][data-current] {
     /**
      * The resting shadow, recoloured. The geometry is the foundation's and the
      * ink is the focus ring's, so the lift under the box and the ring around
@@ -412,14 +412,14 @@
    * colour on the root moves all of them at once — the rule `text-field`
    * wrote and every field family inherits.
    */
-  [data-ui='otp-input'][data-part='root'][data-invalid] {
+  [data-ui-otp-input][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-otp-input-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
   }
 
-  [data-ui='otp-input'][data-part='root'][data-invalid] [data-part='slot'] {
+  [data-ui-otp-input][data-part-root][data-invalid] [data-part-slot] {
     --_invalid-edge-width: var(
       --slotted-otp-input-invalid-edge-width,
       var(--slotted-control-invalid-edge-width, 1px)
@@ -440,8 +440,8 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='otp-input'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible)
-    [data-part='slot'][data-current] {
+  [data-ui-otp-input][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible)
+    [data-part-slot][data-current] {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
@@ -454,15 +454,15 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='otp-input'][data-part='root'][data-invalid] [data-part='slot'] {
+    [data-ui-otp-input][data-part-root][data-invalid] [data-part-slot] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='otp-input'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible)
-      [data-part='slot'][data-current] {
+    [data-ui-otp-input][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible)
+      [data-part-slot][data-current] {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
@@ -475,7 +475,7 @@
    * ground says "not yours to change" and the ink says nothing at all. No
    * caret either — there is nothing to type.
    */
-  [data-ui='otp-input'][data-part='root'][data-readonly] [data-part='slot'] {
+  [data-ui-otp-input][data-part-root][data-readonly] [data-part-slot] {
     background-color: var(
       --slotted-otp-input-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -483,7 +483,7 @@
     cursor: default;
   }
 
-  [data-ui='otp-input'][data-part='root'][data-readonly] [data-part='slot']::after {
+  [data-ui-otp-input][data-part-root][data-readonly] [data-part-slot]::after {
     content: none;
   }
 
@@ -493,14 +493,14 @@
    * disabled `fieldset` disables every control inside it, and the control has
    * no way to know.
    */
-  [data-ui='otp-input'][data-part='root'][data-disabled],
-  [data-ui='otp-input'][data-part='root']:has(> [data-part='input']:disabled) {
+  [data-ui-otp-input][data-part-root][data-disabled],
+  [data-ui-otp-input][data-part-root]:has(> [data-part-input]:disabled) {
     color: var(--slotted-otp-input-disabled-color, var(--slotted-disabled-foreground));
     cursor: not-allowed;
   }
 
-  [data-ui='otp-input'][data-part='root'][data-disabled] [data-part='slot'],
-  [data-ui='otp-input'][data-part='root']:has(> [data-part='input']:disabled) [data-part='slot'] {
+  [data-ui-otp-input][data-part-root][data-disabled] [data-part-slot],
+  [data-ui-otp-input][data-part-root]:has(> [data-part-input]:disabled) [data-part-slot] {
     background-color: var(
       --slotted-otp-input-disabled-background,
       var(--slotted-disabled-background)
@@ -518,7 +518,7 @@
    * theme already remaps.
    */
   @media (forced-colors: active) {
-    [data-ui='otp-input'] > [data-part='input'] {
+    [data-ui-otp-input] > [data-part-input] {
       forced-color-adjust: none;
     }
   }

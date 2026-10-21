@@ -36,6 +36,7 @@ const LIVE_ROLE: Record<AlertLive, string | null> = {
   exportAs: 'slAlertContent',
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     '[attr.role]': 'role()',
   },
 })
@@ -63,6 +64,7 @@ export class SlAlertContent {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'title',
+    'data-part-title': '',
     '[attr.id]': 'alert.titleId',
   },
 })
@@ -83,7 +85,7 @@ export class SlAlertTitle {
   selector: '[slAlertDescription]',
   standalone: true,
   exportAs: 'slAlertDescription',
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlAlertDescription {}
 
@@ -97,7 +99,7 @@ export class SlAlertDescription {}
   selector: '[slAlertActions]',
   standalone: true,
   exportAs: 'slAlertActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlAlertActions {}
 

@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/markdown/markdown.css';
 
 import { markdownMessages } from '@slotted/core/i18n';
@@ -132,7 +133,7 @@ export function Markdown({
   let body: ReactNode;
   if (status === 'error') {
     body = (
-      <div data-part="error">
+      <div data-part="error" data-part-error="">
         <InlineMessage tone="danger">{t('error')}</InlineMessage>
         {onRetry === undefined ? null : (
           <Button
@@ -155,7 +156,11 @@ export function Markdown({
       </SkeletonRegion>
     );
   } else if (document.empty) {
-    body = loading ? null : <p data-part="empty">{empty ?? t('empty')}</p>;
+    body = loading ? null : (
+      <p data-part="empty" data-part-empty="">
+        {empty ?? t('empty')}
+      </p>
+    );
   } else {
     body = (
       <Prose flow={resolvedFlow} size={size}>
@@ -165,7 +170,7 @@ export function Markdown({
     );
   }
 
-  const rootProps: MarkdownRootProps = {
+  const rootProps: MarkdownRootProps = keyedProps({
     ...nativeProps,
     'aria-busy': streaming || painted || undefined,
     children: body,
@@ -176,7 +181,7 @@ export function Markdown({
     'data-status': status,
     'data-streaming': streaming || undefined,
     'data-ui': 'markdown',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -262,14 +267,16 @@ function renderDefault(
       );
     case 'alert':
       return (
-        <div data-part="embed">
+        <div data-part="embed" data-part-embed="">
           <Alert live="off" reach="section" tone={element.tone}>
             <AlertContent>
               <AlertTitle>{context.t(`alerts.${element.type}`)}</AlertTitle>
               <AlertDescription
                 render={({ children: body, ...props }) => <div {...props}>{body}</div>}
               >
-                <div data-part="alert-body">{children}</div>
+                <div data-part="alert-body" data-part-alert-body="">
+                  {children}
+                </div>
               </AlertDescription>
             </AlertContent>
           </Alert>
@@ -278,11 +285,17 @@ function renderDefault(
     case 'list': {
       const taskList = element.task ? 'task-list' : undefined;
       return element.ordered ? (
-        <ol data-part={taskList} start={element.start ?? undefined}>
+        <ol
+          data-part={taskList}
+          {...selectorKeyProps('part', taskList)}
+          start={element.start ?? undefined}
+        >
           {children}
         </ol>
       ) : (
-        <ul data-part={taskList}>{children}</ul>
+        <ul data-part={taskList} {...selectorKeyProps('part', taskList)}>
+          {children}
+        </ul>
       );
     }
     case 'item':
@@ -293,7 +306,7 @@ function renderDefault(
       );
     case 'code':
       return (
-        <div data-part="embed">
+        <div data-part="embed" data-part-embed="">
           <CodeBlock
             code={element.code}
             language={element.language ?? undefined}
@@ -379,7 +392,7 @@ function renderTask(
   const task = element.task ?? 0;
 
   return (
-    <li data-part="task">
+    <li data-part="task" data-part-task="">
       <Checkbox
         aria-label={element.label}
         checked={element.checked === true}
@@ -393,7 +406,9 @@ function renderTask(
         }
         readOnly={onTaskChange === undefined || undefined}
       />
-      <div data-part="task-body">{children}</div>
+      <div data-part="task-body" data-part-task-body="">
+        {children}
+      </div>
     </li>
   );
 }
@@ -427,6 +442,7 @@ function renderFootnoteBody(footnote: MarkdownFootnote, context: RenderContext):
     <a
       aria-label={context.t('backReference', { number: footnote.number, occurrence: index + 1 })}
       data-part="backref"
+      data-part-backref=""
       href={`#${reference}`}
       key={reference}
     >

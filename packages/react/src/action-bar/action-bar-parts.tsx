@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useCallback, useEffect, useId } from 'react';
 import type { HTMLAttributes } from 'react';
 
@@ -20,11 +21,11 @@ import type {
  * guarantee that filling it does not move the action that confirms.
  */
 export function ActionBarStatus({ children, ref, render, ...nativeProps }: ActionBarStatusProps) {
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = {
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'status',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -54,11 +55,11 @@ export function ActionBarActions({ children, ref, render, ...nativeProps }: Acti
 
   useEffect(() => () => registerActions(null), [registerActions]);
 
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = {
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'actions',
-  };
+  });
 
   return render === undefined ? (
     <div {...rootProps} ref={attach} />
@@ -104,7 +105,7 @@ export function ActionBarAction({
   const rootProps: HTMLAttributes<HTMLElement> & {
     'data-part': string;
     'data-priority': ActionBarPriority;
-  } = {
+  } = keyedProps({
     ...nativeProps,
     ...(declared ? { [UNIT_ATTRIBUTE]: id } : {}),
     /* `always` is never drawn in the bar. The attribute is written by this
@@ -114,7 +115,7 @@ export function ActionBarAction({
     children,
     'data-part': 'action',
     'data-priority': resolved,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -133,12 +134,13 @@ export function ActionBarAction({
  * axis of the rule itself, perpendicular to the one the actions run along.
  */
 export function ActionBarSeparator({ ref, render, ...nativeProps }: ActionBarSeparatorProps) {
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string; role: 'separator' } = {
-    'aria-orientation': 'vertical',
-    ...nativeProps,
-    'data-part': 'separator',
-    role: 'separator',
-  };
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string; role: 'separator' } =
+    keyedProps({
+      'aria-orientation': 'vertical',
+      ...nativeProps,
+      'data-part': 'separator',
+      role: 'separator',
+    });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }

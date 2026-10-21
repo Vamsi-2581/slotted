@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/collapsible/collapsible.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -144,7 +145,7 @@ export function Collapsible({
     toggle,
   };
 
-  const rootProps: CollapsibleRootProps = {
+  const rootProps: CollapsibleRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -161,7 +162,7 @@ export function Collapsible({
     'data-value': identity,
     'data-variant': resolvedVariant,
     style,
-  };
+  });
 
   return (
     <CollapsibleContext.Provider value={context}>

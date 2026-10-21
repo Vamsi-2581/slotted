@@ -14,7 +14,7 @@
    * order is the browser's locale rather than the application's. The value
    * reaches a form through a hidden input carrying `HH:mm:ss`.
    */
-  [data-ui='time-field'][data-part='root'] {
+  [data-ui-time-field][data-part-root] {
     /**
      * Type, height, inline padding, gap and glyph size come from the control
      * scales — the only ones the theme restates per density — so a time in a
@@ -70,7 +70,7 @@
    * begin from it — the arithmetic `text-field` records, holding at every step
    * and every density.
    */
-  [data-ui='time-field'][data-part='root']:has(> [data-part='clear']:last-child) {
+  [data-ui-time-field][data-part-root]:has(> [data-part-clear]:last-child) {
     padding-inline-end: max(
       0px,
       calc(var(--_padding-inline) - (var(--_action-size) - var(--_icon-size)) / 2)
@@ -82,7 +82,7 @@
    * and puts the time at the reading edge, so an empty field and a full one
    * start in the same place.
    */
-  [data-ui='time-field'] [data-part='segments'] {
+  [data-ui-time-field] [data-part-segments] {
     align-items: center;
     /* It says what it is before it is pressed. A time is typed, so the pointer
        over it is a caret — and the row rather than only the segments, because
@@ -124,7 +124,7 @@
    * the document — which is the reason every other family in this library
    * reaches for it too.
    */
-  [data-ui='time-field'] [data-part='segments']:dir(rtl) {
+  [data-ui-time-field] [data-part-segments]:dir(rtl) {
     justify-content: flex-end;
   }
 
@@ -135,7 +135,7 @@
    * single digit becomes two: `1ch` is the advance of a digit in a tabular
    * face, and `--_digits` is how many the field can hold.
    */
-  [data-ui='time-field'] [data-part='segment'] {
+  [data-ui-time-field] [data-part-segment] {
     --_digits: 2;
 
     background-color: transparent;
@@ -175,7 +175,7 @@
    * digit face is dropped here for the same reason: tabular figures inside a
    * word letter-space it.
    */
-  [data-ui='time-field'] [data-part='segment'][data-field='dayPeriod'] {
+  [data-ui-time-field] [data-part-segment][data-field='dayPeriod'] {
     font-variant-numeric: normal;
     min-inline-size: var(--slotted-time-field-period-min-inline-size, 2ch);
     /* An abbreviation, in whatever case the locale itself writes it. */
@@ -188,7 +188,7 @@
    * placeholder is the format — `hh:mm` in the reader's own words rather than
    * in English — and a time being typed has to keep saying what is missing.
    */
-  [data-ui='time-field'] [data-part='segment'][data-placeholder] {
+  [data-ui-time-field] [data-part-segment][data-placeholder] {
     color: var(--slotted-time-field-placeholder-color, var(--slotted-text-muted, GrayText));
   }
 
@@ -197,7 +197,7 @@
    * name already carries the whole time in words, so a screen reader reading
    * "colon" between two numbers would be reading punctuation aloud.
    */
-  [data-ui='time-field'] [data-part='literal'] {
+  [data-ui-time-field] [data-part-literal] {
     color: var(--slotted-time-field-literal-color, var(--slotted-text-muted, GrayText));
     flex: 0 0 auto;
     /* Its own bidi run: a colon between two numbers takes the paragraph's
@@ -216,7 +216,7 @@
    * It is a real `input`, so a mobile keyboard opens and the platform supplies
    * every text-editing key the reader already knows.
    */
-  [data-ui='time-field'] [data-part='duration'] {
+  [data-ui-time-field] [data-part-duration] {
     appearance: none;
     background-color: transparent;
     border: 0;
@@ -240,11 +240,11 @@
 
   /* Left-to-right content in a right-to-left field still sits at the reading
      edge, which is the treatment every form gives a phone number or an IBAN. */
-  [data-ui='time-field'] [data-part='duration']:dir(rtl) {
+  [data-ui-time-field] [data-part-duration]:dir(rtl) {
     text-align: right;
   }
 
-  [data-ui='time-field'] [data-part='duration']::placeholder {
+  [data-ui-time-field] [data-part-duration]::placeholder {
     color: var(--slotted-time-field-placeholder-color, var(--slotted-text-muted, GrayText));
   }
 
@@ -256,7 +256,7 @@
    * library already has for "and then"; it is direction-sensitive, so it turns
    * with the document rather than pointing out of it.
    */
-  [data-ui='time-field'] [data-part='preview'] {
+  [data-ui-time-field] [data-part-preview] {
     /**
      * One line box, not a flex row. The chevron sits *in* the line rather than
      * beside it, which is the only way it can be aligned to the text at all —
@@ -293,7 +293,7 @@
    * marked `directional`: it points along the reading direction, so the `icon`
    * family turns it in a right-to-left context.
    */
-  [data-ui='time-field'] [data-part='preview'] > [data-ui='icon'] {
+  [data-ui-time-field] [data-part-preview] > [data-ui-icon] {
     --slotted-icon-size: var(--_mark);
 
     margin-inline-end: var(--slotted-space-1, 0.125rem);
@@ -307,7 +307,7 @@
    * `docs/component-features.md` §2.5 refuses that, and a reader on a screen
    * reader hears the same words the sighted reader sees.
    */
-  [data-ui='time-field'] [data-part='preview'][data-crosses-midnight] {
+  [data-ui-time-field] [data-part-preview][data-crosses-midnight] {
     color: var(--slotted-time-field-preview-next-color, var(--slotted-tone-warning-text));
   }
 
@@ -317,7 +317,7 @@
    * border is the accent the preview is written in, so the two marks are one
    * statement rather than two.
    */
-  [data-ui='time-field'][data-part='root'][data-relative] {
+  [data-ui-time-field][data-part-root][data-relative] {
     border-color: var(
       --slotted-time-field-relative-border-color,
       var(--slotted-tone-accent-border)
@@ -330,7 +330,7 @@
    * holding an `md` control is a field and a control disagreeing about one row.
    */
 
-  [data-ui='time-field'][data-part='root'][data-size='sm'] {
+  [data-ui-time-field][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
@@ -338,7 +338,7 @@
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
   }
 
-  [data-ui='time-field'][data-part='root'][data-size='md'] {
+  [data-ui-time-field][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -346,7 +346,7 @@
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
   }
 
-  [data-ui='time-field'][data-part='root'][data-size='lg'] {
+  [data-ui-time-field][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -360,7 +360,7 @@
    * shows one frame twice rather than two frames.
    */
 
-  [data-ui='time-field'][data-part='root'][data-variant='subtle'] {
+  [data-ui-time-field][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-time-field-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -371,7 +371,7 @@
     );
   }
 
-  [data-ui='time-field'][data-part='root'][data-variant='plain'] {
+  [data-ui-time-field][data-part-root][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -384,8 +384,8 @@
    * the value: an adornment annotates, and a reader looking for the time
    * should not have to step over it.
    */
-  [data-ui='time-field'] > [data-part='start'],
-  [data-ui='time-field'] > [data-part='end'] {
+  [data-ui-time-field] > [data-part-start],
+  [data-ui-time-field] > [data-part-end] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -397,8 +397,8 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='time-field'] > [data-part='start'] > svg,
-  [data-ui='time-field'] > [data-part='end'] > svg {
+  [data-ui-time-field] > [data-part-start] > svg,
+  [data-ui-time-field] > [data-part-end] > svg {
     block-size: var(--_icon-size);
     inline-size: var(--_icon-size);
   }
@@ -409,7 +409,7 @@
    * character, and held to the target minimum by the family rather than by the
    * page.
    */
-  [data-ui='time-field'] > [data-part='clear'] {
+  [data-ui-time-field] > [data-part-clear] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -439,7 +439,7 @@
    * larger one alone, which is the correction `docs/token-foundation.md`
    * leaves to the family rather than to the theme.
    */
-  [data-ui='time-field'] > [data-part='clear']::after {
+  [data-ui-time-field] > [data-part-clear]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -450,28 +450,28 @@
      the hit area above grows to 44 pixels around them. After an end
      adornment — a picker's trigger — it does not reach back across it. */
   @media (pointer: coarse) {
-    [data-ui='time-field'] > [data-part='clear']::after {
+    [data-ui-time-field] > [data-part-clear]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='time-field'] > [data-part='end'] + [data-part='clear']::after {
+    [data-ui-time-field] > [data-part-end] + [data-part-clear]::after {
       inset-inline-start: 0;
     }
   }
 
   /* The cross is drawn at the control's own icon step. */
-  [data-ui='time-field'] > [data-part='clear'] {
+  [data-ui-time-field] > [data-part-clear] {
     --slotted-icon-size: var(--_icon-size);
   }
 
-  [data-ui='time-field'] > [data-part='clear']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-time-field] > [data-part-clear]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-time-field-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='time-field'] > [data-part='clear']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-time-field] > [data-part-clear]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-time-field-action-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -484,7 +484,7 @@
    * and a ring around the whole frame would sit still while focus moved inside
    * it.
    */
-  [data-ui='time-field'] > [data-part='clear']:focus-visible {
+  [data-ui-time-field] > [data-part-clear]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -495,13 +495,13 @@
    * one it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='time-field'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-time-field][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     ) {
     border-color: var(--slotted-time-field-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='time-field'][data-part='root'][data-variant='subtle']:hover:not([data-disabled]):not(
+  [data-ui-time-field][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -510,7 +510,7 @@
     );
   }
 
-  [data-ui='time-field'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+  [data-ui-time-field][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -536,8 +536,8 @@
    * had before the press. The expression is an `input` and takes the frame's
    * ring on `:focus-within` for the same reason from the other side.
    */
-  [data-ui='time-field'][data-part='root']:has([data-part='segment']:focus),
-  [data-ui='time-field'][data-part='root']:has([data-part='duration']:focus) {
+  [data-ui-time-field][data-part-root]:has([data-part-segment]:focus),
+  [data-ui-time-field][data-part-root]:has([data-part-duration]:focus) {
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -551,13 +551,13 @@
    * shadow that appears only under focus is a cell that changes size when it
    * is used.
    */
-  [data-ui='time-field'][data-part='root'][data-variant='plain']:has([data-part='segment']:focus),
-  [data-ui='time-field'][data-part='root'][data-variant='plain']:has([data-part='duration']:focus) {
+  [data-ui-time-field][data-part-root][data-variant='plain']:has([data-part-segment]:focus),
+  [data-ui-time-field][data-part-root][data-variant='plain']:has([data-part-duration]:focus) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='time-field'] [data-part='segment']:focus {
+  [data-ui-time-field] [data-part-segment]:focus {
     background-color: var(
       --slotted-time-field-segment-focus-background,
       var(--slotted-tone-accent-solid)
@@ -573,7 +573,7 @@
    * ring is retargeted rather than repainted, so the frame's outline, the
    * shadow under it and the ring on the clear button all move at once.
    */
-  [data-ui='time-field'][data-part='root'][data-invalid] {
+  [data-ui-time-field][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-time-field-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -598,19 +598,19 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='time-field'][data-part='root'][data-invalid]:has([data-part='segment']:focus),
-  [data-ui='time-field'][data-part='root'][data-invalid]:has([data-part='duration']:focus) {
+  [data-ui-time-field][data-part-root][data-invalid]:has([data-part-segment]:focus),
+  [data-ui-time-field][data-part-root][data-invalid]:has([data-part-duration]:focus) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='time-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-      [data-part='segment']:focus
+  [data-ui-time-field][data-part-root][data-variant='plain'][data-invalid]:has(
+      [data-part-segment]:focus
     ),
-  [data-ui='time-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-      [data-part='duration']:focus
+  [data-ui-time-field][data-part-root][data-variant='plain'][data-invalid]:has(
+      [data-part-duration]:focus
     ) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
@@ -628,25 +628,25 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='time-field'][data-part='root'][data-invalid] {
+    [data-ui-time-field][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='time-field'][data-part='root'][data-invalid]:has([data-part='segment']:focus),
-    [data-ui='time-field'][data-part='root'][data-invalid]:has([data-part='duration']:focus) {
+    [data-ui-time-field][data-part-root][data-invalid]:has([data-part-segment]:focus),
+    [data-ui-time-field][data-part-root][data-invalid]:has([data-part-duration]:focus) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='time-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-        [data-part='segment']:focus
+    [data-ui-time-field][data-part-root][data-variant='plain'][data-invalid]:has(
+        [data-part-segment]:focus
       ),
-    [data-ui='time-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-        [data-part='duration']:focus
+    [data-ui-time-field][data-part-root][data-variant='plain'][data-invalid]:has(
+        [data-part-duration]:focus
       ) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
@@ -661,13 +661,13 @@
    * mistakable for disabled: the value is still real and still submitted. The
    * ground says "not yours to change" and the ink says nothing at all.
    */
-  [data-ui='time-field'][data-part='root'][data-readonly],
-  [data-ui='time-field'][data-part='root'][data-readonly] [data-part='segments'],
-  [data-ui='time-field'][data-part='root'][data-readonly] [data-part='segment'] {
+  [data-ui-time-field][data-part-root][data-readonly],
+  [data-ui-time-field][data-part-root][data-readonly] [data-part-segments],
+  [data-ui-time-field][data-part-root][data-readonly] [data-part-segment] {
     cursor: default;
   }
 
-  [data-ui='time-field'][data-part='root'][data-readonly] {
+  [data-ui-time-field][data-part-root][data-readonly] {
     background-color: var(
       --slotted-time-field-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -679,7 +679,7 @@
    * time nobody can read is a field nobody can check, and a disabled form
    * still has to say what it holds.
    */
-  [data-ui='time-field'][data-part='root'][data-disabled] {
+  [data-ui-time-field][data-part-root][data-disabled] {
     background-color: var(
       --slotted-time-field-disabled-background,
       var(--slotted-disabled-background)
@@ -691,28 +691,28 @@
     cursor: not-allowed;
   }
 
-  [data-ui='time-field'][data-part='root'][data-disabled] [data-part='segments'],
-  [data-ui='time-field'][data-part='root'][data-disabled] [data-part='segment'] {
+  [data-ui-time-field][data-part-root][data-disabled] [data-part-segments],
+  [data-ui-time-field][data-part-root][data-disabled] [data-part-segment] {
     cursor: not-allowed;
   }
 
-  [data-ui='time-field'][data-part='root'][data-disabled] > [data-part='start'],
-  [data-ui='time-field'][data-part='root'][data-disabled] > [data-part='end'],
-  [data-ui='time-field'][data-part='root'][data-disabled] [data-part='literal'],
-  [data-ui='time-field'][data-part='root'][data-disabled] [data-part='segment'][data-placeholder] {
+  [data-ui-time-field][data-part-root][data-disabled] > [data-part-start],
+  [data-ui-time-field][data-part-root][data-disabled] > [data-part-end],
+  [data-ui-time-field][data-part-root][data-disabled] [data-part-literal],
+  [data-ui-time-field][data-part-root][data-disabled] [data-part-segment][data-placeholder] {
     color: var(--slotted-disabled-foreground);
   }
 
   @media (forced-colors: active) {
     /* A transparent border has no system colour to be remapped to, so the
        `plain` control would lose its only edge where an edge matters most. */
-    [data-ui='time-field'][data-part='root'][data-variant='plain'] {
+    [data-ui-time-field][data-part-root][data-variant='plain'] {
       border-color: ButtonBorder;
     }
 
     /* The preview's two tones both map to the same system ink, so the border
        is what is left to say the control is in a different mode. */
-    [data-ui='time-field'][data-part='root'][data-relative] {
+    [data-ui-time-field][data-part-root][data-relative] {
       border-color: Highlight;
     }
   }

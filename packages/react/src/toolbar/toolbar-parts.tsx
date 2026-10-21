@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useEffect, useId } from 'react';
 import type { HTMLAttributes } from 'react';
 
@@ -55,12 +56,12 @@ export function ToolbarItem({
 }: ToolbarItemProps) {
   const unit = useCounterpart(counterpart);
 
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = {
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = keyedProps({
     ...nativeProps,
     ...unit,
     children,
     'data-part': 'item',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -90,13 +91,14 @@ export function ToolbarGroup({
 }: ToolbarGroupProps) {
   const unit = useCounterpart(counterpart);
 
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string; role: 'group' } = {
-    ...nativeProps,
-    ...unit,
-    children,
-    'data-part': 'group',
-    role: 'group',
-  };
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string; role: 'group' } =
+    keyedProps({
+      ...nativeProps,
+      ...unit,
+      children,
+      'data-part': 'group',
+      role: 'group',
+    });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -111,12 +113,13 @@ export function ToolbarGroup({
  */
 export function ToolbarSeparator({ ref, render, ...nativeProps }: ToolbarSeparatorProps) {
   const { orientation } = useToolbarOverflow();
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string; role: 'separator' } = {
-    ...nativeProps,
-    'aria-orientation': orientation === 'vertical' ? 'horizontal' : 'vertical',
-    'data-part': 'separator',
-    role: 'separator',
-  };
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string; role: 'separator' } =
+    keyedProps({
+      ...nativeProps,
+      'aria-orientation': orientation === 'vertical' ? 'horizontal' : 'vertical',
+      'data-part': 'separator',
+      role: 'separator',
+    });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -129,11 +132,11 @@ export function ToolbarSeparator({ ref, render, ...nativeProps }: ToolbarSeparat
  * start, the destructive one at the end.
  */
 export function ToolbarSpacer({ ref, render, ...nativeProps }: ToolbarSpacerProps) {
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = {
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = keyedProps({
     'aria-hidden': true,
     ...nativeProps,
     'data-part': 'spacer',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }

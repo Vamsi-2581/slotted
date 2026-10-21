@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/result-state/result-state.css';
 
 import { isValidElement, useCallback, useId, useMemo, useState } from 'react';
@@ -85,7 +86,7 @@ export function ResultState({
     [defaults.live, live, registerTitle, titleId],
   );
 
-  const rootProps: ResultStateRootProps = {
+  const rootProps: ResultStateRootProps = keyedProps({
     ...(named === null ? {} : { 'aria-labelledby': named }),
     ...nativeProps,
     children: (
@@ -94,7 +95,7 @@ export function ResultState({
             withdraws an empty box, so a region with no picture is a title, a
             description and an action with nothing standing above them (RS1).
             A stack of cards is the one drawing that stands without a glyph. */}
-        <div aria-hidden="true" data-part="media">
+        <div aria-hidden="true" data-part="media" data-part-media="">
           {media}
         </div>
         {children}
@@ -109,7 +110,7 @@ export function ResultState({
     'data-ui': 'result-state',
     ref,
     tabIndex: nativeProps.tabIndex ?? -1,
-  };
+  });
 
   return render === undefined ? <section {...rootProps} /> : render(rootProps);
 }

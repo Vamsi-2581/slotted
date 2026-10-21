@@ -74,7 +74,7 @@
 
   /* ── The control ──────────────────────────────────────────────────────── */
 
-  [data-ui='select'][data-part='root'] {
+  [data-ui-select][data-part-root] {
     /**
      * Type, height, inline padding, gap and glyph size come from the control
      * scales — the only ones the theme restates per density — so a select in a
@@ -144,7 +144,7 @@
   }
 
   /* And the clear button's own lane, before the chevron's, when there is one. */
-  [data-ui='select'][data-part='root']:has(> [data-part='clear']) {
+  [data-ui-select][data-part-root]:has(> [data-part-clear]) {
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
@@ -153,7 +153,7 @@
    * value, which is what a filter beside a table needs and what a field never
    * does — hence the default the contract states, `fullWidth: true`.
    */
-  [data-ui='select'][data-part='root']:not([data-full-width]) {
+  [data-ui-select][data-part-root]:not([data-full-width]) {
     inline-size: auto;
   }
 
@@ -177,7 +177,7 @@
    * the chevron still lands on the button that opens the popup — which is why
    * the chevron can be inert and the arrangement costs nothing.
    */
-  [data-ui='select'] > [data-part='trigger'] {
+  [data-ui-select] > [data-part-trigger] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -218,7 +218,7 @@
   }
 
   /* And the clear button's own box, plus a second gap, when there is one. */
-  [data-ui='select'][data-part='root']:has(> [data-part='clear']) > [data-part='trigger'] {
+  [data-ui-select][data-part-root]:has(> [data-part-clear]) > [data-part-trigger] {
     padding-inline-end: calc(
       var(--_padding-inline) + var(--_icon-size) + var(--_gap) + var(--_action-size) + var(--_gap)
     );
@@ -229,7 +229,7 @@
    * control's height as the reader chose, and a form that reflows on selection
    * is a form that moves under the pointer.
    */
-  [data-ui='select'] [data-part='value'] {
+  [data-ui-select] [data-part-value] {
     flex: 1 1 auto;
     min-inline-size: 0;
     overflow: hidden;
@@ -241,7 +241,7 @@
    * Nothing chosen yet. The same weight the reader will see once they choose,
    * one step quieter, so the control does not change shape when it fills.
    */
-  [data-ui='select'] [data-part='value'][data-placeholder] {
+  [data-ui-select] [data-part-value][data-placeholder] {
     color: var(--slotted-select-placeholder-color, var(--slotted-text-muted, GrayText));
   }
 
@@ -252,7 +252,7 @@
    * the same face and marked as unresolved for a stylesheet that wants to say
    * more.
    */
-  [data-ui='select'] [data-part='value'][data-unmatched] {
+  [data-ui-select] [data-part-value][data-unmatched] {
     font-variant-numeric: tabular-nums;
   }
 
@@ -280,7 +280,7 @@
    * trigger spanning underneath, so the frame still opens the popup everywhere
    * a chip is not.
    */
-  [data-ui='select'][data-part='root'] > [data-part='tags'] {
+  [data-ui-select][data-part-root] > [data-part-tags] {
     align-items: center;
     display: flex;
     gap: var(--slotted-space-2, 0.25rem);
@@ -308,7 +308,7 @@
     pointer-events: none;
   }
 
-  [data-ui='select'] > [data-part='tags'] > * {
+  [data-ui-select] > [data-part-tags] > * {
     /* Each chip takes its own presses back, and stands above the trigger that
        spans the lane underneath it. */
     pointer-events: auto;
@@ -321,7 +321,7 @@
    * to be a count, and `createCollapse` can measure it the way it measures
    * every other unit.
    */
-  [data-ui='select'] > [data-part='tags'] > [data-overflow] {
+  [data-ui-select] > [data-part-tags] > [data-overflow] {
     flex: none;
   }
 
@@ -332,7 +332,7 @@
    * shown: a button whose accessible name disappeared when the frame grew is a
    * button that changes what it is called when the window is resized.
    */
-  [data-ui='select'] [data-part='summary'] {
+  [data-ui-select] [data-part-summary] {
     display: block;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -343,7 +343,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='select'][data-part='root']:not([data-narrow]) [data-part='summary'] {
+  [data-ui-select][data-part-root]:not([data-narrow]) [data-part-summary] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -351,7 +351,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='select'][data-part='root'][data-narrow] > [data-part='tags'] {
+  [data-ui-select][data-part-root][data-narrow] > [data-part-tags] {
     display: none;
   }
 
@@ -361,7 +361,7 @@
    * the popup opens: the one movement in the control, and the only thing on the
    * closed control that says it opens at all.
    */
-  [data-ui='select'] > [data-part='arrow'] {
+  [data-ui-select] > [data-part-arrow] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -378,12 +378,12 @@
     pointer-events: none;
   }
 
-  [data-ui='select'] > [data-part='arrow'] > [data-ui='icon'] {
+  [data-ui-select] > [data-part-arrow] > [data-ui-icon] {
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='select'][data-open] > [data-part='arrow'] > [data-ui='icon'] {
+  [data-ui-select][data-open] > [data-part-arrow] > [data-ui-icon] {
     rotate: 180deg;
   }
 
@@ -398,7 +398,7 @@
    * All this rule does is stand it where the chevron stood and give it the
    * chevron's size and ink, through the size token the shared sheet reads.
    */
-  [data-ui='select'] > [data-part='busy'] {
+  [data-ui-select] > [data-part-busy] {
     --slotted-spinner-size: var(--_icon-size);
 
     color: var(--slotted-select-arrow-color, var(--slotted-text-muted, GrayText));
@@ -417,7 +417,7 @@
    * *glyph* keeps the rhythm the value begins with. `text-field`'s arithmetic,
    * stated in the terms a track states it.
    */
-  [data-ui='select'] > [data-part='clear'] {
+  [data-ui-select] > [data-part-clear] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -451,7 +451,7 @@
    * it can also be 24. This grows the target back in both axes and leaves a
    * larger one alone.
    */
-  [data-ui='select'] > [data-part='clear']::after {
+  [data-ui-select] > [data-part-clear]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -462,14 +462,14 @@
      the hit area above grows to 44 pixels around them. It does not reach into
      the chevron's lane after it, which is the trigger's to answer. */
   @media (pointer: coarse) {
-    [data-ui='select'] > [data-part='clear']::after {
+    [data-ui-select] > [data-part-clear]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
       inset-inline-end: 0;
     }
   }
 
   /* The cross is a `Glyph` the binding draws, at the chevron's size. */
-  [data-ui='select'] > [data-part='clear'] {
+  [data-ui-select] > [data-part-clear] {
     --slotted-icon-size: var(--_icon-size);
   }
 
@@ -481,7 +481,7 @@
    * and a control disagreeing about one row.
    */
 
-  [data-ui='select'][data-part='root'][data-size='sm'] {
+  [data-ui-select][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
@@ -490,7 +490,7 @@
     --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='select'][data-part='root'][data-size='md'] {
+  [data-ui-select][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -499,7 +499,7 @@
     --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
-  [data-ui='select'][data-part='root'][data-size='lg'] {
+  [data-ui-select][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -517,7 +517,7 @@
    * does not reflow when the pointer crosses it.
    */
 
-  [data-ui='select'][data-part='root'][data-variant='subtle'] {
+  [data-ui-select][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-select-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -531,7 +531,7 @@
   /* No edge, no lift, no ground and no corner of its own: the cell it sits in
      is the box, the row is the ground, a cell has no corner, and the resting
      shadow would draw the cell where there is none. */
-  [data-ui='select'][data-part='root'][data-variant='plain'] {
+  [data-ui-select][data-part-root][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -544,7 +544,7 @@
    * its only edge exactly where an edge matters most.
    */
   @media (forced-colors: active) {
-    [data-ui='select'][data-part='root'][data-variant='plain'] {
+    [data-ui-select][data-part-root][data-variant='plain'] {
       border-color: ButtonBorder;
     }
   }
@@ -555,13 +555,13 @@
    * it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='select'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-select][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     ) {
     border-color: var(--slotted-select-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='select'][data-part='root'][data-variant='subtle']:hover:not([data-disabled]):not(
+  [data-ui-select][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -570,7 +570,7 @@
     );
   }
 
-  [data-ui='select'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+  [data-ui-select][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -587,7 +587,7 @@
    * press, which is exactly right here: a reader who pressed the control can
    * see where they pressed, and the popup is already open under it.
    */
-  [data-ui='select'][data-part='root']:has(> [data-part='trigger']:focus-visible) {
+  [data-ui-select][data-part-root]:has(> [data-part-trigger]:focus-visible) {
     /* The resting shadow, recoloured: the geometry is the foundation's and the
        ink is the ring's, so the lift and the outline are one colour. */
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
@@ -603,9 +603,7 @@
    * shadow that appears only under focus is a cell that changes size when it
    * is used.
    */
-  [data-ui='select'][data-part='root'][data-variant='plain']:has(
-      > [data-part='trigger']:focus-visible
-    ) {
+  [data-ui-select][data-part-root][data-variant='plain']:has(> [data-part-trigger]:focus-visible) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -615,7 +613,7 @@
    * it. A popup hanging off a control with a resting border reads as two
    * elements that happen to be adjacent.
    */
-  [data-ui='select'][data-part='root'][data-open]:not([data-disabled]) {
+  [data-ui-select][data-part-root][data-open]:not([data-disabled]) {
     border-color: var(--slotted-select-open-border-color, var(--slotted-tone-accent-border));
   }
 
@@ -626,7 +624,7 @@
    * reads `--slotted-focus-ring-color`, so pointing that one name at the
    * invalid colour moves the outline and the shadow together.
    */
-  [data-ui='select'][data-part='root'][data-invalid] {
+  [data-ui-select][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-select-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -651,15 +649,15 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='select'][data-part='root'][data-invalid]:has(> [data-part='trigger']:focus-visible) {
+  [data-ui-select][data-part-root][data-invalid]:has(> [data-part-trigger]:focus-visible) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='select'][data-part='root'][data-variant='plain'][data-invalid]:has(
-      > [data-part='trigger']:focus-visible
+  [data-ui-select][data-part-root][data-variant='plain'][data-invalid]:has(
+      > [data-part-trigger]:focus-visible
     ) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
@@ -677,21 +675,21 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='select'][data-part='root'][data-invalid] {
+    [data-ui-select][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='select'][data-part='root'][data-invalid]:has(> [data-part='trigger']:focus-visible) {
+    [data-ui-select][data-part-root][data-invalid]:has(> [data-part-trigger]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='select'][data-part='root'][data-variant='plain'][data-invalid]:has(
-        > [data-part='trigger']:focus-visible
+    [data-ui-select][data-part-root][data-variant='plain'][data-invalid]:has(
+        > [data-part-trigger]:focus-visible
       ) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
@@ -708,14 +706,14 @@
    * `role="combobox"` has a readonly the platform enforces, so the family
    * refuses the change itself and this is what the refusal looks like.
    */
-  [data-ui='select'][data-part='root'][data-readonly] {
+  [data-ui-select][data-part-root][data-readonly] {
     background-color: var(
       --slotted-select-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='select'][data-part='root'][data-readonly] [data-part='arrow'] {
+  [data-ui-select][data-part-root][data-readonly] [data-part-arrow] {
     opacity: 0.5;
   }
 
@@ -726,8 +724,8 @@
    * way to say. The attribute alone left such a control looking operable and
    * answering nothing.
    */
-  [data-ui='select'][data-part='root'][data-disabled],
-  [data-ui='select'][data-part='root']:has(> [data-part='trigger']:disabled) {
+  [data-ui-select][data-part-root][data-disabled],
+  [data-ui-select][data-part-root]:has(> [data-part-trigger]:disabled) {
     background-color: var(--slotted-select-disabled-background, var(--slotted-disabled-background));
     border-color: var(--slotted-select-disabled-border-color, var(--slotted-disabled-border));
     /* Nothing a person cannot reach is lifted off the page. */
@@ -737,19 +735,19 @@
     color: var(--slotted-select-disabled-color, var(--slotted-disabled-foreground));
   }
 
-  [data-ui='select'][data-part='root'][data-disabled] > [data-part='trigger'],
-  [data-ui='select'][data-part='root'] > [data-part='trigger']:disabled {
+  [data-ui-select][data-part-root][data-disabled] > [data-part-trigger],
+  [data-ui-select][data-part-root] > [data-part-trigger]:disabled {
     cursor: not-allowed;
   }
 
-  [data-ui='select'] > [data-part='clear']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-select] > [data-part-clear]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-select-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='select'] > [data-part='clear']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-select] > [data-part-clear]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-select-action-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -761,7 +759,7 @@
    * Tabbing from the trigger to it has to move something visible, and a ring
    * around the whole frame would sit still while focus moved inside it.
    */
-  [data-ui='select'] > [data-part='clear']:focus-visible {
+  [data-ui-select] > [data-part-clear]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -774,7 +772,7 @@
    * purpose. The painted surface is one element in, as `tooltip`, `popover` and
    * `menu` are built.
    */
-  [data-ui='select'][data-part='positioner'] {
+  [data-ui-select][data-part-positioner] {
     --_surface: var(--slotted-select-surface, var(--slotted-surface-raised, #ffffff));
     --_text: var(--slotted-select-content-text, var(--slotted-text, #0f172a));
     --_muted: var(--slotted-select-content-text-muted, var(--slotted-text-muted, #5b6b7f));
@@ -848,12 +846,12 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='select'][data-part='positioner'][data-side='top'] {
+  [data-ui-select][data-part-positioner][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* A lateral side has no block direction to arrive from, so it only fades. */
-  [data-ui='select'][data-part='positioner']:is([data-side='left'], [data-side='right']) {
+  [data-ui-select][data-part-positioner]:is([data-side='left'], [data-side='right']) {
     translate: 0 0;
   }
 
@@ -866,7 +864,7 @@
    * A keyframe states where it starts. The exit stays a transition: it
    * leaves from wherever the layer is, on the closed rule's durations.
    */
-  [data-ui='select'][data-part='positioner'][data-open] {
+  [data-ui-select][data-part-positioner][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -877,15 +875,15 @@
    * with the side, and a layer written open in static markup — the harness,
    * a docs snippet — is simply there, and is photographed where it stands.
    */
-  [data-ui='select'][data-part='positioner'][data-open][data-positioned] {
+  [data-ui-select][data-part-positioner][data-open][data-positioned] {
     animation: slotted-select-enter-down var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
-  [data-ui='select'][data-part='positioner'][data-open][data-positioned][data-side='top'] {
+  [data-ui-select][data-part-positioner][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-select-enter-up;
   }
 
-  [data-ui='select'][data-part='positioner'][data-open][data-positioned]:is(
+  [data-ui-select][data-part-positioner][data-open][data-positioned]:is(
       [data-side='left'],
       [data-side='right']
     ) {
@@ -914,25 +912,25 @@
 
   /* Stillness keeps the fade and drops the movement (R7). */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='select'][data-part='positioner'],
-    [data-ui='select'][data-part='positioner'][data-side='top'],
-    [data-ui='select'][data-part='positioner'][data-side='left'],
-    [data-ui='select'][data-part='positioner'][data-side='right'] {
+    [data-ui-select][data-part-positioner],
+    [data-ui-select][data-part-positioner][data-side='top'],
+    [data-ui-select][data-part-positioner][data-side='left'],
+    [data-ui-select][data-part-positioner][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='select'][data-part='positioner'][data-open][data-positioned],
-    [data-ui='select'][data-part='positioner'][data-open][data-positioned][data-side='top'],
-    [data-ui='select'][data-part='positioner'][data-open][data-positioned][data-side='left'],
-    [data-ui='select'][data-part='positioner'][data-open][data-positioned][data-side='right'] {
+    [data-ui-select][data-part-positioner][data-open][data-positioned],
+    [data-ui-select][data-part-positioner][data-open][data-positioned][data-side='top'],
+    [data-ui-select][data-part-positioner][data-open][data-positioned][data-side='left'],
+    [data-ui-select][data-part-positioner][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-select-fade;
     }
   }
 
   /* The anchor scrolled out of its own clipper. The popup is still open and
      its options still belong to a control the reader can no longer see. */
-  [data-ui='select'][data-part='positioner'][data-detached] {
+  [data-ui-select][data-part-positioner][data-detached] {
     visibility: hidden;
   }
 
@@ -942,11 +940,11 @@
    * narrow control does not wrap its option labels. `anchor` pins the popup to
    * the control's width exactly.
    */
-  [data-ui='select'][data-part='positioner'][data-width='anchor'] {
+  [data-ui-select][data-part-positioner][data-width='anchor'] {
     inline-size: var(--slotted-positioner-anchor-width, auto);
   }
 
-  [data-ui='select'][data-part='positioner'][data-width='content'] {
+  [data-ui-select][data-part-positioner][data-width='content'] {
     inline-size: max-content;
     max-inline-size: min(var(--_measure), var(--slotted-positioner-available-width, 100vw));
     /* Never narrower than the control it belongs to: a popup that shrank under
@@ -954,7 +952,7 @@
     min-inline-size: var(--slotted-positioner-anchor-width, auto);
   }
 
-  [data-ui='select'][data-part='positioner'][data-size='sm'] {
+  [data-ui-select][data-part-positioner][data-size='sm'] {
     --_item-inset: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_item-height: var(--slotted-control-height-sm, 30px);
     --_content-font-size: var(--slotted-control-font-size-sm, 12px);
@@ -963,7 +961,7 @@
     --_column-gap: var(--slotted-control-gap-sm, 0.375rem);
   }
 
-  [data-ui='select'][data-part='positioner'][data-size='lg'] {
+  [data-ui-select][data-part-positioner][data-size='lg'] {
     --_item-inset: var(--slotted-control-padding-inline-lg, 1rem);
     --_item-height: var(--slotted-control-height-lg, 38px);
     --_content-font-size: var(--slotted-control-font-size-lg, 14px);
@@ -981,7 +979,7 @@
    * the screen. `overscroll-behavior` keeps the page still once the surface has
    * scrolled to its end.
    */
-  [data-ui='select'] > [data-part='content'] {
+  [data-ui-select] > [data-part-content] {
     background: var(--_surface);
     border: var(--_border-width) solid var(--_border-color);
     border-radius: var(--_radius);
@@ -1010,8 +1008,8 @@
    * `overscroll-behavior` keeps the page still once the scroller has reached
    * its end.
    */
-  [data-ui='select'] > [data-part='content']:not([data-search]),
-  [data-ui='select'] [data-part='list'] {
+  [data-ui-select] > [data-part-content]:not([data-search]),
+  [data-ui-select] [data-part-list] {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     overflow-y: auto;
@@ -1020,7 +1018,7 @@
     padding-inline: var(--_inset-inline);
   }
 
-  [data-ui='select'] > [data-part='content'][data-search] {
+  [data-ui-select] > [data-part-content][data-search] {
     display: flex;
     flex-direction: column;
     /* The field draws to the surface's own edges and the list keeps the inset,
@@ -1030,7 +1028,7 @@
 
   /* `auto` as the flex basis measures the whole list and refuses to shrink;
      the surface is what holds the height, and the list is what gives. */
-  [data-ui='select'] [data-part='list'] {
+  [data-ui-select] [data-part-list] {
     flex: 1 1 auto;
     min-block-size: 0;
   }
@@ -1052,7 +1050,7 @@
    * rhythm, with the rule under it drawn from the border scale rather than
    * from a shadow — the same rule the `chosen` band draws above the list.
    */
-  [data-ui='select'] [data-part='search'] {
+  [data-ui-select] [data-part-search] {
     align-items: center;
     border-block-end: var(--_border-width) solid var(--_border-color);
     box-sizing: border-box;
@@ -1073,7 +1071,7 @@
    * bare line of placeholder text at the top of a panel reads as a title, and
    * a reader does not type into a title.
    */
-  [data-ui='select'] [data-part='search-icon'] {
+  [data-ui-select] [data-part-search-icon] {
     --slotted-icon-size: var(--_content-icon-size);
 
     align-items: center;
@@ -1097,7 +1095,7 @@
    * rather than a state, and the one thing on the surface that never changes
    * would be the loudest. What says where focus is, is the caret.
    */
-  [data-ui='select'] [data-part='search-input'] {
+  [data-ui-select] [data-part-search-input] {
     background-color: transparent;
     border: 0;
     color: inherit;
@@ -1111,7 +1109,7 @@
     text-overflow: ellipsis;
   }
 
-  [data-ui='select'] [data-part='search-input']::placeholder {
+  [data-ui-select] [data-part-search-input]::placeholder {
     color: var(--slotted-select-placeholder-color, var(--_muted));
     text-overflow: ellipsis;
   }
@@ -1131,7 +1129,7 @@
    * to the surface's own edges, which is where the rule between it and the list
    * has to end — a rule from the border scale, not a shadow.
    */
-  [data-ui='select'] [data-part='chosen'] {
+  [data-ui-select] [data-part-chosen] {
     background: var(--_surface);
     border-block-end: var(--_border-width) solid var(--_border-color);
     box-sizing: border-box;
@@ -1169,7 +1167,7 @@
    * interaction — the highlight is `aria-activedescendant`, not focus — so a
    * ring here would draw a box around something nobody is operating.
    */
-  [data-ui='select'] > [data-part='content']:focus-visible {
+  [data-ui-select] > [data-part-content]:focus-visible {
     outline: none;
   }
 
@@ -1180,7 +1178,7 @@
    * surface's columns instead of starting a second set. Without the subgrid a
    * group would align its own labels and disagree with the options outside it.
    */
-  [data-ui='select'] [data-part='group'] {
+  [data-ui-select] [data-part-group] {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
@@ -1194,12 +1192,12 @@
    * author rule wins over the user agent sheet. Without this the search
    * filtered nothing the reader could see.
    */
-  [data-ui='select'] [data-part='item'][hidden],
-  [data-ui='select'] [data-part='group'][hidden] {
+  [data-ui-select] [data-part-item][hidden],
+  [data-ui-select] [data-part-group][hidden] {
     display: none;
   }
 
-  [data-ui='select'] [data-part='group-label'] {
+  [data-ui-select] [data-part-group-label] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -1221,7 +1219,7 @@
    * `min-block-size` rather than a height, because an option with a
    * description is two lines tall and still has to clear the target minimum.
    */
-  [data-ui='select'] [data-part='item'] {
+  [data-ui-select] [data-part-item] {
     align-content: center;
     border-radius: var(--_item-radius);
     box-sizing: border-box;
@@ -1268,7 +1266,7 @@
    * whichever device is driving, and the state a screen reader announces and
    * the state the eye sees are the same state.
    */
-  [data-ui='select'] [data-part='item'][data-current] {
+  [data-ui-select] [data-part-item][data-current] {
     background-color: var(--_highlight);
     /**
      * A ring as well as a ground, because the ground alone carries the whole
@@ -1285,7 +1283,7 @@
       var(--slotted-select-highlight-ring, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='select'] [data-part='item']:not([data-disabled]):active {
+  [data-ui-select] [data-part-item]:not([data-disabled]):active {
     background-color: var(--_highlight-active);
   }
 
@@ -1295,7 +1293,7 @@
    * becomes `Canvas` — and the accent ink is the secondary one, so the row a
    * reader is looking for is findable at a glance in a list of forty.
    */
-  [data-ui='select'] [data-part='item'][data-selected] {
+  [data-ui-select] [data-part-item][data-selected] {
     color: var(--_selected-color);
   }
 
@@ -1308,17 +1306,17 @@
    * selection begins and ends. `select` and `combobox` draw the same ground
    * and answer the same way; `selection-block.test.mjs` holds the three to it.
    */
-  [data-ui='select'] [data-part='item'][data-selected] + [data-part='item'][data-selected] {
+  [data-ui-select] [data-part-item][data-selected] + [data-part-item][data-selected] {
     border-start-end-radius: 0;
     border-start-start-radius: 0;
   }
 
-  [data-ui='select'] [data-part='item'][data-selected]:has(+ [data-part='item'][data-selected]) {
+  [data-ui-select] [data-part-item][data-selected]:has(+ [data-part-item][data-selected]) {
     border-end-end-radius: 0;
     border-end-start-radius: 0;
   }
 
-  [data-ui='select'] [data-part='item'][data-selected] > [data-part='label'] {
+  [data-ui-select] [data-part-item][data-selected] > [data-part-label] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
@@ -1329,7 +1327,7 @@
    * disabled surface rather than the highlight, and the text stays legible
    * instead of being faded toward it.
    */
-  [data-ui='select'] [data-part='item'][data-disabled] {
+  [data-ui-select] [data-part-item][data-disabled] {
     color: var(--slotted-disabled-foreground, #64748b);
     cursor: not-allowed;
   }
@@ -1355,7 +1353,7 @@
    * would watch it disappear. A cursor lifts, always. What the row cannot do is
    * said by the ink and by the ring, which both step down to the disabled pair.
    */
-  [data-ui='select'] [data-part='item'][data-disabled][data-current] {
+  [data-ui-select] [data-part-item][data-disabled][data-current] {
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px)
       var(--slotted-disabled-border, #cbd5e1);
     color: var(--slotted-disabled-foreground, #64748b);
@@ -1369,7 +1367,7 @@
    * states the line box every cell inherits, exactly as tall as the line it
    * sits beside.
    */
-  [data-ui='select'] :is([data-part='indicator'], [data-part='icon']) {
+  [data-ui-select] :is([data-part-indicator], [data-part-icon]) {
     block-size: 1lh;
   }
 
@@ -1382,7 +1380,7 @@
    * artwork of the consumer's own, centred and sized from the column through
    * `--slotted-icon-size`. No stylesheet fills it.
    */
-  [data-ui='select'] [data-part='icon'] {
+  [data-ui-select] [data-part-icon] {
     --slotted-icon-size: var(--_content-icon-size);
 
     align-items: center;
@@ -1398,7 +1396,7 @@
   /* Column two, and the only column that gives way. It is scoped to the option
      rather than to the family: a chip in the control carries a `label` of its
      own, and this rule would have put it in the popup's second column (SL4). */
-  [data-ui='select'] [data-part='item'] > [data-part='label'] {
+  [data-ui-select] [data-part-item] > [data-part-label] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;
@@ -1419,7 +1417,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='select'] [data-part='description'] {
+  [data-ui-select] [data-part-description] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     grid-column: 2;
@@ -1429,7 +1427,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='select'] [data-part='item'][data-disabled] > [data-part='description'] {
+  [data-ui-select] [data-part-item][data-disabled] > [data-part-description] {
     color: inherit;
   }
 
@@ -1438,7 +1436,7 @@
    * reserved whether or not the check is drawn, so a list does not shift by
    * sixteen pixels as the reader moves through it.
    */
-  [data-ui='select'] [data-part='indicator'] {
+  [data-ui-select] [data-part-indicator] {
     --slotted-icon-size: var(--_content-icon-size);
 
     align-items: center;
@@ -1455,13 +1453,13 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='select'] [data-part='item'][data-selected] > [data-part='indicator'] {
+  [data-ui-select] [data-part-item][data-selected] > [data-part-indicator] {
     opacity: 1;
   }
 
   /* ── Separator, empty, status ─────────────────────────────────────────── */
 
-  [data-ui='select'] [data-part='separator'] {
+  [data-ui-select] [data-part-separator] {
     background-color: var(--slotted-select-separator-color, var(--_border-color));
     block-size: var(--_border-width);
     border: 0;
@@ -1477,7 +1475,7 @@
    * refuses to open on an empty collection and Radix paints nothing; the popup
    * here opens onto a sentence.
    */
-  [data-ui='select'] :is([data-part='empty'], [data-part='status']) {
+  [data-ui-select] :is([data-part-empty], [data-part-status]) {
     color: var(--_muted);
     /**
      * Its own bidi run, ordered by its own content. "3 results" is a European
@@ -1512,7 +1510,7 @@
    * takes the same space as the empty message beside it. `combobox` draws the
    * count the same way, in the same place, for the same reason.
    */
-  [data-ui='select'] [data-part='status']:empty {
+  [data-ui-select] [data-part-status]:empty {
     display: none;
   }
 
@@ -1528,7 +1526,7 @@
    * hidden from assistive technology: the `status` row beside them is the live
    * region and it already says what is happening.
    */
-  [data-ui='select'] [data-part='placeholder'] {
+  [data-ui-select] [data-part-placeholder] {
     display: grid;
     /* The surface is a grid of option columns; the rows span all of them, as
        the status and empty rows do. */
@@ -1537,7 +1535,7 @@
     padding-inline: var(--_item-inset);
   }
 
-  [data-ui='select'] [data-part='placeholder'] > [data-ui='skeleton'] {
+  [data-ui-select] [data-part-placeholder] > [data-ui-skeleton] {
     align-self: center;
   }
 
@@ -1545,17 +1543,17 @@
    * Each row is an option: the same minimum height, so three of them measure
    * what three options measure and the popup does not resize when they land.
    */
-  [data-ui='select'] [data-part='placeholder'] > * {
+  [data-ui-select] [data-part-placeholder] > * {
     align-items: center;
     display: flex;
     min-block-size: var(--_item-height);
   }
 
-  [data-ui='select'] [data-part='placeholder'] > :nth-child(2) [data-ui='skeleton'] {
+  [data-ui-select] [data-part-placeholder] > :nth-child(2) [data-ui-skeleton] {
     inline-size: 78%;
   }
 
-  [data-ui='select'] [data-part='placeholder'] > :nth-child(3) [data-ui='skeleton'] {
+  [data-ui-select] [data-part-placeholder] > :nth-child(3) [data-ui-skeleton] {
     inline-size: 56%;
   }
 
@@ -1566,7 +1564,7 @@
    * many for one wait (SL6).
    */
 
-  [data-ui='select'] > [data-part='content'][data-loading] {
+  [data-ui-select] > [data-part-content][data-loading] {
     cursor: progress;
   }
 
@@ -1579,13 +1577,13 @@
    * with no way to tell.
    */
   @media (forced-colors: active) {
-    [data-ui='select'] [data-part='item'][data-current] {
+    [data-ui-select] [data-part-item][data-current] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='select'] [data-part='item'][data-disabled][data-current] {
+    [data-ui-select] [data-part-item][data-disabled][data-current] {
       background-color: Highlight;
       color: GrayText;
     }

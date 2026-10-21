@@ -44,7 +44,7 @@ function activationReason(event: MouseEvent) {
   styleUrl: '../../../styles/src/navigation-menu/navigation-menu.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'list' },
+  host: { 'data-part': 'list', 'data-part-list': '' },
 })
 export class SlNavigationMenuList {}
 
@@ -62,6 +62,7 @@ export class SlNavigationMenuList {}
   ],
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-value]': 'value()',
     '[attr.data-open]': "open() ? '' : null",
     '[attr.data-disabled]': "disabled() ? '' : null",
@@ -121,6 +122,7 @@ export class SlNavigationMenuItem implements NavigationMenuSection {
   standalone: true,
   host: {
     'data-part': 'trigger',
+    'data-part-trigger': '',
     type: 'button',
     '[attr.aria-controls]': 'section.contentId',
     '[attr.aria-expanded]': 'section.open()',
@@ -164,7 +166,7 @@ export class SlNavigationMenuTriggerWiring {
   exportAs: 'slNavigationMenuTrigger',
   imports: [SlGlyph, SlIcon],
   template: `<ng-content />
-    <span data-part="indicator" aria-hidden="true"
+    <span data-part="indicator" data-part-indicator="" aria-hidden="true"
       ><span slIcon [directional]="vertical()"
         ><svg slGlyph [name]="vertical() ? 'chevron-right' : 'chevron-down'"></svg></span
     ></span>`,
@@ -194,6 +196,7 @@ export class SlNavigationMenuTrigger {
   providers: [{ provide: NAVIGATION_MENU_PANEL, useValue: true }],
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     '[attr.id]': 'item.contentId',
     '[attr.data-columns]': 'columns()',
     '[attr.data-open]': "item.open() ? '' : null",
@@ -240,6 +243,7 @@ export class SlNavigationMenuContent {
   exportAs: 'slNavigationMenuLink',
   host: {
     'data-part': 'link',
+    'data-part-link': '',
     '[attr.aria-current]': "resolvedCurrent() ? 'page' : null",
     '[attr.data-current]': "resolvedCurrent() ? '' : null",
     '[attr.aria-disabled]': "disabled() ? 'true' : null",
@@ -296,7 +300,7 @@ export class SlNavigationMenuLink {
 @Directive({
   selector: 'ul[slNavigationMenuLinks]',
   standalone: true,
-  host: { 'data-part': 'links' },
+  host: { 'data-part': 'links', 'data-part-links': '' },
 })
 export class SlNavigationMenuLinks {}
 
@@ -306,6 +310,7 @@ export class SlNavigationMenuLinks {}
   standalone: true,
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     role: 'group',
     '[attr.aria-labelledby]': 'labelledBy ?? labelId',
   },
@@ -321,7 +326,7 @@ export class SlNavigationMenuGroup {
 @Directive({
   selector: '[slNavigationMenuGroupLabel]',
   standalone: true,
-  host: { 'data-part': 'group-label', '[attr.id]': 'id' },
+  host: { 'data-part': 'group-label', 'data-part-group-label': '', '[attr.id]': 'id' },
 })
 export class SlNavigationMenuGroupLabel {
   protected readonly id =
@@ -334,7 +339,7 @@ export class SlNavigationMenuGroupLabel {
 @Directive({
   selector: '[slNavigationMenuFooter]',
   standalone: true,
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlNavigationMenuFooter {}
 
@@ -342,7 +347,7 @@ export class SlNavigationMenuFooter {}
 @Directive({
   selector: '[slNavigationMenuIcon]',
   standalone: true,
-  host: { 'data-part': 'icon', 'aria-hidden': 'true' },
+  host: { 'data-part': 'icon', 'data-part-icon': '', 'aria-hidden': 'true' },
 })
 export class SlNavigationMenuIcon {}
 
@@ -350,7 +355,7 @@ export class SlNavigationMenuIcon {}
 @Directive({
   selector: '[slNavigationMenuLabel]',
   standalone: true,
-  host: { 'data-part': 'label' },
+  host: { 'data-part': 'label', 'data-part-label': '' },
 })
 export class SlNavigationMenuLabel {}
 
@@ -358,6 +363,6 @@ export class SlNavigationMenuLabel {}
 @Directive({
   selector: '[slNavigationMenuDescription]',
   standalone: true,
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlNavigationMenuDescription {}

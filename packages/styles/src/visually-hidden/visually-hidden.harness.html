@@ -34,9 +34,21 @@
         "
       >
         <button type="button">
-          A<span data-ui="visually-hidden" data-part="root">pprove</span>
+          A<span
+            data-ui="visually-hidden"
+            data-ui-visually-hidden=""
+            data-part="root"
+            data-part-root=""
+            >pprove</span
+          >
         </button>
-        <span data-ui="visually-hidden" data-part="root">Not a third gap</span>
+        <span
+          data-ui="visually-hidden"
+          data-ui-visually-hidden=""
+          data-part="root"
+          data-part-root=""
+          >Not a third gap</span
+        >
         <button type="button">B</button>
       </div>
     </div>
@@ -52,7 +64,13 @@
 -->
 <section data-scene="revealed">
   <div style="display: grid; justify-items: start; gap: var(--slotted-space-4)">
-    <a data-ui="visually-hidden" data-part="root" data-focusable href="#visually-hidden-target"
+    <a
+      data-ui="visually-hidden"
+      data-ui-visually-hidden=""
+      data-part="root"
+      data-part-root=""
+      data-focusable
+      href="#visually-hidden-target"
       >Skip to content</a
     >
     <p style="margin: 0">Repeated navigation the link jumps over.</p>
@@ -70,7 +88,12 @@
 <section data-scene="content">
   <div style="display: grid; gap: var(--slotted-space-5)">
     <p style="margin: 0">
-      Read more<span data-ui="visually-hidden" data-part="root">
+      Read more<span
+        data-ui="visually-hidden"
+        data-ui-visually-hidden=""
+        data-part="root"
+        data-part-root=""
+      >
         about the quarterly billing statement issued on the first working day of each month,
         including every line item and the payment method it settles against</span
       >
@@ -85,7 +108,7 @@
       "
     >
       <p style="margin: 0">A scrolling panel that is its own containing block.</p>
-      <span data-ui="visually-hidden" data-part="root"
+      <span data-ui="visually-hidden" data-ui-visually-hidden="" data-part="root" data-part-root=""
         >A hidden string after the last line of a scrolling panel</span
       >
     </div>
@@ -117,7 +140,9 @@
           mask-size: contain;
         "
       ></span>
-      <span data-ui="visually-hidden" data-part="root">Remove invoice</span>
+      <span data-ui="visually-hidden" data-ui-visually-hidden="" data-part="root" data-part-root=""
+        >Remove invoice</span
+      >
     </button>
     <table style="border-collapse: collapse">
       <thead>
@@ -138,7 +163,13 @@
                 mask-size: contain;
               "
             ></span>
-            <span data-ui="visually-hidden" data-part="root">Paid</span>
+            <span
+              data-ui="visually-hidden"
+              data-ui-visually-hidden=""
+              data-part="root"
+              data-part-root=""
+              >Paid</span
+            >
           </th>
         </tr>
       </thead>
@@ -150,7 +181,14 @@
       </tbody>
     </table>
     <a href="#visually-hidden-target"
-      >Read more<span data-ui="visually-hidden" data-part="root"> about quarterly billing</span></a
+      >Read more<span
+        data-ui="visually-hidden"
+        data-ui-visually-hidden=""
+        data-part="root"
+        data-part-root=""
+      >
+        about quarterly billing</span
+      ></a
     >
   </div>
 </section>

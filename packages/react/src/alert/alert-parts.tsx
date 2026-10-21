@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createContext, useContext, useEffect } from 'react';
 
 import type {
@@ -66,11 +67,11 @@ export function AlertContent({ render, ...nativeProps }: AlertContentProps) {
   const { live } = useAlertContext('Content');
   const role = LIVE_ROLE[live];
 
-  const partProps: AlertPartProps = {
+  const partProps: AlertPartProps = keyedProps({
     ...nativeProps,
     ...(role === undefined ? {} : { role }),
     'data-part': 'content',
-  };
+  });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
@@ -89,18 +90,18 @@ export function AlertTitle({ render, ...nativeProps }: AlertTitleProps) {
     return () => registerTitle(false);
   }, [registerTitle]);
 
-  const partProps: AlertPartProps = {
+  const partProps: AlertPartProps = keyedProps({
     id: titleId,
     ...nativeProps,
     'data-part': 'title',
-  };
+  });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
 
 /** The message. A `p`, because that is what a paragraph of prose is. */
 export function AlertDescription({ render, ...nativeProps }: AlertDescriptionProps) {
-  const partProps = { ...nativeProps, 'data-part': 'description' } as const;
+  const partProps = keyedProps({ ...nativeProps, 'data-part': 'description' } as const);
 
   return render === undefined ? <p {...partProps} /> : render(partProps);
 }
@@ -112,7 +113,7 @@ export function AlertDescription({ render, ...nativeProps }: AlertDescriptionPro
  * already owns what a button is.
  */
 export function AlertActions({ render, ...nativeProps }: AlertActionsProps) {
-  const partProps: AlertPartProps = { ...nativeProps, 'data-part': 'actions' };
+  const partProps: AlertPartProps = keyedProps({ ...nativeProps, 'data-part': 'actions' });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }

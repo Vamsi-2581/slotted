@@ -46,7 +46,7 @@ export function Tag({
       render={render}
       rootProps={nativeProps}
     >
-      <span data-part="body">
+      <span data-part="body" data-part-body="">
         <TagContent end={end} labelId={labelId} start={start}>
           {children}
         </TagContent>

@@ -96,6 +96,7 @@ export interface MenuSelectEvent {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     tabindex: '-1',
     '[attr.role]': 'role',
     '[attr.type]': 'isLink ? null : "button"',
@@ -113,16 +114,16 @@ export interface MenuSelectEvent {
   },
   template: `
     @if (role !== 'menuitem') {
-      <span data-part="indicator"
+      <span data-part="indicator" data-part-indicator=""
         ><span slIcon><svg slGlyph [name]="role === 'menuitemradio' ? 'dot' : 'check'"></svg></span
       ></span>
     }
     <ng-content select="[slMenuItemIcon]" />
-    <span data-part="label"><ng-content /></span>
+    <span data-part="label" data-part-label=""><ng-content /></span>
     <ng-content select="[slMenuItemDescription]" />
     <ng-content select="[slMenuItemMeta]" />
     @if (legend(); as printed) {
-      <span data-part="shortcut" aria-hidden="true">{{ printed }}</span>
+      <span data-part="shortcut" data-part-shortcut="" aria-hidden="true">{{ printed }}</span>
     }
     @if (opensSubmenu()) {
       <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
@@ -273,7 +274,7 @@ export class SlMenuItem {
 @Directive({
   selector: '[slMenuItemIcon]',
   standalone: true,
-  host: { 'data-part': 'icon' },
+  host: { 'data-part': 'icon', 'data-part-icon': '' },
 })
 export class SlMenuItemIcon {}
 
@@ -287,7 +288,7 @@ export class SlMenuItemIcon {}
 @Directive({
   selector: '[slMenuItemDescription]',
   standalone: true,
-  host: { 'data-part': 'description', '[attr.id]': 'id' },
+  host: { 'data-part': 'description', 'data-part-description': '', '[attr.id]': 'id' },
 })
 export class SlMenuItemDescription {
   protected readonly id = `sl-menu-description-${Math.random().toString(36).slice(2, 8)}`;
@@ -306,7 +307,7 @@ export class SlMenuItemDescription {
 @Directive({
   selector: '[slMenuItemMeta]',
   standalone: true,
-  host: { 'data-part': 'meta' },
+  host: { 'data-part': 'meta', 'data-part-meta': '' },
 })
 export class SlMenuItemMeta {}
 
@@ -321,7 +322,7 @@ export class SlMenuItemMeta {}
 @Directive({
   selector: '[slMenuHeader]',
   standalone: true,
-  host: { 'data-part': 'header', '[attr.id]': 'id' },
+  host: { 'data-part': 'header', 'data-part-header': '', '[attr.id]': 'id' },
 })
 export class SlMenuHeader {
   protected readonly id = `sl-menu-header-${Math.random().toString(36).slice(2, 8)}`;
@@ -347,12 +348,13 @@ export class SlMenuHeader {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     role: 'group',
     '[attr.aria-labelledby]': 'label() === undefined ? null : labelId',
   },
   template: `
     @if (label(); as words) {
-      <div data-part="group-label" [id]="labelId">{{ words }}</div>
+      <div data-part="group-label" data-part-group-label="" [id]="labelId">{{ words }}</div>
     }
     <ng-content />
   `,
@@ -369,7 +371,7 @@ export class SlMenuGroup {
   exportAs: 'slMenuRadioGroup',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'group', role: 'group' },
+  host: { 'data-part': 'group', 'data-part-group': '', role: 'group' },
   template: '<ng-content />',
 })
 export class SlMenuRadioGroup {
@@ -390,7 +392,12 @@ export class SlMenuRadioGroup {
 @Directive({
   selector: 'hr[slMenuSeparator]',
   standalone: true,
-  host: { 'data-part': 'separator', role: 'separator', 'aria-orientation': 'horizontal' },
+  host: {
+    'data-part': 'separator',
+    'data-part-separator': '',
+    role: 'separator',
+    'aria-orientation': 'horizontal',
+  },
 })
 export class SlMenuSeparator {}
 
@@ -398,6 +405,6 @@ export class SlMenuSeparator {}
 @Directive({
   selector: '[slMenuEmpty]',
   standalone: true,
-  host: { 'data-part': 'empty' },
+  host: { 'data-part': 'empty', 'data-part-empty': '' },
 })
 export class SlMenuEmpty {}

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { buttonMessages } from '@slotted/core/i18n';
 
 import { useMessages } from '../i18n';
@@ -52,7 +53,7 @@ export function IconButton({
   const toggles = holdsPressedState({ defaultPressed, pressed });
   const state = usePressed({ defaultPressed, onPressedChange, pressed });
 
-  const rootProps: ButtonRootProps = {
+  const rootProps: ButtonRootProps = keyedProps({
     ...nativeProps,
     ...rootData({
       disabled,
@@ -69,7 +70,7 @@ export function IconButton({
       is the one thing this member can afford to hide: it carries no name.
     */
     children: (
-      <span data-part="icon">
+      <span data-part="icon" data-part-icon="">
         {children}
         {waiting ? <ButtonIndicator label={t('loading')} /> : null}
       </span>
@@ -85,7 +86,7 @@ export function IconButton({
       onClickCapture?.(event);
     },
     type,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }

@@ -70,26 +70,27 @@ let summaryCounter = 0;
   selector: '[slFormSummary]',
   standalone: true,
   exportAs: 'slFormSummary',
-  template: `<h2 data-part="summary-title" [attr.id]="form.summaryId()">
+  template: `<h2 data-part="summary-title" data-part-summary-title="" [attr.id]="form.summaryId()">
       {{ form.resolvedSummaryTitle() }}
     </h2>
     @if (form.resolvedSummaryDescription(); as description) {
       <p>{{ description }}</p>
     }
-    <ul data-part="summary-list">
+    <ul data-part="summary-list" data-part-summary-list="">
       @for (entry of form.entries(); track entry.name) {
         @for (message of entry.messages; track message) {
           <li>
             @if (entry.id) {
               <a
                 data-part="summary-item"
+                data-part-summary-item=""
                 [attr.href]="'#' + entry.id"
                 (click)="focus($event, entry.id)"
               >
                 {{ message }}
               </a>
             } @else {
-              <span data-part="summary-item">{{ message }}</span>
+              <span data-part="summary-item" data-part-summary-item="">{{ message }}</span>
             }
           </li>
         }
@@ -100,7 +101,9 @@ let summaryCounter = 0;
   host: {
     // The family's identifier on the part: its rules reach it by name, never as any descendant.
     'data-ui': 'form',
+    'data-ui-form': '',
     'data-part': 'summary',
+    'data-part-summary': '',
     role: 'alert',
     tabindex: '-1',
     '[attr.aria-labelledby]': 'form.summaryId()',
@@ -166,7 +169,9 @@ export class SlFormSummary implements AfterViewInit {
   providers: [{ provide: SlFormOwner, useExisting: forwardRef(() => SlForm) }],
   host: {
     'data-ui': 'form',
+    'data-ui-form': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.novalidate]': "resolvedNativeValidation() ? null : ''",
     '[attr.aria-busy]': "submitting() ? 'true' : null",
     '[attr.data-invalid]': "hasAnyError() ? '' : null",

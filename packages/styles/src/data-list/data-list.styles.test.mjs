@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/data-list/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./data-list.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./data-list.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./data-list.harness.html', import.meta.url), 'utf8'),
+);
 /**
  * One spelling for a selector or a sheet. The space before a pseudo-class is
  * kept, because `a :is(b)` and `a:is(b)` are two different selectors.
@@ -27,7 +40,7 @@ function normalize(text) {
 
 const normalized = normalize(css);
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.dataList;
 
 /** A selector list split at its own commas, never at one inside `:is()` or `:has()`. */
@@ -64,13 +77,16 @@ test('lives in the component layer', () => {
 });
 
 test('is selected by the identifier the contract declares', () => {
-  assert.ok(normalized.includes(`${ui}[data-part='root']{`), 'no base rule for the root');
+  assert.ok(normalized.includes(`${ui}[data-part-root]{`), 'no base rule for the root');
 });
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
     if (['root', 'selection', 'media', 'loader', 'load-more'].includes(part)) continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -102,9 +118,7 @@ test('writes no part of its own on the row', () => {
  */
 test('lays the fields under the title and the trailing value', () => {
   assert.match(
-    rule(
-      `${ui} [data-ui='list-item']>[data-part='content']>:is([data-part='fields'],[data-part='more'])`,
-    ),
+    rule(`${ui} [data-ui-list-item]>[data-part-content]>:is([data-part-fields],[data-part-more])`),
     /grid-column:2 \/ -1/,
   );
   assert.match(normalized, /@container slotted-list-item \(max-inline-size:22rem\)/);
@@ -113,31 +127,31 @@ test('lays the fields under the title and the trailing value', () => {
 
 /** The pop-in's geometry, and the two measures the contract records as literals. */
 test('draws the pairs in the pop-in geometry', () => {
-  const root = rule(`${ui}[data-part='root']`);
+  const root = rule(`${ui}[data-part-root]`);
   assert.match(root, /--_field-min:9rem/);
   assert.match(root, /--_field-label-inline:7\.5rem/);
   for (const literal of ['--_field-min', '--_field-label-inline']) {
     assert.ok(literal in contract.literals, literal);
   }
   assert.match(
-    rule(`${ui} [data-part='fields']`),
+    rule(`${ui} [data-part-fields]`),
     /grid-template-columns:repeat\(auto-fill,minmax\(min\(var\(--_field-min\),100%\),1fr\)\)/,
   );
   assert.match(
     normalized,
     /@container slotted-data-list-fields \(min-inline-size:12rem\) and \(max-inline-size:19rem\)/,
   );
-  assert.match(rule(`${ui} [data-part='field-value']`), /overflow-wrap:anywhere/);
-  assert.doesNotMatch(rule(`${ui} [data-part='field-value']`), /text-overflow/);
+  assert.match(rule(`${ui} [data-part-field-value]`), /overflow-wrap:anywhere/);
+  assert.doesNotMatch(rule(`${ui} [data-part-field-value]`), /text-overflow/);
 });
 
 /** §2.3: one target covers the record, and the record's controls stand above it. */
 test('covers the record with the title and lifts every control above it', () => {
-  assert.match(rule(`${ui} [data-ui='list-item']`), /position:relative/);
-  const cover = rule(`${ui} :is(a,button)[data-part='title']::after`);
+  assert.match(rule(`${ui} [data-ui-list-item]`), /position:relative/);
+  const cover = rule(`${ui} :is(a,button)[data-part-title]::after`);
   assert.match(cover, /inset:0/);
   assert.match(cover, /position:absolute/);
-  assert.match(normalized, /\[data-part='selection'\],\[data-part='more'\]/);
+  assert.match(normalized, /\[data-part-selection\],\[data-part-more\]/);
   assert.match(normalized, /z-index:1/);
 });
 
@@ -146,8 +160,8 @@ test('covers the record with the title and lifts every control above it', () => 
  * stronger states — `packages/styles/src/states.test.mjs` for this family.
  */
 test('washes the row from its title and holds back for disabled and loading', () => {
-  const row = `${ui} [data-ui='list-item']:not([data-disabled]):not([data-loading])`;
-  const title = `[data-part='title']:is(a[href], button:not(:disabled))`;
+  const row = `${ui} [data-ui-list-item]:not([data-disabled]):not([data-loading])`;
+  const title = `[data-part-title]:is(a[href], button:not(:disabled))`;
   assert.match(rule(`${row}:has(${title}:hover)`), /--_fill:var\(--_hover/);
   assert.match(rule(`${row}:has(${title}:active)`), /--_fill:var\(--_active/);
 });
@@ -168,8 +182,8 @@ test('draws every glyph with the Glyph element, never a mask or a character', ()
 
 test('draws the focus ring from the foundation on every control the family owns', () => {
   for (const selector of [
-    `${ui} :is(a,button)[data-part='title']:focus-visible::after`,
-    `${ui} [data-part='more']:focus-visible`,
+    `${ui} :is(a,button)[data-part-title]:focus-visible::after`,
+    `${ui} [data-part-more]:focus-visible`,
   ]) {
     assert.match(rule(selector), /var\(--slotted-focus-ring-color/, selector);
   }
@@ -177,7 +191,7 @@ test('draws the focus ring from the foundation on every control the family owns'
 
 /** A refresh keeps the rows and moves nothing. */
 test('dims the set while it refreshes, without replacing it', () => {
-  const busy = rule(`${ui}[aria-busy='true']>[data-ui='list']`);
+  const busy = rule(`${ui}[aria-busy='true']>[data-ui-list]`);
   assert.match(busy, /opacity:0\.55/);
   assert.match(busy, /pointer-events:none/);
 });

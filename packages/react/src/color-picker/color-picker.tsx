@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/color-picker/color-picker.css';
 import '@slotted/styles/text-field/text-field.css';
 
@@ -232,9 +233,8 @@ export function ColorPickerArea({ onKeyDown, ...props }: ColorPickerPartProps) {
   return (
     <div
       {...props}
-      {...(off ? {} : handlers)}
+      {...withSelectorKey(off ? {} : handlers, 'part', 'area')}
       data-dragging={dragging ? '' : undefined}
-      data-part="area"
     >
       <div
         aria-disabled={picker.disabled || undefined}
@@ -242,6 +242,7 @@ export function ColorPickerArea({ onKeyDown, ...props }: ColorPickerPartProps) {
         aria-roledescription={picker.t('areaRoleDescription')}
         aria-valuetext={`${percentText(hsva.s)}, ${percentText(hsva.v)}`}
         data-part="area-thumb"
+        data-part-area-thumb=""
         onKeyDown={(event) => {
           onKeyDown?.(event as never);
           if (off) return;
@@ -279,10 +280,9 @@ export function ColorPickerChannel({ channel, ...props }: ColorPickerChannelProp
   return (
     <div
       {...props}
-      {...(off ? {} : handlers)}
+      {...withSelectorKey(off ? {} : handlers, 'part', 'channel')}
       data-channel={channel}
       data-dragging={dragging ? '' : undefined}
-      data-part="channel"
     >
       <div
         aria-disabled={picker.disabled || undefined}
@@ -293,6 +293,7 @@ export function ColorPickerChannel({ channel, ...props }: ColorPickerChannelProp
         aria-valuetext={hue ? `${Math.round(current)}°` : percentText(current)}
         data-channel={channel}
         data-part="channel-thumb"
+        data-part-channel-thumb=""
         onKeyDown={(event) => {
           if (off) return;
           if (event.key === 'Home' || event.key === 'End') {
@@ -322,11 +323,12 @@ export function ColorPickerSwatch(props: ColorPickerPartProps) {
   const picker = usePicker('Swatch');
   return (
     <>
-      <span {...props} aria-label={picker.value} data-part="swatch" role="img" />
+      <span {...withSelectorKey(props, 'part', 'swatch')} aria-label={picker.value} role="img" />
       {
         <button
           aria-label={picker.t('previous', { color: picker.previous })}
           data-part="previous"
+          data-part-previous=""
           disabled={picker.disabled || picker.readOnly}
           onClick={(event) => picker.requestValue(picker.previous, 'select', event.nativeEvent)}
           type="button"
@@ -364,14 +366,15 @@ export function ColorPickerInput(props: ColorPickerPartProps) {
 
   return (
     <div
-      {...props}
+      {...withSelectorKey(props, 'part', 'root')}
       data-disabled={picker.disabled ? '' : undefined}
       data-invalid={invalid ? '' : undefined}
       data-mono=""
-      data-part="root"
+
       data-readonly={picker.readOnly ? '' : undefined}
       data-size="sm"
       data-ui="text-field"
+      data-ui-text-field=""
       data-variant="outline"
     >
       <input
@@ -379,6 +382,7 @@ export function ColorPickerInput(props: ColorPickerPartProps) {
         aria-label={picker.t('input')}
         autoComplete="off"
         data-part="input"
+        data-part-input=""
         dir="ltr"
         disabled={picker.disabled}
         onBlur={(event) => commit(event.nativeEvent)}
@@ -408,9 +412,9 @@ export function ColorPickerFormat() {
       <MenuTrigger
         render={(props) => (
           <button
-            {...props}
+            {...withSelectorKey(props, 'part', 'format')}
             aria-label={picker.t('format', { format: picker.format })}
-            data-part="format"
+
             disabled={picker.disabled || picker.readOnly}
           >
             {picker.format}
@@ -452,6 +456,7 @@ export function ColorPickerEyedropper() {
     <button
       aria-label={picker.t('eyedropper')}
       data-part="eyedropper"
+      data-part-eyedropper=""
       disabled={picker.disabled || picker.readOnly}
       onClick={async (event) => {
         const EyeDropper = (
@@ -483,7 +488,7 @@ export function ColorPickerEyedropper() {
 /** The row under the channels: the preview, the text, the notation, the eyedropper. */
 export function ColorPickerRow({ children, ...props }: ColorPickerPartProps) {
   return (
-    <div {...props} data-part="row">
+    <div {...withSelectorKey(props, 'part', 'row')}>
       {children ?? (
         <>
           <ColorPickerSwatch />
@@ -510,12 +515,17 @@ export function ColorPickerPresets(props: ColorPickerPartProps) {
   };
 
   return (
-    <div {...props} aria-label={picker.t('presets')} data-part="presets" role="radiogroup">
+    <div
+      {...withSelectorKey(props, 'part', 'presets')}
+      aria-label={picker.t('presets')}
+      role="radiogroup"
+    >
       {presets.map((preset, index) => (
         <button
           aria-checked={index === selected}
           aria-label={preset}
           data-part="preset"
+          data-part-preset=""
           data-selected={index === selected ? '' : undefined}
           disabled={off}
           key={preset}
@@ -560,12 +570,16 @@ export function ColorPickerContrast(props: ColorPickerPartProps) {
   const ratio = contrastRatio(picker.parsed.rgba, background.rgba);
   const level = contrastLevel(ratio);
   return (
-    <div {...props} aria-live="polite" data-level={level} data-part="contrast">
-      <span aria-hidden="true" data-part="contrast-sample">
+    <div {...withSelectorKey(props, 'part', 'contrast')} aria-live="polite" data-level={level}>
+      <span aria-hidden="true" data-part="contrast-sample" data-part-contrast-sample="">
         {picker.t('contrastSample')}
       </span>
-      <span data-part="contrast-ratio">{ratio.toFixed(2)}:1</span>
-      <span data-part="contrast-level">{picker.t(CONTRAST_LEVEL_KEYS[level])}</span>
+      <span data-part="contrast-ratio" data-part-contrast-ratio="">
+        {ratio.toFixed(2)}:1
+      </span>
+      <span data-part="contrast-level" data-part-contrast-level="">
+        {picker.t(CONTRAST_LEVEL_KEYS[level])}
+      </span>
     </div>
   );
 }
@@ -575,7 +589,7 @@ export function ColorPickerGamut(props: ColorPickerPartProps) {
   const picker = usePicker('Gamut');
   if (picker.parsed === null || picker.parsed.inGamut) return null;
   return (
-    <p {...props} data-part="gamut" role="status">
+    <p {...withSelectorKey(props, 'part', 'gamut')} role="status">
       <Icon>
         <Glyph name="circle-alert" />
       </Icon>
@@ -654,15 +668,16 @@ export function ColorPicker({
   return (
     <Context.Provider value={context}>
       <div
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'root')}
         data-disabled={resolvedDisabled ? '' : undefined}
         data-format={state.format}
         data-invalid={resolvedInvalid === true ? '' : undefined}
         data-out-of-gamut={state.parsed !== null && !state.parsed.inGamut ? '' : undefined}
-        data-part="root"
+
         data-readonly={resolvedReadOnly ? '' : undefined}
         data-size={size ?? field?.size ?? defaults.size}
         data-ui="color-picker"
+        data-ui-color-picker=""
         style={{ ...runtime, ...style }}
       >
         {children ?? (
@@ -761,10 +776,11 @@ export function ColorField({
             <PopoverTrigger
               render={(props) => (
                 <button
-                  {...props}
+                  {...withSelectorKey(props, 'part', 'trigger')}
                   aria-label={t('trigger')}
-                  data-part="trigger"
+
                   data-ui="color-picker"
+                  data-ui-color-picker=""
                   disabled={textFieldProps.disabled}
                   style={{ '--slotted-color-picker-color': toCss(rgba) } as CSSProperties}
                   type="button"

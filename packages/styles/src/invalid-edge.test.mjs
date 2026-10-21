@@ -163,7 +163,7 @@ const frame = (selector) =>
     .replace(/:not\((?:[^()]|\([^()]*\))*\)/g, '')
     .replace(new RegExp(FOCUS.source, 'g'), '')
     .replace(/\[data-variant='[a-z-]+'\]/g, '')
-    .replace(/\[data-part='root'\]/g, '')
+    .replace(/\[data-part-root\]/g, '')
     .replace(/\[data-invalid\]/g, '')
     .trim();
 
@@ -301,10 +301,10 @@ test('leaves no inner control’s own ring over the frame’s edge', () => {
           .replace(/:not\((?:[^()]|\([^()]*\))*\)/g, '')
           .match(/:has\((?:[^()]|\([^()]*\))*\)/g)
           ?.join(' ') ?? '';
-      for (const [, part] of inner.matchAll(/\[data-part='([a-z-]+)'\]:focus(?:-visible)?\b/g)) {
+      for (const [, part] of inner.matchAll(/\[data-part-([a-z-]+)\]:focus(?:-visible)?\b/g)) {
         const quiet = list.some(
           ({ selectors, body }) =>
-            selectors.some((item) => item.includes(`[data-part='${part}']`)) &&
+            selectors.some((item) => item.includes(`[data-part-${part.toLowerCase()}]`)) &&
             /(^|;)outline:(none|0)(;|$)/.test(body),
         );
         if (!quiet) failures.push(`${name}: ${part}`);

@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/badge/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./badge.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./badge.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./badge.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -23,9 +36,9 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
-const anchor = `${ui}[data-part='anchor']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
+const anchor = `${ui}[data-part-anchor]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -42,7 +55,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.badge.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -55,7 +71,7 @@ test('styles every part the contract declares', () => {
 test('names the family and the part together, so the frame is never the box', () => {
   for (const selector of normalized.matchAll(/(^|\})([^{}]+)\{/g)) {
     for (const part of (selector[2] ?? '').split(',')) {
-      if (!part.includes(`[data-part='anchor']`) && !part.includes(`[data-part='root']`)) continue;
+      if (!part.includes(`[data-part-anchor]`) && !part.includes(`[data-part-root]`)) continue;
       assert.ok(part.includes(ui), `"${part.trim()}" reaches a part without naming the family`);
     }
   }
@@ -147,7 +163,7 @@ test('excepts the neutral tone, whose fill is the page', () => {
  * item no selector can reach, which is why the part exists.
  */
 test('gives the text a box of its own, and trims it where the engine can', () => {
-  assert.ok(normalized.includes(`${ui} [data-part='label']{`));
+  assert.ok(normalized.includes(`${ui} [data-part-label]{`));
 
   const guarded = normalized.split('@supports (text-box:trim-both cap alphabetic){')[1] ?? '';
   const supported = guarded.split('}')[0];
@@ -211,7 +227,7 @@ test('derives its box from its own type rather than from a height', () => {
 test('keeps one line and clips it, rather than reflowing into a block', () => {
   assert.ok(rule(root).includes('white-space:nowrap'));
   assert.ok(!/overflow-wrap/.test(css), 'a badge does not break its own words');
-  const label = rule(`${ui} [data-part='label']`);
+  const label = rule(`${ui} [data-part-label]`);
   assert.ok(label.includes('overflow:hidden'));
   assert.ok(label.includes('text-overflow:ellipsis'));
   assert.ok(label.includes('min-inline-size:0'), 'the box cannot shrink, so nothing clips');
@@ -318,7 +334,7 @@ test('never draws a dot without the words it cannot say', () => {
 test('hands its glyph size to an icon placed in a slot', () => {
   // The icon family reads `--slotted-icon-size` from its container; a bare
   // glyph host reads the slot's font-size instead. Both are the slot's scale.
-  const rule = normalized.split(`${ui} [data-part='end']{`)[1]?.split('}')[0] ?? '';
+  const rule = normalized.split(`${ui} [data-part-end]{`)[1]?.split('}')[0] ?? '';
   assert.ok(rule.includes('--slotted-icon-size:var(--_icon-size)'));
   assert.ok(rule.includes('font-size:var(--_icon-size)'));
 });

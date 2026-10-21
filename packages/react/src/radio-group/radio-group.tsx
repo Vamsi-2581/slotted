@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/radio-group/radio-group.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -126,7 +127,7 @@ export function RadioGroup({
     value: current,
   };
 
-  const rootProps: RadioGroupRootProps = {
+  const rootProps: RadioGroupRootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel,
     /* A group has no element a label's for can reach, so inside a field the
@@ -159,7 +160,7 @@ export function RadioGroup({
     'data-variant': resolvedVariant,
     role: resolvedRole,
     style,
-  };
+  });
 
   return (
     <RadioGroupContext.Provider value={context}>

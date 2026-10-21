@@ -45,7 +45,7 @@
    * twenty-four clear inside that box, and the ring keeps the same inset, so
    * the swap is between two shapes of one measure.
    */
-  [data-ui='spinner'] {
+  [data-ui-spinner] {
     --_size: var(--slotted-spinner-size, var(--slotted-control-icon-size-md, 16px));
     --_ring: calc(var(--_size) * 5 / 6);
     /**
@@ -122,7 +122,7 @@
   }
 
   @starting-style {
-    [data-ui='spinner'] {
+    [data-ui-spinner] {
       opacity: 0;
       scale: 0.6;
     }
@@ -134,7 +134,7 @@
    * replacing one continuous motion with a slower one.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='spinner'] {
+    [data-ui-spinner] {
       --_head: 270deg;
 
       animation: none;
@@ -149,7 +149,7 @@
      * `currentcolor`, which is the host's ink, already forced to the right
      * value.
      */
-    [data-ui='spinner'] {
+    [data-ui-spinner] {
       forced-color-adjust: none;
     }
   }

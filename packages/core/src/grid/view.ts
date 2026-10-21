@@ -9,6 +9,7 @@ import {
   emptyColumnState,
   normalizeColumnState,
   parseColumnState,
+  statesPins,
   serializeColumnState,
 } from './columns';
 import { fromGridParams, toGridParams, type GridParamOptions } from './query';
@@ -78,13 +79,21 @@ export function parseGridView(
 ): GridView {
   const params = new URLSearchParams(text ?? '');
   const query = fromGridParams(params, options);
-  const state = parseColumnState(params.get(options.columnsParam ?? 'columns'));
+  const columnsText = params.get(options.columnsParam ?? 'columns');
+  const state = parseColumnState(columnsText);
   const density = params.get(options.densityParam ?? 'density');
   return {
-    columns: columns ? normalizeColumnState(state, columns) : state,
+    columns: columns
+      ? normalizeColumnState(statesPins(columnsText) ? state : withoutPins(state), columns)
+      : state,
     query,
     density: DENSITIES.includes(density as GridDensity) ? (density as GridDensity) : null,
   };
+}
+
+/** The state with its pins left to the model. */
+function withoutPins(state: GridColumnState): Partial<GridColumnState> {
+  return { order: state.order, widths: state.widths, hidden: state.hidden };
 }
 
 export function emptyGridView(defaultPageSize?: number): GridView {

@@ -62,7 +62,9 @@ import {
   exportAs: 'slPagination',
   host: {
     'data-ui': 'pagination',
+    'data-ui-pagination': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-label]': 'accessibleLabel()',
     '[attr.aria-busy]': 'loading() ? "true" : null',
     '[attr.data-disabled]': 'disabled() ? "" : null',
@@ -301,6 +303,7 @@ const triggerHost = {
   host: {
     ...triggerHost,
     'data-part': 'first',
+    'data-part-first': '',
     '[attr.data-disabled]': 'unavailable() && !pagination.loading() ? "" : null',
   },
 })
@@ -321,6 +324,7 @@ export class SlPaginationFirst extends SlPaginationTrigger {
   host: {
     ...triggerHost,
     'data-part': 'previous',
+    'data-part-previous': '',
     '[attr.data-disabled]': 'unavailable() && !pagination.loading() ? "" : null',
   },
 })
@@ -341,6 +345,7 @@ export class SlPaginationPrevious extends SlPaginationTrigger {
   host: {
     ...triggerHost,
     'data-part': 'next',
+    'data-part-next': '',
     '[attr.data-disabled]': 'unavailable() && !pagination.loading() ? "" : null',
   },
 })
@@ -361,6 +366,7 @@ export class SlPaginationNext extends SlPaginationTrigger {
   host: {
     ...triggerHost,
     'data-part': 'last',
+    'data-part-last': '',
     '[attr.data-disabled]': 'unavailable() && !pagination.loading() ? "" : null',
   },
 })
@@ -382,9 +388,9 @@ export class SlPaginationLast extends SlPaginationTrigger {
   standalone: true,
   template: `
     @if (pagination.count() !== undefined) {
-      <ul data-part="list">
+      <ul data-part="list" data-part-list="">
         @for (item of pagination.items(); track item.type === 'page' ? item.value : item.side) {
-          <li data-part="item">
+          <li data-part="item" data-part-item="">
             @if (item.type === 'page') {
               @if (pagination.itemHref(); as href) {
                 <a
@@ -395,6 +401,7 @@ export class SlPaginationLast extends SlPaginationTrigger {
                   [attr.data-loading]="pagination.loading() ? '' : null"
                   [attr.href]="pagination.inert() ? null : href(item.value)"
                   data-part="page"
+                  data-part-page=""
                   (click)="pagination.goToPage(item.value, 'pointer', $event)"
                   >{{ item.value }}</a
                 >
@@ -406,6 +413,7 @@ export class SlPaginationLast extends SlPaginationTrigger {
                   [attr.data-loading]="pagination.loading() ? '' : null"
                   [disabled]="pagination.inert()"
                   data-part="page"
+                  data-part-page=""
                   type="button"
                   (click)="pagination.goToPage(item.value, 'pointer', $event)"
                 >
@@ -413,12 +421,12 @@ export class SlPaginationLast extends SlPaginationTrigger {
                 </button>
               }
             } @else {
-              <span aria-hidden="true" data-part="ellipsis">&#8230;</span>
+              <span aria-hidden="true" data-part="ellipsis" data-part-ellipsis="">&#8230;</span>
             }
           </li>
         }
       </ul>
-      <span data-part="summary">{{
+      <span data-part="summary" data-part-summary="">{{
         pagination.t('summary', { page: pagination.currentPage(), pages: pagination.pages() })
       }}</span>
     }
@@ -447,6 +455,7 @@ export class SlPaginationItems {
   exportAs: 'slPaginationStatus',
   host: {
     'data-part': 'status',
+    'data-part-status': '',
     '[attr.aria-live]': 'pagination.liveValue()',
   },
 })
@@ -475,12 +484,13 @@ export class SlPaginationStatus {
   standalone: true,
   imports: [SlGlyph, SlIcon],
   template: `
-    <label data-part="page-size-label">
+    <label data-part="page-size-label" data-part-page-size-label="">
       <ng-content>{{ pagination.t('pageSize') }}</ng-content>
       <select
         [disabled]="pagination.inert()"
         [value]="pagination.pageSize()"
         data-part="page-size"
+        data-part-page-size=""
         (change)="onChange($event)"
       >
         @for (size of pagination.sizeOptions(); track size) {

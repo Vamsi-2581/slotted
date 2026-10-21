@@ -56,8 +56,23 @@ export function normalizeColumnState<Row>(
     merged.splice(at, 0, id);
   }
 
-  const start = keep(state?.pinned?.start);
-  const end = keep(state?.pinned?.end).filter((key) => !start.includes(key));
+  /* A state that says where columns are pinned is the answer; without one,
+     the model's: a column's own `pinned`, and `end` for the row's actions. */
+  const modelPins = (zone: 'start' | 'end') =>
+    columns
+      .filter(
+        (column) =>
+          (column.pinned !== undefined
+            ? column.pinned
+            : column.kind === 'actions'
+              ? 'end'
+              : null) === zone,
+      )
+      .map((column) => column.id);
+  const start = state?.pinned ? keep(state.pinned.start) : modelPins('start');
+  const end = (state?.pinned ? keep(state.pinned.end) : modelPins('end')).filter(
+    (key) => !start.includes(key),
+  );
 
   const widths: Record<string, number> = {};
   for (const column of columns) {
@@ -265,9 +280,34 @@ export function serializeColumnState(
   const widths = Object.entries(state.widths).map(([id, width]) => `${id}:${width}`);
   if (widths.length > 0) parts.push(`w=${widths.join(',')}`);
   if (state.hidden.length > 0) parts.push(`h=${state.hidden.join(',')}`);
-  if (state.pinned.start.length > 0) parts.push(`ps=${state.pinned.start.join(',')}`);
-  if (state.pinned.end.length > 0) parts.push(`pe=${state.pinned.end.join(',')}`);
+  /* With the model at hand, the pins are written only when they differ from
+     the model's own — an `actions` column pinned to the end — and then both
+     lists are written, empty or not, so the text says the reader moved them. */
+  /* A state that never met the model — no order — states only the pins it holds. */
+  const model =
+    columns === undefined || state.order.length === 0
+      ? null
+      : normalizeColumnState(undefined, columns).pinned;
+  const samePins =
+    model !== null &&
+    sameList(model.start, state.pinned.start) &&
+    sameList(model.end, state.pinned.end);
+  if (model !== null && !samePins) {
+    parts.push(`ps=${state.pinned.start.join(',')}`, `pe=${state.pinned.end.join(',')}`);
+  } else if (model === null) {
+    if (state.pinned.start.length > 0) parts.push(`ps=${state.pinned.start.join(',')}`);
+    if (state.pinned.end.length > 0) parts.push(`pe=${state.pinned.end.join(',')}`);
+  }
   return parts.join(';');
+}
+
+function sameList(a: readonly string[], b: readonly string[]): boolean {
+  return a.length === b.length && a.every((entry, index) => entry === b[index]);
+}
+
+/** Whether a serialised state names its pins, rather than leaving them to the model. */
+export function statesPins(text: string | null | undefined): boolean {
+  return (text ?? '').split(';').some((part) => part.startsWith('ps=') || part.startsWith('pe='));
 }
 
 /**

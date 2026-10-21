@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -235,8 +236,8 @@ export class SlTooltipLayer {
 
     const document = this.comment.ownerDocument;
     const layer = document.createElement('div');
-    layer.setAttribute('data-ui', 'tooltip');
-    layer.setAttribute('data-part', 'root');
+    writeSelectorKey(layer, 'ui', 'tooltip');
+    writeSelectorKey(layer, 'part', 'root');
 
     const view = this.viewContainer.createEmbeddedView(this.template);
     view.detectChanges();
@@ -396,6 +397,7 @@ function toggleAttribute(element: HTMLElement, name: string, present: boolean) {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     role: 'tooltip',
     '[attr.id]': 'tooltip.contentId',
     '[attr.aria-hidden]': 'hidden()',
@@ -421,6 +423,7 @@ export class SlTooltipContent {
   exportAs: 'slTooltipArrow',
   host: {
     'data-part': 'arrow',
+    'data-part-arrow': '',
     'aria-hidden': 'true',
   },
 })

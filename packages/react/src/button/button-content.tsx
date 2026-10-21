@@ -36,14 +36,16 @@ export function ButtonContent({ children, end, indicator, start }: ButtonContent
   return (
     <>
       {start === undefined ? null : (
-        <span data-part="start">
+        <span data-part="start" data-part-start="">
           {start}
           {inStart ? indicator : null}
         </span>
       )}
-      <span data-part="label">{children}</span>
+      <span data-part="label" data-part-label="">
+        {children}
+      </span>
       {end === undefined ? null : (
-        <span data-part="end">
+        <span data-part="end" data-part-end="">
           {end}
           {inEnd ? indicator : null}
         </span>

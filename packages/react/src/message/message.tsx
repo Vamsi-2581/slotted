@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/message/message.css';
 
 import { type FamilyTranslator, type MessageMessages, messageMessages } from '@slotted/core/i18n';
@@ -53,11 +54,11 @@ export function reasonOf(event: SyntheticEvent): MessageChangeReason {
  * the run.
  */
 export function MessageGroup({ layout, render, ...nativeProps }: MessageGroupProps) {
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     ...nativeProps,
     'data-part': 'group',
     'data-ui': 'message',
-  };
+  });
   const value = useMemo(() => ({ layout }), [layout]);
   return (
     <GroupContext.Provider value={value}>
@@ -137,7 +138,7 @@ export function Message({
     versionCount,
   };
 
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     /* The author names the article unless the consumer named it: `aria-labelledby` would outrank their `aria-label`. */
     ...(authorPresent && nativeProps['aria-label'] === undefined
       ? { 'aria-labelledby': authorId }
@@ -153,7 +154,7 @@ export function Message({
     'data-part': 'root',
     ...(status === undefined ? {} : { 'data-status': status }),
     'data-ui': 'message',
-  };
+  });
 
   return (
     <MessageContext.Provider value={context}>

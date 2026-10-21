@@ -338,27 +338,35 @@ function Advance() {
     <div className="slotted-demo-row">
       <button
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-tone="secondary"
         data-ui="button"
+        data-ui-button=""
         data-variant="outline"
         disabled={!stepper.canGoPrevious}
         onClick={() => stepper.previous()}
         type="button"
       >
-        <span data-part="label">Back</span>
+        <span data-part="label" data-part-label="">
+          Back
+        </span>
       </button>
       <button
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-tone="accent"
         data-ui="button"
+        data-ui-button=""
         data-variant="solid"
         disabled={!stepper.canGoNext}
         onClick={() => stepper.next()}
         type="button"
       >
-        <span data-part="label">Continue</span>
+        <span data-part="label" data-part-label="">
+          Continue
+        </span>
       </button>
     </div>
   );

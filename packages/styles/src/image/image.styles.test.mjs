@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/image/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./image.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./image.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./image.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 
 const rules = [...normalized.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
   .filter(([, selector]) => !selector.includes('@'))
@@ -45,14 +58,17 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.image.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
 test('names the family and the part together, so a rule for the box stays on the box', () => {
   for (const selector of normalized.matchAll(/(^|\})([^{}]+)\{/g)) {
     for (const part of (selector[2] ?? '').split(',')) {
-      if (!part.includes(`[data-part='root']`)) continue;
+      if (!part.includes(`[data-part-root]`)) continue;
       assert.ok(part.includes(ui), `"${part.trim()}" reaches the root without naming the family`);
     }
   }
@@ -89,10 +105,16 @@ test('answers every value of every axis the contract names', () => {
 test('composes the frame rather than restating it, and reaches its layers at either depth', () => {
   assert.ok(!normalized.includes('aspect-ratio:'), 'the ratio belongs to aspect-ratio');
   for (const part of ['image', 'placeholder', 'fallback']) {
-    assert.ok(selects(`${root} [data-part='${part}']`), `${part} is not reached as a descendant`);
-    assert.ok(!normalized.includes(`> [data-part='${part}']`), `${part} is reached as a child`);
+    assert.ok(
+      selects(`${root} [data-part-${part.toLowerCase()}]`),
+      `${part} is not reached as a descendant`,
+    );
+    assert.ok(
+      !normalized.includes(`> [data-part-${part.toLowerCase()}]`),
+      `${part} is reached as a child`,
+    );
   }
-  assert.ok(rule(`${ui} [data-part='picture']`).includes('display:contents'));
+  assert.ok(rule(`${ui} [data-part-picture]`).includes('display:contents'));
 });
 
 /**
@@ -122,10 +144,10 @@ test('routes fit and position through one pair of properties the picture and the
     assert.ok(rule(`${root}[data-fit='${fit}']`).includes(`--_fit:${fit}`), `fit ${fit}`);
   }
   assert.ok(rule(root).includes('--_fit:cover'));
-  const picture = rule(`${root} [data-part='image']`);
+  const picture = rule(`${root} [data-part-image]`);
   assert.ok(picture.includes('object-fit:var(--_fit)'));
   assert.ok(picture.includes('object-position:var(--_position)'));
-  const preview = rule(`${root}[data-placeholder='blur'] [data-part='placeholder'] > img`);
+  const preview = rule(`${root}[data-placeholder='blur'] [data-part-placeholder] > img`);
   assert.ok(preview.includes('object-fit:var(--_fit)'));
   assert.ok(preview.includes('object-position:var(--_position)'));
   assert.ok(preview.includes('filter:blur('));
@@ -150,11 +172,11 @@ test('mirrors the focal point with the writing direction', () => {
  * ground leaves on the same clock. Nothing loops.
  */
 test('crosses the picture over the placeholder instead of swapping them', () => {
-  const picture = rule(`${root} [data-part='image']`);
+  const picture = rule(`${root} [data-part-image]`);
   assert.ok(picture.includes('opacity:0'));
   assert.ok(picture.includes('transition:opacity var(--slotted-duration-short)'));
-  assert.ok(rule(`${root}[data-status='loaded'] [data-part='image']`).includes('opacity:1'));
-  assert.ok(rule(`${root}[data-status='loaded'] [data-part='placeholder']`).includes('opacity:0'));
+  assert.ok(rule(`${root}[data-status='loaded'] [data-part-image]`).includes('opacity:1'));
+  assert.ok(rule(`${root}[data-status='loaded'] [data-part-placeholder]`).includes('opacity:0'));
   assert.ok(!/animation/.test(normalized));
 });
 
@@ -166,10 +188,10 @@ test('crosses the picture over the placeholder instead of swapping them', () => 
  * sized from the slot; the sheet paints no icon of its own.
  */
 test('paints the fallback only in error, with a box of its own and the glyph sized', () => {
-  const idle = rule(`${root} [data-part='fallback']`);
+  const idle = rule(`${root} [data-part-fallback]`);
   assert.ok(idle.includes('display:none'));
   assert.ok(idle.includes('--slotted-icon-size:var(--slotted-image-glyph-size'));
-  const failed = rule(`${root}[data-status='error'] [data-part='fallback']`);
+  const failed = rule(`${root}[data-status='error'] [data-part-fallback]`);
   assert.ok(failed.includes('display:grid'));
   assert.ok(failed.includes('min-block-size:var(--slotted-image-fallback-min-size'));
   assert.ok(failed.includes('background-color:var(--_ground)'));

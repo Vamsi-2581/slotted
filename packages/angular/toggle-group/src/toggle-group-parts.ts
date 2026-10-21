@@ -27,6 +27,7 @@ import type { ToggleGroupSelectionReason } from './toggle-group';
   exportAs: 'slToggleGroupIcon',
   host: {
     'data-part': 'icon',
+    'data-part-icon': '',
     'aria-hidden': 'true',
   },
 })
@@ -58,12 +59,13 @@ function activationReason(event: Event): ToggleGroupSelectionReason {
   standalone: true,
   exportAs: 'slToggleGroupItem',
   template: `<ng-content select="[slToggleGroupIcon]" />
-    <span data-part="label"><ng-content /></span>`,
+    <span data-part="label" data-part-label=""><ng-content /></span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     type: 'button',
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.aria-pressed]': 'pressed()',
     '[attr.data-pressed]': "pressed() ? '' : null",
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",

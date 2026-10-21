@@ -536,10 +536,12 @@ class EmptyDemo {
     (removeRequest)="store.remove($event)"
   >
     <ng-template slNotificationItem let-item let-time="time" let-tone="tone" let-ids="ids">
-      <span data-part="title" [id]="ids.title">{{ item.title }}</span>
+      <span data-part="title" data-part-title="" [id]="ids.title">{{ item.title }}</span>
       <div slInline [gap]="3">
         <span slBadge shape="pill" size="sm" variant="soft" [tone]="tone">{{ tone }}</span>
-        <time data-part="time" [attr.datetime]="time.dateTime">{{ time.text }}</time>
+        <time data-part="time" data-part-time="" [attr.datetime]="time.dateTime">{{
+          time.text
+        }}</time>
       </div>
     </ng-template>
   </section>`,

@@ -35,7 +35,7 @@
    * a dialog is the ordinary case, and a descendant rule would paint the inner
    * panel's header with the outer panel's tone.
    */
-  [data-ui='dialog'] {
+  [data-ui-dialog] {
     /**
      * The panel's measure, per size step. Five named steps rather than the
      * pixel string Material, Carbon and Ant all take: a theme can retune a
@@ -159,7 +159,7 @@
    * `data-open` either, and a hidden layer in that frame refuses the focus
    * scope's initial focus.
    */
-  [data-ui='dialog'][inert] {
+  [data-ui-dialog][inert] {
     content-visibility: hidden;
     pointer-events: none;
   }
@@ -172,19 +172,19 @@
    * pointer, and a press on the page is the outside press the dismissal policy
    * answers.
    */
-  [data-ui='dialog']:not([data-modal]) {
+  [data-ui-dialog]:not([data-modal]) {
     pointer-events: none;
   }
 
-  [data-ui='dialog']:not([data-modal]) > [data-part='backdrop'] {
+  [data-ui-dialog]:not([data-modal]) > [data-part-backdrop] {
     visibility: hidden;
   }
 
-  [data-ui='dialog']:not([data-modal]) > [data-part='viewport'] > [data-part='content'] {
+  [data-ui-dialog]:not([data-modal]) > [data-part-viewport] > [data-part-content] {
     pointer-events: auto;
   }
 
-  [data-ui='dialog'][data-size='sm'] {
+  [data-ui-dialog][data-size='sm'] {
     --_measure: var(--slotted-dialog-measure, 24rem);
     --_padding-inline: var(--slotted-dialog-padding-inline-sm, var(--slotted-space-7, 1.25rem));
     --_padding-block: var(--slotted-dialog-padding-block-sm, var(--slotted-space-6, 1rem));
@@ -193,11 +193,11 @@
     --_title-font-size: var(--slotted-font-size-lg, 1rem);
   }
 
-  [data-ui='dialog'][data-size='lg'] {
+  [data-ui-dialog][data-size='lg'] {
     --_measure: var(--slotted-dialog-measure, 42rem);
   }
 
-  [data-ui='dialog'][data-size='xl'] {
+  [data-ui-dialog][data-size='xl'] {
     --_measure: var(--slotted-dialog-measure, 56rem);
   }
 
@@ -205,7 +205,7 @@
    * `full` is the step a dialog that is a document takes: the panel spends the
    * whole layer minus its padding, and the measure stops capping it.
    */
-  [data-ui='dialog'][data-size='full'] {
+  [data-ui-dialog][data-size='full'] {
     --_measure: var(--slotted-dialog-measure, none);
   }
 
@@ -218,7 +218,7 @@
    * is `none` in that mode, and a panel separated only by elevation would sit
    * on an opaque ground with nothing to mark its edge.
    */
-  [data-ui='dialog'] > [data-part='backdrop'] {
+  [data-ui-dialog] > [data-part-backdrop] {
     grid-area: 1 / 1;
     background: var(--slotted-dialog-scrim, var(--slotted-scrim, Canvas));
     opacity: 0;
@@ -238,7 +238,7 @@
    * The panel below arrives over the same duration and the same curve, so the
    * two halves of one layer arrive together.
    */
-  [data-ui='dialog'][data-open] > [data-part='backdrop'] {
+  [data-ui-dialog][data-open] > [data-part-backdrop] {
     opacity: 1;
     transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
@@ -252,7 +252,7 @@
    * start edge as soon as the item cannot fit, which is the only reading that
    * keeps the title reachable at 200% zoom and in a short window.
    */
-  [data-ui='dialog'] > [data-part='viewport'] {
+  [data-ui-dialog] > [data-part-viewport] {
     grid-area: 1 / 1;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -272,7 +272,7 @@
     overscroll-behavior: contain;
   }
 
-  [data-ui='dialog'][data-placement='top'] > [data-part='viewport'] {
+  [data-ui-dialog][data-placement='top'] > [data-part-viewport] {
     align-content: safe start;
   }
 
@@ -284,7 +284,7 @@
    */
   /* ── The panel ────────────────────────────────────────────────────────── */
 
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] {
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] {
     /**
      * The inset the rows carry, stated where a layout of the consumer's own can
      * read it: the panel draws no padding, so content written straight inside
@@ -368,7 +368,7 @@
    * the edge it sits on, and it is on the same rule now for the same reason:
    * the type inside it is what the slide was resampling (DG4).
    */
-  [data-ui='dialog'][data-open] > [data-part='viewport'] > [data-part='content'] {
+  [data-ui-dialog][data-open] > [data-part-viewport] > [data-part-content] {
     opacity: 1;
     transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
@@ -382,7 +382,7 @@
    * travelling, and there is no travel to stop (DG4).
    */
 
-  [data-ui='dialog'][data-scroll='viewport'] > [data-part='viewport'] > [data-part='content'] {
+  [data-ui-dialog][data-scroll='viewport'] > [data-part-viewport] > [data-part-content] {
     max-block-size: none;
   }
 
@@ -392,7 +392,7 @@
    * its children are the panel's rows, and every rule of a part is written a
    * second time through it, so the parts keep the panel's inset and rows.
    */
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form {
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] > form {
     display: contents;
   }
 
@@ -419,8 +419,8 @@
    * `interpolate-size`. The cost is a rule over a footer that sometimes has
    * nothing above it to separate.
    */
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form > [data-part='header'],
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='header'] {
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] > form > [data-part-header],
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] > [data-part-header] {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto;
     align-items: start;
@@ -445,28 +445,28 @@
    * where the mark would have gone, and moved as soon as a tone was set. Where
    * it goes is now a rule rather than an accident of the grid.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
+    > [data-part-header]
     > *:not(
-      [data-part='icon'],
-      [data-part='title'],
-      [data-part='description'],
-      [data-part='fullscreen'],
-      [data-part='close']
+      [data-part-icon],
+      [data-part-title],
+      [data-part-description],
+      [data-part-fullscreen],
+      [data-part-close]
     ),
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
     > *:not(
-      [data-part='icon'],
-      [data-part='title'],
-      [data-part='description'],
-      [data-part='fullscreen'],
-      [data-part='close']
+      [data-part-icon],
+      [data-part-title],
+      [data-part-description],
+      [data-part-fullscreen],
+      [data-part-close]
     ) {
     grid-column: 2;
     /**
@@ -489,17 +489,17 @@
    * colours every tone becomes one system colour and the silhouette is all
    * that is left.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='icon'],
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='icon'] {
+    > [data-part-header]
+    > [data-part-icon],
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-icon] {
     --slotted-icon-size: var(--_status-size);
 
     grid-column: 1;
@@ -520,23 +520,23 @@
     margin-inline-end: var(--_mark-gap);
   }
 
-  [data-ui='dialog'][data-tone='accent'] {
+  [data-ui-dialog][data-tone='accent'] {
     --_tone-color: var(--slotted-tone-accent-text, CanvasText);
   }
 
-  [data-ui='dialog'][data-tone='secondary'] {
+  [data-ui-dialog][data-tone='secondary'] {
     --_tone-color: var(--slotted-tone-secondary-text, CanvasText);
   }
 
-  [data-ui='dialog'][data-tone='success'] {
+  [data-ui-dialog][data-tone='success'] {
     --_tone-color: var(--slotted-tone-success-text, CanvasText);
   }
 
-  [data-ui='dialog'][data-tone='warning'] {
+  [data-ui-dialog][data-tone='warning'] {
     --_tone-color: var(--slotted-tone-warning-text, CanvasText);
   }
 
-  [data-ui='dialog'][data-tone='danger'] {
+  [data-ui-dialog][data-tone='danger'] {
     --_tone-color: var(--slotted-tone-danger-text, CanvasText);
   }
 
@@ -548,17 +548,17 @@
    * panel past the layer, and the panel is centred, so both of its edges leave
    * the screen at once.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='title'],
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='title'] {
+    > [data-part-header]
+    > [data-part-title],
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-title] {
     grid-column: 2;
     grid-row: 1;
     margin: 0;
@@ -577,17 +577,17 @@
     color: var(--slotted-dialog-title-color, var(--slotted-text, CanvasText));
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='description'],
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='description'] {
+    > [data-part-header]
+    > [data-part-description],
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-description] {
     grid-column: 2;
     grid-row: 2;
     margin: 0;
@@ -606,18 +606,18 @@
    * weight instead, which is what both product confirmations in the survey do
    * with a span of their own.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='description']
+    > [data-part-header]
+    > [data-part-description]
     :is(strong, b),
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='description']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-description]
     :is(strong, b) {
     font-weight: var(--slotted-font-weight-semibold, 600);
     color: var(--slotted-dialog-title-color, var(--slotted-text, CanvasText));
@@ -633,17 +633,17 @@
    * in an `icon` box, sized here through the icon token so the box and the
    * formula above read one length.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='close'],
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close'] {
+    > [data-part-header]
+    > [data-part-close],
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-close] {
     --slotted-icon-size: var(--_icon-size);
 
     grid-column: 4;
@@ -671,17 +671,17 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='close']:not(:disabled):hover,
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:not(:disabled):hover {
+    > [data-part-header]
+    > [data-part-close]:not(:disabled):hover,
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-close]:not(:disabled):hover {
     /* The ground moves under the pointer and nothing else does (R2). */
     background-color: var(
       --slotted-dialog-close-hover-background,
@@ -689,34 +689,34 @@
     );
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='close']:not(:disabled):active,
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:not(:disabled):active {
+    > [data-part-header]
+    > [data-part-close]:not(:disabled):active,
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-close]:not(:disabled):active {
     background-color: var(
       --slotted-dialog-close-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='close']:focus-visible,
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:focus-visible {
+    > [data-part-header]
+    > [data-part-close]:focus-visible,
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-close]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -737,17 +737,17 @@
    * glyph is the binding's, chosen from the state: the mark says what the
    * press does next, so it is the opposite of the state the panel is in.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='fullscreen'],
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='fullscreen'] {
+    > [data-part-header]
+    > [data-part-fullscreen],
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-fullscreen] {
     --slotted-icon-size: var(--_icon-size);
 
     grid-column: 3;
@@ -778,33 +778,33 @@
    * glyph on every side, and a second gap between them would set them further
    * apart than either is from the words.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='fullscreen']
-    + [data-part='close'],
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='fullscreen']
-    + [data-part='close'] {
+    > [data-part-header]
+    > [data-part-fullscreen]
+    + [data-part-close],
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-fullscreen]
+    + [data-part-close] {
     margin-inline-start: 0;
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='fullscreen']:not(:disabled):hover,
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='fullscreen']:not(:disabled):hover {
+    > [data-part-header]
+    > [data-part-fullscreen]:not(:disabled):hover,
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-fullscreen]:not(:disabled):hover {
     /* The ground moves under the pointer and nothing else does (R2). */
     background-color: var(
       --slotted-dialog-close-hover-background,
@@ -812,34 +812,34 @@
     );
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='fullscreen']:not(:disabled):active,
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='fullscreen']:not(:disabled):active {
+    > [data-part-header]
+    > [data-part-fullscreen]:not(:disabled):active,
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-fullscreen]:not(:disabled):active {
     background-color: var(
       --slotted-dialog-close-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='header']
-    > [data-part='fullscreen']:focus-visible,
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='fullscreen']:focus-visible {
+    > [data-part-header]
+    > [data-part-fullscreen]:focus-visible,
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-header]
+    > [data-part-fullscreen]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -851,63 +851,63 @@
    * controls touch, so neither reaches across the edge they share.
    */
   @media (pointer: coarse) {
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
       > form
-      > [data-part='header']
-      > :is([data-part='close'], [data-part='fullscreen']),
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
-      > [data-part='header']
-      > :is([data-part='close'], [data-part='fullscreen']) {
+      > [data-part-header]
+      > :is([data-part-close], [data-part-fullscreen]),
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
+      > [data-part-header]
+      > :is([data-part-close], [data-part-fullscreen]) {
       position: relative;
     }
 
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
       > form
-      > [data-part='header']
-      > :is([data-part='close'], [data-part='fullscreen'])::before,
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
-      > [data-part='header']
-      > :is([data-part='close'], [data-part='fullscreen'])::before {
+      > [data-part-header]
+      > :is([data-part-close], [data-part-fullscreen])::before,
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
+      > [data-part-header]
+      > :is([data-part-close], [data-part-fullscreen])::before {
       content: '';
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
       position: absolute;
     }
 
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
       > form
-      > [data-part='header']
-      > [data-part='fullscreen']:has(+ [data-part='close'])::before,
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
-      > [data-part='header']
-      > [data-part='fullscreen']:has(+ [data-part='close'])::before {
+      > [data-part-header]
+      > [data-part-fullscreen]:has(+ [data-part-close])::before,
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
+      > [data-part-header]
+      > [data-part-fullscreen]:has(+ [data-part-close])::before {
       inset-inline-end: 0;
     }
 
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
       > form
-      > [data-part='header']
-      > [data-part='fullscreen']
-      + [data-part='close']::before,
-    [data-ui='dialog']
-      > [data-part='viewport']
-      > [data-part='content']
-      > [data-part='header']
-      > [data-part='fullscreen']
-      + [data-part='close']::before {
+      > [data-part-header]
+      > [data-part-fullscreen]
+      + [data-part-close]::before,
+    [data-ui-dialog]
+      > [data-part-viewport]
+      > [data-part-content]
+      > [data-part-header]
+      > [data-part-fullscreen]
+      + [data-part-close]::before {
       inset-inline-start: 0;
     }
   }
@@ -920,21 +920,21 @@
    * `dismissable-layer` covers the modal case; this covers the non-modal one,
    * where the page behind is not locked at all.
    */
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='body']:not(:first-child),
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='body']:not(:first-child) {
+    > [data-part-body]:not(:first-child),
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-body]:not(:first-child) {
     border-block-start: var(--_rule-size) solid
       var(--slotted-dialog-rule-color, var(--slotted-border-subtle, ButtonBorder));
   }
 
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form > [data-part='body'],
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='body'] {
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] > form > [data-part-body],
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] > [data-part-body] {
     min-block-size: 0;
     overflow-x: hidden;
     overflow-y: auto;
@@ -948,15 +948,15 @@
     color: var(--slotted-dialog-body-color, var(--slotted-text, CanvasText));
   }
 
-  [data-ui='dialog'][data-scroll='viewport']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog][data-scroll='viewport']
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='body'],
-  [data-ui='dialog'][data-scroll='viewport']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='body'] {
+    > [data-part-body],
+  [data-ui-dialog][data-scroll='viewport']
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-body] {
     overflow: visible;
   }
 
@@ -967,15 +967,12 @@
    * header, the close button and Escape all stay operable: a loading dialog a
    * reader cannot leave is the worse failure of the two.
    */
-  [data-ui='dialog'][data-loading]
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog][data-loading]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='body'],
-  [data-ui='dialog'][data-loading]
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='body'] {
+    > [data-part-body],
+  [data-ui-dialog][data-loading] > [data-part-viewport] > [data-part-content] > [data-part-body] {
     min-block-size: var(--slotted-space-12, 4rem);
   }
 
@@ -987,8 +984,8 @@
    * reason `content` is bounded — an unbounded panel pushes it past the fold,
    * which is the whole failure the three-row grid exists to prevent.
    */
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > form > [data-part='footer'],
-  [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='footer'] {
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] > form > [data-part-footer],
+  [data-ui-dialog] > [data-part-viewport] > [data-part-content] > [data-part-footer] {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -999,15 +996,15 @@
     background: var(--slotted-dialog-footer-surface, var(--slotted-surface-sunken, Canvas));
   }
 
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > [data-part='footer']:not(:first-child),
-  [data-ui='dialog']
-    > [data-part='viewport']
-    > [data-part='content']
-    > [data-part='footer']:not(:first-child) {
+    > [data-part-footer]:not(:first-child),
+  [data-ui-dialog]
+    > [data-part-viewport]
+    > [data-part-content]
+    > [data-part-footer]:not(:first-child) {
     border-block-start: var(--_rule-size) solid
       var(--slotted-dialog-rule-color, var(--slotted-border-subtle, ButtonBorder));
   }
@@ -1035,7 +1032,7 @@
    * writes their own three-row grid, which is the whole of what they are taking
    * over.
    */
-  [data-ui='dialog'][data-surface='plain'] > [data-part='viewport'] > [data-part='content'] {
+  [data-ui-dialog][data-surface='plain'] > [data-part-viewport] > [data-part-content] {
     display: block;
     background: none;
     border: 0;
@@ -1044,15 +1041,15 @@
     overflow: visible;
   }
 
-  [data-ui='dialog'][data-surface='plain']
-    > [data-part='viewport']
-    > [data-part='content']
+  [data-ui-dialog][data-surface='plain']
+    > [data-part-viewport]
+    > [data-part-content]
     > form
-    > :is([data-part='header'], [data-part='body'], [data-part='footer']),
-  [data-ui='dialog'][data-surface='plain']
-    > [data-part='viewport']
-    > [data-part='content']
-    > :is([data-part='header'], [data-part='body'], [data-part='footer']) {
+    > :is([data-part-header], [data-part-body], [data-part-footer]),
+  [data-ui-dialog][data-surface='plain']
+    > [data-part-viewport]
+    > [data-part-content]
+    > :is([data-part-header], [data-part-body], [data-part-footer]) {
     background: none;
     border: 0;
     padding: 0;
@@ -1077,12 +1074,12 @@
    * a literal because `@container (max-inline-size: var(--x))` is invalid CSS.
    */
   @container slotted-dialog (max-inline-size: 30rem) {
-    [data-ui='dialog'][data-full-screen='narrow'] > [data-part='viewport'] {
+    [data-ui-dialog][data-full-screen='narrow'] > [data-part-viewport] {
       align-content: stretch;
       padding: 0;
     }
 
-    [data-ui='dialog'][data-full-screen='narrow'] > [data-part='viewport'] > [data-part='content'] {
+    [data-ui-dialog][data-full-screen='narrow'] > [data-part-viewport] > [data-part-content] {
       max-inline-size: none;
       block-size: 100%;
       border-radius: 0;
@@ -1100,14 +1097,14 @@
    * owns both — a panel that animated its own box would animate `inset`,
    * `inline-size` and `block-size`, which is the rule R7 exists to state.
    */
-  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'],
-  [data-ui='dialog'][data-fullscreen] > [data-part='viewport'] {
+  [data-ui-dialog][data-full-screen='always'] > [data-part-viewport],
+  [data-ui-dialog][data-fullscreen] > [data-part-viewport] {
     align-content: stretch;
     padding: 0;
   }
 
-  [data-ui='dialog'][data-full-screen='always'] > [data-part='viewport'] > [data-part='content'],
-  [data-ui='dialog'][data-fullscreen] > [data-part='viewport'] > [data-part='content'] {
+  [data-ui-dialog][data-full-screen='always'] > [data-part-viewport] > [data-part-content],
+  [data-ui-dialog][data-fullscreen] > [data-part-viewport] > [data-part-content] {
     max-inline-size: none;
     block-size: 100%;
     border-radius: 0;
@@ -1140,7 +1137,7 @@
    * a system border is read at.
    */
   @media (forced-colors: active) {
-    [data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] {
+    [data-ui-dialog] > [data-part-viewport] > [data-part-content] {
       border-color: CanvasText;
       border-width: var(--slotted-border-width-thick, 2px);
     }

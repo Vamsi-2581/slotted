@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { Fragment, useCallback, useRef } from 'react';
 import type { Ref } from 'react';
 
@@ -84,7 +85,7 @@ export function ActionBarOverflow({
         render={({ ref: anchorRef, ...props }) => {
           anchor.current = anchorRef;
 
-          const rootProps = {
+          const rootProps = keyedProps({
             ...props,
             ...nativeProps,
             'aria-label': nameFor(label, surface.length),
@@ -94,7 +95,7 @@ export function ActionBarOverflow({
               </Icon>
             ),
             'data-part': 'overflow',
-          };
+          });
 
           return render === undefined ? (
             <button {...rootProps} ref={setTriggerNode} type="button" />

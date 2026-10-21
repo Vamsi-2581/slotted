@@ -149,6 +149,37 @@ describe('Page', () => {
     expect(document.documentElement.style.getPropertyValue(STICKY_BOTTOM_PROPERTY)).toBe('');
   });
 
+  /**
+   * The offset is an inherited custom property on the scroller: each write
+   * invalidates style for everything under it. A footer that mounts writes it
+   * once, and a resize that leaves the height alone writes nothing.
+   */
+  it('writes the footer height once when a footer mounts, and not again for the same height', () => {
+    const { rerender } = render(<Screen />);
+    for (const callback of FakeResizeObserver.callbacks) callback([], {} as never);
+    FakeResizeObserver.callbacks = [];
+
+    const observer = new MutationObserver(() => {});
+    observer.observe(document.documentElement, { attributeFilter: ['style'], attributes: true });
+    const footer = (
+      <PageFooter>
+        <button type="button">Enviar</button>
+      </PageFooter>
+    );
+    rerender(<Screen footer={footer} />);
+    const bar = document.querySelector('[data-part="footer"]') as HTMLElement;
+    Object.defineProperty(bar, 'offsetHeight', { configurable: true, value: 67 });
+    for (const callback of FakeResizeObserver.callbacks) callback([], {} as never);
+    const mounting = observer.takeRecords();
+    for (const callback of FakeResizeObserver.callbacks) callback([], {} as never);
+    const resizing = observer.takeRecords();
+    observer.disconnect();
+
+    expect(document.documentElement.style.getPropertyValue(STICKY_BOTTOM_PROPERTY)).toBe('67px');
+    expect(mounting).toHaveLength(1);
+    expect(resizing).toHaveLength(0);
+  });
+
   it('takes its defaults from the provider, and its own props over them', () => {
     render(
       <PageDefaultsProvider ground="surface" scroll="self" width="content">

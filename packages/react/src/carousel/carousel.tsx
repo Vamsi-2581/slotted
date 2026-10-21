@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/carousel/carousel.css';
 
 import {
@@ -393,7 +394,7 @@ export function Carousel({
     runtime['--slotted-carousel-slides-per-view'] = String(slidesPerView);
   if (rotates) runtime['--slotted-carousel-autoplay-delay'] = `${delay}ms`;
 
-  const rootProps: CarouselRootProps = {
+  const rootProps: CarouselRootProps = keyedProps({
     ...nativeProps,
     'aria-roledescription': t('roleDescription'),
     children,
@@ -413,7 +414,7 @@ export function Carousel({
     onPointerEnter: handlePointerEnter,
     onPointerLeave: handlePointerLeave,
     style: { ...runtime, ...style } as CSSProperties,
-  };
+  });
 
   return (
     <CarouselContext.Provider value={context}>

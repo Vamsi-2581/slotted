@@ -161,7 +161,9 @@ export class SlCommandPaletteEmpty {
     <ng-template #panel>
       <div
         data-ui="command-palette"
+        data-ui-command-palette=""
         data-part="root"
+        data-part-root=""
         [attr.data-presentation]="resolvedPresentation()"
         [attr.data-size]="resolvedSize()"
         [attr.data-open]="isOpen() ? '' : null"
@@ -171,23 +173,34 @@ export class SlCommandPaletteEmpty {
         [attr.data-empty]="isEmpty() ? '' : null"
         (mousedown)="keepFocus($event)"
       >
-        <div data-part="header">
+        <div data-part="header" data-part-header="">
           @if (loading()) {
-            <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+            <span
+              data-part="busy"
+              data-part-busy=""
+              data-ui="spinner"
+              data-ui-spinner=""
+              aria-hidden="true"
+            ></span>
           } @else {
-            <span data-part="search" aria-hidden="true"
+            <span data-part="search" data-part-search="" aria-hidden="true"
               ><span slIcon><svg slGlyph name="search"></svg></span
             ></span>
           }
           @if (rows().trail.length > 0) {
-            <ol data-part="pages" [attr.aria-label]="t('back')">
+            <ol data-part="pages" data-part-pages="" [attr.aria-label]="t('back')">
               @for (entry of rows().trail; track entry.id; let index = $index) {
                 <li>
                   <!-- The chevron between two pages, mirrored in a right-to-left document. -->
                   @if (index > 0) {
                     <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
                   }
-                  <button data-part="page" type="button" (click)="returnTo(index, $event)">
+                  <button
+                    data-part="page"
+                    data-part-page=""
+                    type="button"
+                    (click)="returnTo(index, $event)"
+                  >
                     <span>{{ entry.label }}</span>
                   </button>
                 </li>
@@ -197,6 +210,7 @@ export class SlCommandPaletteEmpty {
           <input
             #field
             data-part="input"
+            data-part-input=""
             type="text"
             role="combobox"
             aria-expanded="true"
@@ -215,6 +229,7 @@ export class SlCommandPaletteEmpty {
           />
           <button
             data-part="clear"
+            data-part-clear=""
             type="button"
             tabindex="-1"
             [attr.aria-label]="t('clear')"
@@ -225,7 +240,12 @@ export class SlCommandPaletteEmpty {
           @if (!inline()) {
             <!-- The way out where the scrim is not: shown by the stylesheet
                  under the dialog's full-screen query alone. -->
-            <button data-part="close" type="button" (click)="setOpen(false, 'dismiss', $event)">
+            <button
+              data-part="close"
+              data-part-close=""
+              type="button"
+              (click)="setOpen(false, 'dismiss', $event)"
+            >
               {{ t('close') }}
             </button>
           }
@@ -234,6 +254,7 @@ export class SlCommandPaletteEmpty {
         <div
           #list
           data-part="list"
+          data-part-list=""
           role="listbox"
           [id]="listId"
           [attr.aria-label]="t('input')"
@@ -241,16 +262,23 @@ export class SlCommandPaletteEmpty {
           [attr.data-loading]="loading() ? '' : null"
         >
           @if (loading() && rows().count === 0) {
-            <div data-part="placeholder" aria-hidden="true">
+            <div data-part="placeholder" data-part-placeholder="" aria-hidden="true">
               @for (row of [0, 1, 2]; track row) {
                 <div>
-                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+                  <span
+                    data-ui="skeleton"
+                    data-ui-skeleton=""
+                    data-part="root"
+                    data-part-root=""
+                    data-shape="text"
+                    data-loading
+                  ></span>
                 </div>
               }
             </div>
           }
           @if (isEmpty()) {
-            <div data-part="empty">
+            <div data-part="empty" data-part-empty="">
               @if (emptyTemplate(); as template) {
                 <ng-container *ngTemplateOutlet="template.template" />
               } @else {
@@ -260,16 +288,18 @@ export class SlCommandPaletteEmpty {
           }
           @for (section of rows().sections; track $index; let sectionIndex = $index) {
             @if (sectionIndex > 0) {
-              <div data-part="separator" role="separator"></div>
+              <div data-part="separator" data-part-separator="" role="separator"></div>
             }
             @if (headingOf(section); as heading) {
               <div
                 data-part="group"
+                data-part-group=""
                 role="group"
                 [attr.aria-labelledby]="baseId + '-group-' + sectionIndex"
               >
                 <div
                   data-part="group-label"
+                  data-part-group-label=""
                   role="presentation"
                   [id]="baseId + '-group-' + sectionIndex"
                 >
@@ -287,25 +317,25 @@ export class SlCommandPaletteEmpty {
           }
         </div>
 
-        <div data-part="status" role="status">{{ status() }}</div>
+        <div data-part="status" data-part-status="" role="status">{{ status() }}</div>
 
         @if (footerTemplate(); as footer) {
-          <div data-part="footer" aria-hidden="true">
+          <div data-part="footer" data-part-footer="" aria-hidden="true">
             <ng-container *ngTemplateOutlet="footer.template" />
           </div>
         } @else if (!hideFooter()) {
-          <div data-part="footer" aria-hidden="true">
-            <span data-part="hint">
+          <div data-part="footer" data-part-footer="" aria-hidden="true">
+            <span data-part="hint" data-part-hint="">
               <kbd slShortcut keys="up" separator="" size="inherit" variant="outline"></kbd>
               <kbd slShortcut keys="down" separator="" size="inherit" variant="outline"></kbd>
               <span>{{ t('hintNavigate') }}</span>
             </span>
-            <span data-part="hint">
+            <span data-part="hint" data-part-hint="">
               <kbd slShortcut keys="enter" separator="" size="inherit" variant="outline"></kbd>
               <span>{{ t('hintSelect') }}</span>
             </span>
             @if (pages().length > 0) {
-              <span data-part="hint">
+              <span data-part="hint" data-part-hint="">
                 <kbd
                   slShortcut
                   keys="backspace"
@@ -317,7 +347,7 @@ export class SlCommandPaletteEmpty {
               </span>
             }
             @if (!inline()) {
-              <span data-part="hint">
+              <span data-part="hint" data-part-hint="">
                 <kbd slShortcut keys="escape" separator="" size="inherit" variant="outline"></kbd>
                 <span>{{ t('hintClose') }}</span>
               </span>
@@ -331,6 +361,7 @@ export class SlCommandPaletteEmpty {
       @if (item.href; as href) {
         <a
           data-part="item"
+          data-part-item=""
           role="option"
           [id]="domId(item.id)"
           [href]="href"
@@ -352,6 +383,7 @@ export class SlCommandPaletteEmpty {
       } @else {
         <div
           data-part="item"
+          data-part-item=""
           role="option"
           [id]="domId(item.id)"
           [attr.title]="item.label"
@@ -387,8 +419,8 @@ export class SlCommandPaletteEmpty {
           "
         />
       } @else {
-        <span data-part="icon"></span>
-        <span data-part="label">
+        <span data-part="icon" data-part-icon=""></span>
+        <span data-part="label" data-part-label="">
           @if (marking()) {
             <span
               slHighlight
@@ -401,24 +433,30 @@ export class SlCommandPaletteEmpty {
           }
         </span>
         @if (item.description; as description) {
-          <span data-part="description">{{ description }}</span>
+          <span data-part="description" data-part-description="">{{ description }}</span>
         }
         @if (item.meta; as meta) {
-          <span data-part="meta" aria-hidden="true">{{ meta }}</span>
+          <span data-part="meta" data-part-meta="" aria-hidden="true">{{ meta }}</span>
         }
         @if (!item.children && item.shortcut; as shortcut) {
-          <span data-part="shortcut" aria-hidden="true">
+          <span data-part="shortcut" data-part-shortcut="" aria-hidden="true">
             <kbd slShortcut [keys]="shortcut" size="inherit" separator="" variant="outline"></kbd>
           </span>
         }
         @if (item.children) {
           <!-- The mark that says the item opens a page, mirrored in a right-to-left document. -->
-          <span data-part="arrow" aria-hidden="true"
+          <span data-part="arrow" data-part-arrow="" aria-hidden="true"
             ><span slIcon directional><svg slGlyph name="chevron-right"></svg></span
           ></span>
         }
         @if (pending().has(item.id)) {
-          <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+          <span
+            data-part="busy"
+            data-part-busy=""
+            data-ui="spinner"
+            data-ui-spinner=""
+            aria-hidden="true"
+          ></span>
         }
       }
     </ng-template>
@@ -1014,6 +1052,7 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
   exportAs: 'slCommandPaletteTrigger',
   host: {
     'data-part': 'trigger',
+    'data-part-trigger': '',
     'aria-haspopup': 'dialog',
     '[attr.aria-expanded]': 'palette().open()',
     '[attr.data-open]': 'palette().open() ? "" : null',

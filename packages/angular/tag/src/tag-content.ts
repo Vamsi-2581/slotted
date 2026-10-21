@@ -9,7 +9,7 @@ import { Directive } from '@angular/core';
   selector: '[slTagStart]',
   standalone: true,
   exportAs: 'slTagStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlTagStart {}
 
@@ -18,6 +18,6 @@ export class SlTagStart {}
   selector: '[slTagEnd]',
   standalone: true,
   exportAs: 'slTagEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlTagEnd {}

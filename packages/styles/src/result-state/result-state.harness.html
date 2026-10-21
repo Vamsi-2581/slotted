@@ -14,7 +14,9 @@
   <div style="display: grid; gap: var(--slotted-space-9)">
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="section"
       data-align="center"
@@ -22,37 +24,48 @@
       tabindex="-1"
       aria-labelledby="anatomy-title"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content" role="status">
-        <div data-part="title" id="anatomy-title">Nenhum projeto ainda</div>
-        <p data-part="description">
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="" id="anatomy-title">Nenhum projeto ainda</div>
+        <p data-part="description" data-part-description="">
           Crie um projeto para começar a coletar execuções e comparar resultados.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Criar projeto</span>
+          <span data-part="label" data-part-label="">Criar projeto</span>
         </button>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Importar</span>
+          <span data-part="label" data-part-label="">Importar</span>
         </button>
       </div>
-      <div data-part="footer">
-        <a data-ui="link" data-part="root" data-underline="hover" data-variant="accent" href="#docs"
+      <div data-part="footer" data-part-footer="">
+        <a
+          data-ui="link"
+          data-ui-link=""
+          data-part="root"
+          data-part-root=""
+          data-underline="hover"
+          data-variant="accent"
+          href="#docs"
           >O que é um projeto?</a
         >
       </div>
@@ -62,7 +75,9 @@
          hold when two of the four rows are absent. -->
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="success"
       data-reach="section"
       data-align="center"
@@ -70,20 +85,22 @@
       tabindex="-1"
       aria-labelledby="anatomy-short-title"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content" role="status">
-        <div data-part="title" id="anatomy-short-title">Tudo publicado</div>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="" id="anatomy-short-title">Tudo publicado</div>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Ver publicação</span>
+          <span data-part="label" data-part-label="">Ver publicação</span>
         </button>
       </div>
     </section>
@@ -93,7 +110,9 @@
          its title (RS1). -->
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="section"
       data-align="center"
@@ -101,9 +120,9 @@
       tabindex="-1"
       aria-labelledby="anatomy-bare-title"
     >
-      <div data-part="content">
-        <div data-part="title" id="anatomy-bare-title">Sem marca</div>
-        <p data-part="description">
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="" id="anatomy-bare-title">Sem marca</div>
+        <p data-part="description" data-part-description="">
           A região sem <code>media</code> começa no título e mantém o mesmo ritmo.
         </p>
       </div>
@@ -115,106 +134,124 @@
   <div style="display: grid; gap: var(--slotted-space-6)">
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="inline"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">empty</div>
-        <p data-part="description">A coleção existe e não tem nada dentro.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">empty</div>
+        <p data-part="description" data-part-description="">
+          A coleção existe e não tem nada dentro.
+        </p>
       </div>
     </section>
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="no-results"
       data-reach="inline"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">no-results</div>
-        <p data-part="description">O filtro não encontrou nada.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">no-results</div>
+        <p data-part="description" data-part-description="">O filtro não encontrou nada.</p>
       </div>
     </section>
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="not-found"
       data-reach="inline"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">not-found</div>
-        <p data-part="description">O recurso pedido não está aqui.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">not-found</div>
+        <p data-part="description" data-part-description="">O recurso pedido não está aqui.</p>
       </div>
     </section>
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="error"
       data-reach="inline"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">error</div>
-        <p data-part="description">Uma falha em que o leitor pode agir.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">error</div>
+        <p data-part="description" data-part-description="">Uma falha em que o leitor pode agir.</p>
       </div>
     </section>
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="forbidden"
       data-reach="inline"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">forbidden</div>
-        <p data-part="description">O leitor não tem permissão de ver.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">forbidden</div>
+        <p data-part="description" data-part-description="">O leitor não tem permissão de ver.</p>
       </div>
     </section>
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="offline"
       data-reach="inline"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">offline</div>
-        <p data-part="description">A conexão caiu.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">offline</div>
+        <p data-part="description" data-part-description="">A conexão caiu.</p>
       </div>
     </section>
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="success"
       data-reach="inline"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">success</div>
-        <p data-part="description">O fluxo terminou e não há mais nada a fazer.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">success</div>
+        <p data-part="description" data-part-description="">
+          O fluxo terminou e não há mais nada a fazer.
+        </p>
       </div>
     </section>
   </div>
@@ -233,26 +270,30 @@
     >
       <section
         data-ui="result-state"
+        data-ui-result-state=""
         data-part="root"
+        data-part-root=""
         data-status="no-results"
         data-reach="inline"
         data-align="center"
         data-live="off"
       >
-        <div data-part="media" aria-hidden="true"></div>
-        <div data-part="content">
-          <div data-part="title">Nenhuma linha corresponde ao filtro</div>
+        <div data-part="media" data-part-media="" aria-hidden="true"></div>
+        <div data-part="content" data-part-content="">
+          <div data-part="title" data-part-title="">Nenhuma linha corresponde ao filtro</div>
         </div>
-        <div data-part="actions">
+        <div data-part="actions" data-part-actions="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Limpar filtros</span>
+            <span data-part="label" data-part-label="">Limpar filtros</span>
           </button>
         </div>
       </section>
@@ -266,29 +307,33 @@
     >
       <section
         data-ui="result-state"
+        data-ui-result-state=""
         data-part="root"
+        data-part-root=""
         data-status="empty"
         data-reach="section"
         data-align="center"
         data-live="off"
       >
-        <div data-part="media" aria-hidden="true"></div>
-        <div data-part="content">
-          <div data-part="title">Nenhum ambiente configurado</div>
-          <p data-part="description">
+        <div data-part="media" data-part-media="" aria-hidden="true"></div>
+        <div data-part="content" data-part-content="">
+          <div data-part="title" data-part-title="">Nenhum ambiente configurado</div>
+          <p data-part="description" data-part-description="">
             Um ambiente guarda as variáveis e os segredos de uma implantação.
           </p>
         </div>
-        <div data-part="actions">
+        <div data-part="actions" data-part-actions="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-tone="accent"
             data-variant="solid"
             data-size="md"
             type="button"
           >
-            <span data-part="label">Criar ambiente</span>
+            <span data-part="label" data-part-label="">Criar ambiente</span>
           </button>
         </div>
       </section>
@@ -296,45 +341,53 @@
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="not-found"
       data-reach="page"
       data-align="center"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">Esta página não existe</div>
-        <p data-part="description">
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">Esta página não existe</div>
+        <p data-part="description" data-part-description="">
           O endereço pode ter mudado, ou o projeto pode ter sido arquivado.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Ir para o início</span>
+          <span data-part="label" data-part-label="">Ir para o início</span>
         </button>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Voltar</span>
+          <span data-part="label" data-part-label="">Voltar</span>
         </button>
       </div>
-      <div data-part="footer">
+      <div data-part="footer" data-part-footer="">
         <a
           data-ui="link"
+          data-ui-link=""
           data-part="root"
+          data-part-root=""
           data-underline="hover"
           data-variant="accent"
           href="#status"
@@ -349,58 +402,66 @@
   <div style="display: grid; gap: var(--slotted-space-9)">
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="forbidden"
       data-reach="section"
       data-align="center"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">Você não tem acesso a este relatório</div>
-        <p data-part="description">
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">Você não tem acesso a este relatório</div>
+        <p data-part="description" data-part-description="">
           Peça acesso ao responsável do espaço de trabalho para abrir os dados.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Pedir acesso</span>
+          <span data-part="label" data-part-label="">Pedir acesso</span>
         </button>
       </div>
     </section>
 
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="forbidden"
       data-reach="section"
       data-align="start"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">Você não tem acesso a este relatório</div>
-        <p data-part="description">
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">Você não tem acesso a este relatório</div>
+        <p data-part="description" data-part-description="">
           Peça acesso ao responsável do espaço de trabalho para abrir os dados.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Pedir acesso</span>
+          <span data-part="label" data-part-label="">Pedir acesso</span>
         </button>
       </div>
     </section>
@@ -413,13 +474,15 @@
          so an illustration that has not loaded moves nothing when it arrives. -->
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="page"
       data-align="center"
       data-live="off"
     >
-      <div data-part="media" aria-hidden="true">
+      <div data-part="media" data-part-media="" aria-hidden="true">
         <svg viewBox="0 0 96 64" role="presentation" focusable="false">
           <rect
             x="2"
@@ -449,22 +512,24 @@
           />
         </svg>
       </div>
-      <div data-part="content">
-        <div data-part="title">Comece pelo primeiro quadro</div>
-        <p data-part="description">
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">Comece pelo primeiro quadro</div>
+        <p data-part="description" data-part-description="">
           Um quadro guarda cartões, colunas e as pessoas que trabalham neles.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Criar quadro</span>
+          <span data-part="label" data-part-label="">Criar quadro</span>
         </button>
       </div>
     </section>
@@ -478,196 +543,226 @@
          drawing asked for at inline reach, where none is drawn. -->
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="section"
       data-align="center"
       data-live="polite"
       data-illustration="tile"
     >
-      <div data-part="media" aria-hidden="true">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="inbox"></svg
+      <div data-part="media" data-part-media="" aria-hidden="true">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="inbox"></svg
         ></span>
       </div>
-      <div data-part="content" role="status">
-        <div data-part="title">Nenhuma mensagem</div>
-        <p data-part="description">As mensagens que chegarem aparecem aqui.</p>
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="">Nenhuma mensagem</div>
+        <p data-part="description" data-part-description="">
+          As mensagens que chegarem aparecem aqui.
+        </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Escrever mensagem</span>
+          <span data-part="label" data-part-label="">Escrever mensagem</span>
         </button>
       </div>
     </section>
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="section"
       data-align="center"
       data-live="polite"
       data-illustration="stack"
     >
-      <div data-part="media" aria-hidden="true">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="bell"></svg
+      <div data-part="media" data-part-media="" aria-hidden="true">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="bell"></svg
         ></span>
       </div>
-      <div data-part="content" role="status">
-        <div data-part="title">Convide as primeiras pessoas</div>
-        <p data-part="description">
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="">Convide as primeiras pessoas</div>
+        <p data-part="description" data-part-description="">
           Donos, editores e revisores entram por convite ou por um link partilhado.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Convidar membros</span></button
+          <span data-part="label" data-part-label="">Convidar membros</span></button
         ><button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="neutral"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Copiar link</span>
+          <span data-part="label" data-part-label="">Copiar link</span>
         </button>
       </div>
     </section>
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="section"
       data-align="center"
       data-live="polite"
       data-illustration="cards"
     >
-      <div data-part="media" aria-hidden="true">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="file-text"></svg
+      <div data-part="media" data-part-media="" aria-hidden="true">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg
         ></span>
       </div>
-      <div data-part="content" role="status">
-        <div data-part="title">O espaço de registos está vazio</div>
-        <p data-part="description">
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="">O espaço de registos está vazio</div>
+        <p data-part="description" data-part-description="">
           Ligue uma fonte ou carregue um CSV para começar a organizar pessoas e equipas.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Ligar fonte</span></button
+          <span data-part="label" data-part-label="">Ligar fonte</span></button
         ><button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="neutral"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Carregar CSV</span>
+          <span data-part="label" data-part-label="">Carregar CSV</span>
         </button>
       </div>
     </section>
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="page"
       data-align="center"
       data-live="off"
       data-illustration="stack"
     >
-      <div data-part="media" aria-hidden="true">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="search"></svg
+      <div data-part="media" data-part-media="" aria-hidden="true">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="search"></svg
         ></span>
       </div>
-      <div data-part="content">
-        <div data-part="title">Nenhum resultado para “contrato”</div>
-        <p data-part="description">
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">Nenhum resultado para “contrato”</div>
+        <p data-part="description" data-part-description="">
           Tente outra palavra, ou limpe os filtros ativos para ver tudo de novo.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Limpar filtros</span>
+          <span data-part="label" data-part-label="">Limpar filtros</span>
         </button>
       </div>
     </section>
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="section"
       data-align="center"
       data-live="off"
       data-illustration="cards"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content">
-        <div data-part="title">Sem produtos</div>
-        <p data-part="description">Ainda não há dados aqui. Avisamos quando houver novidades.</p>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">Sem produtos</div>
+        <p data-part="description" data-part-description="">
+          Ainda não há dados aqui. Avisamos quando houver novidades.
+        </p>
       </div>
-      <div data-part="actions"></div>
+      <div data-part="actions" data-part-actions=""></div>
     </section>
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="empty"
       data-reach="inline"
       data-align="center"
       data-live="off"
       data-illustration="stack"
     >
-      <div data-part="media" aria-hidden="true">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="search"></svg
+      <div data-part="media" data-part-media="" aria-hidden="true">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="search"></svg
         ></span>
       </div>
-      <div data-part="content">
-        <div data-part="title">Nenhuma linha corresponde ao filtro</div>
-        <p data-part="description"></p>
+      <div data-part="content" data-part-content="">
+        <div data-part="title" data-part-title="">Nenhuma linha corresponde ao filtro</div>
+        <p data-part="description" data-part-description=""></p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="neutral"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Limpar</span>
+          <span data-part="label" data-part-label="">Limpar</span>
         </button>
       </div>
     </section>
@@ -680,48 +775,56 @@
          language can break. Nothing is removed from the DOM to fit either. -->
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="error"
       data-reach="section"
       data-align="center"
       data-live="assertive"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content" role="alert">
-        <div data-part="title">
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="" role="alert">
+        <div data-part="title" data-part-title="">
           Grundstücksverkehrsgenehmigungszuständigkeitsübertragungsverordnung
         </div>
-        <p data-part="description">
+        <p data-part="description" data-part-description="">
           A execução sha256:9f2c1a7b4e0d8c6f5a3b2e1d0c9b8a7f6e5d4c3b2a1908f7e6d5c4b3a2 falhou antes
           de escrever qualquer artefato. Tente novamente ou abra o registro completo.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="danger"
           data-variant="solid"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Tentar de novo</span>
+          <span data-part="label" data-part-label="">Tentar de novo</span>
         </button>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Abrir registro</span>
+          <span data-part="label" data-part-label="">Abrir registro</span>
         </button>
       </div>
-      <div data-part="footer">
+      <div data-part="footer" data-part-footer="">
         <a
           data-ui="link"
+          data-ui-link=""
           data-part="root"
+          data-part-root=""
           data-underline="hover"
           data-variant="accent"
           href="#retries"
@@ -734,29 +837,33 @@
          rather than take the table's own column with it. -->
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="offline"
       data-reach="inline"
       data-align="start"
       data-live="polite"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content" role="status">
-        <div data-part="title">Sem conexão com o servidor de métricas</div>
-        <p data-part="description">
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="">Sem conexão com o servidor de métricas</div>
+        <p data-part="description" data-part-description="">
           As últimas leituras continuam visíveis e param de ser atualizadas até a conexão voltar.
         </p>
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="ghost"
           data-size="sm"
           type="button"
         >
-          <span data-part="label">Reconectar</span>
+          <span data-part="label" data-part-label="">Reconectar</span>
         </button>
       </div>
     </section>
@@ -772,32 +879,43 @@
       as a ragged band; the two lines below are what a consumer writes instead,
       and the family caps nothing on its own.
     -->
-    <div data-ui="container" data-part="root" data-size="measure" data-inset="0">
+    <div
+      data-ui="container"
+      data-ui-container=""
+      data-part="root"
+      data-part-root=""
+      data-size="measure"
+      data-inset="0"
+    >
       <section
         data-ui="result-state"
+        data-ui-result-state=""
         data-part="root"
+        data-part-root=""
         data-status="no-results"
         data-reach="page"
         data-align="center"
         data-live="polite"
       >
-        <div data-part="media" aria-hidden="true"></div>
-        <div data-part="content" role="status">
-          <div data-part="title">Nada corresponde a “relatório trimestral”</div>
-          <p data-part="description">
+        <div data-part="media" data-part-media="" aria-hidden="true"></div>
+        <div data-part="content" data-part-content="" role="status">
+          <div data-part="title" data-part-title="">Nada corresponde a “relatório trimestral”</div>
+          <p data-part="description" data-part-description="">
             Tente outra palavra, ou limpe os três filtros ativos para ver tudo de novo.
           </p>
         </div>
-        <div data-part="actions">
+        <div data-part="actions" data-part-actions="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-tone="accent"
             data-variant="solid"
             data-size="md"
             type="button"
           >
-            <span data-part="label">Limpar filtros</span>
+            <span data-part="label" data-part-label="">Limpar filtros</span>
           </button>
         </div>
       </section>
@@ -808,37 +926,43 @@
          question. -->
     <div
       data-ui="card"
+      data-ui-card=""
       data-part="root"
+      data-part-root=""
       data-orientation="vertical"
       data-fill="outline"
       data-size="md"
     >
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <section
           data-ui="result-state"
+          data-ui-result-state=""
           data-part="root"
+          data-part-root=""
           data-status="empty"
           data-reach="section"
           data-align="center"
           data-live="off"
         >
-          <div data-part="media" aria-hidden="true"></div>
-          <div data-part="content">
-            <div data-part="title">Nenhum membro convidado</div>
-            <p data-part="description">
+          <div data-part="media" data-part-media="" aria-hidden="true"></div>
+          <div data-part="content" data-part-content="">
+            <div data-part="title" data-part-title="">Nenhum membro convidado</div>
+            <p data-part="description" data-part-description="">
               Convide alguém para dividir os quadros deste espaço de trabalho.
             </p>
           </div>
-          <div data-part="actions">
+          <div data-part="actions" data-part-actions="">
             <button
               data-ui="button"
+              data-ui-button=""
               data-part="root"
+              data-part-root=""
               data-tone="accent"
               data-variant="solid"
               data-size="sm"
               type="button"
             >
-              <span data-part="label">Convidar</span>
+              <span data-part="label" data-part-label="">Convidar</span>
             </button>
           </div>
         </section>

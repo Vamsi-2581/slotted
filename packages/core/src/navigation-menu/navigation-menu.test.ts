@@ -218,23 +218,23 @@ describe('focusTarget', () => {
 
   beforeEach(() => {
     document.body.innerHTML = `
-      <nav data-ui="navigation-menu" data-orientation="horizontal">
-        <ul data-part="list">
-          <li data-part="item" data-value="products">
-            <button data-part="trigger" aria-expanded="true">Products</button>
-            <div data-part="content" data-open>
-              <a data-part="link" href="#a">A</a>
-              <a data-part="link" href="#b">B</a>
+      <nav data-ui="navigation-menu" data-ui-navigation-menu="" data-orientation="horizontal">
+        <ul data-part="list" data-part-list="">
+          <li data-part="item" data-part-item="" data-value="products">
+            <button data-part="trigger" data-part-trigger="" aria-expanded="true">Products</button>
+            <div data-part="content" data-part-content="" data-open>
+              <a data-part="link" data-part-link="" href="#a">A</a>
+              <a data-part="link" data-part-link="" href="#b">B</a>
             </div>
           </li>
-          <li data-part="item" data-value="docs"><a data-part="link" href="#docs">Docs</a></li>
-          <li data-part="item" data-value="off">
-            <button data-part="trigger" disabled>Off</button>
-            <div data-part="content" hidden></div>
+          <li data-part="item" data-part-item="" data-value="docs"><a data-part="link" data-part-link="" href="#docs">Docs</a></li>
+          <li data-part="item" data-part-item="" data-value="off">
+            <button data-part="trigger" data-part-trigger="" disabled>Off</button>
+            <div data-part="content" data-part-content="" hidden></div>
           </li>
-          <li data-part="item" data-value="company">
-            <button data-part="trigger" aria-expanded="false">Company</button>
-            <div data-part="content" hidden><a data-part="link" href="#c">C</a></div>
+          <li data-part="item" data-part-item="" data-value="company">
+            <button data-part="trigger" data-part-trigger="" aria-expanded="false">Company</button>
+            <div data-part="content" data-part-content="" hidden><a data-part="link" data-part-link="" href="#c">C</a></div>
           </li>
         </ul>
       </nav>`;

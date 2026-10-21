@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import {
   afterNextRender,
   ChangeDetectionStrategy,
@@ -18,7 +19,7 @@ import { SlPromptComposer } from './prompt-composer';
 @Directive({
   selector: '[slPromptComposerHeader]',
   standalone: true,
-  host: { 'data-part': 'header' },
+  host: { 'data-part': 'header', 'data-part-header': '' },
 })
 export class SlPromptComposerHeader {}
 
@@ -26,7 +27,7 @@ export class SlPromptComposerHeader {}
 @Directive({
   selector: '[slPromptComposerFooter]',
   standalone: true,
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlPromptComposerFooter {}
 
@@ -40,14 +41,14 @@ export class SlPromptComposerFooter {}
   selector: 'button[slPromptComposerAction]',
   standalone: true,
   exportAs: 'slPromptComposerAction',
-  host: { 'data-part': 'action', '[attr.type]': 'type' },
+  host: { 'data-part': 'action', 'data-part-action': '', '[attr.type]': 'type' },
 })
 export class SlPromptComposerAction {
   protected readonly type = inject(new HostAttributeToken('type'), { optional: true }) ?? 'button';
 
   constructor() {
     const element: HTMLElement = inject(ElementRef).nativeElement;
-    afterNextRender(() => element.setAttribute('data-part', 'action'));
+    afterNextRender(() => writeSelectorKey(element, 'part', 'action'));
   }
 }
 
@@ -67,6 +68,7 @@ export class SlPromptComposerAction {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'attach',
+    'data-part-attach': '',
     type: 'button',
     '[attr.aria-label]': "label ?? composer.t('attach')",
     '[disabled]': 'composer.off()',
@@ -105,10 +107,10 @@ export class SlPromptComposerAttach {
   template: `<ng-content>
     @switch (composer.status()) {
       @case ('submitted') {
-        <span data-ui="spinner" aria-hidden="true"></span>
+        <span data-ui="spinner" data-ui-spinner="" aria-hidden="true"></span>
       }
       @case ('streaming') {
-        <span data-ui="spinner" aria-hidden="true"></span>
+        <span data-ui="spinner" data-ui-spinner="" aria-hidden="true"></span>
         <span slIcon><svg slGlyph name="stop"></svg></span>
       }
       @case ('error') {
@@ -124,6 +126,7 @@ export class SlPromptComposerAttach {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'submit',
+    'data-part-submit': '',
     '[attr.type]': "composer.busy() ? 'button' : 'submit'",
     '[attr.aria-label]': 'named() ? null : label()',
     '[attr.aria-disabled]': "composer.status() === 'submitted' ? 'true' : null",

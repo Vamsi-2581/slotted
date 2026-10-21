@@ -150,17 +150,19 @@ const optionalBoolean = (value: boolean | string | undefined) =>
   imports: [NgTemplateOutlet, SlGlyph, SlIcon],
   template: `<div
       data-part="symbols"
+      data-part-symbols=""
       (pointerdown)="onRowPointerDown($event)"
       (pointermove)="onRowPointerMove($event)"
       (pointerup)="onRowPointerUp($event)"
       (pointercancel)="onRowPointerCancel()"
     >
       @for (item of items(); track item.index) {
-        <span data-part="item" [attr.data-checked]="item.checked ? '' : null">
+        <span data-part="item" data-part-item="" [attr.data-checked]="item.checked ? '' : null">
           @for (radio of item.radios; track radio.value) {
             <input
               #radioInput
               data-part="input"
+              data-part-input=""
               type="radio"
               [attr.data-half]="radio.half ? '' : null"
               [attr.name]="resolvedName()"
@@ -173,14 +175,14 @@ const optionalBoolean = (value: boolean | string | undefined) =>
               (blur)="onBlur()"
             />
           }
-          <span data-part="symbol">
+          <span data-part="symbol" data-part-symbol="">
             @if (symbol(); as custom) {
               <ng-container *ngTemplateOutlet="custom.template; context: item.context" />
             } @else {
               <span slIcon><svg slGlyph name="star"></svg></span>
             }
           </span>
-          <span data-part="fill">
+          <span data-part="fill" data-part-fill="">
             @if (symbol(); as custom) {
               <ng-container *ngTemplateOutlet="custom.template; context: item.context" />
             } @else {
@@ -191,7 +193,7 @@ const optionalBoolean = (value: boolean | string | undefined) =>
       }
     </div>
     @if (caption(); as words) {
-      <span data-part="value" aria-hidden="true">
+      <span data-part="value" data-part-value="" aria-hidden="true">
         @if (words.template; as captionTemplate) {
           <ng-container *ngTemplateOutlet="captionTemplate; context: captionContext()" />
         } @else {
@@ -208,7 +210,9 @@ const optionalBoolean = (value: boolean | string | undefined) =>
   ],
   host: {
     'data-ui': 'rating',
+    'data-ui-rating': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'resolvedRole()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-tone]': 'resolvedTone()',

@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/cascader/cascader.css';
 import '@slotted/styles/skeleton/skeleton.css';
 import '@slotted/styles/spinner/spinner.css';
@@ -494,27 +495,38 @@ export function Cascader<T>(props: CascaderProps<T>) {
       : [];
 
   const valueContent: ReactNode = state.multiple ? (
-    <span data-part="value">
-      <span data-part="summary">
+    <span data-part="value" data-part-value="">
+      <span data-part="summary" data-part-summary="">
         {state.emitted.length === 0 ? '' : state.t('summary', { count: state.emitted.length })}
       </span>
     </span>
   ) : state.emitted.length === 0 ? (
-    <span data-part="placeholder">{state.t('placeholder')}</span>
+    <span data-part="placeholder" data-part-placeholder="">
+      {state.t('placeholder')}
+    </span>
   ) : renderValue !== undefined ? (
-    <span data-part="value">{renderValue(pathItems)}</span>
+    <span data-part="value" data-part-value="">
+      {renderValue(pathItems)}
+    </span>
   ) : (
-    <span data-part="value">
+    <span data-part="value" data-part-value="">
       {pathItems.length === 0 ? (
-        <span data-part="value-segment">{state.emitted[0]}</span>
+        <span data-part="value-segment" data-part-value-segment="">
+          {state.emitted[0]}
+        </span>
       ) : (
         pathItems.flatMap((item, index) => [
           index === 0 ? null : (
-            <span aria-hidden="true" data-part="value-separator" key={`s${index}`}>
+            <span
+              aria-hidden="true"
+              data-part="value-separator"
+              data-part-value-separator=""
+              key={`s${index}`}
+            >
               {resolvedSeparator}
             </span>
           ),
-          <span data-part="value-segment" key={getKey(item)}>
+          <span data-part="value-segment" data-part-value-segment="" key={getKey(item)}>
             {getLabel(item)}
           </span>,
         ])
@@ -546,12 +558,13 @@ export function Cascader<T>(props: CascaderProps<T>) {
     <div
       aria-label={resolvedSearch ? (ariaLabel ?? state.t('search')) : undefined}
       data-part="content"
+      data-part-content=""
       id={contentId}
       ref={setSurfaceNode}
       role={resolvedSearch ? 'dialog' : undefined}
     >
       {resolvedSearch ? (
-        <div data-part="search">
+        <div data-part="search" data-part-search="">
           <Icon>
             <Glyph name="search" />
           </Icon>
@@ -564,6 +577,7 @@ export function Cascader<T>(props: CascaderProps<T>) {
             aria-expanded
             aria-label={state.t('search')}
             data-part="search-input"
+            data-part-search-input=""
             onChange={(event) => state.setQuery(event.target.value, 'keyboard', event.nativeEvent)}
             onKeyDown={(event) => onKey(event, true)}
             placeholder={state.t('searchPlaceholder')}
@@ -590,9 +604,11 @@ export function Cascader<T>(props: CascaderProps<T>) {
     <div
       data-layout={state.layout}
       data-part="positioner"
+      data-part-positioner=""
       data-selection={state.multiple ? 'multiple' : undefined}
       data-size={resolvedSize}
       data-ui="cascader"
+      data-ui-cascader=""
       inert={currentOpen ? undefined : true}
       ref={setLayerNode}
     >
@@ -602,17 +618,18 @@ export function Cascader<T>(props: CascaderProps<T>) {
 
   return (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'root')}
       data-disabled={resolvedDisabled ? '' : undefined}
       data-full-width={(fullWidth ?? defaults.fullWidth) ? '' : undefined}
       data-invalid={resolvedInvalid ? '' : undefined}
       data-narrow={narrow ? '' : undefined}
       data-open={currentOpen ? '' : undefined}
-      data-part="root"
+
       data-readonly={resolvedReadOnly ? '' : undefined}
       data-required={resolvedRequired ? '' : undefined}
       data-size={resolvedSize}
       data-ui="cascader"
+      data-ui-cascader=""
       data-variant={variant ?? defaults.variant}
       ref={(element) => {
         setFrame(element);
@@ -636,6 +653,7 @@ export function Cascader<T>(props: CascaderProps<T>) {
         aria-readonly={resolvedReadOnly ? true : undefined}
         aria-required={resolvedRequired ? true : undefined}
         data-part="trigger"
+        data-part-trigger=""
         disabled={resolvedDisabled}
         id={field?.ids.control}
         onClick={onTriggerClick}
@@ -664,6 +682,7 @@ export function Cascader<T>(props: CascaderProps<T>) {
         <button
           aria-label={state.t('clear')}
           data-part="clear"
+          data-part-clear=""
           onClick={(event) => {
             state.clear(event.nativeEvent);
             trigger?.focus({ preventScroll: true });
@@ -676,9 +695,15 @@ export function Cascader<T>(props: CascaderProps<T>) {
         </button>
       ) : null}
       {busy ? (
-        <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+        <span
+          aria-hidden="true"
+          data-part="busy"
+          data-part-busy=""
+          data-ui="spinner"
+          data-ui-spinner=""
+        />
       ) : (
-        <span aria-hidden="true" data-part="arrow">
+        <span aria-hidden="true" data-part="arrow" data-part-arrow="">
           <Icon>
             <Glyph name="chevron-down" />
           </Icon>
@@ -859,13 +884,14 @@ export function CascaderPanel<T>(props: CascaderPanelProps<T>) {
 
   return (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'content')}
       data-disabled={state.disabled ? '' : undefined}
       data-layout={state.layout}
-      data-part="content"
+
       data-selection={state.multiple ? 'multiple' : undefined}
       data-size={size ?? defaults.size}
       data-ui="cascader"
+      data-ui-cascader=""
       ref={(element) => {
         setSurface(element);
         if (typeof ref === 'function') ref(element);

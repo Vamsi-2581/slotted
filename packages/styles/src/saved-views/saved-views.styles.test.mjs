@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/saved-views/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./saved-views.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./saved-views.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./saved-views.harness.html', import.meta.url), 'utf8'),
+);
 const tokens = JSON.parse(
   readFileSync(new URL('./saved-views.tokens.json', import.meta.url), 'utf8'),
 );
@@ -20,7 +33,7 @@ const normalized = css
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.savedViews;
 
 /** Every declaration the selector receives, across every rule whose list names it. */
@@ -38,14 +51,17 @@ test('lives in the component layer', () => {
 });
 
 test('is selected by the identifier the contract declares', () => {
-  assert.ok(normalized.includes(`${ui}[data-part='root']{`), 'no base rule for the root');
-  assert.ok(normalized.includes(`${ui}[data-part='panel']{`), 'no base rule for the panel');
+  assert.ok(normalized.includes(`${ui}[data-part-root]{`), 'no base rule for the root');
+  assert.ok(normalized.includes(`${ui}[data-part-panel]{`), 'no base rule for the panel');
 });
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
     if (part === 'root' || part === 'panel') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -64,7 +80,7 @@ test('renders every part the contract declares, in at least one scene', () => {
  * panel give — and its width is the one family token the design names.
  */
 test('sizes the panel by its own token, inside the room the positioner leaves', () => {
-  const panel = rule(`${ui}[data-part='panel']`);
+  const panel = rule(`${ui}[data-part-panel]`);
   assert.match(
     panel,
     /grid-template-columns:minmax\(0,var\(--slotted-saved-views-panel-inline-size,18rem\)\)/,
@@ -98,9 +114,9 @@ test('draws every glyph as an icon element, never as a mask', () => {
 
 /** Truncation never removes content from the DOM: the trigger clips, the list wraps. */
 test('truncates the trigger’s name and wraps a long name in the list', () => {
-  assert.match(rule(`${ui}>[data-part='trigger']>[data-label]`), /text-overflow:ellipsis/);
+  assert.match(rule(`${ui}>[data-part-trigger]>[data-label]`), /text-overflow:ellipsis/);
   assert.match(
-    rule(`${ui}[data-part='panel'] [data-part='apply']>[data-label]`),
+    rule(`${ui}[data-part-panel] [data-part-apply]>[data-label]`),
     /overflow-wrap:anywhere/,
   );
 });
@@ -108,7 +124,7 @@ test('truncates the trigger’s name and wraps a long name in the list', () => {
 test('draws the focus ring from the foundation on every control the family owns', () => {
   for (const part of ['trigger', 'revert', 'apply', 'actions']) {
     assert.ok(
-      normalized.includes(`[data-part='${part}']:focus-visible`),
+      normalized.includes(`[data-part-${part.toLowerCase()}]:focus-visible`),
       `${part} has no focus-visible rule`,
     );
   }
@@ -124,19 +140,19 @@ test('draws the focus ring from the foundation on every control the family owns'
  * middle of the band between cap height and x-height.
  */
 test('sets the check and the default mark on the text band of the name', () => {
-  const panel = `${ui}[data-part='panel']`;
-  const apply = rule(`${panel} [data-part='apply']`);
+  const panel = `${ui}[data-part-panel]`;
+  const apply = rule(`${panel} [data-part-apply]`);
   assert.match(apply, /align-items:baseline/);
   const band = 'translate:0 calc(var(--_icon-size-sm) / 2 - (1cap + 1ex) / 4)';
   for (const mark of [
-    `${panel} [data-part='apply']>[data-ui='icon']`,
-    `${panel} [data-part='apply']>[data-part='default-mark']`,
+    `${panel} [data-part-apply]>[data-ui-icon]`,
+    `${panel} [data-part-apply]>[data-part-default-mark]`,
   ]) {
     assert.ok(rule(mark).includes(band), `${mark} is not on the text band`);
   }
   /* The check is an `icon` at `sm`; the default mark is a box of that size holding one. */
   assert.match(
-    rule(`${panel} [data-part='apply']>[data-part='default-mark']`),
+    rule(`${panel} [data-part-apply]>[data-part-default-mark]`),
     /block-size:var\(--_icon-size-sm\)/,
   );
 });

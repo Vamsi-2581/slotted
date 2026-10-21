@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import {
   defaultOperator as kindDefaultOperator,
   describeFilter,
@@ -318,8 +319,13 @@ function TableFilterShell({
     });
 
     return (
-      <div data-operands={operands} data-part="filter-condition" key={index}>
-        <div data-part="filter-operator">
+      <div
+        data-operands={operands}
+        data-part="filter-condition"
+        data-part-filter-condition=""
+        key={index}
+      >
+        <div data-part="filter-operator" data-part-filter-operator="">
           {/* `items` names every operator for the closed control. Without it the
               trigger falls back to the value itself and a reader sees the raw
               `between` and `empty` the engine speaks, which is what the
@@ -351,6 +357,7 @@ function TableFilterShell({
           <div
             data-kind={kind}
             data-part="filter-operand"
+            data-part-filter-operand=""
             {...(operandName === undefined || renderOperand ? {} : { 'data-operand': operandName })}
             {...(rangeOperand && operands === 2 && !renderOperand ? { 'data-range': '' } : {})}
           >
@@ -387,9 +394,9 @@ function TableFilterShell({
       <PopoverTrigger
         render={(triggerProps) => (
           <button
-            {...triggerProps}
+            {...withSelectorKey(triggerProps, 'part', 'filter')}
             aria-label={triggerName}
-            data-part="filter"
+
             {...(filtered ? { 'data-filtered': '' } : {})}
             type="button"
           >
@@ -402,12 +409,20 @@ function TableFilterShell({
           {/* The parts are on this family's own element rather than on the
               popover's: `PopoverContent` names its own part, and a second
               `data-part` on the same element is one of them lost. */}
-          <div data-kind={kind} data-part="filter-panel" data-ui="table" id={base} ref={panel}>
+          <div
+            data-kind={kind}
+            data-part="filter-panel"
+            data-part-filter-panel=""
+            data-ui="table"
+            data-ui-table=""
+            id={base}
+            ref={panel}
+          >
             {renderCondition(0)}
 
             {showsSecond ? (
               <>
-                <div data-part="filter-join">
+                <div data-part="filter-join" data-part-filter-join="">
                   <span data-label="">{t('filterJoin')}</span>
                   <RadioGroup
                     aria-label={t('filterJoin')}
@@ -424,7 +439,7 @@ function TableFilterShell({
               </>
             ) : null}
 
-            <div data-part="filter-actions">
+            <div data-part="filter-actions" data-part-filter-actions="">
               <Button
                 disabled={!isFilterActive(draft)}
                 onClick={(event) => clear(event)}
@@ -892,7 +907,7 @@ function SetOperand({
   return (
     <>
       {searching ? (
-        <div data-part="filter-search">
+        <div data-part="filter-search" data-part-filter-search="">
           <TextField
             aria-controls={`${base}-list`}
             aria-label={t('filterSearch')}
@@ -912,10 +927,12 @@ function SetOperand({
       ) : null}
 
       {shown.length === 0 ? (
-        <p data-part="filter-empty">{t('filterEmpty')}</p>
+        <p data-part="filter-empty" data-part-filter-empty="">
+          {t('filterEmpty')}
+        </p>
       ) : (
-        <div data-part="filter-list" id={`${base}-list`}>
-          <div data-covering="" data-part="filter-option">
+        <div data-part="filter-list" data-part-filter-list="" id={`${base}-list`}>
+          <div data-covering="" data-part="filter-option" data-part-filter-option="">
             <Checkbox
               checked={covered.length > 0 && covered.length === shown.length}
               indeterminate={covered.length > 0 && covered.length < shown.length}
@@ -934,7 +951,7 @@ function SetOperand({
           </div>
 
           {shown.map((option) => (
-            <div data-part="filter-option" key={option.value}>
+            <div data-part="filter-option" data-part-filter-option="" key={option.value}>
               <Checkbox
                 checked={chosen.includes(option.value)}
                 onCheckedChange={(checked) =>

@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/field-group/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./field-group.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./field-group.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./field-group.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.fieldGroup;
 
 function rule(selector) {
@@ -36,7 +49,10 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
     if (part === 'root') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -67,7 +83,7 @@ test('undoes the three things a user agent gives every fieldset', () => {
  */
 test('keeps the legend out of the box that lays the fields out', () => {
   assert.match(rule(root), /display:block/);
-  assert.match(rule(`${ui}>[data-part='content']`), /display:flex/);
+  assert.match(rule(`${ui}>[data-part-content]`), /display:flex/);
 });
 
 /**
@@ -78,14 +94,14 @@ test('keeps the legend out of the box that lays the fields out', () => {
  * the necessity marker on a line of its own.
  */
 test('lets the legend hold a page heading without breaking the line', () => {
-  const heading = rule(`${ui}>[data-part='legend']>:is(h1,h2,h3,h4,h5,h6)`);
+  const heading = rule(`${ui}>[data-part-legend]>:is(h1,h2,h3,h4,h5,h6)`);
   assert.match(heading, /display:inline/);
   assert.match(heading, /margin:0/);
   assert.ok(!heading.includes('font:inherit'), 'the legend overrides the page heading’s own type');
 });
 
 test('keeps the necessity marker in a bidi run of its own', () => {
-  assert.match(rule(`${ui}>[data-part='legend']>[data-part='mark']`), /unicode-bidi:isolate/);
+  assert.match(rule(`${ui}>[data-part-legend]>[data-part-mark]`), /unicode-bidi:isolate/);
 });
 
 /**
@@ -102,7 +118,7 @@ test('separates what is said about the set from the set itself', () => {
     rule(root),
     /--_field-gap:var\(--slotted-field-group-field-gap,var\(--slotted-space-6/,
   );
-  assert.match(rule(`${root}>[data-part='content']`), /margin-block-start:var\(--_content-gap\)/);
+  assert.match(rule(`${root}>[data-part-content]`), /margin-block-start:var\(--_content-gap\)/);
 });
 
 /**
@@ -111,11 +127,11 @@ test('separates what is said about the set from the set itself', () => {
  * is a literal.
  */
 test('wraps a row instead of squeezing the controls in it', () => {
-  const row = rule(`${ui}[data-orientation='horizontal']>[data-part='content']`);
+  const row = rule(`${ui}[data-orientation='horizontal']>[data-part-content]`);
   assert.match(row, /flex-direction:row/);
   assert.match(row, /flex-wrap:wrap/);
   assert.match(
-    rule(`${ui}[data-orientation='horizontal']>[data-part='content']>*`),
+    rule(`${ui}[data-orientation='horizontal']>[data-part-content]>*`),
     /flex:1 1 var\(--slotted-field-group-track-min/,
   );
   assert.ok('--slotted-field-group-track-min' in contract.literals);
@@ -132,12 +148,12 @@ test('wraps a row instead of squeezing the controls in it', () => {
 test('mutes the name the platform cannot disable, and nothing else', () => {
   assert.match(
     rule(
-      `${root}[data-disabled]>[data-part='legend'],${root}[data-disabled]>[data-part='legend']>[data-part='mark']`,
+      `${root}[data-disabled]>[data-part-legend],${root}[data-disabled]>[data-part-legend]>[data-part-mark]`,
     ),
     /color:var\(--slotted-disabled-foreground\)/,
   );
   assert.ok(
-    !normalized.includes(`${root}[data-disabled] [data-ui='field']`),
+    !normalized.includes(`${root}[data-disabled] [data-ui-field]`),
     'the group reaches into a field to paint it',
   );
 });
@@ -146,7 +162,7 @@ test('withdraws an empty message unless the form asked for its line', () => {
   assert.match(
     normalized,
     new RegExp(
-      `\\[data-ui='inline-message'\\]:not\\(\\[data-reserve\\]\\):has\\(\\[data-part='text'\\]:empty\\)\\{display:none`,
+      `\\[data-ui-inline-message\\]:not\\(\\[data-reserve\\]\\):has\\(\\[data-part-text\\]:empty\\)\\{display:none`,
     ),
   );
 });
@@ -162,9 +178,9 @@ test('shows the family it exists to hold', () => {
  * outcome over the help.
  */
 test('sets the type of what the group says the way the field does', () => {
-  const message = rule(`${root}>[data-ui='inline-message']`);
+  const message = rule(`${root}>[data-ui-inline-message]`);
   assert.match(message, /font-size:var\(--slotted-font-size-xs,0\.75rem\)/);
-  const outcome = normalized.split(`${root}>[data-ui='inline-message'][data-tone='danger']`)[1];
+  const outcome = normalized.split(`${root}>[data-ui-inline-message][data-tone='danger']`)[1];
   assert.match(
     outcome ?? '',
     /^,[^{]*\[data-tone='success'\]\{font-weight:var\(--slotted-font-weight-medium,500\);\}/,
@@ -179,7 +195,7 @@ test('sets the type of what the group says the way the field does', () => {
  * message's own rule carries a third attribute and wins in any load order.
  */
 test('spaces its messages from the legend whatever order the message stylesheet loads in', () => {
-  const selector = `${root}>* + [data-ui='inline-message']`;
+  const selector = `${root}>* + [data-ui-inline-message]`;
   const body = rule(selector);
   assert.match(body, /margin-block-start:var\(--_message-gap\)/, `${selector} sets no message gap`);
   const weight = (selector.match(/\[/g) ?? []).length;

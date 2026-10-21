@@ -65,7 +65,7 @@ import {
 @Component({
   selector: 'div[slDescriptionList]',
   standalone: true,
-  template: '<dl data-part="list"><ng-content></ng-content></dl>',
+  template: '<dl data-part="list" data-part-list=""><ng-content></ng-content></dl>',
   styleUrls: [
     '../../../styles/src/description-list/description-list.css',
     '../../../styles/src/visually-hidden/visually-hidden.css',
@@ -75,7 +75,9 @@ import {
   exportAs: 'slDescriptionList',
   host: {
     'data-ui': 'description-list',
+    'data-ui-description-list': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-layout]': 'layoutValue()',
     '[attr.data-columns]': 'columnsValue()',
     '[attr.data-variant]': 'variantValue()',
@@ -125,6 +127,7 @@ export class SlDescriptionList {
   exportAs: 'slDescriptionListItem',
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-span]': 'spanValue()',
   },
 })
@@ -149,6 +152,7 @@ export class SlDescriptionListItem {
   exportAs: 'slDescriptionListTerm',
   host: {
     'data-part': 'term',
+    'data-part-term': '',
     '[attr.id]': 'identifier',
   },
 })
@@ -169,7 +173,7 @@ export class SlDescriptionListTerm {
   selector: '[slDescriptionListHint]',
   standalone: true,
   exportAs: 'slDescriptionListHint',
-  host: { 'data-part': 'hint' },
+  host: { 'data-part': 'hint', 'data-part-hint': '' },
 })
 export class SlDescriptionListHint {}
 
@@ -191,14 +195,16 @@ export class SlDescriptionListHint {}
   standalone: true,
   imports: [SlGlyph, SlIcon],
   template: `
-    <span #value data-part="value">
+    <span #value data-part="value" data-part-value="">
       <ng-content></ng-content>
       @if (empty()) {
         @if (placeholder()) {
-          <span data-part="placeholder">{{ placeholder() }}</span>
+          <span data-part="placeholder" data-part-placeholder="">{{ placeholder() }}</span>
         } @else {
-          <span aria-hidden="true" data-part="placeholder">{{ emptyMark }}</span>
-          <span data-ui="visually-hidden">{{ placeholderText() }}</span>
+          <span aria-hidden="true" data-part="placeholder" data-part-placeholder="">{{
+            emptyMark
+          }}</span>
+          <span data-ui="visually-hidden" data-ui-visually-hidden="">{{ placeholderText() }}</span>
         }
       }
     </span>
@@ -207,6 +213,7 @@ export class SlDescriptionListHint {}
         [attr.aria-label]="list.t('copy')"
         [attr.data-complete]="copied() ? '' : null"
         data-part="copy"
+        data-part-copy=""
         type="button"
         (click)="onCopy($event)"
         (keydown)="onKeydown($event)"
@@ -219,6 +226,7 @@ export class SlDescriptionListHint {}
       <button
         [attr.aria-expanded]="revealed()"
         data-part="toggle"
+        data-part-toggle=""
         type="button"
         (click)="onToggle($event)"
         (keydown)="onKeydown($event)"
@@ -237,6 +245,7 @@ export class SlDescriptionListHint {}
   exportAs: 'slDescriptionListDescription',
   host: {
     'data-part': 'description',
+    'data-part-description': '',
     '[attr.data-clamp]': 'clampValue() > 0 ? "" : null',
     '[attr.data-revealed]': 'clampValue() > 0 && revealed() ? "" : null',
     '[style.--slotted-description-list-clamp]': 'clampValue() > 0 ? clampValue() : null',
@@ -420,6 +429,7 @@ export class SlDescriptionListDescription {
   exportAs: 'slDescriptionListAction',
   host: {
     'data-part': 'action',
+    'data-part-action': '',
     '[attr.aria-describedby]': 'describedBy',
   },
 })

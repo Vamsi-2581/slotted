@@ -20,38 +20,32 @@ const source = new URL('.', import.meta.url).pathname;
  * read. The parts below draw the same edge and are not fields; each says why.
  */
 const NOT_FIELDS = new Map([
+  ["[data-ui-button][data-variant='outline']", 'a button: its ground is the surface it stands on'],
   [
-    "[data-ui='button'][data-variant='outline']",
-    'a button: its ground is the surface it stands on',
-  ],
-  [
-    "[data-ui='toggle'][data-part='root']",
+    '[data-ui-toggle][data-part-root]',
     'a button that stays pressed, with the outline button’s ground',
   ],
-  ["[data-ui='toggle-group'][data-part='root']", 'a frame around toggles, which are buttons'],
-  ["[data-ui='datetime-picker'] [data-part='now']", 'a button in the panel footer'],
+  ['[data-ui-toggle-group][data-part-root]', 'a frame around toggles, which are buttons'],
+  ['[data-ui-datetime-picker] [data-part-now]', 'a button in the panel footer'],
   [
-    "[data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel'] > [data-part='cancel']:not([data-ui])",
+    '[data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-cancel]:not([data-ui])',
     'a button on the overlay panel',
   ],
   [
-    "[data-ui='button-group'][data-part='root'] > [data-ui='button'][data-variant='outline'][data-pressed]",
+    "[data-ui-button-group][data-part-root] > [data-ui-button][data-variant='outline'][data-pressed]",
     'a pressed outline button',
   ],
   [
-    "[data-ui='split-button'][data-part='root'] > [data-ui='button'][data-variant='outline'][data-pressed]",
+    "[data-ui-split-button][data-part-root] > [data-ui-button][data-variant='outline'][data-pressed]",
     'a pressed outline button',
   ],
-  ["[data-ui='kbd']", 'a key cap: the raised ground above its rim is what says the word is a key'],
-  ["[data-ui='listbox']", 'a list on the page surface, not a field'],
-  ["[data-ui='tree']", 'a list on the page surface, not a field'],
-  ["[data-ui='slider'] [data-part='track']", 'a track, whose sunken ground is the unfilled range'],
-  ["[data-ui='switch'] > [data-part='track']", 'a track, painted by its state'],
-  [
-    "[data-ui='switch'] > [data-part='track'] > [data-part='thumb']",
-    'a thumb, painted by its state',
-  ],
-  ["[data-ui='upload'] [data-part='trigger']", 'a button that opens the file chooser'],
+  ['[data-ui-kbd]', 'a key cap: the raised ground above its rim is what says the word is a key'],
+  ['[data-ui-listbox]', 'a list on the page surface, not a field'],
+  ['[data-ui-tree]', 'a list on the page surface, not a field'],
+  ['[data-ui-slider] [data-part-track]', 'a track, whose sunken ground is the unfilled range'],
+  ['[data-ui-switch] > [data-part-track]', 'a track, painted by its state'],
+  ['[data-ui-switch] > [data-part-track] > [data-part-thumb]', 'a thumb, painted by its state'],
+  ['[data-ui-upload] [data-part-trigger]', 'a button that opens the file chooser'],
 ]);
 
 /** A selector list split at its own commas, never at one inside `:is()` or `:not()`. */

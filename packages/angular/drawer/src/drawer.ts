@@ -94,7 +94,9 @@ const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
       <div
         #layer
         data-ui="drawer"
+        data-ui-drawer=""
         data-part="root"
+        data-part-root=""
         [attr.data-mode]="resolvedMode()"
         [attr.data-side]="resolvedSide()"
         [attr.data-size]="resolvedSize()"
@@ -109,11 +111,12 @@ const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
         [style.--slotted-drawer-extent]="extentLength()"
       >
         @if (showBackdrop()) {
-          <div data-part="backdrop"></div>
+          <div data-part="backdrop" data-part-backdrop=""></div>
         }
         <div
           #panel
           data-part="panel"
+          data-part-panel=""
           [id]="panelId"
           [attr.role]="role()"
           [attr.aria-modal]="resolvedModal() ? 'true' : null"

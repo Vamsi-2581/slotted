@@ -114,6 +114,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
     <div
       aria-labelledby={titleId}
       data-part="time-grid"
+      data-part-time-grid=""
       role="grid"
       style={
         {
@@ -122,9 +123,9 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
         } as CSSProperties
       }
     >
-      <div data-part="time-head" role="rowgroup">
-        <div data-part="columns" role="row">
-          <div data-part="zone" role="columnheader">
+      <div data-part="time-head" data-part-time-head="" role="rowgroup">
+        <div data-part="columns" data-part-columns="" role="row">
+          <div data-part="zone" data-part-zone="" role="columnheader">
             {zoneLabel(firstDay, model.timeZone, model.locale)}
           </div>
           {days.map((date) => {
@@ -135,13 +136,14 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                 data-date={toISODate(date)}
                 data-offset-change={change === null ? undefined : ''}
                 data-part="column-header"
+                data-part-column-header=""
                 data-row="header"
                 data-today={isToday(date) ? '' : undefined}
                 key={toISODate(date)}
                 role="columnheader"
                 tabIndex={model.row === 'header' && tabDay(date) ? 0 : -1}
               >
-                <span aria-hidden="true" data-part="weekday">
+                <span aria-hidden="true" data-part="weekday" data-part-weekday="">
                   {new Intl.DateTimeFormat(model.locale, {
                     timeZone: 'UTC',
                     weekday: 'short',
@@ -150,6 +152,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                 <button
                   aria-label={fullDate(model, date)}
                   data-part="day-number"
+                  data-part-day-number=""
                   onClick={(clicked) =>
                     model.drill(date, clicked.detail === 0 ? 'keyboard' : 'pointer', clicked)
                   }
@@ -159,12 +162,15 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                   {date.day}
                 </button>
                 {content === undefined || content === null ? null : (
-                  <div data-part="day-content">{content}</div>
+                  <div data-part="day-content" data-part-day-content="">
+                    {content}
+                  </div>
                 )}
                 {change === null ? null : (
                   <span
                     aria-label={model.t('offsetChange', offsetSlots(change, timeOptions))}
                     data-part="offset-change"
+                    data-part-offset-change=""
                     role="note"
                   >
                     {model.t('offsetChangeShort', offsetSlots(change, timeOptions))}
@@ -176,10 +182,11 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
         </div>
         <div
           data-part="all-day-row"
+          data-part-all-day-row=""
           role="row"
           style={{ '--slotted-event-calendar-lanes': Math.max(1, lanes) } as CSSProperties}
         >
-          <div data-part="all-day-label" role="rowheader">
+          <div data-part="all-day-label" data-part-all-day-label="" role="rowheader">
             {model.t('allDay')}
           </div>
           {days.map((date, index) => {
@@ -194,6 +201,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                 data-date={toISODate(date)}
                 data-non-working={isWorkingDay(date, model.workingHours) ? undefined : ''}
                 data-part="all-day-cell"
+                data-part-all-day-cell=""
                 data-row="all-day"
                 data-selected={selected ? '' : undefined}
                 data-today={isToday(date) ? '' : undefined}
@@ -219,7 +227,11 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                   />
                 ))}
                 {continuing.map((segment) => (
-                  <span data-part="continuation" key={segment.occurrence.key}>
+                  <span
+                    data-part="continuation"
+                    data-part-continuation=""
+                    key={segment.occurrence.key}
+                  >
                     {model.t('titleContinues', { title: segment.occurrence.event.title })}
                   </span>
                 ))}
@@ -228,12 +240,14 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
           })}
         </div>
       </div>
-      <div data-part="scroller" ref={attachScroller} role="rowgroup">
-        <div data-part="time-row" role="row">
-          <div data-part="gutter" role="rowheader">
-            <span data-ui="visually-hidden">{model.t('timed')}</span>
+      <div data-part="scroller" data-part-scroller="" ref={attachScroller} role="rowgroup">
+        <div data-part="time-row" data-part-time-row="" role="row">
+          <div data-part="gutter" data-part-gutter="" role="rowheader">
+            <span data-ui="visually-hidden" data-ui-visually-hidden="">
+              {model.t('timed')}
+            </span>
             {hours.map((hour) => (
-              <span aria-hidden="true" data-part="hour" key={hour}>
+              <span aria-hidden="true" data-part="hour" data-part-hour="" key={hour}>
                 {formatHour(hour, timeOptions)}
               </span>
             ))}
@@ -259,6 +273,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                 data-date={toISODate(date)}
                 data-non-working={isWorkingDay(date, model.workingHours) ? undefined : ''}
                 data-part="column"
+                data-part-column=""
                 data-row="timed"
                 data-today={isToday(date) ? '' : undefined}
                 key={toISODate(date)}
@@ -269,6 +284,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                   <div
                     aria-hidden="true"
                     data-part="off-hours"
+                    data-part-off-hours=""
                     key={entry.start}
                     style={
                       {
@@ -282,6 +298,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                   <div
                     aria-hidden="true"
                     data-part="offset-line"
+                    data-part-offset-line=""
                     style={
                       {
                         '--slotted-event-start':
@@ -294,6 +311,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                   <div
                     aria-hidden="true"
                     data-part="selection"
+                    data-part-selection=""
                     style={
                       {
                         '--slotted-event-start': minutesOf(timed.start) - startHour * 60,
@@ -337,6 +355,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                     aria-label={model.t('moreEvents', { count: entry.occurrences.length })}
                     data-overlay={entry.overlay ? '' : undefined}
                     data-part="more"
+                    data-part-more=""
                     key={entry.start}
                     onClick={(clicked) => model.openMore(date, clicked.currentTarget)}
                     style={
@@ -359,6 +378,7 @@ export function TimeGrid({ days, occurrences, scrollerRef, titleId }: TimeGridPr
                   <div
                     aria-hidden="true"
                     data-part="now"
+                    data-part-now=""
                     style={{ '--slotted-event-start': nowHere - startHour * 60 } as CSSProperties}
                   />
                 )}

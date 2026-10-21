@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/table-of-contents/table-of-contents.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
@@ -494,7 +495,7 @@ export function TableOfContents({
   const currentLabel = currentValue === null ? '' : (links.current.get(currentValue)?.() ?? '');
   const hasLabel = label !== undefined && label !== null;
 
-  const rootProps: TableOfContentsRootProps = {
+  const rootProps: TableOfContentsRootProps = keyedProps({
     ...nativeProps,
     ...(resolvedLandmark
       ? hasLabel
@@ -521,6 +522,7 @@ export function TableOfContents({
             aria-controls={panelId}
             aria-expanded={currentOpen}
             data-part="trigger"
+            data-part-trigger=""
             onClick={(event) =>
               requestOpen(
                 !currentOpen,
@@ -531,27 +533,34 @@ export function TableOfContents({
             ref={triggerRef}
             type="button"
           >
-            <span data-part="label" id={labelId}>
+            <span data-part="label" data-part-label="" id={labelId}>
               {hasLabel ? label : t('navigation')}
             </span>
-            <span data-part="current">{currentLabel}</span>
-            <span aria-hidden="true" data-part="indicator">
+            <span data-part="current" data-part-current="">
+              {currentLabel}
+            </span>
+            <span aria-hidden="true" data-part="indicator" data-part-indicator="">
               <Icon>
                 <Glyph name="chevron-down" />
               </Icon>
             </span>
           </button>
         ) : hasLabel ? (
-          <div data-part="label" id={labelId}>
+          <div data-part="label" data-part-label="" id={labelId}>
             {label}
           </div>
         ) : null}
-        <div data-part="panel" id={panelId} ref={setPanel}>
-          <div aria-hidden="true" data-part="marker" ref={markerRef} />
-          <ol data-part="list">
+        <div data-part="panel" data-part-panel="" id={panelId} ref={setPanel}>
+          <div aria-hidden="true" data-part="marker" data-part-marker="" ref={markerRef} />
+          <ol data-part="list" data-part-list="">
             {loading
               ? SKELETON_ROWS.map((inlineSize) => (
-                  <li aria-hidden="true" data-part="skeleton" key={inlineSize}>
+                  <li
+                    aria-hidden="true"
+                    data-part="skeleton"
+                    data-part-skeleton=""
+                    key={inlineSize}
+                  >
                     <Skeleton inlineSize={inlineSize} shape="text" />
                   </li>
                 ))
@@ -560,7 +569,7 @@ export function TableOfContents({
         </div>
       </>
     ),
-  };
+  });
 
   const Element = resolvedLandmark ? 'nav' : 'div';
 

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import { useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
@@ -45,14 +46,20 @@ export const EMPTY_VALUE_MARK = '\u2014';
  */
 function placeholderContent(stated: ReactNode | undefined, fallback: string) {
   if (stated !== undefined && stated !== null && stated !== '') {
-    return <span data-part="placeholder">{stated}</span>;
+    return (
+      <span data-part="placeholder" data-part-placeholder="">
+        {stated}
+      </span>
+    );
   }
   return (
     <>
-      <span aria-hidden="true" data-part="placeholder">
+      <span aria-hidden="true" data-part="placeholder" data-part-placeholder="">
         {EMPTY_VALUE_MARK}
       </span>
-      <span data-ui="visually-hidden">{fallback}</span>
+      <span data-ui="visually-hidden" data-ui-visually-hidden="">
+        {fallback}
+      </span>
     </>
   );
 }
@@ -122,12 +129,12 @@ export function DescriptionListItem({
   const generatedId = useId();
   const columns = spanWithin(span, list.columns);
 
-  const rootProps: DescriptionListItemRootProps = {
+  const rootProps: DescriptionListItemRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'item',
     'data-span': columns === undefined ? undefined : String(columns),
-  };
+  });
 
   return (
     <DescriptionListItemProvider value={{ termId: `slotted-description-list-${generatedId}` }}>
@@ -149,12 +156,12 @@ export function DescriptionListTerm({
 }: DescriptionListTermProps) {
   const item = useDescriptionListItem();
 
-  const rootProps: DescriptionListTermRootProps = {
+  const rootProps: DescriptionListTermRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'term',
     id: nativeProps.id ?? item?.termId,
-  };
+  });
 
   return render === undefined ? <dt {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -175,11 +182,11 @@ export function DescriptionListHint({
   render,
   ...nativeProps
 }: DescriptionListHintProps) {
-  const rootProps: DescriptionListHintRootProps = {
+  const rootProps: DescriptionListHintRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'hint',
-  };
+  });
 
   return render === undefined ? <span {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -321,11 +328,11 @@ export function DescriptionListDescription({
     return act(reason, event);
   };
 
-  const rootProps: DescriptionListDescriptionRootProps = {
+  const rootProps: DescriptionListDescriptionRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
-        <span data-part="value" ref={value}>
+        <span data-part="value" data-part-value="" ref={value}>
           {missing ? placeholderContent(placeholder, list.t('placeholder')) : children}
         </span>
         {copy === true ? (
@@ -333,6 +340,7 @@ export function DescriptionListDescription({
             aria-label={list.t('copy')}
             data-complete={copied ? '' : undefined}
             data-part="copy"
+            data-part-copy=""
             onClick={(event) => void press(event, write)}
             onKeyDown={remember}
             type="button"
@@ -347,6 +355,7 @@ export function DescriptionListDescription({
           <button
             aria-expanded={current}
             data-part="toggle"
+            data-part-toggle=""
             onClick={(event) =>
               void press(event, (reason, source) => reveal(!current, reason, source))
             }
@@ -367,7 +376,7 @@ export function DescriptionListDescription({
     style: clamped
       ? ({ ...style, '--slotted-description-list-clamp': lines } as CSSProperties)
       : style,
-  };
+  });
 
   return render === undefined ? <dd {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -392,12 +401,12 @@ export function DescriptionListAction({
   const item = useDescriptionListItem();
   const described = [nativeProps['aria-describedby'], item?.termId].filter(Boolean).join(' ');
 
-  const rootProps: DescriptionListActionRootProps = {
+  const rootProps: DescriptionListActionRootProps = keyedProps({
     ...nativeProps,
     'aria-describedby': described === '' ? undefined : described,
     children,
     'data-part': 'action',
-  };
+  });
 
   return render === undefined ? <dd {...rootProps} ref={ref} /> : render(rootProps);
 }

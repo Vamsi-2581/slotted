@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { formatBytes } from '@slotted/core/upload';
 import { useState } from 'react';
 import type { MouseEvent } from 'react';
@@ -40,7 +41,7 @@ export function AttachmentPreview({
   const [failed, setFailed] = useState<string | null>(null);
   const picture = src !== undefined && failed !== src;
 
-  const rootProps: AttachmentPreviewRootProps = {
+  const rootProps: AttachmentPreviewRootProps = keyedProps({
     'aria-hidden': true,
     ...nativeProps,
     children:
@@ -55,14 +56,14 @@ export function AttachmentPreview({
     'data-extension': extensionLabel(attachment.extension, attachment.t('noExtension')),
     'data-kind': attachment.kind,
     'data-part': 'preview',
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }
 
 /** The text column, and the one box in the attachment that may shrink. */
 export function AttachmentBody({ render, ...nativeProps }: AttachmentPartProps) {
-  const rootProps: AttachmentPartRootProps = { ...nativeProps, 'data-part': 'body' };
+  const rootProps: AttachmentPartRootProps = keyedProps({ ...nativeProps, 'data-part': 'body' });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -73,17 +74,23 @@ export function AttachmentBody({ render, ...nativeProps }: AttachmentPartProps) 
 export function AttachmentFilename({ children, render, ...nativeProps }: AttachmentFilenameProps) {
   const { extension, stem } = useAttachment();
 
-  const rootProps: AttachmentPartRootProps = {
+  const rootProps: AttachmentPartRootProps = keyedProps({
     dir: 'auto',
     ...nativeProps,
     children: children ?? (
       <>
-        <span data-part="name">{stem}</span>
-        {extension === '' ? null : <span data-part="extension">{extension}</span>}
+        <span data-part="name" data-part-name="">
+          {stem}
+        </span>
+        {extension === '' ? null : (
+          <span data-part="extension" data-part-extension="">
+            {extension}
+          </span>
+        )}
       </>
     ),
     'data-part': 'filename',
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }
@@ -122,7 +129,7 @@ export function AttachmentTrigger({
 }: AttachmentTriggerProps) {
   const { attachment, blocked, describedBy: description } = useTriggerWiring(ariaDescribedBy);
 
-  const rootProps: AttachmentTriggerRootProps = {
+  const rootProps: AttachmentTriggerRootProps = keyedProps({
     title: attachment.file.name,
     ...nativeProps,
     ...(description === undefined ? {} : { 'aria-describedby': description }),
@@ -130,7 +137,7 @@ export function AttachmentTrigger({
     'data-part': 'trigger',
     disabled: blocked || nativeProps.disabled === true,
     type,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }
@@ -151,7 +158,7 @@ export function AttachmentLink({
 }: AttachmentLinkProps) {
   const { attachment, blocked, describedBy: description } = useTriggerWiring(ariaDescribedBy);
 
-  const rootProps: AttachmentLinkRootProps = {
+  const rootProps: AttachmentLinkRootProps = keyedProps({
     title: attachment.file.name,
     ...nativeProps,
     ...(description === undefined ? {} : { 'aria-describedby': description }),
@@ -165,7 +172,7 @@ export function AttachmentLink({
       }
       onClick?.(event);
     },
-  };
+  });
 
   return render === undefined ? <a {...rootProps} /> : render(rootProps);
 }
@@ -180,12 +187,12 @@ export function AttachmentDetail({ children, id, render, ...nativeProps }: Attac
   const owned = useDescribes('detail', id);
   const size = attachment.file.size;
 
-  const rootProps: AttachmentPartRootProps = {
+  const rootProps: AttachmentPartRootProps = keyedProps({
     ...nativeProps,
     id: owned,
     children: children ?? (size === undefined ? null : formatBytes(size, attachment.locale)),
     'data-part': 'detail',
-  };
+  });
 
   return render === undefined ? <p {...rootProps} /> : render(rootProps);
 }
@@ -194,11 +201,11 @@ export function AttachmentDetail({ children, id, render, ...nativeProps }: Attac
 export function AttachmentMessage({ id, render, ...nativeProps }: AttachmentTextProps) {
   const owned = useDescribes('message', id);
 
-  const rootProps: AttachmentPartRootProps = {
+  const rootProps: AttachmentPartRootProps = keyedProps({
     ...nativeProps,
     id: owned,
     'data-part': 'message',
-  };
+  });
 
   return render === undefined ? <p {...rootProps} /> : render(rootProps);
 }
@@ -212,7 +219,7 @@ export function AttachmentMessage({ id, render, ...nativeProps }: AttachmentText
 export function AttachmentProgress({ render, value, ...nativeProps }: AttachmentProgressProps) {
   const attachment = useAttachment();
 
-  const rootProps: AttachmentPartRootProps = {
+  const rootProps: AttachmentPartRootProps = keyedProps({
     ...nativeProps,
     children: (
       <ProgressBar
@@ -224,7 +231,7 @@ export function AttachmentProgress({ render, value, ...nativeProps }: Attachment
       />
     ),
     'data-part': 'progress',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -235,7 +242,7 @@ export function AttachmentProgress({ render, value, ...nativeProps }: Attachment
  * or `button`.
  */
 export function AttachmentActions({ render, ...nativeProps }: AttachmentPartProps) {
-  const rootProps: AttachmentPartRootProps = { ...nativeProps, 'data-part': 'actions' };
+  const rootProps: AttachmentPartRootProps = keyedProps({ ...nativeProps, 'data-part': 'actions' });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -252,12 +259,12 @@ export function AttachmentAction({
 }: AttachmentActionProps) {
   const attachment = useAttachment();
 
-  const rootProps: AttachmentActionRootProps = {
+  const rootProps: AttachmentActionRootProps = keyedProps({
     ...nativeProps,
     'data-part': 'action',
     disabled: attachment.disabled || nativeProps.disabled === true,
     type,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }
@@ -278,7 +285,7 @@ export function AttachmentRemove({
   const attachment = useAttachment();
   if (!attachment.removable) return null;
 
-  const rootProps: AttachmentActionRootProps = {
+  const rootProps: AttachmentActionRootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel ?? attachment.t('remove', { name: attachment.file.name }),
     children: children ?? (
@@ -294,7 +301,7 @@ export function AttachmentRemove({
       attachment.request('remove', event);
     },
     type,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }

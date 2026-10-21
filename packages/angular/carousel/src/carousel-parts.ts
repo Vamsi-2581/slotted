@@ -52,6 +52,7 @@ function consumerLabel(): string | null {
   standalone: true,
   host: {
     'data-part': 'viewport',
+    'data-part-viewport': '',
     role: 'group',
     tabindex: '0',
     '[id]': 'carousel.viewportId',
@@ -94,6 +95,7 @@ export class SlCarouselViewport {
   standalone: true,
   host: {
     'data-part': 'slide',
+    'data-part-slide': '',
     role: 'group',
     '[attr.aria-roledescription]': "carousel.t('slideRoleDescription')",
   },
@@ -115,6 +117,7 @@ export class SlCarouselSlide {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'previous',
+    'data-part-previous': '',
     type: 'button',
     '[attr.aria-controls]': 'carousel.viewportId',
     '[attr.aria-label]': "label ?? carousel.t('previous')",
@@ -146,6 +149,7 @@ export class SlCarouselPrevious {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'next',
+    'data-part-next': '',
     type: 'button',
     '[attr.aria-controls]': 'carousel.viewportId',
     '[attr.aria-label]': "label ?? carousel.t('next')",
@@ -179,6 +183,7 @@ export class SlCarouselNext {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'autoplay',
+    'data-part-autoplay': '',
     type: 'button',
     '[attr.hidden]': "carousel.rotates() ? null : ''",
     '[attr.aria-controls]': 'carousel.viewportId',
@@ -202,6 +207,7 @@ export class SlCarouselAutoplay {
   standalone: true,
   host: {
     'data-part': 'controls',
+    'data-part-controls': '',
     '[attr.data-placement]': 'placement()',
   },
 })
@@ -218,6 +224,7 @@ export class SlCarouselControls {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'indicator',
+    'data-part-indicator': '',
     role: 'tab',
     type: 'button',
     '[attr.aria-selected]': 'current()',
@@ -289,6 +296,7 @@ export class SlCarouselIndicatorTemplate {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'indicators',
+    'data-part-indicators': '',
     role: 'tablist',
     '[attr.aria-label]': "label ?? carousel.t('indicators')",
     '[attr.data-variant]': 'variant()',
@@ -351,6 +359,7 @@ export class SlCarouselIndicators {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'counter',
+    'data-part-counter': '',
     'aria-hidden': 'true',
   },
 })

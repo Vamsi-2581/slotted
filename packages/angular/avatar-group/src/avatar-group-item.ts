@@ -21,6 +21,7 @@ import { AVATAR_GROUP } from './avatar-group-host';
   exportAs: 'slAvatarGroupItem',
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.hidden]': "hidden() ? '' : null",
   },
 })

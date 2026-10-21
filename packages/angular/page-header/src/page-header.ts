@@ -81,7 +81,9 @@ type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'page-header',
+    'data-ui-page-header': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-level]': 'resolvedLevel()',
@@ -142,7 +144,7 @@ export class SlPageHeader {
   readonly scrolled = signal(false);
   /** The header is too much of the screen to hold; the pin is hidden and a held header let go. */
   readonly tall = signal(false);
-  /** The header is narrower than the compact size class; it is in the flow and nothing condenses it. */
+  /** The frame is narrower than the compact size class — a phone; the header is in the flow and nothing condenses it. */
   readonly compact = signal(false);
   /** Whether the area is shown whole in place although the scroll has passed it. */
   readonly revealed = signal(false);

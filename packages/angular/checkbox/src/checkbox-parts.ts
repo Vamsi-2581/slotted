@@ -17,6 +17,7 @@ import { SlCheckboxIdFactory } from './checkbox-defaults';
   exportAs: 'slCheckboxDescription',
   host: {
     'data-part': 'description',
+    'data-part-description': '',
     '[attr.id]': 'id',
   },
 })

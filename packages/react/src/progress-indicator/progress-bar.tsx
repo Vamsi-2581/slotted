@@ -95,11 +95,12 @@ export function ProgressBar({
       <>
         {progressLabel(resolved)}
         {progressValue(resolved)}
-        <div data-part="track">
+        <div data-part="track" data-part-track="">
           {wave ? (
             <svg
               aria-hidden="true"
               data-part="indicator"
+              data-part-indicator=""
               focusable="false"
               preserveAspectRatio="xMinYMid meet"
               viewBox={`0 -1.25 ${PROGRESS_WAVE_BAR_REACH} 2.5`}
@@ -114,7 +115,7 @@ export function ProgressBar({
               />
             </svg>
           ) : (
-            <div data-part="indicator" />
+            <div data-part="indicator" data-part-indicator="" />
           )}
         </div>
       </>

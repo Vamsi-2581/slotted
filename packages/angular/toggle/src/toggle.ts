@@ -37,6 +37,7 @@ export type TogglePressedReason = 'pointer' | 'keyboard';
   exportAs: 'slToggleIcon',
   host: {
     'data-part': 'icon',
+    'data-part-icon': '',
     'aria-hidden': 'true',
   },
 })
@@ -73,13 +74,16 @@ function activationReason(event: Event): TogglePressedReason {
   selector: 'button[slToggle]',
   standalone: true,
   exportAs: 'slToggle',
-  template: `<ng-content select="[slToggleIcon]" /> <span data-part="label"><ng-content /></span>`,
+  template: `<ng-content select="[slToggleIcon]" />
+    <span data-part="label" data-part-label=""><ng-content /></span>`,
   styleUrl: '../../../styles/src/toggle/toggle.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'toggle',
+    'data-ui-toggle': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.type]': 'type',
     '[attr.aria-pressed]': 'isPressed()',
     '[attr.data-pressed]': "isPressed() ? '' : null",

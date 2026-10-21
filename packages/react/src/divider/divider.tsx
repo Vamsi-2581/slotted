@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/divider/divider.css';
 
 import type { DividerProps, DividerRootProps } from './divider.types';
@@ -26,7 +27,7 @@ export function Divider({
   /** The one case where the element already says everything the family means. */
   const rendersOwnRule = render === undefined && !labelled;
 
-  const rootProps: DividerRootProps = {
+  const rootProps: DividerRootProps = keyedProps({
     ...nativeProps,
     /* A rule that is decoration has no name to give: role="none" prohibits one. */
     ...(labelled && !decorative ? { 'aria-label': label } : {}),
@@ -38,7 +39,7 @@ export function Divider({
     'data-part': 'root',
     'data-ui': 'divider',
     role: role ?? (decorative ? 'none' : rendersOwnRule ? undefined : 'separator'),
-  };
+  });
 
   if (render !== undefined) {
     return render(labelled ? { ...rootProps, children: labelContent(label) } : rootProps);
@@ -48,5 +49,9 @@ export function Divider({
 }
 
 function labelContent(label: string) {
-  return <span data-part="label">{label}</span>;
+  return (
+    <span data-part="label" data-part-label="">
+      {label}
+    </span>
+  );
 }

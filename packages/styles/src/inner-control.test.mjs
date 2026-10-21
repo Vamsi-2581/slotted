@@ -251,7 +251,7 @@ function expand(value, privates, depth = 6) {
 }
 
 function selectorSays(selector, part) {
-  return selector.includes(`[data-part='${part}']`);
+  return selector.includes(`[data-part-${part.toLowerCase()}]`);
 }
 
 function atRest(selector) {
@@ -346,9 +346,13 @@ function audit(family, part) {
 }
 
 for (const { family, part } of PARTS) {
-  test(`${family}: [data-part='${part}'] is an inner control, not a button (R2)`, () => {
+  test(`${family}: [data-part-${part.toLowerCase()}] is an inner control, not a button (R2)`, () => {
     const findings = audit(family, part);
-    assert.deepEqual(findings, [], `${family} [data-part='${part}']:\n  ${findings.join('\n  ')}`);
+    assert.deepEqual(
+      findings,
+      [],
+      `${family} [data-part-${part.toLowerCase()}]:\n  ${findings.join('\n  ')}`,
+    );
   });
 }
 
@@ -417,7 +421,7 @@ function coarseAudit(family, part) {
     STACKED.has(family) &&
     halos.some(
       ({ selector, declarations }) =>
-        selector.includes("[data-part='stepper']") &&
+        selector.includes('[data-part-stepper]') &&
         (declarations['inset-block'] ?? '0') === '0' &&
         reads(declarations, 'inset-inline'),
     );
@@ -446,9 +450,13 @@ function coarseAudit(family, part) {
 }
 
 for (const { family, part } of COARSE) {
-  test(`${family}: [data-part='${part}'] is a comfortable target on a coarse pointer, drawn no taller than wide (R2.6)`, () => {
+  test(`${family}: [data-part-${part.toLowerCase()}] is a comfortable target on a coarse pointer, drawn no taller than wide (R2.6)`, () => {
     const findings = coarseAudit(family, part);
-    assert.deepEqual(findings, [], `${family} [data-part='${part}']:\n  ${findings.join('\n  ')}`);
+    assert.deepEqual(
+      findings,
+      [],
+      `${family} [data-part-${part.toLowerCase()}]:\n  ${findings.join('\n  ')}`,
+    );
   });
 }
 

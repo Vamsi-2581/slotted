@@ -353,15 +353,15 @@ export const Composition: Story = {
       <button slPaginationNext type="button"></button>
     </nav>
     <button
-      data-ui="button"
-      data-part="root"
+      data-ui="button" data-ui-button=""
+      data-part="root" data-part-root=""
       data-tone="secondary"
       data-variant="outline"
       data-size="md"
       type="button"
       (click)="pager.reset()"
     >
-      <span data-part="label">Back to the first page</span>
+      <span data-part="label" data-part-label="">Back to the first page</span>
     </button>`,
   )}
   ${scene(

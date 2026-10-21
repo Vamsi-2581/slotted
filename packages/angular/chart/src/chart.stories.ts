@@ -565,8 +565,8 @@ export const Donut = story(
   <figure slChart title="Tickets por estado" description="slChartCenter mostra a taxa de resolução"
     [data]="tickets" [series]="donut" [x]="status">
     <ng-template slChartCenter let-model>
-      <span data-part="center-value">{{ resolved(model) }}</span>
-      <span data-part="center-label">resolvidos</span>
+      <span data-part="center-value" data-part-center-value="">{{ resolved(model) }}</span>
+      <span data-part="center-label" data-part-center-label="">resolvidos</span>
     </ng-template>
   </figure>
 </div>`,
@@ -627,11 +627,11 @@ export const TooltipCustom = story(
     [activePoint]="point('out', 'revenue')">
   <ng-template slChartTooltip let-context let-model="model">
     @let delta = change(context, model);
-    <div data-part="tooltip-title">{{ context.title }} · {{ brlOf(context.items[0]?.value) }}</div>
-    <div data-part="tooltip-item" data-current [attr.data-tone]="delta === null ? 'neutral' : delta >= 0 ? 'success' : 'danger'">
-      <span data-part="tooltip-marker" data-kind="line"></span>
-      <span data-part="tooltip-label">contra o mês anterior</span>
-      <span data-part="tooltip-value">{{ percent(delta) }}</span>
+    <div data-part="tooltip-title" data-part-tooltip-title="">{{ context.title }} · {{ brlOf(context.items[0]?.value) }}</div>
+    <div data-part="tooltip-item" data-part-tooltip-item="" data-current [attr.data-tone]="delta === null ? 'neutral' : delta >= 0 ? 'success' : 'danger'">
+      <span data-part="tooltip-marker" data-part-tooltip-marker="" data-kind="line"></span>
+      <span data-part="tooltip-label" data-part-tooltip-label="">contra o mês anterior</span>
+      <span data-part="tooltip-value" data-part-tooltip-value="">{{ percent(delta) }}</span>
     </div>
   </ng-template>
 </figure>`,

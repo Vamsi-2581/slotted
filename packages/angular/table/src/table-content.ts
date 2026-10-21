@@ -44,6 +44,7 @@ import { SlTable } from './table';
   exportAs: 'slTableContent',
   template: `<table
     data-part="table"
+    data-part-table=""
     [attr.aria-label]="tableLabel"
     [attr.aria-busy]="table.loading() ? 'true' : null"
     [attr.aria-rowcount]="totalRowCount() ?? null"
@@ -54,6 +55,7 @@ import { SlTable } from './table';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'scroll',
+    'data-part-scroll': '',
     '[attr.data-overflowing]': "state().overflowing ? '' : null",
     '[attr.data-at-start]': "state().overflowing && state().atStart ? '' : null",
     '[attr.data-at-end]': "state().overflowing && state().atEnd ? '' : null",

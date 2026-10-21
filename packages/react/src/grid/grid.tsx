@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/grid/grid.css';
 
 import type { CSSProperties } from 'react';
@@ -45,7 +46,7 @@ export function Grid({
   style,
   ...nativeProps
 }: GridProps) {
-  const rootProps: GridRootProps = {
+  const rootProps: GridRootProps = keyedProps({
     ...nativeProps,
     ...(align === undefined ? {} : { 'data-align': align }),
     ...(columns === undefined ? {} : { 'data-columns': String(columns) }),
@@ -55,7 +56,7 @@ export function Grid({
     'data-part': 'root',
     'data-ui': 'grid',
     style: columnStyle(columns, style),
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

@@ -8,18 +8,20 @@
 <section data-scene="anatomy">
   <div
     data-part="root"
+    data-part-root=""
     data-ui="card"
+    data-ui-card=""
     data-orientation="vertical"
     data-fill="outline"
     data-size="md"
   >
-    <div data-part="media">
+    <div data-part="media" data-part-media="">
       <img
         alt=""
         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 140'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234f46e5'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='320' height='140' fill='url(%23g)'/%3E%3C/svg%3E"
       />
     </div>
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       <span
         style="
           font-family: var(--slotted-font-family-sans);
@@ -39,7 +41,7 @@
         >Invoices, payment methods and the address they are issued to.</span
       >
       <!-- The corner: a badge and a menu button, both the consumer's. -->
-      <span data-part="actions">
+      <span data-part="actions" data-part-actions="">
         <span
           style="
             background: var(--slotted-tone-warning-surface);
@@ -70,6 +72,7 @@
     </div>
     <div
       data-part="body"
+      data-part-body=""
       style="
         font-family: var(--slotted-font-family-sans);
         font-size: var(--slotted-font-size-md);
@@ -78,7 +81,7 @@
     >
       The next invoice settles on the first working day of October against the card ending 4417.
     </div>
-    <div data-part="footer">
+    <div data-part="footer" data-part-footer="">
       <span
         style="
           background: var(--slotted-tone-accent-solid);
@@ -121,26 +124,30 @@
   <div style="display: grid; gap: var(--slotted-space-6)">
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       style="
         font-family: var(--slotted-font-family-sans);
         font-size: var(--slotted-font-size-md);
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="body">A card of only a body.</div>
+      <div data-part="body" data-part-body="">A card of only a body.</div>
     </div>
 
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       style="
         font-family: var(--slotted-font-family-sans);
         font-size: var(--slotted-font-size-md);
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <span
           style="
             font-size: var(--slotted-font-size-lg);
@@ -149,7 +156,7 @@
           >A header and a footer</span
         >
       </div>
-      <div data-part="footer">
+      <div data-part="footer" data-part-footer="">
         <span style="color: var(--slotted-text-muted); font-size: var(--slotted-font-size-xs)"
           >Updated 12 minutes ago</span
         >
@@ -158,20 +165,24 @@
 
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       style="
         font-family: var(--slotted-font-family-sans);
         font-size: var(--slotted-font-size-md);
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="media">
+      <div data-part="media" data-part-media="">
         <img
           alt=""
           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 90'%3E%3Crect width='320' height='90' fill='%23334155'/%3E%3C/svg%3E"
         />
       </div>
-      <div data-part="body">Media at the top, and a body that starts a full inset below it.</div>
+      <div data-part="body" data-part-body="">
+        Media at the top, and a body that starts a full inset below it.
+      </div>
     </div>
   </div>
 </section>
@@ -184,7 +195,9 @@
   <div style="display: grid; gap: var(--slotted-space-6)">
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       data-fill="outline"
       style="
         font-family: var(--slotted-font-family-sans);
@@ -192,7 +205,7 @@
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <span
           style="
             font-size: var(--slotted-font-size-lg);
@@ -201,12 +214,14 @@
           >outline</span
         >
       </div>
-      <div data-part="body">A hairline edge, and no elevation at any state.</div>
+      <div data-part="body" data-part-body="">A hairline edge, and no elevation at any state.</div>
     </div>
 
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       data-fill="elevated"
       style="
         font-family: var(--slotted-font-family-sans);
@@ -214,7 +229,7 @@
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <span
           style="
             font-size: var(--slotted-font-size-lg);
@@ -223,12 +238,14 @@
           >elevated</span
         >
       </div>
-      <div data-part="body">The same edge, lifted off the page.</div>
+      <div data-part="body" data-part-body="">The same edge, lifted off the page.</div>
     </div>
 
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       data-fill="subtle"
       style="
         font-family: var(--slotted-font-family-sans);
@@ -236,7 +253,7 @@
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <span
           style="
             font-size: var(--slotted-font-size-lg);
@@ -245,7 +262,9 @@
           >subtle</span
         >
       </div>
-      <div data-part="body">A fill that recedes into the page, behind the same hairline.</div>
+      <div data-part="body" data-part-body="">
+        A fill that recedes into the page, behind the same hairline.
+      </div>
     </div>
   </div>
 </section>
@@ -259,14 +278,16 @@
 <section data-scene="sections">
   <div
     data-part="root"
+    data-part-root=""
     data-ui="card"
+    data-ui-card=""
     style="
       font-family: var(--slotted-font-family-sans);
       font-size: var(--slotted-font-size-md);
       line-height: var(--slotted-line-height-md);
     "
   >
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       <span
         style="
           font-size: var(--slotted-font-size-lg);
@@ -274,13 +295,15 @@
         "
         >Review pictures</span
       >
-      <span data-part="actions">
+      <span data-part="actions" data-part-actions="">
         <span style="color: var(--slotted-text-muted); letter-spacing: 1px">···</span>
       </span>
     </div>
     <hr
       data-ui="divider"
+      data-ui-divider=""
       data-part="root"
+      data-part-root=""
       data-orientation="horizontal"
       style="
         block-size: 0;
@@ -289,13 +312,15 @@
         margin: 0;
       "
     />
-    <div data-part="body">
+    <div data-part="body" data-part-body="">
       Two hundred images have been uploaded since the last visit. The rule runs edge to edge because
       each region owns its own inset.
     </div>
     <hr
       data-ui="divider"
+      data-ui-divider=""
       data-part="root"
+      data-part-root=""
       data-orientation="horizontal"
       data-inset
       style="
@@ -306,7 +331,7 @@
         margin-inline: var(--slotted-control-padding-inline-md);
       "
     />
-    <div data-part="footer">
+    <div data-part="footer" data-part-footer="">
       <span style="color: var(--slotted-text-muted); font-size: var(--slotted-font-size-xs)"
         >The second rule is inset, so it lines up with the text instead.</span
       >
@@ -321,7 +346,9 @@
 <section data-scene="orientation">
   <div
     data-part="root"
+    data-part-root=""
     data-ui="card"
+    data-ui-card=""
     data-orientation="horizontal"
     style="
       font-family: var(--slotted-font-family-sans);
@@ -329,14 +356,14 @@
       line-height: var(--slotted-line-height-md);
     "
   >
-    <div data-part="media">
+    <div data-part="media" data-part-media="">
       <img
         alt=""
         style="aspect-ratio: 3 / 2"
         src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 200'%3E%3Cdefs%3E%3ClinearGradient id='h' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23f59e0b'/%3E%3Cstop offset='1' stop-color='%23ec4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='160' height='200' fill='url(%23h)'/%3E%3C/svg%3E"
       />
     </div>
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       <span
         style="
           font-size: var(--slotted-font-size-lg);
@@ -348,8 +375,10 @@
         >PDF · 2.4 MB</span
       >
     </div>
-    <div data-part="body">Revenue, retention and the two accounts that moved them.</div>
-    <div data-part="footer">
+    <div data-part="body" data-part-body="">
+      Revenue, retention and the two accounts that moved them.
+    </div>
+    <div data-part="footer" data-part-footer="">
       <span style="color: var(--slotted-text-muted); font-size: var(--slotted-font-size-xs)"
         >Shared with four people</span
       >
@@ -370,7 +399,9 @@
     -->
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       data-fill="elevated"
       style="
         font-family: var(--slotted-font-family-sans);
@@ -378,9 +409,10 @@
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <a
           data-part="link"
+          data-part-link=""
           href="#northwind"
           style="
             color: inherit;
@@ -393,12 +425,14 @@
         <span style="color: var(--slotted-text-muted); font-size: var(--slotted-font-size-sm)"
           >Twelve open invoices</span
         >
-        <span data-part="actions"
+        <span data-part="actions" data-part-actions=""
           ><span style="color: var(--slotted-text-muted); letter-spacing: 1px">···</span></span
         >
       </div>
-      <div data-part="body">The whole surface resolves to the account, and says so on hover.</div>
-      <div data-part="footer">
+      <div data-part="body" data-part-body="">
+        The whole surface resolves to the account, and says so on hover.
+      </div>
+      <div data-part="footer" data-part-footer="">
         <a
           href="#settings"
           style="color: var(--slotted-tone-accent-text); font-size: var(--slotted-font-size-sm)"
@@ -410,7 +444,9 @@
     <form style="display: grid; gap: var(--slotted-space-6); margin: 0">
       <label
         data-part="root"
+        data-part-root=""
         data-ui="card"
+        data-ui-card=""
         data-fill="outline"
         style="
           font-family: var(--slotted-font-family-sans);
@@ -419,8 +455,10 @@
           display: block;
         "
       >
-        <div data-part="header">
-          <span data-part="selection"><input type="radio" name="plan" value="starter" /></span>
+        <div data-part="header" data-part-header="">
+          <span data-part="selection" data-part-selection=""
+            ><input type="radio" name="plan" value="starter"
+          /></span>
           <span
             style="
               font-size: var(--slotted-font-size-lg);
@@ -436,7 +474,9 @@
 
       <label
         data-part="root"
+        data-part-root=""
         data-ui="card"
+        data-ui-card=""
         data-fill="outline"
         data-selected
         style="
@@ -446,8 +486,10 @@
           display: block;
         "
       >
-        <div data-part="header">
-          <span data-part="selection"><input type="radio" name="plan" value="team" checked /></span>
+        <div data-part="header" data-part-header="">
+          <span data-part="selection" data-part-selection=""
+            ><input type="radio" name="plan" value="team" checked
+          /></span>
           <span
             style="
               font-size: var(--slotted-font-size-lg);
@@ -463,7 +505,9 @@
 
       <label
         data-part="root"
+        data-part-root=""
         data-ui="card"
+        data-ui-card=""
         data-fill="outline"
         data-disabled
         style="
@@ -473,8 +517,8 @@
           display: block;
         "
       >
-        <div data-part="header">
-          <span data-part="selection"
+        <div data-part="header" data-part-header="">
+          <span data-part="selection" data-part-selection=""
             ><input type="radio" name="plan" value="enterprise" disabled
           /></span>
           <span
@@ -493,7 +537,9 @@
 
     <label
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       data-fill="subtle"
       style="
         font-family: var(--slotted-font-family-sans);
@@ -502,8 +548,10 @@
         display: block;
       "
     >
-      <div data-part="header">
-        <span data-part="selection"><input type="checkbox" name="audit" value="audit" /></span>
+      <div data-part="header" data-part-header="">
+        <span data-part="selection" data-part-selection=""
+          ><input type="checkbox" name="audit" value="audit"
+        /></span>
         <span
           style="
             font-size: var(--slotted-font-size-lg);
@@ -520,7 +568,9 @@
     <!-- A title that wraps: the control stays beside its first line. -->
     <label
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       data-fill="outline"
       data-selected
       style="
@@ -530,8 +580,8 @@
         display: block;
       "
     >
-      <div data-part="header">
-        <span data-part="selection"
+      <div data-part="header" data-part-header="">
+        <span data-part="selection" data-part-selection=""
           ><input type="checkbox" name="retention" value="long" checked
         /></span>
         <span
@@ -557,14 +607,16 @@
 <section data-scene="extremes">
   <div
     data-part="root"
+    data-part-root=""
     data-ui="card"
+    data-ui-card=""
     style="
       font-family: var(--slotted-font-family-sans);
       font-size: var(--slotted-font-size-md);
       line-height: var(--slotted-line-height-md);
     "
   >
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       <span
         style="
           font-size: var(--slotted-font-size-lg);
@@ -576,7 +628,7 @@
       <span style="color: var(--slotted-text-muted); font-size: var(--slotted-font-size-sm)"
         >An organisation name nobody chose for a card</span
       >
-      <span data-part="actions">
+      <span data-part="actions" data-part-actions="">
         <span
           style="
             background: var(--slotted-tone-danger-surface);
@@ -591,12 +643,12 @@
         >
       </span>
     </div>
-    <div data-part="body">
+    <div data-part="body" data-part-body="">
       Payment terms run to thirty days from the issue date, and a disputed line is held out of the
       settlement until it is resolved, which is why the balance shown here and the balance on the
       statement can differ for as long as a week.
     </div>
-    <div data-part="footer">
+    <div data-part="footer" data-part-footer="">
       <span style="color: var(--slotted-tone-accent-text); font-size: var(--slotted-font-size-sm)"
         >Approve</span
       >
@@ -623,7 +675,9 @@
   <div style="display: flex; align-items: center; padding: var(--slotted-space-4)">
     <div
       data-part="root"
+      data-part-root=""
       data-ui="card"
+      data-ui-card=""
       data-orientation="horizontal"
       style="
         font-family: var(--slotted-font-family-sans);
@@ -631,14 +685,14 @@
         line-height: var(--slotted-line-height-md);
       "
     >
-      <div data-part="media">
+      <div data-part="media" data-part-media="">
         <img
           alt=""
           style="aspect-ratio: 3 / 2"
           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 200'%3E%3Crect width='160' height='200' fill='%23f59e0b'/%3E%3C/svg%3E"
         />
       </div>
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <span
           style="
             font-size: var(--slotted-font-size-lg);
@@ -647,7 +701,9 @@
           >Quarterly report</span
         >
       </div>
-      <div data-part="body">Revenue, retention and the two accounts that moved them.</div>
+      <div data-part="body" data-part-body="">
+        Revenue, retention and the two accounts that moved them.
+      </div>
     </div>
   </div>
 </section>

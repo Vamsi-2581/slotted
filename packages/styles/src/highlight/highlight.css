@@ -46,7 +46,7 @@
    * highlighted row — that caps the share: 0.075 leaves 7.078:1, 0.08 leaves
    * 7.001:1, and 0.12 leaves 6.540:1.
    */
-  [data-ui='highlight'] [data-part='match'] {
+  [data-ui-highlight] [data-part-match] {
     background-color: var(
       --slotted-highlight-background,
       color-mix(
@@ -87,7 +87,7 @@
    * sits inside the fill and reads as nothing, which the capture showed. An
    * outline is not used: R3 reserves it for the focus ring.
    */
-  [data-ui='highlight'] [data-part='match'][data-current] {
+  [data-ui-highlight] [data-part-match][data-current] {
     background-color: var(--slotted-highlight-current-background, var(--slotted-tone-accent-solid));
     color: var(--slotted-highlight-current-color, var(--slotted-tone-accent-on-solid));
     text-decoration-line: none;
@@ -104,7 +104,7 @@
    * already carries `data-disabled`, and the family reads it from there rather
    * than asking the host to say it twice.
    */
-  [data-ui='highlight']:is([data-disabled], [data-disabled] *) [data-part='match'] {
+  [data-ui-highlight]:is([data-disabled], [data-disabled] *) [data-part-match] {
     background-color: var(--slotted-highlight-disabled-background, transparent);
     color: inherit;
     /* Restated for the current match, which gave the rule up for its fill. */
@@ -120,14 +120,14 @@
    * active find match in.
    */
   @media (forced-colors: active) {
-    [data-ui='highlight'] [data-part='match'],
-    [data-ui='highlight']:is([data-disabled], [data-disabled] *) [data-part='match'] {
+    [data-ui-highlight] [data-part-match],
+    [data-ui-highlight]:is([data-disabled], [data-disabled] *) [data-part-match] {
       background-color: Mark;
       color: MarkText;
       forced-color-adjust: none;
     }
 
-    [data-ui='highlight'] [data-part='match'][data-current] {
+    [data-ui-highlight] [data-part-match][data-current] {
       background-color: Highlight;
       color: HighlightText;
     }

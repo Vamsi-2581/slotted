@@ -31,7 +31,7 @@ import { SlStatCard } from './stat-card';
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slStatCardValue',
-  host: { 'data-part': 'value' },
+  host: { 'data-part': 'value', 'data-part-value': '' },
 })
 export class SlStatCardValue {
   /** A number, formatted with the card's locale and `formatOptions`; the text otherwise. */

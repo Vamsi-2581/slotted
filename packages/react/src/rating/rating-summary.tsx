@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/rating/rating.css';
 
 import { ratingMessages } from '@slotted/core/i18n';
@@ -126,7 +127,14 @@ export function RatingSummary({
     const name = levelName(entry.level, entry.count, entry.share);
     if (filterable !== true) {
       return (
-        <div aria-label={name} data-part={part} key={entry.level} role="group" style={shareStyle}>
+        <div
+          aria-label={name}
+          data-part={part}
+          {...selectorKeyProps('part', part)}
+          key={entry.level}
+          role="group"
+          style={shareStyle}
+        >
           {children}
         </div>
       );
@@ -137,6 +145,7 @@ export function RatingSummary({
         aria-label={name}
         aria-pressed={on}
         data-part={part}
+        {...selectorKeyProps('part', part)}
         disabled={entry.count === 0}
         key={entry.level}
         onClick={(event) => toggle(entry.level, event)}
@@ -150,7 +159,10 @@ export function RatingSummary({
   };
 
   const levelLabel = (value: number) => (
-    <span data-part={resolvedVariant === 'spectrum' ? 'tick-label' : 'level-label'}>
+    <span
+      data-part={resolvedVariant === 'spectrum' ? 'tick-label' : 'level-label'}
+      {...selectorKeyProps('part', resolvedVariant === 'spectrum' ? 'tick-label' : 'level-label')}
+    >
       <span>{numbers.format(value)}</span>
       <RatingStar />
     </span>
@@ -158,14 +170,18 @@ export function RatingSummary({
 
   const figure = rated ? (
     <>
-      <span data-part="value">{formatRating(summary.average ?? 0, resolvedLocale)}</span>
-      <span data-part="scale">{t('scale', { max: resolvedMax })}</span>
+      <span data-part="value" data-part-value="">
+        {formatRating(summary.average ?? 0, resolvedLocale)}
+      </span>
+      <span data-part="scale" data-part-scale="">
+        {t('scale', { max: resolvedMax })}
+      </span>
     </>
   ) : null;
 
   const bars = (
     <>
-      <div data-part="aggregate">
+      <div data-part="aggregate" data-part-aggregate="">
         {figure}
         <RatingDisplay
           locale={resolvedLocale}
@@ -176,11 +192,11 @@ export function RatingSummary({
           tone={resolvedTone}
           value={summary.average ?? 0}
         />
-        <span data-part="count">
+        <span data-part="count" data-part-count="">
           {rated ? t('summaryCount', { count: summary.total }) : t('summaryEmpty')}
         </span>
       </div>
-      <ul aria-label={t('distributionLabel')} data-part="distribution">
+      <ul aria-label={t('distributionLabel')} data-part="distribution" data-part-distribution="">
         {summary.levels.map((entry) => (
           <li key={entry.level}>
             {level(
@@ -188,13 +204,16 @@ export function RatingSummary({
               entry,
               <>
                 {levelLabel(entry.level)}
-                <span aria-hidden="true" data-part="track">
+                <span aria-hidden="true" data-part="track" data-part-track="">
                   <span
                     data-part="indicator"
+                    data-part-indicator=""
                     style={{ '--slotted-rating-share': shareValue(entry.share) } as CSSProperties}
                   />
                 </span>
-                <span data-part="level-count">{numbers.format(entry.count)}</span>
+                <span data-part="level-count" data-part-level-count="">
+                  {numbers.format(entry.count)}
+                </span>
               </>,
             )}
           </li>
@@ -217,46 +236,50 @@ export function RatingSummary({
 
   const spectrum = (
     <>
-      <div data-part="aggregate">
+      <div data-part="aggregate" data-part-aggregate="">
         {figure}
         {showInsight !== false && summary.insight !== null ? (
-          <span data-part="insight" data-tone={INSIGHT_TONE[summary.insight]}>
+          <span data-part="insight" data-part-insight="" data-tone={INSIGHT_TONE[summary.insight]}>
             {t(summary.insight)}
           </span>
         ) : null}
-        <span data-part="count">{spectrumCount}</span>
+        <span data-part="count" data-part-count="">
+          {spectrumCount}
+        </span>
       </div>
-      <div data-part="plot">
-        <div data-part="field">
-          <div data-part="columns">
+      <div data-part="plot" data-part-plot="">
+        <div data-part="field" data-part-field="">
+          <div data-part="columns" data-part-columns="">
             {ascending.map((entry) =>
-              level('column', entry, <span data-part="bar" />, {
+              level('column', entry, <span data-part="bar" data-part-bar="" />, {
                 '--slotted-rating-share': shareValue(largest === 0 ? 0 : entry.count / largest),
               } as CSSProperties),
             )}
           </div>
           {rated ? (
             <>
-              <span aria-hidden="true" data-part="interval" />
-              <span aria-hidden="true" data-part="mean">
-                <span data-part="mean-label">
+              <span aria-hidden="true" data-part="interval" data-part-interval="" />
+              <span aria-hidden="true" data-part="mean" data-part-mean="">
+                <span data-part="mean-label" data-part-mean-label="">
                   {formatRating(summary.average ?? 0, resolvedLocale)}
                 </span>
               </span>
             </>
           ) : null}
         </div>
-        <div aria-hidden="true" data-part="axis">
+        <div aria-hidden="true" data-part="axis" data-part-axis="">
           {ascending.map((entry) => (
-            <span data-part="tick" key={entry.level}>
+            <span data-part="tick" data-part-tick="" key={entry.level}>
               {levelLabel(entry.level)}
-              <span data-part="tick-share">{formatShare(entry.share, resolvedLocale)}</span>
+              <span data-part="tick-share" data-part-tick-share="">
+                {formatShare(entry.share, resolvedLocale)}
+              </span>
             </span>
           ))}
         </div>
       </div>
       {rated ? (
-        <p data-part="sentiment">
+        <p data-part="sentiment" data-part-sentiment="">
           {(
             [
               ['positive', 'success'],
@@ -264,8 +287,8 @@ export function RatingSummary({
               ['negative', 'danger'],
             ] as const
           ).map(([bucket, bucketTone]) => (
-            <span data-part="bucket" data-tone={bucketTone} key={bucket}>
-              <span aria-hidden="true" data-part="swatch" />
+            <span data-part="bucket" data-part-bucket="" data-tone={bucketTone} key={bucket}>
+              <span aria-hidden="true" data-part="swatch" data-part-swatch="" />
               {withStrongShare(
                 t(bucket, { share: SHARE_MARK }),
                 formatShare(summary.buckets[bucket], resolvedLocale),
@@ -286,7 +309,7 @@ export function RatingSummary({
         } as CSSProperties)
       : undefined;
 
-  const rootProps: RatingRootProps = {
+  const rootProps: RatingRootProps = keyedProps({
     ...nativeProps,
     children: resolvedVariant === 'spectrum' ? spectrum : bars,
     className,
@@ -296,7 +319,7 @@ export function RatingSummary({
     'data-ui': 'rating',
     'data-variant': resolvedVariant === 'spectrum' ? 'spectrum' : 'summary',
     style: meanStyle === undefined ? style : { ...meanStyle, ...style },
-  };
+  });
 
   return render === undefined ? <section {...rootProps} ref={ref} /> : render(rootProps);
 }

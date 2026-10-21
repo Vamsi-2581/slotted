@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/datetime-picker/datetime-picker.css';
 
 import {
@@ -891,8 +892,10 @@ export function DateTimePicker({
   const surface: ReactNode = mounted ? (
     <div
       data-part="positioner"
+      data-part-positioner=""
       data-presentation={sheet ? 'sheet' : 'popover'}
       data-ui="datetime-picker"
+      data-ui-datetime-picker=""
       ref={setLayerNode}
       {...(isOpen ? { 'data-open': '' } : {})}
     >
@@ -901,16 +904,24 @@ export function DateTimePicker({
         data-granularity={resolvedGranularity}
         data-open-to={resolvedOpenTo}
         data-part="content"
+        data-part-content=""
         id={contentId}
         onKeyDown={onContentKeyDown}
         role="dialog"
         {...(truncated ? { 'aria-description': t('truncated') } : {})}
       >
-        <div data-part="head">
-          <span data-part="head-value">{headValue}</span>
-          {presets === undefined ? null : <div data-part="presets">{presets}</div>}
+        <div data-part="head" data-part-head="">
+          <span data-part="head-value" data-part-head-value="">
+            {headValue}
+          </span>
+          {presets === undefined ? null : (
+            <div data-part="presets" data-part-presets="">
+              {presets}
+            </div>
+          )}
           <button
             data-part="now"
+            data-part-now=""
             onClick={(event) => {
               /* The clock, read at the press: `referenceDateTime` says where an
                  empty field starts, not what time it is. */
@@ -931,8 +942,8 @@ export function DateTimePicker({
           </button>
         </div>
 
-        <div data-part="panels">
-          <div data-part="date-panel" ref={datePanelRef}>
+        <div data-part="panels" data-part-panels="">
+          <div data-part="date-panel" data-part-date-panel="" ref={datePanelRef}>
             <Calendar
               focusedDate={highlight.date}
               isDateUnavailable={isDateUnavailable}
@@ -964,13 +975,16 @@ export function DateTimePicker({
             />
           </div>
 
-          <div data-part="time-panel">
+          <div data-part="time-panel" data-part-time-panel="">
             {list.length === 0 ? (
-              <div data-part="empty">{t('empty')}</div>
+              <div data-part="empty" data-part-empty="">
+                {t('empty')}
+              </div>
             ) : (
               <div
                 aria-label={format.describeDate(listDate, 'short')}
                 data-part="list"
+                data-part-list=""
                 id={listLabelId}
                 onKeyDown={onListKeyDown}
                 ref={listRef}
@@ -989,6 +1003,7 @@ export function DateTimePicker({
                       aria-disabled={option.unavailable ? true : undefined}
                       aria-selected={selected}
                       data-part="option"
+                      data-part-option=""
                       key={toISOTime(option.time)}
                       onClick={(event) => selectTime(option, event)}
                       ref={current ? revealRow : undefined}
@@ -1016,14 +1031,18 @@ export function DateTimePicker({
           </div>
         </div>
 
-        {footer === undefined ? null : <div data-part="footer">{footer}</div>}
+        {footer === undefined ? null : (
+          <div data-part="footer" data-part-footer="">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   ) : null;
 
   const children: ReactNode = (
     <>
-      <div data-part="control" onKeyDown={onControlKeyDown}>
+      <div data-part="control" data-part-control="" onKeyDown={onControlKeyDown}>
         <DateTimeField
           calendar={resolvedCalendar}
           clearable={clearable}
@@ -1035,6 +1054,7 @@ export function DateTimePicker({
               aria-haspopup="dialog"
               aria-label={spoken}
               data-part="trigger"
+              data-part-trigger=""
               disabled={!editable}
               onClick={(event) => setOpen(!isOpen, 'pointer', event)}
               onKeyDown={onTriggerKeyDown}
@@ -1074,7 +1094,7 @@ export function DateTimePicker({
     </>
   );
 
-  const rootProps: DateTimePickerRootProps = {
+  const rootProps: DateTimePickerRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -1090,7 +1110,7 @@ export function DateTimePicker({
     'data-ui': 'datetime-picker',
     'data-variant': resolvedVariant,
     ref: rootRef,
-  };
+  });
 
   return (
     <>

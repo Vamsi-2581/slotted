@@ -32,12 +32,15 @@ import { necessityMark } from './field-defaults';
   exportAs: 'slFieldLabel',
   template: `<ng-content />
     @if (mark(); as text) {
-      <span data-part="mark" [attr.aria-hidden]="markHidden() ? 'true' : null">{{ text }}</span>
+      <span data-part="mark" data-part-mark="" [attr.aria-hidden]="markHidden() ? 'true' : null">{{
+        text
+      }}</span>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'label',
+    'data-part-label': '',
     '[attr.for]': 'labelFor()',
     '[attr.id]': 'labelId()',
   },
@@ -77,6 +80,7 @@ export class SlFieldLabel {
   exportAs: 'slFieldControl',
   host: {
     'data-part': 'control',
+    'data-part-control': '',
     '[attr.id]': 'controlId()',
     '[attr.aria-describedby]': 'describedBy()',
     '[attr.aria-invalid]': 'ariaInvalid()',
@@ -135,6 +139,7 @@ export class SlFieldControl {
   exportAs: 'slFieldAction',
   host: {
     'data-part': 'action',
+    'data-part-action': '',
     '[attr.type]': 'type',
   },
 })

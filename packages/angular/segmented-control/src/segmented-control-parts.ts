@@ -34,6 +34,7 @@ import type {
   exportAs: 'slSegmentIcon',
   host: {
     'data-part': 'icon',
+    'data-part-icon': '',
     'aria-hidden': 'true',
   },
 })
@@ -68,6 +69,7 @@ function activationReason(event: Event): SegmentedControlSelectionReason {
   template: `<input
       #control
       data-part="control"
+      data-part-control=""
       type="radio"
       [attr.id]="controlId"
       [attr.name]="control_.resolvedName()"
@@ -80,11 +82,12 @@ function activationReason(event: Event): SegmentedControlSelectionReason {
       (blur)="onBlur()"
     />
     <ng-content select="[slSegmentIcon]" />
-    <span data-part="label"><ng-content /></span>`,
+    <span data-part="label" data-part-label=""><ng-content /></span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-checked]': "checked() ? '' : null",
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
   },

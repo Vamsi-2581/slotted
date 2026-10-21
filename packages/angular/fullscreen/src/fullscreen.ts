@@ -64,7 +64,9 @@ export type FullscreenReason = 'pointer' | 'keyboard' | 'escape' | 'programmatic
   exportAs: 'slFullscreen',
   host: {
     'data-ui': 'fullscreen',
+    'data-ui-fullscreen': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-fullscreen]': "fullscreen() ? '' : null",
     '[attr.data-mode]': 'mode()',
   },
@@ -223,11 +225,11 @@ function activationReason(event: Event): FullscreenReason {
   exportAs: 'slFullscreenTrigger',
   imports: [SlGlyph, SlIcon],
   /* The mark follows the state unless the consumer projected their own. */
-  template: `<span data-part="icon" aria-hidden="true"
+  template: `<span data-part="icon" data-part-icon="" aria-hidden="true"
       ><ng-content select="[slFullscreenIcon]"
         ><span slIcon
           ><svg slGlyph [name]="on() ? 'minimize' : 'maximize'"></svg></span></ng-content></span
-    ><span data-part="label"
+    ><span data-part="label" data-part-label=""
       ><ng-content>{{ label() }}</ng-content></span
     >`,
   styleUrl: '../../../styles/src/fullscreen/fullscreen.css',
@@ -235,7 +237,9 @@ function activationReason(event: Event): FullscreenReason {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'fullscreen',
+    'data-ui-fullscreen': '',
     'data-part': 'trigger',
+    'data-part-trigger': '',
     '[attr.type]': 'type',
     '[attr.data-fullscreen]': "on() ? '' : null",
     '[attr.data-disabled]': "disabled() ? '' : null",
@@ -301,7 +305,9 @@ export class SlFullscreenTrigger implements AfterViewInit {
   standalone: true,
   host: {
     'data-ui': 'fullscreen',
+    'data-ui-fullscreen': '',
     'data-part': 'content',
+    'data-part-content': '',
   },
 })
 export class SlFullscreenContent {}

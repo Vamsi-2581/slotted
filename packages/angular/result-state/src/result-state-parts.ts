@@ -38,6 +38,7 @@ const LIVE_ROLE: Record<ResultStateLive, string | null> = {
   exportAs: 'slResultStateContent',
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     '[attr.role]': 'role()',
   },
 })
@@ -68,6 +69,7 @@ export class SlResultStateContent {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'title',
+    'data-part-title': '',
     '[attr.id]': 'id',
   },
 })
@@ -97,7 +99,7 @@ export class SlResultStateTitle {
   selector: '[slResultStateDescription]',
   standalone: true,
   exportAs: 'slResultStateDescription',
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlResultStateDescription {}
 
@@ -111,7 +113,7 @@ export class SlResultStateDescription {}
   selector: '[slResultStateActions]',
   standalone: true,
   exportAs: 'slResultStateActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlResultStateActions {}
 
@@ -124,7 +126,7 @@ export class SlResultStateActions {}
   selector: '[slResultStateFooter]',
   standalone: true,
   exportAs: 'slResultStateFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlResultStateFooter {}
 

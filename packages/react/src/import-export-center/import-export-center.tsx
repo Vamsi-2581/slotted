@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/import-export-center/import-export-center.css';
 
 import {
@@ -163,9 +164,15 @@ function kindOf(job: ImportExportJob): FileKind {
 function FileName({ name }: { name: string }) {
   const { stem, extension } = splitName(name);
   return (
-    <span data-part="file-name" dir="auto">
-      <span data-part="name">{stem}</span>
-      {extension === '' ? null : <span data-part="extension">{extension}</span>}
+    <span data-part="file-name" data-part-file-name="" dir="auto">
+      <span data-part="name" data-part-name="">
+        {stem}
+      </span>
+      {extension === '' ? null : (
+        <span data-part="extension" data-part-extension="">
+          {extension}
+        </span>
+      )}
     </span>
   );
 }
@@ -190,6 +197,7 @@ function RemoveControl({
         aria-describedby={describedBy}
         aria-label={label}
         data-part="remove"
+        data-part-remove=""
         onClick={onPress}
       >
         <Icon>
@@ -264,7 +272,7 @@ function DownloadControl({
     ...(describedBy === undefined ? {} : { 'aria-describedby': describedBy }),
   };
   return (
-    <span data-part="download">
+    <span data-part="download" data-part-download="">
       {file.href === undefined ? (
         <Button {...wiring} onClick={ask} size="sm" tone="secondary" variant={variant}>
           {label}
@@ -331,9 +339,15 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
   const total = Math.max(job.errorCount ?? 0, errors.length);
 
   return (
-    <div aria-labelledby={ids.toggle} data-part="details" id={ids.details} role="region">
+    <div
+      aria-labelledby={ids.toggle}
+      data-part="details"
+      data-part-details=""
+      id={ids.details}
+      role="region"
+    >
       {countKeys.length > 0 ? (
-        <dl data-part="counts">
+        <dl data-part="counts" data-part-counts="">
           {countKeys.map((name) => (
             <div data-count={name} key={name}>
               <dt>{t(`countLabels.${name}`)}</dt>
@@ -343,7 +357,7 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
         </dl>
       ) : null}
       {files.length > 0 ? (
-        <ul data-part="files">
+        <ul data-part="files" data-part-files="">
           {files.map(([role, file]) => {
             const availability = fileAvailability(file, clock);
             const note =
@@ -356,8 +370,8 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
                     : t('expires', { date: deadlineText(file.expiresAt, context) });
             const canDownload = availability === 'available' || availability === 'expires';
             return (
-              <li data-part="file" data-availability={availability} key={role}>
-                <span data-part="meta">
+              <li data-part="file" data-part-file="" data-availability={availability} key={role}>
+                <span data-part="meta" data-part-meta="">
                   <strong>{t(`fileLabels.${role}`)}</strong>
                   <span>
                     <FileName name={file.name} />
@@ -381,7 +395,7 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
         </ul>
       ) : null}
       {errors.length > 0 ? (
-        <div data-part="errors">
+        <div data-part="errors" data-part-errors="">
           <Table columns={4} variant="framed">
             <TableContent>
               <TableCaption>{t('errorsCaption')}</TableCaption>
@@ -406,7 +420,7 @@ function Details({ context, job }: { context: JobContext; job: ImportExportJob }
             </TableContent>
           </Table>
           {total > errors.length ? (
-            <p data-part="errors-note">
+            <p data-part="errors-note" data-part-errors-note="">
               <span>{t('sample', { shown: errors.length, total })}</span>
             </p>
           ) : null}
@@ -477,7 +491,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
       case 'cancel':
       case 'retry':
         return (
-          <span data-part={part} key={part}>
+          <span data-part={part} {...selectorKeyProps('part', part)} key={part}>
             <Button
               aria-describedby={ids.status}
               aria-labelledby={labelled(part)}
@@ -502,13 +516,18 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
         );
       case 'toggle':
         return (
-          <span data-part="toggle" key={part} {...(expanded ? { 'data-expanded': '' } : {})}>
+          <span
+            data-part="toggle"
+            data-part-toggle=""
+            key={part}
+            {...(expanded ? { 'data-expanded': '' } : {})}
+          >
             <Button
               aria-controls={ids.details}
               aria-expanded={expanded}
               aria-labelledby={`${ids.toggle} ${ids.title}`}
               end={
-                <span data-part="chevron">
+                <span data-part="chevron" data-part-chevron="">
                   <Icon>
                     <Glyph name="chevron-down" />
                   </Icon>
@@ -547,28 +566,35 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
       data-direction={job.direction}
       data-key={job.key}
       data-part="job"
+      data-part-job=""
       data-status={job.status}
       {...(outcome === null ? {} : { 'data-outcome': outcome })}
       {...(controls.expired ? { 'data-expired': '' } : {})}
       {...(expanded ? { 'data-expanded': '' } : {})}
     >
-      <span aria-hidden="true" data-kind={kindOf(job)} data-part="visual">
+      <span aria-hidden="true" data-kind={kindOf(job)} data-part="visual" data-part-visual="">
         <Icon>
           <Glyph name={KIND_GLYPH[kindOf(job)]} />
         </Icon>
       </span>
-      <div data-part="body">
-        <div data-part="heading">
+      <div data-part="body" data-part-body="">
+        <div data-part="heading" data-part-heading="">
           {job.href === undefined ? (
-            <span data-part="job-title" id={ids.title} tabIndex={-1}>
+            <span data-part="job-title" data-part-job-title="" id={ids.title} tabIndex={-1}>
               {job.title}
             </span>
           ) : (
-            <a data-part="job-title" href={job.href} id={ids.title} onClick={onTitleClick}>
+            <a
+              data-part="job-title"
+              data-part-job-title=""
+              href={job.href}
+              id={ids.title}
+              onClick={onTitleClick}
+            >
               {job.title}
             </a>
           )}
-          <p data-part="meta">
+          <p data-part="meta" data-part-meta="">
             <span>{t(job.direction)}</span>
             {job.format === undefined ? null : <span>{job.format}</span>}
             {file === undefined ? null : (
@@ -581,6 +607,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
             {time === null ? null : (
               <time
                 data-part="time"
+                data-part-time=""
                 dateTime={time.dateTime}
                 {...(time.title === null ? {} : { title: time.title })}
               >
@@ -589,27 +616,27 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
             )}
           </p>
         </div>
-        <div data-part="status" id={ids.status}>
-          <span aria-hidden="true" data-part="mark">
+        <div data-part="status" data-part-status="" id={ids.status}>
+          <span aria-hidden="true" data-part="mark" data-part-mark="">
             {mark === 'spinner' ? (
-              <span data-ui="spinner" />
+              <span data-ui="spinner" data-ui-spinner="" />
             ) : (
               <Icon>
                 <Glyph name={mark} />
               </Icon>
             )}
           </span>
-          <span data-part="status-label">
+          <span data-part="status-label" data-part-status-label="">
             <span>{jobStatusText(job, t)}</span>
             {job.stage === undefined || job.stage === '' ? null : (
-              <span data-part="stage" title={job.stage}>
+              <span data-part="stage" data-part-stage="" title={job.stage}>
                 {job.stage}
               </span>
             )}
           </span>
         </div>
         {job.status === 'running' ? (
-          <div data-part="progress">
+          <div data-part="progress" data-part-progress="">
             <ProgressBar
               aria-labelledby={ids.title}
               delay={0}
@@ -621,7 +648,7 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
               {...(progressText.length > 0 ? { valueText: progressText.join(', ') } : {})}
             />
             {progressText.length > 0 ? (
-              <span data-part="progress-text">
+              <span data-part="progress-text" data-part-progress-text="">
                 {progressText.map((item) => (
                   <span key={item}>{item}</span>
                 ))}
@@ -630,18 +657,26 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
           </div>
         ) : null}
         {summary.length > 0 ? (
-          <p data-part="summary">
+          <p data-part="summary" data-part-summary="">
             {summary.map((item) => (
               <span key={item}>{item}</span>
             ))}
           </p>
         ) : null}
-        {message === null ? null : <p data-part="message">{message}</p>}
+        {message === null ? null : (
+          <p data-part="message" data-part-message="">
+            {message}
+          </p>
+        )}
       </div>
       {ordered.length > 0 || presentNode(actions) || controls.controls.includes('remove') ? (
-        <div data-part="controls">
+        <div data-part="controls" data-part-controls="">
           {ordered.map(control)}
-          {presentNode(actions) ? <span data-part="job-actions">{actions}</span> : null}
+          {presentNode(actions) ? (
+            <span data-part="job-actions" data-part-job-actions="">
+              {actions}
+            </span>
+          ) : null}
           {controls.controls.includes('remove') ? control('remove') : null}
         </div>
       ) : null}
@@ -1026,27 +1061,29 @@ export function ImportExportCenter({
         ? t('emptyExports')
         : t('empty');
 
-  const rootProps: ImportExportCenterRootProps = {
+  const rootProps: ImportExportCenterRootProps = keyedProps({
     ...nativeProps,
     ...(ariaLabel !== undefined
       ? { 'aria-label': ariaLabel }
       : { 'aria-labelledby': ariaLabelledby ?? titleId }),
     children: (
       <>
-        <div data-part="header">
-          <Heading data-part="title" id={titleId}>
+        <div data-part="header" data-part-header="">
+          <Heading data-part="title" data-part-title="" id={titleId}>
             {t('title')}
             {active > 0 ? (
               <>
                 {' '}
-                <span data-part="count">{t('active', { count: active })}</span>
+                <span data-part="count" data-part-count="">
+                  {t('active', { count: active })}
+                </span>
               </>
             ) : null}
           </Heading>
           {finished.length > 0 || presentNode(actions) ? (
-            <div data-part="tools">
+            <div data-part="tools" data-part-tools="">
               {finished.length > 0 ? (
-                <span data-part="clear">
+                <span data-part="clear" data-part-clear="">
                   <Button
                     onClick={(event) =>
                       onRemove?.(
@@ -1062,12 +1099,16 @@ export function ImportExportCenter({
                   </Button>
                 </span>
               ) : null}
-              {presentNode(actions) ? <div data-part="actions">{actions}</div> : null}
+              {presentNode(actions) ? (
+                <div data-part="actions" data-part-actions="">
+                  {actions}
+                </div>
+              ) : null}
             </div>
           ) : null}
         </div>
         {resolvedViews.length > 1 ? (
-          <div data-part="views">
+          <div data-part="views" data-part-views="">
             <Tabs
               onValueChange={(value: string, request: TabsChangeRequest) =>
                 selectView(value, request.reason, request.source)
@@ -1087,7 +1128,7 @@ export function ImportExportCenter({
           </div>
         ) : null}
         {failed ? (
-          <div data-part="error">
+          <div data-part="error" data-part-error="">
             <ResultState live="off" reach="section" status="error">
               <ResultStateContent>
                 <ResultStateTitle>{t('loadError')}</ResultStateTitle>
@@ -1106,7 +1147,7 @@ export function ImportExportCenter({
             </ResultState>
           </div>
         ) : showEmpty ? (
-          <div data-part="empty">
+          <div data-part="empty" data-part-empty="">
             {empty ?? (
               <ResultState live="off" reach="section" status="empty">
                 <ResultStateContent>
@@ -1121,6 +1162,7 @@ export function ImportExportCenter({
             aria-busy={loading ? true : undefined}
             aria-labelledby={titleId}
             data-part="list"
+            data-part-list=""
             id={listId}
             onFocus={rememberFocus}
             ref={listRef}
@@ -1128,11 +1170,11 @@ export function ImportExportCenter({
           >
             {waiting
               ? Array.from({ length: WAITING_ROWS }, (_, index) => (
-                  <li aria-hidden="true" data-part="job" key={index}>
-                    <span data-part="visual">
+                  <li aria-hidden="true" data-part="job" data-part-job="" key={index}>
+                    <span data-part="visual" data-part-visual="">
                       <Skeleton shape="block" />
                     </span>
-                    <div data-part="body">
+                    <div data-part="body" data-part-body="">
                       <SkeletonText lines={2} />
                       <SkeletonText lines={1} />
                     </div>
@@ -1145,6 +1187,7 @@ export function ImportExportCenter({
           <button
             aria-disabled={loading ? true : undefined}
             data-part="more"
+            data-part-more=""
             {...(loading ? { 'data-loading': '' } : {})}
             onClick={(event) => {
               if (loading) return;
@@ -1155,7 +1198,11 @@ export function ImportExportCenter({
             {loading ? t('loading') : t('loadMore')}
           </button>
         ) : null}
-        {presentNode(footer) ? <div data-part="footer">{footer}</div> : null}
+        {presentNode(footer) ? (
+          <div data-part="footer" data-part-footer="">
+            {footer}
+          </div>
+        ) : null}
       </>
     ),
     className,
@@ -1169,7 +1216,7 @@ export function ImportExportCenter({
     'data-ui': 'import-export-center',
     'data-view': currentView,
     style,
-  };
+  });
 
   return render === undefined ? (
     <section {...rootProps} ref={setRoot} />

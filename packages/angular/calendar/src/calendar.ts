@@ -82,9 +82,10 @@ let sequence = 0;
   standalone: true,
   exportAs: 'slCalendar',
   imports: [SlGlyph, SlIcon],
-  template: `<div data-part="header">
+  template: `<div data-part="header" data-part-header="">
       <button
         data-part="previous"
+        data-part-previous=""
         type="button"
         [attr.aria-label]="pageNames()[0]"
         [disabled]="!editable()"
@@ -98,6 +99,7 @@ let sequence = 0;
       -->
       <button
         data-part="heading"
+        data-part-heading=""
         type="button"
         aria-live="polite"
         [attr.id]="headingId"
@@ -111,6 +113,7 @@ let sequence = 0;
       </button>
       <button
         data-part="next"
+        data-part-next=""
         type="button"
         [attr.aria-label]="pageNames()[1]"
         [disabled]="!editable()"
@@ -122,21 +125,31 @@ let sequence = 0;
 
     @switch (currentView()) {
       @case ('day') {
-        <div data-part="grids">
+        <div data-part="grids" data-part-grids="">
           @for (month of shownMonths(); track month.year * 12 + month.month) {
-            <table data-part="grid" role="grid" [attr.aria-labelledby]="headingId">
-              <caption data-part="grid-caption">
+            <table
+              data-part="grid"
+              data-part-grid=""
+              role="grid"
+              [attr.aria-labelledby]="headingId"
+            >
+              <caption data-part="grid-caption" data-part-grid-caption="">
                 {{
                   captionOf(month)
                 }}
               </caption>
               <thead>
-                <tr data-part="week-headers">
+                <tr data-part="week-headers" data-part-week-headers="">
                   @if (resolvedWeekNumbers()) {
-                    <th data-part="week-number" aria-hidden="true"></th>
+                    <th data-part="week-number" data-part-week-number="" aria-hidden="true"></th>
                   }
                   @for (name of weekdayNarrow(); track $index) {
-                    <th data-part="week-header" scope="col" [attr.abbr]="weekdayLong()[$index]">
+                    <th
+                      data-part="week-header"
+                      data-part-week-header=""
+                      scope="col"
+                      [attr.abbr]="weekdayLong()[$index]"
+                    >
                       {{ name }}
                     </th>
                   }
@@ -144,9 +157,11 @@ let sequence = 0;
               </thead>
               <tbody>
                 @for (week of weeksOf(month); track week.weekNumber) {
-                  <tr data-part="week">
+                  <tr data-part="week" data-part-week="">
                     @if (resolvedWeekNumbers()) {
-                      <th data-part="week-number" scope="row">{{ week.weekNumber }}</th>
+                      <th data-part="week-number" data-part-week-number="" scope="row">
+                        {{ week.weekNumber }}
+                      </th>
                     }
                     @for (
                       day of week.days;
@@ -158,6 +173,7 @@ let sequence = 0;
                            digits under it. -->
                       <td
                         data-part="cell"
+                        data-part-cell=""
                         [attr.data-outside-month]="day.outsideMonth ? '' : null"
                         [attr.data-unavailable]="
                           !drawn(day) ? null : unavailable(day.date) ? '' : null
@@ -177,6 +193,7 @@ let sequence = 0;
                         @if (drawn(day)) {
                           <span
                             data-part="day"
+                            data-part-day=""
                             role="button"
                             [attr.data-today]="isToday(day.date) ? '' : null"
                             [attr.aria-selected]="chosen(day.date) ? 'true' : null"
@@ -200,10 +217,11 @@ let sequence = 0;
       }
       @case ('month') {
         @if (monthly()) {
-          <div data-part="months">
+          <div data-part="months" data-part-months="">
             @for (name of monthNames(); track $index) {
               <button
                 data-part="period"
+                data-part-period=""
                 type="button"
                 [attr.aria-label]="monthLabel($index + 1)"
                 [attr.data-selected]="heldMonth($index + 1) ? '' : null"
@@ -219,10 +237,11 @@ let sequence = 0;
             }
           </div>
         } @else {
-          <div data-part="months">
+          <div data-part="months" data-part-months="">
             @for (name of monthNames(); track $index) {
               <button
                 data-part="period"
+                data-part-period=""
                 type="button"
                 [attr.data-selected]="focused().month === $index + 1 ? '' : null"
                 [attr.aria-selected]="focused().month === $index + 1 ? 'true' : null"
@@ -235,10 +254,11 @@ let sequence = 0;
         }
       }
       @default {
-        <div data-part="years">
+        <div data-part="years" data-part-years="">
           @for (year of years(); track year) {
             <button
               data-part="period"
+              data-part-period=""
               type="button"
               [attr.data-selected]="focused().year === year ? '' : null"
               [attr.aria-selected]="focused().year === year ? 'true' : null"
@@ -255,7 +275,9 @@ let sequence = 0;
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'calendar',
+    'data-ui-calendar': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-view]': 'currentView()',
     '[attr.data-calendar]': 'resolvedCalendar()',
     '[attr.data-months]': 'resolvedMonths() > 1 ? resolvedMonths() : null',

@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/aspect-ratio/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./aspect-ratio.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./aspect-ratio.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./aspect-ratio.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -21,8 +34,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 
 const rules = [...normalized.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
   .filter(([, selector]) => !selector.includes('@'))
@@ -46,7 +59,7 @@ test('is selected by the identifier the contract declares', () => {
 test('names the family and the part together, so a rule for the box stays on the box', () => {
   for (const selector of normalized.matchAll(/(^|\})([^{}]+)\{/g)) {
     for (const part of (selector[2] ?? '').split(',')) {
-      if (!part.includes(`[data-part='root']`)) continue;
+      if (!part.includes(`[data-part-root]`)) continue;
       assert.ok(part.includes(ui), `"${part.trim()}" reaches the root without naming the family`);
     }
   }

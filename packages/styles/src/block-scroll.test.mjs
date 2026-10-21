@@ -10,21 +10,15 @@ import test from 'node:test';
  * `data-grid`, `scroll-area`), so the body hides its inline axis.
  */
 const BODIES = [
-  [
-    'app-shell/app-shell.css',
-    "[data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-body'] {",
-  ],
-  [
-    'app-shell/app-shell.css',
-    "[data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-body'] {",
-  ],
-  ['drawer/drawer.css', "[data-ui='drawer'] > [data-part='panel'] > [data-part='body'] {"],
+  ['app-shell/app-shell.css', '[data-ui-app-shell] > [data-part-nav] > [data-part-nav-body] {'],
+  ['app-shell/app-shell.css', '[data-ui-app-shell] > [data-part-aside] > [data-part-aside-body] {'],
+  ['drawer/drawer.css', '[data-ui-drawer] > [data-part-panel] > [data-part-body] {'],
   [
     'dialog/dialog.css',
-    "[data-ui='dialog'] > [data-part='viewport'] > [data-part='content'] > [data-part='body'] {",
+    '[data-ui-dialog] > [data-part-viewport] > [data-part-content] > [data-part-body] {',
   ],
-  ['popover/popover.css', "[data-ui='popover'] > [data-part='content'] > [data-part='body'] {"],
-  ['tour/tour.css', "[data-ui='tour'] [data-part='content'] > [data-part='body'] {"],
+  ['popover/popover.css', '[data-ui-popover] > [data-part-content] > [data-part-body] {'],
+  ['tour/tour.css', '[data-ui-tour] [data-part-content] > [data-part-body] {'],
 ];
 
 function body(path, selector) {

@@ -39,7 +39,7 @@
    * gaps inside the header and the footer read it too, so a dense popover is a
    * tighter popover rather than a smaller one.
    */
-  [data-ui='popover'] {
+  [data-ui-popover] {
     --_gap: var(--slotted-popover-gap, var(--slotted-space-4, 0.5rem));
 
     --_surface: var(--slotted-popover-surface, var(--slotted-surface-raised, #ffffff));
@@ -99,12 +99,12 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='popover'][data-side='top'] {
+  [data-ui-popover][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* A lateral side has no block direction to arrive from, so it only fades. */
-  [data-ui='popover']:is([data-side='left'], [data-side='right']) {
+  [data-ui-popover]:is([data-side='left'], [data-side='right']) {
     translate: 0 0;
   }
 
@@ -117,7 +117,7 @@
    * A keyframe states where it starts. The exit stays a transition: it
    * leaves from wherever the layer is, on the closed rule's durations.
    */
-  [data-ui='popover'][data-open] {
+  [data-ui-popover][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -128,15 +128,15 @@
    * with the side, and a layer written open in static markup — the harness,
    * a docs snippet — is simply there, and is photographed where it stands.
    */
-  [data-ui='popover'][data-open][data-positioned] {
+  [data-ui-popover][data-open][data-positioned] {
     animation: slotted-popover-enter-down var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
-  [data-ui='popover'][data-open][data-positioned][data-side='top'] {
+  [data-ui-popover][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-popover-enter-up;
   }
 
-  [data-ui='popover'][data-open][data-positioned]:is([data-side='left'], [data-side='right']) {
+  [data-ui-popover][data-open][data-positioned]:is([data-side='left'], [data-side='right']) {
     animation-name: slotted-popover-fade;
   }
 
@@ -162,27 +162,27 @@
 
   /* Stillness keeps the fade and drops the movement (R7). */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='popover'],
-    [data-ui='popover'][data-side='top'],
-    [data-ui='popover'][data-side='left'],
-    [data-ui='popover'][data-side='right'] {
+    [data-ui-popover],
+    [data-ui-popover][data-side='top'],
+    [data-ui-popover][data-side='left'],
+    [data-ui-popover][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='popover'][data-open][data-positioned],
-    [data-ui='popover'][data-open][data-positioned][data-side='top'],
-    [data-ui='popover'][data-open][data-positioned][data-side='left'],
-    [data-ui='popover'][data-open][data-positioned][data-side='right'] {
+    [data-ui-popover][data-open][data-positioned],
+    [data-ui-popover][data-open][data-positioned][data-side='top'],
+    [data-ui-popover][data-open][data-positioned][data-side='left'],
+    [data-ui-popover][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-popover-fade;
     }
   }
 
-  [data-ui='popover'][data-detached] {
+  [data-ui-popover][data-detached] {
     visibility: hidden;
   }
 
-  [data-ui='popover'][data-size='sm'] {
+  [data-ui-popover][data-size='sm'] {
     --_inset-block: var(--slotted-popover-padding-block-sm, var(--slotted-space-4, 0.5rem));
     --_inset-inline: var(--slotted-popover-padding-inline-sm, var(--slotted-space-5, 0.75rem));
     --_title-font-size: var(--slotted-font-size-md, 0.875rem);
@@ -190,7 +190,7 @@
     --_measure: var(--slotted-popover-measure-sm, 16rem);
   }
 
-  [data-ui='popover'][data-size='lg'] {
+  [data-ui-popover][data-size='lg'] {
     --_inset-block: var(--slotted-popover-padding-block-lg, var(--slotted-space-6, 1rem));
     --_inset-inline: var(--slotted-popover-padding-inline-lg, var(--slotted-space-7, 1.25rem));
     --_title-font-size: var(--slotted-font-size-xl, 1.125rem);
@@ -203,7 +203,7 @@
    * property for. The layer's own padding is added back, so the panel and the
    * anchor share an edge rather than being inset from one another.
    */
-  [data-ui='popover'][data-width='anchor'] {
+  [data-ui-popover][data-width='anchor'] {
     inline-size: calc(var(--slotted-positioner-anchor-width, 0px) + 2 * var(--_gap));
     max-inline-size: var(--slotted-positioner-available-width, 100vw);
   }
@@ -214,7 +214,7 @@
    * of the document, so the family closes the popover and puts focus back on
    * the trigger, from which the next `Tab` continues down the page.
    */
-  [data-ui='popover'] > [data-part='focus-guard'] {
+  [data-ui-popover] > [data-part-focus-guard] {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
@@ -225,7 +225,7 @@
     pointer-events: none;
   }
 
-  [data-ui='popover'] > [data-part='content'] {
+  [data-ui-popover] > [data-part-content] {
     box-sizing: border-box;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
@@ -271,14 +271,14 @@
    * what it owns. Two children or more are the consumer's own layout and keep
    * their auto rows.
    */
-  [data-ui='popover']
-    > [data-part='content']
-    > :only-child:not([data-part='header'], [data-part='body'], [data-part='footer']) {
+  [data-ui-popover]
+    > [data-part-content]
+    > :only-child:not([data-part-header], [data-part-body], [data-part-footer]) {
     grid-row: 2;
     min-block-size: 0;
   }
 
-  [data-ui='popover'] > [data-part='content']:focus-visible {
+  [data-ui-popover] > [data-part-content]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
@@ -289,7 +289,7 @@
    * on the first row so it stays level with the title rather than centring
    * itself against a description the title may not have.
    */
-  [data-ui='popover'] > [data-part='content'] > [data-part='header'] {
+  [data-ui-popover] > [data-part-content] > [data-part-header] {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     column-gap: var(--_row-gap);
@@ -299,7 +299,7 @@
     padding-inline: var(--_inset-inline);
   }
 
-  [data-ui='popover'] > [data-part='content'] > [data-part='header'] > [data-part='title'] {
+  [data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-title] {
     grid-column: 1;
     margin: 0;
     font-family: var(
@@ -314,7 +314,7 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='popover'] > [data-part='content'] > [data-part='header'] > [data-part='description'] {
+  [data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-description] {
     grid-column: 1;
     margin: 0;
     font-size: var(--slotted-font-size-sm, 0.8125rem);
@@ -331,7 +331,7 @@
    * is pulled level with the title's cap height by the negative
    * block margin rather than by stretching the row.
    */
-  [data-ui='popover'] > [data-part='content'] > [data-part='header'] > [data-part='close'] {
+  [data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-close] {
     grid-column: 2;
     grid-row: 1;
     display: inline-flex;
@@ -357,25 +357,16 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='popover']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:enabled:hover {
+  [data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-close]:enabled:hover {
     background: var(--slotted-tone-secondary-subtle-hover, rgb(15 23 42 / 0.06));
     color: var(--_text);
   }
 
-  [data-ui='popover']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:enabled:active {
+  [data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-close]:enabled:active {
     background: var(--slotted-tone-secondary-subtle-active, rgb(15 23 42 / 0.1));
   }
 
-  [data-ui='popover']
-    > [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:focus-visible {
+  [data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-close]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
@@ -386,7 +377,7 @@
    * there is no header, so a popover holding one sentence is not inset twice at
    * the top and once at the bottom.
    */
-  [data-ui='popover'] > [data-part='content'] > [data-part='body'] {
+  [data-ui-popover] > [data-part-content] > [data-part-body] {
     grid-row: 2;
     min-block-size: 0;
     overflow-x: hidden;
@@ -437,11 +428,11 @@
         center bottom / 100% var(--slotted-space-3, 0.375rem) no-repeat scroll;
   }
 
-  [data-ui='popover'] > [data-part='content'] > [data-part='body']:first-child {
+  [data-ui-popover] > [data-part-content] > [data-part-body]:first-child {
     padding-block-start: var(--_inset-block);
   }
 
-  [data-ui='popover'] > [data-part='content'] > [data-part='footer'] {
+  [data-ui-popover] > [data-part-content] > [data-part-footer] {
     grid-row: 3;
     display: flex;
     flex-wrap: wrap;
@@ -468,7 +459,7 @@
    * of a diamond. Clamped here, the arrow meets a straight edge whatever
    * padding, gap or radius a theme sets.
    */
-  [data-ui='popover'] > [data-part='arrow'] {
+  [data-ui-popover] > [data-part-arrow] {
     --_arrow-x: clamp(
       calc(var(--_gap) + var(--_radius)),
       var(--slotted-positioner-arrow-x, 0px),
@@ -488,7 +479,7 @@
     border: 0 solid var(--_border-color);
   }
 
-  [data-ui='popover'][data-side='top'] > [data-part='arrow'] {
+  [data-ui-popover][data-side='top'] > [data-part-arrow] {
     left: var(--_arrow-x);
     top: auto;
     bottom: calc(var(--_gap) - var(--_arrow-size) / 2);
@@ -497,7 +488,7 @@
     border-bottom-right-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='popover'][data-side='bottom'] > [data-part='arrow'] {
+  [data-ui-popover][data-side='bottom'] > [data-part-arrow] {
     left: var(--_arrow-x);
     top: calc(var(--_gap) - var(--_arrow-size) / 2);
     bottom: auto;
@@ -506,7 +497,7 @@
     border-top-left-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='popover'][data-side='left'] > [data-part='arrow'] {
+  [data-ui-popover][data-side='left'] > [data-part-arrow] {
     top: var(--_arrow-y);
     left: auto;
     right: calc(var(--_gap) - var(--_arrow-size) / 2);
@@ -515,7 +506,7 @@
     border-top-right-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='popover'][data-side='right'] > [data-part='arrow'] {
+  [data-ui-popover][data-side='right'] > [data-part-arrow] {
     top: var(--_arrow-y);
     left: calc(var(--_gap) - var(--_arrow-size) / 2);
     right: auto;

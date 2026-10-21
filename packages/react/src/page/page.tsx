@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/page/page.css';
 
 import { pageMessages } from '@slotted/core/i18n';
@@ -19,6 +20,13 @@ import type {
 
 /** The custom property the scroller carries for what sticks above the footer. */
 export const STICKY_BOTTOM_PROPERTY = '--slotted-page-sticky-bottom';
+
+/** Writes the footer offset only when it differs from the value already written. */
+function writeStickyBottom(target: HTMLElement, height: number) {
+  const value = `${height}px`;
+  if (target.style.getPropertyValue(STICKY_BOTTOM_PROPERTY) === value) return;
+  target.style.setProperty(STICKY_BOTTOM_PROPERTY, value);
+}
 
 const PageContext = createContext<PageContextValue | undefined>(undefined);
 
@@ -113,6 +121,10 @@ export function Page({
    * The footer's height, written on the scroller so a table's sticky summary
    * stops above the bar. Under `self` the footer is outside the scroller and
    * covers nothing, so the property says nought.
+   *
+   * The property inherits, so every write invalidates style for everything
+   * under the scroller: it is written only when the height changes, and a
+   * footer mounting re-observes without taking the value down first.
    */
   useIsomorphicLayoutEffect(() => {
     if (root === null || typeof ResizeObserver === 'undefined') return undefined;
@@ -120,22 +132,29 @@ export function Page({
     const observer = new ResizeObserver(() => {
       const bar = root.querySelector<HTMLElement>(':scope > [data-part="footer"]');
       const height = resolvedScroll === 'self' ? 0 : (bar?.offsetHeight ?? 0);
-      target.style.setProperty(STICKY_BOTTOM_PROPERTY, `${height}px`);
+      writeStickyBottom(target, height);
     });
     observer.observe(root);
     const bar = root.querySelector<HTMLElement>(':scope > [data-part="footer"]');
     if (bar !== null) observer.observe(bar);
-    return () => {
-      observer.disconnect();
-      target.style.removeProperty(STICKY_BOTTOM_PROPERTY);
-    };
+    return () => observer.disconnect();
   }, [root, resolvedScroll, footer !== undefined]);
 
-  const rootProps: PageRootProps = {
+  useIsomorphicLayoutEffect(() => {
+    if (root === null) return undefined;
+    const target = findScroller(root) ?? root.ownerDocument.documentElement;
+    return () => {
+      target.style.removeProperty(STICKY_BOTTOM_PROPERTY);
+    };
+  }, [root]);
+
+  const rootProps: PageRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
-        <div data-part="scroll">{children}</div>
+        <div data-part="scroll" data-part-scroll="">
+          {children}
+        </div>
         <FooterPresence>{footer}</FooterPresence>
       </>
     ),
@@ -148,7 +167,7 @@ export function Page({
     'data-ui': 'page',
     'data-width': resolvedWidth,
     style,
-  };
+  });
 
   const attach = (node: HTMLElement | null) => {
     setRoot(node);
@@ -229,7 +248,7 @@ export function PageBody({
   ...nativeProps
 }: PageBodyProps) {
   const page = usePage();
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     ...(page?.loading ? { 'aria-busy': true as const } : {}),
     children: (
@@ -240,7 +259,7 @@ export function PageBody({
     className,
     'data-part': 'body',
     style,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
@@ -266,19 +285,21 @@ export function PageFooter({
   const own = useMessages(pageMessages);
   const t = page?.t ?? own;
   const { setNode, status } = useContext(FooterStatusContext);
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel ?? t('footer'),
     children: (
       <Container inset={page?.inset} size={page?.width}>
-        <div data-part="actions">{children}</div>
+        <div data-part="actions" data-part-actions="">
+          {children}
+        </div>
       </Container>
     ),
     className,
     'data-part': 'footer',
     'data-status': status,
     style,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return (

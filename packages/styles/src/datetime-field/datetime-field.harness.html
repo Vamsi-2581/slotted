@@ -28,19 +28,27 @@
 -->
 
 <section data-scene="default">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Início, 10 de setembro de 2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Início, 10 de setembro de 2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -53,9 +61,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -68,9 +77,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -81,11 +91,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -98,9 +109,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -115,22 +127,33 @@
           </div>
         </span>
       </div>
-      <span data-part="value-text" hidden>10 de setembro de 2026 às 15:20</span>
-      <input data-part="hidden-input" type="hidden" name="inicio" value="2026-09-10T15:20:00" />
+      <span data-part="value-text" data-part-value-text="" hidden
+        >10 de setembro de 2026 às 15:20</span
+      >
+      <input
+        data-part="hidden-input"
+        data-part-hidden-input=""
+        type="hidden"
+        name="inicio"
+        value="2026-09-10T15:20:00"
+      />
     </div>
 
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Início, vazio">
-        <span data-part="half" data-half="date">
+      <div data-part="segments" data-part-segments="" role="group" aria-label="Início, vazio">
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             data-placeholder
@@ -141,9 +164,10 @@
           >
             dd
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             data-placeholder
@@ -154,9 +178,10 @@
           >
             mm
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             data-placeholder
@@ -167,11 +192,12 @@
           >
             aaaa
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             data-placeholder
@@ -182,9 +208,10 @@
           >
             hh
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             data-placeholder
@@ -197,28 +224,42 @@
           </div>
         </span>
       </div>
-      <span data-part="value-text" hidden>vazio</span>
-      <input data-part="hidden-input" type="hidden" name="vazio" value="" />
+      <span data-part="value-text" data-part-value-text="" hidden>vazio</span>
+      <input
+        data-part="hidden-input"
+        data-part-hidden-input=""
+        type="hidden"
+        name="vazio"
+        value=""
+      />
     </div>
   </div>
 </section>
 
 <section data-scene="locales">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <!-- en-US: the month leads, the halves are separated by a comma the locale
          writes, and the day period follows the time. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="12"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Starts, September 10, 2026 at 3:20 PM">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Starts, September 10, 2026 at 3:20 PM"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -231,9 +272,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -246,9 +288,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -259,11 +302,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -276,9 +320,10 @@
           >
             03
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -291,9 +336,10 @@
           >
             20
           </div>
-          <span data-part="literal" aria-hidden="true">&nbsp;</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">&nbsp;</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="dayPeriod"
             data-half="time"
             role="spinbutton"
@@ -308,7 +354,9 @@
           </div>
         </span>
       </div>
-      <span data-part="value-text" hidden>September 10, 2026 at 3:20 PM</span>
+      <span data-part="value-text" data-part-value-text="" hidden
+        >September 10, 2026 at 3:20 PM</span
+      >
     </div>
 
     <!-- ja-JP under the twelve-hour axis resolves to `h11`: the hour runs from
@@ -316,16 +364,24 @@
          either, which is why the family carries four cycles. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="12"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="開始 2026年9月10日 午後3:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="開始 2026年9月10日 午後3:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -336,9 +392,10 @@
           >
             2026
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -351,9 +408,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -367,9 +425,10 @@
             10
           </div>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="dayPeriod"
             data-half="time"
             role="spinbutton"
@@ -384,6 +443,7 @@
           </div>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -396,9 +456,10 @@
           >
             03
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -413,28 +474,36 @@
           </div>
         </span>
       </div>
-      <span data-part="value-text" hidden>2026年9月10日 午後3:20</span>
+      <span data-part="value-text" data-part-value-text="" hidden>2026年9月10日 午後3:20</span>
     </div>
   </div>
 </section>
 
 <section data-scene="granularity">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <!-- Hour, minute and second, on the same date half. The date half is always
          whole: a datetime without a day is a date, and `date-field` is that
          family. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="hour"
     >
-      <div data-part="segments" role="group" aria-label="Corte, 10/09/2026 às 15 h">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Corte, 10/09/2026 às 15 h"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -447,9 +516,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -462,9 +532,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -475,11 +546,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -498,16 +570,24 @@
 
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="second"
     >
-      <div data-part="segments" role="group" aria-label="Corte, 10/09/2026 às 15:20:45">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Corte, 10/09/2026 às 15:20:45"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -520,9 +600,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -535,9 +616,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -548,11 +630,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -565,9 +648,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -580,9 +664,10 @@
           >
             20
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="second"
             data-half="time"
             role="spinbutton"
@@ -602,24 +687,32 @@
 </section>
 
 <section data-scene="incomplete">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <!-- A day written and no time. The value is null, which every surveyed
          implementation reports; which half is missing is what none of them can
          say, and it is on the root. The frame is warned rather than refused:
          nothing here is wrong, it is unfinished. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
       data-incomplete="time"
     >
-      <div data-part="segments" role="group" aria-label="Início, 10/09/2026, hora por preencher">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Início, 10/09/2026, hora por preencher"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -632,9 +725,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -647,9 +741,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -660,11 +755,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             data-placeholder
@@ -675,9 +771,10 @@
           >
             hh
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             data-placeholder
@@ -690,23 +787,37 @@
           </div>
         </span>
       </div>
-      <input data-part="hidden-input" type="hidden" name="incompleto" value="" />
+      <input
+        data-part="hidden-input"
+        data-part-hidden-input=""
+        type="hidden"
+        name="incompleto"
+        value=""
+      />
     </div>
 
     <!-- The mirror: a time written and no day. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
       data-incomplete="date"
     >
-      <div data-part="segments" role="group" aria-label="Início, 15:20, data por preencher">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Início, 15:20, data por preencher"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             data-placeholder
@@ -717,9 +828,10 @@
           >
             dd
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             data-placeholder
@@ -730,9 +842,10 @@
           >
             mm
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             data-placeholder
@@ -743,11 +856,12 @@
           >
             aaaa
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -760,9 +874,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -782,14 +897,16 @@
 </section>
 
 <section data-scene="relative">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <!-- The expression replaces the segments rather than sitting beside them:
          two controls writing one value would disagree about which is the
          datetime. The preview is a live region, so the resolved value is
          perceivable before Enter to a reader who cannot see it. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -798,14 +915,21 @@
     >
       <input
         data-part="duration"
+        data-part-duration=""
         type="text"
         value="+40m"
         aria-label="Duração a partir de agora"
         placeholder="+40m, 1h30, +2d"
       />
-      <span data-part="preview" data-resolved aria-live="polite"
-        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+      <span data-part="preview" data-part-preview="" data-resolved aria-live="polite"
+        ><span
+          data-ui="icon"
+          data-ui-icon=""
+          data-part="root"
+          data-part-root=""
+          data-directional
+          aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg></span
         >15:20</span
       >
     </div>
@@ -816,7 +940,9 @@
          because a `PlainTime` has no day to put the crossing in. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -825,15 +951,22 @@
     >
       <input
         data-part="duration"
+        data-part-duration=""
         type="text"
         value="+2d"
         aria-label="Duração a partir de agora"
         placeholder="+40m, 1h30, +2d"
       />
-      <span data-part="preview" data-resolved data-rolls-day aria-live="polite"
-        ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
-        ><span data-part="preview-date">12 set</span>, 14:40</span
+      <span data-part="preview" data-part-preview="" data-resolved data-rolls-day aria-live="polite"
+        ><span
+          data-ui="icon"
+          data-ui-icon=""
+          data-part="root"
+          data-part-root=""
+          data-directional
+          aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg></span
+        ><span data-part="preview-date" data-part-preview-date="">12 set</span>, 14:40</span
       >
     </div>
 
@@ -842,7 +975,9 @@
          field takes. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -851,6 +986,7 @@
     >
       <input
         data-part="duration"
+        data-part-duration=""
         type="text"
         value=""
         aria-label="Duração a partir de agora"
@@ -861,19 +997,27 @@
 </section>
 
 <section data-scene="sizes">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Pequeno, 10/09/2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Pequeno, 10/09/2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -886,9 +1030,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -901,9 +1046,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -914,11 +1060,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -931,9 +1078,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -948,25 +1096,33 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
 
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Médio, 10/09/2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Médio, 10/09/2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -979,9 +1135,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -994,9 +1151,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1007,11 +1165,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1024,9 +1183,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1041,25 +1201,33 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
 
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="lg"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Grande, 10/09/2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Grande, 10/09/2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1072,9 +1240,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1087,9 +1256,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1100,11 +1270,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1117,9 +1288,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1134,9 +1306,9 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
@@ -1144,19 +1316,27 @@
 </section>
 
 <section data-scene="variants">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Contorno, 10/09/2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Contorno, 10/09/2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1169,9 +1349,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1184,9 +1365,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1197,11 +1379,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1214,9 +1397,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1235,16 +1419,24 @@
 
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="subtle"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Discreto, 10/09/2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Discreto, 10/09/2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1257,9 +1449,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1272,9 +1465,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1285,11 +1479,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1302,9 +1497,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1323,16 +1519,24 @@
 
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="plain"
       data-cycle="24"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Simples, 10/09/2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Simples, 10/09/2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1345,9 +1549,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1360,9 +1565,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1373,11 +1579,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1390,9 +1597,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1412,11 +1620,13 @@
 </section>
 
 <section data-scene="states">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <!-- Required: the mark is on the control's own wiring, not on the frame. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -1425,13 +1635,15 @@
     >
       <div
         data-part="segments"
+        data-part-segments=""
         role="group"
         aria-label="Obrigatório, 10/09/2026 às 15:20"
         aria-required="true"
       >
-        <span data-part="half" data-half="date">
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1444,9 +1656,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1459,9 +1672,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1472,11 +1686,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1489,9 +1704,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1511,7 +1727,9 @@
     <!-- Invalid: a bound refused the value. It outranks incomplete and hover. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -1520,13 +1738,15 @@
     >
       <div
         data-part="segments"
+        data-part-segments=""
         role="group"
         aria-label="Inválido, 10/09/2026 às 03:20"
         aria-invalid="true"
       >
-        <span data-part="half" data-half="date">
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1539,9 +1759,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1554,9 +1775,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1567,11 +1789,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1584,9 +1807,10 @@
           >
             03
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1606,7 +1830,9 @@
     <!-- Read-only: focusable, readable, copyable, and not disabled. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -1615,13 +1841,15 @@
     >
       <div
         data-part="segments"
+        data-part-segments=""
         role="group"
         aria-label="Só leitura, 10/09/2026 às 15:20"
         aria-readonly="true"
       >
-        <span data-part="half" data-half="date">
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1634,9 +1862,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1649,9 +1878,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1662,11 +1892,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1679,9 +1910,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1701,7 +1933,9 @@
     <!-- Disabled: muted to the colour the theme measures, never faded out. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
@@ -1710,13 +1944,15 @@
     >
       <div
         data-part="segments"
+        data-part-segments=""
         role="group"
         aria-label="Desactivado, 10/09/2026 às 15:20"
         aria-disabled="true"
       >
-        <span data-part="half" data-half="date">
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1728,9 +1964,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1742,9 +1979,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1754,11 +1992,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1770,9 +2009,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1786,9 +2026,9 @@
           </div>
         </span>
       </div>
-      <button data-part="clear" type="button" aria-label="Limpar" disabled>
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar" disabled>
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
@@ -1796,18 +2036,20 @@
 </section>
 
 <section data-scene="adornments">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <!-- The consumer's own slots, quieter than the value, and the clear button
          inset by its own gutter so the glyph ends where the digits begin. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="minute"
     >
-      <span data-part="start">
+      <span data-part="start" data-part-start="">
         <svg
           viewBox="0 0 24 24"
           fill="none"
@@ -1819,10 +2061,16 @@
           <path d="M16 2v4M8 2v4M3 10h18M12 14v3l2 1" />
         </svg>
       </span>
-      <div data-part="segments" role="group" aria-label="Reunião, 10/09/2026 às 15:20">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Reunião, 10/09/2026 às 15:20"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1835,9 +2083,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1850,9 +2099,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1863,11 +2113,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1880,9 +2131,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1897,10 +2149,10 @@
           </div>
         </span>
       </div>
-      <span data-part="end">UTC−3</span>
-      <button data-part="clear" type="button" aria-label="Limpar">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="end" data-part-end="">UTC−3</span>
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Limpar">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
     </div>
@@ -1916,16 +2168,24 @@
   <div style="display: grid; gap: var(--slotted-space-5); inline-size: 160px">
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="24"
       data-granularity="second"
     >
-      <div data-part="segments" role="group" aria-label="Estreito, 10/09/2026 às 15:20:45">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Estreito, 10/09/2026 às 15:20:45"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -1938,9 +2198,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -1953,9 +2214,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -1966,11 +2228,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -1983,9 +2246,10 @@
           >
             15
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -1998,9 +2262,10 @@
           >
             20
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="second"
             data-half="time"
             role="spinbutton"
@@ -2021,16 +2286,24 @@
          stays at the end of the first line, where a comma in a sentence goes. -->
     <div
       data-ui="datetime-field"
+      data-ui-datetime-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-cycle="12"
       data-granularity="minute"
     >
-      <div data-part="segments" role="group" aria-label="Narrow, September 10, 2026 at 3:20 PM">
-        <span data-part="half" data-half="date">
+      <div
+        data-part="segments"
+        data-part-segments=""
+        role="group"
+        aria-label="Narrow, September 10, 2026 at 3:20 PM"
+      >
+        <span data-part="half" data-part-half="" data-half="date">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="month"
             data-half="date"
             role="spinbutton"
@@ -2043,9 +2316,10 @@
           >
             09
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="day"
             data-half="date"
             role="spinbutton"
@@ -2058,9 +2332,10 @@
           >
             10
           </div>
-          <span data-part="literal" aria-hidden="true">/</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">/</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="year"
             data-half="date"
             role="spinbutton"
@@ -2071,11 +2346,12 @@
           >
             2026
           </div>
-          <span data-part="literal" data-boundary aria-hidden="true">,</span>
+          <span data-part="literal" data-part-literal="" data-boundary aria-hidden="true">,</span>
         </span>
-        <span data-part="half" data-half="time">
+        <span data-part="half" data-part-half="" data-half="time">
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="hour"
             data-half="time"
             role="spinbutton"
@@ -2088,9 +2364,10 @@
           >
             03
           </div>
-          <span data-part="literal" aria-hidden="true">:</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="minute"
             data-half="time"
             role="spinbutton"
@@ -2103,9 +2380,10 @@
           >
             20
           </div>
-          <span data-part="literal" aria-hidden="true">&nbsp;</span>
+          <span data-part="literal" data-part-literal="" aria-hidden="true">&nbsp;</span>
           <div
             data-part="segment"
+            data-part-segment=""
             data-field="dayPeriod"
             data-half="time"
             role="spinbutton"

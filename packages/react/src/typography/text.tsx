@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/typography/typography.css';
 
 import { axisAttributes, truncationStyle } from './typography.attributes';
@@ -24,13 +25,13 @@ export function Text({
   wrap,
   ...nativeProps
 }: TextProps) {
-  const rootProps: TypographyRootProps = {
+  const rootProps: TypographyRootProps = keyedProps({
     ...nativeProps,
     ...axisAttributes({ align, numeric, size, tone, transform, truncate, weight, wrap }),
     'data-part': 'root',
     'data-ui': 'typography',
     style: truncationStyle(truncate, style),
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

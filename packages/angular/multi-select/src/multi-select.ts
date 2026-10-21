@@ -146,7 +146,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
   ],
   host: {
     'data-ui': 'multi-select',
+    'data-ui-multi-select': '',
     'data-part': 'root',
+    'data-part-root': '',
     /* The name is the input's and the listbox's; on the host it would name a
        generic element, which is a role that prohibits one. */
     '[attr.aria-label]': 'null',
@@ -167,22 +169,25 @@ const same = (a: readonly string[], b: readonly string[]) =>
     <span hidden [id]="chosenId()">{{ gridLabel() }}</span>
     <div
       data-part="control"
+      data-part-control=""
       role="grid"
       [attr.aria-label]="gridName().label"
       [attr.aria-labelledby]="gridName().labelledBy"
     >
-      <div data-part="chips" role="row" #row>
+      <div data-part="chips" data-part-chips="" role="row" #row>
         @for (chip of value(); track chip; let index = $index) {
           @if (editingValue() === chip) {
             <span
               role="gridcell"
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               [attr.data-value]="chip"
             >
-              <span data-part="body">
+              <span data-part="body" data-part-body="">
                 <input
                   type="text"
                   [attr.aria-label]="labelFor(chip) ?? chip"
@@ -198,7 +203,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
               role="gridcell"
               tabindex="-1"
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               [attr.data-value]="chip"
@@ -206,14 +213,15 @@ const same = (a: readonly string[], b: readonly string[]) =>
               [attr.aria-label]="chipLabel(chip, index)"
               (keydown)="onChipKeyDown(chip, index, $event)"
             >
-              <span data-part="body">
-                <span data-part="label">{{ labelFor(chip) ?? chip }}</span>
+              <span data-part="body" data-part-body="">
+                <span data-part="label" data-part-label="">{{ labelFor(chip) ?? chip }}</span>
               </span>
               @if (!frozen()) {
                 <button
                   type="button"
                   tabindex="-1"
                   data-part="remove"
+                  data-part-remove=""
                   [attr.aria-label]="removeLabelFor(chip)"
                   (click)="onRemoveClick(chip, $event)"
                 >
@@ -231,22 +239,25 @@ const same = (a: readonly string[], b: readonly string[]) =>
             tabindex="-1"
             data-count
             data-ui="tag"
+            data-ui-tag=""
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-variant="outline"
             (click)="onCountClick($event)"
           >
-            <span data-part="body">
-              <span data-part="label">+{{ hiddenCount() }}</span>
+            <span data-part="body" data-part-body="">
+              <span data-part="label" data-part-label="">+{{ hiddenCount() }}</span>
             </span>
           </span>
         }
-        <span data-part="field" role="gridcell">
+        <span data-part="field" data-part-field="" role="gridcell">
           <input
             #control
             type="text"
             role="combobox"
             data-part="input"
+            data-part-input=""
             aria-autocomplete="list"
             [id]="controlId()"
             [value]="inputValue()"
@@ -273,12 +284,13 @@ const same = (a: readonly string[], b: readonly string[]) =>
     </div>
 
     @if (counterText(); as counter) {
-      <span data-part="counter" aria-hidden="true">{{ counter }}</span>
+      <span data-part="counter" data-part-counter="" aria-hidden="true">{{ counter }}</span>
     }
     @if (showClear()) {
       <button
         type="button"
         data-part="clear"
+        data-part-clear=""
         [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
@@ -286,17 +298,24 @@ const same = (a: readonly string[], b: readonly string[]) =>
       </button>
     }
     @if (loading()) {
-      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+      <span
+        data-part="busy"
+        data-part-busy=""
+        data-ui="spinner"
+        data-ui-spinner=""
+        aria-hidden="true"
+      ></span>
     } @else {
       <button
         type="button"
         tabindex="-1"
         data-part="trigger"
+        data-part-trigger=""
         [disabled]="resolvedDisabled()"
         [attr.aria-label]="t('trigger')"
         (click)="onToggle($event)"
       >
-        <span data-part="arrow"
+        <span data-part="arrow" data-part-arrow=""
           ><span slIcon><svg slGlyph name="chevron-down"></svg></span
         ></span>
       </button>
@@ -334,7 +353,9 @@ const same = (a: readonly string[], b: readonly string[]) =>
     <ng-template #layer>
       <div
         data-ui="multi-select"
+        data-ui-multi-select=""
         data-part="positioner"
+        data-part-positioner=""
         [attr.data-align]="resolvedAlign()"
         [attr.data-size]="resolvedSize()"
         [attr.data-width]="resolvedWidth()"
@@ -343,6 +364,7 @@ const same = (a: readonly string[], b: readonly string[]) =>
       >
         <div
           data-part="content"
+          data-part-content=""
           role="listbox"
           aria-multiselectable="true"
           [id]="contentId"
@@ -356,11 +378,18 @@ const same = (a: readonly string[], b: readonly string[]) =>
               Its chips carry no remove control: focus never enters this layer,
               so one would be reachable by pointer and by nothing else.
             -->
-            <div data-part="chosen">
+            <div data-part="chosen" data-part-chosen="">
               @for (held of value(); track held) {
-                <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
-                  <span data-part="body">
-                    <span data-part="label">{{ labelFor(held) ?? held }}</span>
+                <span
+                  data-ui="tag"
+                  data-ui-tag=""
+                  data-part="root"
+                  data-part-root=""
+                  data-size="sm"
+                  data-variant="soft"
+                >
+                  <span data-part="body" data-part-body="">
+                    <span data-part="label" data-part-label="">{{ labelFor(held) ?? held }}</span>
                   </span>
                 </span>
               }
@@ -371,6 +400,7 @@ const same = (a: readonly string[], b: readonly string[]) =>
             <div
               role="option"
               data-part="item"
+              data-part-item=""
               data-create
               aria-selected="false"
               [attr.data-value]="query"
@@ -380,26 +410,34 @@ const same = (a: readonly string[], b: readonly string[]) =>
               (pointerdown)="onOptionPointerDown($event)"
               (pointerenter)="setHighlighted(query, 'pointer', $event)"
             >
-              <span data-part="icon"></span>
-              <span data-part="label">{{ t('create', { query: query }) }}</span>
-              <span data-part="indicator"
+              <span data-part="icon" data-part-icon=""></span>
+              <span data-part="label" data-part-label="">{{ t('create', { query: query }) }}</span>
+              <span data-part="indicator" data-part-indicator=""
                 ><span slIcon><svg slGlyph name="plus"></svg></span
               ></span>
             </div>
           } @else if (!loading() && optionCount() === 0) {
-            <div data-part="empty">{{ t('empty') }}</div>
+            <div data-part="empty" data-part-empty="">{{ t('empty') }}</div>
           }
           @if (loading()) {
-            <div data-part="placeholder" aria-hidden="true">
+            <div data-part="placeholder" data-part-placeholder="" aria-hidden="true">
               @for (row of [0, 1, 2]; track row) {
                 <div>
-                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+                  <span
+                    data-ui="skeleton"
+                    data-ui-skeleton=""
+                    data-part="root"
+                    data-part-root=""
+                    data-shape="text"
+                    data-loading
+                  ></span>
                 </div>
               }
             </div>
           }
           <div
             data-part="status"
+            data-part-status=""
             role="status"
             aria-live="polite"
             [attr.data-loading]="loading() ? '' : null"

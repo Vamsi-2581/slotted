@@ -2,11 +2,24 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/page/contract.json', import.meta.url), 'utf8'),
 );
 const css = readFileSync(new URL('./page.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./page.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./page.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -14,7 +27,7 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.page;
 
 function rule(selector) {
@@ -33,7 +46,7 @@ test('styles every part the contract declares', () => {
   for (const declared of member.parts) {
     if (declared === 'root') continue;
     assert.ok(
-      normalized.includes(`[data-part='${declared}']`),
+      normalized.includes(`[data-part-${declared.toLowerCase()}]`),
       `no rule reaches the ${declared} part`,
     );
   }
@@ -55,12 +68,12 @@ test('grows under an ancestor scroller and scrolls itself under self', () => {
   assert.match(rule(ui), /min-block-size:100%/);
   const self = rule(`${ui}[data-scroll='self']`);
   assert.match(self, /block-size:100%/);
-  const scroller = rule(`${ui}[data-scroll='self']>[data-part='scroll']`);
+  const scroller = rule(`${ui}[data-scroll='self']>[data-part-scroll]`);
   assert.match(scroller, /overflow:auto/);
   assert.match(scroller, /min-block-size:0/);
-  assert.match(rule(`${ui}>[data-part='footer']`), /position:sticky/);
-  assert.match(rule(`${ui}>[data-part='footer']`), /inset-block-end:0/);
-  assert.match(rule(`${ui}[data-scroll='self']>[data-part='footer']`), /position:static/);
+  assert.match(rule(`${ui}>[data-part-footer]`), /position:sticky/);
+  assert.match(rule(`${ui}>[data-part-footer]`), /inset-block-end:0/);
+  assert.match(rule(`${ui}[data-scroll='self']>[data-part-footer]`), /position:static/);
 });
 
 /** The bridge to table, and the ground a sticky section header reads. */
@@ -85,13 +98,10 @@ test('fills when asked, from the compact size class up only', () => {
   const query = /@container slotted-page \(width\s*>=\s*600px\)\{(.*?\})\}/.exec(normalized);
   assert.ok(query, 'fill is not held behind a query on the compact size class');
   const inside = (selector) => query[1].split(`${selector}{`)[1]?.split('}')[0] ?? '';
-  const body = inside(`${ui}[data-fill]>[data-part='scroll']>[data-part='body']`);
+  const body = inside(`${ui}[data-fill]>[data-part-scroll]>[data-part-body]`);
   assert.match(body, /display:flex/);
   assert.match(body, /min-block-size:0/);
-  assert.match(
-    inside(`${ui}[data-fill]>[data-part='scroll']>[data-part='body']>*`),
-    /flex:1 1 auto/,
-  );
+  assert.match(inside(`${ui}[data-fill]>[data-part-scroll]>[data-part-body]>*`), /flex:1 1 auto/);
   assert.doesNotMatch(
     normalized.replace(query[0], ''),
     /\[data-fill\]/,
@@ -110,26 +120,26 @@ test('paints the two grounds the contract names', () => {
 /** The footer enters from below and leaves the same way, on presence's word. */
 test('moves the footer on the presence status', () => {
   const moving = rule(
-    `${ui}>[data-part='footer'][data-status='entering'],${ui}>[data-part='footer'][data-status='exiting']`,
+    `${ui}>[data-part-footer][data-status='entering'],${ui}>[data-part-footer][data-status='exiting']`,
   );
   assert.match(moving, /translate:0 100%/);
-  assert.match(rule(`${ui}>[data-part='footer']`), /transition:translate var\(--_duration\)/);
+  assert.match(rule(`${ui}>[data-part-footer]`), /transition:translate var\(--_duration\)/);
 });
 
 test('lays the footer actions out as one wrapping row aligned to the end', () => {
-  const actions = rule(`${ui}>[data-part='footer']>*>[data-part='actions']`);
+  const actions = rule(`${ui}>[data-part-footer]>*>[data-part-actions]`);
   assert.match(actions, /display:flex/);
   assert.match(actions, /justify-content:flex-end/);
   assert.match(actions, /flex-wrap:wrap/);
 });
 
 test('has no header part', () => {
-  assert.ok(!normalized.includes("[data-part='header']"), 'a header part is styled');
+  assert.ok(!normalized.includes('[data-part-header]'), 'a header part is styled');
 });
 
 /** The header's chrome changes height as it snaps; anchoring would turn that into a scroll. */
 test('lets nothing under the scroll part anchor the scroll', () => {
-  assert.match(rule(`${ui}>[data-part='scroll']`), /overflow-anchor:none/);
+  assert.match(rule(`${ui}>[data-part-scroll]`), /overflow-anchor:none/);
 });
 
 /**
@@ -151,7 +161,7 @@ test('caps the inset of its containers at step 4 below 600 pixels', () => {
   const [selectors, body] = compact.split('{');
   for (let step = 5; step <= 12; step += 1) {
     assert.ok(
-      selectors.split(',').includes(`${ui} [data-ui='container'][data-inset='${step}']`),
+      selectors.split(',').includes(`${ui} [data-ui-container][data-inset='${step}']`),
       `inset ${step} is not capped`,
     );
   }

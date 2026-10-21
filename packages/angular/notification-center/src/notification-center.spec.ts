@@ -120,7 +120,9 @@ const ITEMS: NotificationItem[] = [
       }
       @if (withItemTemplate()) {
         <ng-template slNotificationItem let-item let-position="position" let-ids="ids">
-          <span data-part="title" [id]="ids.title">{{ position }}. {{ item.title }}</span>
+          <span data-part="title" data-part-title="" [id]="ids.title"
+            >{{ position }}. {{ item.title }}</span
+          >
         </ng-template>
       }
       @if (withItemActions()) {

@@ -105,6 +105,7 @@ let counter = 0;
       <button
         #fresh
         data-part="fresh"
+        data-part-fresh=""
         type="button"
         [hidden]="freshCount() <= 0"
         (click)="reveal($event)"
@@ -115,20 +116,26 @@ let counter = 0;
     <ng-content></ng-content>
     @if (growingValue() !== 'none') {
       @if (loading()) {
-        <div #more aria-live="polite" data-part="more">
-          <span aria-hidden="true" data-part="root" data-ui="spinner"></span>
+        <div #more aria-live="polite" data-part="more" data-part-more="">
+          <span
+            aria-hidden="true"
+            data-part="root"
+            data-part-root=""
+            data-ui="spinner"
+            data-ui-spinner=""
+          ></span>
           {{ t('loading') }}
         </div>
       } @else if (growingValue() === 'button') {
-        <button #more data-part="more" type="button" (click)="loadMore($event)">
+        <button #more data-part="more" data-part-more="" type="button" (click)="loadMore($event)">
           {{ t('loadMore') }}
         </button>
       } @else {
-        <div #more data-part="more"></div>
+        <div #more data-part="more" data-part-more=""></div>
       }
     }
     @if (loaded() === 0 && !loading()) {
-      <div data-part="empty">
+      <div data-part="empty" data-part-empty="">
         <ng-content select="[slTimelineEmpty]">{{ t('empty') }}</ng-content>
       </div>
     }
@@ -143,7 +150,9 @@ let counter = 0;
   exportAs: 'slTimeline',
   host: {
     'data-ui': 'timeline',
+    'data-ui-timeline': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-mode]': 'modeValue()',
     '[attr.data-orientation]': 'orientationValue()',
     '[attr.data-placement]': 'placementValue()',
@@ -348,6 +357,7 @@ function assignLast(items: readonly SlTimelineItem[]) {
   exportAs: 'slTimelineList',
   host: {
     'data-part': 'list',
+    'data-part-list': '',
     '[attr.id]': 'timeline.id',
     '[attr.role]': 'timeline.feed() ? "feed" : null',
     '[attr.aria-label]': 'accessibleLabel()',
@@ -444,19 +454,29 @@ export class SlTimelineList {
   template: `
     @switch (levelValue()) {
       @case (2) {
-        <h2 data-part="group-label"><ng-container *ngTemplateOutlet="heading"></ng-container></h2>
+        <h2 data-part="group-label" data-part-group-label="">
+          <ng-container *ngTemplateOutlet="heading"></ng-container>
+        </h2>
       }
       @case (4) {
-        <h4 data-part="group-label"><ng-container *ngTemplateOutlet="heading"></ng-container></h4>
+        <h4 data-part="group-label" data-part-group-label="">
+          <ng-container *ngTemplateOutlet="heading"></ng-container>
+        </h4>
       }
       @case (5) {
-        <h5 data-part="group-label"><ng-container *ngTemplateOutlet="heading"></ng-container></h5>
+        <h5 data-part="group-label" data-part-group-label="">
+          <ng-container *ngTemplateOutlet="heading"></ng-container>
+        </h5>
       }
       @case (6) {
-        <h6 data-part="group-label"><ng-container *ngTemplateOutlet="heading"></ng-container></h6>
+        <h6 data-part="group-label" data-part-group-label="">
+          <ng-container *ngTemplateOutlet="heading"></ng-container>
+        </h6>
       }
       @default {
-        <h3 data-part="group-label"><ng-container *ngTemplateOutlet="heading"></ng-container></h3>
+        <h3 data-part="group-label" data-part-group-label="">
+          <ng-container *ngTemplateOutlet="heading"></ng-container>
+        </h3>
       }
     }
     <ng-content></ng-content>
@@ -467,14 +487,15 @@ export class SlTimelineList {
           [attr.aria-controls]="listId"
           [attr.aria-expanded]="isOpen()"
           data-part="group-trigger"
+          data-part-group-trigger=""
           type="button"
           (click)="toggle($event)"
         >
-          <span aria-hidden="true" data-part="group-indicator"
+          <span aria-hidden="true" data-part="group-indicator" data-part-group-indicator=""
             ><span slIcon><svg slGlyph name="chevron-down"></svg></span
           ></span>
           {{ label()
-          }}<span data-ui="visually-hidden">{{
+          }}<span data-ui="visually-hidden" data-ui-visually-hidden="">{{
             isOpen() ? timeline.t('collapse') : timeline.t('expand')
           }}</span>
         </button>
@@ -494,6 +515,7 @@ export class SlTimelineList {
   exportAs: 'slTimelineGroup',
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     '[attr.data-open]': 'isOpen() ? "" : null',
   },
 })
@@ -544,6 +566,7 @@ export class SlTimelineGroup {
   exportAs: 'slTimelineGroupList',
   host: {
     'data-part': 'group-list',
+    'data-part-group-list': '',
     '[attr.id]': 'group.listId',
     '[hidden]': '!group.isOpen()',
   },
@@ -578,10 +601,16 @@ export class SlTimelineGroupList {
    */
   template: `
     <ng-content select="[slTimelineOpposite]"></ng-content>
-    <div data-part="rail">
-      <span data-part="marker">
+    <div data-part="rail" data-part-rail="">
+      <span data-part="marker" data-part-marker="">
         @if (loading()) {
-          <span aria-hidden="true" data-part="root" data-ui="spinner"></span>
+          <span
+            aria-hidden="true"
+            data-part="root"
+            data-part-root=""
+            data-ui="spinner"
+            data-ui-spinner=""
+          ></span>
         } @else {
           <ng-content select="[slTimelineMarker]">
             @if (finished() && !current()) {
@@ -591,16 +620,18 @@ export class SlTimelineGroupList {
         }
       </span>
       @if (!last()) {
-        <span aria-hidden="true" data-part="connector"></span>
+        <span aria-hidden="true" data-part="connector" data-part-connector=""></span>
       }
     </div>
-    <div data-part="content">
+    <div data-part="content" data-part-content="">
       @if (title() !== undefined) {
-        <div data-part="title" [id]="partId('title')">{{ title() }}</div>
+        <div data-part="title" data-part-title="" [id]="partId('title')">{{ title() }}</div>
       }
       <ng-content select="[slTimelineTitle]"></ng-content>
       @if (current()) {
-        <span data-ui="visually-hidden" [id]="partId('current')">{{ timeline.t('current') }}</span>
+        <span data-ui="visually-hidden" data-ui-visually-hidden="" [id]="partId('current')">{{
+          timeline.t('current')
+        }}</span>
       }
       @if (time() !== undefined) {
         @if (timeLabel() !== undefined) {
@@ -610,11 +641,13 @@ export class SlTimelineGroupList {
         }
       }
       @if (actor() !== undefined) {
-        <div data-part="actor" [id]="partId('actor')">{{ actor() }}</div>
+        <div data-part="actor" data-part-actor="" [id]="partId('actor')">{{ actor() }}</div>
       }
       <ng-content select="[slTimelineActor]"></ng-content>
       @if (description() !== undefined) {
-        <div data-part="description" [id]="partId('description')">{{ description() }}</div>
+        <div data-part="description" data-part-description="" [id]="partId('description')">
+          {{ description() }}
+        </div>
       }
       <ng-content select="[slTimelineDescription]"></ng-content>
       <ng-content></ng-content>
@@ -631,6 +664,7 @@ export class SlTimelineGroupList {
   exportAs: 'slTimelineItem',
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.role]': 'timeline.feed() ? "article" : null',
     '[attr.tabindex]': 'timeline.feed() ? (ownTabindex ?? "0") : null',
     '[attr.aria-posinset]': 'timeline.feed() ? index() + 1 : null',
@@ -749,6 +783,7 @@ export class SlTimelineItem {
   exportAs: 'slTimelineTime',
   host: {
     'data-part': 'time',
+    'data-part-time': '',
     '[attr.datetime]': 'formatted().dateTime',
     '[attr.title]': 'formatted().title',
   },
@@ -782,7 +817,7 @@ export class SlTimelineTime {
 @Directive({
   selector: '[slTimelineTitle]',
   standalone: true,
-  host: { 'data-part': 'title', '[attr.id]': 'item.partId("title")' },
+  host: { 'data-part': 'title', 'data-part-title': '', '[attr.id]': 'item.partId("title")' },
 })
 export class SlTimelineTitle {
   readonly item = inject(SlTimelineItem);
@@ -791,7 +826,7 @@ export class SlTimelineTitle {
 @Directive({
   selector: '[slTimelineActor]',
   standalone: true,
-  host: { 'data-part': 'actor', '[attr.id]': 'item.partId("actor")' },
+  host: { 'data-part': 'actor', 'data-part-actor': '', '[attr.id]': 'item.partId("actor")' },
 })
 export class SlTimelineActor {
   readonly item = inject(SlTimelineItem);
@@ -800,19 +835,27 @@ export class SlTimelineActor {
 @Directive({
   selector: '[slTimelineDescription]',
   standalone: true,
-  host: { 'data-part': 'description', '[attr.id]': 'item.partId("description")' },
+  host: {
+    'data-part': 'description',
+    'data-part-description': '',
+    '[attr.id]': 'item.partId("description")',
+  },
 })
 export class SlTimelineDescription {
   readonly item = inject(SlTimelineItem);
 }
 
-@Directive({ selector: '[slTimelineActions]', standalone: true, host: { 'data-part': 'actions' } })
+@Directive({
+  selector: '[slTimelineActions]',
+  standalone: true,
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
+})
 export class SlTimelineActions {}
 
 @Directive({
   selector: '[slTimelineOpposite]',
   standalone: true,
-  host: { 'data-part': 'opposite' },
+  host: { 'data-part': 'opposite', 'data-part-opposite': '' },
 })
 export class SlTimelineOpposite {}
 

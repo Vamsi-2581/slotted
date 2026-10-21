@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/split-button/split-button.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -82,7 +83,7 @@ export function SplitButton({
     value: remember ? state.value : undefined,
   };
 
-  const rootProps: SplitButtonRootProps = {
+  const rootProps: SplitButtonRootProps = keyedProps({
     role: 'group',
     ...nativeProps,
     children: (
@@ -104,7 +105,7 @@ export function SplitButton({
     'data-tone': resolved.tone,
     'data-ui': 'split-button',
     'data-variant': resolved.variant,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

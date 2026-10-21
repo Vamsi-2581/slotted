@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/message-scroller/message-scroller.css';
 
 import { messageScrollerMessages } from '@slotted/core/i18n';
@@ -158,13 +159,13 @@ export function MessageScroller({
     t,
   };
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'root',
     'data-ui': 'message-scroller',
     ref: setRoot,
-  } as MessageScrollerRootProps;
+  }) as MessageScrollerRootProps;
 
   return (
     <Context.Provider value={context}>
@@ -189,7 +190,7 @@ export function MessageScrollerViewport({ ref, render, ...nativeProps }: Message
     },
     [ref, registerViewport],
   );
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-label': scroller.t('label'),
     role: 'region',
     tabIndex: 0,
@@ -197,7 +198,7 @@ export function MessageScrollerViewport({ ref, render, ...nativeProps }: Message
     'data-part': 'viewport',
     ...(scroller.defaultPosition === 'start' ? {} : { 'data-pending': '' }),
     ref: attach,
-  } as MessageScrollerRootProps;
+  }) as MessageScrollerRootProps;
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -215,14 +216,14 @@ export function MessageScrollerContent({ ref, render, ...nativeProps }: MessageS
     },
     [ref, registerContent],
   );
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-relevant': 'additions',
     role: 'log',
     ...(scroller.busy ? { 'aria-busy': true } : {}),
     ...nativeProps,
     'data-part': 'content',
     ref: attach,
-  } as MessageScrollerRootProps;
+  }) as MessageScrollerRootProps;
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -233,12 +234,12 @@ export function MessageScrollerItem({
   render,
   ...nativeProps
 }: MessageScrollerItemProps) {
-  const rootProps: MessageScrollerRootProps = {
+  const rootProps: MessageScrollerRootProps = keyedProps({
     ...nativeProps,
     ...(anchor ? { 'data-anchor': 'true' } : {}),
     ...(messageId === undefined ? {} : { 'data-message-id': messageId }),
     'data-part': 'item',
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -249,12 +250,12 @@ export function MessageScrollerSeparator({
   sticky,
   ...nativeProps
 }: MessageScrollerSeparatorProps) {
-  const rootProps: MessageScrollerRootProps = {
+  const rootProps: MessageScrollerRootProps = keyedProps({
     ...nativeProps,
     children: <span>{children}</span>,
     'data-part': 'separator',
     ...(sticky ? { 'data-sticky': '' } : {}),
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -265,11 +266,11 @@ export function MessageScrollerUnread({
   ...nativeProps
 }: MessageScrollerPartProps) {
   const { t } = useMessageScroller();
-  const rootProps: MessageScrollerRootProps = {
+  const rootProps: MessageScrollerRootProps = keyedProps({
     ...nativeProps,
     children: <span>{children ?? t('unread')}</span>,
     'data-part': 'unread',
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -280,17 +281,17 @@ export function MessageScrollerLoader({
   ...nativeProps
 }: MessageScrollerPartProps) {
   const { t } = useMessageScroller();
-  const rootProps: MessageScrollerRootProps = {
+  const rootProps: MessageScrollerRootProps = keyedProps({
     role: 'status',
     ...nativeProps,
     children: (
       <>
-        <span aria-hidden="true" data-ui="spinner" />
+        <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" />
         <span>{children ?? t('loader')}</span>
       </>
     ),
     'data-part': 'loader',
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -324,10 +325,10 @@ export function MessageScrollerJump({
     <button
       aria-label={ariaLabel ?? name}
       type="button"
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'jump')}
       data-active={String(active)}
       data-direction={direction}
-      data-part="jump"
+
       inert={!active}
       onClick={(event: MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
@@ -342,7 +343,11 @@ export function MessageScrollerJump({
           <Icon>
             <Glyph name="arrow-left" />
           </Icon>
-          {words === null ? null : <span data-part="jump-count">{words}</span>}
+          {words === null ? null : (
+            <span data-part="jump-count" data-part-jump-count="">
+              {words}
+            </span>
+          )}
         </>
       )}
     </button>

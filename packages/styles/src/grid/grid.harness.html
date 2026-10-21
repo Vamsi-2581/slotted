@@ -67,7 +67,9 @@
       <span data-demo-label>columns 2 · minItemWidth xs</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="2"
         data-min-item-width="xs"
         style="--slotted-grid-columns: 2"
@@ -83,7 +85,9 @@
       <span data-demo-label>columns 3 · minItemWidth xs · two cells fill two thirds</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="3"
         data-min-item-width="xs"
         style="--slotted-grid-columns: 3"
@@ -97,7 +101,9 @@
       <span data-demo-label>columns 4 · minItemWidth xs · gap 2</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="4"
         data-min-item-width="xs"
         data-gap="2"
@@ -120,7 +126,13 @@
   <div data-demo-column>
     <div data-demo-column="3">
       <span data-demo-label>no count · as many tracks as fit · minItemWidth sm</span>
-      <div data-ui="grid" data-part="root" data-min-item-width="sm">
+      <div
+        data-ui="grid"
+        data-ui-grid=""
+        data-part="root"
+        data-part-root=""
+        data-min-item-width="sm"
+      >
         <div data-demo>Workspace settings</div>
         <div data-demo>Members and roles</div>
         <div data-demo>Billing history</div>
@@ -130,7 +142,7 @@
 
     <div data-demo-column="3">
       <span data-demo-label>no count · minItemWidth md · the default</span>
-      <div data-ui="grid" data-part="root">
+      <div data-ui="grid" data-ui-grid="" data-part="root" data-part-root="">
         <div data-demo>Workspace settings</div>
         <div data-demo>Members and roles</div>
         <div data-demo>Billing history</div>
@@ -142,7 +154,9 @@
       <span data-demo-label>columns 12 · a ceiling, not a promise · minItemWidth xs</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="12"
         data-min-item-width="xs"
         data-gap="2"
@@ -165,7 +179,13 @@
 
     <div data-demo-column="3">
       <span data-demo-label>minItemWidth xl · wider than 240px, so it becomes one track</span>
-      <div data-ui="grid" data-part="root" data-min-item-width="xl">
+      <div
+        data-ui="grid"
+        data-ui-grid=""
+        data-part="root"
+        data-part-root=""
+        data-min-item-width="xl"
+      >
         <div data-demo>A cell that refuses to be narrow</div>
         <div data-demo>And its neighbour</div>
       </div>
@@ -179,7 +199,9 @@
       <span data-demo-label>align stretch · the platform default · cells share a height</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="2"
         data-min-item-width="xs"
         style="--slotted-grid-columns: 2"
@@ -193,7 +215,9 @@
       <span data-demo-label>align start · each cell keeps its own height</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="2"
         data-min-item-width="xs"
         data-align="start"
@@ -208,7 +232,9 @@
       <span data-demo-label>align center · justify center · the cell holds its content</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="2"
         data-min-item-width="xs"
         data-align="center"
@@ -224,7 +250,9 @@
       <span data-demo-label>justify end · mirrors in a right-to-left document</span>
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="2"
         data-min-item-width="xs"
         data-justify="end"
@@ -243,7 +271,9 @@
     <div data-demo-frame lang="ar" dir="rtl">
       <div
         data-ui="grid"
+        data-ui-grid=""
         data-part="root"
+        data-part-root=""
         data-columns="3"
         data-min-item-width="xs"
         style="--slotted-grid-columns: 3"
@@ -257,7 +287,9 @@
     <span data-demo-label>a token longer than the cell breaks instead of widening it</span>
     <div
       data-ui="grid"
+      data-ui-grid=""
       data-part="root"
+      data-part-root=""
       data-columns="2"
       data-min-item-width="xs"
       style="--slotted-grid-columns: 2"
@@ -271,11 +303,11 @@
     </div>
 
     <span data-demo-label>one cell, and a grid that holds nothing</span>
-    <div data-ui="grid" data-part="root" data-min-item-width="sm">
+    <div data-ui="grid" data-ui-grid="" data-part="root" data-part-root="" data-min-item-width="sm">
       <div data-demo>Alone, and filling the row</div>
     </div>
     <div data-demo-frame>
-      <div data-ui="grid" data-part="root"></div>
+      <div data-ui="grid" data-ui-grid="" data-part="root" data-part-root=""></div>
     </div>
   </div>
 </section>

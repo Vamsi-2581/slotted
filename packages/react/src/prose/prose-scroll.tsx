@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { proseMessages } from '@slotted/core/i18n';
 import { createScrollAffordance } from '@slotted/core/overflow';
 import type { ScrollAffordanceHandle } from '@slotted/core/overflow';
@@ -88,7 +89,11 @@ export function ProseScroll({
     [],
   );
 
-  const rootProps: ProseScrollRootProps = { ...nativeProps, 'data-part': 'scroll', ref: attach };
+  const rootProps: ProseScrollRootProps = keyedProps({
+    ...nativeProps,
+    'data-part': 'scroll',
+    ref: attach,
+  });
 
   /**
    * A role or a name the consumer wrote is kept: the family adds the wiring a

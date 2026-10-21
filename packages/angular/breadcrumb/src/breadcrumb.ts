@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import {
   afterNextRender,
   afterRenderEffect,
@@ -80,7 +81,9 @@ import {
   exportAs: 'slBreadcrumb',
   host: {
     'data-ui': 'breadcrumb',
+    'data-ui-breadcrumb': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-label]': 'accessibleLabel()',
     '[attr.data-expanded]': 'expanded() ? "" : null',
     '[attr.data-collapsed]': 'collapsedCount() > 0 ? collapsedCount() : null',
@@ -208,19 +211,20 @@ export class SlBreadcrumb {
       [attr.aria-label]="label()"
       aria-expanded="false"
       data-part="ellipsis"
+      data-part-ellipsis=""
       type="button"
       (click)="trail.expand('pointer', $event)"
       (keydown)="onKeydown($event)"
     >
       <span slIcon><svg slGlyph name="ellipsis"></svg></span>
     </button>
-    <span aria-hidden="true" data-part="separator">
+    <span aria-hidden="true" data-part="separator" data-part-separator="">
       <ng-container *ngTemplateOutlet="trail.separatorValue() ?? null"></ng-container>
     </span>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'item' },
+  host: { 'data-part': 'item', 'data-part-item': '' },
 })
 class SlBreadcrumbEllipsis {
   readonly trail = inject(SlBreadcrumb);
@@ -253,7 +257,7 @@ class SlBreadcrumbEllipsis {
   selector: 'ol[slBreadcrumbList]',
   standalone: true,
   exportAs: 'slBreadcrumbList',
-  host: { 'data-part': 'list' },
+  host: { 'data-part': 'list', 'data-part-list': '' },
 })
 export class SlBreadcrumbList {
   private readonly trail = inject(SlBreadcrumb);
@@ -415,7 +419,7 @@ export class SlBreadcrumbList {
   template: `
     <ng-content></ng-content>
     @if (!last()) {
-      <span aria-hidden="true" data-part="separator">
+      <span aria-hidden="true" data-part="separator" data-part-separator="">
         <ng-container *ngTemplateOutlet="trail.separatorValue() ?? null"></ng-container>
       </span>
     }
@@ -426,6 +430,7 @@ export class SlBreadcrumbList {
   exportAs: 'slBreadcrumbItem',
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.hidden]': 'collapsed() ? "" : null',
   },
 })
@@ -454,7 +459,7 @@ export class SlBreadcrumbItem {
   selector: 'a[slBreadcrumbLink]',
   standalone: true,
   exportAs: 'slBreadcrumbLink',
-  host: { 'data-part': 'link' },
+  host: { 'data-part': 'link', 'data-part-link': '' },
 })
 export class SlBreadcrumbLink {
   private readonly element: HTMLAnchorElement = inject(ElementRef).nativeElement;
@@ -475,6 +480,7 @@ export class SlBreadcrumbLink {
   exportAs: 'slBreadcrumbPage',
   host: {
     'data-part': 'page',
+    'data-part-page': '',
     'aria-current': 'page',
   },
 })
@@ -503,6 +509,7 @@ export class SlBreadcrumbPage {}
   exportAs: 'slBreadcrumbTrigger',
   host: {
     'data-part': 'trigger',
+    'data-part-trigger': '',
     '[attr.type]': 'ownType ?? "button"',
     '[attr.aria-current]': 'current() ? "page" : ownCurrent',
   },
@@ -524,7 +531,7 @@ export class SlBreadcrumbTrigger {
      * part written back after the first render is never erased again —
      * `docs/build-briefing.md` records the rule.
      */
-    afterNextRender(() => this.element.setAttribute('data-part', 'trigger'));
+    afterNextRender(() => writeSelectorKey(this.element, 'part', 'trigger'));
   }
 }
 

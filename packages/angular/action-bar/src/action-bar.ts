@@ -174,7 +174,9 @@ function provideBarStep() {
   providers: [provideBarStep()],
   host: {
     'data-ui': 'action-bar',
+    'data-ui-action-bar': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'role()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-size]': 'resolvedSize()',
@@ -412,7 +414,7 @@ export class SlActionBar {
   selector: '[slActionBarStatus]',
   standalone: true,
   exportAs: 'slActionBarStatus',
-  host: { 'data-part': 'status' },
+  host: { 'data-part': 'status', 'data-part-status': '' },
 })
 export class SlActionBarStatus {}
 
@@ -427,7 +429,7 @@ export class SlActionBarStatus {}
   selector: '[slActionBarActions]',
   standalone: true,
   exportAs: 'slActionBarActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlActionBarActions {
   private readonly bar = inject(SlActionBar);
@@ -454,6 +456,7 @@ export class SlActionBarActions {
   exportAs: 'slActionBarAction',
   host: {
     'data-part': 'action',
+    'data-part-action': '',
     '[attr.data-unit]': 'unitId()',
     '[attr.data-priority]': 'resolvedPriority()',
     '[attr.hidden]': 'resolvedPriority() === "always" ? "" : null',
@@ -526,6 +529,11 @@ let unitCount = 0;
   selector: '[slActionBarSeparator]',
   standalone: true,
   exportAs: 'slActionBarSeparator',
-  host: { 'data-part': 'separator', role: 'separator', 'aria-orientation': 'vertical' },
+  host: {
+    'data-part': 'separator',
+    'data-part-separator': '',
+    role: 'separator',
+    'aria-orientation': 'vertical',
+  },
 })
 export class SlActionBarSeparator {}

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useEffect, useState } from 'react';
 import type { ComponentPropsWithRef, MouseEvent, ReactNode } from 'react';
 
@@ -70,13 +71,13 @@ function part(name: string, displayName: string) {
     style,
     ...nativeProps
   }: PageHeaderPartComponentProps) {
-    const rootProps: PageHeaderPartProps = {
+    const rootProps: PageHeaderPartProps = keyedProps({
       ...nativeProps,
       children,
       className,
       'data-part': name,
       style,
-    };
+    });
     if (render !== undefined) return render(rootProps);
     return <div {...rootProps} ref={ref} />;
   }
@@ -127,7 +128,7 @@ export function PageHeaderProgress({
   const header = usePageHeader();
   const defaults = useProgressIndicatorDefaults();
   return (
-    <div data-part="progress">
+    <div data-part="progress" data-part-progress="">
       <ProgressBar
         {...barProps}
         delay={delay ?? defaults.delay ?? 200}
@@ -152,7 +153,7 @@ export function PageHeaderBack({
   style,
   ...nativeProps
 }: PageHeaderBackProps) {
-  const rootProps: PageHeaderPartProps = {
+  const rootProps: PageHeaderPartProps = keyedProps({
     ...nativeProps,
     /* The arrow points along the reading direction and mirrors with it. */
     children: (
@@ -166,7 +167,7 @@ export function PageHeaderBack({
     className,
     'data-part': 'back',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <a {...rootProps} ref={ref} />;
 }
@@ -188,7 +189,7 @@ export function PageHeaderHeading({
 }: PageHeaderHeadingProps) {
   const { ids, level, loading } = usePageHeader();
   const text = typeof children === 'string' ? children : undefined;
-  const rootProps: PageHeaderHeadingRootProps = {
+  const rootProps: PageHeaderHeadingRootProps = keyedProps({
     ...nativeProps,
     children: loading ? placeholder(1) : children,
     className,
@@ -196,7 +197,7 @@ export function PageHeaderHeading({
     id: ids.headingId,
     style,
     ...(title !== undefined || text !== undefined ? { title: title ?? text } : {}),
-  };
+  });
   if (render !== undefined) return render(rootProps);
   const Heading = `h${level}` as 'h1';
   return <Heading {...rootProps} ref={ref} />;
@@ -212,13 +213,13 @@ export function PageHeaderSubheading({
   ...nativeProps
 }: PageHeaderSubheadingProps) {
   const { loading } = usePageHeader();
-  const rootProps: PageHeaderPartProps = {
+  const rootProps: PageHeaderPartProps = keyedProps({
     ...nativeProps,
     children: loading ? placeholder(1) : children,
     className,
     'data-part': 'subheading',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <p {...rootProps} ref={ref} />;
 }
@@ -233,13 +234,13 @@ export function PageHeaderDescription({
   ...nativeProps
 }: PageHeaderDescriptionProps) {
   const { loading } = usePageHeader();
-  const rootProps: PageHeaderPartProps = {
+  const rootProps: PageHeaderPartProps = keyedProps({
     ...nativeProps,
     children: loading ? placeholder(2) : children,
     className,
     'data-part': 'description',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <p {...rootProps} ref={ref} />;
 }
@@ -275,7 +276,7 @@ export function PageHeaderArea({
     }
   }, [element, closedByControl]);
 
-  const rootProps: PageHeaderAreaRootProps = {
+  const rootProps: PageHeaderAreaRootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel ?? t('headerArea'),
     children,
@@ -284,7 +285,7 @@ export function PageHeaderArea({
     id: ids.areaId,
     role: 'region',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return (
     <div
@@ -309,13 +310,13 @@ export function PageHeaderControls({
   style,
   ...nativeProps
 }: PageHeaderPartComponentProps) {
-  const rootProps: PageHeaderPartProps = {
+  const rootProps: PageHeaderPartProps = keyedProps({
     ...nativeProps,
     children: <div>{children}</div>,
     className,
     'data-part': 'controls',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -336,7 +337,7 @@ export function PageHeaderToggle({
   ...nativeProps
 }: PageHeaderToggleProps) {
   const { expanded, ids, setExpanded, t } = usePageHeader();
-  const rootProps: PageHeaderToggleRootProps = {
+  const rootProps: PageHeaderToggleRootProps = keyedProps({
     ...nativeProps,
     'aria-controls': ids.areaId,
     'aria-expanded': expanded,
@@ -357,7 +358,7 @@ export function PageHeaderToggle({
     },
     style,
     type: 'button',
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} ref={ref} />;
 }
@@ -378,7 +379,7 @@ export function PageHeaderPin({
   ...nativeProps
 }: PageHeaderPinProps) {
   const { pinned, setPinned, t } = usePageHeader();
-  const rootProps: PageHeaderPinRootProps = {
+  const rootProps: PageHeaderPinRootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel ?? (pinned ? t('unpin') : t('pin')),
     'aria-pressed': pinned,
@@ -398,7 +399,7 @@ export function PageHeaderPin({
     },
     style,
     type: 'button',
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} ref={ref} />;
 }

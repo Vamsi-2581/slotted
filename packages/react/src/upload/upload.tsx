@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/upload/upload.css';
 
 import { uploadMessages } from '@slotted/core/i18n';
@@ -534,6 +535,7 @@ export function Upload({
       <button
         aria-label={t(action, { name: file.name })}
         data-part={part}
+        {...selectorKeyProps('part', part)}
         key={part}
         onClick={(event) => act(file, action, event)}
         type="button"
@@ -574,22 +576,30 @@ export function Upload({
 
     const nameProps = {
       'data-part': 'filename',
+      ...selectorKeyProps('part', 'filename'),
       dir: 'auto' as const,
       children: (
         <>
-          <span data-part="name">{stem}</span>
-          {extension === '' ? null : <span data-part="extension">{extension}</span>}
+          <span data-part="name" data-part-name="">
+            {stem}
+          </span>
+          {extension === '' ? null : (
+            <span data-part="extension" data-part-extension="">
+              {extension}
+            </span>
+          )}
         </>
       ),
     };
 
     return (
-      <li data-part="item" data-status={file.status} key={file.key}>
+      <li data-part="item" data-part-item="" data-status={file.status} key={file.key}>
         {preview === 'none' && layout === 'list' ? null : (
           <span
             data-extension={extension.replace('.', '').toUpperCase() || t('noExtension')}
             data-kind={file.kind}
             data-part="preview"
+            data-part-preview=""
           >
             {url !== undefined && file.type.startsWith('image/') ? (
               <img alt="" src={url} />
@@ -601,7 +611,7 @@ export function Upload({
           </span>
         )}
 
-        <div data-part="body">
+        <div data-part="body" data-part-body="">
           {openable ? (
             <button
               {...nameProps}
@@ -611,19 +621,23 @@ export function Upload({
           ) : (
             <span {...nameProps} />
           )}
-          <div data-part="detail">
-            <span data-part="meta">{formatters.bytes(file.size)}</span>
-            <span data-part="status">
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">
+              {formatters.bytes(file.size)}
+            </span>
+            <span data-part="status" data-part-status="">
               {t(file.status)}
               {percent !== null && showBar ? ` · ${Math.round(percent)}%` : ''}
             </span>
           </div>
         </div>
 
-        <span data-part="actions">{controls(file)}</span>
+        <span data-part="actions" data-part-actions="">
+          {controls(file)}
+        </span>
 
         {showBar ? (
-          <div data-part="progress">
+          <div data-part="progress" data-part-progress="">
             {/* The bar is `progress-indicator`'s. The row already says what is
                 happening in words, so the bar is decorative here — the one case
                 the feature guide names for it. */}
@@ -637,13 +651,15 @@ export function Upload({
         ) : null}
 
         {file.status === 'rejected' || file.status === 'error' ? (
-          <p data-part="message">{file.status === 'rejected' ? rejection(file) : t('error')}</p>
+          <p data-part="message" data-part-message="">
+            {file.status === 'rejected' ? rejection(file) : t('error')}
+          </p>
         ) : null}
       </li>
     );
   };
 
-  const rootProps: UploadRootProps = {
+  const rootProps: UploadRootProps = keyedProps({
     ...(resolvedDisabled === true ? { 'data-disabled': '' } : {}),
     ...(resolvedInvalid === true ? { 'data-invalid': '' } : {}),
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
@@ -660,9 +676,13 @@ export function Upload({
     style,
     children: (
       <>
-        {label === undefined || insideField ? null : <span data-part="label">{label}</span>}
+        {label === undefined || insideField ? null : (
+          <span data-part="label" data-part-label="">
+            {label}
+          </span>
+        )}
         {description === undefined || insideField ? null : (
-          <p data-part="description" id={`${id ?? generated}-description`}>
+          <p data-part="description" data-part-description="" id={`${id ?? generated}-description`}>
             {description}
           </p>
         )}
@@ -672,6 +692,7 @@ export function Upload({
         ) : (
           <div
             data-part="dropzone"
+            data-part-dropzone=""
             {...(clickToBrowse && accepting ? { 'data-browsable': '' } : {})}
             {...(verdict === 'target' ? { 'data-drop-target': '' } : {})}
             {...(verdict === 'invalid' ? { 'data-drop-invalid': '' } : {})}
@@ -697,7 +718,7 @@ export function Upload({
             ) : null}
             {trigger()}
             {variant === 'field' ? (
-              <span data-part="meta">
+              <span data-part="meta" data-part-meta="">
                 {current.length === 0
                   ? '—'
                   : current.length === 1
@@ -709,7 +730,7 @@ export function Upload({
         )}
 
         {current.length > 1 ? (
-          <div data-part="summary">
+          <div data-part="summary" data-part-summary="">
             <span>
               {remaining === null
                 ? t('summary', { uploaded: summary.counts.success, total: summary.total })
@@ -722,6 +743,7 @@ export function Upload({
             {resolvedReadOnly === true ? null : (
               <button
                 data-part="clear"
+                data-part-clear=""
                 onClick={(event) => {
                   for (const file of listRef.current) runnerRef.current?.remove(file.key);
                   request([], 'clear', event);
@@ -737,6 +759,7 @@ export function Upload({
         {current.length === 0 || (variant === 'field' && current.length === 1) ? null : (
           <ul
             data-part="list"
+            data-part-list=""
             style={
               {
                 '--slotted-upload-visible-rows': maxRows === 0 ? current.length : maxRows,
@@ -761,11 +784,11 @@ export function Upload({
       </>
     ),
     ...nativeProps,
-  };
+  });
 
   function trigger() {
     return (
-      <label data-part="trigger" ref={triggerRef}>
+      <label data-part="trigger" data-part-trigger="" ref={triggerRef}>
         {variant === 'dropzone' ? null : (
           <Icon>
             <Glyph name="upload" />
@@ -783,6 +806,7 @@ export function Upload({
           }
           capture={capture}
           data-part="input"
+          data-part-input=""
           disabled={resolvedDisabled}
           id={id ?? field?.ids.control}
           multiple={multiple}

@@ -20,7 +20,7 @@
    *   DOM so it is read first; `position: absolute` is what keeps it from
    *   taking a grid cell or adding a line.
    */
-  [data-ui='inline-message'][data-part='root'] {
+  [data-ui-inline-message][data-part-root] {
     /**
      * The default is the help tone, which is what most fields carry. It is the
      * one tone that paints in the neutral muted ink rather than in a tone's
@@ -91,23 +91,23 @@
    * a severity.
    */
 
-  [data-ui='inline-message'][data-part='root'][data-tone='accent'] {
+  [data-ui-inline-message][data-part-root][data-tone='accent'] {
     --_text: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='inline-message'][data-part='root'][data-tone='secondary'] {
+  [data-ui-inline-message][data-part-root][data-tone='secondary'] {
     --_text: var(--slotted-text-muted);
   }
 
-  [data-ui='inline-message'][data-part='root'][data-tone='success'] {
+  [data-ui-inline-message][data-part-root][data-tone='success'] {
     --_text: var(--slotted-tone-success-text);
   }
 
-  [data-ui='inline-message'][data-part='root'][data-tone='warning'] {
+  [data-ui-inline-message][data-part-root][data-tone='warning'] {
     --_text: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='inline-message'][data-part='root'][data-tone='danger'] {
+  [data-ui-inline-message][data-part-root][data-tone='danger'] {
     --_text: var(--slotted-tone-danger-text);
   }
 
@@ -119,11 +119,11 @@
    * field. Both are restated per density by the theme.
    */
 
-  [data-ui='inline-message'][data-part='root'][data-size='sm'] {
+  [data-ui-inline-message][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
   }
 
-  [data-ui='inline-message'][data-part='root'][data-size='md'] {
+  [data-ui-inline-message][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
   }
 
@@ -137,7 +137,7 @@
    * character as the message. A space is content: it defeats `:empty` below, so
    * the mark and the severity word would be drawn beside nothing.
    */
-  [data-ui='inline-message'][data-part='root'][data-reserve] {
+  [data-ui-inline-message][data-part-root][data-reserve] {
     min-block-size: 1lh;
   }
 
@@ -156,7 +156,7 @@
    * a one-pixel box, clipped, out of flow, on a single line, with the negative
    * margin that keeps it from adding a pixel of scrollable overflow.
    */
-  [data-ui='inline-message'] > [data-part='prefix'] {
+  [data-ui-inline-message] > [data-part-prefix] {
     block-size: 1px;
     border: 0;
     clip-path: inset(50%);
@@ -183,7 +183,7 @@
    * A mark the page supplies instead takes the same box and its place on the
    * first line, centred in it.
    */
-  [data-ui='inline-message'] > [data-part='icon'] {
+  [data-ui-inline-message] > [data-part-icon] {
     --slotted-icon-size: var(--_mark-size);
 
     align-items: center;
@@ -221,12 +221,12 @@
    * page's own artwork alone: a supplied mark keeps the full box it was
    * measured for.
    */
-  [data-ui='inline-message'][data-part='root'][data-mark='dot'] {
+  [data-ui-inline-message][data-part-root][data-mark='dot'] {
     --_dot-size: calc(var(--_mark-size) / 3);
   }
 
-  [data-ui='inline-message'][data-mark='dot']
-    > [data-part='icon']:has(> [data-ui='icon'] > [data-glyph='dot']) {
+  [data-ui-inline-message][data-mark='dot']
+    > [data-part-icon]:has(> [data-ui-icon] > [data-glyph='dot']) {
     --slotted-icon-size: calc(var(--_dot-size) * 2);
 
     inline-size: var(--_dot-size);
@@ -242,8 +242,8 @@
    * and it is stated as an absence rather than as `[data-mark='glyph']` so
    * markup written without the attribute keeps the rule.
    */
-  [data-ui='inline-message'][data-tone='secondary']:not([data-loading]):not([data-mark='dot'])
-    > [data-part='icon']:empty {
+  [data-ui-inline-message][data-tone='secondary']:not([data-loading]):not([data-mark='dot'])
+    > [data-part-icon]:empty {
     display: none;
   }
 
@@ -263,7 +263,7 @@
    * `:not([data-loading])` keeps the ring, because a message with no mark can
    * be waiting for something like any other.
    */
-  [data-ui='inline-message'][data-mark='none']:not([data-loading]) > [data-part='icon']:empty {
+  [data-ui-inline-message][data-mark='none']:not([data-loading]) > [data-part-icon]:empty {
     display: none;
   }
 
@@ -279,7 +279,7 @@
    * name without a hyphen. Nothing is removed: the whole string stays in the
    * DOM, in the accessibility tree, and findable by a page search.
    */
-  [data-ui='inline-message'] > [data-part='text'] {
+  [data-ui-inline-message] > [data-part-text] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;
@@ -292,8 +292,8 @@
    * standing beside an empty sentence would be the layout shift moved rather
    * than removed.
    */
-  [data-ui='inline-message']:has([data-part='text']:empty) > [data-part='icon'],
-  [data-ui='inline-message']:has([data-part='text']:empty) > [data-part='prefix'] {
+  [data-ui-inline-message]:has([data-part-text]:empty) > [data-part-icon],
+  [data-ui-inline-message]:has([data-part-text]:empty) > [data-part-prefix] {
     display: none;
   }
 
@@ -309,7 +309,7 @@
    * It is the ring `button` draws for the same reason, at the same duration,
    * in the mark's own square on the first line where the mark it replaced was.
    */
-  [data-ui='inline-message'][data-loading] > [data-part='icon'] {
+  [data-ui-inline-message][data-loading] > [data-part-icon] {
     animation: slotted-inline-message-spin var(--slotted-duration-loop-fast) linear infinite;
     block-size: var(--_mark-size);
     border: max(var(--slotted-border-width-thin, 1px), calc(var(--_mark-size) / 8)) solid
@@ -329,7 +329,7 @@
 
   /* The page's own artwork withdraws for the ring rather than sitting inside
      it, because the ring is the mark while the message is waiting. */
-  [data-ui='inline-message'][data-loading] > [data-part='icon'] > * {
+  [data-ui-inline-message][data-loading] > [data-part-icon] > * {
     display: none;
   }
 
@@ -343,11 +343,11 @@
    * own. The ring does need one: `STATE_PRECEDENCE` puts `disabled` above
    * `loading`, and a control nobody can use is not waiting for anything.
    */
-  [data-ui='inline-message'][data-part='root'][data-disabled] {
+  [data-ui-inline-message][data-part-root][data-disabled] {
     color: var(--slotted-disabled-foreground);
   }
 
-  [data-ui='inline-message'][data-disabled] > [data-part='icon'] {
+  [data-ui-inline-message][data-disabled] > [data-part-icon] {
     animation: none;
   }
 
@@ -357,7 +357,7 @@
    * is the decision `button` recorded for the same ring.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='inline-message'][data-loading] > [data-part='icon'] {
+    [data-ui-inline-message][data-loading] > [data-part-icon] {
       animation: none;
     }
   }
@@ -374,15 +374,15 @@
    * one colour and the turn would be a complete circle turning invisibly.
    */
   @media (forced-colors: active) {
-    [data-ui='inline-message'] > [data-part='icon'] {
+    [data-ui-inline-message] > [data-part-icon] {
       color: CanvasText;
     }
 
-    [data-ui='inline-message'][data-part='root'][data-disabled] > [data-part='icon'] {
+    [data-ui-inline-message][data-part-root][data-disabled] > [data-part-icon] {
       color: GrayText;
     }
 
-    [data-ui='inline-message'][data-loading] > [data-part='icon'] {
+    [data-ui-inline-message][data-loading] > [data-part-icon] {
       border-color: CanvasText;
       border-inline-end-color: Canvas;
     }

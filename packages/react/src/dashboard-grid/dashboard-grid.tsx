@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/dashboard-grid/dashboard-grid.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -1097,7 +1098,14 @@ export function DashboardGrid({
 
   const hidden = tiles.filter((tile) => tile.hidden);
   const status = (
-    <p data-part="edit-status" id={statusId} {...(editBar ? {} : { 'data-ui': 'visually-hidden' })}>
+    <p
+      data-part="edit-status"
+      data-part-edit-status=""
+      id={statusId}
+      {...(editBar
+        ? {}
+        : { 'data-ui': 'visually-hidden', ...selectorKeyProps('ui', 'visually-hidden') })}
+    >
       {t('editStatus')}
     </p>
   );
@@ -1118,7 +1126,10 @@ export function DashboardGrid({
                 </Icon>
               }
               render={(buttonProps) => (
-                <button {...buttonProps} ref={triggerRef as never} data-part="add" />
+                <button
+                  {...withSelectorKey(buttonProps, 'part', 'add')}
+                  ref={triggerRef as never}
+                />
               )}
             >
               {t('add')}
@@ -1150,7 +1161,7 @@ export function DashboardGrid({
       tone={part === 'done' ? 'accent' : 'secondary'}
       variant={part === 'done' ? 'solid' : part === 'cancel' ? 'outline' : 'ghost'}
       onClick={onPress}
-      render={(buttonProps) => <button {...buttonProps} data-part={part} />}
+      render={(buttonProps) => <button {...withSelectorKey(buttonProps, 'part', part)} />}
     >
       {label}
     </Button>
@@ -1158,7 +1169,7 @@ export function DashboardGrid({
 
   const placeholderTile = gesture === null ? null : drawn.find((tile) => tile.key === gesture.key);
 
-  const rootProps: DashboardGridRootProps = {
+  const rootProps: DashboardGridRootProps = keyedProps({
     ...nativeProps,
     style: { ...(gridStyle(grid) as CSSProperties), ...style },
     'data-ui': 'dashboard-grid',
@@ -1168,9 +1179,9 @@ export function DashboardGrid({
     children: (
       <>
         {editing && editBar ? (
-          <div data-part="edit-bar" role="group" aria-label={t('editBar')}>
+          <div data-part="edit-bar" data-part-edit-bar="" role="group" aria-label={t('editBar')}>
             {status}
-            <div data-part="edit-actions">
+            <div data-part="edit-actions" data-part-edit-actions="">
               {addMenu}
               {barButton('reset', t('reset'), (event) =>
                 reset(pressReason(event), event.nativeEvent),
@@ -1186,6 +1197,7 @@ export function DashboardGrid({
         <ul
           ref={listRef}
           data-part="grid"
+          data-part-grid=""
           {...(gesture === null ? {} : { 'data-gesture': '' })}
           role="list"
           aria-label={ariaLabel}
@@ -1202,6 +1214,7 @@ export function DashboardGrid({
             <li
               ref={placeholderRef}
               data-part="placeholder"
+              data-part-placeholder=""
               aria-hidden="true"
               style={
                 {
@@ -1217,7 +1230,7 @@ export function DashboardGrid({
           ) : null}
         </ul>
         {visible.length === 0 ? (
-          <div data-part="empty">
+          <div data-part="empty" data-part-empty="">
             <ResultState status="empty" reach="section" live="polite">
               <ResultStateContent>
                 <ResultStateTitle>{t('empty')}</ResultStateTitle>
@@ -1230,7 +1243,7 @@ export function DashboardGrid({
         ) : null}
       </>
     ),
-  };
+  });
 
   return (
     <DashboardGridContext.Provider value={context}>

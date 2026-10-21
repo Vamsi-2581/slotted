@@ -334,7 +334,33 @@ export function applyQuery<Row>(
   }
   const offset = query.page && 'index' in query.page ? query.page.index * query.page.size : 0;
 
-  const groupColumns = query.group
+  const nodes = groupNodes(
+    paged.map((row, index) => ({ row, index: offset + index })),
+    columns,
+    query.group,
+    options,
+    'bucket',
+  );
+
+  return { nodes, rows: kept, total, hasMore, aggregates: aggregates(columns, kept) };
+}
+
+/**
+ * The body of a grouped page: a group node per value of each grouping column,
+ * and the rows under the open ones. `bucket` gathers every row of a value into
+ * one group, in the order the values first appear — the client's sorted rows.
+ * `run` makes a group of each run of consecutive rows sharing a value, in the
+ * order given — a server's page, already ordered for grouping; a value that
+ * comes back after another run heads a group of its own, keyed apart.
+ */
+function groupNodes<Row>(
+  entries: readonly { row: Row; index: number }[],
+  columns: readonly GridColumn<Row>[],
+  group: readonly string[],
+  options: Pick<ApplyQueryOptions<Row>, 'rowKey' | 'expandedGroups'> & FormatOptions,
+  gather: 'bucket' | 'run',
+): GridNode<Row>[] {
+  const groupColumns = group
     .map((id) => columns.find((column) => column.id === id))
     .filter((column): column is GridColumn<Row> => column !== undefined);
   const expanded = options.expandedGroups ?? 'all';
@@ -342,79 +368,109 @@ export function applyQuery<Row>(
 
   const nodes: GridNode<Row>[] = [];
   if (groupColumns.length === 0) {
-    paged.forEach((row, index) => {
+    for (const entry of entries) {
       nodes.push({
         kind: 'row',
-        key: options.rowKey(row),
-        row,
-        index: offset + index,
+        key: options.rowKey(entry.row),
+        row: entry.row,
+        index: entry.index,
         groups: [],
         ...LEAF,
       });
-    });
-  } else {
-    const walk = (
-      subset: readonly { row: Row; index: number }[],
-      level: number,
-      path: { column: string; text: string }[],
-      parents: readonly string[],
-    ) => {
-      const column = groupColumns[level]!;
-      const buckets = new Map<
-        string,
-        { value: unknown; text: string; rows: { row: Row; index: number }[] }
-      >();
-      for (const entry of subset) {
-        const text = cellText(column, entry.row, options);
-        let bucket = buckets.get(text);
-        if (!bucket) {
-          bucket = { value: cellValue(column, entry.row), text, rows: [] };
-          buckets.set(text, bucket);
-        }
-        bucket.rows.push(entry);
-      }
-      for (const bucket of buckets.values()) {
-        const steps = [...path, { column: column.id, text: bucket.text }];
-        const key = groupKey(steps);
-        const open = isOpen(key);
-        const groupRows = bucket.rows.map((entry) => entry.row);
-        nodes.push({
-          kind: 'group',
-          key,
-          column: column.id,
-          value: bucket.value,
-          text: bucket.text,
-          level: level + 1,
-          count: groupRows.length,
-          rows: groupRows,
-          aggregates: aggregates(columns, groupRows),
-          expanded: open,
-        });
-        if (!open) continue;
-        if (level + 1 < groupColumns.length) walk(bucket.rows, level + 1, steps, [...parents, key]);
-        else {
-          for (const entry of bucket.rows) {
-            nodes.push({
-              kind: 'row',
-              key: options.rowKey(entry.row),
-              row: entry.row,
-              index: entry.index,
-              groups: [...parents, key],
-              ...LEAF,
-            });
-          }
-        }
-      }
-    };
-    walk(
-      paged.map((row, index) => ({ row, index: offset + index })),
-      0,
-      [],
-      [],
-    );
+    }
+    return nodes;
   }
 
-  return { nodes, rows: kept, total, hasMore, aggregates: aggregates(columns, kept) };
+  const seen = new Map<string, number>();
+  const walk = (
+    subset: readonly { row: Row; index: number }[],
+    level: number,
+    path: { column: string; text: string }[],
+    parents: readonly string[],
+  ) => {
+    const column = groupColumns[level]!;
+    const buckets: { value: unknown; text: string; rows: { row: Row; index: number }[] }[] = [];
+    const byText = new Map<string, (typeof buckets)[number]>();
+    for (const entry of subset) {
+      const text = cellText(column, entry.row, options);
+      const last = buckets.at(-1);
+      let bucket = gather === 'run' ? (last?.text === text ? last : undefined) : byText.get(text);
+      if (!bucket) {
+        bucket = { value: cellValue(column, entry.row), text, rows: [] };
+        buckets.push(bucket);
+        byText.set(text, bucket);
+      }
+      bucket.rows.push(entry);
+    }
+    for (const bucket of buckets) {
+      const steps = [...path, { column: column.id, text: bucket.text }];
+      const base = groupKey(steps);
+      const occurrence = (seen.get(base) ?? 0) + 1;
+      seen.set(base, occurrence);
+      const key = occurrence === 1 ? base : `${base}~${String(occurrence)}`;
+      const open = isOpen(key);
+      const groupRows = bucket.rows.map((entry) => entry.row);
+      nodes.push({
+        kind: 'group',
+        key,
+        column: column.id,
+        value: bucket.value,
+        text: bucket.text,
+        level: level + 1,
+        count: groupRows.length,
+        rows: groupRows,
+        aggregates: aggregates(columns, groupRows),
+        expanded: open,
+      });
+      if (!open) continue;
+      if (level + 1 < groupColumns.length) walk(bucket.rows, level + 1, steps, [...parents, key]);
+      else {
+        for (const entry of bucket.rows) {
+          nodes.push({
+            kind: 'row',
+            key: options.rowKey(entry.row),
+            row: entry.row,
+            index: entry.index,
+            groups: [...parents, key],
+            ...LEAF,
+          });
+        }
+      }
+    }
+  };
+  walk(entries, 0, [], []);
+  return nodes;
+}
+
+export interface GroupInOrderOptions<Row> extends FormatOptions {
+  /** The key of a row. */
+  rowKey: (row: Row) => string;
+  /** The group keys that are open, or `all`. Default `all`. */
+  expandedGroups?: readonly string[] | 'all';
+  /** The index of the first row, when the rows are a page of a larger set. Default 0. */
+  offset?: number;
+}
+
+/**
+ * The rows a server sent, grouped in the order it sent them: consecutive rows
+ * sharing the value of each column of `group` form one group, with its count
+ * and its aggregates over the rows given. Nothing is filtered, sorted or paged:
+ * that is the server's.
+ */
+export function groupInOrder<Row>(
+  rows: readonly Row[],
+  columns: readonly GridColumn<Row>[],
+  group: readonly string[],
+  options: GroupInOrderOptions<Row>,
+): GridNode<Row>[] {
+  const offset = options.offset ?? 0;
+  return groupNodes(
+    rows.map((row, index) => ({ row, index: offset + index })),
+    columns,
+    group,
+    options,
+    'run',
+  );
 }
 
 /** What a row node says when there is no tree. */

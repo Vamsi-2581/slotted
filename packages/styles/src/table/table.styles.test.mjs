@@ -2,8 +2,21 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const css = readFileSync(new URL('./table.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./table.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./table.harness.html', import.meta.url), 'utf8'),
+);
 const shared = readFileSync(new URL('../plain-variant.test.mjs', import.meta.url), 'utf8');
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
@@ -22,8 +35,8 @@ const normalize = (text) =>
    descendant combinator before `:is` and `:has` is lost on both sides alike. */
 const normalized = normalize(declarations);
 
-const cell = ":is([data-part='cell'],[data-part='row-header'])";
-const plainRoot = "[data-part='root'][data-variant='plain']";
+const cell = ':is([data-part-cell],[data-part-row-header])';
+const plainRoot = "[data-part-root][data-variant='plain']";
 
 /**
  * The families that ship the `plain` variant, read from the shared
@@ -45,8 +58,8 @@ test('a cell holding a plain control gives its inset to the control, and to a co
     plainFamilies.length >= 14,
     `plain-variant.test.mjs names ${plainFamilies.length} families`,
   );
-  const families = plainFamilies.map((family) => `[data-ui='${family}']`).join(',');
-  const selector = normalize(`[data-ui='table'] ${cell}:has(> ${plainRoot}:is(${families}))`);
+  const families = plainFamilies.map((family) => `[data-ui-${family.toLowerCase()}]`).join(',');
+  const selector = normalize(`[data-ui-table] ${cell}:has(> ${plainRoot}:is(${families}))`);
   const match = normalized.match(new RegExp(`${escape(selector)}\\{([^}]*)\\}`));
   assert.ok(
     match,
@@ -74,7 +87,7 @@ test('a cell holding a plain control gives its inset to the control, and to a co
  * at the same specificity, and without the guard it won.
  */
 test('the two-column floor for a time operand steps aside for a between drawn as one range picker', () => {
-  const operand = "[data-ui='table'][data-part='filter-panel'] [data-part='filter-operand']";
+  const operand = '[data-ui-table][data-part-filter-panel] [data-part-filter-operand]';
   assert.match(normalized, new RegExp(`${escape(`${operand}[data-range],`)}`));
   assert.match(
     normalized,
@@ -129,7 +142,7 @@ test('leaves a column header weak enough for the alignment axis to reach it', ()
   assert.ok(
     normalized.includes(
       normalize(
-        "[data-ui='table'] [data-part='column-header'],[data-ui='table'] [data-part='head'] [data-part='selection']{",
+        '[data-ui-table] [data-part-column-header],[data-ui-table] [data-part-head] [data-part-selection]{',
       ),
     ),
     'the column header and the selection cell are two selectors, not one :is()',
@@ -137,15 +150,13 @@ test('leaves a column header weak enough for the alignment axis to reach it', ()
   assert.ok(
     !normalized.includes(
       normalize(
-        "[data-ui='table'] :is([data-part='column-header'],[data-part='head'] [data-part='selection'])",
+        '[data-ui-table] :is([data-part-column-header],[data-part-head] [data-part-selection])',
       ),
     ),
     'the :is() that outranked the alignment rule is gone',
   );
   /* The axis itself, which the header now loses to on source order. */
-  assert.ok(
-    normalized.includes(normalize("[data-ui='table'] [data-align='end']{text-align:end;}")),
-  );
+  assert.ok(normalized.includes(normalize("[data-ui-table] [data-align='end']{text-align:end;}")));
 });
 
 /**
@@ -158,7 +169,7 @@ test('draws the sort mark and the chevron with the Glyph element, never a mask',
   assert.ok(
     normalized.includes(
       normalize(
-        "[data-ui='table'] [aria-sort='ascending'] > [data-part='sort'] > [data-ui='icon']{rotate:180deg;}",
+        "[data-ui-table] [aria-sort='ascending'] > [data-part-sort] > [data-ui-icon]{rotate:180deg;}",
       ),
     ),
   );
@@ -187,18 +198,18 @@ test('stands on the ground its container publishes before the page surface', () 
  */
 test('reads the sticky offsets only under stickyTo page', () => {
   const header = normalize(
-    "[data-ui='table'][data-sticky-header] [data-part='column-header'],[data-ui='table'][data-sticky-header] [data-part='head'] [data-part='selection']{inset-block-start:0;",
+    '[data-ui-table][data-sticky-header] [data-part-column-header],[data-ui-table][data-sticky-header] [data-part-head] [data-part-selection]{inset-block-start:0;',
   );
   assert.ok(normalized.includes(header), 'the header sticks at the top of its own scroller');
   assert.ok(
     normalized.includes(
-      "[data-ui='table'][data-sticky-to='page'][data-sticky-header] [data-part='column-header'],[data-ui='table'][data-sticky-to='page'][data-sticky-header] [data-part='head'] [data-part='selection']{inset-block-start:var(--slotted-table-sticky-offset,0);}",
+      "[data-ui-table][data-sticky-to='page'][data-sticky-header] [data-part-column-header],[data-ui-table][data-sticky-to='page'][data-sticky-header] [data-part-head] [data-part-selection]{inset-block-start:var(--slotted-table-sticky-offset,0);}",
     ),
     'the header stops under the page chrome under stickyTo page',
   );
   assert.ok(
     normalized.includes(
-      "[data-ui='table'][data-sticky-to='page'][data-sticky-footer] [data-part='summary'] > [data-part='row'] > *{inset-block-end:var(--slotted-table-sticky-offset-end,0);}",
+      "[data-ui-table][data-sticky-to='page'][data-sticky-footer] [data-part-summary] > [data-part-row] > *{inset-block-end:var(--slotted-table-sticky-offset-end,0);}",
     ),
     'the summary stops over the page chrome under stickyTo page',
   );
@@ -231,11 +242,9 @@ test('paints the current row with a ground and the group band with tabular figur
     assert.doesNotMatch(rule, /border-inline-start|box-shadow|::before|::after/, rule);
   }
   assert.ok(
-    normalized.includes(
-      "[data-ui='table'] [data-part='group-end']{font-variant-numeric:tabular-nums;",
-    ),
+    normalized.includes('[data-ui-table] [data-part-group-end]{font-variant-numeric:tabular-nums;'),
   );
-  assert.ok(normalized.includes("[data-ui='table'] [data-part='group-header']{"));
+  assert.ok(normalized.includes('[data-ui-table] [data-part-group-header]{'));
 });
 
 /**
@@ -248,7 +257,7 @@ test('draws the scroller ring for a focus from the keyboard only', () => {
     m[1].replace(/\s+/g, ' ').trim(),
   );
   const ring = rules.filter(
-    (selector) => selector.includes("[data-part='scroll']") && selector.includes(':focus-visible'),
+    (selector) => selector.includes('[data-part-scroll]') && selector.includes(':focus-visible'),
   );
   assert.ok(ring.length > 0, 'the region has a ring');
   for (const selector of ring) {
@@ -256,7 +265,7 @@ test('draws the scroller ring for a focus from the keyboard only', () => {
   }
   const flat = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
   assert.ok(
-    flat.includes("[data-part='scroll']:focus { outline: none; }"),
+    flat.includes('[data-part-scroll]:focus { outline: none; }'),
     'the browser’s own ring is suppressed for a focus from the pointer',
   );
 });

@@ -38,7 +38,7 @@ import {
   template: `@if (card.loading()) {
       <span slSkeleton inlineSize="3.5em"></span>
     } @else {
-      <span data-part="indicator" aria-hidden="true"
+      <span data-part="indicator" data-part-indicator="" aria-hidden="true"
         ><span slIcon [directional]="trend() !== 'flat'"
           ><svg slGlyph [name]="trend() === 'flat' ? 'minus' : 'trending-up'"></svg></span></span
       ><span slVisuallyHidden>{{ card.t(trend()) }} </span>{{ formatted() }}<ng-content />
@@ -48,6 +48,7 @@ import {
   exportAs: 'slStatCardDelta',
   host: {
     'data-part': 'delta',
+    'data-part-delta': '',
     '[attr.data-trend]': 'card.loading() ? "flat" : trend()',
     '[attr.data-tone]': 'card.loading() ? "neutral" : resolvedTone()',
     '[attr.hidden]': 'shown() ? null : ""',

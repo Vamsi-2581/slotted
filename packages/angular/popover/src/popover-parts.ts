@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -200,8 +201,8 @@ export class SlPopoverLayer {
 
     const document = this.comment.ownerDocument;
     const layer = document.createElement('div');
-    layer.setAttribute('data-ui', 'popover');
-    layer.setAttribute('data-part', 'root');
+    writeSelectorKey(layer, 'ui', 'popover');
+    writeSelectorKey(layer, 'part', 'root');
 
     const view = this.viewContainer.createEmbeddedView(this.template);
     view.detectChanges();
@@ -226,7 +227,7 @@ export class SlPopoverLayer {
 
   private guard(document: Document): HTMLElement {
     const guard = document.createElement('span');
-    guard.setAttribute('data-part', 'focus-guard');
+    writeSelectorKey(guard, 'part', 'focus-guard');
     guard.setAttribute('aria-hidden', 'true');
     guard.tabIndex = 0;
     guard.addEventListener('focus', () => {
@@ -406,6 +407,7 @@ export class SlPopoverLayer {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     tabindex: '-1',
     '[attr.role]': 'role()',
     '[attr.id]': 'popover.contentId',
@@ -439,7 +441,7 @@ export class SlPopoverContent {
   selector: '[slPopoverHeader]',
   standalone: true,
   exportAs: 'slPopoverHeader',
-  host: { 'data-part': 'header' },
+  host: { 'data-part': 'header', 'data-part-header': '' },
 })
 export class SlPopoverHeader {}
 
@@ -452,7 +454,7 @@ export class SlPopoverHeader {}
   selector: '[slPopoverTitle]',
   standalone: true,
   exportAs: 'slPopoverTitle',
-  host: { 'data-part': 'title', '[attr.id]': 'popover.titleId' },
+  host: { 'data-part': 'title', 'data-part-title': '', '[attr.id]': 'popover.titleId' },
 })
 export class SlPopoverTitle {
   protected readonly popover = inject(SlPopover);
@@ -468,7 +470,11 @@ export class SlPopoverTitle {
   selector: '[slPopoverDescription]',
   standalone: true,
   exportAs: 'slPopoverDescription',
-  host: { 'data-part': 'description', '[attr.id]': 'popover.descriptionId' },
+  host: {
+    'data-part': 'description',
+    'data-part-description': '',
+    '[attr.id]': 'popover.descriptionId',
+  },
 })
 export class SlPopoverDescription {
   protected readonly popover = inject(SlPopover);
@@ -488,7 +494,7 @@ export class SlPopoverDescription {
   selector: '[slPopoverBody]',
   standalone: true,
   exportAs: 'slPopoverBody',
-  host: { 'data-part': 'body' },
+  host: { 'data-part': 'body', 'data-part-body': '' },
 })
 export class SlPopoverBody {}
 
@@ -497,7 +503,7 @@ export class SlPopoverBody {}
   selector: '[slPopoverFooter]',
   standalone: true,
   exportAs: 'slPopoverFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlPopoverFooter {}
 
@@ -520,6 +526,7 @@ export class SlPopoverFooter {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'close',
+    'data-part-close': '',
     type: 'button',
     '[attr.aria-label]': 'label()',
     '(click)': 'popover.toggle(false, "dismiss", $event)',
@@ -550,7 +557,7 @@ export class SlPopoverClose {
   selector: '[slPopoverArrow]',
   standalone: true,
   exportAs: 'slPopoverArrow',
-  host: { 'data-part': 'arrow', 'aria-hidden': 'true' },
+  host: { 'data-part': 'arrow', 'data-part-arrow': '', 'aria-hidden': 'true' },
 })
 export class SlPopoverArrow {
   constructor() {

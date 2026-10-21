@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/calendar/calendar.css';
 
 import {
@@ -512,7 +513,7 @@ export function Calendar({
 
   const grids: ReactNode =
     currentView === 'day' ? (
-      <div data-part="grids">
+      <div data-part="grids" data-part-grids="">
         {visibleMonths(page, resolvedMonths).map((month) => (
           <MonthTable
             editable={editable}
@@ -535,7 +536,7 @@ export function Calendar({
         ))}
       </div>
     ) : currentView === 'month' && monthly ? (
-      <div data-part="months">
+      <div data-part="months" data-part-months="">
         {format.monthNames('short').map((name, index) => {
           const month = index + 1;
           const refused = monthUnavailable(focused.year, month);
@@ -544,6 +545,7 @@ export function Calendar({
             <button
               aria-label={format.monthYear(plainDate(focused.year, month, 1))}
               data-part="period"
+              data-part-period=""
               key={name}
               onClick={(event) => selectMonth(focused.year, month, 'pointer', event)}
               tabIndex={focused.month === month ? 0 : -1}
@@ -558,10 +560,11 @@ export function Calendar({
         })}
       </div>
     ) : currentView === 'month' ? (
-      <div data-part="months">
+      <div data-part="months" data-part-months="">
         {format.monthNames('short').map((name, index) => (
           <button
             data-part="period"
+            data-part-period=""
             key={name}
             onClick={(event) => {
               requestFocused({ ...focused, month: index + 1, day: 1 }, 'pointer', event);
@@ -575,10 +578,11 @@ export function Calendar({
         ))}
       </div>
     ) : (
-      <div data-part="years">
+      <div data-part="years" data-part-years="">
         {yearPage(focused.year, YEAR_PAGE).map((year) => (
           <button
             data-part="period"
+            data-part-period=""
             key={year}
             onClick={(event) => {
               requestFocused({ ...focused, year, day: 1 }, 'pointer', event);
@@ -603,10 +607,11 @@ export function Calendar({
 
   const children: ReactNode = (
     <>
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <button
           aria-label={previousName}
           data-part="previous"
+          data-part-previous=""
           disabled={!editable}
           onClick={turnPage(-1)}
           type="button"
@@ -620,6 +625,7 @@ export function Calendar({
         <button
           aria-live="polite"
           data-part="heading"
+          data-part-heading=""
           disabled={!editable || currentView === 'year'}
           id={headingId}
           onClick={() => changeView(currentView === 'day' ? 'month' : 'year')}
@@ -635,6 +641,7 @@ export function Calendar({
         <button
           aria-label={nextName}
           data-part="next"
+          data-part-next=""
           disabled={!editable}
           onClick={turnPage(1)}
           type="button"
@@ -648,7 +655,7 @@ export function Calendar({
     </>
   );
 
-  const rootProps: CalendarRootProps = {
+  const rootProps: CalendarRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -665,7 +672,7 @@ export function Calendar({
     'data-ui': 'calendar',
     'data-view': currentView,
     ref: rootRef,
-  } as CalendarRootProps;
+  }) as CalendarRootProps;
 
   return render === undefined ? (
     <div {...(rootProps as CalendarRootProps & { ref?: React.Ref<HTMLDivElement> })} />
@@ -715,16 +722,26 @@ function MonthTable({
   const narrow = format.weekdayNames('narrow');
 
   return (
-    <table aria-labelledby={headingId} data-part="grid" role="grid">
-      <caption data-part="grid-caption">{caption}</caption>
+    <table aria-labelledby={headingId} data-part="grid" data-part-grid="" role="grid">
+      <caption data-part="grid-caption" data-part-grid-caption="">
+        {caption}
+      </caption>
       <thead>
-        <tr data-part="week-headers">
-          {weekNumbers ? <th aria-hidden="true" data-part="week-number" /> : null}
+        <tr data-part="week-headers" data-part-week-headers="">
+          {weekNumbers ? (
+            <th aria-hidden="true" data-part="week-number" data-part-week-number="" />
+          ) : null}
           {narrow.map((name, index) => (
             /* Two characters is what a column holds and is not a weekday; the
                full name reaches assistive technology through `abbr`, which is
                the APG's own answer. */
-            <th abbr={long[index]} data-part="week-header" key={long[index]} scope="col">
+            <th
+              abbr={long[index]}
+              data-part="week-header"
+              data-part-week-header=""
+              key={long[index]}
+              scope="col"
+            >
               {name}
             </th>
           ))}
@@ -732,9 +749,9 @@ function MonthTable({
       </thead>
       <tbody>
         {weeks.map((week) => (
-          <tr data-part="week" key={week.weekNumber}>
+          <tr data-part="week" data-part-week="" key={week.weekNumber}>
             {weekNumbers ? (
-              <th data-part="week-number" scope="row">
+              <th data-part="week-number" data-part-week-number="" scope="row">
                 {week.weekNumber}
               </th>
             ) : null}
@@ -755,6 +772,7 @@ function MonthTable({
                    month boundary painted a band with no digits under it. */
                 <td
                   data-part="cell"
+                  data-part-cell=""
                   key={`${String(day.date.month)}-${String(day.date.day)}`}
                   {...(outside ? { 'data-outside-month': '' } : {})}
                   {...(!hidden && unavailable(day.date) ? { 'data-unavailable': '' } : {})}
@@ -769,6 +787,7 @@ function MonthTable({
                       aria-disabled={refused ? true : undefined}
                       aria-selected={chosen ? true : undefined}
                       data-part="day"
+                      data-part-day=""
                       {...(today !== null && isSameDate(day.date, today)
                         ? { 'data-today': '' }
                         : {})}

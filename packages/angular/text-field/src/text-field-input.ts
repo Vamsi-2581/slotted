@@ -61,6 +61,7 @@ function activationReason(event: Event): ChangeReason {
   ],
   host: {
     'data-part': 'input',
+    'data-part-input': '',
     '[attr.id]': 'controlId()',
     '[attr.type]': 'resolvedType()',
     '[attr.aria-describedby]': 'describedBy()',

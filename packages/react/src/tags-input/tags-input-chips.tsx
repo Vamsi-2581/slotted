@@ -174,15 +174,17 @@ function Chip({ context, index, value }: ChipProps) {
     return (
       <span
         data-part="root"
+        data-part-root=""
         data-size="sm"
         data-ui="tag"
+        data-ui-tag=""
         data-value={value}
         data-variant="soft"
         ref={cell}
         role="gridcell"
         tabIndex={-1}
       >
-        <span data-part="body">
+        <span data-part="body" data-part-body="">
           <input
             aria-label={label}
             autoFocus
@@ -219,8 +221,10 @@ function Chip({ context, index, value }: ChipProps) {
           : undefined
       }
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-ui="tag"
+      data-ui-tag=""
       data-value={value}
       data-variant="soft"
       onDoubleClick={onDoubleClick}
@@ -233,18 +237,20 @@ function Chip({ context, index, value }: ChipProps) {
       {...(context.duplicate === value ? { 'data-current': '' } : {})}
       {...(locked || context.disabled ? { 'data-disabled': '' } : {})}
     >
-      <span data-part="body">
+      <span data-part="body" data-part-body="">
         {message === null ? null : (
-          <span data-part="start">
+          <span data-part="start" data-part-start="">
             <Icon>
               <Glyph name="circle-alert" />
             </Icon>
           </span>
         )}
-        <span data-part="label">{label}</span>
+        <span data-part="label" data-part-label="">
+          {label}
+        </span>
       </span>
       {message === null ? null : (
-        <span data-part="message" id={messageId}>
+        <span data-part="message" data-part-message="" id={messageId}>
           {message}
         </span>
       )}
@@ -252,6 +258,7 @@ function Chip({ context, index, value }: ChipProps) {
         <button
           aria-label={context.t('remove', { label })}
           data-part="remove"
+          data-part-remove=""
           onClick={onRemove}
           tabIndex={-1}
           type="button"
@@ -369,7 +376,14 @@ export function ChipRow({ children, context, describedBy, label }: ChipRowProps)
   }, [context.value]);
 
   return (
-    <div aria-describedby={describedBy} aria-label={label} data-part="chips" ref={row} role="row">
+    <div
+      aria-describedby={describedBy}
+      aria-label={label}
+      data-part="chips"
+      data-part-chips=""
+      ref={row}
+      role="row"
+    >
       {keysFor(context.value).map((key, index) => (
         <Chip context={context} index={index} key={key} value={context.value[index] as string} />
       ))}
@@ -383,8 +397,10 @@ export function ChipRow({ children, context, describedBy, label }: ChipRowProps)
         <span
           data-count=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-ui="tag"
+          data-ui-tag=""
           data-variant="outline"
           hidden
           onClick={() => latest.current.inputNode?.focus({ preventScroll: true })}
@@ -392,8 +408,8 @@ export function ChipRow({ children, context, describedBy, label }: ChipRowProps)
           role="gridcell"
           tabIndex={-1}
         >
-          <span data-part="body">
-            <span data-part="label">{`+${Math.max(hidden, 1)}`}</span>
+          <span data-part="body" data-part-body="">
+            <span data-part="label" data-part-label="">{`+${Math.max(hidden, 1)}`}</span>
           </span>
         </span>
       ) : null}

@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { handleShortcuts, tileStyle } from '@slotted/core/dashboard-grid';
 import {
   memo,
@@ -79,7 +80,7 @@ function HandleButton({
     [register],
   );
   return (
-    <button {...props} type="button" data-part="handle" ref={setNode}>
+    <button {...withSelectorKey(props, 'part', 'handle')} type="button" ref={setNode}>
       <Icon>
         <Glyph name="grip-horizontal" />
       </Icon>
@@ -259,7 +260,11 @@ const WidgetView = memo(function WidgetView({
         tone="secondary"
         variant="ghost"
         render={({ type: _type, disabled: _disabled, ...props }) => (
-          <a {...(props as object)} data-part="detail" href={detailHref} onClick={onDetail} />
+          <a
+            {...withSelectorKey(props as object, 'part', 'detail')}
+            href={detailHref}
+            onClick={onDetail}
+          />
         )}
       >
         {/* The arrow points out of the widget, to the inline end: it turns with the writing direction. */}
@@ -274,7 +279,7 @@ const WidgetView = memo(function WidgetView({
         tone="secondary"
         variant="ghost"
         onClick={onDetail}
-        render={(props) => <button {...props} data-part="detail" />}
+        render={(props) => <button {...withSelectorKey(props, 'part', 'detail')} />}
       >
         <Icon directional>
           <Glyph name="external" />
@@ -364,7 +369,7 @@ const WidgetView = memo(function WidgetView({
     ) : null;
 
   const message = (kind: 'empty' | 'error') => (
-    <div data-part="message">
+    <div data-part="message" data-part-message="">
       <ResultState
         status={kind}
         reach="section"
@@ -396,7 +401,7 @@ const WidgetView = memo(function WidgetView({
                 </Icon>
               }
               onClick={onRetry}
-              render={(props) => <button {...props} data-part="retry" />}
+              render={(props) => <button {...withSelectorKey(props, 'part', 'retry')} />}
             >
               {t('retry')}
             </Button>
@@ -407,7 +412,9 @@ const WidgetView = memo(function WidgetView({
   );
 
   const content = painted ? (
-    <div data-part="skeleton">{skeleton ?? <Skeleton shape="block" />}</div>
+    <div data-part="skeleton" data-part-skeleton="">
+      {skeleton ?? <Skeleton shape="block" />}
+    </div>
   ) : status === 'empty' ? (
     message('empty')
   ) : status === 'error' ? (
@@ -416,7 +423,7 @@ const WidgetView = memo(function WidgetView({
     children
   );
 
-  const rootProps: DashboardWidgetRootProps = {
+  const rootProps: DashboardWidgetRootProps = keyedProps({
     ...nativeProps,
     style: {
       ...(tileStyle(tile) as CSSProperties),
@@ -448,11 +455,11 @@ const WidgetView = memo(function WidgetView({
           )}
         >
           <CardHeader>
-            <Heading data-part="title" id={titleId}>
+            <Heading data-part="title" data-part-title="" id={titleId}>
               {title}
             </Heading>
             {description === undefined ? null : (
-              <p data-part="description" id={descriptionId}>
+              <p data-part="description" data-part-description="" id={descriptionId}>
                 {description}
               </p>
             )}
@@ -464,7 +471,9 @@ const WidgetView = memo(function WidgetView({
             ) : null}
           </CardHeader>
           <CardBody>
-            {busy && !painted ? <span data-part="busy-indicator" aria-hidden="true" /> : null}
+            {busy && !painted ? (
+              <span data-part="busy-indicator" data-part-busy-indicator="" aria-hidden="true" />
+            ) : null}
             {content}
           </CardBody>
           {footer === undefined ? null : <CardFooter>{footer}</CardFooter>}
@@ -475,6 +484,7 @@ const WidgetView = memo(function WidgetView({
               <span
                 key={edge}
                 data-part="resize-handle"
+                data-part-resize-handle=""
                 data-edge={edge}
                 {...(slot.edge === edge ? { 'data-active': '' } : {})}
                 aria-hidden="true"
@@ -483,13 +493,18 @@ const WidgetView = memo(function WidgetView({
             ))
           : null}
         {slot.readout === null ? null : (
-          <span data-part="size-readout" data-edge={slot.edge ?? undefined} aria-hidden="true">
+          <span
+            data-part="size-readout"
+            data-part-size-readout=""
+            data-edge={slot.edge ?? undefined}
+            aria-hidden="true"
+          >
             {slot.readout}
           </span>
         )}
       </>
     ),
-  };
+  });
 
   return render === undefined ? <li {...rootProps} /> : render(rootProps);
 });

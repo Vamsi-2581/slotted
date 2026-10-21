@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/radio-group/contract.json', import.meta.url),
@@ -10,7 +21,9 @@ const contract = JSON.parse(
 );
 const checkboxCss = readFileSync(new URL('../checkbox/checkbox.css', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./radio-group.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./radio-group.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./radio-group.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -18,15 +31,15 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.radioGroup;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
 }
 
-const part = (name) => `${ui} [data-part='${name}']`;
+const part = (name) => `${ui} [data-part-${name.toLowerCase()}]`;
 
 test('lives in the component layer', () => {
   assert.match(css, /@layer slotted\.components/);
@@ -40,7 +53,7 @@ test('styles every part the contract declares', () => {
   for (const declared of member.parts) {
     if (declared === 'root') continue;
     assert.ok(
-      normalized.includes(`[data-part='${declared}']`),
+      normalized.includes(`[data-part-${declared.toLowerCase()}]`),
       `no rule reaches the ${declared} part`,
     );
   }
@@ -72,7 +85,7 @@ test('names every radio in every scene, which is what makes the set a group', ()
 
 /** The dot is the control's next sibling, as the check is in `checkbox`. */
 test('paints the dot from the control it stands on, through the sibling combinator', () => {
-  assert.ok(normalized.includes(`${part('control')}:checked + [data-part='indicator']`));
+  assert.ok(normalized.includes(`${part('control')}:checked + [data-part-indicator]`));
 });
 
 test('draws the dot as the glyph element, never as a mask or a character', () => {
@@ -150,7 +163,7 @@ test('says chosen with the edge and the dot, and leaves the ground alone', () =>
   assert.match(indicator, /scale:0\.6/);
   /* Invalid moves the dot with the edge. */
   assert.match(
-    rule(`${root}[data-invalid] [data-part='control']:checked + [data-part='indicator']`),
+    rule(`${root}[data-invalid] [data-part-control]:checked + [data-part-indicator]`),
     /color:var\(--slotted-radio-group-invalid-mark-color,var\(--slotted-tone-danger-solid\)\)/,
   );
 });
@@ -163,10 +176,10 @@ test('says chosen with the edge and the dot, and leaves the ground alone', () =>
  * are concentric with the circle.
  */
 test('lights the circle and its label as one wash, lit by hover alone', () => {
-  const label = rule(`${root}:not([data-variant='tile']) [data-part='label']`);
+  const label = rule(`${root}:not([data-variant='tile']) [data-part-label]`);
   assert.match(label, /justify-self:start/);
   assert.match(label, /position:relative/);
-  const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::after`);
+  const halo = rule(`${root}:not([data-variant='tile']) [data-part-label]::after`);
   assert.match(
     halo,
     /background-color:var\(--slotted-radio-group-halo-color,var\(--slotted-tone-accent-text\)\)/,
@@ -181,7 +194,7 @@ test('lights the circle and its label as one wash, lit by hover alone', () => {
   assert.match(halo, /direction:var\(--_direction\)/);
   assert.doesNotMatch(halo, /box-shadow/);
   assert.match(
-    rule(`${root}:not([data-variant='tile']) [data-part='label']:empty::after`),
+    rule(`${root}:not([data-variant='tile']) [data-part-label]:empty::after`),
     /inset-inline-end:calc\(var\(--_label-gap\) - var\(--_halo-spread\)\)/,
   );
   assert.match(halo, /opacity:0/);
@@ -192,22 +205,22 @@ test('lights the circle and its label as one wash, lit by hover alone', () => {
   assert.match(rule(part('item')), /position:relative/);
   assert.ok(
     normalized.includes(
-      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::after,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::after{opacity:var(--slotted-selection-halo-opacity,0.12);}`,
+      `${root}:not([data-readonly]) [data-part-control]:hover:not(:disabled) ~ [data-part-label]::after,${root}:not([data-readonly]) [data-part-control]:not(:disabled) ~ [data-part-label]:hover::after{opacity:var(--slotted-selection-halo-opacity,0.12);}`,
     ),
     'hover does not light the halo, or lights it from somewhere else',
   );
-  const hover = rule(`${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled)`);
+  const hover = rule(`${root}:not([data-readonly]) [data-part-control]:hover:not(:disabled)`);
   assert.match(
     hover,
     /border-color:var\(--slotted-radio-group-hover-border-color,var\(--slotted-tone-accent-border\)\)/,
   );
   assert.doesNotMatch(hover, /background-color/);
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='label']`),
+    rule(`${root}[data-label-placement='start'] [data-part-label]`),
     /justify-self:stretch/,
   );
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='label']::after`),
+    rule(`${root}[data-label-placement='start'] [data-part-label]::after`),
     /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_label-gap\) \+ var\(--_halo-spread\)\)\);inset-inline-start:calc\(-1\.5 \* var\(--_halo-spread\)\)/,
   );
 });
@@ -232,7 +245,7 @@ test('keeps the row at its line and hits the target around the circle', () => {
   assert.doesNotMatch(label, /padding-block/);
   assert.doesNotMatch(declarations, /--_label-slack/);
   assert.match(rule(root), /--_target:var\(--slotted-target-min,24px\)/);
-  const target = rule(`${root}:not([data-variant='tile']) [data-part='label']::before`);
+  const target = rule(`${root}:not([data-variant='tile']) [data-part-label]::before`);
   assert.match(target, /block-size:var\(--_target\)/);
   assert.match(target, /inline-size:var\(--_target\)/);
   assert.match(
@@ -244,7 +257,7 @@ test('keeps the row at its line and hits the target around the circle', () => {
     /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2 - var\(--_size\) - var\(--_label-gap\)\)/,
   );
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
+    rule(`${root}[data-label-placement='start'] [data-part-label]::before`),
     /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_label-gap\)\)\);inset-inline-start:auto/,
   );
   assert.doesNotMatch(target, /box-shadow|opacity/);
@@ -272,7 +285,7 @@ test('answers every size the contract declares', () => {
 
 test('swaps the two columns for the other placement', () => {
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='item']`),
+    rule(`${root}[data-label-placement='start'] [data-part-item]`),
     /grid-template-columns:minmax\(0,1fr\) auto/,
   );
   assert.doesNotMatch(declarations, /margin-left|margin-right|padding-left|padding-right/);
@@ -289,16 +302,14 @@ test('holds hover and press back for disabled and for read-only', () => {
 
 /** The chosen option keeps its accent, because the value is real. */
 test('does not paint read-only as if it were disabled', () => {
-  const readonly = rule(`${root}[data-readonly] [data-part='control']:not(:checked)`);
+  const readonly = rule(`${root}[data-readonly] [data-part-control]:not(:checked)`);
   assert.match(readonly, /background-color:var\(--slotted-radio-group-readonly-background/);
   assert.doesNotMatch(readonly, /--slotted-disabled/);
 });
 
 test('answers the disabled element as well as the mirrored attribute', () => {
   assert.ok(
-    normalized.includes(
-      `${root}[data-disabled] [data-part='control'],${part('control')}:disabled{`,
-    ),
+    normalized.includes(`${root}[data-disabled] [data-part-control],${part('control')}:disabled{`),
   );
 });
 
@@ -308,7 +319,7 @@ test('answers the disabled element as well as the mirrored attribute', () => {
  * carries the element's own state across to the text beside it.
  */
 test('dims the label of a single disabled option, not only of a disabled group', () => {
-  assert.ok(normalized.includes(`${part('control')}:disabled ~ [data-part='label']`));
+  assert.ok(normalized.includes(`${part('control')}:disabled ~ [data-part-label]`));
 });
 
 test('restates the pair forced colors would collapse', () => {
@@ -321,7 +332,7 @@ test('restates the pair forced colors would collapse', () => {
   /* The dot is the accent on the field, so under forced colours it is
      Highlight on Field rather than HighlightText on Highlight. */
   assert.ok(
-    normalized.includes(`${part('control')}:checked + [data-part='indicator']{color:Highlight;}`),
+    normalized.includes(`${part('control')}:checked + [data-part-indicator]{color:Highlight;}`),
   );
 });
 
@@ -351,13 +362,13 @@ test('transitions the two changes the eye has to follow, from the scale', () => 
  */
 test('keeps a checked invalid option checked under forced colours', () => {
   const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
-  const control = `${root}[data-invalid] [data-part='control']`;
+  const control = `${root}[data-invalid] [data-part-control]`;
   assert.ok(
     forced.includes(`${control}:checked{background-color:Field;border-color:CanvasText;}`),
     forced,
   );
   assert.ok(
-    forced.includes(`${control}:checked + [data-part='indicator']{color:Highlight;}`),
+    forced.includes(`${control}:checked + [data-part-indicator]{color:Highlight;}`),
     forced,
   );
   assert.match(forced, /\[data-variant='tile'\]\[data-invalid\][^{]*\{--_tile-edge:CanvasText;/);
@@ -370,22 +381,22 @@ test('keeps a checked invalid option checked under forced colours', () => {
  * tile is still wider than a chosen valid one.
  */
 test('says invalid with weight as well as with colour', () => {
-  const invalid = rule(`${root}[data-invalid] [data-part='control']`);
+  const invalid = rule(`${root}[data-invalid] [data-part-control]`);
   assert.match(
     invalid,
     /border-width:calc\(var\(--slotted-radio-group-border-width,var\(--slotted-border-width-medium,1\.5px\)\) \+ var\(--slotted-radio-group-invalid-edge-width,var\(--slotted-control-invalid-edge-width,1px\)\)\)/,
   );
   assert.match(
-    rule(`${root}[data-variant='tile'][data-invalid] [data-part='item']`),
+    rule(`${root}[data-variant='tile'][data-invalid] [data-part-item]`),
     /--_tile-invalid-edge:var\(--slotted-radio-group-invalid-edge-width,var\(--slotted-control-invalid-edge-width,1px\)\)/,
   );
   assert.doesNotMatch(
-    rule(`${root}[data-variant='tile'][data-invalid] [data-part='item']`),
+    rule(`${root}[data-variant='tile'][data-invalid] [data-part-item]`),
     /--_tile-edge-width:/,
     'invalid replaces the width instead of adding to it',
   );
   assert.match(
-    rule(`${root}[data-variant='tile'] [data-part='item']::before`),
+    rule(`${root}[data-variant='tile'] [data-part-item]::before`),
     /border:calc\(var\(--_tile-edge-width\) \+ var\(--_tile-invalid-edge,0px\)\) solid var\(--_tile-edge\)/,
   );
   assert.match(invalid, /border-color:var\(--slotted-radio-group-invalid-border-color/);
@@ -398,7 +409,7 @@ test('says invalid with weight as well as with colour', () => {
  * public override still wins.
  */
 test('separates two described choices by twice the distance it separates bare ones', () => {
-  const described = rule(`${root}:has([data-part='description'])`);
+  const described = rule(`${root}:has([data-part-description])`);
   assert.match(described, /row-gap:var\(--slotted-radio-group-gap,calc\(var\(--_gap\) \* 2\)\)/);
   assert.match(rule(root), /gap:var\(--slotted-radio-group-gap,var\(--_gap\)\)/);
 });
@@ -412,7 +423,7 @@ test('puts a description one step from its label, and one step nearer inside a t
   assert.match(rule(root), /--_description-gap:var\(--slotted-space-3,0\.375rem\)/);
   assert.match(rule(part('description')), /padding-block-start:var\(--_description-gap\)/);
   assert.match(
-    rule(`${root}[data-variant='tile'] [data-part='item']`),
+    rule(`${root}[data-variant='tile'] [data-part-item]`),
     /--_description-gap:var\(--slotted-radio-group-tile-description-gap,var\(--slotted-space-2,0\.25rem\)\)/,
   );
 });

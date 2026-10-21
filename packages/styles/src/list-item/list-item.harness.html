@@ -32,17 +32,34 @@
 -->
 
 <section data-scene="anatomy">
-  <ul data-ui="list" data-part="root" data-variant="plain" data-size="md" role="list">
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="plain"
+    data-size="md"
+    role="list"
+  >
     <li
       data-ui="list-item"
+      data-ui-list-item=""
       data-part="root"
+      data-part-root=""
       data-variant="plain"
       data-size="md"
       data-align="center"
     >
-      <div data-part="content">
-        <span data-part="start">
-          <span data-ui="icon" data-part="root" data-size="md" aria-hidden="true">
+      <div data-part="content" data-part-content="">
+        <span data-part="start" data-part-start="">
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-size="md"
+            aria-hidden="true"
+          >
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -57,13 +74,15 @@
             </svg>
           </span>
         </span>
-        <span data-part="body">
-          <span data-part="label">Design tokens</span>
-          <span data-part="description">Updated 4 minutes ago by Ada Lovelace</span>
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">Design tokens</span>
+          <span data-part="description" data-part-description=""
+            >Updated 4 minutes ago by Ada Lovelace</span
+          >
         </span>
-        <span data-part="end">24</span>
+        <span data-part="end" data-part-end="">24</span>
       </div>
-      <span data-part="actions">
+      <span data-part="actions" data-part-actions="">
         <button
           type="button"
           aria-label="Remove Design tokens"
@@ -79,7 +98,14 @@
             justify-content: center;
           "
         >
-          <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true">
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-size="sm"
+            aria-hidden="true"
+          >
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -102,24 +128,40 @@
   visual at the start and keeps the line it had.
 -->
 <section data-scene="glyph-actions">
-  <ul data-ui="list" data-part="root" data-variant="plain" data-size="md" role="list">
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="plain"
+    data-size="md"
+    role="list"
+  >
     <li
       data-ui="list-item"
+      data-ui-list-item=""
       data-part="root"
+      data-part-root=""
       data-variant="plain"
       data-size="md"
       data-align="center"
     >
-      <div data-part="content">
-        <span data-part="body">
-          <span data-part="label">Shipment SHP-035726 reported an exception</span>
-          <span data-part="description">Pallet damage reported by the carrier; claim opened.</span>
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label=""
+            >Shipment SHP-035726 reported an exception</span
+          >
+          <span data-part="description" data-part-description=""
+            >Pallet damage reported by the carrier; claim opened.</span
+          >
         </span>
       </div>
-      <span data-part="actions">
+      <span data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="ghost"
           data-size="sm"
@@ -127,7 +169,7 @@
           type="button"
           aria-label="Mark as read"
         >
-          <span data-part="icon">
+          <span data-part="icon" data-part-icon="">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -143,7 +185,9 @@
         </button>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="ghost"
           data-size="sm"
@@ -151,7 +195,7 @@
           type="button"
           aria-label="Archive"
         >
-          <span data-part="icon">
+          <span data-part="icon" data-part-icon="">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -171,89 +215,188 @@
 </section>
 
 <section data-scene="content-elements">
-  <ul data-ui="list" data-part="root" data-variant="ruled" data-size="md" role="list">
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
-      <div data-part="content">
-        <span data-part="body"><span data-part="label">A row that is read</span></span>
-        <span data-part="end">div</span>
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="ruled"
+    data-size="md"
+    role="list"
+  >
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">A row that is read</span></span
+        >
+        <span data-part="end" data-part-end="">div</span>
       </div>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
-      <button type="button" data-part="content">
-        <span data-part="body"><span data-part="label">A row that is one command</span></span>
-        <span data-part="end">button</span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+    >
+      <button type="button" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">A row that is one command</span></span
+        >
+        <span data-part="end" data-part-end="">button</span>
       </button>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
-      <a href="#destination" data-part="content">
-        <span data-part="body"><span data-part="label">A row that is one destination</span></span>
-        <span data-part="end">a</span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+    >
+      <a href="#destination" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">A row that is one destination</span></span
+        >
+        <span data-part="end" data-part-end="">a</span>
       </a>
     </li>
   </ul>
 </section>
 
 <section data-scene="states">
-  <ul data-ui="list" data-part="root" data-variant="ruled" data-size="md" role="list">
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
-      <button type="button" data-part="content">
-        <span data-part="body"><span data-part="label">Default</span></span>
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="ruled"
+    data-size="md"
+    role="list"
+  >
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+    >
+      <button type="button" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Default</span></span
+        >
       </button>
     </li>
     <!-- A chooser makes the row static: an `input` inside a `button` is the
          nesting this family's parts exist to prevent, so the box that holds it
          is a `div` and the checkbox is the row's own control. -->
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-selected>
-      <div data-part="content">
-        <span data-part="start">
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+      data-selected
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="start" data-part-start="">
           <span
             data-ui="checkbox"
+            data-ui-checkbox=""
             data-part="root"
+            data-part-root=""
             data-size="md"
             data-label-placement="end"
             data-checked
           >
             <input
               data-part="control"
+              data-part-control=""
               type="checkbox"
               id="list-item-selected"
               checked
               aria-label="Select Selected"
             />
-            <span data-part="indicator"></span>
+            <span data-part="indicator" data-part-indicator=""></span>
           </span>
         </span>
-        <span data-part="body"><span data-part="label">Selected</span></span>
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Selected</span></span
+        >
       </div>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-current>
-      <a href="#current" data-part="content" aria-current="page">
-        <span data-part="body"><span data-part="label">Current</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+      data-current
+    >
+      <a href="#current" data-part="content" data-part-content="" aria-current="page">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Current</span></span
+        >
       </a>
     </li>
     <li
       data-ui="list-item"
+      data-ui-list-item=""
       data-part="root"
+      data-part-root=""
       data-variant="ruled"
       data-size="md"
       data-selected
       data-current
     >
-      <a href="#both" data-part="content" aria-current="page">
-        <span data-part="body"><span data-part="label">Selected and current</span></span>
+      <a href="#both" data-part="content" data-part-content="" aria-current="page">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Selected and current</span></span
+        >
       </a>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-loading>
-      <button type="button" data-part="content" disabled aria-busy="true">
-        <span data-part="body"><span data-part="label">Loading</span></span>
-        <span data-part="end">busy</span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+      data-loading
+    >
+      <button type="button" data-part="content" data-part-content="" disabled aria-busy="true">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Loading</span></span
+        >
+        <span data-part="end" data-part-end="">busy</span>
       </button>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-disabled>
-      <button type="button" data-part="content" disabled>
-        <span data-part="body">
-          <span data-part="label">Disabled</span>
-          <span data-part="description">Unavailable while the index rebuilds</span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+      data-disabled
+    >
+      <button type="button" data-part="content" data-part-content="" disabled>
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">Disabled</span>
+          <span data-part="description" data-part-description=""
+            >Unavailable while the index rebuilds</span
+          >
         </span>
       </button>
     </li>
@@ -261,30 +404,83 @@
 </section>
 
 <section data-scene="tone">
-  <ul data-ui="list" data-part="root" data-variant="ruled" data-size="md" role="list">
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-tone="secondary">
-      <button type="button" data-part="content">
-        <span data-part="body"><span data-part="label">Rename workspace</span></span>
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="ruled"
+    data-size="md"
+    role="list"
+  >
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-tone="secondary"
+    >
+      <button type="button" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Rename workspace</span></span
+        >
       </button>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-tone="accent">
-      <button type="button" data-part="content">
-        <span data-part="body"><span data-part="label">Invite a collaborator</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-tone="accent"
+    >
+      <button type="button" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Invite a collaborator</span></span
+        >
       </button>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-tone="success">
-      <button type="button" data-part="content">
-        <span data-part="body"><span data-part="label">Publish the changes</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-tone="success"
+    >
+      <button type="button" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Publish the changes</span></span
+        >
       </button>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-tone="warning">
-      <button type="button" data-part="content">
-        <span data-part="body"><span data-part="label">Revoke every session</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-tone="warning"
+    >
+      <button type="button" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Revoke every session</span></span
+        >
       </button>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-tone="danger">
-      <button type="button" data-part="content">
-        <span data-part="body"><span data-part="label">Delete the workspace</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-tone="danger"
+    >
+      <button type="button" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Delete the workspace</span></span
+        >
       </button>
     </li>
   </ul>
@@ -292,45 +488,89 @@
 
 <section data-scene="alignment">
   <div style="display: grid; gap: var(--slotted-space-6)">
-    <ul data-ui="list" data-part="root" data-variant="framed" data-size="md" role="list">
-      <li data-ui="list-item" data-part="root" data-variant="framed" data-align="center">
-        <div data-part="content">
-          <span data-part="start">
-            <span data-ui="icon" data-part="root" data-size="md" aria-hidden="true">
+    <ul
+      data-ui="list"
+      data-ui-list=""
+      data-part="root"
+      data-part-root=""
+      data-variant="framed"
+      data-size="md"
+      role="list"
+    >
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-variant="framed"
+        data-align="center"
+      >
+        <div data-part="content" data-part-content="">
+          <span data-part="start" data-part-start="">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="md"
+              aria-hidden="true"
+            >
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="12" cy="12" r="9" />
               </svg>
             </span>
           </span>
-          <span data-part="body">
-            <span data-part="label">center</span>
-            <span data-part="description">
+          <span data-part="body" data-part-body="">
+            <span data-part="label" data-part-label="">center</span>
+            <span data-part="description" data-part-description="">
               The mark sits on the middle of the block, which is right while the block is one line
               and wrong as soon as it is three.
             </span>
           </span>
-          <span data-part="end">14:02</span>
+          <span data-part="end" data-part-end="">14:02</span>
         </div>
       </li>
     </ul>
-    <ul data-ui="list" data-part="root" data-variant="framed" data-size="md" role="list">
-      <li data-ui="list-item" data-part="root" data-variant="framed" data-align="start">
-        <div data-part="content">
-          <span data-part="start">
-            <span data-ui="icon" data-part="root" data-size="md" aria-hidden="true">
+    <ul
+      data-ui="list"
+      data-ui-list=""
+      data-part="root"
+      data-part-root=""
+      data-variant="framed"
+      data-size="md"
+      role="list"
+    >
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-variant="framed"
+        data-align="start"
+      >
+        <div data-part="content" data-part-content="">
+          <span data-part="start" data-part-start="">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="md"
+              aria-hidden="true"
+            >
               <svg viewBox="0 0 24 24" fill="currentColor">
                 <circle cx="12" cy="12" r="9" />
               </svg>
             </span>
           </span>
-          <span data-part="body">
-            <span data-part="label">start</span>
-            <span data-part="description">
+          <span data-part="body" data-part-body="">
+            <span data-part="label" data-part-label="">start</span>
+            <span data-part="description" data-part-description="">
               The mark returns to the title's own line, and the metadata beside it goes with it, so
               a row of three lines reads from one corner.
             </span>
           </span>
-          <span data-part="end">14:02</span>
+          <span data-part="end" data-part-end="">14:02</span>
         </div>
       </li>
     </ul>
@@ -339,24 +579,56 @@
 
 <section data-scene="markers">
   <div style="display: grid; gap: var(--slotted-space-6)">
-    <ul data-ui="list" data-part="root" data-variant="plain" data-marker="bullet" role="list">
-      <li data-ui="list-item" data-part="root" data-marker="bullet">
-        <span data-part="marker" aria-hidden="true"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="dot"></svg></span
+    <ul
+      data-ui="list"
+      data-ui-list=""
+      data-part="root"
+      data-part-root=""
+      data-variant="plain"
+      data-marker="bullet"
+      role="list"
+    >
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-marker="bullet"
+      >
+        <span data-part="marker" data-part-marker="" aria-hidden="true"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg></span
         ></span>
-        <div data-part="content">
-          <span data-part="body"><span data-part="label">Geometry from the glyph scale</span></span>
+        <div data-part="content" data-part-content="">
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">Geometry from the glyph scale</span></span
+          >
         </div>
       </li>
-      <li data-ui="list-item" data-part="root" data-marker="bullet">
-        <span data-part="marker" aria-hidden="true"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="dot"></svg></span
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-marker="bullet"
+      >
+        <span data-part="marker" data-part-marker="" aria-hidden="true"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="dot"></svg></span
         ></span>
-        <div data-part="content">
-          <span data-part="body">
-            <span data-part="label">
+        <div data-part="content" data-part-content="">
+          <span data-part="body" data-part-body="">
+            <span data-part="label" data-part-label="">
               A dot that keeps its shape when the reader changes the typeface, because it is drawn
               rather than typed.
             </span>
@@ -364,20 +636,52 @@
         </div>
       </li>
     </ul>
-    <ol data-ui="list" data-part="root" data-variant="plain" data-marker="number" role="list">
-      <li data-ui="list-item" data-part="root" data-marker="number">
-        <div data-part="content">
-          <span data-part="body"><span data-part="label">Open the workspace</span></span>
+    <ol
+      data-ui="list"
+      data-ui-list=""
+      data-part="root"
+      data-part-root=""
+      data-variant="plain"
+      data-marker="number"
+      role="list"
+    >
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-marker="number"
+      >
+        <div data-part="content" data-part-content="">
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">Open the workspace</span></span
+          >
         </div>
       </li>
-      <li data-ui="list-item" data-part="root" data-marker="number">
-        <div data-part="content">
-          <span data-part="body"><span data-part="label">Choose a theme</span></span>
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-marker="number"
+      >
+        <div data-part="content" data-part-content="">
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">Choose a theme</span></span
+          >
         </div>
       </li>
-      <li data-ui="list-item" data-part="root" data-marker="number">
-        <div data-part="content">
-          <span data-part="body"><span data-part="label">Invite the rest of the team</span></span>
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-marker="number"
+      >
+        <div data-part="content" data-part-content="">
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">Invite the rest of the team</span></span
+          >
         </div>
       </li>
     </ol>
@@ -386,42 +690,114 @@
 
 <section data-scene="sizes">
   <div style="display: grid; gap: var(--slotted-space-6)">
-    <ul data-ui="list" data-part="root" data-variant="framed" data-size="sm" role="list">
-      <li data-ui="list-item" data-part="root" data-variant="framed" data-size="sm">
-        <a href="#sm" data-part="content">
-          <span data-part="start">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true">
+    <ul
+      data-ui="list"
+      data-ui-list=""
+      data-part="root"
+      data-part-root=""
+      data-variant="framed"
+      data-size="sm"
+      role="list"
+    >
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-variant="framed"
+        data-size="sm"
+      >
+        <a href="#sm" data-part="content" data-part-content="">
+          <span data-part="start" data-part-start="">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+            >
               <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" /></svg>
             </span>
           </span>
-          <span data-part="body"><span data-part="label">sm</span></span>
-          <span data-part="end">3 items</span>
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">sm</span></span
+          >
+          <span data-part="end" data-part-end="">3 items</span>
         </a>
       </li>
     </ul>
-    <ul data-ui="list" data-part="root" data-variant="framed" data-size="md" role="list">
-      <li data-ui="list-item" data-part="root" data-variant="framed" data-size="md">
-        <a href="#md" data-part="content">
-          <span data-part="start">
-            <span data-ui="icon" data-part="root" data-size="md" aria-hidden="true">
+    <ul
+      data-ui="list"
+      data-ui-list=""
+      data-part="root"
+      data-part-root=""
+      data-variant="framed"
+      data-size="md"
+      role="list"
+    >
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-variant="framed"
+        data-size="md"
+      >
+        <a href="#md" data-part="content" data-part-content="">
+          <span data-part="start" data-part-start="">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="md"
+              aria-hidden="true"
+            >
               <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" /></svg>
             </span>
           </span>
-          <span data-part="body"><span data-part="label">md</span></span>
-          <span data-part="end">3 items</span>
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">md</span></span
+          >
+          <span data-part="end" data-part-end="">3 items</span>
         </a>
       </li>
     </ul>
-    <ul data-ui="list" data-part="root" data-variant="framed" data-size="lg" role="list">
-      <li data-ui="list-item" data-part="root" data-variant="framed" data-size="lg">
-        <a href="#lg" data-part="content">
-          <span data-part="start">
-            <span data-ui="icon" data-part="root" data-size="lg" aria-hidden="true">
+    <ul
+      data-ui="list"
+      data-ui-list=""
+      data-part="root"
+      data-part-root=""
+      data-variant="framed"
+      data-size="lg"
+      role="list"
+    >
+      <li
+        data-ui="list-item"
+        data-ui-list-item=""
+        data-part="root"
+        data-part-root=""
+        data-variant="framed"
+        data-size="lg"
+      >
+        <a href="#lg" data-part="content" data-part-content="">
+          <span data-part="start" data-part-start="">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="lg"
+              aria-hidden="true"
+            >
               <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" /></svg>
             </span>
           </span>
-          <span data-part="body"><span data-part="label">lg</span></span>
-          <span data-part="end">3 items</span>
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">lg</span></span
+          >
+          <span data-part="end" data-part-end="">3 items</span>
         </a>
       </li>
     </ul>
@@ -429,70 +805,125 @@
 </section>
 
 <section data-scene="content">
-  <ul data-ui="list" data-part="root" data-variant="ruled" data-size="md" role="list">
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-align="start">
-      <a href="#unbroken" data-part="content">
-        <span data-part="body">
-          <span data-part="label">
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="ruled"
+    data-size="md"
+    role="list"
+  >
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-align="start"
+    >
+      <a href="#unbroken" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">
             https://example.test/workspaces/9f2c1ab4e77d4c5f9a3b6e8d0c1f2a34/settings
           </span>
-          <span data-part="description">One unbroken token breaks inside the row</span>
+          <span data-part="description" data-part-description=""
+            >One unbroken token breaks inside the row</span
+          >
         </span>
-        <span data-part="end">Yesterday</span>
+        <span data-part="end" data-part-end="">Yesterday</span>
       </a>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-align="start">
-      <a href="#translated" data-part="content">
-        <span data-part="body">
-          <span data-part="label">
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-align="start"
+    >
+      <a href="#translated" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">
             Configurações de notificação para colaboradores externos do espaço de trabalho
           </span>
-          <span data-part="description">
+          <span data-part="description" data-part-description="">
             Uma cadeia traduzida ocupa mais espaço do que a original, e é a linha do título que cede
             — nunca a data ao lado dela.
           </span>
         </span>
-        <span data-part="end">14:02</span>
+        <span data-part="end" data-part-end="">14:02</span>
       </a>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-truncate>
-      <a href="#truncate" data-part="content">
-        <span data-part="body">
-          <span data-part="label">
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-truncate
+    >
+      <a href="#truncate" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">
             A title the row cannot grow for, clipped to one line rather than wrapped to four, with
             the whole string still in the document.
           </span>
-          <span data-part="description">
+          <span data-part="description" data-part-description="">
             The description is clipped with it, because a clipped title over four wrapped lines is a
             row that gave up on one measure and not the other.
           </span>
         </span>
-        <span data-part="end">14:02</span>
+        <span data-part="end" data-part-end="">14:02</span>
       </a>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled">
-      <a href="#arabic" data-part="content">
-        <span data-part="body">
-          <span data-part="label">مساحة العمل المشتركة</span>
-          <span data-part="description">A title in another script keeps its own direction</span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+    >
+      <a href="#arabic" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">مساحة العمل المشتركة</span>
+          <span data-part="description" data-part-description=""
+            >A title in another script keeps its own direction</span
+          >
         </span>
-        <span data-part="end">14:02</span>
+        <span data-part="end" data-part-end="">14:02</span>
       </a>
     </li>
   </ul>
 </section>
 
 <section data-scene="separated">
-  <ul data-ui="list" data-part="root" data-variant="separated" data-size="md" role="list">
-    <li data-ui="list-item" data-part="root" data-variant="separated">
-      <a href="#one" data-part="content">
-        <span data-part="body">
-          <span data-part="label">Each row is its own surface</span>
-          <span data-part="description">A list of cards and a list of rows, one family</span>
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="separated"
+    data-size="md"
+    role="list"
+  >
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="separated"
+    >
+      <a href="#one" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">Each row is its own surface</span>
+          <span data-part="description" data-part-description=""
+            >A list of cards and a list of rows, one family</span
+          >
         </span>
-        <span data-part="end">14:02</span>
+        <span data-part="end" data-part-end="">14:02</span>
       </a>
-      <span data-part="actions">
+      <span data-part="actions" data-part-actions="">
         <button
           type="button"
           aria-label="Pin Each row is its own surface"
@@ -508,7 +939,14 @@
             justify-content: center;
           "
         >
-          <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true">
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-size="sm"
+            aria-hidden="true"
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 3v18M3 12h18" />
             </svg>
@@ -516,21 +954,39 @@
         </button>
       </span>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="separated" data-selected>
-      <a href="#two" data-part="content">
-        <span data-part="body">
-          <span data-part="label">Selected keeps the row's own corners</span>
-          <span data-part="description">The fill is clipped by the edge above it</span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="separated"
+      data-selected
+    >
+      <a href="#two" data-part="content" data-part-content="">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">Selected keeps the row's own corners</span>
+          <span data-part="description" data-part-description=""
+            >The fill is clipped by the edge above it</span
+          >
         </span>
-        <span data-part="end">Yesterday</span>
+        <span data-part="end" data-part-end="">Yesterday</span>
       </a>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="separated" data-disabled>
-      <a data-part="content" aria-disabled="true">
-        <span data-part="body">
-          <span data-part="label">Disabled recedes onto the disabled ground</span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="separated"
+      data-disabled
+    >
+      <a data-part="content" data-part-content="" aria-disabled="true">
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label=""
+            >Disabled recedes onto the disabled ground</span
+          >
         </span>
-        <span data-part="end">—</span>
+        <span data-part="end" data-part-end="">—</span>
       </a>
     </li>
   </ul>
@@ -542,35 +998,100 @@
   row after it draws one, and a run of selected rows has one line inside it.
 -->
 <section data-scene="selected-edges">
-  <ul data-ui="list" data-part="root" data-variant="ruled" data-size="md" role="list">
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
-      <div data-part="content">
-        <span data-part="body"><span data-part="label">Before</span></span>
+  <ul
+    data-ui="list"
+    data-ui-list=""
+    data-part="root"
+    data-part-root=""
+    data-variant="ruled"
+    data-size="md"
+    role="list"
+  >
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Before</span></span
+        >
       </div>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-selected>
-      <div data-part="content">
-        <span data-part="body"><span data-part="label">Selected, first of a run</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+      data-selected
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Selected, first of a run</span></span
+        >
       </div>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-selected>
-      <div data-part="content">
-        <span data-part="body"><span data-part="label">Selected, second of a run</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+      data-selected
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Selected, second of a run</span></span
+        >
       </div>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
-      <div data-part="content">
-        <span data-part="body"><span data-part="label">Between</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Between</span></span
+        >
       </div>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md" data-current>
-      <div data-part="content">
-        <span data-part="body"><span data-part="label">Current</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+      data-current
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">Current</span></span
+        >
       </div>
     </li>
-    <li data-ui="list-item" data-part="root" data-variant="ruled" data-size="md">
-      <div data-part="content">
-        <span data-part="body"><span data-part="label">After</span></span>
+    <li
+      data-ui="list-item"
+      data-ui-list-item=""
+      data-part="root"
+      data-part-root=""
+      data-variant="ruled"
+      data-size="md"
+    >
+      <div data-part="content" data-part-content="">
+        <span data-part="body" data-part-body=""
+          ><span data-part="label" data-part-label="">After</span></span
+        >
       </div>
     </li>
   </ul>

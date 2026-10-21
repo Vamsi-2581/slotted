@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/filter-bar/filter-bar.css';
 
 import {
@@ -848,6 +849,7 @@ export function FilterBar({
       readOnly || unknown ? (
         <button
           data-part="chip-operator"
+          data-part-chip-operator=""
           disabled={disabled}
           type="button"
           {...(unknown ? { 'aria-disabled': true as const } : lockProps)}
@@ -859,8 +861,8 @@ export function FilterBar({
           <MenuTrigger
             render={(props) => (
               <button
-                {...(props as object)}
-                data-part="chip-operator"
+                {...withSelectorKey(props as object, 'part', 'chip-operator')}
+
                 disabled={segmentDisabled}
                 type="button"
               >
@@ -900,6 +902,7 @@ export function FilterBar({
             aria-haspopup={narrow && !readOnly && !unknown ? 'dialog' : undefined}
             aria-label={valueName}
             data-part="chip-value"
+            data-part-chip-value=""
             disabled={disabled}
             onClick={(event) =>
               narrow && !readOnly && !unknown ? openBuilderOn(key, event) : undefined
@@ -918,10 +921,10 @@ export function FilterBar({
             <PopoverTrigger
               render={(props) => (
                 <button
-                  {...(props as object)}
+                  {...withSelectorKey(props as object, 'part', 'chip-value')}
                   aria-haspopup="dialog"
                   aria-label={valueName}
-                  data-part="chip-value"
+
                   disabled={disabled}
                   title={valueTitle}
                   type="button"
@@ -962,6 +965,7 @@ export function FilterBar({
         data-field={key}
         data-operands={words.operands}
         data-part="chip"
+        data-part-chip=""
         key={key}
         onKeyDown={(event) => onChipKeyDown(event, key)}
         role="group"
@@ -970,7 +974,7 @@ export function FilterBar({
         {...(flags.folded ? { 'data-folded': '' } : {})}
         {...(unknown || invalid === key ? { 'data-invalid': '' } : {})}
       >
-        <span data-part="chip-field">
+        <span data-part="chip-field" data-part-chip-field="">
           <FieldIcon icon={field?.icon} />
           <span>{label}</span>
         </span>
@@ -980,6 +984,7 @@ export function FilterBar({
           <button
             aria-label={t('remove', { name: label })}
             data-part="chip-remove"
+            data-part-chip-remove=""
             disabled={disabled}
             onClick={(event) => removeField(key, event)}
             type="button"
@@ -1001,6 +1006,7 @@ export function FilterBar({
         aria-label={words}
         data-operands={1}
         data-part="chip"
+        data-part-chip=""
         key={`group-${path.join('.')}`}
         onKeyDown={(event) => {
           if ((event.key === 'Delete' || event.key === 'Backspace') && !locked) {
@@ -1014,6 +1020,7 @@ export function FilterBar({
         <button
           aria-haspopup="dialog"
           data-part="chip-value"
+          data-part-chip-value=""
           disabled={disabled}
           onClick={(event) => (readOnly ? undefined : openBuilder('pointer', event, { path }))}
           title={words}
@@ -1026,6 +1033,7 @@ export function FilterBar({
           <button
             aria-label={t('remove', { name: words })}
             data-part="chip-remove"
+            data-part-chip-remove=""
             disabled={disabled}
             onClick={(event) => removeNode(path, event)}
             type="button"
@@ -1057,6 +1065,7 @@ export function FilterBar({
           aria-haspopup="dialog"
           data-field={field.key}
           data-part="pill"
+          data-part-pill=""
           disabled={disabled}
           key={field.key}
           onClick={(event) => start(field.key, event)}
@@ -1097,11 +1106,12 @@ export function FilterBar({
     <div
       aria-label={t('bar')}
       role="search"
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'root')}
       data-apply={apply}
-      data-part="root"
+
       data-size={size}
       data-ui="filter-bar"
+      data-ui-filter-bar=""
       ref={root}
       {...(disabled ? { 'data-disabled': '' } : {})}
       {...(readOnly ? { 'data-readonly': '' } : {})}
@@ -1110,8 +1120,8 @@ export function FilterBar({
       {...(open ? { 'data-open': '' } : {})}
       {...(sticky ? { 'data-sticky': '' } : {})}
     >
-      <div data-part="frame">
-        <div data-part="search">
+      <div data-part="frame" data-part-frame="">
+        <div data-part="search" data-part-search="">
           <TextField
             aria-label={t('search')}
             clearable
@@ -1137,6 +1147,7 @@ export function FilterBar({
         <div
           aria-label={t('filters')}
           data-part="bar"
+          data-part-bar=""
           ref={bar}
           role="toolbar"
           {...(readOnly ? { 'aria-description': t('readOnly') } : {})}
@@ -1146,7 +1157,7 @@ export function FilterBar({
             aria-haspopup="dialog"
             disabled={disabled}
             onClick={(event) => openBuilder('pointer', event)}
-            render={(props) => <button {...props} data-part="summary" />}
+            render={(props) => <button {...withSelectorKey(props, 'part', 'summary')} />}
             size={size}
             start={
               <Icon>
@@ -1165,6 +1176,7 @@ export function FilterBar({
             <button
               aria-expanded={revealed}
               data-part="more"
+              data-part-more=""
               disabled={disabled}
               onClick={(event) => requestRevealed(!revealed, 'pointer', event)}
               type="button"
@@ -1183,7 +1195,9 @@ export function FilterBar({
                       {...(props as object)}
                       aria-label={t('add')}
                       disabled={disabled || unfiltered.length === 0}
-                      render={(inner) => <button {...inner} data-compact="" data-part="add" />}
+                      render={(inner) => (
+                        <button {...withSelectorKey(inner, 'part', 'add')} data-compact="" />
+                      )}
                       shape="circle"
                       size={size}
                       title={t('add')}
@@ -1198,7 +1212,7 @@ export function FilterBar({
                     <Button
                       {...(props as object)}
                       disabled={disabled || unfiltered.length === 0}
-                      render={(inner) => <button {...inner} data-part="add" />}
+                      render={(inner) => <button {...withSelectorKey(inner, 'part', 'add')} />}
                       size={size}
                       start={
                         <Icon>
@@ -1241,7 +1255,7 @@ export function FilterBar({
             <Button
               disabled={disabled}
               onClick={(event) => clearAll(event)}
-              render={(props) => <button {...props} data-part="clear" />}
+              render={(props) => <button {...withSelectorKey(props, 'part', 'clear')} />}
               size={size}
               tone="secondary"
               variant="ghost"
@@ -1251,11 +1265,11 @@ export function FilterBar({
           ) : null}
 
           {apply === 'manual' && !readOnly ? (
-            <div data-part="actions">
+            <div data-part="actions" data-part-actions="">
               <Button
                 disabled={disabled || !dirty}
                 onClick={reset}
-                render={(props) => <button {...props} data-part="reset" />}
+                render={(props) => <button {...withSelectorKey(props, 'part', 'reset')} />}
                 size={size}
                 tone="secondary"
                 variant="ghost"
@@ -1265,7 +1279,7 @@ export function FilterBar({
               <Button
                 disabled={disabled || loading || !dirty}
                 onClick={(event) => submit(event)}
-                render={(props) => <button {...props} data-part="apply" />}
+                render={(props) => <button {...withSelectorKey(props, 'part', 'apply')} />}
                 size={size}
               >
                 {t('apply')}
@@ -1274,11 +1288,11 @@ export function FilterBar({
           ) : null}
         </div>
 
-        <div data-part="end">
+        <div data-part="end" data-part-end="">
           {presets && presets.length > 0 ? (
             /* Clearable: leaving a preset is the control's own clear, and
                without it the one way out of a saved view is deleting it. */
-            <div data-part="preset">
+            <div data-part="preset" data-part-preset="">
               <Select
                 clearable
                 disabled={disabled || readOnly}
@@ -1306,11 +1320,18 @@ export function FilterBar({
         </div>
 
         {countText !== null || loading ? (
-          <p aria-live="polite" data-part="count" {...(loading ? { 'aria-busy': true } : {})}>
+          <p
+            aria-live="polite"
+            data-part="count"
+            data-part-count=""
+            {...(loading ? { 'aria-busy': true } : {})}
+          >
             {loading ? (
               <span
                 data-ui="spinner"
+                data-ui-spinner=""
                 data-part="root"
+                data-part-root=""
                 data-size="sm"
                 role="progressbar"
                 aria-label={t('filters')}
@@ -1336,7 +1357,13 @@ export function FilterBar({
             <DrawerClose />
           </DrawerHeader>
           <DrawerBody>
-            <div data-part="builder" data-ui="filter-bar" id={`${base}builder`}>
+            <div
+              data-part="builder"
+              data-part-builder=""
+              data-ui="filter-bar"
+              data-ui-filter-bar=""
+              id={`${base}builder`}
+            >
               <GroupEditor
                 environment={{
                   ...environment,
@@ -1349,7 +1376,7 @@ export function FilterBar({
                     {drawerDraft.value && countActive(drawerDraft.value) > 0 ? (
                       <Button
                         onClick={() => drawerDraft.set(baseline())}
-                        render={(props) => <button {...props} data-part="clear" />}
+                        render={(props) => <button {...withSelectorKey(props, 'part', 'clear')} />}
                         size="sm"
                         tone="secondary"
                         variant="ghost"
@@ -1360,7 +1387,9 @@ export function FilterBar({
                     {onPresetSave ? (
                       <Button
                         onClick={() => onPresetSave(normalizeFilterGroup(drawerDraft.value))}
-                        render={(props) => <button {...props} data-part="save-preset" />}
+                        render={(props) => (
+                          <button {...withSelectorKey(props, 'part', 'save-preset')} />
+                        )}
                         size="sm"
                         tone="secondary"
                         variant="ghost"
@@ -1529,7 +1558,9 @@ function RuleEditorPopoverBody({
     <div
       data-kind={field.kind}
       data-part="rule"
+      data-part-rule=""
       data-ui="filter-bar"
+      data-ui-filter-bar=""
       {...(invalid ? { 'data-invalid': '' } : {})}
     >
       <ConditionEditor
@@ -1540,7 +1571,7 @@ function RuleEditorPopoverBody({
         withOperator={withOperator}
         onConditionChange={(next) => change({ ...local, conditions: [next] } as FilterDescriptor)}
       />
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <Button
           disabled={field.required === true}
           onClick={() => {

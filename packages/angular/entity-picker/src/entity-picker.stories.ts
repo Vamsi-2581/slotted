@@ -347,8 +347,10 @@ class FormDemo {
       [source]="source"
     >
       <ng-template slEntityPickerOption let-person>
-        <span data-part="label">{{ person.label }}</span>
-        <span data-part="description">{{ person.description }} · Northwind</span>
+        <span data-part="label" data-part-label="">{{ person.label }}</span>
+        <span data-part="description" data-part-description=""
+          >{{ person.description }} · Northwind</span
+        >
       </ng-template>
       <ng-template slEntityPickerChip let-person
         >{{ person.label }}{{ person.meta ? ' · ' + person.meta : '' }}</ng-template

@@ -29,7 +29,7 @@
    * shell's toggle and its account control. Outside the shell the fallbacks
    * are the same numbers the shell composes its own from.
    */
-  [data-ui='side-navigation'] {
+  [data-ui-side-navigation] {
     --_row-height: var(--slotted-app-shell-row-height, var(--slotted-control-height-md, 34px));
     /** The mark's box is the row's height: a square the mark is centred in. */
     --_mark: var(--slotted-app-shell-row-mark, var(--_row-height));
@@ -149,7 +149,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='side-navigation'][data-size='sm'] {
+  [data-ui-side-navigation][data-size='sm'] {
     --_row-height: var(--slotted-control-height-sm, 30px);
     --_mark: var(--_row-height);
     --_gap: var(--slotted-control-gap-sm, 6px);
@@ -158,7 +158,7 @@
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
   }
 
-  [data-ui='side-navigation'][data-size='lg'] {
+  [data-ui-side-navigation][data-size='lg'] {
     --_row-height: var(--slotted-control-height-lg, 38px);
     --_mark: var(--_row-height);
     --_gap: var(--slotted-control-gap-lg, 8px);
@@ -170,7 +170,7 @@
 
   /* ── The root ─────────────────────────────────────────────────────────── */
 
-  [data-ui='side-navigation'][data-part='root'] {
+  [data-ui-side-navigation][data-part-root] {
     container-name: slotted-side-navigation;
     container-type: inline-size;
     display: flex;
@@ -184,7 +184,7 @@
     inline-size: 100%;
   }
 
-  [data-ui='side-navigation'] [data-part='section'] {
+  [data-ui-side-navigation] [data-part-section] {
     display: flex;
     flex-direction: column;
     min-inline-size: 0;
@@ -196,7 +196,7 @@
    * column: a navigation whose rows carry no marks keeps its titles near its
    * words, and one whose rows do keeps them on the glyphs' own edge.
    */
-  [data-ui='side-navigation'] [data-part='section-label'] {
+  [data-ui-side-navigation] [data-part-section-label] {
     color: var(--_section-color);
     font-size: var(--_section-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -213,8 +213,8 @@
     padding-inline: calc(var(--_inset) + (var(--_mark) - var(--_icon-size)) / 2);
   }
 
-  [data-ui='side-navigation'] [data-part='list'],
-  [data-ui='side-navigation'] [data-part='group'] {
+  [data-ui-side-navigation] [data-part-list],
+  [data-ui-side-navigation] [data-part-group] {
     display: flex;
     flex-direction: column;
     gap: var(--_row-gap);
@@ -231,7 +231,7 @@
    * and a second row for the group. A trigger that is the whole row spans the
    * three columns; the group always does.
    */
-  [data-ui='side-navigation'] [data-part='item'] {
+  [data-ui-side-navigation] [data-part-item] {
     /**
      * `start`, not the default stretch. While the second track is between
      * `0fr` and `1fr` the grid holds free space, and a stretched `auto` first
@@ -271,11 +271,11 @@
     transition: grid-template-rows var(--slotted-duration-medium) var(--_easing);
   }
 
-  [data-ui='side-navigation'] [data-part='item'][data-expanded] {
+  [data-ui-side-navigation] [data-part-item][data-expanded] {
     grid-template-rows: auto 1fr;
   }
 
-  [data-ui='side-navigation'] [data-part='item'] > [data-part='group'] {
+  [data-ui-side-navigation] [data-part-item] > [data-part-group] {
     grid-column: 1 / -1;
     grid-row: 2;
     min-block-size: 0;
@@ -297,7 +297,7 @@
     visibility: hidden;
   }
 
-  [data-ui='side-navigation'] [data-part='item'][data-expanded] > [data-part='group'] {
+  [data-ui-side-navigation] [data-part-item][data-expanded] > [data-part-group] {
     opacity: 1;
     padding-block-start: var(--_row-gap);
     transition:
@@ -313,19 +313,19 @@
    * guide runs down the mark's centre: shadcn and Primer both draw it, and it
    * is what tells a third level from a second.
    */
-  [data-ui='side-navigation'] [data-part='item'] > [data-part='group'] {
+  [data-ui-side-navigation] [data-part-item] > [data-part-group] {
     padding-inline-start: var(--_indent-step);
     position: relative;
   }
 
   /* Under a row with a mark, the children stand under the parent's words. */
-  [data-ui='side-navigation']
-    [data-part='item']:has(> :is([data-part='link'], [data-part='trigger']) > [data-part='icon'])
-    > [data-part='group'] {
+  [data-ui-side-navigation]
+    [data-part-item]:has(> :is([data-part-link], [data-part-trigger]) > [data-part-icon])
+    > [data-part-group] {
     padding-inline-start: var(--_indent);
   }
 
-  [data-ui='side-navigation'][data-guides] [data-part='item'] > [data-part='group']::before {
+  [data-ui-side-navigation][data-guides] [data-part-item] > [data-part-group]::before {
     background-color: var(--_guide-color);
     content: '';
     inline-size: var(--_guide-width);
@@ -336,15 +336,15 @@
   }
 
   /* … and down the centre of the mark for one that has it. */
-  [data-ui='side-navigation'][data-guides]
-    [data-part='item']:has(> :is([data-part='link'], [data-part='trigger']) > [data-part='icon'])
-    > [data-part='group']::before {
+  [data-ui-side-navigation][data-guides]
+    [data-part-item]:has(> :is([data-part-link], [data-part-trigger]) > [data-part-icon])
+    > [data-part-group]::before {
     inset-inline-start: calc(var(--_inset) + var(--_mark) / 2 - var(--_guide-width) / 2);
   }
 
   /* ── The row: a link, or a trigger ────────────────────────────────────── */
 
-  [data-ui='side-navigation'] :is([data-part='link'], [data-part='trigger']) {
+  [data-ui-side-navigation] :is([data-part-link], [data-part-trigger]) {
     align-content: center;
     align-items: center;
     appearance: none;
@@ -374,13 +374,13 @@
       color var(--_duration) var(--_easing);
   }
 
-  [data-ui='side-navigation']
-    [data-part='item']:not([data-disabled])
-    > :is([data-part='link'], [data-part='trigger']):active {
+  [data-ui-side-navigation]
+    [data-part-item]:not([data-disabled])
+    > :is([data-part-link], [data-part-trigger]):active {
     transition-duration: var(--slotted-duration-instant);
   }
 
-  [data-ui='side-navigation'] [data-part='item'] > [data-part='trigger'] {
+  [data-ui-side-navigation] [data-part-item] > [data-part-trigger] {
     grid-column: 1 / -1;
   }
 
@@ -389,7 +389,7 @@
    * the APG hybrid example's second control — the height of the row and the
    * width of a mark, so the pair reads as one row with a chevron on it.
    */
-  [data-ui='side-navigation'] [data-part='item']:has(> [data-part='link']) > [data-part='trigger'] {
+  [data-ui-side-navigation] [data-part-item]:has(> [data-part-link]) > [data-part-trigger] {
     grid-column: 2;
     grid-template-columns: auto;
     inline-size: var(--_mark);
@@ -397,7 +397,7 @@
     place-items: center;
   }
 
-  [data-ui='side-navigation'] [data-part='actions'] {
+  [data-ui-side-navigation] [data-part-actions] {
     align-items: center;
     align-self: center;
     column-gap: var(--slotted-space-2, 0.25rem);
@@ -409,7 +409,7 @@
     padding-inline-end: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='side-navigation'] :is([data-part='link'], [data-part='trigger']):focus-visible {
+  [data-ui-side-navigation] :is([data-part-link], [data-part-trigger]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -422,7 +422,7 @@
    * `ng-icon` — which sizes itself at `1em` — through the font-size. Nothing
    * placed here is drawn at the row's type size.
    */
-  [data-ui='side-navigation'] [data-part='icon'] {
+  [data-ui-side-navigation] [data-part-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     block-size: var(--_mark);
@@ -443,7 +443,7 @@
     position: relative;
   }
 
-  [data-ui='side-navigation'] [data-part='icon'] > svg {
+  [data-ui-side-navigation] [data-part-icon] > svg {
     block-size: var(--_icon-size);
     inline-size: var(--_icon-size);
   }
@@ -469,7 +469,7 @@
    * row around it. The text is in the DOM in every mode, which is what
    * `docs/build-briefing.md` requires.
    */
-  [data-ui='side-navigation'] [data-part='label'] {
+  [data-ui-side-navigation] [data-part-label] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;
@@ -477,7 +477,7 @@
     unicode-bidi: isolate;
   }
 
-  [data-ui='side-navigation']:not([data-truncate='none']) [data-part='label'] {
+  [data-ui-side-navigation]:not([data-truncate='none']) [data-part-label] {
     overflow: hidden;
     overflow-wrap: normal;
     text-overflow: ellipsis;
@@ -485,11 +485,11 @@
   }
 
   /* The binding has already placed the ellipsis; a second one at the edge would be a lie. */
-  [data-ui='side-navigation'][data-truncate='middle'] [data-part='label'] {
+  [data-ui-side-navigation][data-truncate='middle'] [data-part-label] {
     text-overflow: clip;
   }
 
-  [data-ui='side-navigation'] [data-part='description'] {
+  [data-ui-side-navigation] [data-part-description] {
     color: var(--_description-color);
     font-size: var(--_description-font-size);
     font-weight: var(--slotted-font-weight-regular, 400);
@@ -502,7 +502,7 @@
     unicode-bidi: isolate;
   }
 
-  [data-ui='side-navigation']:not([data-truncate='none']) [data-part='description'] {
+  [data-ui-side-navigation]:not([data-truncate='none']) [data-part-description] {
     overflow: hidden;
     overflow-wrap: normal;
     text-overflow: ellipsis;
@@ -519,31 +519,31 @@
    * nothing between — the first version put the title on the mark's own
    * thirty-four pixels and the description under that, which read as a gap.
    */
-  [data-ui='side-navigation']
-    :is([data-part='link'], [data-part='trigger']):has(> [data-part='description']) {
+  [data-ui-side-navigation]
+    :is([data-part-link], [data-part-trigger]):has(> [data-part-description]) {
     padding-block: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='side-navigation']
-    :is([data-part='link'], [data-part='trigger']):has(> [data-part='description'])
-    > :is([data-part='icon'], [data-part='end'], [data-part='count'], [data-part='indicator']) {
+  [data-ui-side-navigation]
+    :is([data-part-link], [data-part-trigger]):has(> [data-part-description])
+    > :is([data-part-icon], [data-part-end], [data-part-count], [data-part-indicator]) {
     grid-row: 1 / -1;
   }
 
-  [data-ui='side-navigation']
-    :is([data-part='link'], [data-part='trigger']):has(> [data-part='description'])
-    > [data-part='label'] {
+  [data-ui-side-navigation]
+    :is([data-part-link], [data-part-trigger]):has(> [data-part-description])
+    > [data-part-label] {
     align-self: end;
     line-height: var(--slotted-line-height-xs, 1.4);
   }
 
-  [data-ui='side-navigation']
-    :is([data-part='link'], [data-part='trigger']):has(> [data-part='description'])
-    > [data-part='description'] {
+  [data-ui-side-navigation]
+    :is([data-part-link], [data-part-trigger]):has(> [data-part-description])
+    > [data-part-description] {
     align-self: start;
   }
 
-  [data-ui='side-navigation'] [data-part='end'] {
+  [data-ui-side-navigation] [data-part-end] {
     align-items: center;
     display: flex;
     grid-column: 3;
@@ -560,7 +560,7 @@
    * `badge`, composed into `end`, and the two are told apart on purpose:
    * every row with a number would otherwise be a row with a pill.
    */
-  [data-ui='side-navigation'] [data-part='count'] {
+  [data-ui-side-navigation] [data-part-count] {
     color: var(--_description-color);
     font-size: var(--_description-font-size);
     font-variant-numeric: tabular-nums;
@@ -573,19 +573,19 @@
     text-align: end;
   }
 
-  [data-ui='side-navigation'] [data-part='link'][data-current] > [data-part='description'] {
+  [data-ui-side-navigation] [data-part-link][data-current] > [data-part-description] {
     color: var(--_current-description-color);
   }
 
-  [data-ui='side-navigation'] [data-part='link'][data-current] > [data-part='count'],
-  [data-ui='side-navigation']
-    [data-part='item'][data-current]
-    > [data-part='trigger']
-    > [data-part='count'] {
+  [data-ui-side-navigation] [data-part-link][data-current] > [data-part-count],
+  [data-ui-side-navigation]
+    [data-part-item][data-current]
+    > [data-part-trigger]
+    > [data-part-count] {
     color: inherit;
   }
 
-  [data-ui='side-navigation'] [data-part='indicator'] {
+  [data-ui-side-navigation] [data-part-indicator] {
     --slotted-icon-size: var(--_icon-size);
 
     display: flex;
@@ -602,33 +602,33 @@
    * direction is the other way; the open mark points down in both, turning the
    * other way where it is mirrored.
    */
-  [data-ui='side-navigation'] [data-part='indicator'] > [data-ui='icon'] {
+  [data-ui-side-navigation] [data-part-indicator] > [data-ui-icon] {
     /* The same duration as the track it announces, so the turn and the opening end together. */
     transition: rotate var(--slotted-duration-medium) var(--_easing);
   }
 
-  [data-ui='side-navigation']
-    [data-part='item']:has(> [data-part='link'])
-    > [data-part='trigger']
-    > [data-part='indicator'] {
+  [data-ui-side-navigation]
+    [data-part-item]:has(> [data-part-link])
+    > [data-part-trigger]
+    > [data-part-indicator] {
     grid-column: 1;
     margin-inline-start: 0;
   }
 
-  [data-ui='side-navigation']
-    [data-part='item'][data-expanded]
-    > [data-part='trigger']
-    > [data-part='indicator']
-    > [data-ui='icon'] {
+  [data-ui-side-navigation]
+    [data-part-item][data-expanded]
+    > [data-part-trigger]
+    > [data-part-indicator]
+    > [data-ui-icon] {
     rotate: 90deg;
   }
 
   /* The mirror is applied before the turn, so the mirrored mark turns the other way to land on down. */
-  [data-ui='side-navigation']
-    [data-part='item'][data-expanded]
-    > [data-part='trigger']
-    > [data-part='indicator']
-    > [data-ui='icon']:dir(rtl) {
+  [data-ui-side-navigation]
+    [data-part-item][data-expanded]
+    > [data-part-trigger]
+    > [data-part-indicator]
+    > [data-ui-icon]:dir(rtl) {
     rotate: -90deg;
   }
 
@@ -650,18 +650,18 @@
    * `button`: a proportion of the type, which is what the trim removes.
    */
   @supports (text-box: trim-both cap alphabetic) {
-    [data-ui='side-navigation'] [data-part='label'] {
+    [data-ui-side-navigation] [data-part-label] {
       padding-block: calc((var(--_line-height) * 1em - 0.75em) / 2);
       text-box: trim-both cap alphabetic;
     }
 
-    [data-ui='side-navigation'] [data-part='description'],
-    [data-ui='side-navigation'] [data-part='section-label'] {
+    [data-ui-side-navigation] [data-part-description],
+    [data-ui-side-navigation] [data-part-section-label] {
       padding-block: calc((var(--slotted-line-height-xs, 1.4) * 1em - 0.75em) / 2);
       text-box: trim-both cap alphabetic;
     }
 
-    [data-ui='side-navigation'] [data-part='count'] {
+    [data-ui-side-navigation] [data-part-count] {
       line-height: var(--slotted-line-height-xs, 1.4);
       padding-block: calc((var(--slotted-line-height-xs, 1.4) * 1em - 0.75em) / 2);
       text-box: trim-both cap alphabetic;
@@ -670,26 +670,24 @@
 
   /* ── States ───────────────────────────────────────────────────────────── */
 
-  [data-ui='side-navigation']
-    [data-part='item']:not([data-disabled])
-    > [data-part='link']:not([data-current]):hover,
-  [data-ui='side-navigation']
-    [data-part='item']:not([data-disabled]):not([data-current])
-    > [data-part='trigger']:enabled:hover {
+  [data-ui-side-navigation]
+    [data-part-item]:not([data-disabled])
+    > [data-part-link]:not([data-current]):hover,
+  [data-ui-side-navigation]
+    [data-part-item]:not([data-disabled]):not([data-current])
+    > [data-part-trigger]:enabled:hover {
     background-color: var(--_hover-background);
     color: var(--_hover-color);
   }
 
   /* A trigger whose group is in the flyout holds the pressed ground while the layer is open. */
-  [data-ui='side-navigation']
-    [data-part='item'][data-open]:not([data-current])
-    > [data-part='trigger'],
-  [data-ui='side-navigation']
-    [data-part='item']:not([data-disabled])
-    > [data-part='link']:not([data-current]):active,
-  [data-ui='side-navigation']
-    [data-part='item']:not([data-disabled]):not([data-current])
-    > [data-part='trigger']:enabled:active {
+  [data-ui-side-navigation] [data-part-item][data-open]:not([data-current]) > [data-part-trigger],
+  [data-ui-side-navigation]
+    [data-part-item]:not([data-disabled])
+    > [data-part-link]:not([data-current]):active,
+  [data-ui-side-navigation]
+    [data-part-item]:not([data-disabled]):not([data-current])
+    > [data-part-trigger]:enabled:active {
     background-color: var(--_active-background);
   }
 
@@ -699,39 +697,39 @@
    * Carbon and PatternFly draw a bar on the row's start edge instead, and
    * `state-rail.test.mjs` refuses one (R1): the state is said by the ground.
    */
-  [data-ui='side-navigation'] [data-part='link'][data-current],
-  [data-ui='side-navigation'] [data-part='item'][data-current] > [data-part='trigger'] {
+  [data-ui-side-navigation] [data-part-link][data-current],
+  [data-ui-side-navigation] [data-part-item][data-current] > [data-part-trigger] {
     background-color: var(--_current-background);
     box-shadow: inset 0 0 0 var(--_guide-width) var(--_current-edge);
     color: var(--_current-color);
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='side-navigation']
-    [data-part='item'][data-disabled]
-    > :is([data-part='link'], [data-part='trigger']),
-  [data-ui='side-navigation'] [data-part='trigger']:disabled {
+  [data-ui-side-navigation]
+    [data-part-item][data-disabled]
+    > :is([data-part-link], [data-part-trigger]),
+  [data-ui-side-navigation] [data-part-trigger]:disabled {
     color: var(--_disabled-color);
     cursor: not-allowed;
   }
 
-  [data-ui='side-navigation']
-    [data-part='item'][data-disabled]
-    > [data-part='link']
-    > [data-part='description'] {
+  [data-ui-side-navigation]
+    [data-part-item][data-disabled]
+    > [data-part-link]
+    > [data-part-description] {
     color: var(--_disabled-color);
   }
 
   /* ── The divider and the skeleton row ─────────────────────────────────── */
 
-  [data-ui='side-navigation'] [data-part='divider'] {
+  [data-ui-side-navigation] [data-part-divider] {
     border: 0;
     border-block-start: var(--_guide-width) solid var(--_guide-color);
     margin-block: var(--slotted-space-2, 0.25rem);
     margin-inline: var(--_inset);
   }
 
-  [data-ui='side-navigation'] [data-part='skeleton'] {
+  [data-ui-side-navigation] [data-part-skeleton] {
     align-items: center;
     display: grid;
     gap: var(--_gap);
@@ -740,17 +738,17 @@
     padding-inline: var(--_inset);
   }
 
-  [data-ui='side-navigation'] [data-part='skeleton'] > [data-part='icon'] {
+  [data-ui-side-navigation] [data-part-skeleton] > [data-part-icon] {
     margin-inline: 0;
   }
 
   /* The boxes are `skeleton`'s; this family only says how big a mark is. */
-  [data-ui='side-navigation'] [data-part='skeleton'] > [data-part='icon'] > [data-ui='skeleton'] {
+  [data-ui-side-navigation] [data-part-skeleton] > [data-part-icon] > [data-ui-skeleton] {
     --slotted-skeleton-block-size: var(--_icon-size);
     --slotted-skeleton-inline-size: var(--_icon-size);
   }
 
-  [data-ui='side-navigation'] [data-part='skeleton'] > [data-part='label'] {
+  [data-ui-side-navigation] [data-part-skeleton] > [data-part-label] {
     display: block;
     min-inline-size: 0;
     overflow: visible;
@@ -767,10 +765,10 @@
    * cannot select it and there is no third selector that says "either".
    */
   @container slotted-side-navigation (inline-size < 96px) {
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='label'],
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='description'],
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='end'],
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='count'] {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-label],
+    [data-ui-side-navigation][data-mode='auto'] [data-part-description],
+    [data-ui-side-navigation][data-mode='auto'] [data-part-end],
+    [data-ui-side-navigation][data-mode='auto'] [data-part-count] {
       block-size: 1px;
       clip-path: inset(50%);
       inline-size: 1px;
@@ -780,15 +778,15 @@
       white-space: nowrap;
     }
 
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='indicator'],
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='actions'],
-    [data-ui='side-navigation'][data-mode='auto']
-      [data-part='item']:has(> [data-part='link'])
-      > [data-part='trigger'] {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-indicator],
+    [data-ui-side-navigation][data-mode='auto'] [data-part-actions],
+    [data-ui-side-navigation][data-mode='auto']
+      [data-part-item]:has(> [data-part-link])
+      > [data-part-trigger] {
       display: none;
     }
 
-    [data-ui='side-navigation'][data-mode='auto'] :is([data-part='link'], [data-part='trigger']) {
+    [data-ui-side-navigation][data-mode='auto'] :is([data-part-link], [data-part-trigger]) {
       grid-template-columns: auto;
       inline-size: var(--_mark);
       justify-content: center;
@@ -796,19 +794,19 @@
       padding: 0;
     }
 
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='icon'] {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-icon] {
       margin: 0;
     }
 
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='item'] {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-item] {
       grid-template-rows: auto 0fr;
     }
 
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='item'] > [data-part='group'] {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-item] > [data-part-group] {
       visibility: hidden;
     }
 
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='section-label'] {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-section-label] {
       block-size: 0;
       border-block-start: var(--_guide-width) solid var(--_guide-color);
       color: transparent;
@@ -818,23 +816,19 @@
       padding: 0;
     }
 
-    [data-ui='side-navigation'][data-mode='auto'] [data-part='skeleton'] {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-skeleton] {
       grid-template-columns: var(--_mark);
       justify-content: center;
       padding-inline: 0;
     }
 
-    [data-ui='side-navigation'][data-mode='auto']
-      [data-part='skeleton']
-      > :not([data-part='icon']) {
+    [data-ui-side-navigation][data-mode='auto'] [data-part-skeleton] > :not([data-part-icon]) {
       display: none;
     }
 
-    [data-ui='side-navigation'][data-mode='auto']
-      :is([data-part='link'], [data-part='trigger']):has(
-        > :is([data-part='end'], [data-part='count'])
-      )
-      > [data-part='icon']::after {
+    [data-ui-side-navigation][data-mode='auto']
+      :is([data-part-link], [data-part-trigger]):has(> :is([data-part-end], [data-part-count]))
+      > [data-part-icon]::after {
       background-color: var(--_dot-color);
       block-size: var(--_dot-size);
       border-radius: var(--slotted-radius-full, 9999px);
@@ -846,10 +840,10 @@
     }
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='label'],
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='description'],
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='end'],
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='count'] {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-label],
+  [data-ui-side-navigation][data-mode='compact'] [data-part-description],
+  [data-ui-side-navigation][data-mode='compact'] [data-part-end],
+  [data-ui-side-navigation][data-mode='compact'] [data-part-count] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -859,15 +853,15 @@
     white-space: nowrap;
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='indicator'],
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='actions'],
-  [data-ui='side-navigation'][data-mode='compact']
-    [data-part='item']:has(> [data-part='link'])
-    > [data-part='trigger'] {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-indicator],
+  [data-ui-side-navigation][data-mode='compact'] [data-part-actions],
+  [data-ui-side-navigation][data-mode='compact']
+    [data-part-item]:has(> [data-part-link])
+    > [data-part-trigger] {
     display: none;
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] :is([data-part='link'], [data-part='trigger']) {
+  [data-ui-side-navigation][data-mode='compact'] :is([data-part-link], [data-part-trigger]) {
     grid-template-columns: auto;
     inline-size: var(--_mark);
     justify-content: center;
@@ -875,19 +869,19 @@
     padding: 0;
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='icon'] {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-icon] {
     margin: 0;
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='item'] {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-item] {
     grid-template-rows: auto 0fr;
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='item'] > [data-part='group'] {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-item] > [data-part-group] {
     visibility: hidden;
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='section-label'] {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-section-label] {
     block-size: 0;
     border-block-start: var(--_guide-width) solid var(--_guide-color);
     color: transparent;
@@ -897,23 +891,19 @@
     padding: 0;
   }
 
-  [data-ui='side-navigation'][data-mode='compact'] [data-part='skeleton'] {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-skeleton] {
     grid-template-columns: var(--_mark);
     justify-content: center;
     padding-inline: 0;
   }
 
-  [data-ui='side-navigation'][data-mode='compact']
-    [data-part='skeleton']
-    > :not([data-part='icon']) {
+  [data-ui-side-navigation][data-mode='compact'] [data-part-skeleton] > :not([data-part-icon]) {
     display: none;
   }
 
-  [data-ui='side-navigation'][data-mode='compact']
-    :is([data-part='link'], [data-part='trigger']):has(
-      > :is([data-part='end'], [data-part='count'])
-    )
-    > [data-part='icon']::after {
+  [data-ui-side-navigation][data-mode='compact']
+    :is([data-part-link], [data-part-trigger]):has(> :is([data-part-end], [data-part-count]))
+    > [data-part-icon]::after {
     background-color: var(--_dot-color);
     block-size: var(--_dot-size);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -933,7 +923,7 @@
    * rather than on the root part. The group inside it is a plain list again:
    * no indent, no guide, the raised surface under it.
    */
-  [data-ui='side-navigation'][data-part='flyout'] {
+  [data-ui-side-navigation][data-part-flyout] {
     --_surface: var(
       --slotted-side-navigation-flyout-surface,
       var(--slotted-surface-raised, Canvas)
@@ -968,40 +958,40 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='side-navigation'][data-part='flyout'][data-side='top'] {
+  [data-ui-side-navigation][data-part-flyout][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* The layer arrives along the inline axis it opens on: from one step inside
      the rail's edge, the way a submenu does. */
-  [data-ui='side-navigation'][data-part='flyout'][data-side='right'] {
+  [data-ui-side-navigation][data-part-flyout][data-side='right'] {
     translate: calc(-1 * var(--_enter-distance)) 0;
   }
 
-  [data-ui='side-navigation'][data-part='flyout'][data-side='left'] {
+  [data-ui-side-navigation][data-part-flyout][data-side='left'] {
     translate: var(--_enter-distance) 0;
   }
 
-  [data-ui='side-navigation'][data-part='flyout'][data-open] {
+  [data-ui-side-navigation][data-part-flyout][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
   }
 
-  [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned] {
+  [data-ui-side-navigation][data-part-flyout][data-open][data-positioned] {
     animation: slotted-side-navigation-enter-down var(--slotted-duration-medium)
       var(--slotted-easing-enter);
   }
 
-  [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned][data-side='top'] {
+  [data-ui-side-navigation][data-part-flyout][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-side-navigation-enter-up;
   }
 
-  [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned][data-side='right'] {
+  [data-ui-side-navigation][data-part-flyout][data-open][data-positioned][data-side='right'] {
     animation-name: slotted-side-navigation-enter-from-start;
   }
 
-  [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned][data-side='left'] {
+  [data-ui-side-navigation][data-part-flyout][data-open][data-positioned][data-side='left'] {
     animation-name: slotted-side-navigation-enter-from-end;
   }
 
@@ -1041,28 +1031,28 @@
 
   /* Stillness keeps the fade and drops the movement (R7). */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='side-navigation'][data-part='flyout'],
-    [data-ui='side-navigation'][data-part='flyout'][data-side='top'],
-    [data-ui='side-navigation'][data-part='flyout'][data-side='left'],
-    [data-ui='side-navigation'][data-part='flyout'][data-side='right'] {
+    [data-ui-side-navigation][data-part-flyout],
+    [data-ui-side-navigation][data-part-flyout][data-side='top'],
+    [data-ui-side-navigation][data-part-flyout][data-side='left'],
+    [data-ui-side-navigation][data-part-flyout][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned],
-    [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned][data-side='top'],
-    [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned][data-side='left'],
-    [data-ui='side-navigation'][data-part='flyout'][data-open][data-positioned][data-side='right'] {
+    [data-ui-side-navigation][data-part-flyout][data-open][data-positioned],
+    [data-ui-side-navigation][data-part-flyout][data-open][data-positioned][data-side='top'],
+    [data-ui-side-navigation][data-part-flyout][data-open][data-positioned][data-side='left'],
+    [data-ui-side-navigation][data-part-flyout][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-side-navigation-fade;
     }
   }
 
   /* The anchor scrolled out of its own clipper: the layer waits, hidden. */
-  [data-ui='side-navigation'][data-part='flyout'][data-detached] {
+  [data-ui-side-navigation][data-part-flyout][data-detached] {
     visibility: hidden;
   }
 
-  [data-ui='side-navigation'][data-part='flyout'] > [data-part='group'] {
+  [data-ui-side-navigation][data-part-flyout] > [data-part-group] {
     background-color: var(--_surface);
     border: var(--_guide-width) solid var(--_border-color);
     border-radius: var(--_flyout-radius);
@@ -1072,31 +1062,31 @@
     pointer-events: auto;
   }
 
-  [data-ui='side-navigation'][data-part='flyout']
-    > [data-part='group']
-    > [data-part='item']
-    > [data-part='group'] {
+  [data-ui-side-navigation][data-part-flyout]
+    > [data-part-group]
+    > [data-part-item]
+    > [data-part-group] {
     padding-inline-start: var(--_indent);
   }
 
   /* ── Forced colours ───────────────────────────────────────────────────── */
 
   @media (forced-colors: active) {
-    [data-ui='side-navigation'] [data-part='link'][data-current],
-    [data-ui='side-navigation'] [data-part='item'][data-current] > [data-part='trigger'] {
+    [data-ui-side-navigation] [data-part-link][data-current],
+    [data-ui-side-navigation] [data-part-item][data-current] > [data-part-trigger] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='side-navigation']
-      [data-part='item'][data-disabled]
-      > :is([data-part='link'], [data-part='trigger']),
-    [data-ui='side-navigation'] [data-part='trigger']:disabled {
+    [data-ui-side-navigation]
+      [data-part-item][data-disabled]
+      > :is([data-part-link], [data-part-trigger]),
+    [data-ui-side-navigation] [data-part-trigger]:disabled {
       color: GrayText;
     }
 
-    [data-ui='side-navigation'][data-part='flyout'] > [data-part='group'] {
+    [data-ui-side-navigation][data-part-flyout] > [data-part-group] {
       border-color: CanvasText;
     }
   }

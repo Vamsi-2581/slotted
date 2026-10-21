@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/detail-panel/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./detail-panel.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./detail-panel.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./detail-panel.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,11 +30,11 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.detailPanel;
-const column = `${ui}>[data-part='body']>[data-ui='container']`;
-const columns = `${column}>[data-part='columns']`;
-const section = `${columns}>[data-part='main']>[data-part='section']`;
+const column = `${ui}>[data-part-body]>[data-ui-container]`;
+const columns = `${column}>[data-part-columns]`;
+const section = `${columns}>[data-part-main]>[data-part-section]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -42,7 +55,7 @@ test('styles every part the contract declares', () => {
   for (const declared of member.parts) {
     if (declared === 'root') continue;
     assert.ok(
-      normalized.includes(`[data-part='${declared}']`),
+      normalized.includes(`[data-part-${declared.toLowerCase()}]`),
       `no rule reaches the ${declared} part`,
     );
   }
@@ -66,7 +79,7 @@ test('renders every part the contract declares, in at least one scene', () => {
 test('reaches its own parts with a child combinator, never a descendant one', () => {
   for (const part of member.parts) {
     if (part === 'root') continue;
-    const descendant = new RegExp(`\\[data-ui='detail-panel'\\][^{]*? \\[data-part='${part}'\\]`);
+    const descendant = new RegExp(`\\[data-ui-detail-panel\\][^{]*? \\[data-part-${part}\\]`);
     assert.ok(!descendant.test(normalized), `a descendant rule reaches ${part}`);
   }
 });
@@ -85,12 +98,12 @@ test('queries its own width from the root and lays the columns out three element
   assert.ok(wide.includes(`${columns}{grid-template-columns:minmax(0,1fr) var(--_aside-size);}`));
   assert.ok(
     wide.includes(
-      `${ui}[data-aside='start']>[data-part='body']>[data-ui='container']>[data-part='columns']{grid-template-columns:var(--_aside-size) minmax(0,1fr);}`,
+      `${ui}[data-aside='start']>[data-part-body]>[data-ui-container]>[data-part-columns]{grid-template-columns:var(--_aside-size) minmax(0,1fr);}`,
     ),
   );
   assert.ok(
     wide.includes(
-      `${ui}[data-aside='none']>[data-part='body']>[data-ui='container']>[data-part='columns']{grid-template-columns:minmax(0,1fr);}`,
+      `${ui}[data-aside='none']>[data-part-body]>[data-ui-container]>[data-part-columns]{grid-template-columns:minmax(0,1fr);}`,
     ),
   );
   assert.doesNotMatch(normalized, /@media/);
@@ -103,7 +116,7 @@ test('queries its own width from the root and lays the columns out three element
  * never hidden.
  */
 test('reflows the aside under the body instead of hiding it', () => {
-  const aside = rule(`${columns}>[data-part='aside']`);
+  const aside = rule(`${columns}>[data-part-aside]`);
   assert.match(aside, /border-block-start:var\(--_rule-size\) solid var\(--_rule\)/);
   assert.match(aside, /padding-block-start:var\(--_gap\)/);
   assert.match(aside, /overflow-wrap:anywhere/);
@@ -160,7 +173,7 @@ test('makes a section the tabpanel under tabs and a scroll target under stacked'
   );
   assert.match(ring, /outline-offset:var\(--slotted-focus-ring-offset,2px\)/);
   const arriving = rule(
-    `${ui}[data-layout='tabs']>[data-part='body']>[data-ui='container']>[data-part='columns']>[data-part='main']>[data-part='section']:not([hidden])`,
+    `${ui}[data-layout='tabs']>[data-part-body]>[data-ui-container]>[data-part-columns]>[data-part-main]>[data-part-section]:not([hidden])`,
   );
   assert.match(
     arriving,
@@ -171,7 +184,7 @@ test('makes a section the tabpanel under tabs and a scroll target under stacked'
 });
 
 test('puts a tabbed section’s own controls in a row at the inline end', () => {
-  const actions = rule(`${section}>[data-part='section-actions']`);
+  const actions = rule(`${section}>[data-part-section-actions]`);
   assert.match(actions, /display:flex/);
   assert.match(actions, /justify-content:flex-end/);
   assert.match(actions, /gap:var\(--slotted-control-gap-md,8px\)/);
@@ -183,7 +196,7 @@ test('puts a tabbed section’s own controls in a row at the inline end', () => 
  * covered. The aside does not stick: see the contract.
  */
 test('sticks the footer at the bottom and paints it, and sticks nothing else', () => {
-  const footer = rule(`${ui}>[data-part='footer']`);
+  const footer = rule(`${ui}>[data-part-footer]`);
   assert.match(footer, /position:sticky/);
   assert.match(footer, /inset-block-end:var\(--slotted-page-sticky-bottom,0px\)/);
   assert.match(footer, /background-color:var\(--_ground\)/);
@@ -195,7 +208,7 @@ test('sticks the footer at the bottom and paints it, and sticks nothing else', (
 
 /** The message stands where the body stood and is tall enough to read as the record's absence. */
 test('gives the message the body’s place and a height', () => {
-  const message = rule(`${column}>[data-part='message']`);
+  const message = rule(`${column}>[data-part-message]`);
   assert.match(message, /display:grid/);
   assert.match(message, /place-items:center/);
   assert.match(message, /min-block-size:calc\(4 \* var\(--slotted-space-12,4rem\)\)/);

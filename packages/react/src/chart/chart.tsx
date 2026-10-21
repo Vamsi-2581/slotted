@@ -1,6 +1,7 @@
 /* The chart draws three other families inside its plot — the skeleton while
    it waits, a result state when it is empty or failed, a button in that
    state — so it brings their stylesheets with its own. */
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/button/button.css';
 import '@slotted/styles/result-state/result-state.css';
 import '@slotted/styles/skeleton/skeleton.css';
@@ -305,9 +306,11 @@ export function ChartTooltipContent({
 }: ChartTooltipContentProps) {
   return (
     <>
-      <div data-part="tooltip-title">{context.title}</div>
+      <div data-part="tooltip-title" data-part-tooltip-title="">
+        {context.title}
+      </div>
       {context.notes.map((note) => (
-        <div data-part="tooltip-note" key={note}>
+        <div data-part="tooltip-note" data-part-tooltip-note="" key={note}>
           {note}
         </div>
       ))}
@@ -322,6 +325,7 @@ export function ChartTooltipContent({
         return (
           <div
             data-part="tooltip-item"
+            data-part-tooltip-item=""
             {...(context.items.length > 1 && item.current ? { 'data-current': '' } : {})}
             {...colorAttributes(item.color)}
             key={`${item.series}-${item.label}`}
@@ -330,20 +334,25 @@ export function ChartTooltipContent({
               <span
                 data-kind={kind}
                 data-part="tooltip-marker"
+                data-part-tooltip-marker=""
                 {...(series && series.stroke !== 'solid' ? { 'data-stroke': series.stroke } : {})}
               />
             )}
-            <span data-part="tooltip-label">{item.label}</span>
-            <span data-part="tooltip-value">
+            <span data-part="tooltip-label" data-part-tooltip-label="">
+              {item.label}
+            </span>
+            <span data-part="tooltip-value" data-part-tooltip-value="">
               {item.share ? `${item.share} · ${item.formatted}` : item.formatted}
             </span>
           </div>
         );
       })}
       {context.total ? (
-        <div data-part="tooltip-total">
+        <div data-part="tooltip-total" data-part-tooltip-total="">
           <span>{totalLabel}</span>
-          <span data-part="tooltip-value">{context.total.formatted}</span>
+          <span data-part="tooltip-value" data-part-tooltip-value="">
+            {context.total.formatted}
+          </span>
         </div>
       ) : null}
     </>
@@ -960,16 +969,22 @@ export function Chart(props: ChartProps) {
               : entry.kind
           }
           data-part="legend-marker"
+          data-part-legend-marker=""
           {...(owner && owner.stroke !== 'solid' ? { 'data-stroke': owner.stroke } : {})}
         />
-        <span data-part="legend-label" title={entry.label}>
+        <span data-part="legend-label" data-part-legend-label="" title={entry.label}>
           {entry.label}
         </span>
-        {legendValues ? <span data-part="legend-value">{legendValue(entry)}</span> : null}
+        {legendValues ? (
+          <span data-part="legend-value" data-part-legend-value="">
+            {legendValue(entry)}
+          </span>
+        ) : null}
       </>
     );
     const common: ChartLegendItemProps = {
       'data-part': 'legend-item',
+      ...selectorKeyProps('part', 'legend-item'),
       'data-key': entry.key,
       ...colorAttributes(entry.color),
       ...(current ? { 'data-current': '' } : {}),
@@ -1085,21 +1100,21 @@ export function Chart(props: ChartProps) {
     description !== undefined ||
     actions !== undefined ||
     resolved.toolbar !== 'none' ? (
-      <figcaption data-part="header">
+      <figcaption data-part="header" data-part-header="">
         <div>
           <div>
             {title !== undefined ? (
-              <span data-part="title" id={titleId}>
+              <span data-part="title" data-part-title="" id={titleId}>
                 {title}
               </span>
             ) : null}
             {help !== undefined ? (
               <>
                 <button
-                  {...helpLayer.controlProps}
+                  {...withSelectorKey(helpLayer.controlProps, 'part', 'help')}
                   aria-controls={`${id}-help`}
                   aria-label={t('help')}
-                  data-part="help"
+
                   type="button"
                 >
                   <Icon>
@@ -1107,8 +1122,8 @@ export function Chart(props: ChartProps) {
                   </Icon>
                 </button>
                 <div
-                  {...helpLayer.layerProps}
-                  data-part="help-content"
+                  {...withSelectorKey(helpLayer.layerProps, 'part', 'help-content')}
+
                   id={`${id}-help`}
                   role="note"
                 >
@@ -1118,12 +1133,16 @@ export function Chart(props: ChartProps) {
             ) : null}
           </div>
           {description !== undefined ? (
-            <span data-part="description" id={descriptionId}>
+            <span data-part="description" data-part-description="" id={descriptionId}>
               {description}
             </span>
           ) : null}
         </div>
-        {actions !== undefined ? <div data-part="actions">{actions}</div> : null}
+        {actions !== undefined ? (
+          <div data-part="actions" data-part-actions="">
+            {actions}
+          </div>
+        ) : null}
         {/* The box stands in every state, so the header's words wrap at one width; it
             holds nothing a reader can reach until the plot has something to act on. */}
         {resolved.toolbar !== 'none' ? (
@@ -1131,6 +1150,7 @@ export function Chart(props: ChartProps) {
             aria-hidden={usable ? undefined : true}
             aria-label={usable ? t('toolbar') : undefined}
             data-part="toolbar"
+            data-part-toolbar=""
             data-waiting={usable ? undefined : ''}
             inert={!usable}
             role={usable ? 'toolbar' : undefined}
@@ -1161,10 +1181,10 @@ export function Chart(props: ChartProps) {
               part="fullscreen-toggle"
             />
             <button
-              {...menu.controlProps}
+              {...withSelectorKey(menu.controlProps, 'part', 'menu-trigger')}
               aria-haspopup="menu"
               aria-label={t('more')}
-              data-part="menu-trigger"
+
               title={t('more')}
               type="button"
             >
@@ -1172,7 +1192,11 @@ export function Chart(props: ChartProps) {
                 <Glyph name="ellipsis" />
               </Icon>
             </button>
-            <div {...menu.layerProps} aria-label={t('more')} data-part="menu" role="menu">
+            <div
+              {...withSelectorKey(menu.layerProps, 'part', 'menu')}
+              aria-label={t('more')}
+              role="menu"
+            >
               <MenuItem
                 action="view"
                 label={t('tableView')}
@@ -1225,6 +1249,7 @@ export function Chart(props: ChartProps) {
       <div
         aria-label={waiting && (!model || model.shape === 'pie') ? undefined : t('legend')}
         data-part="legend"
+        data-part-legend=""
         onKeyDown={onLegendKeyDown}
         ref={legendNode}
         role={
@@ -1245,21 +1270,25 @@ export function Chart(props: ChartProps) {
           <>
             {legendEntries.map((entry, index) => legendItem(entry, index, false))}
             <button
-              {...moreLayer.controlProps}
+              {...withSelectorKey(moreLayer.controlProps, 'part', 'legend-more')}
               aria-haspopup="true"
               aria-label={t('legendMore', {
                 series: new Intl.ListFormat(locale ?? appLocale, { type: 'unit' }).format(
                   collapsed.map((index) => legendEntries[index]?.label ?? ''),
                 ),
               })}
-              data-part="legend-more"
+
               hidden={collapsed.length === 0}
               tabIndex={rovingKey === null ? 0 : -1}
               type="button"
             >
               {t('moreSeries', { count: collapsed.length })}
             </button>
-            <div {...moreLayer.layerProps} aria-label={t('legend')} data-part="menu" role="group">
+            <div
+              {...withSelectorKey(moreLayer.layerProps, 'part', 'menu')}
+              aria-label={t('legend')}
+              role="group"
+            >
               {collapsed.map((index) => {
                 const entry = legendEntries[index];
                 return entry ? legendItem(entry, index, true) : null;
@@ -1270,7 +1299,7 @@ export function Chart(props: ChartProps) {
       </div>
     );
 
-  const rootProps: ChartRootProps = {
+  const rootProps: ChartRootProps = keyedProps({
     ...nativeProps,
     'data-ui': 'chart',
     'data-part': 'root',
@@ -1299,6 +1328,7 @@ export function Chart(props: ChartProps) {
           aria-labelledby={title !== undefined ? titleId : undefined}
           aria-roledescription={t('roledescription')}
           data-part="plot"
+          data-part-plot=""
           onBlur={(event) => requestActive(null, 'blur', event.nativeEvent)}
           onFocus={onPlotFocus}
           onKeyDown={onPlotKeyDown}
@@ -1308,6 +1338,7 @@ export function Chart(props: ChartProps) {
         >
           <div
             data-part="crosshair"
+            data-part-crosshair=""
             hidden={!overlay.crosshair}
             {...(overlay.crosshair?.isBand ? { 'data-band': '' } : {})}
             data-orientation={model?.orientation ?? 'vertical'}
@@ -1324,11 +1355,18 @@ export function Chart(props: ChartProps) {
                 : undefined
             }
           />
-          <div aria-hidden="true" data-part="canvas" hidden={!drawable} ref={canvas} />
+          <div
+            aria-hidden="true"
+            data-part="canvas"
+            data-part-canvas=""
+            hidden={!drawable}
+            ref={canvas}
+          />
           {overlay.markers.map((marker) => (
             <div
               aria-hidden="true"
               data-part="marker"
+              data-part-marker=""
               key={marker.key}
               {...colorAttributes(marker.color)}
               {...(marker.selected ? { 'data-selected': '' } : {})}
@@ -1339,6 +1377,7 @@ export function Chart(props: ChartProps) {
           <div
             aria-hidden="true"
             data-part="tooltip"
+            data-part-tooltip=""
             ref={tooltipNode}
             {...(overlay.tooltip ? { 'data-open': '' } : {})}
             {...(overlay.docked ? { 'data-docked': '' } : {})}
@@ -1355,11 +1394,15 @@ export function Chart(props: ChartProps) {
               : null}
           </div>
           {drawable && model?.shape === 'pie' && (model.series[0]?.innerRadius ?? 0) > 0 ? (
-            <div aria-hidden="true" data-part="center">
+            <div aria-hidden="true" data-part="center" data-part-center="">
               {renderCenter?.(model) ?? (
                 <>
-                  <span data-part="center-value">{model.series[0]!.format(model.total)}</span>
-                  <span data-part="center-label">{t('total')}</span>
+                  <span data-part="center-value" data-part-center-value="">
+                    {model.series[0]!.format(model.total)}
+                  </span>
+                  <span data-part="center-label" data-part-center-label="">
+                    {t('total')}
+                  </span>
                 </>
               )}
             </div>
@@ -1368,11 +1411,12 @@ export function Chart(props: ChartProps) {
             <div
               aria-labelledby={title !== undefined ? titleId : undefined}
               data-part="table-region"
+              data-part-table-region=""
               ref={attachTableRegion}
               role="region"
               tabIndex={0}
             >
-              <table data-part="table">
+              <table data-part="table" data-part-table="">
                 <caption>
                   {table.omitted
                     ? typeof title === 'string'
@@ -1424,7 +1468,7 @@ export function Chart(props: ChartProps) {
           ) : null}
           {waiting ? <Skeleton kind={skeletonKind} /> : null}
           {!waiting && failed ? (
-            <div data-part="error">
+            <div data-part="error" data-part-error="">
               {renderError?.() ?? (
                 <ResultState
                   action={onRetry || engineFailure ? t('retry') : undefined}
@@ -1436,7 +1480,7 @@ export function Chart(props: ChartProps) {
             </div>
           ) : null}
           {!waiting && !failed && model?.empty ? (
-            <div data-part="empty">
+            <div data-part="empty" data-part-empty="">
               {renderEmpty?.(model.empty) ?? (
                 <ResultState
                   action={model.empty === 'all-hidden' ? t('showAll') : undefined}
@@ -1447,13 +1491,13 @@ export function Chart(props: ChartProps) {
               )}
             </div>
           ) : null}
-          <p data-part="summary" id={summaryId}>
+          <p data-part="summary" data-part-summary="" id={summaryId}>
             {summary}
           </p>
         </div>
       </>
     ),
-  };
+  });
 
   return render ? render(rootProps) : <figure {...rootProps} />;
 }
@@ -1523,6 +1567,7 @@ function ToolbarButton({
         ? {}
         : { 'aria-pressed': pressed, ...(pressed ? { 'data-pressed': '' } : {}) })}
       data-part={part}
+      {...selectorKeyProps('part', part)}
       onClick={(event) => onPress(reasonOf(), event.nativeEvent)}
       ref={element}
       title={label}
@@ -1549,6 +1594,7 @@ function MenuItem({
     <button
       data-action={action}
       data-part="menu-item"
+      data-part-menu-item=""
       onClick={(event) => onPress(reasonOf(), event.nativeEvent)}
       ref={element}
       role="menuitem"
@@ -1566,9 +1612,11 @@ function SkeletonBlock({ shape = 'block' }: { shape?: 'block' | 'circle' }) {
       data-animation="shimmer"
       data-loading=""
       data-part="root"
+      data-part-root=""
       data-shape={shape}
       data-size="md"
       data-ui="skeleton"
+      data-ui-skeleton=""
     />
   );
 }
@@ -1585,8 +1633,15 @@ function Skeleton({ kind }: { kind: 'bar' | 'line' | 'pie' }) {
   const repeat = (count: number) =>
     Array.from({ length: count }, (_, index) => <SkeletonBlock key={index} />);
   return (
-    <div aria-hidden="true" data-kind={kind} data-part="skeleton">
-      <div data-animation="shimmer" data-loading="" data-part="region" data-ui="skeleton">
+    <div aria-hidden="true" data-kind={kind} data-part="skeleton" data-part-skeleton="">
+      <div
+        data-animation="shimmer"
+        data-loading=""
+        data-part="region"
+        data-part-region=""
+        data-ui="skeleton"
+        data-ui-skeleton=""
+      >
         {kind === 'pie' ? (
           <SkeletonBlock shape="circle" />
         ) : (
@@ -1617,26 +1672,34 @@ function ResultState({
       data-align="center"
       data-live="polite"
       data-part="root"
+      data-part-root=""
       data-reach="section"
       data-status={status}
       data-ui="result-state"
+      data-ui-result-state=""
     >
-      <div aria-hidden="true" data-part="media" />
-      <div data-part="content" role="status">
-        <div data-part="title">{text}</div>
+      <div aria-hidden="true" data-part="media" data-part-media="" />
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="">
+          {text}
+        </div>
       </div>
       {action ? (
-        <div data-part="actions">
+        <div data-part="actions" data-part-actions="">
           <button
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-tone="secondary"
             data-ui="button"
+            data-ui-button=""
             data-variant="outline"
             onClick={(event) => onAction(event.nativeEvent)}
             type="button"
           >
-            <span data-part="label">{action}</span>
+            <span data-part="label" data-part-label="">
+              {action}
+            </span>
           </button>
         </div>
       ) : null}

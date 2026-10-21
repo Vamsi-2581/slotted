@@ -15,7 +15,7 @@
    * sections, and the families inside it — a card, a description-list — have
    * a `header`, an `actions` and a `description` of their own.
    */
-  [data-ui='section'] {
+  [data-ui-section] {
     --_gap: var(--slotted-section-gap, var(--slotted-space-5, 0.75rem));
     --_text: var(--slotted-text, CanvasText);
     --_muted: var(--slotted-text-muted, GrayText);
@@ -42,11 +42,11 @@
     scroll-margin-block-start: var(--slotted-page-sticky-top, 0px);
   }
 
-  [data-ui='section'][data-size='sm'] {
+  [data-ui-section][data-size='sm'] {
     --_heading-size: var(--slotted-section-heading-size-sm, var(--slotted-font-size-md, 0.875rem));
     --_heading-line-height: var(--slotted-line-height-md, 1.5);
   }
-  [data-ui='section'][data-size='lg'] {
+  [data-ui-section][data-size='lg'] {
     --_heading-size: var(--slotted-section-heading-size-lg, var(--slotted-font-size-xl, 1.125rem));
     --_heading-line-height: var(--slotted-line-height-xl, 1.45);
   }
@@ -55,7 +55,7 @@
    * A surface and not a card: a raised ground, a subtle edge, the large
    * radius, one step of inset, and no shadow, no hover, no action.
    */
-  [data-ui='section'][data-ground='surface'] {
+  [data-ui-section][data-ground='surface'] {
     --_ground: var(--slotted-section-surface, var(--slotted-surface-raised, Canvas));
     /* Published, as a card's is, for the families that state a ground inside it. */
     --slotted-ground: var(--_ground);
@@ -67,7 +67,7 @@
 
   /* ── The header ──────────────────────────────────────────────────────── */
 
-  [data-ui='section'] > [data-part='header'] {
+  [data-ui-section] > [data-part-header] {
     align-items: flex-start;
     display: flex;
     flex-wrap: wrap;
@@ -75,7 +75,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='section'][data-divider] > [data-part='header'] {
+  [data-ui-section][data-divider] > [data-part-header] {
     border-block-end: var(--slotted-border-width-thin, 1px) solid var(--_rule);
     padding-block-end: var(--slotted-space-4, 0.5rem);
   }
@@ -85,7 +85,7 @@
    * The inset a surface section gives its header is kept by sticking the
    * header at the same distance the surface's padding put it at.
    */
-  [data-ui='section'][data-sticky] > [data-part='header'] {
+  [data-ui-section][data-sticky] > [data-part-header] {
     background-color: var(--_ground);
     inset-block-start: var(--slotted-page-sticky-top, 0px);
     /* Stuck, the header's text and buttons met the chrome's edge with no
@@ -108,15 +108,15 @@
    * The alias on the root is what keeps the redefinition from referring to
    * itself.
    */
-  [data-ui='section'][data-sticky] {
+  [data-ui-section][data-sticky] {
     --_above: var(--slotted-page-sticky-top, 0px);
   }
-  [data-ui='section'][data-sticky] > [data-part='body'] {
+  [data-ui-section][data-sticky] > [data-part-body] {
     --slotted-page-sticky-top: calc(var(--_above) + var(--slotted-section-header-size, 0px));
     --slotted-table-sticky-offset: var(--slotted-page-sticky-top);
   }
 
-  [data-ui='section'] > [data-part='header'] > [data-part='title'] {
+  [data-ui-section] > [data-part-header] > [data-part-title] {
     display: flex;
     flex: 1 1 16rem;
     flex-direction: column;
@@ -124,7 +124,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='section'] > [data-part='header'] > [data-part='title'] > [data-part='eyebrow'] {
+  [data-ui-section] > [data-part-header] > [data-part-title] > [data-part-eyebrow] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -133,7 +133,7 @@
     text-transform: uppercase;
   }
 
-  [data-ui='section'] > [data-part='header'] > [data-part='title'] > [data-part='heading'] {
+  [data-ui-section] > [data-part-header] > [data-part-title] > [data-part-heading] {
     color: var(--_text);
     font-family: var(
       --slotted-font-family-heading,
@@ -149,7 +149,7 @@
     text-wrap: pretty;
   }
 
-  [data-ui='section'] > [data-part='header'] > [data-part='title'] > [data-part='description'] {
+  [data-ui-section] > [data-part-header] > [data-part-title] > [data-part-description] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     line-height: var(--slotted-line-height-sm, 1.45);
@@ -158,20 +158,20 @@
     text-wrap: pretty;
   }
 
-  [data-ui='section'] > [data-part='header'] > [data-part='actions'] {
+  [data-ui-section] > [data-part-header] > [data-part-actions] {
     align-items: center;
     display: flex;
     flex: none;
     gap: var(--slotted-control-gap-md, 8px);
     margin-inline-start: auto;
   }
-  [data-ui='section'] > [data-part='header'] > [data-part='actions']:empty {
+  [data-ui-section] > [data-part-header] > [data-part-actions]:empty {
     display: none;
   }
 
   /* ── The body ────────────────────────────────────────────────────────── */
 
-  [data-ui='section'] > [data-part='body'] {
+  [data-ui-section] > [data-part-body] {
     min-inline-size: 0;
   }
 }

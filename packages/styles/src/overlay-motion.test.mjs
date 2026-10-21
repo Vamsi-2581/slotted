@@ -26,25 +26,25 @@ const source = new URL('.', import.meta.url).pathname;
  * retunes every other gap.
  */
 const LAYERS = [
-  { family: 'select', layer: "[data-ui='select'][data-part='positioner']", lateral: 'fade' },
-  { family: 'combobox', layer: "[data-ui='combobox'][data-part='positioner']", lateral: 'fade' },
+  { family: 'select', layer: '[data-ui-select][data-part-positioner]', lateral: 'fade' },
+  { family: 'combobox', layer: '[data-ui-combobox][data-part-positioner]', lateral: 'fade' },
   {
     family: 'multi-select',
-    layer: "[data-ui='multi-select'][data-part='positioner']",
+    layer: '[data-ui-multi-select][data-part-positioner]',
     lateral: 'fade',
   },
   {
     family: 'entity-picker',
-    layer: "[data-ui='entity-picker'][data-part='positioner']",
+    layer: '[data-ui-entity-picker][data-part-positioner]',
     lateral: 'fade',
   },
-  { family: 'menu', layer: "[data-ui='menu']", lateral: 'slide' },
-  { family: 'popover', layer: "[data-ui='popover']", lateral: 'fade' },
-  { family: 'tooltip', layer: "[data-ui='tooltip']", lateral: 'fade' },
+  { family: 'menu', layer: '[data-ui-menu]', lateral: 'slide' },
+  { family: 'popover', layer: '[data-ui-popover]', lateral: 'fade' },
+  { family: 'tooltip', layer: '[data-ui-tooltip]', lateral: 'fade' },
   /** The flyout beside a rail is placed at the row's inline end, so it slides like a submenu. */
   {
     family: 'side-navigation',
-    layer: "[data-ui='side-navigation'][data-part='flyout']",
+    layer: '[data-ui-side-navigation][data-part-flyout]',
     lateral: 'slide',
   },
 ];

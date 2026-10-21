@@ -147,11 +147,19 @@ export function UploadViewer({
            * declares `container-type` and is therefore a containing block for the
            * fixed layer.
            */}
-          <div data-part="viewer" data-size={size} data-ui="upload">
-            <div data-part="viewerHeader">
+          <div
+            data-part="viewer"
+            data-part-viewer=""
+            data-size={size}
+            data-ui="upload"
+            data-ui-upload=""
+          >
+            <div data-part="viewerHeader" data-part-viewerheader="">
               <div>
-                <h2 data-part="viewerTitle">{current.name}</h2>
-                <span data-part="viewerMeta">
+                <h2 data-part="viewerTitle" data-part-viewertitle="">
+                  {current.name}
+                </h2>
+                <span data-part="viewerMeta" data-part-viewermeta="">
                   {index === -1
                     ? t('viewerMeta', {
                         size: formatters.bytes(current.size),
@@ -165,11 +173,12 @@ export function UploadViewer({
                       })}
                 </span>
               </div>
-              <span data-part="viewerActions">
+              <span data-part="viewerActions" data-part-vieweractions="">
                 {url === undefined ? null : (
                   <button
                     aria-label={t('viewerExternal')}
                     data-part="viewerExternal"
+                    data-part-viewerexternal=""
                     onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}
                     type="button"
                   >
@@ -181,6 +190,7 @@ export function UploadViewer({
                 <button
                   aria-label={t('viewerClose')}
                   data-part="viewerClose"
+                  data-part-viewerclose=""
                   onClick={(event) => onViewing(null, 'pointer', event)}
                   type="button"
                 >
@@ -191,11 +201,12 @@ export function UploadViewer({
               </span>
             </div>
 
-            <div data-part="viewerStage">
+            <div data-part="viewerStage" data-part-viewerstage="">
               {shown.length > 1 ? (
                 <button
                   aria-label={t('viewerPrevious')}
                   data-part="viewerPrevious"
+                  data-part-viewerprevious=""
                   disabled={index <= 0}
                   onClick={(event) => move(-1, event)}
                   type="button"
@@ -212,6 +223,7 @@ export function UploadViewer({
                 <button
                   aria-label={t('viewerNext')}
                   data-part="viewerNext"
+                  data-part-viewernext=""
                   disabled={index === -1 || index >= shown.length - 1}
                   onClick={(event) => move(1, event)}
                   type="button"
@@ -277,6 +289,7 @@ function UploadStage({
         data-extension={extensionLabel(current.name, t('noExtension'))}
         data-kind={current.kind}
         data-part="preview"
+        data-part-preview=""
       >
         <Icon>
           <Glyph name={KIND_GLYPH[current.kind]} />

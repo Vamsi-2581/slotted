@@ -13,7 +13,7 @@
    * implied by `tr`, `th` and `td`, and writing them again would be the
    * duplication `patterns.md` refuses.
    */
-  [data-ui='calendar'][data-part='root'] {
+  [data-ui-calendar][data-part-root] {
     /**
      * The reflow container. It is on the root and the grids are one element
      * in, because `container-type: inline-size` makes an element a query
@@ -92,15 +92,15 @@
     max-inline-size: 100%;
   }
 
-  [data-ui='calendar'][data-part='root'][data-week-numbers] {
+  [data-ui-calendar][data-part-root][data-week-numbers] {
     --_week-number-columns: 0.75;
   }
 
-  [data-ui='calendar'][data-part='root'][data-months='2'] {
+  [data-ui-calendar][data-part-root][data-months='2'] {
     --_months: 2;
   }
 
-  [data-ui='calendar'][data-part='root'][data-months='3'] {
+  [data-ui-calendar][data-part-root][data-months='3'] {
     --_months: 3;
   }
 
@@ -124,10 +124,10 @@
    * condition, which is what makes `clamp()` the answer here rather than a
    * query.
    */
-  [data-ui='calendar'] [data-part='header'],
-  [data-ui='calendar'] [data-part='grids'],
-  [data-ui='calendar'] [data-part='months'],
-  [data-ui='calendar'] [data-part='years'] {
+  [data-ui-calendar] [data-part-header],
+  [data-ui-calendar] [data-part-grids],
+  [data-ui-calendar] [data-part-months],
+  [data-ui-calendar] [data-part-years] {
     --_cell-size: clamp(
       var(--slotted-target-min, 24px),
       calc(100cqi / (var(--_columns) + var(--_week-number-columns)) / var(--_months)),
@@ -141,7 +141,7 @@
    * them rather than beside them, because it is the thing being changed and a
    * label at one end would make the pair read as two unrelated buttons.
    */
-  [data-ui='calendar'] [data-part='header'] {
+  [data-ui-calendar] [data-part-header] {
     align-items: center;
     display: flex;
     gap: var(--slotted-space-2, 0.25rem);
@@ -157,7 +157,7 @@
    * that is what it says. The live region is on it: paging with a key changes
    * nothing that focus lands on, so without this nothing announces the month.
    */
-  [data-ui='calendar'] [data-part='heading'] {
+  [data-ui-calendar] [data-part-heading] {
     --slotted-icon-size: var(--_icon-size);
 
     appearance: none;
@@ -226,8 +226,8 @@
    * under `dir="rtl"` by the icon's own rule, which is how one glyph serves
    * both document directions.
    */
-  [data-ui='calendar'] [data-part='previous'],
-  [data-ui='calendar'] [data-part='next'] {
+  [data-ui-calendar] [data-part-previous],
+  [data-ui-calendar] [data-part-next] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -257,7 +257,7 @@
    * RTL mirror composes with the turn, so both follow `dir` without a second
    * glyph — the rule `pagination` set.
    */
-  [data-ui='calendar'] [data-part='previous'] > [data-ui='icon'] {
+  [data-ui-calendar] [data-part-previous] > [data-ui-icon] {
     rotate: 180deg;
   }
 
@@ -267,7 +267,7 @@
    * narrower than its months is a calendar with fewer months, and a sideways
    * scrollbar under a grid is a control nobody finds.
    */
-  [data-ui='calendar'] [data-part='grids'] {
+  [data-ui-calendar] [data-part-grids] {
     display: flex;
     /**
      * A second month that does not fit goes under the first rather than being
@@ -283,7 +283,7 @@
     justify-content: center;
   }
 
-  [data-ui='calendar'] [data-part='grid'] {
+  [data-ui-calendar] [data-part-grid] {
     border-collapse: collapse;
     /* A table sizes itself from its content and would give a 31-day column one
        pixel more than a 30-day one. Fixed layout hands every column the same
@@ -296,7 +296,7 @@
    * of the document — the heading above already shows it, and a screen reader
    * reaching the grid still needs it.
    */
-  [data-ui='calendar'] [data-part='grid-caption'] {
+  [data-ui-calendar] [data-part-grid-caption] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -311,8 +311,8 @@
    * A reader looking at two grids and one title has to count columns to find
    * out where October starts.
    */
-  [data-ui='calendar'][data-part='root']:is([data-months='2'], [data-months='3'])
-    [data-part='grid-caption'] {
+  [data-ui-calendar][data-part-root]:is([data-months='2'], [data-months='3'])
+    [data-part-grid-caption] {
     block-size: auto;
     clip-path: none;
     color: var(--slotted-calendar-weekday-color, var(--slotted-text-muted, GrayText));
@@ -329,7 +329,7 @@
    * reaches assistive technology through `abbr`, which is the APG's own
    * answer and the difference between hearing "Mo" and hearing "Monday".
    */
-  [data-ui='calendar'] [data-part='week-header'] {
+  [data-ui-calendar] [data-part-week-header] {
     block-size: var(--_cell-size);
     color: var(--slotted-calendar-weekday-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-font-size-xs, 0.75rem);
@@ -341,7 +341,7 @@
     text-overflow: clip;
   }
 
-  [data-ui='calendar'] [data-part='week-number'] {
+  [data-ui-calendar] [data-part-week-number] {
     color: var(--slotted-calendar-week-number-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-variant-numeric: tabular-nums;
@@ -355,7 +355,7 @@
       var(--slotted-calendar-week-number-border-color, var(--slotted-border-subtle, ButtonBorder));
   }
 
-  [data-ui='calendar'] [data-part='cell'] {
+  [data-ui-calendar] [data-part-cell] {
     padding: 0;
     /* The containing block of the range band below. */
     position: relative;
@@ -368,7 +368,7 @@
    * has to run edge to edge across a cell while the day itself stays a circle
    * inside it — two shapes, and one element cannot be both.
    */
-  [data-ui='calendar'] [data-part='day'] {
+  [data-ui-calendar] [data-part-day] {
     /**
      * A rule short of the cell on every side, in every cell.
      *
@@ -420,7 +420,7 @@
    * whose control scale is smaller gets the target back without the family
    * having to know which theme it is under.
    */
-  [data-ui='calendar'] [data-part='day']::after {
+  [data-ui-calendar] [data-part-day]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -432,8 +432,8 @@
    * name. A reader entering a birth date must not press "previous month" four
    * hundred times, which is what these two exist to prevent.
    */
-  [data-ui='calendar'] [data-part='months'],
-  [data-ui='calendar'] [data-part='years'] {
+  [data-ui-calendar] [data-part-months],
+  [data-ui-calendar] [data-part-years] {
     display: grid;
     gap: var(--slotted-space-2, 0.25rem);
     grid-template-columns: repeat(4, 1fr);
@@ -442,7 +442,7 @@
     inline-size: calc(var(--_cell-size) * var(--_columns));
   }
 
-  [data-ui='calendar'] [data-part='period'] {
+  [data-ui-calendar] [data-part-period] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -482,12 +482,12 @@
    * operable — and it survives `forced-colors`, where `currentcolor` is
    * already the system's ink.
    */
-  [data-ui='calendar'] [data-part='day'][data-today] {
+  [data-ui-calendar] [data-part-day][data-today] {
     color: var(--slotted-calendar-today-color, var(--slotted-tone-accent-text));
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='calendar'] [data-part='day']::before {
+  [data-ui-calendar] [data-part-day]::before {
     /* Reserved in every cell and painted in one, so the row keeps its line. */
     background-color: transparent;
     block-size: var(--slotted-space-2, 0.25rem);
@@ -500,7 +500,7 @@
     order: 1;
   }
 
-  [data-ui='calendar'] [data-part='day'][data-today]::before {
+  [data-ui-calendar] [data-part-day][data-today]::before {
     background-color: currentcolor;
   }
 
@@ -509,7 +509,7 @@
    * enough to press, because a reader who wants 1 October while looking at
    * September should be able to.
    */
-  [data-ui='calendar'] [data-part='cell'][data-outside-month] [data-part='day'] {
+  [data-ui-calendar] [data-part-cell][data-outside-month] [data-part-day] {
     color: var(--slotted-calendar-outside-color, var(--slotted-text-muted, GrayText));
   }
 
@@ -518,7 +518,7 @@
    * `disabled` — so a reader can arrow onto it and be told why, and the strike
    * is what says so without colour.
    */
-  [data-ui='calendar'] [data-part='cell'][data-unavailable] [data-part='day'] {
+  [data-ui-calendar] [data-part-cell][data-unavailable] [data-part-day] {
     color: var(--slotted-calendar-unavailable-color, var(--slotted-disabled-foreground));
     cursor: not-allowed;
     text-decoration: line-through;
@@ -548,9 +548,9 @@
    * `--slotted-highlight-tint-opacity` holds. One share, one gesture, all
    * three schemes, and nothing to align across a row break.
    */
-  [data-ui='calendar'] [data-part='cell'][data-in-range]::before,
-  [data-ui='calendar'] [data-part='cell'][data-range-start]::before,
-  [data-ui='calendar'] [data-part='cell'][data-range-end]::before {
+  [data-ui-calendar] [data-part-cell][data-in-range]::before,
+  [data-ui-calendar] [data-part-cell][data-range-start]::before,
+  [data-ui-calendar] [data-part-cell][data-range-end]::before {
     background-color: var(
       --slotted-calendar-range-background,
       color-mix(
@@ -569,12 +569,12 @@
    * begins and ends, and a square cut at either end reads as a run that was
    * clipped rather than one that stops.
    */
-  [data-ui='calendar'] [data-part='cell'][data-range-start]::before {
+  [data-ui-calendar] [data-part-cell][data-range-start]::before {
     border-end-start-radius: var(--slotted-calendar-day-radius, var(--slotted-radius-sm, 4px));
     border-start-start-radius: var(--slotted-calendar-day-radius, var(--slotted-radius-sm, 4px));
   }
 
-  [data-ui='calendar'] [data-part='cell'][data-range-end]::before {
+  [data-ui-calendar] [data-part-cell][data-range-end]::before {
     border-end-end-radius: var(--slotted-calendar-day-radius, var(--slotted-radius-sm, 4px));
     border-start-end-radius: var(--slotted-calendar-day-radius, var(--slotted-radius-sm, 4px));
   }
@@ -586,16 +586,12 @@
    * once and stays round on both sides, which is why each rule excludes the
    * other.
    */
-  [data-ui='calendar']
-    [data-part='cell'][data-range-start]:not([data-range-end])
-    [data-part='day'] {
+  [data-ui-calendar] [data-part-cell][data-range-start]:not([data-range-end]) [data-part-day] {
     border-end-end-radius: 0;
     border-start-end-radius: 0;
   }
 
-  [data-ui='calendar']
-    [data-part='cell'][data-range-end]:not([data-range-start])
-    [data-part='day'] {
+  [data-ui-calendar] [data-part-cell][data-range-end]:not([data-range-start]) [data-part-day] {
     border-end-start-radius: 0;
     border-start-start-radius: 0;
   }
@@ -605,9 +601,9 @@
    * continuous from one cell to the next and the run reads as one band rather
    * than as a row of tinted squares with gaps between them.
    */
-  [data-ui='calendar']
-    [data-part='cell']:is([data-in-range], [data-range-start], [data-range-end])
-    [data-part='day'] {
+  [data-ui-calendar]
+    [data-part-cell]:is([data-in-range], [data-range-start], [data-range-end])
+    [data-part-day] {
     --_inset: 0px;
   }
 
@@ -617,7 +613,7 @@
    * scheme where the band is faint, and it is the second half of the pair the
    * foundation asks for where there is no edge to make one with.
    */
-  [data-ui='calendar'] [data-part='cell'][data-in-range] [data-part='day'] {
+  [data-ui-calendar] [data-part-cell][data-in-range] [data-part-day] {
     border-radius: 0;
     color: var(--slotted-calendar-in-range-color, var(--slotted-tone-accent-text));
   }
@@ -632,7 +628,7 @@
    * end takes an edge in the accent's border role rather than the solid the
    * chosen end takes: a proposal is drawn as an outline, a choice as a fill.
    */
-  [data-ui='calendar'] [data-part='cell'][data-preview]::before {
+  [data-ui-calendar] [data-part-cell][data-preview]::before {
     background-color: var(
       --slotted-calendar-preview-background,
       color-mix(
@@ -643,9 +639,9 @@
     );
   }
 
-  [data-ui='calendar']
-    [data-part='cell'][data-preview]:is([data-range-start], [data-range-end]):not([data-selected])
-    [data-part='day'] {
+  [data-ui-calendar]
+    [data-part-cell][data-preview]:is([data-range-start], [data-range-end]):not([data-selected])
+    [data-part-day] {
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px)
       var(--slotted-calendar-preview-border-color, var(--slotted-tone-accent-border));
     color: var(--slotted-calendar-in-range-color, var(--slotted-tone-accent-text));
@@ -657,21 +653,21 @@
    * one it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='calendar'] [data-part='day']:hover:not([data-disabled]),
-  [data-ui='calendar'] [data-part='period']:hover:not(:disabled):not([data-disabled]),
-  [data-ui='calendar'] [data-part='heading']:hover:not(:disabled):not([data-disabled]),
-  [data-ui='calendar'] [data-part='previous']:hover:not(:disabled):not([data-disabled]),
-  [data-ui='calendar'] [data-part='next']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-calendar] [data-part-day]:hover:not([data-disabled]),
+  [data-ui-calendar] [data-part-period]:hover:not(:disabled):not([data-disabled]),
+  [data-ui-calendar] [data-part-heading]:hover:not(:disabled):not([data-disabled]),
+  [data-ui-calendar] [data-part-previous]:hover:not(:disabled):not([data-disabled]),
+  [data-ui-calendar] [data-part-next]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-calendar-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='calendar'] [data-part='day']:active:not([data-disabled]),
-  [data-ui='calendar'] [data-part='period']:active:not(:disabled):not([data-disabled]),
-  [data-ui='calendar'] [data-part='previous']:active:not(:disabled):not([data-disabled]),
-  [data-ui='calendar'] [data-part='next']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-calendar] [data-part-day]:active:not([data-disabled]),
+  [data-ui-calendar] [data-part-period]:active:not(:disabled):not([data-disabled]),
+  [data-ui-calendar] [data-part-previous]:active:not(:disabled):not([data-disabled]),
+  [data-ui-calendar] [data-part-next]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-calendar-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -684,18 +680,14 @@
    * a hole in the run, and the reader's own selection is what the band is
    * about — the pointer should deepen it, not neutralise it.
    */
-  [data-ui='calendar']
-    [data-part='cell'][data-in-range]
-    [data-part='day']:hover:not([data-disabled]) {
+  [data-ui-calendar] [data-part-cell][data-in-range] [data-part-day]:hover:not([data-disabled]) {
     background-color: var(
       --slotted-calendar-range-hover-background,
       var(--slotted-tone-accent-subtle-hover)
     );
   }
 
-  [data-ui='calendar']
-    [data-part='cell'][data-in-range]
-    [data-part='day']:active:not([data-disabled]) {
+  [data-ui-calendar] [data-part-cell][data-in-range] [data-part-day]:active:not([data-disabled]) {
     background-color: var(
       --slotted-calendar-range-active-background,
       var(--slotted-tone-accent-subtle-active)
@@ -707,12 +699,10 @@
    * and it is written after the two rules above for that reason: the guards
    * they carry are for `data-disabled`, and this state is the family's own.
    */
-  [data-ui='calendar']
-    [data-part='cell'][data-unavailable]
-    [data-part='day']:hover:not([data-disabled]),
-  [data-ui='calendar']
-    [data-part='cell'][data-unavailable]
-    [data-part='day']:active:not([data-disabled]) {
+  [data-ui-calendar] [data-part-cell][data-unavailable] [data-part-day]:hover:not([data-disabled]),
+  [data-ui-calendar]
+    [data-part-cell][data-unavailable]
+    [data-part-day]:active:not([data-disabled]) {
     background-color: transparent;
   }
 
@@ -720,25 +710,25 @@
    * The chosen date. A fill rather than a ring, so it and today can be true at
    * once and still read as two facts.
    */
-  [data-ui='calendar'] [data-part='cell'][data-selected] [data-part='day'],
-  [data-ui='calendar'] [data-part='period'][data-selected] {
+  [data-ui-calendar] [data-part-cell][data-selected] [data-part-day],
+  [data-ui-calendar] [data-part-period][data-selected] {
     background-color: var(--slotted-calendar-selected-background, var(--slotted-tone-accent-solid));
     color: var(--slotted-calendar-selected-color, var(--slotted-tone-accent-on-solid));
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='calendar'] [data-part='day']:focus-visible,
-  [data-ui='calendar'] [data-part='period']:focus-visible,
-  [data-ui='calendar'] [data-part='heading']:focus-visible,
-  [data-ui='calendar'] [data-part='previous']:focus-visible,
-  [data-ui='calendar'] [data-part='next']:focus-visible {
+  [data-ui-calendar] [data-part-day]:focus-visible,
+  [data-ui-calendar] [data-part-period]:focus-visible,
+  [data-ui-calendar] [data-part-heading]:focus-visible,
+  [data-ui-calendar] [data-part-previous]:focus-visible,
+  [data-ui-calendar] [data-part-next]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     /* Inside the cell rather than outside it: an offset ring on a grid of
        touching cells would overlap the four neighbours and read as a smear. */
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='calendar'][data-part='root'][data-invalid] {
+  [data-ui-calendar][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-calendar-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -752,11 +742,11 @@
    * adds — inward, like the ring it replaces, so no neighbouring cell is
    * covered.
    */
-  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='day']:focus-visible,
-  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='period']:focus-visible,
-  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='heading']:focus-visible,
-  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='previous']:focus-visible,
-  [data-ui='calendar'][data-part='root'][data-invalid] [data-part='next']:focus-visible {
+  [data-ui-calendar][data-part-root][data-invalid] [data-part-day]:focus-visible,
+  [data-ui-calendar][data-part-root][data-invalid] [data-part-period]:focus-visible,
+  [data-ui-calendar][data-part-root][data-invalid] [data-part-heading]:focus-visible,
+  [data-ui-calendar][data-part-root][data-invalid] [data-part-previous]:focus-visible,
+  [data-ui-calendar][data-part-root][data-invalid] [data-part-next]:focus-visible {
     --_invalid-ring: calc(
       var(--slotted-focus-ring-width, 2px) +
         var(--slotted-calendar-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
@@ -768,38 +758,38 @@
 
   /* A calendar the reader may read and not change: the days stop offering
      themselves, and nothing is faded, because the value is still real. */
-  [data-ui='calendar'][data-part='root'][data-readonly] [data-part='day'],
-  [data-ui='calendar'][data-part='root'][data-readonly] [data-part='period'] {
+  [data-ui-calendar][data-part-root][data-readonly] [data-part-day],
+  [data-ui-calendar][data-part-root][data-readonly] [data-part-period] {
     cursor: default;
   }
 
-  [data-ui='calendar'][data-part='root'][data-disabled] {
+  [data-ui-calendar][data-part-root][data-disabled] {
     color: var(--slotted-calendar-disabled-color, var(--slotted-disabled-foreground));
   }
 
   /* Nothing a person cannot reach is painted in the tone that says "act on
      me": today keeps its dot, in the ink a disabled control is allowed. */
-  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='day'][data-today] {
+  [data-ui-calendar][data-part-root][data-disabled] [data-part-day][data-today] {
     color: var(--slotted-disabled-foreground);
   }
 
-  [data-ui='calendar'][data-part='root'][data-disabled]
-    [data-part='cell'][data-selected]
-    [data-part='day'] {
+  [data-ui-calendar][data-part-root][data-disabled]
+    [data-part-cell][data-selected]
+    [data-part-day] {
     background-color: var(--slotted-disabled-background);
     color: var(--slotted-disabled-foreground);
   }
 
-  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='day'],
-  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='period'],
-  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='previous'],
-  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='next'],
-  [data-ui='calendar'][data-part='root'][data-disabled] [data-part='heading'] {
+  [data-ui-calendar][data-part-root][data-disabled] [data-part-day],
+  [data-ui-calendar][data-part-root][data-disabled] [data-part-period],
+  [data-ui-calendar][data-part-root][data-disabled] [data-part-previous],
+  [data-ui-calendar][data-part-root][data-disabled] [data-part-next],
+  [data-ui-calendar][data-part-root][data-disabled] [data-part-heading] {
     cursor: not-allowed;
   }
 
-  [data-ui='calendar'] [data-part='previous']:disabled,
-  [data-ui='calendar'] [data-part='next']:disabled {
+  [data-ui-calendar] [data-part-previous]:disabled,
+  [data-ui-calendar] [data-part-next]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -819,7 +809,7 @@
    * than on the root because a container cannot query itself.
    */
   @container slotted-calendar (max-width: 320px) {
-    [data-ui='calendar'] [data-part='grids'] {
+    [data-ui-calendar] [data-part-grids] {
       --_month-gap: var(--slotted-space-4, 0.5rem);
     }
   }
@@ -830,16 +820,16 @@
      * run takes an edge here and only here — two rules the operating system
      * keeps, on a band that would otherwise be the page's own ground.
      */
-    [data-ui='calendar'] [data-part='cell'][data-in-range]::before,
-    [data-ui='calendar'] [data-part='cell'][data-range-start]::before,
-    [data-ui='calendar'] [data-part='cell'][data-range-end]::before {
+    [data-ui-calendar] [data-part-cell][data-in-range]::before,
+    [data-ui-calendar] [data-part-cell][data-range-start]::before,
+    [data-ui-calendar] [data-part-cell][data-range-end]::before {
       border-block: var(--slotted-border-width-thin, 1px) solid
         var(--slotted-calendar-range-border-color, var(--slotted-tone-accent-border));
     }
 
     /* A proposal keeps its own distance from a choice here too: the pending
        band's edges are dashed where the chosen run's are solid. */
-    [data-ui='calendar'] [data-part='cell'][data-preview]::before {
+    [data-ui-calendar] [data-part-cell][data-preview]::before {
       border-block-style: dashed;
     }
   }

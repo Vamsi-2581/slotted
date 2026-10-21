@@ -147,6 +147,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
       <input
         #duration
         data-part="duration"
+        data-part-duration=""
         type="text"
         placeholder="+40m, 1h30, +2d"
         [attr.aria-label]="t('duration')"
@@ -158,6 +159,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
       />
       <span
         data-part="preview"
+        data-part-preview=""
         role="status"
         aria-live="polite"
         [attr.data-resolved]="resolved() === null ? null : ''"
@@ -165,7 +167,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
       >
         <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
         @if (rollsDay()) {
-          <span data-part="preview-date">{{ previewDate() }}</span
+          <span data-part="preview-date" data-part-preview-date="">{{ previewDate() }}</span
           >, {{ previewTime() }}
         } @else {
           {{ previewTime() }}
@@ -174,6 +176,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
     } @else {
       <div
         data-part="segments"
+        data-part-segments=""
         role="group"
         [attr.id]="controlId()"
         [attr.aria-label]="label() ?? writtenLabel"
@@ -186,12 +189,13 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
         (paste)="onPaste($event)"
       >
         @for (group of halves(); track group.half) {
-          <span data-part="half" [attr.data-half]="group.half">
+          <span data-part="half" data-part-half="" [attr.data-half]="group.half">
             @for (part of group.parts; track $index) {
               @if (part.type === 'literal') {
                 @if (part.boundary !== true || part.drawn !== false) {
                   <span
                     data-part="literal"
+                    data-part-literal=""
                     aria-hidden="true"
                     [attr.data-boundary]="part.boundary === true ? '' : null"
                     >{{ part.value }}</span
@@ -200,6 +204,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
               } @else {
                 <div
                   data-part="segment"
+                  data-part-segment=""
                   role="spinbutton"
                   [attr.data-field]="part.type"
                   [attr.data-half]="halfOf(part.type)"
@@ -224,10 +229,13 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
         }
       </div>
     }
-    <span data-part="value-text" hidden [attr.id]="valueTextId">{{ spokenValue() }}</span>
+    <span data-part="value-text" data-part-value-text="" hidden [attr.id]="valueTextId">{{
+      spokenValue()
+    }}</span>
     @if (showClear()) {
       <button
         data-part="clear"
+        data-part-clear=""
         type="button"
         [attr.aria-label]="t('clear')"
         (click)="clear($event)"
@@ -236,7 +244,14 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
       </button>
     }
     <ng-content select="[slDateTimeFieldEnd]" />
-    <input data-part="hidden-input" type="hidden" readonly [attr.name]="name()" [value]="iso()" />`,
+    <input
+      data-part="hidden-input"
+      data-part-hidden-input=""
+      type="hidden"
+      readonly
+      [attr.name]="name()"
+      [value]="iso()"
+    />`,
   styleUrl: '../../../styles/src/datetime-field/datetime-field.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -246,7 +261,9 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
   ],
   host: {
     'data-ui': 'datetime-field',
+    'data-ui-datetime-field': '',
     'data-part': 'root',
+    'data-part-root': '',
     '(mousedown)': 'onRootMouseDown($event)',
     '(keydown)': 'onKeyDown($event)',
     '[attr.data-size]': 'resolvedSize()',

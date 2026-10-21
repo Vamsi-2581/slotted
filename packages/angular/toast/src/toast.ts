@@ -109,6 +109,7 @@ function naturalHeight(item: HTMLElement): number {
   exportAs: 'slToastItem',
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     tabindex: '-1',
     '[attr.data-tone]': 'tone()',
     '[attr.data-variant]': 'variant()',
@@ -269,7 +270,9 @@ export class SlToastItem {
   template: `<section
     #layer
     data-part="root"
+    data-part-root=""
     data-ui="toast"
+    data-ui-toast=""
     role="region"
     tabindex="-1"
     [attr.aria-label]="t('label')"
@@ -285,7 +288,7 @@ export class SlToastItem {
     (pointerenter)="onPointer(true)"
     (pointerleave)="onPointer(false)"
   >
-    <ol data-part="list">
+    <ol data-part="list" data-part-list="">
       @for (message of visible(); track message.id; let index = $index) {
         <li [slToastItem]="message" [slToastItemIndex]="index" #item="slToastItem">
           @if (message.data.body; as body) {
@@ -296,7 +299,7 @@ export class SlToastItem {
             />
           } @else {
             @if (!message.data.hideIcon && (message.loading || item.mark())) {
-              <span aria-hidden="true" data-part="icon">
+              <span aria-hidden="true" data-part="icon" data-part-icon="">
                 @if (message.loading) {
                   <div
                     slLoader
@@ -311,18 +314,21 @@ export class SlToastItem {
                 }
               </span>
             }
-            <div data-part="content">
+            <div data-part="content" data-part-content="">
               @if (message.data.title) {
-                <div data-part="title">{{ message.data.title }}</div>
+                <div data-part="title" data-part-title="">{{ message.data.title }}</div>
               }
               @if (message.data.description) {
-                <p data-part="description">{{ message.data.description }}</p>
+                <p data-part="description" data-part-description="">
+                  {{ message.data.description }}
+                </p>
               }
             </div>
             @if (message.data.dismissible ?? defaults.dismissible) {
               <button
                 type="button"
                 data-part="close"
+                data-part-close=""
                 [attr.aria-label]="t('close')"
                 (click)="store.dismiss(message.id, 'dismiss')"
               >
@@ -330,7 +336,7 @@ export class SlToastItem {
               </button>
             }
             @if (message.data.actions; as actions) {
-              <div data-part="actions">
+              <div data-part="actions" data-part-actions="">
                 <ng-container
                   [ngTemplateOutlet]="actions"
                   [ngTemplateOutletContext]="{ $implicit: message }"
@@ -338,7 +344,7 @@ export class SlToastItem {
               </div>
             }
             @if ((message.data.progress ?? defaults.progress) && message.duration > 0) {
-              <div aria-hidden="true" data-part="progress"></div>
+              <div aria-hidden="true" data-part="progress" data-part-progress=""></div>
             }
           }
         </li>

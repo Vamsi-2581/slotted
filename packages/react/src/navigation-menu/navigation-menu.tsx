@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/navigation-menu/navigation-menu.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
@@ -361,14 +362,15 @@ export function NavigationMenu({
   const surface = nested ? null : (
     <div
       data-part="viewport"
+      data-part-viewport=""
       {...(currentValue !== null && surfaced ? { 'data-open': '' } : {})}
       {...(positioned ? { 'data-positioned': '' } : {})}
     >
-      {resolvedArrow ? <span aria-hidden="true" data-part="arrow" /> : null}
+      {resolvedArrow ? <span aria-hidden="true" data-part="arrow" data-part-arrow="" /> : null}
     </div>
   );
 
-  const rootProps: NavigationMenuRootProps = {
+  const rootProps: NavigationMenuRootProps = keyedProps({
     ...nativeProps,
     ...(nested ? {} : { 'aria-label': nativeProps['aria-label'] ?? t('navigation') }),
     children: (
@@ -389,7 +391,7 @@ export function NavigationMenu({
     onPointerLeave: handlePointerLeave,
     ref: setRoot,
     style,
-  };
+  });
 
   const Element = nested ? 'div' : 'nav';
 

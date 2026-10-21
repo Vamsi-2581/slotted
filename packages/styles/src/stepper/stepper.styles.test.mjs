@@ -21,7 +21,7 @@ test('lives in the component layer', () => {
 test('styles every part the contract declares', () => {
   for (const part of contract.members.stepper.parts) {
     if (part === 'status') continue; /* The visually-hidden family owns it. */
-    const selector = part === 'root' ? "[data-ui='stepper']{" : `[data-part='${part}']`;
+    const selector = part === 'root' ? '[data-ui-stepper]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
 });
@@ -48,7 +48,7 @@ test('separates the four statuses by shape as well as by colour', () => {
   assert.ok(!declarations.includes('mask'), 'the check and the cross are Glyph elements');
   assert.ok(
     normalized.includes(
-      "[data-part='marker']>[data-ui='icon']{--slotted-icon-size:var(--_mark-size);color:var(--_mark);",
+      '[data-part-marker]>[data-ui-icon]{--slotted-icon-size:var(--_mark-size);color:var(--_mark);',
     ),
     'the glyph the binding renders is sized and painted by the marker',
   );
@@ -76,10 +76,10 @@ test('draws a bare mark inside the marker rather than a status glyph', () => {
 test('hides the number wherever a mark replaces it', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='stepper']:is([data-complete],[data-invalid])[data-part='marker']{color:transparent",
+      '[data-ui-stepper]:is([data-complete],[data-invalid])[data-part-marker]{color:transparent',
     ) ||
       normalized.includes(
-        ":is([data-complete],[data-invalid]) [data-part='marker']{color:transparent".replace(
+        ':is([data-complete],[data-invalid]) [data-part-marker]{color:transparent'.replace(
           /\s+/g,
           '',
         ),
@@ -105,7 +105,7 @@ test('resolves the statuses in the order the vocabulary declares', () => {
   assert.ok(STATE_PRECEDENCE.indexOf('current') < STATE_PRECEDENCE.indexOf('complete'));
   assert.ok(
     normalized.includes(
-      "[data-current]:not([data-invalid])[data-part='marker']{color:var(--slotted-stepper-marker-color-current",
+      '[data-current]:not([data-invalid])[data-part-marker]{color:var(--slotted-stepper-marker-color-current',
     ),
   );
 });
@@ -135,8 +135,8 @@ test('holds hover and press back for the states that outrank them', () => {
  * `span`, and the two rules name the two elements that are controls.
  */
 test('answers the pointer only where the header is a control', () => {
-  assert.ok(normalized.includes(":is(button,a)[data-part='trigger']:hover"));
-  assert.ok(normalized.includes(":is(button,a)[data-part='trigger']:active"));
+  assert.ok(normalized.includes(':is(button,a)[data-part-trigger]:hover'));
+  assert.ok(normalized.includes(':is(button,a)[data-part-trigger]:active'));
 });
 
 /**
@@ -145,10 +145,8 @@ test('answers the pointer only where the header is a control', () => {
  * the connector, and not the consumer's claim about the item.
  */
 test('fills the connector from where the reader has been', () => {
-  assert.ok(normalized.includes("[data-part='separator'][data-complete]"));
-  assert.ok(
-    normalized.includes("[data-part='item']:last-child[data-part='separator']{display:none"),
-  );
+  assert.ok(normalized.includes('[data-part-separator][data-complete]'));
+  assert.ok(normalized.includes('[data-part-item]:last-child[data-part-separator]{display:none'));
 });
 
 /**
@@ -160,7 +158,7 @@ test('fills the connector from where the reader has been', () => {
 test('measures the connector from the marker in both placements', () => {
   assert.ok(
     normalized.includes(
-      "[data-label-placement='end'][data-part='separator']{align-self:center;block-size:var(--_rule);flex:11auto",
+      "[data-label-placement='end'][data-part-separator]{align-self:center;block-size:var(--_rule);flex:11auto",
     ),
   );
   assert.ok(normalized.includes('inset-inline-start:calc(50%+0.5*var(--_marker)+var(--_gap))'));
@@ -187,10 +185,10 @@ test('turns the row into a column from its own container', () => {
 test('reaches past the placement rules it replaces', () => {
   const reflow = normalized.slice(normalized.indexOf('@containerslotted-stepper'));
   assert.ok(
-    reflow.includes("[data-orientation='horizontal'][data-label-placement][data-part='separator']"),
+    reflow.includes("[data-orientation='horizontal'][data-label-placement][data-part-separator]"),
   );
   assert.ok(
-    reflow.includes("[data-orientation='horizontal'][data-label-placement][data-part='trigger']"),
+    reflow.includes("[data-orientation='horizontal'][data-label-placement][data-part-trigger]"),
   );
 });
 
@@ -232,7 +230,7 @@ test('restates the statuses forced colours would flatten, and names no system co
  */
 test('leaves the same room above and below a vertical connector', () => {
   const rule =
-    /\[data-ui='stepper'\]\[data-orientation='vertical'\]\[data-part='separator'\]\{([^}]*)\}/.exec(
+    /\[data-ui-stepper\]\[data-orientation='vertical'\]\[data-part-separator\]\{([^}]*)\}/.exec(
       normalized,
     );
   assert.ok(rule, 'no vertical connector rule');

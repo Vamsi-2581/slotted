@@ -5,10 +5,12 @@
 -->
 
 <section data-scene="panel">
-  <div data-ui="stack" data-part="root" data-gap="8">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="8">
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="hex"
       style="
@@ -22,18 +24,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 84 %, brilho 92 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -44,9 +48,10 @@
           aria-valuetext="221 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -57,37 +62,68 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #2563EB"></span>
-        <button data-part="previous" type="button" aria-label="Repor #7C3AED">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #2563EB"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #7C3AED">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
-          <input data-part="input" value="#2563EB" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#2563EB"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="presets" role="radiogroup" aria-label="Cores da marca">
+      <div data-part="presets" data-part-presets="" role="radiogroup" aria-label="Cores da marca">
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#0F172A"
@@ -97,6 +133,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#64748B"
@@ -106,6 +143,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#DC2626"
@@ -115,6 +153,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#EA580C"
@@ -124,6 +163,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#D97706"
@@ -133,6 +173,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#16A34A"
@@ -142,6 +183,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#0D9488"
@@ -151,6 +193,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="true"
           aria-label="#2563EB"
@@ -160,6 +203,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#7C3AED"
@@ -169,6 +213,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#DB2777"
@@ -177,20 +222,22 @@
           tabindex="-1"
         ></button>
       </div>
-      <div data-part="contrast" data-level="AA">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">5.17:1</span>
-        <span data-part="contrast-level">AA</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AA">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">5.17:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AA</span>
       </div>
     </div>
   </div>
 </section>
 
 <section data-scene="alpha">
-  <div data-ui="stack" data-part="root" data-gap="8">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="8">
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="rgb"
       style="
@@ -204,18 +251,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 87 %, brilho 64 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -226,9 +275,10 @@
           aria-valuetext="142 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -239,43 +289,68 @@
           aria-valuetext="60 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual rgb(22 163 74 / 60%)"></span>
-        <button data-part="previous" type="button" aria-label="Repor #16A34A">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual rgb(22 163 74 / 60%)"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #16A34A">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
           <input
             data-part="input"
+            data-part-input=""
             value="rgb(22 163 74 / 60%)"
             aria-label="Cor"
             spellcheck="false"
             dir="ltr"
           />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          rgb<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          rgb<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="presets" role="radiogroup" aria-label="Cores da marca">
+      <div data-part="presets" data-part-presets="" role="radiogroup" aria-label="Cores da marca">
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#0F172A"
@@ -285,6 +360,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#64748B"
@@ -294,6 +370,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#DC2626"
@@ -303,6 +380,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#EA580C"
@@ -312,6 +390,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#D97706"
@@ -321,6 +400,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="true"
           aria-label="#16A34A"
@@ -330,6 +410,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#0D9488"
@@ -339,6 +420,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#2563EB"
@@ -348,6 +430,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#7C3AED"
@@ -357,6 +440,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#DB2777"
@@ -365,22 +449,32 @@
           tabindex="-1"
         ></button>
       </div>
-      <div data-part="contrast" data-level="AA-large">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">3.30:1</span>
-        <span data-part="contrast-level">AA grande</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AA-large">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">3.30:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AA grande</span>
       </div>
     </div>
   </div>
 </section>
 
 <section data-scene="field">
-  <div data-ui="stack" data-part="root" data-gap="8">
-    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-mono="">
-      <span data-part="start"
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="8">
+    <div
+      data-ui="text-field"
+      data-ui-text-field=""
+      data-part="root"
+      data-part-root=""
+      data-size="md"
+      data-variant="outline"
+      data-mono=""
+    >
+      <span data-part="start" data-part-start=""
         ><button
           data-ui="color-picker"
+          data-ui-color-picker=""
           data-part="trigger"
+          data-part-trigger=""
           type="button"
           aria-label="Escolher cor"
           aria-haspopup="dialog"
@@ -388,13 +482,29 @@
           style="--slotted-color-picker-color: #2563eb"
         ></button
       ></span>
-      <input data-part="input" value="#2563EB" aria-label="Cor primária" dir="ltr" />
+      <input
+        data-part="input"
+        data-part-input=""
+        value="#2563EB"
+        aria-label="Cor primária"
+        dir="ltr"
+      />
     </div>
-    <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline" data-mono="">
-      <span data-part="start"
+    <div
+      data-ui="text-field"
+      data-ui-text-field=""
+      data-part="root"
+      data-part-root=""
+      data-size="md"
+      data-variant="outline"
+      data-mono=""
+    >
+      <span data-part="start" data-part-start=""
         ><button
           data-ui="color-picker"
+          data-ui-color-picker=""
           data-part="trigger"
+          data-part-trigger=""
           type="button"
           aria-label="Escolher cor"
           aria-haspopup="dialog"
@@ -402,20 +512,30 @@
           style="--slotted-color-picker-color: #dc2626"
         ></button
       ></span>
-      <input data-part="input" value="#DC2626" aria-label="Cor primária" dir="ltr" />
+      <input
+        data-part="input"
+        data-part-input=""
+        value="#DC2626"
+        aria-label="Cor primária"
+        dir="ltr"
+      />
     </div>
     <div
       data-ui="text-field"
+      data-ui-text-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-mono=""
       data-disabled=""
     >
-      <span data-part="start"
+      <span data-part="start" data-part-start=""
         ><button
           data-ui="color-picker"
+          data-ui-color-picker=""
           data-part="trigger"
+          data-part-trigger=""
           type="button"
           aria-label="Escolher cor"
           aria-haspopup="dialog"
@@ -424,11 +544,20 @@
           disabled
         ></button
       ></span>
-      <input data-part="input" value="#16A34A" aria-label="Cor primária" dir="ltr" disabled />
+      <input
+        data-part="input"
+        data-part-input=""
+        value="#16A34A"
+        aria-label="Cor primária"
+        dir="ltr"
+        disabled
+      />
     </div>
     <div
       data-ui="popover"
+      data-ui-popover=""
       data-part="root"
+      data-part-root=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -436,11 +565,13 @@
       data-open
       style="position: relative; inset: auto"
     >
-      <div data-part="content" role="dialog" aria-label="Cor primária">
-        <div data-part="body">
+      <div data-part="content" data-part-content="" role="dialog" aria-label="Cor primária">
+        <div data-part="body" data-part-body="">
           <div
             data-ui="color-picker"
+            data-ui-color-picker=""
             data-part="root"
+            data-part-root=""
             data-size="md"
             data-format="hex"
             style="
@@ -454,18 +585,20 @@
               --slotted-color-picker-contrast-with: #ffffff;
             "
           >
-            <div data-part="area">
+            <div data-part="area" data-part-area="">
               <div
                 data-part="area-thumb"
+                data-part-area-thumb=""
                 role="slider"
                 tabindex="0"
                 aria-label="Saturação e brilho"
                 aria-valuetext="saturação 84 %, brilho 92 %"
               ></div>
             </div>
-            <div data-part="channel" data-channel="hue">
+            <div data-part="channel" data-part-channel="" data-channel="hue">
               <div
                 data-part="channel-thumb"
+                data-part-channel-thumb=""
                 data-channel="hue"
                 role="slider"
                 tabindex="0"
@@ -476,9 +609,10 @@
                 aria-valuetext="221 graus"
               ></div>
             </div>
-            <div data-part="channel" data-channel="alpha">
+            <div data-part="channel" data-part-channel="" data-channel="alpha">
               <div
                 data-part="channel-thumb"
+                data-part-channel-thumb=""
                 data-channel="alpha"
                 role="slider"
                 tabindex="0"
@@ -489,43 +623,88 @@
                 aria-valuetext="100 %"
               ></div>
             </div>
-            <div data-part="row">
-              <span data-part="swatch" role="img" aria-label="Cor atual #2563EB"></span>
-              <button data-part="previous" type="button" aria-label="Repor #7C3AED">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+            <div data-part="row" data-part-row="">
+              <span
+                data-part="swatch"
+                data-part-swatch=""
+                role="img"
+                aria-label="Cor atual #2563EB"
+              ></span>
+              <button
+                data-part="previous"
+                data-part-previous=""
+                type="button"
+                aria-label="Repor #7C3AED"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
                 ></span>
               </button>
               <div
                 data-ui="text-field"
+                data-ui-text-field=""
                 data-part="root"
+                data-part-root=""
                 data-size="sm"
                 data-variant="outline"
                 data-mono=""
               >
                 <input
                   data-part="input"
+                  data-part-input=""
                   value="#2563EB"
                   aria-label="Cor"
                   spellcheck="false"
                   dir="ltr"
                 />
               </div>
-              <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-                hex<span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="chevron-down"></svg
+              <button
+                data-part="format"
+                data-part-format=""
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded="false"
+              >
+                hex<span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
                 ></span>
               </button>
-              <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="pipette"></svg
+              <button
+                data-part="eyedropper"
+                data-part-eyedropper=""
+                type="button"
+                aria-label="Conta-gotas"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
                 ></span>
               </button>
             </div>
 
-            <div data-part="presets" role="radiogroup" aria-label="Cores da marca">
+            <div
+              data-part="presets"
+              data-part-presets=""
+              role="radiogroup"
+              aria-label="Cores da marca"
+            >
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#0F172A"
@@ -535,6 +714,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#64748B"
@@ -544,6 +724,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#DC2626"
@@ -553,6 +734,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#EA580C"
@@ -562,6 +744,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#D97706"
@@ -571,6 +754,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#16A34A"
@@ -580,6 +764,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#0D9488"
@@ -589,6 +774,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="true"
                 aria-label="#2563EB"
@@ -598,6 +784,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#7C3AED"
@@ -607,6 +794,7 @@
               ></button>
               <button
                 data-part="preset"
+                data-part-preset=""
                 role="radio"
                 aria-checked="false"
                 aria-label="#DB2777"
@@ -615,10 +803,12 @@
                 tabindex="-1"
               ></button>
             </div>
-            <div data-part="contrast" data-level="AA">
-              <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-              <span data-part="contrast-ratio">5.17:1</span>
-              <span data-part="contrast-level">AA</span>
+            <div data-part="contrast" data-part-contrast="" data-level="AA">
+              <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true"
+                >Aa</span
+              >
+              <span data-part="contrast-ratio" data-part-contrast-ratio="">5.17:1</span>
+              <span data-part="contrast-level" data-part-contrast-level="">AA</span>
             </div>
           </div>
         </div>
@@ -628,10 +818,12 @@
 </section>
 
 <section data-scene="contrast">
-  <div data-ui="stack" data-part="root" data-gap="8">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="8">
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="hex"
       style="
@@ -645,18 +837,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 20 %, brilho 72 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -667,9 +861,10 @@
           aria-valuetext="215 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -680,43 +875,75 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #94A3B8"></span>
-        <button data-part="previous" type="button" aria-label="Repor #94A3B8">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #94A3B8"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #94A3B8">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
-          <input data-part="input" value="#94A3B8" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#94A3B8"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="contrast" data-level="fail">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">2.56:1</span>
-        <span data-part="contrast-level">Insuficiente</span>
+      <div data-part="contrast" data-part-contrast="" data-level="fail">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">2.56:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">Insuficiente</span>
       </div>
     </div>
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="hex"
       style="
@@ -730,18 +957,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 28 %, brilho 55 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -752,9 +981,10 @@
           aria-valuetext="215 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -765,43 +995,75 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #64748B"></span>
-        <button data-part="previous" type="button" aria-label="Repor #64748B">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #64748B"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #64748B">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
-          <input data-part="input" value="#64748B" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#64748B"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="contrast" data-level="AA">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">4.76:1</span>
-        <span data-part="contrast-level">AA</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AA">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">4.76:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AA</span>
       </div>
     </div>
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="hex"
       style="
@@ -815,18 +1077,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 64 %, brilho 16 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -837,9 +1101,10 @@
           aria-valuetext="222 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -850,43 +1115,75 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #0F172A"></span>
-        <button data-part="previous" type="button" aria-label="Repor #0F172A">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #0F172A"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #0F172A">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
-          <input data-part="input" value="#0F172A" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#0F172A"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="contrast" data-level="AAA">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">17.85:1</span>
-        <span data-part="contrast-level">AAA</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AAA">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">17.85:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AAA</span>
       </div>
     </div>
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="hex"
       style="
@@ -900,18 +1197,20 @@
         --slotted-color-picker-contrast-with: #0f172a;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 2 %, brilho 99 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -922,9 +1221,10 @@
           aria-valuetext="210 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -935,48 +1235,80 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #F8FAFC"></span>
-        <button data-part="previous" type="button" aria-label="Repor #E2E8F0">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #F8FAFC"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #E2E8F0">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
-          <input data-part="input" value="#F8FAFC" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#F8FAFC"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="contrast" data-level="AAA">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">17.06:1</span>
-        <span data-part="contrast-level">AAA</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AAA">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">17.06:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AAA</span>
       </div>
     </div>
   </div>
 </section>
 
 <section data-scene="gamut">
-  <div data-ui="stack" data-part="root" data-gap="8">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="8">
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="oklch"
       data-out-of-gamut
@@ -991,18 +1323,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 100 %, brilho 100 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -1013,9 +1347,10 @@
           aria-valuetext="150 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -1026,60 +1361,86 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual oklch(0.9 0.3 150)"></span>
-        <button data-part="previous" type="button" aria-label="Repor #00FF7F">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual oklch(0.9 0.3 150)"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #00FF7F">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
           <input
             data-part="input"
+            data-part-input=""
             value="oklch(0.9 0.3 150)"
             aria-label="Cor"
             spellcheck="false"
             dir="ltr"
           />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          oklch<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          oklch<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
-      <p data-part="gamut">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="circle-alert"></svg
+      <p data-part="gamut" data-part-gamut="">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-alert"></svg
         ></span>
         Fora de sRGB: o ecrã mostra a cor mais próxima.
       </p>
 
-      <div data-part="contrast" data-level="fail">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">1.35:1</span>
-        <span data-part="contrast-level">Insuficiente</span>
+      <div data-part="contrast" data-part-contrast="" data-level="fail">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">1.35:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">Insuficiente</span>
       </div>
     </div>
   </div>
 </section>
 
 <section data-scene="sizes">
-  <div data-ui="stack" data-part="root" data-gap="8">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="8">
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-format="hex"
       style="
@@ -1093,18 +1454,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 97 %, brilho 85 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -1115,9 +1478,10 @@
           aria-valuetext="32 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -1128,43 +1492,75 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #D97706"></span>
-        <button data-part="previous" type="button" aria-label="Repor #7C3AED">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #D97706"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #7C3AED">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
-          <input data-part="input" value="#D97706" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#D97706"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="contrast" data-level="AA-large">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">3.19:1</span>
-        <span data-part="contrast-level">AA grande</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AA-large">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">3.19:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AA grande</span>
       </div>
     </div>
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="lg"
       data-format="hex"
       style="
@@ -1178,18 +1574,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 76 %, brilho 93 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -1200,9 +1598,10 @@
           aria-valuetext="262 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -1213,48 +1612,80 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #7C3AED"></span>
-        <button data-part="previous" type="button" aria-label="Repor #7C3AED">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #7C3AED"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #7C3AED">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
         >
-          <input data-part="input" value="#7C3AED" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#7C3AED"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="contrast" data-level="AA">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">5.70:1</span>
-        <span data-part="contrast-level">AA</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AA">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">5.70:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AA</span>
       </div>
     </div>
   </div>
 </section>
 
 <section data-scene="states">
-  <div data-ui="stack" data-part="root" data-gap="8">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="8">
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="hex"
       data-disabled=""
@@ -1269,18 +1700,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 28 %, brilho 55 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -1291,9 +1724,10 @@
           aria-valuetext="215 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -1304,16 +1738,29 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #64748B"></span>
-        <button data-part="previous" type="button" aria-label="Repor #7C3AED" disabled>
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #64748B"
+        ></span>
+        <button
+          data-part="previous"
+          data-part-previous=""
+          type="button"
+          aria-label="Repor #7C3AED"
+          disabled
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
@@ -1321,6 +1768,7 @@
         >
           <input
             data-part="input"
+            data-part-input=""
             value="#64748B"
             aria-label="Cor"
             spellcheck="false"
@@ -1330,25 +1778,38 @@
         </div>
         <button
           data-part="format"
+          data-part-format=""
           type="button"
           aria-haspopup="menu"
           aria-expanded="false"
           disabled
         >
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas" disabled>
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+          disabled
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="presets" role="radiogroup" aria-label="Cores da marca">
+      <div data-part="presets" data-part-presets="" role="radiogroup" aria-label="Cores da marca">
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#0F172A"
@@ -1359,6 +1820,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="true"
           aria-label="#64748B"
@@ -1369,6 +1831,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#DC2626"
@@ -1379,6 +1842,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#EA580C"
@@ -1389,6 +1853,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#D97706"
@@ -1399,6 +1864,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#16A34A"
@@ -1409,6 +1875,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#0D9488"
@@ -1419,6 +1886,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#2563EB"
@@ -1429,6 +1897,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#7C3AED"
@@ -1439,6 +1908,7 @@
         ></button>
         <button
           data-part="preset"
+          data-part-preset=""
           role="radio"
           aria-checked="false"
           aria-label="#DB2777"
@@ -1448,15 +1918,17 @@
           disabled
         ></button>
       </div>
-      <div data-part="contrast" data-level="AA">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">4.76:1</span>
-        <span data-part="contrast-level">AA</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AA">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">4.76:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AA</span>
       </div>
     </div>
     <div
       data-ui="color-picker"
+      data-ui-color-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-format="hex"
       data-readonly=""
@@ -1471,18 +1943,20 @@
         --slotted-color-picker-contrast-with: #ffffff;
       "
     >
-      <div data-part="area">
+      <div data-part="area" data-part-area="">
         <div
           data-part="area-thumb"
+          data-part-area-thumb=""
           role="slider"
           tabindex="0"
           aria-label="Saturação e brilho"
           aria-valuetext="saturação 82 %, brilho 86 %"
         ></div>
       </div>
-      <div data-part="channel" data-channel="hue">
+      <div data-part="channel" data-part-channel="" data-channel="hue">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="hue"
           role="slider"
           tabindex="0"
@@ -1493,9 +1967,10 @@
           aria-valuetext="333 graus"
         ></div>
       </div>
-      <div data-part="channel" data-channel="alpha">
+      <div data-part="channel" data-part-channel="" data-channel="alpha">
         <div
           data-part="channel-thumb"
+          data-part-channel-thumb=""
           data-channel="alpha"
           role="slider"
           tabindex="0"
@@ -1506,39 +1981,69 @@
           aria-valuetext="100 %"
         ></div>
       </div>
-      <div data-part="row">
-        <span data-part="swatch" role="img" aria-label="Cor atual #DB2777"></span>
-        <button data-part="previous" type="button" aria-label="Repor #7C3AED">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+      <div data-part="row" data-part-row="">
+        <span
+          data-part="swatch"
+          data-part-swatch=""
+          role="img"
+          aria-label="Cor atual #DB2777"
+        ></span>
+        <button data-part="previous" data-part-previous="" type="button" aria-label="Repor #7C3AED">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
           ></span>
         </button>
         <div
           data-ui="text-field"
+          data-ui-text-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-mono=""
           data-readonly=""
         >
-          <input data-part="input" value="#DB2777" aria-label="Cor" spellcheck="false" dir="ltr" />
+          <input
+            data-part="input"
+            data-part-input=""
+            value="#DB2777"
+            aria-label="Cor"
+            spellcheck="false"
+            dir="ltr"
+          />
         </div>
-        <button data-part="format" type="button" aria-haspopup="menu" aria-expanded="false">
-          hex<span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg
+        <button
+          data-part="format"
+          data-part-format=""
+          type="button"
+          aria-haspopup="menu"
+          aria-expanded="false"
+        >
+          hex<span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg
           ></span>
         </button>
-        <button data-part="eyedropper" type="button" aria-label="Conta-gotas">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="pipette"></svg
+        <button
+          data-part="eyedropper"
+          data-part-eyedropper=""
+          type="button"
+          aria-label="Conta-gotas"
+        >
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="pipette"></svg
           ></span>
         </button>
       </div>
 
-      <div data-part="contrast" data-level="AA">
-        <span data-part="contrast-sample" aria-hidden="true">Aa</span>
-        <span data-part="contrast-ratio">4.60:1</span>
-        <span data-part="contrast-level">AA</span>
+      <div data-part="contrast" data-part-contrast="" data-level="AA">
+        <span data-part="contrast-sample" data-part-contrast-sample="" aria-hidden="true">Aa</span>
+        <span data-part="contrast-ratio" data-part-contrast-ratio="">4.60:1</span>
+        <span data-part="contrast-level" data-part-contrast-level="">AA</span>
       </div>
     </div>
   </div>

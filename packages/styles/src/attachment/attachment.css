@@ -23,8 +23,8 @@
    * resolves the same size step its attachments do, because a grid of cards
    * sizes its tracks from the card.
    */
-  [data-ui='attachment'][data-part='root'],
-  [data-ui='attachment'][data-part='group'] {
+  [data-ui-attachment][data-part-root],
+  [data-ui-attachment][data-part-group] {
     /**
      * Type and glyph come from the control scales, the ones the theme restates
      * per density, so an attachment inside a dense form shrinks with the
@@ -87,14 +87,14 @@
     );
   }
 
-  [data-ui='attachment'][data-size='sm']:is([data-part='root'], [data-part='group']) {
+  [data-ui-attachment][data-size='sm']:is([data-part-root], [data-part-group]) {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_inset: var(--slotted-attachment-padding-sm, var(--slotted-space-3, 0.375rem));
   }
 
-  [data-ui='attachment'][data-size='lg']:is([data-part='root'], [data-part='group']) {
+  [data-ui-attachment][data-size='lg']:is([data-part-root], [data-part-group]) {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_glyph-size: var(--slotted-control-icon-size-lg, 18px);
     --_gap: var(--slotted-control-gap-lg, 8px);
@@ -109,7 +109,7 @@
    * without moving either. The message starts under the name, not under the
    * tile, so its first letter lines up with the name's.
    */
-  [data-ui='attachment'][data-part='root'] {
+  [data-ui-attachment][data-part-root] {
     /**
      * What the attachment is painted with at rest. A state of the file —
      * invalid — moves these two; a pointer on the trigger moves `--_fill`,
@@ -187,22 +187,22 @@
    * the gap beside it, and an attachment without actions ended its name eight
    * pixels short of the edge it could have used.
    */
-  [data-ui='attachment'][data-part='root']:not(:has(> [data-part='actions'])) {
+  [data-ui-attachment][data-part-root]:not(:has(> [data-part-actions])) {
     grid-template-areas:
       'preview body'
       '. message';
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  [data-ui='attachment'][data-part='root']:not(:has(> [data-part='preview'])) {
+  [data-ui-attachment][data-part-root]:not(:has(> [data-part-preview])) {
     grid-template-areas:
       'body actions'
       'message message';
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  [data-ui='attachment'][data-part='root']:not(:has(> [data-part='preview'])):not(
-      :has(> [data-part='actions'])
+  [data-ui-attachment][data-part-root]:not(:has(> [data-part-preview])):not(
+      :has(> [data-part-actions])
     ) {
     grid-template-areas:
       'body'
@@ -220,7 +220,7 @@
    * list beside the consumer's — the debt `upload` records for its rows.
    */
   @starting-style {
-    [data-ui='attachment'][data-part='root'] {
+    [data-ui-attachment][data-part-root] {
       opacity: 0;
       translate: 0 calc(-1 * var(--slotted-space-2, 0.25rem));
     }
@@ -233,7 +233,7 @@
    * measurements are under **File kind** in `docs/token-foundation.md`; the
    * scale is `upload`'s and is read here under its own name.
    */
-  [data-ui='attachment'] [data-part='preview'] {
+  [data-ui-attachment] [data-part-preview] {
     --_kind-tile: var(--slotted-upload-kind-other);
 
     align-items: center;
@@ -250,7 +250,7 @@
     overflow: hidden;
   }
 
-  [data-ui='attachment'] [data-part='preview'] > img {
+  [data-ui-attachment] [data-part-preview] > img {
     block-size: 100%;
     display: block;
     inline-size: 100%;
@@ -261,39 +261,39 @@
    * Half the tile, rounded to a whole pixel: 20 in a 40 tile. The row glyph
    * (16) in a tile two lines tall read as a mark lost in its box.
    */
-  [data-ui='attachment'] [data-part='preview'] > [data-ui='icon'] {
+  [data-ui-attachment] [data-part-preview] > [data-ui-icon] {
     --slotted-icon-size: round(calc(var(--_preview-size) / 2), 1px);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='pdf'] {
+  [data-ui-attachment] [data-part-preview][data-kind='pdf'] {
     --_kind-tile: var(--slotted-upload-kind-pdf);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='document'] {
+  [data-ui-attachment] [data-part-preview][data-kind='document'] {
     --_kind-tile: var(--slotted-upload-kind-document);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='spreadsheet'] {
+  [data-ui-attachment] [data-part-preview][data-kind='spreadsheet'] {
     --_kind-tile: var(--slotted-upload-kind-spreadsheet);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='presentation'] {
+  [data-ui-attachment] [data-part-preview][data-kind='presentation'] {
     --_kind-tile: var(--slotted-upload-kind-presentation);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='image'] {
+  [data-ui-attachment] [data-part-preview][data-kind='image'] {
     --_kind-tile: var(--slotted-upload-kind-image);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='video'] {
+  [data-ui-attachment] [data-part-preview][data-kind='video'] {
     --_kind-tile: var(--slotted-upload-kind-video);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='audio'] {
+  [data-ui-attachment] [data-part-preview][data-kind='audio'] {
     --_kind-tile: var(--slotted-upload-kind-audio);
   }
 
-  [data-ui='attachment'] [data-part='preview'][data-kind='archive'] {
+  [data-ui-attachment] [data-part-preview][data-kind='archive'] {
     --_kind-tile: var(--slotted-upload-kind-archive);
   }
 
@@ -303,7 +303,7 @@
    * `min-inline-size: 0`, which is what makes a long name truncate instead of
    * pushing the actions off the end.
    */
-  [data-ui='attachment'] [data-part='body'] {
+  [data-ui-attachment] [data-part-body] {
     display: flex;
     flex-direction: column;
     gap: var(--_line-gap);
@@ -318,7 +318,7 @@
    * about it looks like a control at rest; the attachment is the control, and
    * it answers as one.
    */
-  [data-ui='attachment'] [data-part='trigger'] {
+  [data-ui-attachment] [data-part-trigger] {
     appearance: none;
     background: none;
     border: 0;
@@ -339,7 +339,7 @@
    * The stretched target. Transparent, over the whole attachment, and below
    * `actions`, which is positioned after it in the same stacking context.
    */
-  [data-ui='attachment'] [data-part='trigger']::after {
+  [data-ui-attachment] [data-part-trigger]::after {
     content: '';
     inset: 0;
     position: absolute;
@@ -352,18 +352,18 @@
    * by a hairline — the answer `upload` gives its file name — so press and
    * hover differ on the trigger itself and not only on the attachment.
    */
-  [data-ui='attachment'] [data-part='trigger']:not(:disabled):not([aria-disabled='true']):hover {
+  [data-ui-attachment] [data-part-trigger]:not(:disabled):not([aria-disabled='true']):hover {
     text-decoration-line: underline;
     text-underline-offset: 0.2em;
   }
 
-  [data-ui='attachment'] [data-part='trigger']:not(:disabled):not([aria-disabled='true']):active {
+  [data-ui-attachment] [data-part-trigger]:not(:disabled):not([aria-disabled='true']):active {
     text-decoration-line: underline;
     text-underline-offset: 0.2em;
     translate: 0 var(--slotted-border-width-thin, 1px);
   }
 
-  [data-ui='attachment'] [data-part='trigger']:is(:disabled, [aria-disabled='true']) {
+  [data-ui-attachment] [data-part-trigger]:is(:disabled, [aria-disabled='true']) {
     cursor: default;
   }
 
@@ -373,13 +373,11 @@
    * the words can be pressed. The browser's own ring on the trigger is
    * suppressed so the two are never drawn at once.
    */
-  [data-ui='attachment'] [data-part='trigger']:focus-visible {
+  [data-ui-attachment] [data-part-trigger]:focus-visible {
     outline: none;
   }
 
-  [data-ui='attachment'][data-part='root']:has(
-      > [data-part='body'] > [data-part='trigger']:focus-visible
-    ) {
+  [data-ui-attachment][data-part-root]:has(> [data-part-body] > [data-part-trigger]:focus-visible) {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -389,14 +387,14 @@
    * cannot be opened: a disabled or loading attachment refuses its trigger,
    * and a fill would promise the press it refuses.
    */
-  [data-ui='attachment'][data-part='root']:not([data-disabled]):not([data-loading]):has(
-      > [data-part='body'] > [data-part='trigger']:hover
+  [data-ui-attachment][data-part-root]:not([data-disabled]):not([data-loading]):has(
+      > [data-part-body] > [data-part-trigger]:hover
     ) {
     --_fill: var(--_fill-hover);
   }
 
-  [data-ui='attachment'][data-part='root']:not([data-disabled]):not([data-loading]):has(
-      > [data-part='body'] > [data-part='trigger']:active
+  [data-ui-attachment][data-part-root]:not([data-disabled]):not([data-loading]):has(
+      > [data-part-body] > [data-part-trigger]:active
     ) {
     --_fill: var(--_fill-active);
   }
@@ -407,7 +405,7 @@
    * that order inside a right-to-left page instead of `pdf.claim-form` — the
    * defect `upload` found in its capture at `dir="rtl"`.
    */
-  [data-ui='attachment'] [data-part='filename'] {
+  [data-ui-attachment] [data-part-filename] {
     display: flex;
     font-weight: var(--slotted-attachment-name-font-weight, var(--slotted-font-weight-medium, 500));
     line-height: var(--_title-leading);
@@ -422,8 +420,8 @@
    * gives the run its own direction, so it must also be only as wide as the run.
    * Found in the capture at `dir="rtl"`.
    */
-  [data-ui='attachment'] [data-part='body'] > [data-part='filename'],
-  [data-ui='attachment'] [data-part='body'] > [data-part='trigger'] {
+  [data-ui-attachment] [data-part-body] > [data-part-filename],
+  [data-ui-attachment] [data-part-body] > [data-part-trigger] {
     align-self: start;
     max-inline-size: 100%;
   }
@@ -434,7 +432,7 @@
    * middle; `splitName` makes the split in the binding, and the whole name
    * stays in the document and in the trigger's `title`.
    */
-  [data-ui='attachment'] [data-part='name'] {
+  [data-ui-attachment] [data-part-name] {
     flex: 0 1 auto;
     min-inline-size: 0;
     overflow: hidden;
@@ -442,13 +440,13 @@
     white-space: nowrap;
   }
 
-  [data-ui='attachment'] [data-part='extension'] {
+  [data-ui-attachment] [data-part-extension] {
     flex: none;
     white-space: nowrap;
   }
 
   /** The second line: a size, a date, a sender — whatever the page says. */
-  [data-ui='attachment'] [data-part='detail'] {
+  [data-ui-attachment] [data-part-detail] {
     color: var(--slotted-text-muted);
     font-size: var(--_detail-size);
     font-variant-numeric: tabular-nums;
@@ -465,7 +463,7 @@
    * length than a line of detail. It wraps, because a reason cut off by an
    * ellipsis is a reason nobody reads.
    */
-  [data-ui='attachment'] [data-part='message'] {
+  [data-ui-attachment] [data-part-message] {
     color: var(--_message-color);
     font-size: var(--_detail-size);
     grid-area: message;
@@ -490,7 +488,7 @@
    * Centred in the inset, the bar clears the edge by the same distance it
    * clears the detail line above it.
    */
-  [data-ui='attachment'] [data-part='progress'] {
+  [data-ui-attachment] [data-part-progress] {
     display: block;
     inset-block-end: round(
       down,
@@ -505,14 +503,13 @@
   }
 
   /* Without a tile, or on a card, the text's column starts at the inset. */
-  [data-ui='attachment'][data-part='root']:not(:has(> [data-part='preview']))
-    > [data-part='progress'],
-  [data-ui='attachment'][data-orientation='vertical'] > [data-part='progress'] {
+  [data-ui-attachment][data-part-root]:not(:has(> [data-part-preview])) > [data-part-progress],
+  [data-ui-attachment][data-orientation='vertical'] > [data-part-progress] {
     inset-inline-start: var(--_inset);
   }
 
   @starting-style {
-    [data-ui='attachment'] [data-part='progress'] {
+    [data-ui-attachment] [data-part-progress] {
       opacity: 0;
     }
   }
@@ -521,7 +518,7 @@
    *
    * Above the stretched target, so a press on a control is the control's.
    */
-  [data-ui='attachment'] [data-part='actions'] {
+  [data-ui-attachment] [data-part-actions] {
     align-items: center;
     display: inline-flex;
     gap: var(--slotted-space-1, 0.125rem);
@@ -538,8 +535,8 @@
    * controls: it is legible on whatever ground the attachment has, including
    * a failed one's tint.
    */
-  [data-ui='attachment'] [data-part='action'],
-  [data-ui='attachment'] [data-part='remove'] {
+  [data-ui-attachment] [data-part-action],
+  [data-ui-attachment] [data-part-remove] {
     --_state-hover: color-mix(
       in oklab,
       currentcolor var(--slotted-attachment-action-state-layer-hover, 8%),
@@ -574,8 +571,8 @@
       color var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='attachment'] [data-part='action'] > [data-ui='icon'],
-  [data-ui='attachment'] [data-part='remove'] > [data-ui='icon'] {
+  [data-ui-attachment] [data-part-action] > [data-ui-icon],
+  [data-ui-attachment] [data-part-remove] > [data-ui-icon] {
     --slotted-icon-size: var(--_action-glyph-size);
   }
 
@@ -584,18 +581,18 @@
    * has no native disabled state. A control that cannot act does not answer a
    * pointer.
    */
-  [data-ui='attachment'] [data-part='action']:not(:disabled):not([aria-disabled='true']):hover,
-  [data-ui='attachment'] [data-part='remove']:not(:disabled):not([aria-disabled='true']):hover {
+  [data-ui-attachment] [data-part-action]:not(:disabled):not([aria-disabled='true']):hover,
+  [data-ui-attachment] [data-part-remove]:not(:disabled):not([aria-disabled='true']):hover {
     background-color: var(--_state-hover);
   }
 
-  [data-ui='attachment'] [data-part='action']:not(:disabled):not([aria-disabled='true']):active,
-  [data-ui='attachment'] [data-part='remove']:not(:disabled):not([aria-disabled='true']):active {
+  [data-ui-attachment] [data-part-action]:not(:disabled):not([aria-disabled='true']):active,
+  [data-ui-attachment] [data-part-remove]:not(:disabled):not([aria-disabled='true']):active {
     background-color: var(--_state-active);
   }
 
-  [data-ui='attachment'] [data-part='action']:is(:disabled, [aria-disabled='true']),
-  [data-ui='attachment'] [data-part='remove']:is(:disabled, [aria-disabled='true']) {
+  [data-ui-attachment] [data-part-action]:is(:disabled, [aria-disabled='true']),
+  [data-ui-attachment] [data-part-remove]:is(:disabled, [aria-disabled='true']) {
     color: var(--slotted-disabled-foreground);
     cursor: default;
   }
@@ -605,8 +602,8 @@
    * stand two pixels apart, and an outward ring would be drawn over the
    * neighbour's box.
    */
-  [data-ui='attachment'] [data-part='action']:focus-visible,
-  [data-ui='attachment'] [data-part='remove']:focus-visible {
+  [data-ui-attachment] [data-part-action]:focus-visible,
+  [data-ui-attachment] [data-part-remove]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
@@ -618,11 +615,11 @@
    * `upload`'s.
    */
   @media (pointer: coarse) {
-    [data-ui='attachment'] :is([data-part='action'], [data-part='remove']) {
+    [data-ui-attachment] :is([data-part-action], [data-part-remove]) {
       position: relative;
     }
 
-    [data-ui='attachment'] :is([data-part='action'], [data-part='remove'])::after {
+    [data-ui-attachment] :is([data-part-action], [data-part-remove])::after {
       content: '';
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
       position: absolute;
@@ -637,7 +634,7 @@
    * message was about archives — and every kind clears 4.03 : 1 against the
    * failed ground in `light` (`default-theme.test.mjs`).
    */
-  [data-ui='attachment'][data-part='root'][data-invalid] {
+  [data-ui-attachment][data-part-root][data-invalid] {
     --_surface: var(--slotted-tone-danger-surface);
     --_edge: var(--slotted-tone-danger-border);
     --_message-color: var(--slotted-tone-danger-text);
@@ -659,15 +656,15 @@
    * at its contrast, and the tile gives up the kind's colour, because a file
    * that cannot be opened should not still be the brightest thing in the row.
    */
-  [data-ui='attachment'][data-part='root'][data-disabled] {
+  [data-ui-attachment][data-part-root][data-disabled] {
     --_ink: var(--slotted-disabled-foreground);
   }
 
-  [data-ui='attachment'][data-part='root'][data-disabled] [data-part='detail'] {
+  [data-ui-attachment][data-part-root][data-disabled] [data-part-detail] {
     color: var(--slotted-disabled-foreground);
   }
 
-  [data-ui='attachment'][data-part='root'][data-disabled] [data-part='preview'] {
+  [data-ui-attachment][data-part-root][data-disabled] [data-part-preview] {
     --_kind-tile: var(--slotted-disabled-background);
 
     color: var(--slotted-disabled-foreground);
@@ -678,7 +675,7 @@
    * whole-strength grey is the one value that says unavailable without
    * dimming the thumbnail below legibility.
    */
-  [data-ui='attachment'][data-part='root'][data-disabled] [data-part='preview'] > img {
+  [data-ui-attachment][data-part-root][data-disabled] [data-part-preview] > img {
     filter: grayscale(1);
   }
 
@@ -690,7 +687,7 @@
    * photograph is any colour, and a dark mark on a mid-blue sky was what
    * `upload`'s first grid capture showed.
    */
-  [data-ui='attachment'][data-part='root'][data-orientation='vertical'] {
+  [data-ui-attachment][data-part-root][data-orientation='vertical'] {
     align-items: stretch;
     grid-template-areas:
       'preview'
@@ -705,14 +702,14 @@
    * the card rather than from `aspect-ratio`, which carried a fractional
    * width into a fractional height in `upload`'s grid.
    */
-  [data-ui='attachment'][data-orientation='vertical'] > [data-part='preview'] {
+  [data-ui-attachment][data-orientation='vertical'] > [data-part-preview] {
     --_preview-radius: var(--slotted-attachment-card-preview-radius, var(--slotted-radius-md, 6px));
 
     block-size: calc(var(--_card-size) - 2 * var(--_inset) - 2 * var(--_border-width));
     inline-size: 100%;
   }
 
-  [data-ui='attachment'][data-orientation='vertical'] > [data-part='preview'] > [data-ui='icon'] {
+  [data-ui-attachment][data-orientation='vertical'] > [data-part-preview] > [data-ui-icon] {
     --slotted-icon-size: calc(2 * var(--_glyph-size));
   }
 
@@ -721,8 +718,7 @@
    * of thumbnails for the one PDF finds it faster by the three letters than by
    * the silhouette. It is text, drawn from the attribute the binding writes.
    */
-  [data-ui='attachment'][data-orientation='vertical']
-    > [data-part='preview']:not(:has(img))::after {
+  [data-ui-attachment][data-orientation='vertical'] > [data-part-preview]:not(:has(img))::after {
     content: attr(data-extension);
     font-size: var(--_detail-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -733,11 +729,11 @@
     margin-block-start: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='attachment'][data-orientation='vertical'] > [data-part='body'] {
+  [data-ui-attachment][data-orientation='vertical'] > [data-part-body] {
     margin-block-start: var(--_gap);
   }
 
-  [data-ui='attachment'][data-orientation='vertical'] > [data-part='actions'] {
+  [data-ui-attachment][data-orientation='vertical'] > [data-part-actions] {
     background-color: color-mix(
       in oklab,
       var(--slotted-surface) var(--slotted-attachment-card-actions-opacity, 96%),
@@ -764,17 +760,13 @@
    * card it stays too: a card that answers no pointer cannot summon it either.
    */
   @media (hover: hover) and (pointer: fine) {
-    [data-ui='attachment'][data-orientation='vertical']:not([data-disabled])
-      > [data-part='actions'] {
+    [data-ui-attachment][data-orientation='vertical']:not([data-disabled]) > [data-part-actions] {
       opacity: 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='attachment'][data-orientation='vertical']:not([data-disabled]):is(
-        :hover,
-        :focus-within
-      )
-      > [data-part='actions'] {
+    [data-ui-attachment][data-orientation='vertical']:not([data-disabled]):is(:hover, :focus-within)
+      > [data-part-actions] {
       opacity: 1;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-enter);
     }
@@ -785,7 +777,7 @@
    * A native list. It takes focus only when its last attachment is removed
    * with the keyboard, which is what `tabindex="-1"` is for.
    */
-  [data-ui='attachment'][data-part='group'] {
+  [data-ui-attachment][data-part-group] {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -796,7 +788,7 @@
     padding: 0;
   }
 
-  [data-ui='attachment'][data-part='group']:focus-visible {
+  [data-ui-attachment][data-part-group]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -805,12 +797,12 @@
    * An empty set takes no room: a message whose last file was removed does
    * not keep a gap where the files were.
    */
-  [data-ui='attachment'][data-part='group']:empty {
+  [data-ui-attachment][data-part-group]:empty {
     display: none;
   }
 
   /** Rows that share the width: two or three to a line, never narrower than a name. */
-  [data-ui='attachment'][data-part='group'][data-layout='grid'] {
+  [data-ui-attachment][data-part-group][data-layout='grid'] {
     display: grid;
     grid-template-columns: repeat(
       auto-fill,
@@ -819,7 +811,7 @@
   }
 
   /* Cards keep their own width, so every card is a whole pixel wide. */
-  [data-ui='attachment'][data-part='group'][data-layout='grid'][data-orientation='vertical'] {
+  [data-ui-attachment][data-part-group][data-layout='grid'][data-orientation='vertical'] {
     grid-template-columns: repeat(auto-fill, var(--_card-size));
   }
 
@@ -829,7 +821,7 @@
    * at either end keeps its whole ring inside the scroll box instead of
    * losing two pixels of it to the clip.
    */
-  [data-ui='attachment'][data-part='group'][data-layout='strip'] {
+  [data-ui-attachment][data-part-group][data-layout='strip'] {
     --_ring-reach: calc(
       var(--slotted-focus-ring-width, 2px) + var(--slotted-focus-ring-offset, 2px)
     );
@@ -845,13 +837,13 @@
     scrollbar-width: thin;
   }
 
-  [data-ui='attachment'][data-part='group'][data-layout='strip'] > [data-part='root'] {
+  [data-ui-attachment][data-part-group][data-layout='strip'] > [data-part-root] {
     flex: none;
     scroll-snap-align: start;
   }
 
-  [data-ui='attachment'][data-part='group'][data-layout='strip']
-    > [data-part='root'][data-orientation='horizontal'] {
+  [data-ui-attachment][data-part-group][data-layout='strip']
+    > [data-part-root][data-orientation='horizontal'] {
     inline-size: var(--slotted-attachment-strip-item-size, 15rem);
   }
 
@@ -864,38 +856,38 @@
    * `upload`'s controls, and the failed attachment keeps its edge.
    */
   @media (forced-colors: active) {
-    [data-ui='attachment'][data-part='root'][data-invalid] {
+    [data-ui-attachment][data-part-root][data-invalid] {
       --_edge: CanvasText;
     }
 
     /* The doubled edge is a shadow, which forced colours remove: it comes back
        as an outline inside the border, and a focused failed attachment draws
        its ring double. */
-    [data-ui='attachment'][data-part='root'][data-invalid] {
+    [data-ui-attachment][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
     }
 
-    [data-ui='attachment'][data-part='root'][data-invalid]:has(
-        > [data-part='body'] > [data-part='trigger']:focus-visible
+    [data-ui-attachment][data-part-root][data-invalid]:has(
+        > [data-part-body] > [data-part-trigger]:focus-visible
       ) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='attachment'][data-part='root']:not([data-disabled]):not([data-loading]):has(
-        > [data-part='body'] > [data-part='trigger']:is(:hover, :active)
+    [data-ui-attachment][data-part-root]:not([data-disabled]):not([data-loading]):has(
+        > [data-part-body] > [data-part-trigger]:is(:hover, :active)
       ) {
       border-color: Highlight;
     }
 
-    [data-ui='attachment'] [data-part='preview'] {
+    [data-ui-attachment] [data-part-preview] {
       border: var(--_border-width) solid ButtonBorder;
     }
 
-    [data-ui='attachment']
-      :is([data-part='action'], [data-part='remove']):not(:disabled):not([aria-disabled='true']):is(
+    [data-ui-attachment]
+      :is([data-part-action], [data-part-remove]):not(:disabled):not([aria-disabled='true']):is(
         :hover,
         :active
       ) {

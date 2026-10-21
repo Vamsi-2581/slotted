@@ -39,7 +39,7 @@
    * that end, and choosing one end moves to the other — the end list
    * appears already striking what the chosen start refuses.
    */
-  [data-ui='datetime-range-picker'][data-part='root'] {
+  [data-ui-datetime-range-picker][data-part-root] {
     display: block;
     /* The anchor the positioner measures is the control, and a block root
        lets the frame take the width the form gave it. */
@@ -55,7 +55,7 @@
    * and two of them broke the frame into two lines in any form column
    * narrower than they are, against the height every control shares.
    */
-  [data-ui='datetime-range-picker'] [data-part='control'] {
+  [data-ui-datetime-range-picker] [data-part-control] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -105,7 +105,7 @@
       box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-size='sm'] [data-part='control'] {
+  [data-ui-datetime-range-picker][data-part-root][data-size='sm'] [data-part-control] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 11px);
@@ -113,7 +113,7 @@
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-size='lg'] [data-part='control'] {
+  [data-ui-datetime-range-picker][data-part-root][data-size='lg'] [data-part-control] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 15px);
@@ -125,7 +125,7 @@
    *
    * The three steps `text-field` set, through the field's own variant tokens.
    */
-  [data-ui='datetime-range-picker'][data-part='root'][data-variant='subtle'] [data-part='control'] {
+  [data-ui-datetime-range-picker][data-part-root][data-variant='subtle'] [data-part-control] {
     background-color: var(
       --slotted-datetime-range-picker-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -136,7 +136,7 @@
     );
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-variant='plain'] [data-part='control'] {
+  [data-ui-datetime-range-picker][data-part-root][data-variant='plain'] [data-part-control] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -151,7 +151,7 @@
    * into `PageDown` before the browser sees it, so a chord cannot be the only
    * way in.
    */
-  [data-ui='datetime-range-picker'] [data-part='trigger'] {
+  [data-ui-datetime-range-picker] [data-part-trigger] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -177,14 +177,14 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='control']:has(> [data-part='clear']) {
+  [data-ui-datetime-range-picker] [data-part-control]:has(> [data-part-clear]) {
     --_actions: 2;
   }
 
   /* The value in words, one line, cut where it does not fit: the trigger's
      name carries it whole, so the ellipsis removes nothing a reader cannot
      hear. Tabular figures, so two ranges in a form line up. */
-  [data-ui='datetime-range-picker'] [data-part='summary'] {
+  [data-ui-datetime-range-picker] [data-part-summary] {
     flex: 1 1 auto;
     font-variant-numeric: tabular-nums;
     min-inline-size: 0;
@@ -194,7 +194,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='summary'][data-placeholder] {
+  [data-ui-datetime-range-picker] [data-part-summary][data-placeholder] {
     color: var(
       --slotted-datetime-range-picker-placeholder-color,
       var(--slotted-text-muted, GrayText)
@@ -207,11 +207,11 @@
      open. */
   /* The frame draws the ring for the trigger; the browser's own ring on the
      trigger would be a second one, inside the frame and over its edge. */
-  [data-ui='datetime-range-picker'] [data-part='trigger']:focus-visible {
+  [data-ui-datetime-range-picker] [data-part-trigger]:focus-visible {
     outline: none;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='trigger'] > [data-ui='icon'] {
+  [data-ui-datetime-range-picker] [data-part-trigger] > [data-ui-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     /* No system-colour fallback on a decoration: unthemed, it takes the
@@ -223,7 +223,7 @@
     translate: 0 -50%;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='trigger']:disabled {
+  [data-ui-datetime-range-picker] [data-part-trigger]:disabled {
     cursor: not-allowed;
   }
 
@@ -233,7 +233,7 @@
    * stands. Its own ring: tabbing from the trigger to it has to move
    * something visible, and the frame's ring would sit still.
    */
-  [data-ui='datetime-range-picker'] [data-part='clear'] {
+  [data-ui-datetime-range-picker] [data-part-clear] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -263,7 +263,7 @@
   }
 
   /* The hit area, recovered outside the paint, as every inner control does. */
-  [data-ui='datetime-range-picker'] [data-part='clear']::after {
+  [data-ui-datetime-range-picker] [data-part-clear]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -274,32 +274,32 @@
      the hit area above grows to 44 pixels around them. It does not reach into
      the calendar's lane after it, which is the trigger's to answer. */
   @media (pointer: coarse) {
-    [data-ui='datetime-range-picker'] [data-part='clear']::after {
+    [data-ui-datetime-range-picker] [data-part-clear]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
       inset-inline-end: 0;
     }
   }
 
-  [data-ui='datetime-range-picker'] [data-part='clear']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-datetime-range-picker] [data-part-clear]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-datetime-range-picker-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='clear']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-datetime-range-picker] [data-part-clear]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-datetime-range-picker-action-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='clear']:focus-visible {
+  [data-ui-datetime-range-picker] [data-part-clear]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='clear']:disabled {
+  [data-ui-datetime-range-picker] [data-part-clear]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -310,30 +310,30 @@
    * one it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='datetime-range-picker'][data-part='root']:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-datetime-range-picker][data-part-root]:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     )
-    [data-part='control']:hover {
+    [data-part-control]:hover {
     border-color: var(
       --slotted-datetime-range-picker-hover-border-color,
       var(--slotted-tone-accent-border)
     );
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-variant='subtle']:not(
-      [data-disabled]
-    ):not([data-readonly]):not([data-invalid])
-    [data-part='control']:hover {
+  [data-ui-datetime-range-picker][data-part-root][data-variant='subtle']:not([data-disabled]):not(
+      [data-readonly]
+    ):not([data-invalid])
+    [data-part-control]:hover {
     background-color: var(
       --slotted-datetime-range-picker-subtle-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-variant='plain']:not(
-      [data-disabled]
-    ):not([data-readonly]):not([data-invalid])
-    [data-part='control']:hover {
+  [data-ui-datetime-range-picker][data-part-root][data-variant='plain']:not([data-disabled]):not(
+      [data-readonly]
+    ):not([data-invalid])
+    [data-part-control]:hover {
     background-color: var(
       --slotted-datetime-range-picker-plain-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -343,8 +343,7 @@
 
   /* The trigger is the only thing in the frame that takes focus, apart from
      the clear, which draws its own ring; the frame's ring is drawn for it. */
-  [data-ui='datetime-range-picker']
-    [data-part='control']:has(> [data-part='trigger']:focus-visible) {
+  [data-ui-datetime-range-picker] [data-part-control]:has(> [data-part-trigger]:focus-visible) {
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -353,15 +352,15 @@
 
   /* The ring of a control whose box is not its own is drawn inside that box,
      and there is no lift — the `plain` rule of `plain-variant.test.mjs`. */
-  [data-ui='datetime-range-picker'][data-part='root'][data-variant='plain']
-    [data-part='control']:has(> [data-part='trigger']:focus-visible) {
+  [data-ui-datetime-range-picker][data-part-root][data-variant='plain']
+    [data-part-control]:has(> [data-part-trigger]:focus-visible) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   /* Invalid outranks hover and is written after it. The ring is retargeted
      rather than repainted, so every ring in the frame moves at once. */
-  [data-ui='datetime-range-picker'][data-part='root'][data-invalid] [data-part='control'] {
+  [data-ui-datetime-range-picker][data-part-root][data-invalid] [data-part-control] {
     --slotted-focus-ring-color: var(
       --slotted-datetime-range-picker-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -389,16 +388,16 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='datetime-range-picker'][data-invalid]
-    [data-part='control']:has(> [data-part='trigger']:focus-visible) {
+  [data-ui-datetime-range-picker][data-invalid]
+    [data-part-control]:has(> [data-part-trigger]:focus-visible) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-variant='plain'][data-invalid]
-    [data-part='control']:has(> [data-part='trigger']:focus-visible) {
+  [data-ui-datetime-range-picker][data-part-root][data-variant='plain'][data-invalid]
+    [data-part-control]:has(> [data-part-trigger]:focus-visible) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
     box-shadow: inset 0 0 0
@@ -414,20 +413,20 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='datetime-range-picker'][data-part='root'][data-invalid] [data-part='control'] {
+    [data-ui-datetime-range-picker][data-part-root][data-invalid] [data-part-control] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
     }
 
-    [data-ui='datetime-range-picker'][data-invalid]
-      [data-part='control']:has(> [data-part='trigger']:focus-visible) {
+    [data-ui-datetime-range-picker][data-invalid]
+      [data-part-control]:has(> [data-part-trigger]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='datetime-range-picker'][data-part='root'][data-variant='plain'][data-invalid]
-      [data-part='control']:has(> [data-part='trigger']:focus-visible) {
+    [data-ui-datetime-range-picker][data-part-root][data-variant='plain'][data-invalid]
+      [data-part-control]:has(> [data-part-trigger]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: calc(
@@ -438,7 +437,7 @@
 
   /* Read-only stays focusable, readable and copyable, and must not be
      mistakable for disabled: the ground says "not yours to change". */
-  [data-ui='datetime-range-picker'][data-part='root'][data-readonly] [data-part='control'] {
+  [data-ui-datetime-range-picker][data-part-root][data-readonly] [data-part-control] {
     background-color: var(
       --slotted-datetime-range-picker-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -447,7 +446,7 @@
   }
 
   /* Muted to the colour the theme measures rather than faded by opacity. */
-  [data-ui='datetime-range-picker'][data-part='root'][data-disabled] [data-part='control'] {
+  [data-ui-datetime-range-picker][data-part-root][data-disabled] [data-part-control] {
     background-color: var(
       --slotted-datetime-range-picker-disabled-background,
       var(--slotted-disabled-background)
@@ -461,9 +460,9 @@
     cursor: not-allowed;
   }
 
-  [data-ui='datetime-range-picker'][data-part='root'][data-disabled]
-    [data-part='trigger']
-    > [data-ui='icon'] {
+  [data-ui-datetime-range-picker][data-part-root][data-disabled]
+    [data-part-trigger]
+    > [data-ui-icon] {
     color: var(--slotted-disabled-foreground);
   }
 
@@ -472,7 +471,7 @@
    * What `packages/core/src/positioner` writes `position`, `left` and `top`
    * onto. The painted surface is one element in, as every overlay is built.
    */
-  [data-ui='datetime-range-picker'][data-part='positioner'] {
+  [data-ui-datetime-range-picker][data-part-positioner] {
     /* Only the block inset: the positioner writes `left` and never `right`,
        and `inset-inline-start` would resolve to `right` in a right-to-left
        document and win over the measured value. */
@@ -494,18 +493,18 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='datetime-range-picker'][data-part='positioner'][data-side='top'] {
+  [data-ui-datetime-range-picker][data-part-positioner][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
-  [data-ui='datetime-range-picker'][data-part='positioner']:is(
+  [data-ui-datetime-range-picker][data-part-positioner]:is(
       [data-side='left'],
       [data-side='right']
     ) {
     translate: 0 0;
   }
 
-  [data-ui='datetime-range-picker'][data-part='positioner'][data-open] {
+  [data-ui-datetime-range-picker][data-part-positioner][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -513,16 +512,16 @@
 
   /* The entrance is a keyframe animation and not a transition, for the reason
      `select` records: only a layer the positioner placed arrives. */
-  [data-ui='datetime-range-picker'][data-part='positioner'][data-open][data-positioned] {
+  [data-ui-datetime-range-picker][data-part-positioner][data-open][data-positioned] {
     animation: slotted-datetime-range-picker-enter-down var(--slotted-duration-medium)
       var(--slotted-easing-enter);
   }
 
-  [data-ui='datetime-range-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'] {
+  [data-ui-datetime-range-picker][data-part-positioner][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-datetime-range-picker-enter-up;
   }
 
-  [data-ui='datetime-range-picker'][data-part='positioner'][data-open][data-positioned]:is(
+  [data-ui-datetime-range-picker][data-part-positioner][data-open][data-positioned]:is(
       [data-side='left'],
       [data-side='right']
     ) {
@@ -551,24 +550,24 @@
 
   /* Stillness keeps the fade and drops the movement. */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='datetime-range-picker'][data-part='positioner'],
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-side='top'],
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-side='left'],
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-side='right'] {
+    [data-ui-datetime-range-picker][data-part-positioner],
+    [data-ui-datetime-range-picker][data-part-positioner][data-side='top'],
+    [data-ui-datetime-range-picker][data-part-positioner][data-side='left'],
+    [data-ui-datetime-range-picker][data-part-positioner][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-open][data-positioned],
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'],
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-open][data-positioned][data-side='left'],
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-open][data-positioned][data-side='right'] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-open][data-positioned],
+    [data-ui-datetime-range-picker][data-part-positioner][data-open][data-positioned][data-side='top'],
+    [data-ui-datetime-range-picker][data-part-positioner][data-open][data-positioned][data-side='left'],
+    [data-ui-datetime-range-picker][data-part-positioner][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-datetime-range-picker-fade;
     }
   }
 
   /* The anchor scrolled out of its own clipper. */
-  [data-ui='datetime-range-picker'][data-part='positioner'][data-detached] {
+  [data-ui-datetime-range-picker][data-part-positioner][data-detached] {
     visibility: hidden;
   }
 
@@ -579,7 +578,7 @@
    * `auto` track takes the calendar's own width as its floor, and the cap
    * below would then cap a box the track had already overflowed.
    */
-  [data-ui='datetime-range-picker'] [data-part='content'] {
+  [data-ui-datetime-range-picker] [data-part-content] {
     background-color: var(
       --slotted-datetime-range-picker-surface,
       var(--slotted-surface-raised, Canvas)
@@ -635,7 +634,7 @@
    * what to do next. It renders at the panel's width and contributes nothing
    * to it, by the pair `datetime-picker` records.
    */
-  [data-ui='datetime-range-picker'] [data-part='head'] {
+  [data-ui-datetime-range-picker] [data-part-head] {
     box-sizing: border-box;
     inline-size: 0;
     min-inline-size: 100%;
@@ -650,30 +649,30 @@
     row-gap: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tabs'] {
+  [data-ui-datetime-range-picker] [data-part-tabs] {
     grid-area: tabs;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='field'] {
+  [data-ui-datetime-range-picker] [data-part-field] {
     grid-area: field;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='head'] > [data-part='now'] {
+  [data-ui-datetime-range-picker] [data-part-head] > [data-part-now] {
     align-self: center;
     grid-area: now;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='hint'] {
+  [data-ui-datetime-range-picker] [data-part-hint] {
     align-self: center;
     grid-area: hint;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='length'] {
+  [data-ui-datetime-range-picker] [data-part-length] {
     align-self: center;
     grid-area: length;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='limit'] {
+  [data-ui-datetime-range-picker] [data-part-limit] {
     grid-area: limit;
   }
 
@@ -685,7 +684,7 @@
    * The row is the whole width so the two are the same size whatever their
    * values, and a thumb finds them without aiming.
    */
-  [data-ui='datetime-range-picker'] [data-part='tabs'] {
+  [data-ui-datetime-range-picker] [data-part-tabs] {
     border-block-end: var(--slotted-border-width-thin, 1px) solid
       var(
         --slotted-datetime-range-picker-content-border-color,
@@ -696,7 +695,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab'] {
+  [data-ui-datetime-range-picker] [data-part-tab] {
     appearance: none;
     background-color: transparent;
     border: 0;
@@ -726,7 +725,7 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab']::after {
+  [data-ui-datetime-range-picker] [data-part-tab]::after {
     background-color: var(
       --slotted-datetime-range-picker-current-color,
       var(--slotted-tone-accent-solid)
@@ -745,30 +744,30 @@
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab'][data-current]::after {
+  [data-ui-datetime-range-picker] [data-part-tab][data-current]::after {
     opacity: 1;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab']:hover:not(:disabled):not([data-current]) {
+  [data-ui-datetime-range-picker] [data-part-tab]:hover:not(:disabled):not([data-current]) {
     background-color: var(
       --slotted-datetime-range-picker-option-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab']:focus-visible {
+  [data-ui-datetime-range-picker] [data-part-tab]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab']:disabled {
+  [data-ui-datetime-range-picker] [data-part-tab]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
 
   /* The label, in the muted ink for both ends alike: which end is current
      is said once, by the underline. */
-  [data-ui='datetime-range-picker'] [data-part='tab-label'] {
+  [data-ui-datetime-range-picker] [data-part-tab-label] {
     color: var(--slotted-datetime-range-picker-label-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-font-size-xs, 11px);
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -777,7 +776,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab-value'] {
+  [data-ui-datetime-range-picker] [data-part-tab-value] {
     font-size: var(--slotted-font-size-sm, 13px);
     font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -787,7 +786,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='tab'][data-placeholder] [data-part='tab-value'] {
+  [data-ui-datetime-range-picker] [data-part-tab][data-placeholder] [data-part-tab-value] {
     color: var(--slotted-datetime-range-picker-label-color, var(--slotted-text-muted, GrayText));
     font-weight: var(--slotted-font-weight-regular, 400);
   }
@@ -801,7 +800,7 @@
    * `now` sits at the reading end of the same row. On a coarse pointer the
    * row is `now` alone: a segment is a spinbutton and raises no keyboard.
    */
-  [data-ui='datetime-range-picker'] [data-part='field'] {
+  [data-ui-datetime-range-picker] [data-part-field] {
     --slotted-control-border-width: 0px;
     --slotted-control-padding-inline-sm: var(--slotted-space-2, 0.25rem);
     --slotted-control-padding-inline-md: var(--slotted-space-2, 0.25rem);
@@ -822,7 +821,7 @@
    * line of its own under them. The hint is the difference between a panel
    * that refuses and a panel that explains.
    */
-  [data-ui='datetime-range-picker'] [data-part='hint'] {
+  [data-ui-datetime-range-picker] [data-part-hint] {
     color: var(--slotted-datetime-range-picker-hint-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-font-size-sm, 13px);
     min-inline-size: 0;
@@ -831,13 +830,13 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='hint'][data-invalid] {
+  [data-ui-datetime-range-picker] [data-part-hint][data-invalid] {
     color: var(--slotted-datetime-range-picker-invalid-color, var(--slotted-tone-danger-text));
   }
 
   /* The duration, at the reading end, in the accent's text tone: it is the
      number the band exists to say. Pending, it drops a step of weight. */
-  [data-ui='datetime-range-picker'] [data-part='length'] {
+  [data-ui-datetime-range-picker] [data-part-length] {
     color: var(--slotted-datetime-range-picker-length-color, var(--slotted-tone-accent-text));
     font-size: var(--slotted-font-size-sm, 13px);
     font-variant-numeric: tabular-nums;
@@ -847,17 +846,17 @@
     white-space: nowrap;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='length'][data-pending] {
+  [data-ui-datetime-range-picker] [data-part-length][data-pending] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
   /* An empty length still holds its line, so the band does not grow a row
      when the first end is chosen. */
-  [data-ui='datetime-range-picker'] [data-part='length']:empty::before {
+  [data-ui-datetime-range-picker] [data-part-length]:empty::before {
     content: '\200B';
   }
 
-  [data-ui='datetime-range-picker'] [data-part='limit'] {
+  [data-ui-datetime-range-picker] [data-part-limit] {
     color: var(--slotted-datetime-range-picker-limit-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-font-size-xs, 11px);
     padding-inline-start: var(--slotted-space-2, 0.25rem);
@@ -876,7 +875,7 @@
    * item and the same half taken back on the row, in place of `gap`, the
    * habit of the date chain.
    */
-  [data-ui='datetime-range-picker'] [data-part='panel'] {
+  [data-ui-datetime-range-picker] [data-part-panel] {
     --_panel-gap: calc(var(--slotted-space-4, 0.5rem) / 2);
 
     align-items: stretch;
@@ -887,26 +886,26 @@
     min-inline-size: 0;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='panel'] > * {
+  [data-ui-datetime-range-picker] [data-part-panel] > * {
     margin: var(--_panel-gap);
   }
 
   /* The calendar keeps its own width and wraps its second month under the
      first when the surface is narrow, which is its own container rule. */
-  [data-ui='datetime-range-picker'] [data-part='date-panel'] {
+  [data-ui-datetime-range-picker] [data-part-date-panel] {
     flex: 0 1 auto;
     min-inline-size: 0;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='panel'] > [data-part='list'],
-  [data-ui='datetime-range-picker'] [data-part='panel'] > [data-part='empty'] {
+  [data-ui-datetime-range-picker] [data-part-panel] > [data-part-list],
+  [data-ui-datetime-range-picker] [data-part-panel] > [data-part-empty] {
     flex: 1 1 var(--slotted-datetime-range-picker-list-min-inline-size, 9rem);
     min-inline-size: var(--slotted-datetime-range-picker-list-min-inline-size, 9rem);
   }
 
   /* A hairline between the grid and the list while they share a row. */
-  [data-ui='datetime-range-picker'] [data-part='date-panel'] + [data-part='list'],
-  [data-ui='datetime-range-picker'] [data-part='date-panel'] + [data-part='empty'] {
+  [data-ui-datetime-range-picker] [data-part-date-panel] + [data-part-list],
+  [data-ui-datetime-range-picker] [data-part-date-panel] + [data-part-empty] {
     border-inline-start: var(--slotted-border-width-thin, 1px) solid
       var(
         --slotted-datetime-range-picker-content-border-color,
@@ -915,7 +914,7 @@
     padding-inline-start: var(--slotted-space-4, 0.5rem);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='now'] {
+  [data-ui-datetime-range-picker] [data-part-now] {
     appearance: none;
     background-color: transparent;
     border: 0;
@@ -936,19 +935,19 @@
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='now']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-datetime-range-picker] [data-part-now]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-datetime-range-picker-option-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='now']:focus-visible {
+  [data-ui-datetime-range-picker] [data-part-now]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='now']:disabled {
+  [data-ui-datetime-range-picker] [data-part-now]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -959,7 +958,7 @@
    * clock. It ships the row they stand in and the chip each one is, between
    * the band and the panel, wrapping when they do not fit.
    */
-  [data-ui='datetime-range-picker'] [data-part='presets'] {
+  [data-ui-datetime-range-picker] [data-part-presets] {
     display: flex;
     flex-wrap: wrap;
     gap: var(--slotted-space-2, 0.25rem);
@@ -967,7 +966,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='preset'] {
+  [data-ui-datetime-range-picker] [data-part-preset] {
     appearance: none;
     background-color: var(
       --slotted-datetime-range-picker-preset-background,
@@ -996,22 +995,21 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='preset']:hover:not(:disabled):not([data-selected]) {
+  [data-ui-datetime-range-picker] [data-part-preset]:hover:not(:disabled):not([data-selected]) {
     background-color: var(
       --slotted-datetime-range-picker-preset-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='datetime-range-picker']
-    [data-part='preset']:active:not(:disabled):not([data-selected]) {
+  [data-ui-datetime-range-picker] [data-part-preset]:active:not(:disabled):not([data-selected]) {
     background-color: var(
       --slotted-datetime-range-picker-preset-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='preset'][data-selected] {
+  [data-ui-datetime-range-picker] [data-part-preset][data-selected] {
     background-color: var(
       --slotted-datetime-range-picker-preset-selected-background,
       var(--slotted-tone-accent-subtle-hover)
@@ -1023,12 +1021,12 @@
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='preset']:focus-visible {
+  [data-ui-datetime-range-picker] [data-part-preset]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='preset']:disabled {
+  [data-ui-datetime-range-picker] [data-part-preset]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -1039,7 +1037,7 @@
    * cap holds at every density, and scrolled rather than truncated —
    * `time-picker`'s list.
    */
-  [data-ui='datetime-range-picker'] [data-part='list'] {
+  [data-ui-datetime-range-picker] [data-part-list] {
     display: flex;
     flex-direction: column;
     /* One step of air between rows, so the chosen row's painted ground and
@@ -1057,7 +1055,7 @@
     scroll-padding-block: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='option'] {
+  [data-ui-datetime-range-picker] [data-part-option] {
     /* The time and its duration share a baseline, and the line box is the
        row: baseline alignment alone would seat both at the top of a row
        taller than one line, and a length line-height centres them in it. */
@@ -1095,7 +1093,7 @@
    * the other end it is the duration to the end already chosen. Muted, so the
    * time stays what the row is; on the chosen row it takes the row's own ink.
    */
-  [data-ui='datetime-range-picker'] [data-part='option-duration'] {
+  [data-ui-datetime-range-picker] [data-part-option-duration] {
     color: var(--slotted-datetime-range-picker-label-color, var(--slotted-text-muted, GrayText));
     flex: 0 1 auto;
     font-size: var(--slotted-font-size-xs, 11px);
@@ -1106,12 +1104,8 @@
     white-space: nowrap;
   }
 
-  [data-ui='datetime-range-picker']
-    [data-part='option'][data-selected]
-    [data-part='option-duration'],
-  [data-ui='datetime-range-picker']
-    [data-part='option'][data-disabled]
-    [data-part='option-duration'] {
+  [data-ui-datetime-range-picker] [data-part-option][data-selected] [data-part-option-duration],
+  [data-ui-datetime-range-picker] [data-part-option][data-disabled] [data-part-option-duration] {
     color: inherit;
   }
 
@@ -1122,27 +1116,27 @@
    * outranks the pointer. Specificity is what makes this a rule rather than an
    * ordering — the defect `time-picker` records from its visual gate.
    */
-  [data-ui='datetime-range-picker']
-    [data-part='option']:hover:not([data-disabled]):not([data-selected]):not([data-current]) {
+  [data-ui-datetime-range-picker]
+    [data-part-option]:hover:not([data-disabled]):not([data-selected]):not([data-current]) {
     background-color: var(
       --slotted-datetime-range-picker-option-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='option'][data-current]:not([data-selected]) {
+  [data-ui-datetime-range-picker] [data-part-option][data-current]:not([data-selected]) {
     background-color: var(
       --slotted-datetime-range-picker-option-current-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='option']:focus-visible {
+  [data-ui-datetime-range-picker] [data-part-option]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='option'][data-selected] {
+  [data-ui-datetime-range-picker] [data-part-option][data-selected] {
     background-color: var(
       --slotted-datetime-range-picker-option-selected-background,
       var(--slotted-tone-accent-solid)
@@ -1154,7 +1148,7 @@
   }
 
   /* The chosen row still answers the pointer, one step along its own tone. */
-  [data-ui='datetime-range-picker'] [data-part='option'][data-selected]:hover:not([data-disabled]) {
+  [data-ui-datetime-range-picker] [data-part-option][data-selected]:hover:not([data-disabled]) {
     background-color: var(
       --slotted-datetime-range-picker-option-selected-hover-background,
       var(--slotted-tone-accent-solid-hover)
@@ -1167,7 +1161,7 @@
    * step the reader cannot infer — and it is muted to the colour the theme
    * measures rather than faded by opacity, so it stays readable.
    */
-  [data-ui='datetime-range-picker'] [data-part='option'][data-disabled] {
+  [data-ui-datetime-range-picker] [data-part-option][data-disabled] {
     background-color: transparent;
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
@@ -1175,7 +1169,7 @@
 
   /* Nothing available for this end at all. A sentence rather than an empty
      box, the reason `time-picker` records. */
-  [data-ui='datetime-range-picker'] [data-part='empty'] {
+  [data-ui-datetime-range-picker] [data-part-empty] {
     align-items: center;
     color: var(--slotted-datetime-range-picker-label-color, var(--slotted-text-muted, GrayText));
     display: flex;
@@ -1192,7 +1186,7 @@
 
   /* The consumer's own actions and, at the reading end, `done`: the way out
      of a sheet that fills the screen and of an edit left half way. */
-  [data-ui='datetime-range-picker'] [data-part='footer'] {
+  [data-ui-datetime-range-picker] [data-part-footer] {
     box-sizing: border-box;
     inline-size: 0;
     min-inline-size: 100%;
@@ -1210,7 +1204,7 @@
     padding-block-start: var(--slotted-space-3, 0.375rem);
   }
 
-  [data-ui='datetime-range-picker'] [data-part='done'] {
+  [data-ui-datetime-range-picker] [data-part-done] {
     appearance: none;
     background-color: var(
       --slotted-datetime-range-picker-done-background,
@@ -1237,21 +1231,21 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='datetime-range-picker'] [data-part='done']:hover:not(:disabled) {
+  [data-ui-datetime-range-picker] [data-part-done]:hover:not(:disabled) {
     background-color: var(
       --slotted-datetime-range-picker-done-hover-background,
       var(--slotted-tone-accent-solid-hover)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='done']:active:not(:disabled) {
+  [data-ui-datetime-range-picker] [data-part-done]:active:not(:disabled) {
     background-color: var(
       --slotted-datetime-range-picker-done-active-background,
       var(--slotted-tone-accent-solid-active)
     );
   }
 
-  [data-ui='datetime-range-picker'] [data-part='done']:focus-visible {
+  [data-ui-datetime-range-picker] [data-part-done]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -1264,7 +1258,7 @@
    * raises no keyboard — and the list is the way to a time.
    */
   @media (pointer: coarse) {
-    [data-ui='datetime-range-picker'] [data-part='field'] {
+    [data-ui-datetime-range-picker] [data-part-field] {
       display: none;
     }
   }
@@ -1275,18 +1269,18 @@
    * desktop and a sheet in a narrow viewport. The DOM does not change.
    */
   @media (max-width: 480px) and (pointer: coarse) {
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet'] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet'] {
       inset: auto 0 0;
       position: fixed;
       translate: 0 var(--slotted-space-9, 2rem);
     }
 
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet'][data-open] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet'][data-open] {
       translate: 0 0;
     }
 
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='content'] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet']
+      [data-part-content] {
       border-end-end-radius: 0;
       border-end-start-radius: 0;
       border-inline: 0;
@@ -1312,31 +1306,31 @@
 
     /* Four rows and a half under the grid on a phone, at the touch height:
        the grid, the list and done fit a short screen together. */
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='list'] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet']
+      [data-part-list] {
       max-block-size: calc(var(--_row-pitch) * 4.5);
     }
 
     /* The list under the grid on a phone, whatever the row's width: a grid
        and a column side by side leave neither room enough. */
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='panel']
-      > [data-part='list'],
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='panel']
-      > [data-part='empty'] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet']
+      [data-part-panel]
+      > [data-part-list],
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet']
+      [data-part-panel]
+      > [data-part-empty] {
       flex-basis: 100%;
     }
 
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='date-panel']
-      + [data-part='list'] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet']
+      [data-part-date-panel]
+      + [data-part-list] {
       border-inline-start: 0;
       padding-inline-start: 0;
     }
 
-    [data-ui='datetime-range-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='tab'] {
+    [data-ui-datetime-range-picker][data-part-positioner][data-presentation='sheet']
+      [data-part-tab] {
       min-block-size: var(
         --slotted-datetime-range-picker-tab-block-size,
         var(--slotted-target-comfortable, 44px)
@@ -1345,29 +1339,28 @@
   }
 
   @media (forced-colors: active) {
-    [data-ui='datetime-range-picker'][data-part='root'][data-variant='plain']
-      [data-part='control'] {
+    [data-ui-datetime-range-picker][data-part-root][data-variant='plain'] [data-part-control] {
       border-color: ButtonBorder;
     }
 
     /* The tab's underline is painted with a background, and forced colours
        replace a background that is not one of the system's own. */
-    [data-ui='datetime-range-picker'] [data-part='tab']::after {
+    [data-ui-datetime-range-picker] [data-part-tab]::after {
       forced-color-adjust: none;
     }
 
-    [data-ui='datetime-range-picker'] [data-part='tab']::after {
+    [data-ui-datetime-range-picker] [data-part-tab]::after {
       background-color: currentcolor;
     }
 
-    [data-ui='datetime-range-picker'] [data-part='preset'][data-selected],
-    [data-ui='datetime-range-picker'] [data-part='option'][data-selected] {
+    [data-ui-datetime-range-picker] [data-part-preset][data-selected],
+    [data-ui-datetime-range-picker] [data-part-option][data-selected] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='datetime-range-picker'] [data-part='option'][data-current]:not([data-selected]) {
+    [data-ui-datetime-range-picker] [data-part-option][data-current]:not([data-selected]) {
       outline: var(--slotted-focus-ring-width, 2px) solid Highlight;
       outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
     }

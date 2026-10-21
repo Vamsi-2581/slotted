@@ -526,7 +526,11 @@ export const Composition: Story = {
             renderOption={({ duration, label }) => (
               <>
                 {label}
-                {duration === null ? null : <span data-part="option-duration">{duration}</span>}
+                {duration === null ? null : (
+                  <span data-part="option-duration" data-part-option-duration="">
+                    {duration}
+                  </span>
+                )}
               </>
             )}
           />

@@ -97,7 +97,7 @@
    * authored stylesheet has to know which of three things it is painting, and
    * a prop would be a fourth way to pick a component already picked.
    */
-  [data-ui='progress-indicator'][data-part='root'] {
+  [data-ui-progress-indicator][data-part-root] {
     /**
      * The ink, and it is the tone's `text` role rather than its `solid` one.
      * Two reasons, and the second is the one that decides it. The indicator is
@@ -231,7 +231,7 @@
    * user agent's `[hidden]`, and a family that painted through its own
    * withdrawal would flash exactly what the delay exists to prevent.
    */
-  [data-ui='progress-indicator'][hidden] {
+  [data-ui-progress-indicator][hidden] {
     display: none;
   }
 
@@ -253,23 +253,23 @@
    * It is the same substitution `badge` and `status-indicator` make for their
    * own neutral marks, for the same reason.
    */
-  [data-ui='progress-indicator'][data-part='root'][data-tone='secondary'] {
+  [data-ui-progress-indicator][data-part-root][data-tone='secondary'] {
     --_ink: var(--slotted-progress-indicator-indicator-color, var(--slotted-border-strong));
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-tone='success'] {
+  [data-ui-progress-indicator][data-part-root][data-tone='success'] {
     --_ink: var(--slotted-progress-indicator-indicator-color, var(--slotted-tone-success-text));
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-tone='warning'] {
+  [data-ui-progress-indicator][data-part-root][data-tone='warning'] {
     --_ink: var(--slotted-progress-indicator-indicator-color, var(--slotted-tone-warning-text));
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-tone='danger'] {
+  [data-ui-progress-indicator][data-part-root][data-tone='danger'] {
     --_ink: var(--slotted-progress-indicator-indicator-color, var(--slotted-tone-danger-text));
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-buffered] {
+  [data-ui-progress-indicator][data-part-root][data-buffered] {
     --_buffer-color: var(
       --slotted-progress-indicator-buffer-color,
       color-mix(in oklab, var(--_ink) 52%, var(--slotted-surface))
@@ -286,14 +286,14 @@
    * component layer of the token contract stays as `avatar` left it.
    */
 
-  [data-ui='progress-indicator'][data-part='root'][data-size='sm'] {
+  [data-ui-progress-indicator][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_text-gap: var(--slotted-space-3, 0.375rem);
     --_thickness: var(--slotted-progress-indicator-thickness, var(--slotted-space-2, 0.25rem));
     --_size: var(--slotted-progress-indicator-size, var(--slotted-control-height-sm, 30px));
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-size='lg'] {
+  [data-ui-progress-indicator][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_row-gap: var(--slotted-space-4, 0.5rem);
     --_thickness: var(--slotted-progress-indicator-thickness, var(--slotted-space-4, 0.5rem));
@@ -313,7 +313,7 @@
    * character, so a grid column sized to its content collapses to that
    * character.
    */
-  [data-ui='progress-indicator'] [data-part='label'] {
+  [data-ui-progress-indicator] [data-part-label] {
     color: var(--slotted-text, CanvasText);
     min-inline-size: 0;
     overflow-wrap: break-word;
@@ -326,7 +326,7 @@
    * is the muted step, because the number annotates the bar rather than
    * naming it.
    */
-  [data-ui='progress-indicator'] [data-part='value'] {
+  [data-ui-progress-indicator] [data-part-value] {
     color: var(--slotted-text-muted, GrayText);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -344,7 +344,7 @@
    * inline end, which is the right edge of an English page and the left edge
    * of an Arabic one, with no mirrored rule to write.
    */
-  [data-ui='progress-indicator'][data-part='root'][data-shape='linear'] {
+  [data-ui-progress-indicator][data-part-root][data-shape='linear'] {
     align-items: baseline;
     column-gap: var(--_text-gap);
     display: grid;
@@ -352,16 +352,16 @@
     row-gap: var(--_row-gap);
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'] > [data-part='label'] {
+  [data-ui-progress-indicator][data-shape='linear'] > [data-part-label] {
     grid-column: 1;
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'] > [data-part='value'] {
+  [data-ui-progress-indicator][data-shape='linear'] > [data-part-value] {
     grid-column: 2;
     justify-self: end;
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'] > [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='linear'] > [data-part-track] {
     grid-column: 1 / -1;
   }
 
@@ -379,7 +379,7 @@
    * block axis has to let a crest out. A single `clip` is what sliced the
    * crests flat in the first capture of this family.
    */
-  [data-ui='progress-indicator'][data-shape='linear'] [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='linear'] [data-part-track] {
     background-color: var(--_buffer-color);
     block-size: var(--_thickness);
     border-radius: var(--_radius);
@@ -397,7 +397,7 @@
    * notch — the shape M3 took in 2024 and the one no other surveyed
    * implementation draws.
    */
-  [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::before {
+  [data-ui-progress-indicator][data-shape='linear'] [data-part-track]::before {
     background-color: var(--_track-color);
     border-radius: inherit;
     content: '';
@@ -413,7 +413,7 @@
    * and it is the detail that makes a bar at four per cent read as four per
    * cent of something rather than as a stray mark.
    */
-  [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::after {
+  [data-ui-progress-indicator][data-shape='linear'] [data-part-track]::after {
     background-color: var(--_ink);
     border-radius: var(--slotted-radius-full, 9999px);
     content: '';
@@ -423,7 +423,7 @@
     position: absolute;
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='linear'] [data-part-indicator] {
     background-color: var(--_ink);
     block-size: 100%;
     border-radius: inherit;
@@ -446,8 +446,8 @@
    * way along it. Keyed on the number, it goes when the fill arrives.
    */
   @container style(--slotted-progress-indicator-percent: 100) {
-    [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::before,
-    [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::after {
+    [data-ui-progress-indicator][data-shape='linear'] [data-part-track]::before,
+    [data-ui-progress-indicator][data-shape='linear'] [data-part-track]::after {
       content: none;
     }
   }
@@ -459,17 +459,15 @@
    * one replaces recorded, and `inset-inline-start` is why a translation runs
    * the way the document reads instead of the way the screen does.
    */
-  [data-ui='progress-indicator'][data-shape='linear'][data-indeterminate]
-    [data-part='track']::before {
+  [data-ui-progress-indicator][data-shape='linear'][data-indeterminate] [data-part-track]::before {
     inset-inline-start: 0;
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'][data-indeterminate]
-    [data-part='track']::after {
+  [data-ui-progress-indicator][data-shape='linear'][data-indeterminate] [data-part-track]::after {
     content: none;
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'][data-indeterminate] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='linear'][data-indeterminate] [data-part-indicator] {
     animation: slotted-progress-indicator-travel var(--slotted-duration-loop-slow)
       var(--slotted-easing-standard) infinite;
     inline-size: calc(1% * var(--slotted-progress-indicator-travel-size));
@@ -515,7 +513,7 @@
    * The stacking layer is a token, so an application's own stacking contract
    * still decides. Every router progress bar in the field types a number here.
    */
-  [data-ui='progress-indicator'][data-part='root'][data-placement='page'] {
+  [data-ui-progress-indicator][data-part-root][data-placement='page'] {
     --_radius: var(--slotted-progress-indicator-radius, var(--slotted-radius-none, 0px));
     --_track-color: var(--slotted-progress-indicator-track-color, transparent);
     --_gap: var(--slotted-progress-indicator-gap, 0);
@@ -526,7 +524,7 @@
     z-index: var(--slotted-z-index-sticky, 100);
   }
 
-  [data-ui='progress-indicator'][data-placement='page'] [data-part='track']::after {
+  [data-ui-progress-indicator][data-placement='page'] [data-part-track]::after {
     content: none;
   }
 
@@ -548,7 +546,7 @@
    * the edge. `app-shell` writes it for a content region that scrolls with
    * the document. It is a composition value, not a design token.
    */
-  [data-ui='progress-indicator'][data-part='root']:is(
+  [data-ui-progress-indicator][data-part-root]:is(
       [data-placement='edge-start'],
       [data-placement='edge-end']
     ) {
@@ -560,16 +558,16 @@
     position: var(--slotted-progress-indicator-position, absolute);
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-placement='edge-start'] {
+  [data-ui-progress-indicator][data-part-root][data-placement='edge-start'] {
     inset-block-start: 0;
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-placement='edge-end'] {
+  [data-ui-progress-indicator][data-part-root][data-placement='edge-end'] {
     inset-block-end: 0;
   }
 
-  [data-ui='progress-indicator']:is([data-placement='edge-start'], [data-placement='edge-end'])
-    [data-part='track']::after {
+  [data-ui-progress-indicator]:is([data-placement='edge-start'], [data-placement='edge-end'])
+    [data-part-track]::after {
     content: none;
   }
 
@@ -596,7 +594,7 @@
    * back into its edge rather than on the frame it is asked to. The theme
    * collapses both steps under `prefers-reduced-motion`.
    */
-  [data-ui='progress-indicator'][data-part='root']:is(
+  [data-ui-progress-indicator][data-part-root]:is(
       [data-placement='page'],
       [data-placement='edge-start'],
       [data-placement='edge-end']
@@ -616,11 +614,11 @@
     }
   }
 
-  [data-ui='progress-indicator'][data-part='root'][data-placement='edge-end'] {
+  [data-ui-progress-indicator][data-part-root][data-placement='edge-end'] {
     --_withdrawn: inset(100% 0 0 0);
   }
 
-  [data-ui='progress-indicator'][data-part='root']:is(
+  [data-ui-progress-indicator][data-part-root]:is(
       [data-placement='page'],
       [data-placement='edge-start'],
       [data-placement='edge-end']
@@ -642,8 +640,8 @@
    * centred in it would be four-pixel type. Ant Design and MUI both put it
    * inside because both draw rings twice this size.
    */
-  [data-ui='progress-indicator'][data-part='root'][data-shape='circular'],
-  [data-ui='progress-indicator'][data-part='root'][data-shape='morph'] {
+  [data-ui-progress-indicator][data-part-root][data-shape='circular'],
+  [data-ui-progress-indicator][data-part-root][data-shape='morph'] {
     align-items: center;
     column-gap: var(--_text-gap);
     display: inline-flex;
@@ -657,7 +655,7 @@
    * and this family's circle are the same object, and Button can stop drawing
    * its own.
    */
-  [data-ui='progress-indicator'][data-shape='circular'] svg {
+  [data-ui-progress-indicator][data-shape='circular'] svg {
     --_stroke: var(--slotted-progress-indicator-stroke, 6);
 
     block-size: var(--_size);
@@ -669,8 +667,8 @@
     rotate: -90deg;
   }
 
-  [data-ui='progress-indicator'][data-shape='circular'] [data-part='track'],
-  [data-ui='progress-indicator'][data-shape='circular'] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='circular'] [data-part-track],
+  [data-ui-progress-indicator][data-shape='circular'] [data-part-indicator] {
     fill: none;
     stroke-linecap: round;
     stroke-width: var(--_stroke);
@@ -680,7 +678,7 @@
        it by a second smoothing. */
   }
 
-  [data-ui='progress-indicator'][data-shape='circular'] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='circular'] [data-part-indicator] {
     stroke: var(--_ink);
     stroke-dasharray: var(--_percent) 100;
     /**
@@ -698,7 +696,7 @@
    * path is four device pixels of a 44-pixel ring, which is the gap M3
    * specifies for the bar.
    */
-  [data-ui='progress-indicator'][data-shape='circular'] [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='circular'] [data-part-track] {
     /**
      * Three and two tenths of the path is four device pixels of a 44-pixel
      * ring, and it collapses to nothing at nought per cent by the same clamp
@@ -720,7 +718,7 @@
    * travel, not the stated value.
    */
   @container style(--slotted-progress-indicator-percent: 100) {
-    [data-ui='progress-indicator'][data-shape='circular'] [data-part='track'] {
+    [data-ui-progress-indicator][data-shape='circular'] [data-part-track] {
       stroke: transparent;
     }
   }
@@ -735,16 +733,15 @@
    * do not divide into each other, so the sweep never repeats the same shape
    * in the same orientation.
    */
-  [data-ui='progress-indicator'][data-shape='circular'][data-indeterminate] [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='circular'][data-indeterminate] [data-part-track] {
     stroke: transparent;
   }
 
-  [data-ui='progress-indicator'][data-shape='circular'][data-indeterminate] svg {
+  [data-ui-progress-indicator][data-shape='circular'][data-indeterminate] svg {
     animation: slotted-progress-indicator-turn var(--slotted-duration-loop) linear infinite;
   }
 
-  [data-ui='progress-indicator'][data-shape='circular'][data-indeterminate]
-    [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='circular'][data-indeterminate] [data-part-indicator] {
     animation: slotted-progress-indicator-sweep var(--slotted-duration-loop-slow)
       var(--slotted-easing-standard) infinite;
     stroke-opacity: 1;
@@ -818,7 +815,7 @@
    * at fast and slow loads, and the geometry below carries the sign once per
    * shape.
    */
-  [data-ui='progress-indicator'][data-part='root'][data-wave] {
+  [data-ui-progress-indicator][data-part-root][data-wave] {
     --slotted-progress-indicator-wave-amplitude: min(
       clamp(0, calc((var(--_percent) - 6) / 10), 1),
       clamp(0, calc((96 - var(--_percent)) / 12), 1)
@@ -832,7 +829,7 @@
    * throughout, which is what M3 draws: `hasWavyEffect(isDeterminate)` is the
    * flag that separates the two.
    */
-  [data-ui='progress-indicator'][data-part='root'][data-wave][data-indeterminate] {
+  [data-ui-progress-indicator][data-part-root][data-wave][data-indeterminate] {
     --slotted-progress-indicator-wave-amplitude: 1;
   }
 
@@ -862,12 +859,12 @@
    * container the path measures itself against: `cqi` is how a dash stated in
    * thicknesses learns how many thicknesses the track is.
    */
-  [data-ui='progress-indicator'][data-shape='linear'][data-wave] [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='linear'][data-wave] [data-part-track] {
     container-type: inline-size;
     margin-block: calc(0.75 * var(--_thickness));
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'][data-wave] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='linear'][data-wave] [data-part-indicator] {
     /** One wavelength, in thicknesses. */
     --_wave-length: 10;
 
@@ -888,7 +885,7 @@
    * anchored to the inline start, and its centre is the one point that stays
    * inside the track.
    */
-  [data-ui='progress-indicator'][data-shape='linear'][data-wave] [data-part='indicator']:dir(rtl) {
+  [data-ui-progress-indicator][data-shape='linear'][data-wave] [data-part-indicator]:dir(rtl) {
     transform: scaleX(-1);
   }
 
@@ -915,7 +912,7 @@
    * one thickness, and at nought it is not painted at all, by the same clamp
    * the ring uses on its own cap.
    */
-  [data-ui='progress-indicator'][data-shape='linear'][data-wave] [data-part='indicator'] path {
+  [data-ui-progress-indicator][data-shape='linear'][data-wave] [data-part-indicator] path {
     /** The track's length, in thicknesses: a ratio of two lengths, read as a number. */
     --_track-units: tan(atan2(100cqi, var(--_thickness)));
     --_window-start: 0;
@@ -941,8 +938,8 @@
    * says at every moment of the fill's own transition. An indeterminate bar
    * carries a different path and is left to the markup.
    */
-  [data-ui='progress-indicator'][data-shape='linear'][data-wave]:not([data-indeterminate])
-    [data-part='indicator']
+  [data-ui-progress-indicator][data-shape='linear'][data-wave]:not([data-indeterminate])
+    [data-part-indicator]
     path {
     animation: slotted-progress-indicator-flatten-bar var(--_scrub) var(--_taper) both paused;
     animation-delay: calc(
@@ -955,16 +952,16 @@
    * is unknown — `IndeterminateActiveWaveWavelength` — so the markup carries
    * the tighter path, and the window is the travelling bar's own two numbers.
    */
-  [data-ui='progress-indicator'][data-shape='linear'][data-wave][data-indeterminate]
-    [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='linear'][data-wave][data-indeterminate]
+    [data-part-indicator] {
     --_wave-length: 5;
 
     animation: slotted-progress-indicator-travel var(--slotted-duration-loop-slow)
       var(--slotted-easing-standard) infinite;
   }
 
-  [data-ui='progress-indicator'][data-shape='linear'][data-wave][data-indeterminate]
-    [data-part='indicator']
+  [data-ui-progress-indicator][data-shape='linear'][data-wave][data-indeterminate]
+    [data-part-indicator]
     path {
     --_window-start: var(--slotted-progress-indicator-travel-start);
     --_window-size: var(--slotted-progress-indicator-travel-size);
@@ -984,7 +981,7 @@
    * wavy keeps its weight, and the crest may pass the viewBox by the tenth of
    * a unit the stroke needs.
    */
-  [data-ui='progress-indicator'][data-shape='circular'][data-wave] svg {
+  [data-ui-progress-indicator][data-shape='circular'][data-wave] svg {
     --_stroke: var(--slotted-progress-indicator-stroke, 5);
 
     block-size: calc(1.2 * var(--_size));
@@ -1010,7 +1007,7 @@
    * far end fell into the gap as the pattern shifted, and a full ring opened
    * a hole at twelve o'clock.
    */
-  [data-ui='progress-indicator'][data-shape='circular'][data-wave] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='circular'][data-wave] [data-part-indicator] {
     rotate: calc(-45deg * var(--slotted-progress-indicator-wave-phase));
     stroke-dasharray: var(--_percent) calc(100 - var(--_percent));
     stroke-dashoffset: calc(-12.5 * var(--slotted-progress-indicator-wave-phase));
@@ -1020,8 +1017,8 @@
     transform-origin: 50% 50%;
   }
 
-  [data-ui='progress-indicator'][data-shape='circular'][data-wave]:not([data-indeterminate])
-    [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='circular'][data-wave]:not([data-indeterminate])
+    [data-part-indicator] {
     animation: slotted-progress-indicator-flatten-ring var(--_scrub) var(--_taper) both paused;
     animation-delay: calc(
       -1 * var(--_scrub) * (1 - var(--slotted-progress-indicator-wave-amplitude))
@@ -1046,7 +1043,7 @@
    * each pair must share a command list, and `progress.test.ts` holds both
    * copies to `@slotted/core/progress`.
    */
-  [data-ui='progress-indicator'][data-part='root'][data-wave] {
+  [data-ui-progress-indicator][data-part-root][data-wave] {
     --_scrub: var(--slotted-duration-long);
     --_taper: cubic-bezier(0.45, 0, 0.55, 1);
   }
@@ -1090,7 +1087,7 @@
    * never shows the same shape in the same orientation twice — which is what
    * makes a five-second wait bearable to watch and a spinning ring not.
    */
-  [data-ui='progress-indicator'][data-shape='morph'] [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='morph'] [data-part-track] {
     block-size: var(--_size);
     border-radius: var(--slotted-radius-full, 9999px);
     display: grid;
@@ -1106,7 +1103,7 @@
    * pair the bar's own track holds and clears the 3:1 the loading indicator
    * documentation asks for between a contained shape and its container.
    */
-  [data-ui='progress-indicator'][data-shape='morph'][data-contained] [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='morph'][data-contained] [data-part-track] {
     background-color: var(--_track-color);
   }
 
@@ -1137,7 +1134,7 @@
    * each target and settle. Both animations take it, at the same period and on
    * the same keyframe boundaries, because in M3 they are one spring.
    */
-  [data-ui='progress-indicator'][data-shape='morph'] [data-part='track'] {
+  [data-ui-progress-indicator][data-shape='morph'] [data-part-track] {
     animation: slotted-progress-indicator-drift calc(2 * var(--slotted-duration-loop-slow)) linear
       infinite;
   }
@@ -1151,7 +1148,7 @@
    * hurry, and a multiple of one inherits that where a fourth token would be a
    * scale step added for a single family.
    */
-  [data-ui='progress-indicator'][data-shape='morph'] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='morph'] [data-part-indicator] {
     animation:
       slotted-progress-indicator-morph calc(2 * var(--slotted-duration-loop-slow))
         var(--slotted-easing-emphasized) infinite,
@@ -1177,7 +1174,7 @@
    * pixels. `round()` is what states that, and it states it once for the three
    * steps rather than as three numbers.
    */
-  [data-ui='progress-indicator'][data-shape='morph'][data-contained] [data-part='indicator'] {
+  [data-ui-progress-indicator][data-shape='morph'][data-contained] [data-part-indicator] {
     --_shape: round(nearest, calc(0.79 * var(--_size)), 2px);
 
     block-size: var(--_shape);
@@ -1469,10 +1466,10 @@
      * `path` is left out: the wave's paths carry the paused ramp below, which
      * is a value and survives.
      */
-    [data-ui='progress-indicator'][data-part='root'],
-    [data-ui='progress-indicator'] [data-part='indicator']:not(path),
-    [data-ui='progress-indicator'] [data-part='track'],
-    [data-ui='progress-indicator'] svg {
+    [data-ui-progress-indicator][data-part-root],
+    [data-ui-progress-indicator] [data-part-indicator]:not(path),
+    [data-ui-progress-indicator] [data-part-track],
+    [data-ui-progress-indicator] svg {
       animation: none !important;
     }
 
@@ -1482,8 +1479,7 @@
      * than as a value: pinned to either end it would read as nought per cent
      * or as a hundred, which is a number this indicator does not have.
      */
-    [data-ui='progress-indicator'][data-shape='linear'][data-indeterminate]
-      [data-part='indicator'] {
+    [data-ui-progress-indicator][data-shape='linear'][data-indeterminate] [data-part-indicator] {
       --slotted-progress-indicator-travel-size: 46;
       --slotted-progress-indicator-travel-start: 27;
     }
@@ -1493,8 +1489,7 @@
      * is unmistakably a fraction of something rather than a full circle or an
      * empty one.
      */
-    [data-ui='progress-indicator'][data-shape='circular'][data-indeterminate]
-      [data-part='indicator'] {
+    [data-ui-progress-indicator][data-shape='circular'][data-indeterminate] [data-part-indicator] {
       stroke-dasharray: 34 100;
     }
 
@@ -1503,7 +1498,7 @@
      * range survives, because it is a value rather than motion: a ring at four
      * per cent is a circle whether or not anything moves.
      */
-    [data-ui='progress-indicator'][data-part='root'][data-wave] {
+    [data-ui-progress-indicator][data-part-root][data-wave] {
       animation: none;
     }
   }
@@ -1525,14 +1520,14 @@
    * with it, and a gap is a refinement rather than a meaning.
    */
   @media (forced-colors: active) {
-    [data-ui='progress-indicator'][data-shape='linear'] [data-part='track'] {
+    [data-ui-progress-indicator][data-shape='linear'] [data-part-track] {
       background-color: Canvas;
       outline: var(--slotted-border-width-thin, 1px) solid ButtonBorder;
       outline-offset: calc(-1 * var(--slotted-border-width-thin, 1px));
     }
 
-    [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::before,
-    [data-ui='progress-indicator'][data-shape='linear'] [data-part='track']::after {
+    [data-ui-progress-indicator][data-shape='linear'] [data-part-track]::before,
+    [data-ui-progress-indicator][data-shape='linear'] [data-part-track]::after {
       content: none;
     }
 
@@ -1541,13 +1536,13 @@
      * draws its edge in a system colour, and an outline here would be a
      * second line beside the first.
      */
-    [data-ui='progress-indicator']:is([data-placement='edge-start'], [data-placement='edge-end'])
-      [data-part='track'] {
+    [data-ui-progress-indicator]:is([data-placement='edge-start'], [data-placement='edge-end'])
+      [data-part-track] {
       background-color: transparent;
       outline: none;
     }
 
-    [data-ui='progress-indicator'] [data-part='indicator'] {
+    [data-ui-progress-indicator] [data-part-indicator] {
       background-color: Highlight;
     }
 
@@ -1556,20 +1551,20 @@
      * way the ring does: the box behind it stays clear and the path takes
      * the highlight.
      */
-    [data-ui='progress-indicator'][data-shape='linear'][data-wave] [data-part='indicator'] {
+    [data-ui-progress-indicator][data-shape='linear'][data-wave] [data-part-indicator] {
       background-color: transparent;
     }
 
-    [data-ui='progress-indicator'][data-shape='linear'][data-wave] [data-part='indicator'] path {
+    [data-ui-progress-indicator][data-shape='linear'][data-wave] [data-part-indicator] path {
       stroke: Highlight;
     }
 
-    [data-ui='progress-indicator'][data-shape='circular'] [data-part='indicator'] {
+    [data-ui-progress-indicator][data-shape='circular'] [data-part-indicator] {
       background-color: transparent;
       stroke: Highlight;
     }
 
-    [data-ui='progress-indicator'][data-shape='circular'] [data-part='track'] {
+    [data-ui-progress-indicator][data-shape='circular'] [data-part-track] {
       stroke: ButtonBorder;
     }
 
@@ -1578,7 +1573,7 @@
      * loader exists — and loses the container behind it, which in a forced
      * palette would be a `Canvas` disc on a `Canvas` page.
      */
-    [data-ui='progress-indicator'][data-shape='morph'][data-contained] [data-part='track'] {
+    [data-ui-progress-indicator][data-shape='morph'][data-contained] [data-part-track] {
       background-color: Canvas;
     }
   }

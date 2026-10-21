@@ -79,7 +79,9 @@ function sameSelection(a: readonly string[], b: readonly string[]): boolean {
   ],
   host: {
     'data-ui': 'checkbox-group',
+    'data-ui-checkbox-group': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'resolvedRole()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'resolvedOrientation()',

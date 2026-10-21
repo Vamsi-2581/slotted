@@ -587,10 +587,10 @@ export const Composition: Story = {
             </button>
             <sl-command-palette #p="slCommandPalette" [messages]="{ label: 'People', input: 'Search people', placeholder: 'Search people…' }" [container]="pictured ? box : undefined" [open]="pictured" [items]="teams">
               <ng-template slCommandPaletteItem let-item let-query="query">
-                <span data-part="icon"><span slAvatar [name]="item.label" size="xs"></span></span>
-                <span data-part="label"><span slHighlight [text]="item.label" [query]="query"></span></span>
+                <span data-part="icon" data-part-icon=""><span slAvatar [name]="item.label" size="xs"></span></span>
+                <span data-part="label" data-part-label=""><span slHighlight [text]="item.label" [query]="query"></span></span>
                 @if (item.description) {
-                  <span data-part="description">{{ item.description }}</span>
+                  <span data-part="description" data-part-description="">{{ item.description }}</span>
                 }
               </ng-template>
             </sl-command-palette>`),

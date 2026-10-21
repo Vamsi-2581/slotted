@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { CardLinkProps, CardLinkRootProps } from './card.types';
 
 /**
@@ -9,7 +10,7 @@ import type { CardLinkProps, CardLinkRootProps } from './card.types';
  * A card carries at most one. Two would be two destinations for one surface.
  */
 export function CardLink({ render, ...nativeProps }: CardLinkProps) {
-  const rootProps: CardLinkRootProps = { ...nativeProps, 'data-part': 'link' };
+  const rootProps: CardLinkRootProps = keyedProps({ ...nativeProps, 'data-part': 'link' });
 
   return render === undefined ? <a {...rootProps} /> : render(rootProps);
 }

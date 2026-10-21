@@ -72,7 +72,7 @@ export class SlTableCellAxes {
   selector: 'caption[slTableCaption]',
   standalone: true,
   exportAs: 'slTableCaption',
-  host: { 'data-part': 'caption' },
+  host: { 'data-part': 'caption', 'data-part-caption': '' },
 })
 export class SlTableCaption {}
 
@@ -80,7 +80,7 @@ export class SlTableCaption {}
   selector: 'thead[slTableHead]',
   standalone: true,
   exportAs: 'slTableHead',
-  host: { 'data-part': 'head' },
+  host: { 'data-part': 'head', 'data-part-head': '' },
 })
 export class SlTableHead {}
 
@@ -88,7 +88,7 @@ export class SlTableHead {}
   selector: 'tbody[slTableBody]',
   standalone: true,
   exportAs: 'slTableBody',
-  host: { 'data-part': 'body' },
+  host: { 'data-part': 'body', 'data-part-body': '' },
 })
 export class SlTableBody {}
 
@@ -101,7 +101,7 @@ export class SlTableBody {}
   selector: 'tfoot[slTableSummary]',
   standalone: true,
   exportAs: 'slTableSummary',
-  host: { 'data-part': 'summary' },
+  host: { 'data-part': 'summary', 'data-part-summary': '' },
 })
 export class SlTableSummary {}
 
@@ -114,7 +114,7 @@ export class SlTableSummary {}
   selector: 'div[slTableFooter]',
   standalone: true,
   exportAs: 'slTableFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlTableFooter {}
 
@@ -132,6 +132,7 @@ export class SlTableFooter {}
   exportAs: 'slTableRow',
   host: {
     'data-part': 'row',
+    'data-part-row': '',
     '[attr.data-value]': 'value() ?? null',
     '[attr.data-selected]': "selected() ? '' : null",
     '[attr.data-expanded]': "expanded() ? '' : null",
@@ -235,6 +236,7 @@ export class SlTableRow {
   ],
   host: {
     'data-part': 'column-header',
+    'data-part-column-header': '',
     '[attr.scope]': "scope() ?? 'col'",
     '[attr.aria-sort]': 'ariaSort()',
   },
@@ -274,7 +276,11 @@ export class SlTableColumnHeader {
       inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
     },
   ],
-  host: { 'data-part': 'row-header', '[attr.scope]': "scope() ?? 'row'" },
+  host: {
+    'data-part': 'row-header',
+    'data-part-row-header': '',
+    '[attr.scope]': "scope() ?? 'row'",
+  },
 })
 export class SlTableRowHeader {
   readonly scope = input<string | undefined>(undefined);
@@ -290,7 +296,7 @@ export class SlTableRowHeader {
       inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
     },
   ],
-  host: { 'data-part': 'cell' },
+  host: { 'data-part': 'cell', 'data-part-cell': '' },
 })
 export class SlTableCell {}
 
@@ -312,6 +318,7 @@ export class SlTableCell {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'sort',
+    'data-part-sort': '',
     type: 'button',
     '(click)': 'press($event)',
   },
@@ -340,7 +347,7 @@ export class SlTableSort {
   selector: 'span[slTableColumnActions]',
   standalone: true,
   exportAs: 'slTableColumnActions',
-  host: { 'data-part': 'column-actions' },
+  host: { 'data-part': 'column-actions', 'data-part-column-actions': '' },
 })
 export class SlTableColumnActions {}
 
@@ -363,7 +370,9 @@ export class SlTableColumnActions {}
     [disabled]="row.disabled()"
     (click)="press($event)"
   >
-    <span data-ui="visually-hidden" data-part="root">{{ name() }}</span>
+    <span data-ui="visually-hidden" data-ui-visually-hidden="" data-part="root" data-part-root="">{{
+      name()
+    }}</span>
   </span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -373,7 +382,7 @@ export class SlTableColumnActions {}
       inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
     },
   ],
-  host: { 'data-part': 'selection' },
+  host: { 'data-part': 'selection', 'data-part-selection': '' },
 })
 export class SlTableSelect {
   /** The row this checkbox chooses. Read from the row when it is not stated. */
@@ -416,7 +425,9 @@ export class SlTableSelect {
     [indeterminate]="indeterminate()"
     (click)="press($event)"
   >
-    <span data-ui="visually-hidden" data-part="root">{{ name() }}</span>
+    <span data-ui="visually-hidden" data-ui-visually-hidden="" data-part="root" data-part-root="">{{
+      name()
+    }}</span>
   </span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -426,7 +437,7 @@ export class SlTableSelect {
       inputs: ['align', 'blockAlign', 'numeric', 'text', 'sticky', 'stickyOffset'],
     },
   ],
-  host: { 'data-part': 'selection', scope: 'col' },
+  host: { 'data-part': 'selection', 'data-part-selection': '', scope: 'col' },
 })
 export class SlTableSelectAll {
   readonly table = inject(SlTable);
@@ -466,6 +477,7 @@ export class SlTableSelectAll {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'expander',
+    'data-part-expander': '',
     type: 'button',
     '[attr.aria-expanded]': 'row.expanded()',
     '[attr.aria-controls]': 'row.expanded() ? row.detailId() : null',
@@ -504,10 +516,10 @@ export class SlTableExpander {
   selector: 'tr[slTableDetail]',
   standalone: true,
   exportAs: 'slTableDetail',
-  template: `<td [attr.colspan]="span()" data-part="cell"><ng-content /></td>`,
+  template: `<td [attr.colspan]="span()" data-part="cell" data-part-cell=""><ng-content /></td>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'detail', '[attr.id]': 'detailId()' },
+  host: { 'data-part': 'detail', 'data-part-detail': '', '[attr.id]': 'detailId()' },
 })
 export class SlTableDetail {
   /** The row the detail belongs to. */
@@ -539,17 +551,28 @@ export class SlTableGroupRowEnd {}
   selector: 'tr[slTableGroupRow]',
   standalone: true,
   exportAs: 'slTableGroupRow',
-  template: `<th [attr.colspan]="span()" data-part="group-header" scope="rowgroup">
-    <div data-part="group-content">
-      <span data-part="group-start"><ng-content /></span>
+  template: `<th
+    [attr.colspan]="span()"
+    data-part="group-header"
+    data-part-group-header=""
+    scope="rowgroup"
+  >
+    <div data-part="group-content" data-part-group-content="">
+      <span data-part="group-start" data-part-group-start=""><ng-content /></span>
       @if (end()) {
-        <span data-part="group-end"><ng-content select="[slTableGroupRowEnd]" /></span>
+        <span data-part="group-end" data-part-group-end=""
+          ><ng-content select="[slTableGroupRowEnd]"
+        /></span>
       }
     </div>
   </th>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'group-row', '[attr.data-sticky]': "sticky() ? '' : null" },
+  host: {
+    'data-part': 'group-row',
+    'data-part-group-row': '',
+    '[attr.data-sticky]': "sticky() ? '' : null",
+  },
 })
 export class SlTableGroupRow {
   /** How many columns the band spans. Defaults to the table's own count. */
@@ -575,7 +598,7 @@ export class SlTableGroupRow {
   selector: 'td[slTableEmpty]',
   standalone: true,
   exportAs: 'slTableEmpty',
-  host: { 'data-part': 'empty', '[attr.colspan]': 'span()' },
+  host: { 'data-part': 'empty', 'data-part-empty': '', '[attr.colspan]': 'span()' },
 })
 export class SlTableEmpty {
   readonly colSpan = input<number | undefined, number | string | undefined>(undefined, {
@@ -598,9 +621,9 @@ export class SlTableEmpty {
   exportAs: 'slTableLoader',
   imports: [SlSkeleton],
   template: `@for (row of skeleton(); track row) {
-    <tr data-part="row">
+    <tr data-part="row" data-part-row="">
       @for (cell of cells(); track cell) {
-        <td data-part="cell">
+        <td data-part="cell" data-part-cell="">
           <span slSkeleton loading inlineSize="100%"></span>
         </td>
       }
@@ -608,7 +631,7 @@ export class SlTableEmpty {
   }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'loader', 'aria-hidden': 'true' },
+  host: { 'data-part': 'loader', 'data-part-loader': '', 'aria-hidden': 'true' },
 })
 export class SlTableLoader {
   /** How many skeleton rows a first load draws. */

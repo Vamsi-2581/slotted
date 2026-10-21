@@ -29,7 +29,7 @@ export class SlDateTimePickerOption {}
   selector: '[slDateTimePickerPresets]',
   standalone: true,
   exportAs: 'slDateTimePickerPresets',
-  host: { 'data-part': 'presets' },
+  host: { 'data-part': 'presets', 'data-part-presets': '' },
 })
 export class SlDateTimePickerPresets {}
 
@@ -38,6 +38,6 @@ export class SlDateTimePickerPresets {}
   selector: '[slDateTimePickerFooter]',
   standalone: true,
   exportAs: 'slDateTimePickerFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlDateTimePickerFooter {}

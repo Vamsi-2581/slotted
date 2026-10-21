@@ -14,7 +14,7 @@
    * are the composer inside a form — a comment, a reply — and keep the
    * geometry of a one-line control.
    */
-  [data-ui='prompt-composer'][data-part='root'] {
+  [data-ui-prompt-composer][data-part-root] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
@@ -82,14 +82,14 @@
       outline-color var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-size='sm'] {
+  [data-ui-prompt-composer][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
     --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-size='lg'] {
+  [data-ui-prompt-composer][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_icon-size: var(--slotted-control-icon-size-lg, 18px);
@@ -110,7 +110,7 @@
    * card's corner, and a card's corner around a round send draws two curves
    * that do not agree.
    */
-  [data-ui='prompt-composer'][data-part='root'][data-variant='raised'] {
+  [data-ui-prompt-composer][data-part-root][data-variant='raised'] {
     --_button: calc(var(--_inner-size) + var(--slotted-space-2, 0.25rem));
     --_inset: var(--slotted-space-4, 0.5rem);
     --_padding-block: calc(var(--_inset) + var(--slotted-space-2, 0.25rem));
@@ -123,7 +123,7 @@
     );
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-variant='subtle'] {
+  [data-ui-prompt-composer][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-prompt-composer-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -141,7 +141,7 @@
    * script measures a line. The band below stays where the reader's thumb
    * expects it.
    */
-  [data-ui='prompt-composer'] > [data-part='input'] {
+  [data-ui-prompt-composer] > [data-part-input] {
     appearance: none;
     background: transparent;
     border: 0;
@@ -171,11 +171,11 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='prompt-composer'] > [data-part='input']::placeholder {
+  [data-ui-prompt-composer] > [data-part-input]::placeholder {
     color: var(--slotted-prompt-composer-placeholder-color, var(--slotted-text-muted, GrayText));
   }
 
-  [data-ui='prompt-composer'] > [data-part='input']::selection {
+  [data-ui-prompt-composer] > [data-part-input]::selection {
     background-color: var(
       --slotted-prompt-composer-selection-background,
       var(--slotted-tone-accent-surface, Highlight)
@@ -183,14 +183,13 @@
   }
 
   /* A band above the value gives it back the block padding it already has. */
-  [data-ui='prompt-composer'] > [data-part='header'] + [data-part='input'] {
+  [data-ui-prompt-composer] > [data-part-header] + [data-part-input] {
     padding-block-start: var(--_inset);
   }
 
   /* The band below sits on the last line: the value keeps its own air above
      the text and hands the air below it to the band's inset. */
-  [data-ui='prompt-composer'][data-variant='raised']
-    > [data-part='input']:has(+ [data-part='footer']) {
+  [data-ui-prompt-composer][data-variant='raised'] > [data-part-input]:has(+ [data-part-footer]) {
     padding-block-end: var(--slotted-space-2, 0.25rem);
   }
 
@@ -201,7 +200,7 @@
    * does not: the send stays on the line, and a narrow composer gives up the
    * space between the tools first.
    */
-  [data-ui='prompt-composer'] > :is([data-part='header'], [data-part='footer']) {
+  [data-ui-prompt-composer] > :is([data-part-header], [data-part-footer]) {
     --slotted-icon-size: var(--_icon-size);
     --slotted-control-inner-size: var(--_button);
 
@@ -212,19 +211,19 @@
     padding: var(--_inset);
   }
 
-  [data-ui='prompt-composer'] > [data-part='header'] {
+  [data-ui-prompt-composer] > [data-part-header] {
     flex-wrap: wrap;
     padding-block-end: 0;
   }
 
   /* A strip of attachments is the width the band has and scrolls inside it;
      a flex item otherwise keeps its content's width and crosses the frame. */
-  [data-ui='prompt-composer'] > [data-part='header'] > * {
+  [data-ui-prompt-composer] > [data-part-header] > * {
     max-inline-size: 100%;
     min-inline-size: 0;
   }
 
-  [data-ui='prompt-composer'] > [data-part='footer'] {
+  [data-ui-prompt-composer] > [data-part-footer] {
     flex-wrap: nowrap;
     padding-block-start: 0;
   }
@@ -237,9 +236,9 @@
    * padded when named by their own words, the rule `text-field` set; round
    * in the chat composer, a pill when they carry words.
    */
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > :is([data-part='action'], [data-part='attach']) {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > :is([data-part-action], [data-part-attach]) {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -266,9 +265,9 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > [data-part='action']:not([aria-label], [aria-labelledby]) {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > [data-part-action]:not([aria-label], [aria-labelledby]) {
     color: var(--slotted-prompt-composer-action-label-color, var(--slotted-text, CanvasText));
     font-weight: var(--slotted-font-weight-medium, 500);
     padding-inline: var(--slotted-space-3, 0.375rem);
@@ -286,9 +285,9 @@
    * translate puts its centre at `(1cap + 1ex) / 4` above the baseline — the
    * midpoint of the capitals' and the lowercase letters' own centres.
    */
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > [data-part='action']:not([aria-label], [aria-labelledby]) {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > [data-part-action]:not([aria-label], [aria-labelledby]) {
     align-content: center;
     align-items: baseline;
     display: inline-grid;
@@ -296,64 +295,64 @@
     justify-content: center;
   }
 
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > [data-part='action']:not([aria-label], [aria-labelledby])
-    > [data-ui='icon'] {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > [data-part-action]:not([aria-label], [aria-labelledby])
+    > [data-ui-icon] {
     margin-block-start: calc((1cap + 1ex) / 4 - var(--_icon-size) / 2);
     translate: 0 calc(var(--_icon-size) / 2 - (1cap + 1ex) / 4);
   }
 
   /* A pill carries its words a step further from its round ends. */
-  [data-ui='prompt-composer'][data-variant='raised']
-    > :is([data-part='header'], [data-part='footer'])
-    > [data-part='action']:not([aria-label], [aria-labelledby]) {
+  [data-ui-prompt-composer][data-variant='raised']
+    > :is([data-part-header], [data-part-footer])
+    > [data-part-action]:not([aria-label], [aria-labelledby]) {
     padding-inline: var(--slotted-space-4, 0.5rem);
   }
 
   /* The target, recovered outside the paint: 24 pixels on a mouse, 44 on a
      finger, and never across the edge two buttons share. */
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > :is([data-part='action'], [data-part='attach'], [data-part='submit'])::after {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > :is([data-part-action], [data-part-attach], [data-part-submit])::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
   }
 
   @media (pointer: coarse) {
-    [data-ui='prompt-composer']
-      > :is([data-part='header'], [data-part='footer'])
-      > :is([data-part='action'], [data-part='attach'], [data-part='submit'])::after {
+    [data-ui-prompt-composer]
+      > :is([data-part-header], [data-part-footer])
+      > :is([data-part-action], [data-part-attach], [data-part-submit])::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='prompt-composer']
-      > :is([data-part='header'], [data-part='footer'])
-      > :is([data-part='action'], [data-part='attach']):has(+ *)::after {
+    [data-ui-prompt-composer]
+      > :is([data-part-header], [data-part-footer])
+      > :is([data-part-action], [data-part-attach]):has(+ *)::after {
       inset-inline-end: 0;
     }
 
-    [data-ui='prompt-composer']
-      > :is([data-part='header'], [data-part='footer'])
+    [data-ui-prompt-composer]
+      > :is([data-part-header], [data-part-footer])
       > *
-      + :is([data-part='action'], [data-part='attach'], [data-part='submit'])::after {
+      + :is([data-part-action], [data-part-attach], [data-part-submit])::after {
       inset-inline-start: 0;
     }
   }
 
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > :is([data-part='action'], [data-part='attach']):hover:not(:disabled, [aria-expanded='true']) {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > :is([data-part-action], [data-part-attach]):hover:not(:disabled, [aria-expanded='true']) {
     background-color: var(
       --slotted-prompt-composer-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > :is([data-part='action'], [data-part='attach']):is(:active, [aria-expanded='true']):not(
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > :is([data-part-action], [data-part-attach]):is(:active, [aria-expanded='true']):not(
       :disabled
     ) {
     background-color: var(
@@ -362,9 +361,9 @@
     );
   }
 
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > :is([data-part='action'], [data-part='attach']):disabled {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > :is([data-part-action], [data-part-attach]):disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -377,7 +376,7 @@
    * The mark and the ring share one grid cell, so the stop square stands in
    * the middle of the ring that says an answer is still arriving.
    */
-  [data-ui='prompt-composer'] > [data-part='footer'] > [data-part='submit'] {
+  [data-ui-prompt-composer] > [data-part-footer] > [data-part-submit] {
     /* Alone, the ring is the glyph's size and stands where the arrow stood;
        around the stop square it grows to the disc (below). */
     --slotted-spinner-size: var(--_icon-size);
@@ -412,15 +411,15 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='prompt-composer'] > [data-part='footer'] > [data-part='submit'] > * {
+  [data-ui-prompt-composer] > [data-part-footer] > [data-part-submit] > * {
     grid-area: 1 / 1;
   }
 
   /* Named by its own word — Comentar, Publicar — the send is a padded pill at
      the same height; named by aria-label it is the round mark. */
-  [data-ui='prompt-composer']
-    > [data-part='footer']
-    > [data-part='submit']:not([aria-label], [aria-labelledby]) {
+  [data-ui-prompt-composer]
+    > [data-part-footer]
+    > [data-part-submit]:not([aria-label], [aria-labelledby]) {
     border-radius: var(--_action-radius);
     font: inherit;
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -429,7 +428,7 @@
     padding-inline: var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='prompt-composer'] > [data-part='footer'] > [data-part='submit']:hover:not(:disabled) {
+  [data-ui-prompt-composer] > [data-part-footer] > [data-part-submit]:hover:not(:disabled) {
     background-color: var(
       --slotted-prompt-composer-submit-hover-background,
       var(--slotted-tone-accent-solid-hover, Highlight)
@@ -441,16 +440,16 @@
    * the button going in; the ground darkens a further step. A padded send
    * holds its words, so it takes the ground alone (R7).
    */
-  [data-ui='prompt-composer'] > [data-part='footer'] > [data-part='submit']:active:not(:disabled) {
+  [data-ui-prompt-composer] > [data-part-footer] > [data-part-submit]:active:not(:disabled) {
     background-color: var(
       --slotted-prompt-composer-submit-active-background,
       var(--slotted-tone-accent-solid-active, Highlight)
     );
   }
 
-  [data-ui='prompt-composer']
-    > [data-part='footer']
-    > [data-part='submit']:is([aria-label], [aria-labelledby]):active:not(:disabled) {
+  [data-ui-prompt-composer]
+    > [data-part-footer]
+    > [data-part-submit]:is([aria-label], [aria-labelledby]):active:not(:disabled) {
     scale: 0.9;
   }
 
@@ -459,23 +458,23 @@
    * over it: a hint of the movement the press will start, and nothing else
    * in the frame moves.
    */
-  [data-ui='prompt-composer']
-    > [data-part='footer']
-    > [data-part='submit']
-    > [data-ui='icon']:has([data-glyph='arrow-up']) {
+  [data-ui-prompt-composer]
+    > [data-part-footer]
+    > [data-part-submit]
+    > [data-ui-icon]:has([data-glyph='arrow-up']) {
     transition: translate var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='prompt-composer']
-    > [data-part='footer']
-    > [data-part='submit']:hover:not(:disabled)
-    > [data-ui='icon']:has([data-glyph='arrow-up']) {
+  [data-ui-prompt-composer]
+    > [data-part-footer]
+    > [data-part-submit]:hover:not(:disabled)
+    > [data-ui-icon]:has([data-glyph='arrow-up']) {
     translate: 0 calc(var(--slotted-border-width-thin, 1px) * -1);
   }
 
   /* Nothing to send: a quiet disc in the disabled ground, the arrow still
      legible, so the reader sees where the send will be before it wakes. */
-  [data-ui='prompt-composer'] > [data-part='footer'] > [data-part='submit']:disabled {
+  [data-ui-prompt-composer] > [data-part-footer] > [data-part-submit]:disabled {
     background-color: var(
       --slotted-prompt-composer-submit-disabled-background,
       var(--slotted-disabled-background)
@@ -486,9 +485,7 @@
 
   /* While the request travels the button is busy, not unavailable: the ring
      stands where the arrow stood and the ground keeps the accent. */
-  [data-ui='prompt-composer'][data-status='submitted']
-    > [data-part='footer']
-    > [data-part='submit'] {
+  [data-ui-prompt-composer][data-status='submitted'] > [data-part-footer] > [data-part-submit] {
     background-color: var(
       --slotted-prompt-composer-submit-background,
       var(--slotted-tone-accent-solid, Highlight)
@@ -502,9 +499,7 @@
 
   /* The ring around the stop square is drawn inside the disc, a stroke in
      from its edge, so the disc keeps its outline. */
-  [data-ui='prompt-composer'][data-status='streaming']
-    > [data-part='footer']
-    > [data-part='submit'] {
+  [data-ui-prompt-composer][data-status='streaming'] > [data-part-footer] > [data-part-submit] {
     --slotted-spinner-size: calc(var(--_button) - 2 * var(--slotted-space-1, 2px));
     --slotted-icon-size: calc(var(--_icon-size) * 3 / 4);
   }
@@ -515,10 +510,10 @@
    * transparent, on the entering curve. The old mark is gone in the same
    * frame.
    */
-  [data-ui='prompt-composer']
-    > [data-part='footer']
-    > [data-part='submit']
-    > :is([data-ui='icon'], [data-ui='spinner']) {
+  [data-ui-prompt-composer]
+    > [data-part-footer]
+    > [data-part-submit]
+    > :is([data-ui-icon], [data-ui-spinner]) {
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-enter),
       scale var(--slotted-duration-short) var(--slotted-easing-enter),
@@ -526,10 +521,10 @@
   }
 
   @starting-style {
-    [data-ui='prompt-composer']
-      > [data-part='footer']
-      > [data-part='submit']
-      > :is([data-ui='icon'], [data-ui='spinner']) {
+    [data-ui-prompt-composer]
+      > [data-part-footer]
+      > [data-part-submit]
+      > :is([data-ui-icon], [data-ui-spinner]) {
       opacity: 0;
       scale: 0.8;
     }
@@ -539,21 +534,21 @@
      inner control does: four pixels from the frame, an outward ring would
      land on the frame's edge. The solid send keeps it outside, where the
      ring stands against the frame's ground rather than against the accent. */
-  [data-ui='prompt-composer']
-    > :is([data-part='header'], [data-part='footer'])
-    > :is([data-part='action'], [data-part='attach']):focus-visible {
+  [data-ui-prompt-composer]
+    > :is([data-part-header], [data-part-footer])
+    > :is([data-part-action], [data-part-attach]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='prompt-composer'] > [data-part='footer'] > [data-part='submit']:focus-visible {
+  [data-ui-prompt-composer] > [data-part-footer] > [data-part-submit]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   /* ── States of the frame ─────────────────────────────────────────────── */
 
-  [data-ui='prompt-composer'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-prompt-composer][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     ):not([data-drop-target]) {
     border-color: var(
@@ -569,7 +564,7 @@
    * the theme's large shadow, because a surface that is being written on
    * comes forward.
    */
-  [data-ui='prompt-composer'][data-part='root']:has(> [data-part='input']:focus-visible) {
+  [data-ui-prompt-composer][data-part-root]:has(> [data-part-input]:focus-visible) {
     box-shadow: var(--_lift-focus);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
@@ -583,11 +578,11 @@
    * moment. The dashed edge is a pseudo-element rather than an outline: the
    * outline is the focus ring's, and the two can be on at once.
    */
-  [data-ui='prompt-composer'][data-part='root'] {
+  [data-ui-prompt-composer][data-part-root] {
     position: relative;
   }
 
-  [data-ui='prompt-composer'][data-part='root']::before {
+  [data-ui-prompt-composer][data-part-root]::before {
     /* Unthemed, the dashed edge disappears rather than shouting in a system
        colour; the wash and the frame's edge still say where the drop lands. */
     border: var(--slotted-border-width-medium, 1.5px) dashed
@@ -606,12 +601,12 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-drop-target]::before {
+  [data-ui-prompt-composer][data-part-root][data-drop-target]::before {
     opacity: 1;
     transition-timing-function: var(--slotted-easing-enter);
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-drop-target] {
+  [data-ui-prompt-composer][data-part-root][data-drop-target] {
     background-color: var(
       --slotted-prompt-composer-drop-background,
       var(--slotted-tone-accent-surface, Canvas)
@@ -622,7 +617,7 @@
     );
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-invalid] {
+  [data-ui-prompt-composer][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-prompt-composer-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -646,7 +641,7 @@
    * the large one in `raised` — and forced colours, which remove shadows, keep
    * a border. Nothing moves: the box is out of flow.
    */
-  [data-ui='prompt-composer'][data-part='root'][data-invalid]::after {
+  [data-ui-prompt-composer][data-part-root][data-invalid]::after {
     border: var(--_invalid-edge-width) solid
       var(--slotted-prompt-composer-invalid-border-color, var(--slotted-tone-danger-border));
     border-radius: max(0px, calc(var(--_radius) - var(--slotted-control-border-width, 1px)));
@@ -656,7 +651,7 @@
     position: absolute;
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-readonly] {
+  [data-ui-prompt-composer][data-part-root][data-readonly] {
     background-color: var(
       --slotted-prompt-composer-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -664,7 +659,7 @@
     cursor: default;
   }
 
-  [data-ui='prompt-composer'][data-part='root'][data-disabled] {
+  [data-ui-prompt-composer][data-part-root][data-disabled] {
     background-color: var(
       --slotted-prompt-composer-disabled-background,
       var(--slotted-disabled-background)

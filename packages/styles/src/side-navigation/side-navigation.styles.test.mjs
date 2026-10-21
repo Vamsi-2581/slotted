@@ -74,13 +74,13 @@ test('states the forced compact mode with the same rules the width states', () =
  * tooltip repeats what the label says.
  */
 test('clips the label in compact mode rather than removing it', () => {
-  const label = compactRules().find(({ selector }) => selector.includes("[data-part='label']"));
+  const label = compactRules().find(({ selector }) => selector.includes('[data-part-label]'));
   assert.ok(label, 'no compact rule for the label');
   assert.match(label.body, /clip-path: inset\(50%\)/);
   assert.doesNotMatch(label.body, /display: none/);
   for (const part of contract.compact.hides) {
     assert.ok(
-      compactRules().some(({ selector }) => selector.includes(`[data-part='${part}']`)),
+      compactRules().some(({ selector }) => selector.includes(`[data-part-${part.toLowerCase()}]`)),
       `${part} is not hidden in compact mode`,
     );
   }
@@ -94,13 +94,13 @@ test('clips the label in compact mode rather than removing it', () => {
 test('opens a group without measuring it, and hides a closed one from Tab', () => {
   assert.match(css, /grid-template-rows: auto 0fr;/);
   assert.match(css, /\[data-expanded\] \{\s*grid-template-rows: auto 1fr;/);
-  assert.match(css, /> \[data-part='group'\] \{[^}]*visibility: hidden;/);
-  assert.match(css, /\[data-expanded\] > \[data-part='group'\] \{[^}]*visibility: visible;/);
+  assert.match(css, /> \[data-part-group\] \{[^}]*visibility: hidden;/);
+  assert.match(css, /\[data-expanded\] > \[data-part-group\] \{[^}]*visibility: visible;/);
 });
 
 /** R1, in this family's own words: the ground says current, no band does. */
 test('says current with the ground and paints no bar', () => {
-  assert.match(css, /\[data-part='link'\]\[data-current\][^{]*\{[^}]*--_current-background/);
+  assert.match(css, /\[data-part-link\]\[data-current\][^{]*\{[^}]*--_current-background/);
   assert.doesNotMatch(css, /data-marker/);
 });
 
@@ -124,10 +124,10 @@ test('draws the current edge from the foundation token, and no border step', () 
  * part, so a group moved into the layer keeps the row it had in the column.
  */
 test('gives the flyout the row geometry the column has', () => {
-  const at = css.indexOf("[data-ui='side-navigation'] {");
+  const at = css.indexOf('[data-ui-side-navigation] {');
   assert.notEqual(at, -1, 'the geometry is stated on the root part alone');
-  assert.match(css, /\[data-ui='side-navigation'\]\[data-part='flyout'\] \{/);
-  assert.match(css, /\[data-part='flyout'\] > \[data-part='group'\] \{/);
+  assert.match(css, /\[data-ui-side-navigation\]\[data-part-flyout\] \{/);
+  assert.match(css, /\[data-part-flyout\] > \[data-part-group\] \{/);
 });
 
 /**
@@ -145,8 +145,7 @@ test('hands its glyph size to whatever the icon slot holds', () => {
   // as `ng-icon` sizes itself at `1em`, and an icon box reads
   // `--slotted-icon-size`: the slot declares both, so nothing placed in it is
   // drawn at the row's font-size.
-  const rule =
-    css.match(/\[data-ui='side-navigation'\] \[data-part='icon'\] \{([^}]*)\}/)?.[1] ?? '';
+  const rule = css.match(/\[data-ui-side-navigation\] \[data-part-icon\] \{([^}]*)\}/)?.[1] ?? '';
   assert.match(rule, /--slotted-icon-size: var\(--_icon-size\)/);
   assert.match(rule, /font-size: var\(--_icon-size\)/);
 });
@@ -160,9 +159,7 @@ test('hands its glyph size to whatever the icon slot holds', () => {
  */
 test('stands a row off the column edge without moving its mark', () => {
   const row = css
-    .slice(
-      css.indexOf("[data-ui='side-navigation'] :is([data-part='link'], [data-part='trigger']) {"),
-    )
+    .slice(css.indexOf('[data-ui-side-navigation] :is([data-part-link], [data-part-trigger]) {'))
     .slice(0, 900);
   assert.match(row, /margin-inline:\s*calc\(var\(--_standoff\) - var\(--_ring-inset\)\)/);
   assert.match(

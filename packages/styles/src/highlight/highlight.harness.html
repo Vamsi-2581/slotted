@@ -28,38 +28,46 @@
   </style>
   <p data-demo-label>marked, then the same line unmarked</p>
   <p data-demo-line>
-    <span data-part="label"
-      ><span data-ui="highlight" data-part="root"
-        >Blue<mark data-part="match">berr</mark>y</span
+    <span data-part="label" data-part-label=""
+      ><span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+        >Blue<mark data-part="match" data-part-match="">berr</mark>y</span
       ></span
     >
   </p>
-  <p data-demo-line><span data-part="label">Blueberry</span></p>
+  <p data-demo-line><span data-part="label" data-part-label="">Blueberry</span></p>
   <p data-demo-line>
-    <span data-part="label"
-      ><span data-ui="highlight" data-part="root"
-        >Rasp<mark data-part="match">berr</mark>y</span
+    <span data-part="label" data-part-label=""
+      ><span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+        >Rasp<mark data-part="match" data-part-match="">berr</mark>y</span
       ></span
     >
   </p>
-  <p data-demo-line><span data-part="label">Raspberry</span></p>
+  <p data-demo-line><span data-part="label" data-part-label="">Raspberry</span></p>
 </section>
 
 <section data-scene="runs">
   <p data-demo-label>every occurrence, and a run at each end</p>
   <p data-demo-line>
-    <span data-ui="highlight" data-part="root"
-      ><mark data-part="match">An</mark>a B<mark data-part="match">anan</mark>a</span
+    <span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+      ><mark data-part="match" data-part-match="">An</mark>a B<mark
+        data-part="match"
+        data-part-match=""
+        >anan</mark
+      >a</span
     >
   </p>
   <p data-demo-line>
-    <span data-ui="highlight" data-part="root"
-      >urn:acme:catalogue:<mark data-part="match">9f2c41ab</mark></span
+    <span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+      >urn:acme:catalogue:<mark data-part="match" data-part-match="">9f2c41ab</mark></span
     >
   </p>
   <p data-demo-line>
-    <span data-ui="highlight" data-part="root"
-      ><mark data-part="match">Ro</mark>man Pet<mark data-part="match">ro</mark>v</span
+    <span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+      ><mark data-part="match" data-part-match="">Ro</mark>man Pet<mark
+        data-part="match"
+        data-part-match=""
+        >ro</mark
+      >v</span
     >
   </p>
 </section>
@@ -67,8 +75,8 @@
 <section data-scene="wrapping">
   <p data-demo-label>a run that wraps across a line</p>
   <p data-demo-line style="inline-size: 9rem">
-    <span data-ui="highlight" data-part="root"
-      >Relatório <mark data-part="match">consolidado anual</mark> de vendas</span
+    <span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+      >Relatório <mark data-part="match" data-part-match="">consolidado anual</mark> de vendas</span
     >
   </p>
 </section>
@@ -76,10 +84,10 @@
 <section data-scene="current">
   <p data-demo-label>a find bar standing on the second of three</p>
   <p data-demo-prose>
-    <span data-ui="highlight" data-part="root"
-      >The <mark data-part="match">invoice</mark> was issued twice; the second
-      <mark data-part="match" data-current>invoice</mark> supersedes the first, and neither
-      <mark data-part="match">invoice</mark> has been paid.</span
+    <span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+      >The <mark data-part="match" data-part-match="">invoice</mark> was issued twice; the second
+      <mark data-part="match" data-part-match="" data-current>invoice</mark> supersedes the first,
+      and neither <mark data-part="match" data-part-match="">invoice</mark> has been paid.</span
     >
   </p>
 </section>
@@ -87,16 +95,16 @@
 <section data-scene="disabled">
   <p data-demo-label>inside a row that answers nothing, and disabled on its own</p>
   <p data-demo-line data-disabled style="color: var(--slotted-disabled-foreground)">
-    <span data-part="label"
-      ><span data-ui="highlight" data-part="root"
-        >Cloud<mark data-part="match">berr</mark>y</span
+    <span data-part="label" data-part-label=""
+      ><span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+        >Cloud<mark data-part="match" data-part-match="">berr</mark>y</span
       ></span
     >
   </p>
   <p data-demo-line style="color: var(--slotted-disabled-foreground)">
-    <span data-ui="highlight" data-part="root" data-disabled
-      >Goose<mark data-part="match">berr</mark>y,
-      <mark data-part="match" data-current>berr</mark>ies</span
+    <span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root="" data-disabled
+      >Goose<mark data-part="match" data-part-match="">berr</mark>y,
+      <mark data-part="match" data-part-match="" data-current>berr</mark>ies</span
     >
   </p>
 </section>
@@ -104,8 +112,12 @@
 <section data-scene="grapheme">
   <p data-demo-label>a query inside a flag and a decomposed accent</p>
   <p data-demo-line>
-    <span data-ui="highlight" data-part="root"
-      >🇧🇷 <mark data-part="match">Bra</mark>sil · Cr<mark data-part="match">è</mark>me</span
+    <span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+      >🇧🇷 <mark data-part="match" data-part-match="">Bra</mark>sil · Cr<mark
+        data-part="match"
+        data-part-match=""
+        >è</mark
+      >me</span
     >
   </p>
 </section>

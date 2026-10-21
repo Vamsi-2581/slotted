@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/container/contract.json', import.meta.url),
@@ -9,12 +20,14 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./container.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./container.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./container.harness.html', import.meta.url), 'utf8'),
+);
 
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /** One space between tokens, so a wrapped declaration reads the same as a short one. */
 const collapsed = declarations.replace(/\s+/g, ' ');
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 
 const ruleFor = (selector) => collapsed.split(`${selector} {`)[1]?.split('}')[0]?.trim() ?? '';
 
@@ -46,7 +59,7 @@ test('names the two areas a child can be placed in', () => {
     'a child belongs to the bounded column',
   );
   assert.equal(
-    ruleFor(`${ui} > [data-part='breakout']`).includes('grid-column: full'),
+    ruleFor(`${ui} > [data-part-breakout]`).includes('grid-column: full'),
     true,
     'a breakout spans every track, which is what makes it a breakout',
   );

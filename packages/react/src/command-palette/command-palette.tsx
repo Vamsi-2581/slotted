@@ -1,3 +1,4 @@
+import { selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/command-palette/command-palette.css';
 import '@slotted/styles/skeleton/skeleton.css';
 import '@slotted/styles/spinner/spinner.css';
@@ -656,18 +657,24 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
     const content =
       renderItem === undefined ? (
         <>
-          <span data-part="icon">{item.icon}</span>
-          <span data-part="label">{labelNode}</span>
+          <span data-part="icon" data-part-icon="">
+            {item.icon}
+          </span>
+          <span data-part="label" data-part-label="">
+            {labelNode}
+          </span>
           {item.description === undefined ? null : (
-            <span data-part="description">{item.description}</span>
+            <span data-part="description" data-part-description="">
+              {item.description}
+            </span>
           )}
           {item.meta === undefined ? null : (
-            <span aria-hidden="true" data-part="meta">
+            <span aria-hidden="true" data-part="meta" data-part-meta="">
               {item.meta}
             </span>
           )}
           {shortcut === undefined ? null : (
-            <span aria-hidden="true" data-part="shortcut">
+            <span aria-hidden="true" data-part="shortcut" data-part-shortcut="">
               {/* Keycaps, and nothing drawn between them: `Ctrl` `Shift` `D`
                   is how Linear and Raycast write a chord outside a Mac, and
                   the caps say "keys" where plain text says "a word". */}
@@ -676,13 +683,21 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
           )}
           {item.children === undefined ? null : (
             /* The mark that says the item opens a page, mirrored in a right-to-left document. */
-            <span aria-hidden="true" data-part="arrow">
+            <span aria-hidden="true" data-part="arrow" data-part-arrow="">
               <Icon directional>
                 <Glyph name="chevron-right" />
               </Icon>
             </span>
           )}
-          {isPending ? <span aria-hidden="true" data-part="busy" data-ui="spinner" /> : null}
+          {isPending ? (
+            <span
+              aria-hidden="true"
+              data-part="busy"
+              data-part-busy=""
+              data-ui="spinner"
+              data-ui-spinner=""
+            />
+          ) : null}
         </>
       ) : (
         renderItem(item, {
@@ -701,6 +716,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
         shortcut === undefined ? undefined : announceShortcut(shortcut, platform),
       'aria-selected': current,
       'data-part': 'item',
+      ...selectorKeyProps('part', 'item'),
       ...(current ? { 'data-current': '' } : {}),
       ...(isDisabled ? { 'data-disabled': '' } : {}),
       ...(isPending ? { 'data-loading': '' } : {}),
@@ -740,15 +756,23 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
     const heading = section.recent ? t('recent') : section.label;
     const rows = section.items.map(renderRow);
     const separator =
-      index === 0 ? null : <div data-part="separator" key={`sep-${index}`} role="separator" />;
+      index === 0 ? null : (
+        <div data-part="separator" data-part-separator="" key={`sep-${index}`} role="separator" />
+      );
     if (heading === undefined) {
       return [separator, ...rows];
     }
     const labelId = `${base}-group-${index}`;
     return [
       separator,
-      <div aria-labelledby={labelId} data-part="group" key={`group-${index}`} role="group">
-        <div data-part="group-label" id={labelId} role="presentation">
+      <div
+        aria-labelledby={labelId}
+        data-part="group"
+        data-part-group=""
+        key={`group-${index}`}
+        role="group"
+      >
+        <div data-part="group-label" data-part-group-label="" id={labelId} role="presentation">
           {heading}
         </div>
         {rows}
@@ -758,28 +782,28 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
 
   const hints: ReactNode =
     footer === null ? null : (
-      <div aria-hidden="true" data-part="footer">
+      <div aria-hidden="true" data-part="footer" data-part-footer="">
         {footer !== undefined ? (
           footer
         ) : (
           <>
-            <span data-part="hint">
+            <span data-part="hint" data-part-hint="">
               <Shortcut keys="up" separator="" size="inherit" variant="outline" />
               <Shortcut keys="down" separator="" size="inherit" variant="outline" />
               <span>{t('hintNavigate')}</span>
             </span>
-            <span data-part="hint">
+            <span data-part="hint" data-part-hint="">
               <Shortcut keys="enter" separator="" size="inherit" variant="outline" />
               <span>{t('hintSelect')}</span>
             </span>
             {currentPages.length === 0 ? null : (
-              <span data-part="hint">
+              <span data-part="hint" data-part-hint="">
                 <Shortcut keys="backspace" separator="" size="inherit" variant="outline" />
                 <span>{t('hintBack')}</span>
               </span>
             )}
             {inline ? null : (
-              <span data-part="hint">
+              <span data-part="hint" data-part-hint="">
                 <Shortcut keys="escape" separator="" size="inherit" variant="outline" />
                 <span>{t('hintClose')}</span>
               </span>
@@ -800,10 +824,11 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
 
   const panel = (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'ui', 'command-palette')}
       className={className}
-      data-ui="command-palette"
+
       data-part="root"
+      data-part-root=""
       data-presentation={resolved.presentation}
       data-size={resolved.size}
       {...(currentOpen ? { 'data-open': '' } : {})}
@@ -820,18 +845,24 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
       })}
       style={style}
     >
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         {resolved.loading ? (
-          <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+          <span
+            aria-hidden="true"
+            data-part="busy"
+            data-part-busy=""
+            data-ui="spinner"
+            data-ui-spinner=""
+          />
         ) : (
-          <span aria-hidden="true" data-part="search">
+          <span aria-hidden="true" data-part="search" data-part-search="">
             <Icon>
               <Glyph name="search" />
             </Icon>
           </span>
         )}
         {model.trail.length === 0 ? null : (
-          <ol aria-label={t('back')} data-part="pages">
+          <ol aria-label={t('back')} data-part="pages" data-part-pages="">
             {model.trail.map((entry, index) => (
               <li key={entry.id}>
                 {/* The chevron between two pages, mirrored in a right-to-left document. */}
@@ -842,6 +873,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
                 )}
                 <button
                   data-part="page"
+                  data-part-page=""
                   onClick={(event) => setPages(currentPages.slice(0, index + 1), 'pointer', event)}
                   type="button"
                 >
@@ -852,7 +884,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
           </ol>
         )}
         <input
-          {...restInput}
+          {...withSelectorKey(restInput, 'part', 'input')}
           aria-activedescendant={
             currentHighlighted === null ? undefined : domId(base, currentHighlighted)
           }
@@ -861,7 +893,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
           aria-expanded="true"
           aria-label={restInput['aria-label'] ?? t('input')}
           autoComplete="off"
-          data-part="input"
+
           disabled={resolved.disabled}
           onChange={compose(theirOnChange, (event) =>
             setQuery(event.target.value, 'keyboard', event),
@@ -883,6 +915,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
         <button
           aria-label={t('clear')}
           data-part="clear"
+          data-part-clear=""
           onClick={(event) => {
             setQuery('', 'clear', event);
             inputRef.current?.focus();
@@ -899,6 +932,7 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
              under the dialog's full-screen query alone. */
           <button
             data-part="close"
+            data-part-close=""
             onClick={(event) => setOpen(false, 'dismiss', event)}
             type="button"
           >
@@ -910,24 +944,36 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
         aria-busy={resolved.loading ? true : undefined}
         aria-label={t('input')}
         data-part="list"
+        data-part-list=""
         {...(resolved.loading ? { 'data-loading': '' } : {})}
         id={listId}
         ref={listRef}
         role="listbox"
       >
         {resolved.loading && model.count === 0 ? (
-          <div aria-hidden="true" data-part="placeholder">
+          <div aria-hidden="true" data-part="placeholder" data-part-placeholder="">
             {[0, 1, 2].map((row) => (
               <div key={row}>
-                <span data-loading data-part="root" data-shape="text" data-ui="skeleton" />
+                <span
+                  data-loading
+                  data-part="root"
+                  data-part-root=""
+                  data-shape="text"
+                  data-ui="skeleton"
+                  data-ui-skeleton=""
+                />
               </div>
             ))}
           </div>
         ) : null}
-        {isEmpty ? <div data-part="empty">{empty ?? t('empty')}</div> : null}
+        {isEmpty ? (
+          <div data-part="empty" data-part-empty="">
+            {empty ?? t('empty')}
+          </div>
+        ) : null}
         {model.sections.flatMap(renderSection)}
       </div>
-      <div data-part="status" role="status">
+      <div data-part="status" data-part-status="" role="status">
         {status}
       </div>
       {hints}

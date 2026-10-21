@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/prompt-composer/prompt-composer.css';
 import '@slotted/styles/spinner/spinner.css';
 
@@ -227,7 +228,7 @@ export function PromptComposer({
     value: current,
   };
 
-  const rootProps: PromptComposerRootProps = {
+  const rootProps: PromptComposerRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -278,7 +279,7 @@ export function PromptComposer({
       event.preventDefault();
       attach(Array.from(event.dataTransfer.files), 'drop', event.nativeEvent);
     },
-  };
+  });
 
   return (
     <Context.Provider value={context}>
@@ -289,13 +290,13 @@ export function PromptComposer({
 
 /** The band above the value: attachments, a quoted reply, a context chip. */
 export function PromptComposerHeader({ render, ...nativeProps }: PromptComposerBandProps) {
-  const props = { ...nativeProps, 'data-part': 'header' };
+  const props = keyedProps({ ...nativeProps, 'data-part': 'header' });
   return render === undefined ? <div {...props} /> : render(props);
 }
 
 /** The band below the value: tools on the start, the send at the end. */
 export function PromptComposerFooter({ render, ...nativeProps }: PromptComposerBandProps) {
-  const props = { ...nativeProps, 'data-part': 'footer' };
+  const props = keyedProps({ ...nativeProps, 'data-part': 'footer' });
   return render === undefined ? <div {...props} /> : render(props);
 }
 
@@ -331,11 +332,11 @@ export function PromptComposerInput({
 
   return (
     <textarea
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'input')}
       aria-describedby={[describedBy, composer.describedBy].filter(Boolean).join(' ') || undefined}
       aria-invalid={ariaInvalid ?? (composer.invalid === true ? true : undefined)}
       aria-required={ariaRequired ?? (composer.required === true ? true : undefined)}
-      data-part="input"
+
       dir={nativeProps.dir ?? 'auto'}
       disabled={composer.disabled}
       id={id ?? composer.id}
@@ -390,7 +391,7 @@ export function PromptComposerAction({
   type = 'button',
   ...nativeProps
 }: PromptComposerActionProps) {
-  const props = { ...nativeProps, 'data-part': 'action' as const, type };
+  const props = keyedProps({ ...nativeProps, 'data-part': 'action' as const, type });
   return render === undefined ? <button {...props} /> : render(props);
 }
 
@@ -409,9 +410,9 @@ export function PromptComposerAttach({
   return (
     <>
       <button
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'attach')}
         aria-label={ariaLabel ?? composer.t('attach')}
-        data-part="attach"
+
         disabled={off}
         onClick={(event) => {
           onClick?.(event);
@@ -475,10 +476,10 @@ export function PromptComposerSubmit({
 
   return (
     <button
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'submit')}
       aria-disabled={submitted ? true : undefined}
       aria-label={children === undefined ? (ariaLabel ?? label) : ariaLabel}
-      data-part="submit"
+
       disabled={streaming ? false : (disabled ?? (!submitted && !composer.canSubmit))}
       onClick={(event: MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
@@ -491,10 +492,10 @@ export function PromptComposerSubmit({
     >
       {children ??
         (submitted ? (
-          <span aria-hidden="true" data-ui="spinner" key="busy" />
+          <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" key="busy" />
         ) : streaming ? (
           <>
-            <span aria-hidden="true" data-ui="spinner" key="ring" />
+            <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" key="ring" />
             <Icon key="stop">
               <Glyph name="stop" />
             </Icon>

@@ -11,7 +11,7 @@
    * this family. An instance overrides that container through `data-size`,
    * which sets the same token on the element itself.
    */
-  [data-ui='icon'] {
+  [data-ui-icon] {
     --_size: var(--slotted-icon-size, var(--slotted-control-icon-size-md, 16px));
 
     align-items: center;
@@ -58,8 +58,8 @@
    * is on the child and not on the box, because `vertical-align` above reads
    * `cap` from the text the box sits in.
    */
-  [data-ui='icon'] > *,
-  [data-ui='icon'] svg {
+  [data-ui-icon] > *,
+  [data-ui-icon] svg {
     block-size: 100%;
     display: block;
     font-size: var(--_size);
@@ -72,19 +72,19 @@
    * the type it sits in, because sixteen pixels inside a display heading is
    * not an icon.
    */
-  [data-ui='icon'][data-size='text'] {
+  [data-ui-icon][data-size='text'] {
     --slotted-icon-size: 1em;
   }
 
-  [data-ui='icon'][data-size='sm'] {
+  [data-ui-icon][data-size='sm'] {
     --slotted-icon-size: var(--slotted-control-icon-size-sm, 14px);
   }
 
-  [data-ui='icon'][data-size='md'] {
+  [data-ui-icon][data-size='md'] {
     --slotted-icon-size: var(--slotted-control-icon-size-md, 16px);
   }
 
-  [data-ui='icon'][data-size='lg'] {
+  [data-ui-icon][data-size='lg'] {
     --slotted-icon-size: var(--slotted-control-icon-size-lg, 18px);
   }
 
@@ -95,31 +95,31 @@
    * `stroke="currentColor"` and filled artwork declares `fill="currentColor"`,
    * and imposing either would break the other.
    */
-  [data-ui='icon'][data-tone='default'] {
+  [data-ui-icon][data-tone='default'] {
     color: var(--slotted-text, CanvasText);
   }
 
-  [data-ui='icon'][data-tone='muted'] {
+  [data-ui-icon][data-tone='muted'] {
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='icon'][data-tone='accent'] {
+  [data-ui-icon][data-tone='accent'] {
     color: var(--slotted-tone-accent-text, LinkText);
   }
 
-  [data-ui='icon'][data-tone='success'] {
+  [data-ui-icon][data-tone='success'] {
     color: var(--slotted-tone-success-text, CanvasText);
   }
 
-  [data-ui='icon'][data-tone='warning'] {
+  [data-ui-icon][data-tone='warning'] {
     color: var(--slotted-tone-warning-text, CanvasText);
   }
 
-  [data-ui='icon'][data-tone='danger'] {
+  [data-ui-icon][data-tone='danger'] {
     color: var(--slotted-tone-danger-text, CanvasText);
   }
 
-  [data-ui='icon'][data-tone='inverse'] {
+  [data-ui-icon][data-tone='inverse'] {
     color: var(--slotted-text-inverse, Canvas);
   }
 
@@ -130,7 +130,7 @@
    * right-to-left page has to read the directionality that actually applies to
    * it.
    */
-  [data-ui='icon'][data-directional]:dir(rtl) {
+  [data-ui-icon][data-directional]:dir(rtl) {
     scale: -1 1;
   }
 }

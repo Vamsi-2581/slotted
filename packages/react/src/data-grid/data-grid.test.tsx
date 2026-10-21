@@ -388,6 +388,50 @@ describe('DataGrid, the query', () => {
     expect(grid().querySelectorAll('[data-part="row"]')).toHaveLength(2);
   });
 
+  /**
+   * A server that pages by date sends its rows already ordered for grouping;
+   * in server mode the grid emitted one plain row per row and ignored the
+   * query's group. It groups what it is given, in the order given.
+   */
+  it('groups the rows a server sent, in their order, in server mode', () => {
+    const dated = [
+      { ...ROWS[0]!, id: 'D1', shipped: '2026-09-13' },
+      { ...ROWS[1]!, id: 'D2', shipped: '2026-09-13' },
+      { ...ROWS[2]!, id: 'D3', shipped: '2026-09-12' },
+      { ...ROWS[3]!, id: 'D4', shipped: '2026-09-12' },
+      { ...ROWS[0]!, id: 'D5', shipped: '2026-09-11' },
+      { ...ROWS[1]!, id: 'D6', shipped: '2026-09-11' },
+    ];
+    render(
+      <Shipments
+        defaultQuery={{ ...emptyQuery(), group: ['shipped'] }}
+        mode="server"
+        rows={dated}
+        totalCount={6}
+      />,
+    );
+    const groups = grid().querySelectorAll('[data-part="group-row"]');
+    expect(groups).toHaveLength(3);
+    for (const group of groups) expect(group).toHaveTextContent('2 rows');
+    expect(grid().querySelectorAll('[data-part="row"]')).toHaveLength(6);
+  });
+
+  /**
+   * The row's actions scrolled out of the frame with the columns unless the
+   * application pinned them by hand. A column of kind `actions` is pinned to
+   * the end while no column state says otherwise.
+   */
+  it('pins the actions column to the end without any column state', () => {
+    render(
+      <Shipments
+        columns={[...COLUMNS, { id: 'actions', label: 'Actions', kind: 'actions' }]}
+        cellRenderers={{ actions: () => <button type="button">More</button> }}
+      />,
+    );
+    expect(cell('S1', 'actions')).toHaveAttribute('data-pinned', 'end');
+    expect(header('actions')).toHaveAttribute('data-pinned', 'end');
+  });
+
   it('draws a summary row from the aggregating columns', () => {
     render(<Shipments />);
     expect(grid().querySelector('[data-part="summary"] [data-column="weight"]')).toHaveTextContent(
@@ -1107,21 +1151,70 @@ describe('DataGrid, the rest', () => {
     ).toBe('56px');
   });
 
-  it('offers load more when the total is unknown and more exists', () => {
+  /**
+   * A grid that loads its next page on its own offered a Load more control as
+   * well, whose purpose the reader could not tell. Under the default trigger
+   * the request is automatic, the footer says the page is loading, and a
+   * control appears only to retry a page that failed.
+   */
+  it('asks for the next page by itself and offers no Load more control by default', () => {
     const onLoadMore = vi.fn();
-    render(
+    const { rerender } = render(
       <Shipments
         hasMore
         onLoadMore={onLoadMore}
         defaultQuery={emptyQuery({ cursor: null, size: 4 })}
       />,
     );
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: 'Load more' })).toBeNull();
+    expect(grid().querySelector('[data-range]')).toHaveTextContent('1–4');
+
+    rerender(
+      <Shipments
+        hasMore
+        loading
+        onLoadMore={onLoadMore}
+        defaultQuery={emptyQuery({ cursor: null, size: 4 })}
+      />,
+    );
+    expect(screen.getByRole('status')).toHaveTextContent('Loading more rows…');
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops asking after a failed page and offers a retry', () => {
+    const onLoadMore = vi.fn();
+    render(
+      <Shipments
+        hasMore
+        loadMoreFailed
+        onLoadMore={onLoadMore}
+        defaultQuery={emptyQuery({ cursor: null, size: 4 })}
+      />,
+    );
+    expect(onLoadMore).not.toHaveBeenCalled();
+    act(() => {
+      fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    });
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  it('asks only from the Load more control under the button trigger', () => {
+    const onLoadMore = vi.fn();
+    render(
+      <Shipments
+        hasMore
+        loadMoreTrigger="button"
+        onLoadMore={onLoadMore}
+        defaultQuery={emptyQuery({ cursor: null, size: 4 })}
+      />,
+    );
+    expect(onLoadMore).not.toHaveBeenCalled();
     expect(grid()).toHaveAttribute('aria-rowcount', '0');
     act(() => {
       fireEvent.click(screen.getByRole('button', { name: 'Load more' }));
     });
-    expect(onLoadMore).toHaveBeenCalled();
-    expect(grid().querySelector('[data-range]')).toHaveTextContent('1–4');
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
 
   it('settles a cell reference into the same cell object', () => {

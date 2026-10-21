@@ -17,6 +17,7 @@ import { SlSwitchIdFactory } from './switch-defaults';
   exportAs: 'slSwitchDescription',
   host: {
     'data-part': 'description',
+    'data-part-description': '',
     '[attr.id]': 'id',
   },
 })

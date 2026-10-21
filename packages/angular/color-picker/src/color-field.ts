@@ -77,7 +77,9 @@ function sameColor(a: string, b: string): boolean {
             slPopoverTrigger
             type="button"
             data-ui="color-picker"
+            data-ui-color-picker=""
             data-part="trigger"
+            data-part-trigger=""
             [attr.aria-label]="t('trigger')"
             [disabled]="resolvedDisabled()"
             [style.--slotted-color-picker-color]="css()"

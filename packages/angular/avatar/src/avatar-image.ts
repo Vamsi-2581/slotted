@@ -22,6 +22,7 @@ import { AVATAR_IMAGE_HOST } from './avatar-image-host';
   exportAs: 'slAvatarImage',
   host: {
     'data-part': 'image',
+    'data-part-image': '',
     '[attr.alt]': 'alt',
     '(load)': 'avatar.reportStatus("loaded")',
     '(error)': 'avatar.reportStatus("error")',

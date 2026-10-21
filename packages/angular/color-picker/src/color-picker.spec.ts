@@ -204,10 +204,10 @@ describe('SlColorField', () => {
     );
     expect(fixture.nativeElement.querySelector('[data-part="trigger"]')).not.toBeNull();
     expect(document.querySelector('[data-ui="color-picker"][data-part="root"]')).toBeNull();
-    const swatch = /\[data-ui=['"]?color-picker['"]?\]\[data-part=['"]?trigger['"]?\]/;
+    const swatch = /\[data-ui-color-picker\]\[data-part-trigger\]/;
     const sheets = [...document.head.querySelectorAll('style')].map((style) => style.textContent);
     /* The text field's own sheet is there: the page does carry the parts' stylesheets. */
-    expect(sheets.some((css) => /\[data-ui=['"]?text-field['"]?\]/.test(css ?? ''))).toBe(true);
+    expect(sheets.some((css) => /\[data-ui-text-field\]/.test(css ?? ''))).toBe(true);
     expect(sheets.some((css) => swatch.test(css ?? ''))).toBe(true);
   });
 });

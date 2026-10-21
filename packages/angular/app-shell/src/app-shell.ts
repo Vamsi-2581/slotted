@@ -114,7 +114,7 @@ let nextId = 0;
   standalone: true,
   exportAs: 'slAppShell',
   template: `@if (skipTargets().length > 0) {
-      <div data-part="skip">
+      <div data-part="skip" data-part-skip="">
         @for (target of skipTargets(); track target.href) {
           <a [href]="'#' + target.href" (click)="target.href === mainId && focusMain()">{{
             target.label
@@ -124,15 +124,17 @@ let nextId = 0;
     }
     <ng-content />
     @if (veilStatus() !== 'unmounted') {
-      <div data-part="scrim" [attr.data-status]="veilStatus()" #scrim></div>
+      <div data-part="scrim" data-part-scrim="" [attr.data-status]="veilStatus()" #scrim></div>
     }
-    <div data-part="layer" #layer></div>`,
+    <div data-part="layer" data-part-layer="" #layer></div>`,
   styleUrl: '../../../styles/src/app-shell/app-shell.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'app-shell',
+    'data-ui-app-shell': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-primary]': 'resolvedPrimary()',
     '[attr.data-canvas]': 'resolvedCanvas()',
     '[attr.data-nav-mode]': 'resolvedMode()',
@@ -693,7 +695,7 @@ function attach(slot: 'aside' | 'asideToggle' | 'banner' | 'footer' | 'main' | '
   selector: 'header[slAppShellBanner]',
   standalone: true,
   exportAs: 'slAppShellBanner',
-  host: { 'data-part': 'banner' },
+  host: { 'data-part': 'banner', 'data-part-banner': '' },
 })
 export class SlAppShellBanner {
   constructor() {
@@ -706,7 +708,7 @@ export class SlAppShellBanner {
   selector: '[slAppShellBrand]',
   standalone: true,
   exportAs: 'slAppShellBrand',
-  host: { 'data-part': 'brand' },
+  host: { 'data-part': 'brand', 'data-part-brand': '' },
 })
 export class SlAppShellBrand {}
 
@@ -715,7 +717,7 @@ export class SlAppShellBrand {}
   selector: '[slAppShellCentre]',
   standalone: true,
   exportAs: 'slAppShellCentre',
-  host: { 'data-part': 'centre' },
+  host: { 'data-part': 'centre', 'data-part-centre': '' },
 })
 export class SlAppShellCentre {}
 
@@ -724,7 +726,7 @@ export class SlAppShellCentre {}
   selector: '[slAppShellActions]',
   standalone: true,
   exportAs: 'slAppShellActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlAppShellActions {}
 
@@ -739,6 +741,7 @@ export class SlAppShellActions {}
   exportAs: 'slAppShellNav',
   host: {
     'data-part': 'nav',
+    'data-part-nav': '',
     '[attr.id]': 'elementId',
     '[attr.aria-label]': 'label()',
   },
@@ -766,7 +769,7 @@ export class SlAppShellNav {
   selector: '[slAppShellNavRail]',
   standalone: true,
   exportAs: 'slAppShellNavRail',
-  host: { 'data-part': 'nav-rail' },
+  host: { 'data-part': 'nav-rail', 'data-part-nav-rail': '' },
 })
 export class SlAppShellNavRail {}
 
@@ -775,7 +778,7 @@ export class SlAppShellNavRail {}
   selector: '[slAppShellNavHeader]',
   standalone: true,
   exportAs: 'slAppShellNavHeader',
-  host: { 'data-part': 'nav-header' },
+  host: { 'data-part': 'nav-header', 'data-part-nav-header': '' },
 })
 export class SlAppShellNavHeader {}
 
@@ -784,7 +787,7 @@ export class SlAppShellNavHeader {}
   selector: '[slAppShellNavBody]',
   standalone: true,
   exportAs: 'slAppShellNavBody',
-  host: { 'data-part': 'nav-body' },
+  host: { 'data-part': 'nav-body', 'data-part-nav-body': '' },
 })
 export class SlAppShellNavBody {}
 
@@ -793,7 +796,7 @@ export class SlAppShellNavBody {}
   selector: '[slAppShellNavFooter]',
   standalone: true,
   exportAs: 'slAppShellNavFooter',
-  host: { 'data-part': 'nav-footer' },
+  host: { 'data-part': 'nav-footer', 'data-part-nav-footer': '' },
 })
 export class SlAppShellNavFooter {}
 
@@ -812,6 +815,7 @@ export class SlAppShellNavFooter {}
   exportAs: 'slAppShellMain',
   host: {
     'data-part': 'main',
+    'data-part-main': '',
     '[attr.id]': 'elementId',
     '[attr.aria-busy]': 'busy()',
   },
@@ -866,7 +870,7 @@ export class SlAppShellMain {
   ></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'progress' },
+  host: { 'data-part': 'progress', 'data-part-progress': '' },
 })
 export class SlAppShellProgress {
   protected readonly shell = inject(SlAppShell);
@@ -906,6 +910,7 @@ export class SlAppShellProgress {
   exportAs: 'slAppShellAside',
   host: {
     'data-part': 'aside',
+    'data-part-aside': '',
     '[attr.id]': 'elementId',
     '[attr.aria-label]': 'label()',
     '[attr.data-open]': "shell.asideOpen() ? '' : null",
@@ -936,7 +941,7 @@ export class SlAppShellAside {
   selector: '[slAppShellAsideHeader]',
   standalone: true,
   exportAs: 'slAppShellAsideHeader',
-  host: { 'data-part': 'aside-header' },
+  host: { 'data-part': 'aside-header', 'data-part-aside-header': '' },
 })
 export class SlAppShellAsideHeader {}
 
@@ -948,7 +953,11 @@ export class SlAppShellAsideHeader {}
   selector: '[slAppShellAsideBody]',
   standalone: true,
   exportAs: 'slAppShellAsideBody',
-  host: { 'data-part': 'aside-body', '[attr.data-inset]': 'inset() ?? null' },
+  host: {
+    'data-part': 'aside-body',
+    'data-part-aside-body': '',
+    '[attr.data-inset]': 'inset() ?? null',
+  },
 })
 export class SlAppShellAsideBody {
   /** `none` drops the body's own padding, for content that brings its own inset. */
@@ -997,6 +1006,7 @@ const TAP_SLOP_PX = 3;
   exportAs: 'slAppShellAsideResizer',
   host: {
     'data-part': 'aside-resizer',
+    'data-part-aside-resizer': '',
     role: 'separator',
     tabindex: '0',
     'aria-orientation': 'vertical',
@@ -1168,7 +1178,7 @@ export class SlAppShellAsideResizer {
   selector: '[slAppShellAsideFooter]',
   standalone: true,
   exportAs: 'slAppShellAsideFooter',
-  host: { 'data-part': 'aside-footer' },
+  host: { 'data-part': 'aside-footer', 'data-part-aside-footer': '' },
 })
 export class SlAppShellAsideFooter {}
 
@@ -1190,6 +1200,7 @@ export class SlAppShellAsideFooter {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'aside-toggle',
+    'data-part-aside-toggle': '',
     type: 'button',
     '[attr.id]': 'elementId',
     '[attr.aria-controls]': 'controls',
@@ -1224,7 +1235,7 @@ export class SlAppShellAsideToggle {
   selector: 'footer[slAppShellFooter]',
   standalone: true,
   exportAs: 'slAppShellFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlAppShellFooter {
   constructor() {
@@ -1251,6 +1262,7 @@ export class SlAppShellFooter {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'nav-toggle',
+    'data-part-nav-toggle': '',
     type: 'button',
     '[attr.id]': 'elementId',
     '[attr.aria-controls]': 'controls',

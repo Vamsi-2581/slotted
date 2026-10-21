@@ -19,7 +19,7 @@
    * force the header to match it. The weight is carried by the triggers, which
    * is where a reader's pointer goes.
    */
-  [data-ui='menubar'] {
+  [data-ui-menubar] {
     --_gap: var(--slotted-menubar-gap, var(--slotted-space-1, 0.125rem));
 
     --_text: var(--slotted-menubar-text, var(--slotted-text, #0f172a));
@@ -58,18 +58,18 @@
    * key swap for it. The triggers stretch rather than centring, because a
    * column of labels reads from one edge.
    */
-  [data-ui='menubar'][data-orientation='vertical'] {
+  [data-ui-menubar][data-orientation='vertical'] {
     align-items: stretch;
     flex-direction: column;
   }
 
-  [data-ui='menubar'][data-size='sm'] {
+  [data-ui-menubar][data-size='sm'] {
     --_trigger-height: var(--slotted-control-height-sm, 30px);
     --_trigger-inset: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
   }
 
-  [data-ui='menubar'][data-size='lg'] {
+  [data-ui-menubar][data-size='lg'] {
     --_trigger-height: var(--slotted-control-height-lg, 38px);
     --_trigger-inset: var(--slotted-control-padding-inline-lg, 1rem);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
@@ -85,7 +85,7 @@
    * The trigger holds the consumer's own text and nothing the family imposes —
    * no icon slot, no chevron, no shortcut. A menubar trigger is a word.
    */
-  [data-ui='menubar'] > [data-part='trigger'] {
+  [data-ui-menubar] > [data-part-trigger] {
     appearance: none;
     background: transparent;
     border: 0;
@@ -111,7 +111,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='menubar'][data-orientation='vertical'] > [data-part='trigger'] {
+  [data-ui-menubar][data-orientation='vertical'] > [data-part-trigger] {
     text-align: start;
   }
 
@@ -122,19 +122,19 @@
    * highlight follows the pointer; once a menu is open, entering another
    * trigger opens it and focus moves, so hover and focus agree again.
    */
-  [data-ui='menubar'] > [data-part='trigger']:not([data-disabled]):hover {
+  [data-ui-menubar] > [data-part-trigger]:not([data-disabled]):hover {
     background-color: var(--_highlight);
   }
 
-  [data-ui='menubar'] > [data-part='trigger']:not([data-disabled]):active {
+  [data-ui-menubar] > [data-part-trigger]:not([data-disabled]):active {
     background-color: var(--_highlight-active);
   }
 
-  [data-ui='menubar'] > [data-part='trigger'][data-open] {
+  [data-ui-menubar] > [data-part-trigger][data-open] {
     background-color: var(--_highlight-active);
   }
 
-  [data-ui='menubar'] > [data-part='trigger']:focus-visible {
+  [data-ui-menubar] > [data-part-trigger]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
@@ -145,11 +145,11 @@
    * pattern asks of every item in a menubar. It answers focus quietly, as a
    * disabled menu item does.
    */
-  [data-ui='menubar'] > [data-part='trigger'][data-disabled] {
+  [data-ui-menubar] > [data-part-trigger][data-disabled] {
     color: var(--slotted-disabled-foreground, #64748b);
   }
 
-  [data-ui='menubar'] > [data-part='trigger'][data-disabled]:focus {
+  [data-ui-menubar] > [data-part-trigger][data-disabled]:focus {
     background-color: var(--slotted-disabled-background, #e2e8f0);
   }
 
@@ -161,7 +161,7 @@
    * bar that has to stay distinguishable from the other three.
    */
   @media (forced-colors: active) {
-    [data-ui='menubar'] > [data-part='trigger'][data-open] {
+    [data-ui-menubar] > [data-part-trigger][data-open] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;

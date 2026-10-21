@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { buttonMessages } from '@slotted/core/i18n';
 
 import { useMessages } from '../i18n';
@@ -42,7 +43,7 @@ export function Button({
   const waiting = useLoadingIndicator({ loading, loadingDelay });
   const t = useMessages(buttonMessages, messages);
 
-  const rootProps: ButtonRootProps = {
+  const rootProps: ButtonRootProps = keyedProps({
     ...nativeProps,
     ...rootData({ disabled, fullWidth, justify, loading, ...appearance }),
     'aria-disabled': inert.ariaDisabled,
@@ -71,7 +72,7 @@ export function Button({
       onClickCapture?.(event);
     },
     type,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }

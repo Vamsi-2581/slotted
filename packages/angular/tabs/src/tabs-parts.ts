@@ -43,6 +43,7 @@ function activationReason(event: Event): TabsSelectionReason {
   exportAs: 'slTabList',
   host: {
     'data-part': 'list',
+    'data-part-list': '',
     role: 'tablist',
     tabindex: '-1',
     '[attr.aria-orientation]': 'ariaOrientation()',
@@ -69,7 +70,7 @@ export class SlTabList {
   selector: '[slTabStart]',
   standalone: true,
   exportAs: 'slTabStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlTabStart {}
 
@@ -78,7 +79,7 @@ export class SlTabStart {}
   selector: '[slTabEnd]',
   standalone: true,
   exportAs: 'slTabEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlTabEnd {}
 
@@ -101,13 +102,15 @@ export class SlTabEnd {}
      whichever control the tab renders: a selecting `ng-content` repeated in
      both branches left the button branch without its icon and its count. */
   template: `<ng-template #content
-      ><ng-content select="[slTabStart]" /><span data-part="label"><ng-content /></span
+      ><ng-content select="[slTabStart]" /><span data-part="label" data-part-label=""
+        ><ng-content /></span
       ><ng-content select="[slTabEnd]"
     /></ng-template>
     @if (href(); as destination) {
       <a
         #control
         data-part="tab"
+        data-part-tab=""
         role="tab"
         [attr.id]="tabId()"
         [attr.href]="destination"
@@ -125,6 +128,7 @@ export class SlTabEnd {}
       <button
         #control
         data-part="tab"
+        data-part-tab=""
         role="tab"
         type="button"
         [attr.id]="tabId()"
@@ -143,6 +147,7 @@ export class SlTabEnd {}
     @if (dismissible()) {
       <button
         data-part="dismiss"
+        data-part-dismiss=""
         type="button"
         tabindex="-1"
         [attr.aria-label]="dismissLabel()"
@@ -156,6 +161,7 @@ export class SlTabEnd {}
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     role: 'presentation',
     '[attr.data-selected]': "selected() ? '' : null",
   },
@@ -284,6 +290,7 @@ export class SlTabPanelContent {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'panel',
+    'data-part-panel': '',
     role: 'tabpanel',
     tabindex: '0',
     '[attr.id]': 'panelId()',
@@ -323,6 +330,6 @@ export class SlTabPanel {
   selector: '[slTabActions]',
   standalone: true,
   exportAs: 'slTabActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlTabActions {}

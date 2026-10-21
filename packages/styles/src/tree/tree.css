@@ -51,7 +51,7 @@
    * only the frame's own inset, radius and shadow come off the space, radius
    * and shadow scales.
    */
-  [data-ui='tree'] {
+  [data-ui-tree] {
     --_surface: var(--slotted-tree-surface, var(--slotted-surface, #ffffff));
     --_text: var(--slotted-tree-text, var(--slotted-text, #0f172a));
     --_muted: var(--slotted-tree-text-muted, var(--slotted-text-muted, #5b6b7f));
@@ -177,7 +177,7 @@
     text-align: start;
   }
 
-  [data-ui='tree'][data-size='sm'] {
+  [data-ui-tree][data-size='sm'] {
     --_row-inset: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_row-height: var(--slotted-control-height-sm, 30px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
@@ -187,7 +187,7 @@
     --_check-size: var(--slotted-selection-size-sm, 14px);
   }
 
-  [data-ui='tree'][data-size='lg'] {
+  [data-ui-tree][data-size='lg'] {
     --_row-inset: var(--slotted-control-padding-inline-lg, 1rem);
     --_row-height: var(--slotted-control-height-lg, 38px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
@@ -201,14 +201,14 @@
    * `framed` is the standalone control; `plain` is what a tree renders as
    * inside a panel, a drawer or a page region that already has an edge.
    */
-  [data-ui='tree'][data-variant='framed'] {
+  [data-ui-tree][data-variant='framed'] {
     background-color: var(--_surface);
     border: var(--_border-width) solid var(--_border-color);
     border-radius: var(--_radius);
     box-shadow: var(--_shadow);
   }
 
-  [data-ui='tree'] [data-part='canvas'] {
+  [data-ui-tree] [data-part-canvas] {
     /**
      * The block cap is stated rather than the height: a tree of four branches
      * is four rows tall, and one of four hundred stops at `rows` and scrolls.
@@ -222,7 +222,7 @@
     padding-inline: 0;
   }
 
-  [data-ui='tree'] :is([data-part='canvas'], [data-part='group']) {
+  [data-ui-tree] :is([data-part-canvas], [data-part-group]) {
     list-style: none;
     margin-block: 0;
     margin-inline: 0;
@@ -233,7 +233,7 @@
    * The group carries no inset: the row states the whole indent, so the band
    * can span the tree's full width at every level.
    */
-  [data-ui='tree'] [data-part='group'] {
+  [data-ui-tree] [data-part-group] {
     padding-block: 0;
     padding-inline: 0;
   }
@@ -248,7 +248,7 @@
    * family that only works under one reset is a family waiting for the next
    * one.
    */
-  [data-ui='tree'] [data-part='node'] {
+  [data-ui-tree] [data-part-node] {
     display: block;
     margin-block: 0;
     margin-inline: 0;
@@ -265,7 +265,7 @@
     outline: none;
   }
 
-  [data-ui='tree'] [data-part='row'] {
+  [data-ui-tree] [data-part-row] {
     align-items: center;
     background-color: transparent;
     color: inherit;
@@ -339,7 +339,7 @@
    * row is what `VS Code`, Primer and Carbon all draw, and what the reviewer
    * asked for at the visual gate.
    */
-  [data-ui='tree'] [data-part='guide'] {
+  [data-ui-tree] [data-part-guide] {
     background-image: repeating-linear-gradient(
       to right,
       var(--_guide-color) 0 var(--_border-width),
@@ -352,7 +352,7 @@
     position: absolute;
   }
 
-  [data-ui='tree'] [data-part='guide']:dir(rtl) {
+  [data-ui-tree] [data-part-guide]:dir(rtl) {
     background-image: repeating-linear-gradient(
       to left,
       var(--_guide-color) 0 var(--_border-width),
@@ -360,7 +360,7 @@
     );
   }
 
-  [data-ui='tree'][data-guides='false'] [data-part='guide'] {
+  [data-ui-tree][data-guides='false'] [data-part-guide] {
     background-image: none;
   }
 
@@ -370,7 +370,7 @@
    * as one control moving. A leaf keeps the box and the binding draws nothing
    * in it, which is what holds every label in one column whatever its node is.
    */
-  [data-ui='tree'] [data-part='expander'] {
+  [data-ui-tree] [data-part-expander] {
     /**
      * The glyph is the icon size and never the box: under `expandOn="expander"`
      * the box grows by padding to the target minimum, and the `icon` box stays
@@ -391,20 +391,20 @@
     margin-inline-end: var(--_gap);
   }
 
-  [data-ui='tree'] [data-part='expander'] > [data-ui='icon'] {
+  [data-ui-tree] [data-part-expander] > [data-ui-icon] {
     transition: rotate var(--slotted-control-transition-duration, var(--slotted-duration-short))
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='tree'] [data-part='expander']:dir(rtl) > [data-ui='icon'] {
+  [data-ui-tree] [data-part-expander]:dir(rtl) > [data-ui-icon] {
     rotate: 180deg;
   }
 
-  [data-ui='tree']
-    [data-part='node'][data-expanded]
-    > [data-part='row']
-    [data-part='expander']
-    > [data-ui='icon'] {
+  [data-ui-tree]
+    [data-part-node][data-expanded]
+    > [data-part-row]
+    [data-part-expander]
+    > [data-ui-icon] {
     rotate: 90deg;
   }
 
@@ -413,10 +413,10 @@
    * the target otherwise. Under the first the box is grown to the WCAG minimum
    * without the artwork growing, and the growth is taken back so no label moves.
    */
-  [data-ui='tree'][data-expand-on='expander']
-    [data-part='node'][data-branch]
-    > [data-part='row']
-    [data-part='expander'] {
+  [data-ui-tree][data-expand-on='expander']
+    [data-part-node][data-branch]
+    > [data-part-row]
+    [data-part-expander] {
     box-sizing: content-box;
     cursor: pointer;
     margin-block: calc((var(--slotted-target-min, 24px) - var(--_icon-size)) / -2);
@@ -439,10 +439,8 @@
    * leaf is text; and with the chevron as the only target, no row is pressed at
    * all.
    */
-  [data-ui='tree'][data-selection='none'][data-expand-on='expander'] [data-part='row'],
-  [data-ui='tree'][data-selection='none']
-    [data-part='node']:not([data-branch])
-    > [data-part='row'] {
+  [data-ui-tree][data-selection='none'][data-expand-on='expander'] [data-part-row],
+  [data-ui-tree][data-selection='none'] [data-part-node]:not([data-branch]) > [data-part-row] {
     cursor: default;
   }
 
@@ -450,7 +448,7 @@
    * A tree the reader may read and not move keeps the arrow throughout, as
    * `listbox` does with the same word.
    */
-  [data-ui='tree'][data-readonly] [data-part='row'] {
+  [data-ui-tree][data-readonly] [data-part-row] {
     cursor: default;
   }
 
@@ -483,7 +481,7 @@
    * subpixels — and the two families are held together by
    * `tree.styles.test.mjs`, which reads `checkbox.css` and compares them.
    */
-  [data-ui='tree'] [data-part='indicator'] {
+  [data-ui-tree] [data-part-indicator] {
     --_mark-inset: var(--slotted-tree-mark-inset, 2px);
     --_check-border: var(--slotted-border-width-medium, 1.5px);
     --_mark-size: calc(var(--_check-size) - 2 * var(--_mark-inset));
@@ -514,7 +512,7 @@
    * two whole pixels from the outside of the square, which is where `checkbox`
    * puts its own.
    */
-  [data-ui='tree'] [data-part='indicator'] > [data-ui='icon'] {
+  [data-ui-tree] [data-part-indicator] > [data-ui-icon] {
     /* Physical on purpose: a check is not mirrored in a right-to-left row, so
        neither is the hand that draws it. `checkbox` states the same. */
     clip-path: inset(0% 100% 0% 0%);
@@ -531,24 +529,24 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='tree']
-    [data-part='node']:is([data-selected], [data-indeterminate])
-    > [data-part='row']
-    [data-part='indicator'] {
+  [data-ui-tree]
+    [data-part-node]:is([data-selected], [data-indeterminate])
+    > [data-part-row]
+    [data-part-indicator] {
     background-color: var(--slotted-tone-accent-solid);
     border-color: var(--slotted-tone-accent-solid);
   }
 
-  [data-ui='tree']
-    [data-part='node']:is([data-selected], [data-indeterminate])
-    > [data-part='row']
-    [data-part='indicator']
-    > [data-ui='icon'] {
+  [data-ui-tree]
+    [data-part-node]:is([data-selected], [data-indeterminate])
+    > [data-part-row]
+    [data-part-indicator]
+    > [data-ui-icon] {
     clip-path: inset(0% 0% 0% 0%);
     opacity: 1;
   }
 
-  [data-ui='tree'] [data-part='node'][data-disabled] > [data-part='row'] [data-part='indicator'] {
+  [data-ui-tree] [data-part-node][data-disabled] > [data-part-row] [data-part-indicator] {
     background-color: var(--slotted-disabled-background, Canvas);
     border-color: var(--slotted-disabled-border, GrayText);
     cursor: not-allowed;
@@ -559,8 +557,7 @@
    * at all, and the rule is written so a consumer who leaves the element in the
    * markup still gets the tree the axis promises.
    */
-  [data-ui='tree']:is([data-indicator='highlight'], [data-indicator='none'])
-    [data-part='indicator'] {
+  [data-ui-tree]:is([data-indicator='highlight'], [data-indicator='none']) [data-part-indicator] {
     display: none;
   }
 
@@ -568,7 +565,7 @@
    * The node's own picture, which the consumer supplies. The family owns no
    * folder glyph: a folder is content, and the glyph scale holds none.
    */
-  [data-ui='tree'] [data-part='icon'] {
+  [data-ui-tree] [data-part-icon] {
     block-size: var(--_icon-size);
     color: var(--_muted);
     flex: none;
@@ -582,9 +579,9 @@
    * taken. Primer asks the consumer to pass a visual on every item or to accept
    * two columns of names; the fact is one the tree can read for itself.
    */
-  [data-ui='tree'][data-part='root']:has([data-part='icon'])
-    [data-part='row']:not(:has([data-part='icon']))
-    [data-part='label'] {
+  [data-ui-tree][data-part-root]:has([data-part-icon])
+    [data-part-row]:not(:has([data-part-icon]))
+    [data-part-label] {
     margin-inline-start: calc(var(--_icon-size) + var(--_gap));
   }
 
@@ -601,8 +598,8 @@
    * and its count are data of unknown direction, and each one is now its own
    * paragraph.
    */
-  [data-ui='tree']
-    :is([data-part='label'], [data-part='description'], [data-part='meta'], [data-part='empty']) {
+  [data-ui-tree]
+    :is([data-part-label], [data-part-description], [data-part-meta], [data-part-empty]) {
     unicode-bidi: plaintext;
   }
 
@@ -617,7 +614,7 @@
    * reader's own start edge in both directions, and leaves the truncation
    * where it was.
    */
-  [data-ui='tree'] [data-part='label'] {
+  [data-ui-tree] [data-part-label] {
     flex: 0 1 auto;
     line-height: var(--slotted-line-height-sm, 1.45);
     /**
@@ -647,22 +644,22 @@
    * they are is a placeholder the eye refuses. They are literals because they
    * are a proportion of a row rather than a step on any scale.
    */
-  [data-ui='tree'] [data-part='label']:has([data-ui='skeleton']) {
+  [data-ui-tree] [data-part-label]:has([data-ui-skeleton]) {
     flex: 1 1 auto;
     max-inline-size: 62%;
   }
 
-  [data-ui='tree']
-    [data-part='node']:nth-child(2n)
-    > [data-part='row']
-    [data-part='label']:has([data-ui='skeleton']) {
+  [data-ui-tree]
+    [data-part-node]:nth-child(2n)
+    > [data-part-row]
+    [data-part-label]:has([data-ui-skeleton]) {
     max-inline-size: 44%;
   }
 
-  [data-ui='tree']
-    [data-part='node']:nth-child(3n)
-    > [data-part='row']
-    [data-part='label']:has([data-ui='skeleton']) {
+  [data-ui-tree]
+    [data-part-node]:nth-child(3n)
+    > [data-part-row]
+    [data-part-label]:has([data-ui-skeleton]) {
     max-inline-size: 73%;
   }
 
@@ -671,7 +668,7 @@
    * from its ground, which is the rule `--slotted-highlight-tint-opacity`
    * states and what `select` and `combobox` already draw.
    */
-  [data-ui='tree'] [data-part='label'] mark {
+  [data-ui-tree] [data-part-label] mark {
     background-color: color-mix(
       in oklab,
       var(--slotted-tone-accent-text) calc(var(--slotted-highlight-tint-opacity, 0.075) * 100%),
@@ -687,11 +684,11 @@
    * and over the tone's own ground it is neither visible nor clean — two washes
    * of one colour, one of them too faint to read as deliberate.
    */
-  [data-ui='tree'] [data-part='node'][data-selected] > [data-part='row'] [data-part='label'] mark {
+  [data-ui-tree] [data-part-node][data-selected] > [data-part-row] [data-part-label] mark {
     background-color: transparent;
   }
 
-  [data-ui='tree'] [data-part='description'] {
+  [data-ui-tree] [data-part-description] {
     color: var(--_muted);
     margin-inline-start: var(--_gap);
     flex: 0 1 auto;
@@ -706,7 +703,7 @@
    * The trailing count. It keeps its intrinsic width so a label twice as long
    * in translation pushes on itself rather than on the number beside it.
    */
-  [data-ui='tree'] [data-part='meta'] {
+  [data-ui-tree] [data-part-meta] {
     color: var(--_muted);
     flex: none;
     font-size: var(--_secondary-font-size);
@@ -733,7 +730,7 @@
    * that drew an arc of its own would be a second answer to the same wait,
    * drifting from the first the moment one of them is retuned.
    */
-  [data-ui='tree'] [data-part='loader'] {
+  [data-ui-tree] [data-part-loader] {
     --slotted-spinner-size: var(--_icon-size);
 
     block-size: var(--_icon-size);
@@ -748,7 +745,7 @@
    * reachable: revealing them on hover alone puts a control behind a gesture a
    * touch reader does not have.
    */
-  [data-ui='tree'] [data-part='actions'] {
+  [data-ui-tree] [data-part-actions] {
     align-items: center;
     display: flex;
     flex: none;
@@ -759,11 +756,11 @@
 
   /* The free space is taken once. With a count before them, the controls sit a
      gap after it rather than splitting the row between the two. */
-  [data-ui='tree'] [data-part='meta'] ~ [data-part='actions'] {
+  [data-ui-tree] [data-part-meta] ~ [data-part-actions] {
     margin-inline-start: 0;
   }
 
-  [data-ui='tree'] [data-part='empty'] {
+  [data-ui-tree] [data-part-empty] {
     color: var(--_muted);
     padding-block: var(--slotted-space-5, 0.75rem);
     padding-inline: var(--_row-inset);
@@ -776,15 +773,13 @@
    * A weaker state holds itself back for every stronger one, in the order
    * `STATE_PRECEDENCE` names.
    */
-  [data-ui='tree']
-    [data-part='node']:not([data-disabled]):not([data-loading])
-    > [data-part='row']:hover {
+  [data-ui-tree] [data-part-node]:not([data-disabled]):not([data-loading]) > [data-part-row]:hover {
     background-color: var(--_highlight);
   }
 
-  [data-ui='tree']
-    [data-part='node']:not([data-disabled]):not([data-loading])
-    > [data-part='row']:active {
+  [data-ui-tree]
+    [data-part-node]:not([data-disabled]):not([data-loading])
+    > [data-part-row]:active {
     background-color: var(--_highlight-active);
   }
 
@@ -792,19 +787,19 @@
    * The row the keyboard is on paints the same quiet ground as hover, and the
    * ring is what tells the two apart.
    */
-  [data-ui='tree'] [data-part='node'][data-current]:not([data-disabled]) > [data-part='row'] {
+  [data-ui-tree] [data-part-node][data-current]:not([data-disabled]) > [data-part-row] {
     background-color: var(--_highlight);
   }
 
-  [data-ui='tree'] [data-part='node'][data-selected]:not([data-disabled]) > [data-part='row'] {
+  [data-ui-tree] [data-part-node][data-selected]:not([data-disabled]) > [data-part-row] {
     background-color: var(--_selected-surface);
     color: var(--_selected-text);
   }
 
-  [data-ui='tree']
-    [data-part='node'][data-selected]:not([data-disabled])
-    > [data-part='row']
-    :is([data-part='icon'], [data-part='meta'], [data-part='expander']) {
+  [data-ui-tree]
+    [data-part-node][data-selected]:not([data-disabled])
+    > [data-part-row]
+    :is([data-part-icon], [data-part-meta], [data-part-expander]) {
     color: inherit;
   }
 
@@ -821,32 +816,32 @@
    * one of the three devices R1 names, and it is quieter than a ground, which
    * is right: the reader chose the descendant and not this.
    */
-  [data-ui='tree']
-    [data-part='node'][data-selected-within]:not([data-selected]):not([data-disabled])
-    > [data-part='row'] {
+  [data-ui-tree]
+    [data-part-node][data-selected-within]:not([data-selected]):not([data-disabled])
+    > [data-part-row] {
     color: var(--_selected-text);
   }
 
-  [data-ui='tree']
-    [data-part='node'][data-selected-within]:not([data-selected]):not([data-disabled])
-    > [data-part='row']
-    [data-part='expander'] {
+  [data-ui-tree]
+    [data-part-node][data-selected-within]:not([data-selected]):not([data-disabled])
+    > [data-part-row]
+    [data-part-expander] {
     color: inherit;
   }
 
-  [data-ui='tree'] [data-part='node'][data-disabled] > [data-part='row'] {
+  [data-ui-tree] [data-part-node][data-disabled] > [data-part-row] {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: not-allowed;
   }
 
-  [data-ui='tree']
-    [data-part='node'][data-disabled]
-    > [data-part='row']
-    :is([data-part='icon'], [data-part='meta'], [data-part='expander'], [data-part='description']) {
+  [data-ui-tree]
+    [data-part-node][data-disabled]
+    > [data-part-row]
+    :is([data-part-icon], [data-part-meta], [data-part-expander], [data-part-description]) {
     color: inherit;
   }
 
-  [data-ui='tree'] [data-part='node'][data-loading] > [data-part='row'] {
+  [data-ui-tree] [data-part-node][data-loading] > [data-part-row] {
     cursor: progress;
   }
 
@@ -855,16 +850,13 @@
    * the top or the bottom of a scrolling canvas is not clipped by its own
    * viewport.
    */
-  [data-ui='tree'] [data-part='node']:focus-visible > [data-part='row'],
-  [data-ui='tree']
-    [data-part='canvas']:focus-visible
-    [data-part='node'][data-current]
-    > [data-part='row'] {
+  [data-ui-tree] [data-part-node]:focus-visible > [data-part-row],
+  [data-ui-tree] [data-part-canvas]:focus-visible [data-part-node][data-current] > [data-part-row] {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
-  [data-ui='tree'][data-invalid] {
+  [data-ui-tree][data-invalid] {
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
     --_border-color: var(--slotted-tone-danger-border);
     /* Width as well as colour (WCAG 1.4.1): in `high-contrast` the danger
@@ -875,11 +867,11 @@
     --_shadow: inset 0 0 0 var(--_invalid-edge-width) var(--slotted-tone-danger-border);
   }
 
-  [data-ui='tree'][data-disabled] {
+  [data-ui-tree][data-disabled] {
     color: var(--slotted-disabled-foreground, GrayText);
   }
 
-  [data-ui='tree'][data-disabled][data-variant='framed'] {
+  [data-ui-tree][data-disabled][data-variant='framed'] {
     background-color: var(--slotted-disabled-background, Canvas);
     border-color: var(--slotted-disabled-border, GrayText);
     box-shadow: none;
@@ -894,12 +886,12 @@
    * holds a slice of. The canvas falls back to `auto`, so a flat tree with no
    * window is laid out exactly as a nested one.
    */
-  [data-ui='tree'][data-structure='flat'] {
+  [data-ui-tree][data-structure='flat'] {
     max-block-size: calc(var(--_rows) * var(--_row-height) + 2 * var(--_inset-block));
     overflow: auto;
   }
 
-  [data-ui='tree'][data-structure='flat'] [data-part='canvas'] {
+  [data-ui-tree][data-structure='flat'] [data-part-canvas] {
     block-size: var(--_canvas-size, auto);
     max-block-size: none;
     overflow: visible;
@@ -917,7 +909,7 @@
    * because the reader scrolled it out and moving it back would take the
    * scrollbar away from them.
    */
-  [data-ui='tree'] [data-part='node'][data-pinned] {
+  [data-ui-tree] [data-part-node][data-pinned] {
     inset-block-start: var(--slotted-tree-row-offset, 0px);
     inset-inline: 0;
     position: absolute;
@@ -933,26 +925,26 @@
    *
    * The retuned value lands on the canvas rather than on the root. A container
    * query styles the container's descendants and never the container itself, so
-   * a rule for `[data-ui='tree']` inside this block matches nothing — the tree
+   * a rule for `[data-ui-tree]` inside this block matches nothing — the tree
    * is not its own descendant. Written on the root it looked correct and did
    * nothing, and the harness at 240 pixels is what showed the indent had not
    * moved. It is the second half of the two-element decision the briefing
    * records, and the half that is easy to write and hard to see.
    */
   @container slotted-tree (max-width: 320px) {
-    [data-ui='tree'] [data-part='canvas'] {
+    [data-ui-tree] [data-part-canvas] {
       --_indent: calc(var(--_icon-size) / 2 + var(--slotted-space-3, 0.375rem));
     }
   }
 
   @container slotted-tree (max-width: 240px) {
-    [data-ui='tree'] [data-part='canvas'] {
+    [data-ui-tree] [data-part-canvas] {
       --_indent: calc(var(--_icon-size) / 2 + var(--slotted-space-2, 0.25rem));
       --_row-inset: var(--slotted-control-padding-inline-sm, 0.625rem);
     }
 
     /* The second line has no room to sit beside the first at this width. */
-    [data-ui='tree'] [data-part='description'] {
+    [data-ui-tree] [data-part-description] {
       display: none;
     }
   }
@@ -965,13 +957,13 @@
    * and the theme maps it to `Highlight`, which is what is restated here.
    */
   @media (forced-colors: active) {
-    [data-ui='tree'] [data-part='node'][data-selected] > [data-part='row'] {
+    [data-ui-tree] [data-part-node][data-selected] > [data-part-row] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='tree'] [data-part='node'][data-disabled] > [data-part='row'] {
+    [data-ui-tree] [data-part-node][data-disabled] > [data-part-row] {
       color: GrayText;
     }
 
@@ -981,7 +973,7 @@
      * both; the mark opts out as well, or the system forces its ink to the
      * text colour and the tick loses its contrast with the box it stands on.
      */
-    [data-ui='tree'] [data-part='indicator'] > [data-ui='icon'] {
+    [data-ui-tree] [data-part-indicator] > [data-ui-icon] {
       forced-color-adjust: none;
     }
   }
@@ -992,7 +984,7 @@
    * ring belongs to a row and leaves it alone.
    */
   @media (forced-colors: active) {
-    [data-ui='tree'][data-variant='framed'][data-invalid] {
+    [data-ui-tree][data-variant='framed'][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(-1 * (var(--_border-width) + var(--_invalid-edge-width)));
     }

@@ -17,5 +17,14 @@ import '@slotted/styles/spinner/spinner.css';
  * which is exactly the claim being made.
  */
 export function ButtonIndicator({ label }: { label: string }) {
-  return <span aria-label={label} data-part="indicator" data-ui="spinner" role="progressbar" />;
+  return (
+    <span
+      aria-label={label}
+      data-part="indicator"
+      data-part-indicator=""
+      data-ui="spinner"
+      data-ui-spinner=""
+      role="progressbar"
+    />
+  );
 }

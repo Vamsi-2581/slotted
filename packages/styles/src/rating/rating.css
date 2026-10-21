@@ -17,7 +17,7 @@
    * input derives it here, from which radio is checked and which one is under
    * the pointer, so the picture is the platform's state.
    */
-  [data-ui='rating'][data-part='root'] {
+  [data-ui-rating][data-part-root] {
     /**
      * The symbol does not follow density. The selection scale settled the same
      * question for a checkbox: the thing the value is read from keeps its size,
@@ -72,13 +72,13 @@
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='rating'][data-part='root'][data-size='sm'] {
+  [data-ui-rating][data-part-root][data-size='sm'] {
     --_symbol: var(--slotted-rating-symbol-size, var(--slotted-space-6, 1rem));
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='rating'][data-part='root'][data-size='lg'] {
+  [data-ui-rating][data-part-root][data-size='lg'] {
     --_symbol: var(--slotted-rating-symbol-size, var(--slotted-space-8, 1.5rem));
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_gap: var(--slotted-control-gap-lg, 8px);
@@ -86,15 +86,15 @@
 
   /* ── Tone ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='rating'][data-part='root'][data-tone='accent'] {
+  [data-ui-rating][data-part-root][data-tone='accent'] {
     --_on: var(--slotted-rating-lit-color, var(--slotted-tone-accent-solid));
   }
 
-  [data-ui='rating'][data-part='root'][data-tone='success'] {
+  [data-ui-rating][data-part-root][data-tone='success'] {
     --_on: var(--slotted-rating-lit-color, var(--slotted-tone-success-solid));
   }
 
-  [data-ui='rating'][data-part='root'][data-tone='danger'] {
+  [data-ui-rating][data-part-root][data-tone='danger'] {
     --_on: var(--slotted-rating-lit-color, var(--slotted-tone-danger-solid));
   }
 
@@ -111,7 +111,7 @@
    * inside a twenty-four unit box with a unit and a half of air a side, so two
    * pixels between boxes reads as the five ReUI's rows read at.
    */
-  [data-ui='rating'] [data-part='symbols'] {
+  [data-ui-rating] [data-part-symbols] {
     column-gap: var(--slotted-rating-gap, var(--slotted-space-1, 0.125rem));
     display: flex;
     flex: 0 1 auto;
@@ -123,12 +123,12 @@
    * A finger dragged along the row is the binding's to read, so the row keeps
    * vertical panning for the page and takes the horizontal gesture.
    */
-  [data-ui='rating'] [data-part='symbols']:has([data-part='input']) {
+  [data-ui-rating] [data-part-symbols]:has([data-part-input]) {
     column-gap: 0;
     touch-action: pan-y;
   }
 
-  [data-ui='rating'] [data-part='item'] {
+  [data-ui-rating] [data-part-item] {
     --_fill: var(--slotted-rating-fill, 0);
     /*
      * The curve of the next change of the lit share, read at the moment it
@@ -164,14 +164,14 @@
    * shrinking included: at `sm` and `md` the box is twenty-four pixels, at
    * `lg` the symbol plus two pixels of air a side, twenty-eight.
    */
-  [data-ui='rating'] [data-part='item']:has(> [data-part='input']) {
+  [data-ui-rating] [data-part-item]:has(> [data-part-input]) {
     --_air: var(--slotted-space-1, 0.125rem);
     --_box: max(var(--slotted-target-min, 24px), calc(var(--_symbol) + 2 * var(--_air)));
 
     min-inline-size: var(--slotted-target-min, 24px);
   }
 
-  [data-ui='rating'] :is([data-part='symbol'], [data-part='fill']) {
+  [data-ui-rating] :is([data-part-symbol], [data-part-fill]) {
     --_drawn: min(var(--_symbol), 100cqi - 2 * var(--_air));
     --slotted-icon-size: var(--_drawn);
 
@@ -184,14 +184,14 @@
     z-index: 2;
   }
 
-  [data-ui='rating'] :is([data-part='symbol'], [data-part='fill']) svg {
+  [data-ui-rating] :is([data-part-symbol], [data-part-fill]) svg {
     stroke-width: var(--_stroke);
     transition:
       fill var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
       stroke var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='rating'] [data-part='symbol'] svg {
+  [data-ui-rating] [data-part-symbol] svg {
     fill: var(--_off);
     stroke: var(--_off-edge);
   }
@@ -201,18 +201,18 @@
    * the share `--_fill` names; the clip moves on the medium step, so a value
    * that changes by three stars is seen travelling rather than swapped.
    */
-  [data-ui='rating'] [data-part='fill'] {
+  [data-ui-rating] [data-part-fill] {
     clip-path: inset(0 calc((1 - var(--_fill)) * 100%) 0 0);
     transition:
       scale var(--slotted-duration-short) var(--slotted-easing-standard),
       clip-path var(--slotted-duration-medium) var(--_fill-easing);
   }
 
-  [data-ui='rating'][data-part='root']:dir(rtl) [data-part='fill'] {
+  [data-ui-rating][data-part-root]:dir(rtl) [data-part-fill] {
     clip-path: inset(0 0 0 calc((1 - var(--_fill)) * 100%));
   }
 
-  [data-ui='rating'] [data-part='fill'] svg {
+  [data-ui-rating] [data-part-fill] svg {
     fill: var(--_on);
     stroke: var(--_edge);
   }
@@ -229,7 +229,7 @@
    * The box is a circle: its ground is the halo the pointer lights, and its
    * edge is where the focus ring is drawn.
    */
-  [data-ui='rating'] [data-part='input'] {
+  [data-ui-rating] [data-part-input] {
     appearance: none;
     background-color: transparent;
     block-size: 100%;
@@ -247,7 +247,7 @@
     z-index: 0;
   }
 
-  [data-ui='rating'] [data-part='input'][data-half] {
+  [data-ui-rating] [data-part-input][data-half] {
     border-end-end-radius: 0;
     border-start-end-radius: 0;
     inline-size: 50%;
@@ -259,13 +259,13 @@
    * What the reader has picked: every symbol before the checked radio's item
    * is lit, and that item is lit whole or by half.
    */
-  [data-ui='rating'] [data-part='item']:has(~ [data-part='item'] > [data-part='input']:checked),
-  [data-ui='rating'] [data-part='item']:has(> [data-part='input']:not([data-half]):checked) {
+  [data-ui-rating] [data-part-item]:has(~ [data-part-item] > [data-part-input]:checked),
+  [data-ui-rating] [data-part-item]:has(> [data-part-input]:not([data-half]):checked) {
     --_fill: 1;
     --_fill-easing: var(--slotted-easing-enter);
   }
 
-  [data-ui='rating'] [data-part='item']:has(> [data-part='input'][data-half]:checked) {
+  [data-ui-rating] [data-part-item]:has(> [data-part-input][data-half]:checked) {
     --_fill: 0.5;
     --_fill-easing: var(--slotted-easing-enter);
   }
@@ -275,27 +275,27 @@
    * row shows the value under it instead of the one held, the way every
    * surveyed input previews; nothing is requested until the press.
    */
-  [data-ui='rating'][data-part='root']:not([data-readonly], [data-disabled]):has(
-      [data-part='input']:hover:not(:disabled)
+  [data-ui-rating][data-part-root]:not([data-readonly], [data-disabled]):has(
+      [data-part-input]:hover:not(:disabled)
     )
-    [data-part='item'] {
+    [data-part-item] {
     --_fill: 0;
     --_fill-easing: var(--slotted-easing-exit);
   }
 
-  [data-ui='rating'][data-part='root']:not([data-readonly], [data-disabled]):has(
-      [data-part='input']:hover:not(:disabled)
+  [data-ui-rating][data-part-root]:not([data-readonly], [data-disabled]):has(
+      [data-part-input]:hover:not(:disabled)
     )
-    [data-part='item']:is(
-      :has(~ [data-part='item'] > [data-part='input']:hover:not(:disabled)),
-      :has(> [data-part='input']:not([data-half]):hover:not(:disabled))
+    [data-part-item]:is(
+      :has(~ [data-part-item] > [data-part-input]:hover:not(:disabled)),
+      :has(> [data-part-input]:not([data-half]):hover:not(:disabled))
     ) {
     --_fill: 1;
     --_fill-easing: var(--slotted-easing-enter);
   }
 
-  [data-ui='rating'][data-part='root']:not([data-readonly], [data-disabled])
-    [data-part='item']:has(> [data-part='input'][data-half]:hover:not(:disabled)) {
+  [data-ui-rating][data-part-root]:not([data-readonly], [data-disabled])
+    [data-part-item]:has(> [data-part-input][data-half]:hover:not(:disabled)) {
     --_fill: 0.5;
     --_fill-easing: var(--slotted-easing-enter);
   }
@@ -305,7 +305,7 @@
    * and marks the root `data-dragging`; the transitions of the lit share step
    * aside, so the row follows the finger rather than trailing it.
    */
-  [data-ui='rating'][data-part='root'][data-dragging] [data-part='fill'] {
+  [data-ui-rating][data-part-root][data-dragging] [data-part-fill] {
     transition-duration: var(--slotted-duration-instant);
   }
 
@@ -319,19 +319,19 @@
    * symbol six per cent below its size and darkens the wash, and the release
    * brings both back on the standard curve.
    */
-  [data-ui='rating'][data-part='root']:not([data-readonly], [data-disabled])
-    [data-part='input']:hover:not(:disabled) {
+  [data-ui-rating][data-part-root]:not([data-readonly], [data-disabled])
+    [data-part-input]:hover:not(:disabled) {
     background-color: var(--_halo);
   }
 
-  [data-ui='rating'][data-part='root']:not([data-readonly], [data-disabled])
-    [data-part='input']:active:not(:disabled) {
+  [data-ui-rating][data-part-root]:not([data-readonly], [data-disabled])
+    [data-part-input]:active:not(:disabled) {
     background-color: var(--_halo-active);
   }
 
-  [data-ui='rating'][data-part='root']:not([data-readonly], [data-disabled])
-    [data-part='item']:has(> [data-part='input']:active:not(:disabled))
-    > :is([data-part='symbol'], [data-part='fill']) {
+  [data-ui-rating][data-part-root]:not([data-readonly], [data-disabled])
+    [data-part-item]:has(> [data-part-input]:active:not(:disabled))
+    > :is([data-part-symbol], [data-part-fill]) {
     scale: 0.94;
   }
 
@@ -341,7 +341,7 @@
    * half radio is half of a star and the ring still encloses the whole star,
    * because the star is what the reader is on.
    */
-  [data-ui='rating'] [data-part='item']:has(> [data-part='input']:focus-visible) {
+  [data-ui-rating] [data-part-item]:has(> [data-part-input]:focus-visible) {
     border-radius: var(--slotted-radius-full, 9999px);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
@@ -352,7 +352,7 @@
    * that holds the ratio against it — so a required rating left empty is
    * marked on the stars themselves, beside the message `field` writes.
    */
-  [data-ui='rating'][data-part='root'][data-invalid] {
+  [data-ui-rating][data-part-root][data-invalid] {
     --_off: var(--slotted-rating-invalid-color, var(--slotted-tone-danger-surface));
     --_off-edge: var(--slotted-tone-danger-border);
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
@@ -365,14 +365,14 @@
    * stroke grows about its path inside the drawing's own box, so no star and
    * no label moves.
    */
-  [data-ui='rating'][data-part='root'][data-invalid] [data-part='symbol'] svg {
+  [data-ui-rating][data-part-root][data-invalid] [data-part-symbol] svg {
     stroke-width: calc(
       var(--_stroke) * 1px +
         var(--slotted-rating-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
     );
   }
 
-  [data-ui='rating'][data-part='root'][data-readonly] [data-part='input'] {
+  [data-ui-rating][data-part-root][data-readonly] [data-part-input] {
     cursor: default;
   }
 
@@ -381,14 +381,14 @@
    * disabled ink and the unlit ones stay on the disabled ground, so three of
    * five reads as three of five and not as an absent control.
    */
-  [data-ui='rating'][data-part='root'][data-disabled] {
+  [data-ui-rating][data-part-root][data-disabled] {
     --_on: var(--slotted-disabled-foreground);
     --_off: var(--slotted-disabled-background);
 
     color: var(--slotted-disabled-foreground);
   }
 
-  [data-ui='rating'][data-part='root'][data-disabled] [data-part='input'] {
+  [data-ui-rating][data-part-root][data-disabled] [data-part-input] {
     cursor: not-allowed;
   }
 
@@ -399,13 +399,13 @@
    * how many readings the number is made of. Figures are tabular, so a row of
    * products lines its numbers up.
    */
-  [data-ui='rating'] [data-part='value'] {
+  [data-ui-rating] [data-part-value] {
     font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-font-weight-semibold, 600);
     white-space: nowrap;
   }
 
-  [data-ui='rating'] [data-part='count'] {
+  [data-ui-rating] [data-part-count] {
     color: var(--slotted-text-muted, GrayText);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -416,7 +416,7 @@
    * rather than a figure — so it is set muted, as a description is, and a
    * long one wraps inside the row rather than running past it.
    */
-  [data-ui='rating'][data-part='root']:has([data-part='input']) > [data-part='value'] {
+  [data-ui-rating][data-part-root]:has([data-part-input]) > [data-part-value] {
     color: var(--slotted-text-muted, GrayText);
     font-weight: var(--slotted-font-weight-regular, 400);
     min-inline-size: 0;
@@ -428,14 +428,14 @@
 
   /* While the pointer previews a value the word names it, and reads as the
      answer to the pointer rather than as a hint. */
-  [data-ui='rating'][data-part='root']:not([data-readonly], [data-disabled]):has(
-      [data-part='input']:hover:not(:disabled)
+  [data-ui-rating][data-part-root]:not([data-readonly], [data-disabled]):has(
+      [data-part-input]:hover:not(:disabled)
     )
-    > [data-part='value'] {
+    > [data-part-value] {
     color: var(--slotted-text, CanvasText);
   }
 
-  [data-ui='rating'][data-part='root'][data-disabled] > [data-part='value'] {
+  [data-ui-rating][data-part-root][data-disabled] > [data-part-value] {
     color: var(--slotted-disabled-foreground);
   }
 
@@ -457,9 +457,9 @@
    * trimmed figure pulled the stars up against its baseline.
    */
   @supports (text-box: trim-both cap alphabetic) {
-    [data-ui='rating'][data-part='root'] > :is([data-part='value'], [data-part='count']),
-    [data-ui='rating'] [data-part='level-count'],
-    [data-ui='rating'] [data-part='level-label'] > span:not([data-ui]) {
+    [data-ui-rating][data-part-root] > :is([data-part-value], [data-part-count]),
+    [data-ui-rating] [data-part-level-count],
+    [data-ui-rating] [data-part-level-label] > span:not([data-ui]) {
       text-box: trim-both cap alphabetic;
     }
   }
@@ -471,11 +471,11 @@
    * cell has room for, and the one Fluent calls `compact`. The star is the
    * mark of the figure, not a share of it, so it is always lit whole.
    */
-  [data-ui='rating'][data-part='root'][data-variant='compact'] {
+  [data-ui-rating][data-part-root][data-variant='compact'] {
     column-gap: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='rating'][data-part='root'][data-variant='compact'] [data-part='item'] {
+  [data-ui-rating][data-part-root][data-variant='compact'] [data-part-item] {
     --_fill: 1;
   }
 
@@ -489,7 +489,7 @@
    * query, because the break is where the content stops fitting and nowhere
    * else.
    */
-  [data-ui='rating'][data-part='root'][data-variant='summary'] {
+  [data-ui-rating][data-part-root][data-variant='summary'] {
     --_bar: var(--slotted-rating-bar-size, var(--slotted-space-4, 0.5rem));
 
     align-items: start;
@@ -500,7 +500,7 @@
     inline-size: 100%;
   }
 
-  [data-ui='rating'] [data-part='aggregate'] {
+  [data-ui-rating] [data-part-aggregate] {
     align-content: start;
     column-gap: var(--slotted-space-3, 0.375rem);
     display: grid;
@@ -513,23 +513,23 @@
    * The figure is set at the key-figure step `stat-card` reads, on its own
    * line height, and the scale beside it sits on its baseline.
    */
-  [data-ui='rating'] [data-part='aggregate'] > [data-part='value'] {
+  [data-ui-rating] [data-part-aggregate] > [data-part-value] {
     align-self: baseline;
     font-size: var(--slotted-font-size-4xl, 2rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--slotted-line-height-4xl, 1.2);
   }
 
-  [data-ui='rating'] [data-part='scale'] {
+  [data-ui-rating] [data-part-scale] {
     align-self: baseline;
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='rating'] [data-part='aggregate'] > :not([data-part='value'], [data-part='scale']) {
+  [data-ui-rating] [data-part-aggregate] > :not([data-part-value], [data-part-scale]) {
     grid-column: 1 / -1;
   }
 
-  [data-ui='rating'] [data-part='aggregate'] > [data-part='count'] {
+  [data-ui-rating] [data-part-aggregate] > [data-part-count] {
     white-space: normal;
   }
 
@@ -537,7 +537,7 @@
    * The distribution is one grid whose rows are subgrids, so every label,
    * bar and count lines up with the one above it whatever the numbers.
    */
-  [data-ui='rating'] [data-part='distribution'] {
+  [data-ui-rating] [data-part-distribution] {
     display: grid;
     flex: 1 1 15rem;
     grid-template-columns: auto minmax(4rem, 1fr) auto;
@@ -548,13 +548,13 @@
     row-gap: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='rating'] [data-part='distribution'] > li {
+  [data-ui-rating] [data-part-distribution] > li {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
   }
 
-  [data-ui='rating'] [data-part='level'] {
+  [data-ui-rating] [data-part-level] {
     align-items: center;
     background-color: transparent;
     border: 0;
@@ -578,19 +578,19 @@
       box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='rating'] button[data-part='level'] {
+  [data-ui-rating] button[data-part-level] {
     cursor: pointer;
   }
 
-  [data-ui='rating'] button[data-part='level']:hover:not(:disabled) {
+  [data-ui-rating] button[data-part-level]:hover:not(:disabled) {
     background-color: var(--_halo);
   }
 
-  [data-ui='rating'] button[data-part='level']:active:not(:disabled) {
+  [data-ui-rating] button[data-part-level]:active:not(:disabled) {
     background-color: var(--_halo-active);
   }
 
-  [data-ui='rating'] button[data-part='level']:focus-visible {
+  [data-ui-rating] button[data-part-level]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
@@ -601,22 +601,22 @@
    * as they are, so the filter reads as one row lit among five rather than
    * four rows dimmed.
    */
-  [data-ui='rating'] [data-part='level'][data-pressed] {
+  [data-ui-rating] [data-part-level][data-pressed] {
     background-color: var(--slotted-tone-warning-surface);
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px) var(--slotted-tone-warning-border);
   }
 
-  [data-ui='rating'] [data-part='level'][data-pressed] [data-part='level-count'] {
+  [data-ui-rating] [data-part-level][data-pressed] [data-part-level-count] {
     color: var(--slotted-text, CanvasText);
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='rating'] button[data-part='level']:disabled {
+  [data-ui-rating] button[data-part-level]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: default;
   }
 
-  [data-ui='rating'] [data-part='level-label'] {
+  [data-ui-rating] [data-part-level-label] {
     --slotted-icon-size: var(--slotted-control-icon-size-sm, 14px);
 
     align-items: center;
@@ -626,18 +626,18 @@
     white-space: nowrap;
   }
 
-  [data-ui='rating'] [data-part='level-label'] svg {
+  [data-ui-rating] [data-part-level-label] svg {
     fill: currentColor;
     stroke-width: var(--_stroke);
   }
 
-  [data-ui='rating'] [data-part='level-label'] > [data-ui='icon'] {
+  [data-ui-rating] [data-part-level-label] > [data-ui-icon] {
     color: var(--slotted-text-muted, GrayText);
   }
 
   /* The track takes the symbols' edge: nothing in `light` and `dark`, a black
      hairline in `high-contrast`, where its ground is the page's white. */
-  [data-ui='rating'] [data-part='track'] {
+  [data-ui-rating] [data-part-track] {
     background-color: var(--_off);
     block-size: var(--_bar);
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px) var(--_edge);
@@ -650,7 +650,7 @@
    * the enter curve, the first time it is drawn and every time the share
    * changes, so a summary that loads reads as filling rather than popping.
    */
-  [data-ui='rating'] [data-part='indicator'] {
+  [data-ui-rating] [data-part-indicator] {
     background-color: var(--slotted-rating-bar-color, var(--_on));
     block-size: 100%;
     border-radius: inherit;
@@ -660,20 +660,20 @@
   }
 
   @starting-style {
-    [data-ui='rating'] [data-part='indicator'] {
+    [data-ui-rating] [data-part-indicator] {
       inline-size: 0;
     }
   }
 
-  [data-ui='rating'] [data-part='level-count'] {
+  [data-ui-rating] [data-part-level-count] {
     color: var(--slotted-text-muted, GrayText);
     font-variant-numeric: tabular-nums;
     justify-self: end;
     white-space: nowrap;
   }
 
-  [data-ui='rating'][data-disabled] [data-part='indicator'],
-  [data-ui='rating'] button[data-part='level']:disabled [data-part='indicator'] {
+  [data-ui-rating][data-disabled] [data-part-indicator],
+  [data-ui-rating] button[data-part-level]:disabled [data-part-indicator] {
     background-color: var(--slotted-disabled-foreground);
   }
 
@@ -689,7 +689,7 @@
    * (`@slotted/core/rating`, `summariseRatings`). Every figure, the interval
    * included, is also written as text.
    */
-  [data-ui='rating'][data-part='root'][data-variant='spectrum'] {
+  [data-ui-rating][data-part-root][data-variant='spectrum'] {
     --_g: var(--slotted-space-3, 0.375rem);
     --_plot: var(--slotted-space-12, 4rem);
     --_col: calc((100% - 4 * var(--_g)) / 5);
@@ -702,7 +702,7 @@
     inline-size: 100%;
   }
 
-  [data-ui='rating'][data-variant='spectrum'] > [data-part='aggregate'] {
+  [data-ui-rating][data-variant='spectrum'] > [data-part-aggregate] {
     align-items: baseline;
     column-gap: var(--slotted-space-3, 0.375rem);
     display: flex;
@@ -710,7 +710,7 @@
     row-gap: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='rating'][data-variant='spectrum'] > [data-part='aggregate'] > [data-part='count'] {
+  [data-ui-rating][data-variant='spectrum'] > [data-part-aggregate] > [data-part-count] {
     color: var(--slotted-text-muted, GrayText);
     flex-basis: 100%;
   }
@@ -719,7 +719,7 @@
    * The conclusion is a pill in its tone's surface, edge and text roles, the
    * pair a badge reads, pushed to the inline end of the figure's line.
    */
-  [data-ui='rating'] [data-part='insight'] {
+  [data-ui-rating] [data-part-insight] {
     align-self: center;
     background-color: var(--_tint-surface);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -733,61 +733,61 @@
     white-space: nowrap;
   }
 
-  [data-ui='rating'] :is([data-part='insight'], [data-part='bucket'])[data-tone='success'] {
+  [data-ui-rating] :is([data-part-insight], [data-part-bucket])[data-tone='success'] {
     --_tint-surface: var(--slotted-tone-success-surface);
     --_tint-border: var(--slotted-tone-success-border);
     --_tint-text: var(--slotted-tone-success-text);
     --_mark: var(--slotted-tone-success-solid);
   }
 
-  [data-ui='rating'] :is([data-part='insight'], [data-part='bucket'])[data-tone='warning'] {
+  [data-ui-rating] :is([data-part-insight], [data-part-bucket])[data-tone='warning'] {
     --_tint-surface: var(--slotted-tone-warning-surface);
     --_tint-border: var(--slotted-tone-warning-border);
     --_tint-text: var(--slotted-tone-warning-text);
     --_mark: var(--slotted-tone-warning-solid);
   }
 
-  [data-ui='rating'] :is([data-part='insight'], [data-part='bucket'])[data-tone='secondary'] {
+  [data-ui-rating] :is([data-part-insight], [data-part-bucket])[data-tone='secondary'] {
     --_tint-surface: var(--slotted-tone-secondary-surface);
     --_tint-border: var(--slotted-tone-secondary-border);
     --_tint-text: var(--slotted-text-muted, GrayText);
     --_mark: var(--slotted-tone-secondary-border);
   }
 
-  [data-ui='rating'] :is([data-part='insight'], [data-part='bucket'])[data-tone='danger'] {
+  [data-ui-rating] :is([data-part-insight], [data-part-bucket])[data-tone='danger'] {
     --_tint-surface: var(--slotted-tone-danger-surface);
     --_tint-border: var(--slotted-tone-danger-border);
     --_tint-text: var(--slotted-tone-danger-text);
     --_mark: var(--slotted-tone-danger-solid);
   }
 
-  [data-ui='rating'] [data-part='plot'] {
+  [data-ui-rating] [data-part-plot] {
     display: grid;
     row-gap: var(--slotted-space-3, 0.375rem);
   }
 
   /* The drawing area: its top margin is the room the mean's label stands in. */
-  [data-ui='rating'] [data-part='field'] {
+  [data-ui-rating] [data-part-field] {
     block-size: var(--_plot);
     border-block-end: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
     margin-block-start: var(--slotted-space-7, 1.25rem);
     position: relative;
   }
 
-  [data-ui='rating'] :is([data-part='columns'], [data-part='axis']) {
+  [data-ui-rating] :is([data-part-columns], [data-part-axis]) {
     column-gap: var(--_g);
     display: grid;
     grid-template-columns: repeat(5, 1fr);
   }
 
-  [data-ui='rating'] [data-part='columns'] {
+  [data-ui-rating] [data-part-columns] {
     block-size: 100%;
     isolation: isolate;
     position: relative;
     z-index: 1;
   }
 
-  [data-ui='rating'] [data-part='column'] {
+  [data-ui-rating] [data-part-column] {
     align-items: end;
     background-color: transparent;
     border: 0;
@@ -801,19 +801,19 @@
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='rating'] button[data-part='column'] {
+  [data-ui-rating] button[data-part-column] {
     cursor: pointer;
   }
 
-  [data-ui='rating'] button[data-part='column']:hover:not(:disabled) {
+  [data-ui-rating] button[data-part-column]:hover:not(:disabled) {
     background-color: var(--_halo);
   }
 
-  [data-ui='rating'] button[data-part='column']:active:not(:disabled) {
+  [data-ui-rating] button[data-part-column]:active:not(:disabled) {
     background-color: var(--_halo-active);
   }
 
-  [data-ui='rating'] button[data-part='column']:focus-visible {
+  [data-ui-rating] button[data-part-column]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -824,7 +824,7 @@
    * any other is at least two pixels, so one reading is never invisible. It
    * grows from the baseline on the long step and the enter curve.
    */
-  [data-ui='rating'] [data-part='column'] > [data-part='bar'] {
+  [data-ui-rating] [data-part-column] > [data-part-bar] {
     background-color: var(--_on);
     block-size: max(
       min(var(--slotted-space-1, 0.125rem), var(--slotted-rating-share, 0) * 100rem),
@@ -841,15 +841,15 @@
   }
 
   @starting-style {
-    [data-ui='rating'] [data-part='column'] > [data-part='bar'] {
+    [data-ui-rating] [data-part-column] > [data-part-bar] {
       block-size: 0;
     }
   }
 
-  [data-ui='rating']
-    [data-part='columns']:has([data-pressed])
-    [data-part='column']:not([data-pressed])
-    > [data-part='bar'] {
+  [data-ui-rating]
+    [data-part-columns]:has([data-pressed])
+    [data-part-column]:not([data-pressed])
+    > [data-part-bar] {
     background-color: var(--_off);
   }
 
@@ -858,12 +858,12 @@
    * first column, plus one column and one gap per unit. The interval sits
    * behind the columns and the mean in front of them.
    */
-  [data-ui='rating'] :is([data-part='interval'], [data-part='mean']) {
+  [data-ui-rating] :is([data-part-interval], [data-part-mean]) {
     pointer-events: none;
     position: absolute;
   }
 
-  [data-ui='rating'] [data-part='interval'] {
+  [data-ui-rating] [data-part-interval] {
     background-color: color-mix(
       in oklab,
       var(--slotted-text) calc(var(--slotted-highlight-tint-opacity, 0.075) * 100%),
@@ -883,7 +883,7 @@
     z-index: 0;
   }
 
-  [data-ui='rating'] [data-part='mean'] {
+  [data-ui-rating] [data-part-mean] {
     border-inline-start: var(--slotted-border-width-thick, 2px) solid var(--slotted-text);
     inset-block: calc(-1 * var(--slotted-space-5, 0.75rem)) 0;
     inset-inline-start: calc(
@@ -894,7 +894,7 @@
     z-index: 2;
   }
 
-  [data-ui='rating'] [data-part='mean-label'] {
+  [data-ui-rating] [data-part-mean-label] {
     background-color: var(--slotted-surface-inverse);
     border-radius: var(--slotted-radius-full, 9999px);
     color: var(--slotted-text-inverse);
@@ -910,17 +910,17 @@
     white-space: nowrap;
   }
 
-  [data-ui='rating'][data-part='root']:dir(rtl) [data-part='mean-label'] {
+  [data-ui-rating][data-part-root]:dir(rtl) [data-part-mean-label] {
     translate: 50% 0;
   }
 
-  [data-ui='rating'] [data-part='tick'] {
+  [data-ui-rating] [data-part-tick] {
     display: grid;
     justify-items: center;
     row-gap: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='rating'] [data-part='tick-label'] {
+  [data-ui-rating] [data-part-tick-label] {
     --slotted-icon-size: var(--slotted-control-icon-size-sm, 14px);
 
     align-items: center;
@@ -929,16 +929,16 @@
     font-variant-numeric: tabular-nums;
   }
 
-  [data-ui='rating'] [data-part='tick-label'] svg {
+  [data-ui-rating] [data-part-tick-label] svg {
     fill: currentColor;
     stroke-width: var(--_stroke);
   }
 
-  [data-ui='rating'] [data-part='tick-label'] > [data-ui='icon'] {
+  [data-ui-rating] [data-part-tick-label] > [data-ui-icon] {
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='rating'] [data-part='tick-share'] {
+  [data-ui-rating] [data-part-tick-share] {
     color: var(--slotted-text-muted, GrayText);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-variant-numeric: tabular-nums;
@@ -946,7 +946,7 @@
 
   /* The executive reading: positive, neutral and negative shares, each with
      its tone's mark, which never carries the meaning alone. */
-  [data-ui='rating'] [data-part='sentiment'] {
+  [data-ui-rating] [data-part-sentiment] {
     color: var(--slotted-text-muted, GrayText);
     column-gap: var(--slotted-space-6, 1rem);
     display: flex;
@@ -955,19 +955,19 @@
     row-gap: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='rating'] [data-part='bucket'] {
+  [data-ui-rating] [data-part-bucket] {
     align-items: center;
     column-gap: var(--slotted-space-2, 0.25rem);
     display: inline-flex;
   }
 
-  [data-ui='rating'] [data-part='bucket'] > strong {
+  [data-ui-rating] [data-part-bucket] > strong {
     color: var(--slotted-text, CanvasText);
     font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='rating'] [data-part='swatch'] {
+  [data-ui-rating] [data-part-swatch] {
     background-color: var(--_mark);
     block-size: var(--slotted-space-4, 0.5rem);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -984,15 +984,15 @@
    * the count. Two rows at 3.3 stop looking alike when one is split between
    * the ends.
    */
-  [data-ui='rating'][data-part='root'][data-variant='histogram'] {
+  [data-ui-rating][data-part-root][data-variant='histogram'] {
     column-gap: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='rating'][data-part='root'][data-variant='histogram'] [data-part='item'] {
+  [data-ui-rating][data-part-root][data-variant='histogram'] [data-part-item] {
     --_fill: 1;
   }
 
-  [data-ui='rating'] [data-part='histogram'] {
+  [data-ui-rating] [data-part-histogram] {
     align-items: end;
     block-size: calc(1cap + 0.5em);
     border-block-end: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-strong);
@@ -1002,7 +1002,7 @@
     margin-inline: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='rating'] [data-part='histogram'] > [data-part='bar'] {
+  [data-ui-rating] [data-part-histogram] > [data-part-bar] {
     background-color: var(--_on);
     block-size: max(
       min(var(--slotted-border-width-thin, 1px), var(--slotted-rating-share, 0) * 100rem),
@@ -1019,11 +1019,11 @@
    * scales.
    */
   @media (pointer: coarse) {
-    [data-ui='rating'] [data-part='item']:has(> [data-part='input']) {
+    [data-ui-rating] [data-part-item]:has(> [data-part-input]) {
       --_box: max(var(--slotted-target-comfortable, 44px), var(--_symbol));
     }
 
-    [data-ui='rating'] [data-part='level'] {
+    [data-ui-rating] [data-part-level] {
       min-block-size: var(--slotted-target-comfortable, 44px);
     }
   }
@@ -1035,36 +1035,36 @@
    * it — the shape carries the value, as it does in every scheme.
    */
   @media (forced-colors: active) {
-    [data-ui='rating'][data-part='root'] {
+    [data-ui-rating][data-part-root] {
       --_on: CanvasText;
       --_off: Canvas;
       --_edge: CanvasText;
       --_off-edge: CanvasText;
     }
 
-    [data-ui='rating'][data-part='root'][data-disabled] {
+    [data-ui-rating][data-part-root][data-disabled] {
       --_on: GrayText;
       --_edge: GrayText;
       --_off-edge: GrayText;
     }
 
-    [data-ui='rating'] [data-part='track'] {
+    [data-ui-rating] [data-part-track] {
       border: var(--slotted-border-width-thin, 1px) solid CanvasText;
     }
 
-    [data-ui='rating'] :is([data-part='insight'], [data-part='swatch']) {
+    [data-ui-rating] :is([data-part-insight], [data-part-swatch]) {
       border: var(--slotted-border-width-thin, 1px) solid CanvasText;
     }
 
-    [data-ui='rating'] [data-part='column'][data-pressed] {
+    [data-ui-rating] [data-part-column][data-pressed] {
       outline: var(--slotted-border-width-thick, 2px) solid Highlight;
     }
 
-    [data-ui='rating'] [data-part='level'][data-pressed] {
+    [data-ui-rating] [data-part-level][data-pressed] {
       outline: var(--slotted-border-width-thick, 2px) solid Highlight;
     }
 
-    [data-ui='rating'] [data-part='item']:has(> [data-part='input']:focus-visible) {
+    [data-ui-rating] [data-part-item]:has(> [data-part-input]:focus-visible) {
       outline-color: Highlight;
     }
   }

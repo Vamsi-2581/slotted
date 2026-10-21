@@ -56,16 +56,24 @@ import {
   selector: '[slProgressBar]',
   standalone: true,
   template: `@if (labelText(); as text) {
-      <span data-part="label" [id]="labelId" [attr.data-ui]="labelUi()">{{ text }}</span>
+      <span
+        data-part="label"
+        data-part-label=""
+        [id]="labelId"
+        [attr.data-ui]="labelUi()"
+        [attr.data-ui-visually-hidden]="labelUi() ? '' : null"
+        >{{ text }}</span
+      >
     }
     @if (showValueValue()) {
-      <span data-part="value">{{ valueTextValue() }}</span>
+      <span data-part="value" data-part-value="">{{ valueTextValue() }}</span>
     }
-    <div data-part="track">
+    <div data-part="track" data-part-track="">
       @if (wave()) {
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           [attr.viewBox]="waveViewBox"
@@ -73,7 +81,7 @@ import {
           <svg:path [attr.d]="wavePath()" [attr.pathLength]="waveReach" />
         </svg>
       } @else {
-        <div data-part="indicator"></div>
+        <div data-part="indicator" data-part-indicator=""></div>
       }
     </div>`,
   styleUrls: [
@@ -85,7 +93,9 @@ import {
   exportAs: 'slProgressBar',
   host: {
     'data-ui': 'progress-indicator',
+    'data-ui-progress-indicator': '',
     'data-part': 'root',
+    'data-part-root': '',
     'data-shape': 'linear',
     '[attr.role]': 'roleAttribute()',
     '[attr.aria-hidden]': 'hiddenFromTree()',

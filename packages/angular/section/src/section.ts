@@ -50,7 +50,9 @@ export const HEADER_SIZE_PROPERTY = '--slotted-section-header-size';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'section',
+    'data-ui-section': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.id]': 'id()',
     '[attr.aria-labelledby]': 'hasHeading() ? headingId() : null',
     '[attr.data-size]': 'resolvedSize()',

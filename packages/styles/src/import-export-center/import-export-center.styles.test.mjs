@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/import-export-center/contract.json', import.meta.url),
@@ -9,9 +20,8 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./import-export-center.css', import.meta.url), 'utf8');
-const fragment = readFileSync(
-  new URL('./import-export-center.harness.html', import.meta.url),
-  'utf8',
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./import-export-center.harness.html', import.meta.url), 'utf8'),
 );
 const normalized = css
   .replace(/\/\*[\s\S]*?\*\//g, '')
@@ -20,7 +30,7 @@ const normalized = css
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.importExportCenter;
 
 /** Every declaration of every rule whose selector list names the selector. */
@@ -53,7 +63,7 @@ test('exercises every declared part in the fragment', () => {
  * against a band midpoint of 4.15px, the whole-pixel snap.
  */
 test('centres the status mark on the middle of the cap and x-height band', () => {
-  const mark = declarations(`${ui} [data-part='status']>[data-part='mark']`);
+  const mark = declarations(`${ui} [data-part-status]>[data-part-mark]`);
   assert.match(mark, /--slotted-icon-size:1em/);
   assert.match(mark, /align-self:baseline/);
   assert.match(
@@ -69,7 +79,7 @@ test('centres the status mark on the middle of the cap and x-height band', () =>
  * up to minus its own width, so the words beside it do not move.
  */
 test('centres the separator dot on the middle of the x-height, and moves no word', () => {
-  const dot = declarations(`${ui} [data-part='meta']>* + *::before`);
+  const dot = declarations(`${ui} [data-part-meta]>* + *::before`);
   assert.match(dot, /display:inline-block/);
   assert.match(dot, /vertical-align:calc\(0\.5ex - var\(--_separator\) \/ 2\)/);
   assert.match(
@@ -92,7 +102,7 @@ test('draws the running mark with spinner and animates nothing of its own', () =
   assert.doesNotMatch(fragment, /data-glyph="loader-circle"/);
   assert.match(fragment, /data-part="mark" aria-hidden="true"\s*><span data-ui="spinner">/);
   assert.match(
-    declarations(`${ui} [data-part='status']>[data-part='mark']`),
+    declarations(`${ui} [data-part-status]>[data-part-mark]`),
     /--slotted-spinner-size:1em/,
   );
 });
@@ -102,7 +112,7 @@ test('draws the running mark with spinner and animates nothing of its own', () =
  * words wrap inside the column beside it.
  */
 test('keeps the mark beside its words at every width', () => {
-  const status = declarations(`${ui} [data-part='body']>[data-part='status']`);
+  const status = declarations(`${ui} [data-part-body]>[data-part-status]`);
   assert.match(status, /display:grid/);
   assert.match(status, /grid-template-columns:auto minmax\(0,1fr\)/);
   assert.match(status, /column-gap:var\(--_mark-gap\)/);
@@ -116,8 +126,8 @@ test('keeps the mark beside its words at every width', () => {
  */
 test('truncates the stage and the items of a secondary line instead of splitting them', () => {
   for (const selector of [
-    `${ui} [data-part='status-label']>[data-part='stage']`,
-    `${ui} [data-part='meta']>*`,
+    `${ui} [data-part-status-label]>[data-part-stage]`,
+    `${ui} [data-part-meta]>*`,
   ]) {
     const rules = declarations(selector);
     assert.match(rules, /white-space:nowrap/, selector);

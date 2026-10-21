@@ -38,14 +38,18 @@ const SECTION_SKELETON_LINES = 3;
 const ASIDE_SKELETON_LINES = 4;
 
 /** An alert about the record, above the columns. */
-@Directive({ selector: '[slDetailPanelBanner]', standalone: true, host: { 'data-part': 'banner' } })
+@Directive({
+  selector: '[slDetailPanelBanner]',
+  standalone: true,
+  host: { 'data-part': 'banner', 'data-part-banner': '' },
+})
 export class SlDetailPanelBanner {}
 
 /** What stands in place of the columns when the record is not there: a result-state. */
 @Directive({
   selector: '[slDetailPanelMessage]',
   standalone: true,
-  host: { 'data-part': 'message' },
+  host: { 'data-part': 'message', 'data-part-message': '' },
 })
 export class SlDetailPanelMessage {}
 
@@ -68,6 +72,7 @@ export class SlDetailPanelMessage {}
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'aside',
+    'data-part-aside': '',
     '[attr.aria-label]': 'name()',
   },
 })
@@ -92,7 +97,7 @@ export class SlDetailPanelAside {
   </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlDetailPanelFooter {
   protected readonly page = inject(SlPage, { optional: true });
@@ -128,12 +133,13 @@ export class SlDetailPanelFooter {
   template: `<div slContainer [size]="page?.resolvedWidth()" [inset]="page?.resolvedInset()">
     <ng-content select="[slDetailPanelBanner]" />
     @if (panel.status() === 'ready') {
-      <div data-part="columns">
-        <div data-part="main">
+      <div data-part="columns" data-part-columns="">
+        <div data-part="main" data-part-main="">
           @for (section of panel.sections(); track section.name()) {
             @if (tabbed()) {
               <div
                 data-part="section"
+                data-part-section=""
                 role="tabpanel"
                 tabindex="0"
                 [attr.id]="identity(section.name())?.panelId"
@@ -143,7 +149,7 @@ export class SlDetailPanelFooter {
                 [hidden]="panel.current() !== section.name()"
               >
                 @if (section.actions(); as actions) {
-                  <div data-part="section-actions">
+                  <div data-part="section-actions" data-part-section-actions="">
                     <ng-container *ngTemplateOutlet="actions" />
                   </div>
                 }
@@ -158,6 +164,7 @@ export class SlDetailPanelFooter {
             } @else {
               <div
                 data-part="section"
+                data-part-section=""
                 [attr.data-name]="section.name()"
                 [attr.data-current]="panel.current() === section.name() ? '' : null"
               >
@@ -206,7 +213,7 @@ export class SlDetailPanelFooter {
   </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'body' },
+  host: { 'data-part': 'body', 'data-part-body': '' },
 })
 export class SlDetailPanelBody {
   protected readonly panel = inject(SlDetailPanel);

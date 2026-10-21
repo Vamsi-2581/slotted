@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/inline-message/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./inline-message.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./inline-message.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./inline-message.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -23,8 +36,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.inlineMessage;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
@@ -42,7 +55,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -54,9 +70,9 @@ test('styles every part the contract declares', () => {
  */
 test('places the mark and the sentence rather than letting the grid guess', () => {
   assert.match(rule(root), /grid-template-columns:auto minmax\(0,1fr\)/);
-  assert.match(rule(`${ui}>[data-part='icon']`), /grid-column:1/);
-  assert.match(rule(`${ui}>[data-part='text']`), /grid-column:2/);
-  assert.match(rule(`${ui}>[data-part='text']`), /grid-row:1/);
+  assert.match(rule(`${ui}>[data-part-icon]`), /grid-column:1/);
+  assert.match(rule(`${ui}>[data-part-text]`), /grid-column:2/);
+  assert.match(rule(`${ui}>[data-part-text]`), /grid-row:1/);
 });
 
 /**
@@ -68,7 +84,7 @@ test('places the mark and the sentence rather than letting the grid guess', () =
  */
 test('keeps the mark on the message’s first line however far it runs', () => {
   assert.match(rule(root), /--_mark-size:1em/);
-  const icon = rule(`${ui}>[data-part='icon']`);
+  const icon = rule(`${ui}>[data-part-icon]`);
   assert.match(icon, /align-self:start/);
   assert.match(icon, /block-size:var\(--_mark-size\)/);
   assert.match(icon, /inline-size:var\(--_mark-size\)/);
@@ -81,7 +97,7 @@ test('keeps the mark on the message’s first line however far it runs', () => {
  * generated content, so a screen reader reads it and a page search finds it.
  */
 test('clips the severity word from sight without removing it', () => {
-  const prefix = rule(`${ui}>[data-part='prefix']`);
+  const prefix = rule(`${ui}>[data-part-prefix]`);
   assert.match(prefix, /position:absolute/);
   assert.match(prefix, /clip-path:inset\(50%\)/);
   assert.match(prefix, /inline-size:1px/);
@@ -102,7 +118,7 @@ test('withdraws the mark for the tone that has none', () => {
   assert.equal(contract.toneGlyphs.secondary, null);
   assert.ok(
     normalized.includes(
-      `${ui}[data-tone='secondary']:not([data-loading]):not([data-mark='dot'])>[data-part='icon']:empty{display:none;}`,
+      `${ui}[data-tone='secondary']:not([data-loading]):not([data-mark='dot'])>[data-part-icon]:empty{display:none;}`,
     ),
     'the help tone would hold an empty column where its mark would be',
   );
@@ -126,7 +142,7 @@ test('draws one neutral bullet for every tone when the mark is a dot', () => {
   assert.match(dot, /--_dot-size:calc\(var\(--_mark-size\) \/ 3\)/);
 
   const bullet = rule(
-    `${ui}[data-mark='dot']>[data-part='icon']:has(>[data-ui='icon']>[data-glyph='dot'])`,
+    `${ui}[data-mark='dot']>[data-part-icon]:has(>[data-ui-icon]>[data-glyph='dot'])`,
   );
   assert.match(bullet, /inline-size:var\(--_dot-size\)/);
   assert.match(bullet, /--slotted-icon-size:calc\(var\(--_dot-size\) \* 2\)/);
@@ -141,7 +157,7 @@ test('draws one neutral bullet for every tone when the mark is a dot', () => {
 test('draws nothing at all when the mark is none', () => {
   assert.ok(
     normalized.includes(
-      `${ui}[data-mark='none']:not([data-loading])>[data-part='icon']:empty{display:none;}`,
+      `${ui}[data-mark='none']:not([data-loading])>[data-part-icon]:empty{display:none;}`,
     ),
     'a message asked for no mark still draws one',
   );
@@ -154,7 +170,7 @@ test('draws nothing at all when the mark is none', () => {
  * message's own left edge rather than in the middle of a glyph's column.
  */
 test('gives the wait a round ring even when the mark is a dot', () => {
-  assert.match(rule(`${ui}[data-loading]>[data-part='icon']`), /inline-size:var\(--_mark-size\)/);
+  assert.match(rule(`${ui}[data-loading]>[data-part-icon]`), /inline-size:var\(--_mark-size\)/);
 });
 
 /**
@@ -164,8 +180,8 @@ test('gives the wait a round ring even when the mark is a dot', () => {
  */
 test('draws nothing at all when there is nothing to say', () => {
   assert.match(rule(`${root}[data-reserve]`), /min-block-size:1lh/);
-  assert.ok(normalized.includes(`${ui}:has([data-part='text']:empty)>[data-part='icon']`));
-  assert.ok(normalized.includes(`${ui}:has([data-part='text']:empty)>[data-part='prefix']`));
+  assert.ok(normalized.includes(`${ui}:has([data-part-text]:empty)>[data-part-icon]`));
+  assert.ok(normalized.includes(`${ui}:has([data-part-text]:empty)>[data-part-prefix]`));
 });
 
 /**
@@ -204,7 +220,7 @@ test('takes its type from the scale density restates, and its mark from the type
  * that an infinite animation must stop, and shortening is insufficient.
  */
 test('turns a ring for the wait and stops it when asked for stillness', () => {
-  const loading = rule(`${ui}[data-loading]>[data-part='icon']`);
+  const loading = rule(`${ui}[data-loading]>[data-part-icon]`);
   assert.match(
     loading,
     /animation:slotted-inline-message-spin var\(--slotted-duration-loop-fast\)/,
@@ -221,7 +237,7 @@ test('turns a ring for the wait and stops it when asked for stillness', () => {
  */
 test('lets the stronger state stop the weaker one’s motion', () => {
   assert.match(rule(`${root}[data-disabled]`), /color:var\(--slotted-disabled-foreground\)/);
-  assert.match(rule(`${ui}[data-disabled]>[data-part='icon']`), /animation:none/);
+  assert.match(rule(`${ui}[data-disabled]>[data-part-icon]`), /animation:none/);
 });
 
 /**
@@ -231,7 +247,7 @@ test('lets the stronger state stop the weaker one’s motion', () => {
  */
 test('keeps the mark visible when the system replaces the palette', () => {
   const forced = css.slice(css.indexOf('forced-colors: active'));
-  assert.match(forced, /\[data-part='icon'\]\s*\{\s*color: CanvasText/);
+  assert.match(forced, /\[data-part-icon\]\s*\{\s*color: CanvasText/);
   assert.match(forced, /border-inline-end-color: Canvas;/);
 });
 

@@ -25,7 +25,7 @@ test('recolours the dot grip in its states and never fills its box', () => {
       /background-color/.test(body) &&
       selectors.some(
         (selector) =>
-          /\[data-part='grip'\]/.test(selector) &&
+          /\[data-part-grip\]/.test(selector) &&
           /:hover|:focus-visible|\[data-dragging\]/.test(selector) &&
           !/\[data-side='(top|bottom)'\]/.test(selector),
       ),

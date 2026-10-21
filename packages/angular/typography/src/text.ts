@@ -36,7 +36,9 @@ import type {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'typography',
+    'data-ui-typography': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'size() ?? null',
     '[attr.data-weight]': 'weight() ?? null',
     '[attr.data-tone]': 'toneAttribute()',

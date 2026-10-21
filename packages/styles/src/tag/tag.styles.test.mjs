@@ -2,11 +2,24 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/tag/contract.json', import.meta.url), 'utf8'),
 );
 const css = readFileSync(new URL('./tag.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./tag.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./tag.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -20,8 +33,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -76,9 +89,9 @@ test('routes every tone through the same local properties', () => {
  */
 test('paints the chip on the root and the inset on the body', () => {
   assert.match(rule(root), /border-radius:var\(--_radius\)/);
-  assert.match(rule(`${ui} [data-part='body']`), /padding-inline:/);
+  assert.match(rule(`${ui} [data-part-body]`), /padding-inline:/);
   assert.ok(
-    !normalized.includes("[data-part='body'] [data-part='remove']"),
+    !normalized.includes('[data-part-body] [data-part-remove]'),
     'the remove control is a sibling of the body, never a descendant of it',
   );
 });
@@ -127,11 +140,11 @@ test('gives the remove control its target on both axes', () => {
     /--_inset:max\(0px,calc\(\(var\(--_block-size\) - var\(--_line\) - 2 \* var\(--_edge-width\)\) \/ 2\)\)/,
   );
   assert.match(
-    rule(`${ui} [data-part='remove']`),
+    rule(`${ui} [data-part-remove]`),
     /inline-size:max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_icon-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)/,
   );
-  assert.match(rule(`${ui} [data-part='remove']`), /position:relative/);
-  const halo = rule(`${ui} [data-part='remove']::after`);
+  assert.match(rule(`${ui} [data-part-remove]`), /position:relative/);
+  const halo = rule(`${ui} [data-part-remove]::after`);
   assert.match(halo, /position:absolute/);
   assert.match(halo, /inset:min\(0px,calc\(\(100% - var\(--slotted-target-min,24px\)\) \/ 2\)\)/);
 });
@@ -141,10 +154,10 @@ test('gives the remove control its target on both axes', () => {
  * icon boxes and paints neither, and the fragment writes the markup they do.
  */
 test('draws the remove glyph and the selection mark as Glyph elements', () => {
-  assert.ok(!normalized.includes(`${ui} [data-part='remove']::before`));
+  assert.ok(!normalized.includes(`${ui} [data-part-remove]::before`));
   assert.ok(!/mask/.test(declarations), 'no mask stands in for a glyph');
-  assert.match(rule(`${ui} [data-part='remove']`), /--slotted-icon-size:var\(--_icon-size\)/);
-  assert.match(rule(`${ui} [data-part='indicator']`), /--slotted-icon-size:var\(--_icon-size\)/);
+  assert.match(rule(`${ui} [data-part-remove]`), /--slotted-icon-size:var\(--_icon-size\)/);
+  assert.match(rule(`${ui} [data-part-indicator]`), /--slotted-icon-size:var\(--_icon-size\)/);
   assert.ok(!/content:'[^']+'/.test(normalized), 'a character is never an icon');
   const drawn = (part, glyph) =>
     new RegExp(
@@ -171,7 +184,7 @@ test('draws the remove glyph and the selection mark as Glyph elements', () => {
  * having jumped.
  */
 test('animates the selection mark arriving, from the motion scale', () => {
-  const declared = rule(`${ui} [data-part='indicator']`);
+  const declared = rule(`${ui} [data-part-indicator]`);
   assert.match(declared, /transition:/);
   assert.match(declared, /inline-size var\(--slotted-duration-short\)/);
   assert.ok(!/\d+m?s/.test(declared.replace(/var\([^)]*\)/g, '')), 'a literal duration');
@@ -221,7 +234,7 @@ test('exercises every declared state in the harness fragment', () => {
 test('hands its glyph size to an icon placed in a slot', () => {
   // The icon family reads `--slotted-icon-size` from its container; a bare
   // glyph host reads the slot's font-size instead. Both are the slot's scale.
-  const rule = normalized.split(`${ui} [data-part='end']{`)[1]?.split('}')[0] ?? '';
+  const rule = normalized.split(`${ui} [data-part-end]{`)[1]?.split('}')[0] ?? '';
   assert.ok(rule.includes('--slotted-icon-size:var(--_icon-size)'));
   assert.ok(rule.includes('font-size:var(--_icon-size)'));
 });

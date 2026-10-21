@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { Badge } from '../badge';
@@ -51,18 +52,22 @@ export function DetailPanelBody({
   const ready = panel.status === 'ready';
   const hasAside = panel.aside !== 'none' && (aside !== undefined || panel.loading);
 
-  const rootProps: DetailPanelPartProps = {
+  const rootProps: DetailPanelPartProps = keyedProps({
     ...nativeProps,
     children: (
       <Container inset={page?.inset} size={page?.width}>
         {banner !== undefined && banner !== null && banner !== false ? (
-          <div data-part="banner">{banner}</div>
+          <div data-part="banner" data-part-banner="">
+            {banner}
+          </div>
         ) : null}
         {ready ? (
-          <div data-part="columns">
-            <div data-part="main">{children}</div>
+          <div data-part="columns" data-part-columns="">
+            <div data-part="main" data-part-main="">
+              {children}
+            </div>
             {hasAside ? (
-              <aside data-part="aside" aria-label={panel.t('aside')}>
+              <aside data-part="aside" data-part-aside="" aria-label={panel.t('aside')}>
                 {panel.loading ? (
                   <SkeletonText lines={ASIDE_SKELETON_LINES} inlineSize="60%" />
                 ) : (
@@ -72,14 +77,16 @@ export function DetailPanelBody({
             ) : null}
           </div>
         ) : (
-          <div data-part="message">{message}</div>
+          <div data-part="message" data-part-message="">
+            {message}
+          </div>
         )}
       </Container>
     ),
     className,
     'data-part': 'body',
     style,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
@@ -139,13 +146,15 @@ export function DetailPanelSection({
     );
   const waiting = panel.loading ? <SkeletonText lines={SECTION_SKELETON_LINES} /> : null;
 
-  const rootProps: DetailPanelSectionRootProps = {
+  const rootProps: DetailPanelSectionRootProps = keyedProps({
     ...nativeProps,
     ...(identity !== undefined ? { 'aria-labelledby': identity.tabId, id: identity.panelId } : {}),
     children: tabbed ? (
       <>
         {actions !== undefined && actions !== null && actions !== false ? (
-          <div data-part="section-actions">{actions}</div>
+          <div data-part="section-actions" data-part-section-actions="">
+            {actions}
+          </div>
         ) : null}
         {present ? (waiting ?? children) : null}
       </>
@@ -174,7 +183,7 @@ export function DetailPanelSection({
     'data-part': 'section',
     ...(tabbed ? { hidden: !current, role: 'tabpanel', tabIndex: 0 } : {}),
     style,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={setRef} />;

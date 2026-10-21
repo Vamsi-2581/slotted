@@ -8,6 +8,6 @@ import { Directive } from '@angular/core';
   selector: '[slCardFooter]',
   standalone: true,
   exportAs: 'slCardFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlCardFooter {}

@@ -41,6 +41,7 @@ const HEADINGS = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
   exportAs: 'slCollapsibleHeader',
   host: {
     'data-part': 'header',
+    'data-part-header': '',
     '[attr.role]': 'ariaRole()',
     '[attr.aria-level]': 'ariaLevel()',
   },
@@ -76,18 +77,19 @@ export class SlCollapsibleHeader {
   exportAs: 'slCollapsibleTrigger',
   imports: [SlGlyph, SlIcon],
   template: `@if (collapsible.resolvedIndicator() !== 'none') {
-      <span data-part="indicator" aria-hidden="true"
+      <span data-part="indicator" data-part-indicator="" aria-hidden="true"
         ><span slIcon><svg slGlyph [name]="indicatorGlyph()"></svg></span
       ></span>
     }
-    <span data-part="label"><ng-content /></span>
+    <span data-part="label" data-part-label=""><ng-content /></span>
     @if (description()) {
-      <span data-part="description">{{ description() }}</span>
+      <span data-part="description" data-part-description="">{{ description() }}</span>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'trigger',
+    'data-part-trigger': '',
     type: 'button',
     '[attr.id]': 'ids().triggerId',
     '[attr.aria-controls]': 'ids().panelId',
@@ -141,7 +143,7 @@ export class SlCollapsibleTrigger {
   selector: '[slCollapsibleActions]',
   standalone: true,
   exportAs: 'slCollapsibleActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlCollapsibleActions {}
 
@@ -182,7 +184,7 @@ export class SlCollapsibleContent {
   exportAs: 'slCollapsiblePanel',
   imports: [NgTemplateOutlet],
   template: `@if (mounted()) {
-    <div data-part="content">
+    <div data-part="content" data-part-content="">
       @if (deferred()) {
         <ng-container [ngTemplateOutlet]="deferred()!.template" />
       }
@@ -193,6 +195,7 @@ export class SlCollapsibleContent {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'panel',
+    'data-part-panel': '',
     '[attr.id]': 'ids().panelId',
     '[attr.aria-labelledby]': 'ids().triggerId',
     '[attr.role]': "collapsible.region() ? 'region' : null",

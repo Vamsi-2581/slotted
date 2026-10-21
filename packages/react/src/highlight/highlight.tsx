@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/highlight/highlight.css';
 
 import { Fragment, useMemo } from 'react';
@@ -52,12 +53,13 @@ export function Highlight({
     [matcher, query, ranges, resolvedLocale, resolvedOccurrences, resolvedSensitivity, text],
   );
 
-  const rootProps: HighlightRootProps = {
+  const rootProps: HighlightRootProps = keyedProps({
     ...nativeProps,
     children: runs.map((run, index) =>
       run.matched ? (
         <mark
           data-part="match"
+          data-part-match=""
           key={index}
           {...(run.index === current ? { 'data-current': '' } : {})}
         >
@@ -70,7 +72,7 @@ export function Highlight({
     'data-part': 'root',
     'data-ui': 'highlight',
     ...(disabled ? { 'data-disabled': '' as const } : {}),
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

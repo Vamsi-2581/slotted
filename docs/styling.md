@@ -86,6 +86,39 @@ layer defines, use `revert-layer`:
 }
 ```
 
+## Selector keys
+
+Every element that carries `data-part="cell"` also carries `data-part-cell`,
+and every element that carries `data-ui="data-grid"` also carries
+`data-ui-data-grid`. The library's stylesheet matches the key, not the value.
+Blink and WebKit file an attribute selector under the attribute's name, so a
+rule keyed on `[data-part='cell']` is tested against every element that
+carries `data-part`; a rule keyed on `[data-part-cell]` is tested against the
+cells only. A full style recalculation of an application shell holding a data
+grid of 50 rows measured 357 to 470 ms with value selectors, and 29 ms above
+the bare document with keys (1 499 elements, Chromium headless,
+`packages/react/src/styles.perf.browser.test.tsx`).
+
+`data-part` and `data-ui` stay the public hooks a test or an application
+selects by. An application rule keyed on them still matches; it costs one test
+per element that carries the attribute.
+
+An element an application renders into a family's anatomy, through a `render`
+callback or a slot that asks for a part, carries the key beside the value:
+
+```tsx
+import { selectorKeyProps } from '@slotted/core/selector-key';
+
+<span data-part="option-duration" {...selectorKeyProps('part', 'option-duration')}>
+  {duration}
+</span>;
+```
+
+The key is the value in lower case after `data-part-` or `data-ui-`. The
+parts of `prose` that its content writes — `lead`, `exclude` and `footnotes` —
+are the exception: the stylesheet keys them on the value, so content from a
+CMS needs no key.
+
 ## Themes
 
 A theme is a module, not a value file. `defineTheme` (`@slotted/theme`) takes

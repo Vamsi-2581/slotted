@@ -634,7 +634,8 @@ describe('the pointer', () => {
     const { drag, list } = scene();
     list('todo');
     const item = document.getElementById('todo-b')!;
-    item.innerHTML = '<span data-label>b</span><span data-part="resizer"></span>';
+    item.innerHTML =
+      '<span data-label>b</span><span data-part="resizer" data-part-resizer=""></span>';
     drag.attachDraggable(item, {
       container: 'todo',
       key: 'b',

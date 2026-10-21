@@ -107,7 +107,7 @@ export const Accessibility: Story = {
       <ButtonLink aria-describedby="settings-help" href="/settings">
         Open settings
       </ButtonLink>
-      <span data-ui="visually-hidden" id="settings-help">
+      <span data-ui="visually-hidden" data-ui-visually-hidden="" id="settings-help">
         Opens account settings.
       </span>
       <ButtonLink
@@ -117,7 +117,10 @@ export const Accessibility: Story = {
         target="_blank"
       >
         Documentation
-        <span data-ui="visually-hidden"> (opens in a new tab)</span>
+        <span data-ui="visually-hidden" data-ui-visually-hidden="">
+          {' '}
+          (opens in a new tab)
+        </span>
       </ButtonLink>
     </div>
   ),

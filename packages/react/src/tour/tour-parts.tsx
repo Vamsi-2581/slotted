@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useCallback, useEffect } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode, Ref } from 'react';
 
@@ -59,7 +60,7 @@ export function TourContent({ children, ref, render, ...nativeProps }: TourConte
     [ref, tour.setContentNode],
   );
 
-  const rootProps: TourContentRootProps = {
+  const rootProps: TourContentRootProps = keyedProps({
     ...nativeProps,
     children,
     ...(tour.hasTitle ? { 'aria-labelledby': tour.titleId } : {}),
@@ -71,7 +72,7 @@ export function TourContent({ children, ref, render, ...nativeProps }: TourConte
     ),
     role: nativeProps.role ?? 'dialog',
     tabIndex: -1,
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref: setNode });
   return <div {...rootProps} ref={setNode} />;
@@ -83,7 +84,7 @@ export function TourMedia({ children, ref, render, ...nativeProps }: TourMediaPr
   const content: ReactNode = children ?? tour.step.media;
   if (content === undefined || content === null) return null;
 
-  const rootProps = { ...nativeProps, children: content, 'data-part': 'media' };
+  const rootProps = keyedProps({ ...nativeProps, children: content, 'data-part': 'media' });
   if (render !== undefined)
     return render({ ...rootProps, ref: (node) => attach(node, ref as Ref<HTMLElement>) });
   return <div {...rootProps} ref={ref} />;
@@ -91,7 +92,7 @@ export function TourMedia({ children, ref, render, ...nativeProps }: TourMediaPr
 
 /** Where the reader is, and the way out, on one row. */
 export function TourHeader({ children, ref, render, ...nativeProps }: TourHeaderProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'header' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'header' });
   if (render !== undefined)
     return render({ ...rootProps, ref: (node) => attach(node, ref as Ref<HTMLElement>) });
   return <div {...rootProps} ref={ref} />;
@@ -105,11 +106,11 @@ export function TourProgress({ children, ref, render, ...nativeProps }: TourProg
   const tour = useTourContext();
   if (children === undefined && tour.total <= 1) return null;
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children: children ?? tour.t('progress', { position: tour.position, total: tour.total }),
     'data-part': 'progress',
-  };
+  });
   if (render !== undefined)
     return render({ ...rootProps, ref: (node) => attach(node, ref as Ref<HTMLElement>) });
   return <p {...rootProps} ref={ref} />;
@@ -124,7 +125,7 @@ export function TourClose({ children, onClick, ref, render, ...nativeProps }: To
   const tour = useTourContext();
   if (tour.step.actions?.close === false) return null;
 
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-label': tour.t('close'),
     ...nativeProps,
     /* The cross is the library's own glyph, unless the consumer wrote content of their own. */
@@ -138,7 +139,7 @@ export function TourClose({ children, onClick, ref, render, ...nativeProps }: To
       tour.close('close', { detail: event.detail, dismiss: true }),
     ),
     type: 'button' as const,
-  };
+  });
   if (render !== undefined)
     return render({ ...rootProps, ref: (node) => attach(node, ref as Ref<HTMLElement>) });
   return <button {...rootProps} ref={ref} />;
@@ -168,7 +169,12 @@ export function TourTitle({ children, ref, render, ...nativeProps }: TourTitlePr
   );
 
   if (!present) return null;
-  const rootProps = { ...nativeProps, children: content, 'data-part': 'title', id: tour.titleId };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    children: content,
+    'data-part': 'title',
+    id: tour.titleId,
+  });
   if (render !== undefined) return render({ ...rootProps, ref: setNode });
   return <h2 {...rootProps} ref={setNode} />;
 }
@@ -184,12 +190,12 @@ export function TourDescription({ children, ref, render, ...nativeProps }: TourD
   }, [present, tour.setHasDescription]);
 
   if (!present) return null;
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children: content,
     'data-part': 'description',
     id: tour.descriptionId,
-  };
+  });
   if (render !== undefined)
     return render({ ...rootProps, ref: (node) => attach(node, ref as Ref<HTMLElement>) });
   return <p {...rootProps} ref={ref} />;
@@ -201,7 +207,7 @@ export function TourBody({ children, ref, render, ...nativeProps }: TourBodyProp
   const content: ReactNode = children ?? tour.step.content;
   if (content === undefined || content === null || content === false) return null;
 
-  const rootProps = { ...nativeProps, children: content, 'data-part': 'body' };
+  const rootProps = keyedProps({ ...nativeProps, children: content, 'data-part': 'body' });
   if (render !== undefined)
     return render({ ...rootProps, ref: (node) => attach(node, ref as Ref<HTMLElement>) });
   return <div {...rootProps} ref={ref} />;
@@ -209,7 +215,7 @@ export function TourBody({ children, ref, render, ...nativeProps }: TourBodyProp
 
 /** The actions. A consumer's own button placed here sits beside the family's. */
 export function TourFooter({ children, ref, render, ...nativeProps }: TourFooterProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'footer' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'footer' });
   if (render !== undefined)
     return render({ ...rootProps, ref: (node) => attach(node, ref as Ref<HTMLElement>) });
   return <div {...rootProps} ref={ref} />;
@@ -235,12 +241,12 @@ function action(
         : { messages: { loading: extra.loadingMessage } })}
       onClick={compose(onClick, onPress)}
       render={({ ref: buttonRef, ...buttonProps }) => {
-        const partProps = {
+        const partProps = keyedProps({
           ...buttonProps,
           'data-part': part,
           ...(extra.last ? { 'data-last': '' } : {}),
           ref: (node: HTMLElement | null) => attach(node, buttonRef as Ref<HTMLElement>),
-        };
+        });
         return render === undefined ? <button {...partProps} /> : render(partProps);
       }}
       size="sm"

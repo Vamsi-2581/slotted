@@ -36,7 +36,7 @@ import {
   selector: 'a[slButtonLink]',
   standalone: true,
   template: `<ng-content select="[slButtonStart]"></ng-content
-    ><span data-part="label"><ng-content></ng-content></span
+    ><span data-part="label" data-part-label=""><ng-content></ng-content></span
     ><ng-content select="[slButtonEnd]"></ng-content>`,
   styleUrl: '../../../styles/src/button/button.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -44,7 +44,9 @@ import {
   exportAs: 'slButtonLink',
   host: {
     'data-ui': 'button',
+    'data-ui-button': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-disabled]': "disabled() ? 'true' : null",
     '[attr.role]': "disabled() ? 'link' : null",
     '[attr.href]': 'disabled() ? null : href()',

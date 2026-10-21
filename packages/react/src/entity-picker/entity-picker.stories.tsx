@@ -840,8 +840,13 @@ export const Composition: Story = {
           }
           renderOption={(person) => (
             <>
-              <span data-part="label">{person.label}</span>
-              <span data-part="description">{`${person.description ?? ''} · Northwind`}</span>
+              <span data-part="label" data-part-label="">
+                {person.label}
+              </span>
+              <span
+                data-part="description"
+                data-part-description=""
+              >{`${person.description ?? ''} · Northwind`}</span>
             </>
           )}
           selectionMode="multiple"

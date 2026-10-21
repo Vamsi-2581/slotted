@@ -21,7 +21,7 @@
    * actions stacks when the box is narrow, and the `inline` row becomes a
    * column at the same point.
    */
-  [data-ui='result-state'][data-part='root'] {
+  [data-ui-result-state][data-part-root] {
     /**
      * Prose sizes come from the type scale, which does not vary by density,
      * and the mark comes from the control scales, which do. That is where
@@ -204,7 +204,7 @@
    * it. The middle track can still shrink below its content, which is what
    * lets a long sentence wrap inside a narrow cell.
    */
-  [data-ui='result-state'][data-part='root'][data-reach='inline'] {
+  [data-ui-result-state][data-part-root][data-reach='inline'] {
     --_title-font-size: var(
       --slotted-result-state-title-font-size,
       var(--slotted-font-size-sm, 0.8125rem)
@@ -234,7 +234,7 @@
    * the type scale's top step — the size a page-level heading takes in this
    * library, and one no control font size can reach.
    */
-  [data-ui='result-state'][data-part='root'][data-reach='page'] {
+  [data-ui-result-state][data-part-root][data-reach='page'] {
     --_title-font-size: var(
       --slotted-result-state-title-font-size,
       var(--slotted-font-size-3xl, 1.5rem)
@@ -273,22 +273,22 @@
    * would otherwise ship: the title looks centred until the description wraps
    * onto a second line.
    */
-  [data-ui='result-state'][data-part='root'][data-align='center'] {
+  [data-ui-result-state][data-part-root][data-align='center'] {
     justify-items: center;
     text-align: center;
   }
 
-  [data-ui='result-state'][data-part='root'][data-align='start'] {
+  [data-ui-result-state][data-part-root][data-align='start'] {
     justify-items: start;
     text-align: start;
   }
 
-  [data-ui='result-state'][data-part='root'][data-reach='inline'][data-align='center'] {
+  [data-ui-result-state][data-part-root][data-reach='inline'][data-align='center'] {
     justify-content: center;
     justify-items: stretch;
   }
 
-  [data-ui='result-state'][data-part='root'][data-reach='inline'][data-align='start'] {
+  [data-ui-result-state][data-part-root][data-reach='inline'][data-align='start'] {
     justify-content: start;
     justify-items: stretch;
   }
@@ -313,7 +313,7 @@
    * names it, the declaration is invalid at computed-value time and the box
    * paints nothing at all.
    */
-  [data-ui='result-state'] > [data-part='media']:empty {
+  [data-ui-result-state] > [data-part-media]:empty {
     background: var(--slotted-result-state-media) center / contain no-repeat;
     block-size: var(--_media-size);
     display: none;
@@ -331,7 +331,7 @@
    * loaded reserves the room it will take and nothing below it moves when it
    * does.
    */
-  [data-ui='result-state'] > [data-part='media']:not(:empty) {
+  [data-ui-result-state] > [data-part-media]:not(:empty) {
     align-items: center;
     background-color: transparent;
     block-size: var(--_media-size);
@@ -341,14 +341,14 @@
     min-inline-size: var(--_media-size);
   }
 
-  [data-ui='result-state'] > [data-part='media']:not(:empty) > * {
+  [data-ui-result-state] > [data-part-media]:not(:empty) > * {
     block-size: 100%;
     inline-size: auto;
     max-inline-size: 100%;
   }
 
   /** Supplied artwork on the same line, centred on the same axis by its own size. */
-  [data-ui='result-state'][data-reach='inline'] > [data-part='media']:not(:empty) {
+  [data-ui-result-state][data-reach='inline'] > [data-part-media]:not(:empty) {
     align-self: start;
     grid-column: 1;
     grid-row: 1;
@@ -385,8 +385,8 @@
    * at the three densities and its corners stay concentric — the outer radius
    * is the inner one plus the ring.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='tile']
-    > [data-part='media']:not(:empty) {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='tile']
+    > [data-part-media]:not(:empty) {
     --_ring: var(--slotted-space-2, 0.25rem);
     --_inner-radius: var(--slotted-radius-lg, 8px);
 
@@ -411,8 +411,8 @@
    * because the root is the stacking context (`isolation` above) and the tile
    * is not one.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='tile']
-    > [data-part='media']:not(:empty)::before {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='tile']
+    > [data-part-media]:not(:empty)::before {
     background-color: var(--slotted-surface-raised);
     border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
     border-radius: var(--_inner-radius);
@@ -423,8 +423,8 @@
     z-index: -1;
   }
 
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='tile']
-    > [data-part='media']:not(:empty)
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='tile']
+    > [data-part-media]:not(:empty)
     > * {
     block-size: var(--_art-glyph);
     inline-size: var(--_art-glyph);
@@ -454,8 +454,8 @@
    * of those bounds: 0.325 of a side along the lean and 0.145 down, the
    * centre of the sheared stack measured against the centre of the square.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
-    > [data-part='media']:not(:empty) {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part-media]:not(:empty) {
     --_side: calc(var(--_art) + var(--slotted-space-2, 0.25rem));
     --_lean: 1;
     --_step-x: calc(var(--_side) * -0.36 * var(--_lean));
@@ -482,15 +482,15 @@
   }
 
   /** Depth is read from the reading edge, so the stack leans the other way. */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']:dir(rtl)
-    > [data-part='media']:not(:empty) {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='stack']:dir(rtl)
+    > [data-part-media]:not(:empty) {
     --_lean: -1;
   }
 
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
-    > [data-part='media']:not(:empty)::before,
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
-    > [data-part='media']:not(:empty)::after {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part-media]:not(:empty)::before,
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part-media]:not(:empty)::after {
     background-color: var(--slotted-surface-raised);
     border: var(--_layer-border) solid var(--slotted-border-subtle);
     border-radius: inherit;
@@ -507,8 +507,8 @@
    * because a face drawn in the control edge is read by `field-surface.test.mjs`
    * as a field, and this is a drawing.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
-    > [data-part='media']:not(:empty)::before {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part-media]:not(:empty)::before {
     border-color: color-mix(
       in oklab,
       var(--slotted-border-subtle),
@@ -518,8 +518,8 @@
     z-index: -1;
   }
 
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
-    > [data-part='media']:not(:empty)::after {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part-media]:not(:empty)::after {
     transition: translate var(--slotted-duration-long) var(--slotted-easing-enter);
     translate: var(--_step-x) var(--_step-y);
     z-index: -2;
@@ -531,8 +531,8 @@
    * same size and the glyph is a size smaller, because a glyph as tall as
    * the title's line box competes with the title.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='stack']
-    > [data-part='media']:not(:empty)
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='stack']
+    > [data-part-media]:not(:empty)
     > * {
     block-size: calc(var(--_side) * 0.5);
     inline-size: calc(var(--_side) * 0.5);
@@ -558,8 +558,7 @@
    * sunken surface is on another one; a mask would clip the cards behind,
    * which stand outside the box. The drawing does not fade.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
-    > [data-part='media'] {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards'] > [data-part-media] {
     --_pad: var(--slotted-space-6, 1rem);
     --_gap: var(--slotted-space-5, 0.75rem);
     --_thumb: var(--slotted-control-height-sm, 30px);
@@ -649,8 +648,8 @@
   }
 
   /** No thumbnail without a glyph: the lines start at the padding. */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
-    > [data-part='media']:empty {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part-media]:empty {
     --_lines-x: var(--_pad);
   }
 
@@ -660,15 +659,15 @@
    * transform: a transformed box is a stacking context, and the cards behind
    * would then paint over the front one.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']:dir(rtl)
-    > [data-part='media'] {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards']:dir(rtl)
+    > [data-part-media] {
     --_edge: right;
   }
 
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
-    > [data-part='media']::before,
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
-    > [data-part='media']::after {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part-media]::before,
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part-media]::after {
     background-color: var(--slotted-surface-sunken);
     block-size: 100%;
     border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
@@ -682,15 +681,15 @@
   }
 
   /** The farthest card, painted first. */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
-    > [data-part='media']::before {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part-media]::before {
     border-color: var(--_ink-2);
     inset-inline: calc(2 * var(--_step) - var(--slotted-border-width-thin, 1px));
     translate: 0 calc(-2 * var(--_step));
   }
 
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
-    > [data-part='media']::after {
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part-media]::after {
     inset-inline: calc(var(--_step) - var(--slotted-border-width-thin, 1px));
     translate: 0 calc(-1 * var(--_step));
   }
@@ -699,8 +698,8 @@
    * The thumbnail is the page's glyph on the sunken surface, padded from its
    * edge to the glyph size.
    */
-  [data-ui='result-state']:not([data-reach='inline'])[data-illustration='cards']
-    > [data-part='media']
+  [data-ui-result-state]:not([data-reach='inline'])[data-illustration='cards']
+    > [data-part-media]
     > * {
     background-color: var(--slotted-surface-sunken);
     block-size: var(--_thumb);
@@ -717,13 +716,13 @@
    * inside the grid, and it is the half of the pair that `minmax(0, …)` on the
    * track cannot supply on its own.
    */
-  [data-ui='result-state'] > [data-part='content'] {
+  [data-ui-result-state] > [data-part-content] {
     display: grid;
     min-inline-size: 0;
     row-gap: var(--_text-gap);
   }
 
-  [data-ui='result-state'][data-reach='inline'] > [data-part='content'] {
+  [data-ui-result-state][data-reach='inline'] > [data-part-content] {
     grid-column: 2;
     grid-row: 1;
   }
@@ -739,7 +738,7 @@
    * Nothing is removed: the whole string stays in the DOM, in the accessibility
    * tree, and findable by a page search.
    */
-  [data-ui='result-state'] [data-part='title'] {
+  [data-ui-result-state] [data-part-title] {
     font-family: var(
       --slotted-result-state-title-font-family,
       var(
@@ -765,7 +764,7 @@
    * first and two lines of equal weight give them no order to read in. It is
    * the pair the theme measures against all three neutral surfaces.
    */
-  [data-ui='result-state'] [data-part='description'] {
+  [data-ui-result-state] [data-part-description] {
     color: var(--slotted-text-muted);
     font-size: var(--_description-font-size);
     line-height: var(--slotted-line-height-md, 1.5);
@@ -781,7 +780,7 @@
    * own `button` and `a`, because those families already own what a button and
    * a link are.
    */
-  [data-ui='result-state'] > [data-part='actions'] {
+  [data-ui-result-state] > [data-part-actions] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -789,14 +788,12 @@
     min-inline-size: 0;
   }
 
-  [data-ui='result-state'][data-align='center'] > [data-part='actions'] {
+  [data-ui-result-state][data-align='center'] > [data-part-actions] {
     justify-content: center;
   }
 
   /** The pause between the message and its answer (`--_actions-gap`). */
-  [data-ui='result-state']:not([data-reach='inline'])
-    > [data-part='content']
-    + [data-part='actions'] {
+  [data-ui-result-state]:not([data-reach='inline']) > [data-part-content] + [data-part-actions] {
     margin-block-start: calc(var(--_actions-gap) - var(--_row-gap));
   }
 
@@ -811,7 +808,7 @@
    * the control stand proud of the line by the same distance above and below —
    * a distance the region's own block inset already holds.
    */
-  [data-ui='result-state'][data-reach='inline'] > [data-part='actions'] {
+  [data-ui-result-state][data-reach='inline'] > [data-part-actions] {
     /**
      * `align-content` rather than `align-items`, because the row is allowed to
      * wrap and a wrapping flex container aligns its *lines*: with the line
@@ -834,14 +831,14 @@
    * is set one step down and in the muted role rather than made a third
    * control.
    */
-  [data-ui='result-state'] > [data-part='footer'] {
+  [data-ui-result-state] > [data-part-footer] {
     color: var(--slotted-text-muted);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     line-height: var(--slotted-line-height-sm, 1.45);
     min-inline-size: 0;
   }
 
-  [data-ui='result-state'][data-reach='inline'] > [data-part='footer'] {
+  [data-ui-result-state][data-reach='inline'] > [data-part-footer] {
     grid-column: 2;
     grid-row: 2;
   }
@@ -854,7 +851,7 @@
    * is not animated: a focus indicator that fades in is a focus indicator that
    * is not there yet.
    */
-  [data-ui='result-state'][data-part='root']:focus-visible {
+  [data-ui-result-state][data-part-root]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -866,7 +863,7 @@
    * is the composition change the 240-pixel capture exists to check.
    */
   @container slotted-result-state (max-width: 20rem) {
-    [data-ui='result-state'] > [data-part='actions'] {
+    [data-ui-result-state] > [data-part-actions] {
       /**
        * Stacked, and each control still its own width. How wide a control is
        * belongs to the control, and `button` already ships `fullWidth` for a
@@ -875,15 +872,15 @@
       flex-direction: column;
     }
 
-    [data-ui='result-state'][data-align='center'] > [data-part='actions'] {
+    [data-ui-result-state][data-align='center'] > [data-part-actions] {
       align-items: center;
     }
 
-    [data-ui='result-state'][data-align='start'] > [data-part='actions'] {
+    [data-ui-result-state][data-align='start'] > [data-part-actions] {
       align-items: flex-start;
     }
 
-    [data-ui='result-state'][data-reach='inline'] {
+    [data-ui-result-state][data-reach='inline'] {
       grid-template-columns: auto minmax(0, 1fr);
     }
 
@@ -891,14 +888,14 @@
      * Below the words now, so the box goes back to its own height: a row of
      * controls held to one line box only makes sense while it is on that line.
      */
-    [data-ui='result-state'][data-reach='inline'] > [data-part='actions'] {
+    [data-ui-result-state][data-reach='inline'] > [data-part-actions] {
       block-size: auto;
       grid-column: 2;
       grid-row: 2;
       margin-inline-start: 0;
     }
 
-    [data-ui='result-state'][data-reach='inline'] > [data-part='footer'] {
+    [data-ui-result-state][data-reach='inline'] > [data-part-footer] {
       grid-column: 2;
       grid-row: 3;
     }
@@ -913,7 +910,7 @@
    * because the root's own `display: grid` would win over the user agent's
    * rule for `[hidden]`.
    */
-  [data-ui='result-state'][data-part='root'][hidden] {
+  [data-ui-result-state][data-part-root][hidden] {
     display: none;
     opacity: 0;
     transition:
@@ -932,41 +929,41 @@
    * collapses under reduced motion.
    */
   @starting-style {
-    [data-ui='result-state'][data-part='root']:is([data-live='polite'], [data-live='assertive']) {
+    [data-ui-result-state][data-part-root]:is([data-live='polite'], [data-live='assertive']) {
       opacity: 0;
     }
 
-    [data-ui='result-state'][data-part='root']:is([data-live='polite'], [data-live='assertive'])
-      > [data-part='media'] {
+    [data-ui-result-state][data-part-root]:is([data-live='polite'], [data-live='assertive'])
+      > [data-part-media] {
       --_step-x: 0px;
       --_step-y: 0px;
     }
 
-    [data-ui='result-state'][data-part='root']:is(
+    [data-ui-result-state][data-part-root]:is(
         [data-live='polite'],
         [data-live='assertive']
       )[data-illustration='tile']
-      > [data-part='media'] {
+      > [data-part-media] {
       opacity: 0;
       scale: 0.96;
     }
 
-    [data-ui='result-state'][data-part='root']:is(
+    [data-ui-result-state][data-part-root]:is(
         [data-live='polite'],
         [data-live='assertive']
       )[data-illustration='cards']
-      > [data-part='media']::before,
-    [data-ui='result-state'][data-part='root']:is(
+      > [data-part-media]::before,
+    [data-ui-result-state][data-part-root]:is(
         [data-live='polite'],
         [data-live='assertive']
       )[data-illustration='cards']
-      > [data-part='media']::after {
+      > [data-part-media]::after {
       translate: 0 0;
     }
   }
 
   /** The farther of two moving layers leaves a short step after the nearer. */
-  [data-ui='result-state'][data-illustration='cards'] > [data-part='media']::before {
+  [data-ui-result-state][data-illustration='cards'] > [data-part-media]::before {
     transition-delay: var(--slotted-duration-short);
   }
 

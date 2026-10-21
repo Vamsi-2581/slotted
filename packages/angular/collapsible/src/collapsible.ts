@@ -68,7 +68,9 @@ export const COLLAPSIBLE_TRIGGER_SELECTOR = '[data-part="trigger"]';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'collapsible',
+    'data-ui-collapsible': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-value]': 'identity()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',

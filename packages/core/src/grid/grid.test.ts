@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   applyQuery,
+  groupInOrder,
   type GridNode,
   cellText,
   columnRange,
@@ -691,5 +692,119 @@ describe('cursor', () => {
       anchor: { row: 'S1', column: 'weight' },
       focus: { row: 'S5', column: 'weight' },
     });
+  });
+});
+
+/**
+ * A server that pages by date sends rows already ordered for grouping. The
+ * grid in server mode grouped nothing; the rows it is given are grouped in
+ * the order given, and a value that comes back after another run heads a
+ * group of its own.
+ */
+describe('groupInOrder', () => {
+  interface Entry {
+    id: string;
+    date: string;
+    amount: number;
+  }
+  const columns = [
+    { id: 'date', label: 'Date' },
+    { id: 'amount', label: 'Amount', kind: 'number' as const, aggregate: 'sum' as const },
+  ];
+  const rows: Entry[] = [
+    { id: 'a', date: '2026-10-03', amount: 1 },
+    { id: 'b', date: '2026-10-03', amount: 2 },
+    { id: 'c', date: '2026-10-02', amount: 3 },
+    { id: 'd', date: '2026-10-02', amount: 4 },
+    { id: 'e', date: '2026-10-01', amount: 5 },
+    { id: 'f', date: '2026-10-01', amount: 6 },
+  ];
+
+  it('groups consecutive rows by value, in the order given, with counts and aggregates', () => {
+    const nodes = groupInOrder(rows, columns, ['date'], { rowKey: (row) => row.id, booleans });
+    const groups = nodes.filter((node) => node.kind === 'group');
+    expect(groups.map((node) => node.kind === 'group' && node.text)).toEqual([
+      '2026-10-03',
+      '2026-10-02',
+      '2026-10-01',
+    ]);
+    expect(groups.map((node) => node.kind === 'group' && node.count)).toEqual([2, 2, 2]);
+    expect(groups.map((node) => node.kind === 'group' && node.aggregates['amount'])).toEqual([
+      3, 7, 11,
+    ]);
+    expect(nodes.filter((node) => node.kind === 'row').map((node) => node.key)).toEqual([
+      'a',
+      'b',
+      'c',
+      'd',
+      'e',
+      'f',
+    ]);
+  });
+
+  it('keys a value that comes back after another run apart, and keeps the order', () => {
+    const interleaved = [rows[0]!, rows[2]!, rows[1]!];
+    const nodes = groupInOrder(interleaved, columns, ['date'], {
+      rowKey: (row) => row.id,
+      booleans,
+    });
+    const keys = nodes.filter((node) => node.kind === 'group').map((node) => node.key);
+    expect(keys).toEqual(['date=2026-10-03', 'date=2026-10-02', 'date=2026-10-03~2']);
+    expect(nodes.filter((node) => node.kind === 'row').map((node) => node.key)).toEqual([
+      'a',
+      'c',
+      'b',
+    ]);
+  });
+
+  it('shows no rows under a closed group, and numbers rows from the offset', () => {
+    const nodes = groupInOrder(rows, columns, ['date'], {
+      rowKey: (row) => row.id,
+      booleans,
+      expandedGroups: ['date=2026-10-02'],
+      offset: 40,
+    });
+    const shown = nodes.filter((node) => node.kind === 'row');
+    expect(shown.map((node) => node.key)).toEqual(['c', 'd']);
+    expect(shown.map((node) => node.kind === 'row' && node.index)).toEqual([42, 43]);
+  });
+});
+
+/**
+ * A column of kind `actions` scrolled out of the frame with the columns, and
+ * the row's menu with it, unless the application pinned it by hand.
+ */
+describe('the actions column', () => {
+  const model = [
+    { id: 'name', label: 'Name', rowHeader: true },
+    { id: 'amount', label: 'Amount', kind: 'number' as const },
+    { id: 'actions', label: 'Actions', kind: 'actions' as const },
+  ];
+
+  it('is pinned to the end while no state says where columns are pinned', () => {
+    expect(normalizeColumnState(undefined, model).pinned).toEqual({ start: [], end: ['actions'] });
+    expect(normalizeColumnState({ widths: { amount: 120 } }, model).pinned.end).toEqual([
+      'actions',
+    ]);
+  });
+
+  it('stays where a state or its own column model puts it', () => {
+    expect(normalizeColumnState({ pinned: { start: [], end: [] } }, model).pinned.end).toEqual([]);
+    expect(
+      normalizeColumnState(undefined, [...model.slice(0, 2), { ...model[2]!, pinned: null }]).pinned
+        .end,
+    ).toEqual([]);
+  });
+
+  it('writes no pins for the model’s own, and both lists once the reader moved them', () => {
+    const untouched = normalizeColumnState(undefined, model);
+    expect(serializeColumnState(untouched, model)).toBe('');
+    const unpinned = normalizeColumnState({ pinned: { start: [], end: [] } }, model);
+    const text = serializeGridView(
+      { columns: unpinned, query: emptyQuery(), density: null },
+      model,
+    );
+    expect(parseGridView(text, model).columns.pinned.end).toEqual([]);
+    expect(parseGridView('', model).columns.pinned.end).toEqual(['actions']);
   });
 });

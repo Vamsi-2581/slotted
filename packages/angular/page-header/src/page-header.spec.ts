@@ -406,11 +406,11 @@ describe('SlPageHeader', () => {
    * Too much of the screen to hold: on a phone the pin is not offered, and a
    * header held when the fact turns true is let go.
    */
-  it('writes data-tall on a phone-wide header and lets a held one go', async () => {
+  it('writes data-tall in a phone-wide frame and lets a held one go', async () => {
     host.pinned.set(true);
     fixture.detectChanges();
     expect(root().hasAttribute('data-tall')).toBe(false);
-    Object.defineProperty(root(), 'clientWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
     FakeResizeObserver.last?.callback([], {} as ResizeObserver);
     /* The engine publishes on the next frame. */
     await new Promise((resolve) => setTimeout(resolve, 40));
@@ -418,6 +418,7 @@ describe('SlPageHeader', () => {
     expect(root().hasAttribute('data-tall')).toBe(true);
     expect(host.pinned()).toBe(false);
     expect(host.pinnedRequests.at(-1)?.reason).toBe('programmatic');
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
 
   it('writes band by default, and data-stuck once the title area holds with the page scrolled', async () => {
@@ -448,9 +449,9 @@ describe('SlPageHeader', () => {
    * reads `data-compact` and takes the root out of `sticky`, and nothing is
    * left for another family to stop under.
    */
-  it('writes data-compact below the compact size class, and takes it off above it', async () => {
+  it('writes data-compact in a frame below the compact size class, and takes it off above it', async () => {
     const width = { value: 390 };
-    Object.defineProperty(root(), 'clientWidth', { configurable: true, get: () => width.value });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => width.value });
     FakeResizeObserver.last?.callback([], {} as ResizeObserver);
     await new Promise((resolve) => setTimeout(resolve, 40));
     fixture.detectChanges();
@@ -464,6 +465,7 @@ describe('SlPageHeader', () => {
     await new Promise((resolve) => setTimeout(resolve, 40));
     fixture.detectChanges();
     expect(root().hasAttribute('data-compact')).toBe(false);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
 });
 

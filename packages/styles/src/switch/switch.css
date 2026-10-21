@@ -21,7 +21,7 @@
    * the binding mirrors, because a control can be disabled by something that
    * never told it so.
    */
-  [data-ui='switch'][data-part='root'] {
+  [data-ui-switch][data-part-root] {
     /**
      * The thumb is the control glyph, which is the scale the theme restates
      * per density — so a switch in a dense table shrinks whole rather than in
@@ -98,7 +98,7 @@
    * its pill and its label and never of its target (SW2). The overhang is on
    * a transparent box, so nothing about it is visible.
    */
-  [data-ui='switch'] > [data-part='control'] {
+  [data-ui-switch] > [data-part-control] {
     align-self: start;
     appearance: none;
     background-color: transparent;
@@ -139,7 +139,7 @@
    * first line rather than centred on the label, because `align-items: center`
    * on a label that wraps to three lines puts the pill beside the second one.
    */
-  [data-ui='switch'] > [data-part='track'] {
+  [data-ui-switch] > [data-part-track] {
     background-color: var(
       --slotted-switch-track-background,
       var(--slotted-tone-secondary-solid, ButtonFace)
@@ -169,7 +169,7 @@
    * right-to-left document mirrors the movement with no direction-specific
    * rule at all — the axis is the writing direction's, not the screen's.
    */
-  [data-ui='switch'] > [data-part='track'] > [data-part='thumb'] {
+  [data-ui-switch] > [data-part-track] > [data-part-thumb] {
     /* A flex box, so the mark's icon is centred in the knob as a box and not
        set on a line of text. */
     align-items: center;
@@ -226,7 +226,7 @@
    * changing rather than two marks swapping places. Off is the absence of the
    * mark, which is the same statement a checkbox makes.
    */
-  [data-ui='switch'] > [data-part='track'] > [data-part='thumb'] > [data-ui='icon'] {
+  [data-ui-switch] > [data-part-track] > [data-part-thumb] > [data-ui-icon] {
     /**
      * Seventy per cent of the knob rather than all of it. The glyph is drawn
      * on a 24-unit grid with a 3-unit stroke, so filling the knob the check
@@ -251,7 +251,7 @@
    * own — the correction `docs/token-foundation.md` asks the family for. The
    * padding here is optical: it centres the words on the pill.
    */
-  [data-ui='switch'] > [data-part='label'] {
+  [data-ui-switch] > [data-part-label] {
     cursor: pointer;
     grid-column: 2;
     grid-row: 1;
@@ -271,18 +271,18 @@
    * back as a negative margin, as it gives back its block overhang, so the row
    * is no wider and a press between the pill and the words still lands on it.
    */
-  [data-ui='switch'][data-part='root']:has(> [data-part='label']) {
+  [data-ui-switch][data-part-root]:has(> [data-part-label]) {
     column-gap: var(--_gap);
   }
 
   /* Beside the pill, the label is as wide as its words: stretched across the
      column, a label in Arabic in a row in Portuguese aligned its text to its
      own start and set it at the far end of the row, away from the pill. */
-  [data-ui='switch'] > [data-part='label'] {
+  [data-ui-switch] > [data-part-label] {
     justify-self: start;
   }
 
-  [data-ui='switch'][data-part='root']:has(> [data-part='label']) > [data-part='control'] {
+  [data-ui-switch][data-part-root]:has(> [data-part-label]) > [data-part-control] {
     inline-size: calc(var(--_track-inline) + var(--_gap));
     margin-inline-end: calc(-1 * var(--_gap));
   }
@@ -292,7 +292,7 @@
    * label: inside, it would join the accessible name, and a paragraph of help
    * text that toggles a setting when it is clicked is a paragraph nobody reads.
    */
-  [data-ui='switch'] > [data-part='description'] {
+  [data-ui-switch] > [data-part-description] {
     color: var(--slotted-switch-description-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-switch-description-font-size, var(--slotted-font-size-xs, 0.75rem));
     grid-column: 2;
@@ -312,7 +312,7 @@
    * directions.
    */
 
-  [data-ui='switch'][data-part='root'][data-label-placement='start'] {
+  [data-ui-switch][data-part-root][data-label-placement='start'] {
     /**
      * `1fr` and not `max-content`, for the reason `checkbox` records: sizing
      * the first column from each row's own label ends a list with the controls
@@ -321,24 +321,24 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='control'],
-  [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='track'] {
+  [data-ui-switch][data-part-root][data-label-placement='start'] > [data-part-control],
+  [data-ui-switch][data-part-root][data-label-placement='start'] > [data-part-track] {
     grid-area: 1 / 2;
   }
 
-  [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='label'],
-  [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='description'] {
+  [data-ui-switch][data-part-root][data-label-placement='start'] > [data-part-label],
+  [data-ui-switch][data-part-root][data-label-placement='start'] > [data-part-description] {
     grid-column: 1;
   }
 
   /* Before the pill, the label takes the row, so the row is the settings row. */
-  [data-ui='switch'][data-part='root'][data-label-placement='start'] > [data-part='label'] {
+  [data-ui-switch][data-part-root][data-label-placement='start'] > [data-part-label] {
     justify-self: stretch;
   }
 
   /* The control reaches across the gap towards the label, now on its start side. */
-  [data-ui='switch'][data-part='root'][data-label-placement='start']:has(> [data-part='label'])
-    > [data-part='control'] {
+  [data-ui-switch][data-part-root][data-label-placement='start']:has(> [data-part-label])
+    > [data-part-control] {
     margin-inline-end: 0;
     margin-inline-start: calc(-1 * var(--_gap));
   }
@@ -350,19 +350,19 @@
    * an `md` control is a field and a control disagreeing about one row.
    */
 
-  [data-ui='switch'][data-part='root'][data-size='sm'] {
+  [data-ui-switch][data-part-root][data-size='sm'] {
     --_thumb-size: var(--slotted-control-icon-size-sm, 14px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_gap: var(--slotted-control-label-gap-sm, 8px);
   }
 
-  [data-ui='switch'][data-part='root'][data-size='md'] {
+  [data-ui-switch][data-part-root][data-size='md'] {
     --_thumb-size: var(--slotted-control-icon-size-md, 16px);
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-label-gap-md, 12px);
   }
 
-  [data-ui='switch'][data-part='root'][data-size='lg'] {
+  [data-ui-switch][data-part-root][data-size='lg'] {
     --_thumb-size: var(--slotted-control-icon-size-lg, 18px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_gap: var(--slotted-control-label-gap-lg, 12px);
@@ -379,8 +379,8 @@
    * and the deleted `input` family shipped that defect once already.
    */
 
-  [data-ui='switch'][data-part='root']:is([data-checked], :has(> [data-part='control']:checked))
-    > [data-part='track'] {
+  [data-ui-switch][data-part-root]:is([data-checked], :has(> [data-part-control]:checked))
+    > [data-part-track] {
     background-color: var(
       --slotted-switch-checked-background,
       var(--slotted-tone-accent-solid, Highlight)
@@ -391,9 +391,9 @@
     );
   }
 
-  [data-ui='switch'][data-part='root']:is([data-checked], :has(> [data-part='control']:checked))
-    > [data-part='track']
-    > [data-part='thumb'] {
+  [data-ui-switch][data-part-root]:is([data-checked], :has(> [data-part-control]:checked))
+    > [data-part-track]
+    > [data-part-thumb] {
     border-color: var(
       --slotted-switch-checked-thumb-border-color,
       var(--slotted-tone-accent-solid, Highlight)
@@ -401,13 +401,12 @@
     inset-inline-start: calc(var(--_gutter) + var(--_travel));
   }
 
-  [data-ui='switch'][data-part='root']:is(
-      [data-checked],
-      :has(> [data-part='control']:checked)
-    ):not([data-loading])
-    > [data-part='track']
-    > [data-part='thumb']
-    > [data-ui='icon'] {
+  [data-ui-switch][data-part-root]:is([data-checked], :has(> [data-part-control]:checked)):not(
+      [data-loading]
+    )
+    > [data-part-track]
+    > [data-part-thumb]
+    > [data-ui-icon] {
     opacity: 1;
   }
 
@@ -417,23 +416,23 @@
    * competes with it. Both are held back for disabled, loading and read-only,
    * and both are written before `invalid`, which outranks them.
    */
-  [data-ui='switch'][data-part='root']:hover:not([data-disabled]):not([data-loading]):not(
+  [data-ui-switch][data-part-root]:hover:not([data-disabled]):not([data-loading]):not(
       [data-readonly]
-    ):not(:has(> [data-part='control']:disabled))
-    > [data-part='track'] {
+    ):not(:has(> [data-part-control]:disabled))
+    > [data-part-track] {
     background-color: var(
       --slotted-switch-hover-background,
       var(--slotted-tone-secondary-solid-hover, ButtonFace)
     );
   }
 
-  [data-ui='switch'][data-part='root']:is(
+  [data-ui-switch][data-part-root]:is(
       [data-checked],
-      :has(> [data-part='control']:checked)
+      :has(> [data-part-control]:checked)
     ):hover:not([data-disabled]):not([data-loading]):not([data-readonly]):not(
-      :has(> [data-part='control']:disabled)
+      :has(> [data-part-control]:disabled)
     )
-    > [data-part='track'] {
+    > [data-part-track] {
     background-color: var(
       --slotted-switch-checked-hover-background,
       var(--slotted-tone-accent-solid-hover, Highlight)
@@ -444,23 +443,23 @@
     );
   }
 
-  [data-ui='switch'][data-part='root']:active:not([data-disabled]):not([data-loading]):not(
+  [data-ui-switch][data-part-root]:active:not([data-disabled]):not([data-loading]):not(
       [data-readonly]
-    ):not(:has(> [data-part='control']:disabled))
-    > [data-part='track'] {
+    ):not(:has(> [data-part-control]:disabled))
+    > [data-part-track] {
     background-color: var(
       --slotted-switch-active-background,
       var(--slotted-tone-secondary-solid-active, ButtonFace)
     );
   }
 
-  [data-ui='switch'][data-part='root']:is(
+  [data-ui-switch][data-part-root]:is(
       [data-checked],
-      :has(> [data-part='control']:checked)
+      :has(> [data-part-control]:checked)
     ):active:not([data-disabled]):not([data-loading]):not([data-readonly]):not(
-      :has(> [data-part='control']:disabled)
+      :has(> [data-part-control]:disabled)
     )
-    > [data-part='track'] {
+    > [data-part-track] {
     background-color: var(
       --slotted-switch-checked-active-background,
       var(--slotted-tone-accent-solid-active, Highlight)
@@ -477,8 +476,7 @@
    * offset keeps the ring off the pill's own edge, which is what makes a
    * focused unchecked switch legible against a sunken surface.
    */
-  [data-ui='switch'][data-part='root']:has(> [data-part='control']:focus-visible)
-    > [data-part='track'] {
+  [data-ui-switch][data-part-root]:has(> [data-part-control]:focus-visible) > [data-part-track] {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -488,12 +486,12 @@
    * mistakable for disabled. The pill goes hollow rather than grey: the state
    * keeps its own colour in the mark, and the ground stops saying "press me".
    */
-  [data-ui='switch'][data-part='root'][data-readonly] > [data-part='track'] {
+  [data-ui-switch][data-part-root][data-readonly] > [data-part-track] {
     background-color: var(--slotted-switch-readonly-background, var(--slotted-surface, Canvas));
   }
 
-  [data-ui='switch'][data-part='root'][data-readonly] > [data-part='control'],
-  [data-ui='switch'][data-part='root'][data-readonly] > [data-part='label'] {
+  [data-ui-switch][data-part-root][data-readonly] > [data-part-control],
+  [data-ui-switch][data-part-root][data-readonly] > [data-part-label] {
     cursor: default;
   }
 
@@ -506,11 +504,11 @@
    * two pixels apart, and neither could be told from the other. The state is
    * carried where it always is — the thumb's position, and the mark on it.
    */
-  [data-ui='switch'][data-part='root'][data-readonly]:is(
+  [data-ui-switch][data-part-root][data-readonly]:is(
       [data-checked],
-      :has(> [data-part='control']:checked)
+      :has(> [data-part-control]:checked)
     )
-    > [data-part='track'] {
+    > [data-part-track] {
     background-color: var(--slotted-switch-readonly-background, var(--slotted-surface, Canvas));
     border-color: var(
       --slotted-switch-readonly-border-color,
@@ -518,12 +516,12 @@
     );
   }
 
-  [data-ui='switch'][data-part='root'][data-readonly]:is(
+  [data-ui-switch][data-part-root][data-readonly]:is(
       [data-checked],
-      :has(> [data-part='control']:checked)
+      :has(> [data-part-control]:checked)
     )
-    > [data-part='track']
-    > [data-part='thumb'] {
+    > [data-part-track]
+    > [data-part-thumb] {
     border-color: var(
       --slotted-switch-readonly-border-color,
       var(--slotted-control-border-color, ButtonBorder)
@@ -540,15 +538,15 @@
    * invalid colour on the root moves the ring without restating it — the rule
    * `text-field` wrote for this family to inherit.
    */
-  [data-ui='switch'][data-part='root'][data-invalid] {
+  [data-ui-switch][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-switch-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
   }
 
-  [data-ui='switch'][data-part='root'][data-invalid] > [data-part='track'],
-  [data-ui='switch'][data-part='root'][data-invalid] > [data-part='track'] > [data-part='thumb'] {
+  [data-ui-switch][data-part-root][data-invalid] > [data-part-track],
+  [data-ui-switch][data-part-root][data-invalid] > [data-part-track] > [data-part-thumb] {
     border-color: var(--slotted-switch-invalid-border-color, var(--slotted-tone-danger-border));
     /*
      * Width as well as colour (WCAG 1.4.1), the edge `text-field` draws: in
@@ -572,14 +570,14 @@
    * moves the row under the pointer. The mark gives way to the arc, which is
    * the one thing in the family that says the value is not settled yet.
    */
-  [data-ui='switch'][data-part='root'][data-loading] > [data-part='control'] {
+  [data-ui-switch][data-part-root][data-loading] > [data-part-control] {
     cursor: progress;
   }
 
-  [data-ui='switch'][data-part='root'][data-loading]
-    > [data-part='track']
-    > [data-part='thumb']
-    > [data-ui='icon'] {
+  [data-ui-switch][data-part-root][data-loading]
+    > [data-part-track]
+    > [data-part-thumb]
+    > [data-ui-icon] {
     opacity: 0;
   }
 
@@ -593,9 +591,7 @@
    * rather than as a spinner in a still image, and a still image is what a
    * reader under `prefers-reduced-motion` is looking at.
    */
-  [data-ui='switch'][data-part='root'][data-loading]
-    > [data-part='track']
-    > [data-part='thumb']::after {
+  [data-ui-switch][data-part-root][data-loading] > [data-part-track] > [data-part-thumb]::after {
     animation: slotted-switch-pending var(--slotted-duration-loop) linear infinite;
     border: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-switch-pending-color, var(--slotted-tone-accent-solid));
@@ -622,9 +618,7 @@
    * without anything moving.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='switch'][data-part='root'][data-loading]
-      > [data-part='track']
-      > [data-part='thumb']::after {
+    [data-ui-switch][data-part-root][data-loading] > [data-part-track] > [data-part-thumb]::after {
       animation: none;
     }
   }
@@ -636,15 +630,15 @@
    * so — and left to the attribute alone it would look fully operable and
    * answer nothing.
    */
-  [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
-    > [data-part='control'],
-  [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
-    > [data-part='label'] {
+  [data-ui-switch][data-part-root]:is([data-disabled], :has(> [data-part-control]:disabled))
+    > [data-part-control],
+  [data-ui-switch][data-part-root]:is([data-disabled], :has(> [data-part-control]:disabled))
+    > [data-part-label] {
     cursor: not-allowed;
   }
 
-  [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
-    > [data-part='track'] {
+  [data-ui-switch][data-part-root]:is([data-disabled], :has(> [data-part-control]:disabled))
+    > [data-part-track] {
     background-color: var(
       --slotted-switch-disabled-background,
       var(--slotted-disabled-background, ButtonFace)
@@ -657,9 +651,9 @@
    * setting nobody can read is a setting nobody can check, and a disabled form
    * still has to say what it holds.
    */
-  [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
-    > [data-part='track']
-    > [data-part='thumb'] {
+  [data-ui-switch][data-part-root]:is([data-disabled], :has(> [data-part-control]:disabled))
+    > [data-part-track]
+    > [data-part-thumb] {
     /**
      * Grey rather than white. The knob is the brightest thing in the family,
      * and a bright knob on a grey track reads as a control still waiting to be
@@ -673,17 +667,17 @@
     box-shadow: none;
   }
 
-  [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
-    > [data-part='track']
-    > [data-part='thumb']
-    > [data-ui='icon'] {
+  [data-ui-switch][data-part-root]:is([data-disabled], :has(> [data-part-control]:disabled))
+    > [data-part-track]
+    > [data-part-thumb]
+    > [data-ui-icon] {
     color: var(--slotted-switch-disabled-mark-color, var(--slotted-disabled-background));
   }
 
-  [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
-    > [data-part='label'],
-  [data-ui='switch'][data-part='root']:is([data-disabled], :has(> [data-part='control']:disabled))
-    > [data-part='description'] {
+  [data-ui-switch][data-part-root]:is([data-disabled], :has(> [data-part-control]:disabled))
+    > [data-part-label],
+  [data-ui-switch][data-part-root]:is([data-disabled], :has(> [data-part-control]:disabled))
+    > [data-part-description] {
     color: var(--slotted-switch-disabled-color, var(--slotted-disabled-foreground, GrayText));
   }
 
@@ -694,8 +688,8 @@
    * its edge.
    */
   @media (forced-colors: active) {
-    [data-ui='switch'][data-part='root'][data-invalid] > [data-part='track'],
-    [data-ui='switch'][data-part='root'][data-invalid] > [data-part='track'] > [data-part='thumb'] {
+    [data-ui-switch][data-part-root][data-invalid] > [data-part-track],
+    [data-ui-switch][data-part-root][data-invalid] > [data-part-track] > [data-part-thumb] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(-1 * (var(--_border) + var(--_invalid-edge-width)));
     }

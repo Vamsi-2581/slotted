@@ -843,7 +843,7 @@ class ShipmentsPage {
   {
     id: 'load-more',
     title: 'Load more',
-    note: 'With an unknown total the footer states the range without one and offers Load more; when the grid windows its rows, loadMore is emitted on its own as the window nears the end.',
+    note: 'With an unknown total the footer states the range without one. loadMore is emitted on its own as the reader nears the end, and the footer says a page is loading; it offers a control only to retry a page that failed (loadMoreFailed). loadMoreTrigger="button" asks only from a Load more control, "both" does the two.',
     snippet: defineSnippet({
       id: 'data-grid-angular-load-more',
       language: 'angular',
@@ -1097,7 +1097,7 @@ const api = apiRows([
     'GridColumn<Row>[]',
     '—',
     'sl-data-grid',
-    'The column model: id, label, description, kind, accessor, format, compare, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse.',
+    'The column model: id, label, description, kind, accessor, format, compare, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, pinned (end by default for kind actions), options, aggregate, validate, parse.',
   ],
   [
     'description',
@@ -1160,7 +1160,7 @@ const api = apiRows([
     'boolean',
     '—',
     'sl-data-grid',
-    'Whether a page past this one exists when the total is unknown; the footer offers Load more.',
+    'Whether a page past this one exists when the total is unknown; loadMoreTrigger decides what asks for it.',
   ],
   [
     'loading',
@@ -1352,6 +1352,20 @@ const api = apiRows([
     '20',
     'sl-data-grid',
     'Rows left below the window before loadMore is emitted.',
+  ],
+  [
+    'loadMoreTrigger',
+    "'scroll' | 'button' | 'both'",
+    'scroll',
+    'sl-data-grid',
+    'What asks for the next page: nearing the end, with a loading status in the footer; a Load more control; or both.',
+  ],
+  [
+    'loadMoreFailed',
+    'boolean',
+    'false',
+    'sl-data-grid',
+    'The last page asked for failed: the automatic request stops and the footer offers Try again.',
   ],
   ['skeletonRows', 'number', '8', 'sl-data-grid', 'Rows the first load draws.'],
   [
@@ -1585,7 +1599,7 @@ const composition = apiRows([
     'provider',
     '—',
     'Application',
-    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold and skeletonRows once for an injector. A grid that states one itself still wins. Its words and its locale come from the language in force (provideSlotted).',
+    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, loadMoreTrigger and skeletonRows once for an injector. A grid that states one itself still wins. Its words and its locale come from the language in force (provideSlotted).',
   ],
   [
     '@slotted/core/grid',

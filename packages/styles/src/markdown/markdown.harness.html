@@ -9,11 +9,26 @@
 <!-- A section of documentation: headings with their anchors, inline marks,
      an internal and an external link, nested lists, a quotation, a rule. -->
 <section data-scene="document">
-  <div data-ui="markdown" data-part="root" data-status="ready" data-flow="normal">
-    <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="markdown"
+    data-ui-markdown=""
+    data-part="root"
+    data-part-root=""
+    data-status="ready"
+    data-flow="normal"
+  >
+    <div
+      data-ui="prose"
+      data-ui-prose=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      data-flow="normal"
+    >
       <h2 id="deploying-a-service">
         Deploying a service&#8288;<a
           data-part="anchor"
+          data-part-anchor=""
           href="#deploying-a-service"
           aria-label="Link to section: Deploying a service"
           >#</a
@@ -24,16 +39,33 @@
         moves, and who is told. Read <a href="#prerequisites">the prerequisites</a> first, and the
         <a
           data-ui="link"
+          data-ui-link=""
           data-part="root"
+          data-part-root=""
           data-underline="always"
           data-variant="accent"
           href="https://example.com/cli"
           rel="noopener noreferrer"
           target="_blank"
-          >CLI reference&#8288;<span aria-hidden="true" data-part="external-icon"
-            ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="external"></svg></span></span
-          ><span data-part="external-hint" data-ui="visually-hidden"> (opens in a new tab)</span
+          >CLI reference&#8288;<span
+            aria-hidden="true"
+            data-part="external-icon"
+            data-part-external-icon=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-directional
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="external"></svg></span></span
+          ><span
+            data-part="external-hint"
+            data-part-external-hint=""
+            data-ui="visually-hidden"
+            data-ui-visually-hidden=""
+          >
+            (opens in a new tab)</span
           >&#8288;</a
         >
         when a flag is unclear. The old <del>blue-green</del> flow is gone.
@@ -41,6 +73,7 @@
       <h3 id="prerequisites">
         Prerequisites&#8288;<a
           data-part="anchor"
+          data-part-anchor=""
           href="#prerequisites"
           aria-label="Link to section: Prerequisites"
           >#</a
@@ -72,9 +105,23 @@
 <!-- GFM tables: the three alignments, and a table wider than the column held
      by prose's scroll part. -->
 <section data-scene="tables">
-  <div data-ui="markdown" data-part="root" data-status="ready" data-flow="normal">
-    <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
-      <div data-part="scroll">
+  <div
+    data-ui="markdown"
+    data-ui-markdown=""
+    data-part="root"
+    data-part-root=""
+    data-status="ready"
+    data-flow="normal"
+  >
+    <div
+      data-ui="prose"
+      data-ui-prose=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      data-flow="normal"
+    >
+      <div data-part="scroll" data-part-scroll="">
         <table>
           <thead>
             <tr>
@@ -97,7 +144,13 @@
           </tbody>
         </table>
       </div>
-      <div data-part="scroll" role="region" tabindex="0" aria-label="Scrollable content">
+      <div
+        data-part="scroll"
+        data-part-scroll=""
+        role="region"
+        tabindex="0"
+        aria-label="Scrollable content"
+      >
         <table>
           <thead>
             <tr>
@@ -133,29 +186,62 @@
 <!-- A fence with a title and a highlighted line from its info string:
      ```ts title="deploy.ts" {2} -->
 <section data-scene="code">
-  <div data-ui="markdown" data-part="root" data-status="ready" data-flow="normal">
-    <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="markdown"
+    data-ui-markdown=""
+    data-part="root"
+    data-part-root=""
+    data-status="ready"
+    data-flow="normal"
+  >
+    <div
+      data-ui="prose"
+      data-ui-prose=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      data-flow="normal"
+    >
       <p>The whole pipeline is one call:</p>
-      <div data-part="embed">
-        <div data-ui="code-block" data-part="root" data-language="ts" data-marks>
-          <div data-part="header">
-            <span data-part="icon" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="file"></svg></span
+      <div data-part="embed" data-part-embed="">
+        <div
+          data-ui="code-block"
+          data-ui-code-block=""
+          data-part="root"
+          data-part-root=""
+          data-language="ts"
+          data-marks
+        >
+          <div data-part="header" data-part-header="">
+            <span data-part="icon" data-part-icon="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="file"></svg></span
             ></span>
-            <span data-part="title">deploy.ts</span>
-            <span data-part="language">ts</span>
-            <div data-part="actions">
-              <button data-part="copy" type="button" aria-label="Copy code">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="copy"></svg
+            <span data-part="title" data-part-title="">deploy.ts</span>
+            <span data-part="language" data-part-language="">ts</span>
+            <div data-part="actions" data-part-actions="">
+              <button data-part="copy" data-part-copy="" type="button" aria-label="Copy code">
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="copy"></svg
                 ></span>
               </button>
             </div>
           </div>
           <div
             data-ui="scroll-area"
+            data-ui-scroll-area=""
             data-part="body"
+            data-part-body=""
             data-axis="both"
             data-scrollbars="auto"
             data-gutter="auto"
@@ -166,11 +252,12 @@
             data-at-inline-start
             data-at-inline-end
           >
-            <div data-part="viewport">
-              <div data-part="content">
+            <div data-part="viewport" data-part-viewport="">
+              <div data-part="content" data-part-content="">
                 <pre
                   data-part="pre"
-                ><code data-part="code" class="language-ts"><span data-part="line" data-line="1"><span data-part="marker" aria-hidden="true"></span><span data-part="text">import { deploy } from '@acme/cli';</span></span><span data-part="line" data-line="2" data-mark="highlight"><span data-part="marker" aria-hidden="true"></span><span data-part="text">await deploy({ env: 'production', wait: true });</span></span></code></pre>
+                  data-part-pre=""
+                ><code data-part="code" data-part-code="" class="language-ts"><span data-part="line" data-part-line="" data-line="1"><span data-part="marker" data-part-marker="" aria-hidden="true"></span><span data-part="text" data-part-text="">import { deploy } from '@acme/cli';</span></span><span data-part="line" data-part-line="" data-line="2" data-mark="highlight"><span data-part="marker" data-part-marker="" aria-hidden="true"></span><span data-part="text" data-part-text="">await deploy({ env: 'production', wait: true });</span></span></code></pre>
               </div>
             </div>
           </div>
@@ -184,13 +271,29 @@
 <!-- Task lists: a read-only list with an ordinary item beside two tasks, and
      an interactive list, as a consumer listening for task changes gets. -->
 <section data-scene="tasks">
-  <div data-ui="markdown" data-part="root" data-status="ready" data-flow="normal">
-    <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
-      <ul data-part="task-list">
-        <li data-part="task">
+  <div
+    data-ui="markdown"
+    data-ui-markdown=""
+    data-part="root"
+    data-part-root=""
+    data-status="ready"
+    data-flow="normal"
+  >
+    <div
+      data-ui="prose"
+      data-ui-prose=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      data-flow="normal"
+    >
+      <ul data-part="task-list" data-part-task-list="">
+        <li data-part="task" data-part-task="">
           <div
             data-ui="checkbox"
+            data-ui-checkbox=""
             data-part="root"
+            data-part-root=""
             data-size="md"
             data-label-placement="end"
             data-readonly
@@ -198,71 +301,110 @@
           >
             <input
               data-part="control"
+              data-part-control=""
               type="checkbox"
               checked
               aria-readonly="true"
               aria-label="Write the migration"
             />
-            <span data-part="indicator"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg></span
+            <span data-part="indicator" data-part-indicator=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
             ></span>
           </div>
-          <div data-part="task-body">Write the migration</div>
+          <div data-part="task-body" data-part-task-body="">Write the migration</div>
         </li>
-        <li data-part="task">
+        <li data-part="task" data-part-task="">
           <div
             data-ui="checkbox"
+            data-ui-checkbox=""
             data-part="root"
+            data-part-root=""
             data-size="md"
             data-label-placement="end"
             data-readonly
           >
             <input
               data-part="control"
+              data-part-control=""
               type="checkbox"
               aria-readonly="true"
               aria-label="Review it with the data team, whose sign-off the change needs before Friday"
             />
-            <span data-part="indicator"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg></span
+            <span data-part="indicator" data-part-indicator=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
             ></span>
           </div>
-          <div data-part="task-body">
+          <div data-part="task-body" data-part-task-body="">
             Review it with <strong>the data team</strong>, whose sign-off the change needs before
             Friday
           </div>
         </li>
         <li>An ordinary item keeps its marker.</li>
       </ul>
-      <ul data-part="task-list">
-        <li data-part="task">
-          <div data-ui="checkbox" data-part="root" data-size="md" data-label-placement="end">
-            <input data-part="control" type="checkbox" aria-label="Ship it" />
-            <span data-part="indicator"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg></span
+      <ul data-part="task-list" data-part-task-list="">
+        <li data-part="task" data-part-task="">
+          <div
+            data-ui="checkbox"
+            data-ui-checkbox=""
+            data-part="root"
+            data-part-root=""
+            data-size="md"
+            data-label-placement="end"
+          >
+            <input data-part="control" data-part-control="" type="checkbox" aria-label="Ship it" />
+            <span data-part="indicator" data-part-indicator=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
             ></span>
           </div>
-          <div data-part="task-body">
+          <div data-part="task-body" data-part-task-body="">
             Ship it
-            <ul data-part="task-list">
-              <li data-part="task">
+            <ul data-part="task-list" data-part-task-list="">
+              <li data-part="task" data-part-task="">
                 <div
                   data-ui="checkbox"
+                  data-ui-checkbox=""
                   data-part="root"
+                  data-part-root=""
                   data-size="md"
                   data-label-placement="end"
                   data-checked
                 >
-                  <input data-part="control" type="checkbox" checked aria-label="Tag the release" />
-                  <span data-part="indicator"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="check"></svg></span
+                  <input
+                    data-part="control"
+                    data-part-control=""
+                    type="checkbox"
+                    checked
+                    aria-label="Tag the release"
+                  />
+                  <span data-part="indicator" data-part-indicator=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
                   ></span>
                 </div>
-                <div data-part="task-body">Tag the release</div>
+                <div data-part="task-body" data-part-task-body="">Tag the release</div>
               </li>
             </ul>
           </div>
@@ -274,13 +416,29 @@
 
 <!-- GitHub's five alerts, read from `> [!TYPE]` and drawn by `alert`. -->
 <section data-scene="alerts">
-  <div data-ui="markdown" data-part="root" data-status="ready" data-flow="normal">
-    <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="markdown"
+    data-ui-markdown=""
+    data-part="root"
+    data-part-root=""
+    data-status="ready"
+    data-flow="normal"
+  >
+    <div
+      data-ui="prose"
+      data-ui-prose=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      data-flow="normal"
+    >
       <p>Before the first deployment:</p>
-      <div data-part="embed">
+      <div data-part="embed" data-part-embed="">
         <section
           data-ui="alert"
+          data-ui-alert=""
           data-part="root"
+          data-part-root=""
           data-tone="accent"
           data-variant="soft"
           data-reach="section"
@@ -288,24 +446,36 @@
           data-open=""
           aria-labelledby="a-note"
         >
-          <span data-part="icon" aria-hidden="true"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="circle-info" data-solid></svg></span
+          <span data-part="icon" data-part-icon="" aria-hidden="true"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg
+                data-part="glyph"
+                data-part-glyph=""
+                data-glyph="circle-info"
+                data-solid
+              ></svg></span
           ></span>
-          <div data-part="content">
-            <div data-part="title" id="a-note">Note</div>
-            <div data-part="description">
-              <div data-part="alert-body">
+          <div data-part="content" data-part-content="">
+            <div data-part="title" data-part-title="" id="a-note">Note</div>
+            <div data-part="description" data-part-description="">
+              <div data-part="alert-body" data-part-alert-body="">
                 <p>Deployments run in the order they were queued.</p>
               </div>
             </div>
           </div>
         </section>
       </div>
-      <div data-part="embed">
+      <div data-part="embed" data-part-embed="">
         <section
           data-ui="alert"
+          data-ui-alert=""
           data-part="root"
+          data-part-root=""
           data-tone="success"
           data-variant="soft"
           data-reach="section"
@@ -313,24 +483,36 @@
           data-open=""
           aria-labelledby="a-tip"
         >
-          <span data-part="icon" aria-hidden="true"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="circle-check" data-solid></svg></span
+          <span data-part="icon" data-part-icon="" aria-hidden="true"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg
+                data-part="glyph"
+                data-part-glyph=""
+                data-glyph="circle-check"
+                data-solid
+              ></svg></span
           ></span>
-          <div data-part="content">
-            <div data-part="title" id="a-tip">Tip</div>
-            <div data-part="description">
-              <div data-part="alert-body">
+          <div data-part="content" data-part-content="">
+            <div data-part="title" data-part-title="" id="a-tip">Tip</div>
+            <div data-part="description" data-part-description="">
+              <div data-part="alert-body" data-part-alert-body="">
                 <p>Pass <code>--wait</code> to block until every instance is healthy.</p>
               </div>
             </div>
           </div>
         </section>
       </div>
-      <div data-part="embed">
+      <div data-part="embed" data-part-embed="">
         <section
           data-ui="alert"
+          data-ui-alert=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="soft"
           data-reach="section"
@@ -338,24 +520,31 @@
           data-open=""
           aria-labelledby="a-important"
         >
-          <span data-part="icon" aria-hidden="true"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="circle" data-solid></svg></span
+          <span data-part="icon" data-part-icon="" aria-hidden="true"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="circle" data-solid></svg></span
           ></span>
-          <div data-part="content">
-            <div data-part="title" id="a-important">Important</div>
-            <div data-part="description">
-              <div data-part="alert-body">
+          <div data-part="content" data-part-content="">
+            <div data-part="title" data-part-title="" id="a-important">Important</div>
+            <div data-part="description" data-part-description="">
+              <div data-part="alert-body" data-part-alert-body="">
                 <p>Production needs a second approver.</p>
               </div>
             </div>
           </div>
         </section>
       </div>
-      <div data-part="embed">
+      <div data-part="embed" data-part-embed="">
         <section
           data-ui="alert"
+          data-ui-alert=""
           data-part="root"
+          data-part-root=""
           data-tone="warning"
           data-variant="soft"
           data-reach="section"
@@ -363,14 +552,24 @@
           data-open=""
           aria-labelledby="a-warning"
         >
-          <span data-part="icon" aria-hidden="true"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="circle-alert" data-solid></svg></span
+          <span data-part="icon" data-part-icon="" aria-hidden="true"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg
+                data-part="glyph"
+                data-part-glyph=""
+                data-glyph="circle-alert"
+                data-solid
+              ></svg></span
           ></span>
-          <div data-part="content">
-            <div data-part="title" id="a-warning">Warning</div>
-            <div data-part="description">
-              <div data-part="alert-body">
+          <div data-part="content" data-part-content="">
+            <div data-part="title" data-part-title="" id="a-warning">Warning</div>
+            <div data-part="description" data-part-description="">
+              <div data-part="alert-body" data-part-alert-body="">
                 <p>A deployment during a migration waits for the migration to finish.</p>
                 <p>It is not cancelled.</p>
               </div>
@@ -378,10 +577,12 @@
           </div>
         </section>
       </div>
-      <div data-part="embed">
+      <div data-part="embed" data-part-embed="">
         <section
           data-ui="alert"
+          data-ui-alert=""
           data-part="root"
+          data-part-root=""
           data-tone="danger"
           data-variant="soft"
           data-reach="section"
@@ -389,14 +590,24 @@
           data-open=""
           aria-labelledby="a-caution"
         >
-          <span data-part="icon" aria-hidden="true"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="circle-x" data-solid></svg></span
+          <span data-part="icon" data-part-icon="" aria-hidden="true"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg
+                data-part="glyph"
+                data-part-glyph=""
+                data-glyph="circle-x"
+                data-solid
+              ></svg></span
           ></span>
-          <div data-part="content">
-            <div data-part="title" id="a-caution">Caution</div>
-            <div data-part="description">
-              <div data-part="alert-body">
+          <div data-part="content" data-part-content="">
+            <div data-part="title" data-part-title="" id="a-caution">Caution</div>
+            <div data-part="description" data-part-description="">
+              <div data-part="alert-body" data-part-alert-body="">
                 <p>Rolling back deletes the instances the deployment created.</p>
               </div>
             </div>
@@ -410,8 +621,22 @@
 <!-- GFM footnotes: numbered by first reference, a back link per reference,
      the section headed for assistive technology. -->
 <section data-scene="footnotes">
-  <div data-ui="markdown" data-part="root" data-status="ready" data-flow="normal">
-    <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="markdown"
+    data-ui-markdown=""
+    data-part="root"
+    data-part-root=""
+    data-status="ready"
+    data-flow="normal"
+  >
+    <div
+      data-ui="prose"
+      data-ui-prose=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      data-flow="normal"
+    >
       <p>
         Latency fell by a third<sup
           ><a
@@ -428,17 +653,31 @@
           ></sup
         >.
       </p>
-      <section data-part="footnotes">
-        <h2 id="footnote-label" data-ui="visually-hidden" data-part="root">Footnotes</h2>
+      <section data-part="footnotes" data-part-footnotes="">
+        <h2
+          id="footnote-label"
+          data-ui="visually-hidden"
+          data-ui-visually-hidden=""
+          data-part="root"
+          data-part-root=""
+        >
+          Footnotes
+        </h2>
         <ol>
           <li id="fn-latency">
             <p>
               Measured at the 95th percentile over the week of 14 September.<a
                 data-part="backref"
+                data-part-backref=""
                 href="#fnref-latency"
                 aria-label="Back to reference 1"
-                ><span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="arrow-left"></svg></span
+                ><span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="arrow-left"></svg></span
               ></a>
             </p>
           </li>
@@ -446,10 +685,16 @@
             <p>
               Twelve regions.<a
                 data-part="backref"
+                data-part-backref=""
                 href="#fnref-edge"
                 aria-label="Back to reference 2"
-                ><span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="arrow-left"></svg></span
+                ><span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="arrow-left"></svg></span
               ></a>
             </p>
           </li>
@@ -463,61 +708,107 @@
      that did not arrive, and the wait for it. -->
 <section data-scene="states">
   <div style="display: grid; gap: var(--slotted-space-8)">
-    <div data-ui="markdown" data-part="root" data-status="ready" data-empty>
-      <p data-part="empty">This document has no content yet.</p>
+    <div
+      data-ui="markdown"
+      data-ui-markdown=""
+      data-part="root"
+      data-part-root=""
+      data-status="ready"
+      data-empty
+    >
+      <p data-part="empty" data-part-empty="">This document has no content yet.</p>
     </div>
-    <div data-ui="markdown" data-part="root" data-status="error">
-      <div data-part="error">
+    <div
+      data-ui="markdown"
+      data-ui-markdown=""
+      data-part="root"
+      data-part-root=""
+      data-status="error"
+    >
+      <div data-part="error" data-part-error="">
         <p
           data-ui="inline-message"
+          data-ui-inline-message=""
           data-part="root"
+          data-part-root=""
           data-tone="danger"
           data-size="sm"
           data-live="off"
         >
-          <span data-part="icon" aria-hidden="true"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="circle-alert"></svg></span
+          <span data-part="icon" data-part-icon="" aria-hidden="true"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-alert"></svg></span
           ></span>
-          <span data-part="text">The document could not be loaded.</span>
+          <span data-part="text" data-part-text="">The document could not be loaded.</span>
         </p>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="sm"
           type="button"
         >
-          <span data-part="label">Try again</span>
+          <span data-part="label" data-part-label="">Try again</span>
         </button>
       </div>
     </div>
-    <div data-ui="markdown" data-part="root" data-status="ready" data-loading aria-busy="true">
+    <div
+      data-ui="markdown"
+      data-ui-markdown=""
+      data-part="root"
+      data-part-root=""
+      data-status="ready"
+      data-loading
+      aria-busy="true"
+    >
       <div
         data-ui="skeleton"
+        data-ui-skeleton=""
         data-part="region"
+        data-part-region=""
         data-animation="shimmer"
         data-loading=""
         aria-busy="true"
       >
-        <span data-ui="visually-hidden" data-part="announcement" role="status"
+        <span
+          data-ui="visually-hidden"
+          data-ui-visually-hidden=""
+          data-part="announcement"
+          data-part-announcement=""
+          role="status"
           >Loading document</span
         >
-        <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+        <div
+          data-ui="prose"
+          data-ui-prose=""
+          data-part="root"
+          data-part-root=""
+          data-size="lg"
+          data-flow="normal"
+        >
           <p>
             <span
               data-ui="skeleton"
+              data-ui-skeleton=""
               data-part="text"
+              data-part-text=""
               data-animation="shimmer"
               data-loading=""
               aria-hidden="true"
               inert
               style="--slotted-skeleton-last-line-size: 62%"
             >
-              <span data-part="line"></span>
-              <span data-part="line"></span>
-              <span data-part="line"></span>
+              <span data-part="line" data-part-line=""></span>
+              <span data-part="line" data-part-line=""></span>
+              <span data-part="line" data-part-line=""></span>
             </span>
           </p>
         </div>
@@ -529,11 +820,26 @@
 <!-- Content a renderer cannot shorten: an unbroken address, a long heading,
      a refused link drawn as its text. -->
 <section data-scene="extremes">
-  <div data-ui="markdown" data-part="root" data-status="ready" data-flow="normal">
-    <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="markdown"
+    data-ui-markdown=""
+    data-part="root"
+    data-part-root=""
+    data-status="ready"
+    data-flow="normal"
+  >
+    <div
+      data-ui="prose"
+      data-ui-prose=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      data-flow="normal"
+    >
       <h2 id="what-changes-when-a-region-is-promoted-to-primary-during-an-incident">
         What changes when a region is promoted to primary during an incident&#8288;<a
           data-part="anchor"
+          data-part-anchor=""
           href="#what-changes-when-a-region-is-promoted-to-primary-during-an-incident"
           aria-label="Link to section: What changes when a region is promoted to primary during an incident"
           >#</a

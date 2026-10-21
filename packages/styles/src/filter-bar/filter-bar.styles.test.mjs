@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/filter-bar/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./filter-bar.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./filter-bar.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./filter-bar.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations.replace(/\s+/g, '');
 
@@ -39,12 +52,13 @@ test('styles or wears every part the contract declares', () => {
   ]);
   for (const part of contract.members.filterBar.parts) {
     if (worn.has(part)) continue;
-    const selector = part === 'root' ? "[data-ui='filter-bar']{" : `[data-part='${part}']`;
+    const selector =
+      part === 'root' ? '[data-ui-filter-bar]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
   for (const wrapped of ['search', 'preset']) {
     assert.ok(
-      normalized.includes(`[data-part='${wrapped}']>[data-ui='`),
+      normalized.includes(`[data-part-${wrapped.toLowerCase()}]>[data-ui-`),
       `${wrapped} wraps another family's root`,
     );
   }
@@ -59,12 +73,12 @@ test('styles or wears every part the contract declares', () => {
 test('composes by container query with the container on the root and the grid on the frame', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='root']{container-name:slotted-filter-bar;container-type:inline-size;display:block;inline-size:100%;",
+      '[data-ui-filter-bar][data-part-root]{container-name:slotted-filter-bar;container-type:inline-size;display:block;inline-size:100%;',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='frame']{align-items:start;column-gap:var(--_gap);display:grid;grid-template-areas:'searchendcount''barbarbar';",
+      "[data-part-frame]{align-items:start;column-gap:var(--_gap);display:grid;grid-template-areas:'searchendcount''barbarbar';",
     ),
   );
   assert.doesNotMatch(declarations, /min-width: 64rem/);
@@ -85,13 +99,13 @@ test('composes by container query with the container on the root and the grid on
 test('lays the popover editor out as a column at its own width, outside the root container', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='rule']{display:grid;gap:var(--_gap);inline-size:var(--slotted-filter-bar-editor-size,18rem);max-inline-size:100%;",
+      '[data-ui-filter-bar][data-part-rule]{display:grid;gap:var(--_gap);inline-size:var(--slotted-filter-bar-editor-size,18rem);max-inline-size:100%;',
     ),
   );
-  assert.ok(!normalized.includes("[data-ui='filter-bar']:not([data-part='builder'])"));
+  assert.ok(!normalized.includes('[data-ui-filter-bar]:not([data-part-builder])'));
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='rule']>[data-part='actions']{align-items:center;display:flex;gap:var(--_gap-sm);justify-content:flex-end;",
+      '[data-ui-filter-bar][data-part-rule]>[data-part-actions]{align-items:center;display:flex;gap:var(--_gap-sm);justify-content:flex-end;',
     ),
   );
 });
@@ -108,42 +122,36 @@ test('lays the popover editor out as a column at its own width, outside the root
 test('keeps every condition on one sideways row on a phone, and drops what it does not draw from the roving ring', () => {
   const narrow = normalized.slice(normalized.indexOf('(max-width:36rem)'));
   const row =
-    narrow
-      .split("[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']{")[1]
-      ?.split('}')[0] ?? '';
+    narrow.split('[data-ui-filter-bar]>[data-part-frame]>[data-part-bar]{')[1]?.split('}')[0] ?? '';
   assert.match(row, /flex-wrap:nowrap;/);
   assert.match(row, /overflow-x:auto;/);
   assert.doesNotMatch(row, /margin|padding/);
   assert.ok(
     narrow.includes(
-      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>:is([data-part='summary'],[data-part='pill']):focus-visible{outline-offset:calc(var(--slotted-focus-ring-width,2px)*-1);}",
+      '[data-ui-filter-bar]>[data-part-frame]>[data-part-bar]>:is([data-part-summary],[data-part-pill]):focus-visible{outline-offset:calc(var(--slotted-focus-ring-width,2px)*-1);}',
     ),
   );
   assert.ok(
     narrow.includes(
-      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>:is([data-part='summary'],[data-part='chip'],[data-part='pill']){flex:none;}",
+      '[data-ui-filter-bar]>[data-part-frame]>[data-part-bar]>:is([data-part-summary],[data-part-chip],[data-part-pill]){flex:none;}',
     ),
   );
   assert.ok(
     narrow.includes(
-      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>:is([data-part='more'],[data-part='add'],[data-part='clear'],[data-part='actions']),[data-ui='filter-bar'][data-part='chip']>[data-part='chip-operator']{display:none;visibility:hidden;}",
+      '[data-ui-filter-bar]>[data-part-frame]>[data-part-bar]>:is([data-part-more],[data-part-add],[data-part-clear],[data-part-actions]),[data-ui-filter-bar][data-part-chip]>[data-part-chip-operator]{display:none;visibility:hidden;}',
     ),
   );
   assert.ok(
     narrow.includes(
-      "[data-ui='filter-bar']>[data-part='frame']>[data-part='bar']>[data-part='chip'][data-folded]{display:inline-flex;visibility:visible;}",
+      '[data-ui-filter-bar]>[data-part-frame]>[data-part-bar]>[data-part-chip][data-folded]{display:inline-flex;visibility:visible;}',
     ),
   );
   assert.ok(
-    narrow.includes(
-      "[data-ui='filter-bar'][data-part='chip-value']>[data-operator]{display:inline;}",
-    ),
+    narrow.includes('[data-ui-filter-bar][data-part-chip-value]>[data-operator]{display:inline;}'),
   );
-  assert.ok(narrow.includes("[data-part='summary']{display:inline-flex;visibility:visible;}"));
-  assert.ok(normalized.includes("[data-part='summary']{display:none;visibility:hidden;}"));
-  assert.ok(
-    normalized.includes("[data-part='chip'][data-folded]{display:none;visibility:hidden;}"),
-  );
+  assert.ok(narrow.includes('[data-part-summary]{display:inline-flex;visibility:visible;}'));
+  assert.ok(normalized.includes('[data-part-summary]{display:none;visibility:hidden;}'));
+  assert.ok(normalized.includes('[data-part-chip][data-folded]{display:none;visibility:hidden;}'));
 });
 
 /**
@@ -156,7 +164,7 @@ test('hides the shortcut legend where the primary input is a touch screen', () =
   assert.ok(touch.length > 0, 'a touch-screen media query');
   assert.match(
     touch,
-    /\[data-ui='filter-bar'\] \[data-part='search'\] \[data-ui='kbd'\]\s*\{\s*display: none;/,
+    /\[data-ui-filter-bar\] \[data-part-search\] \[data-ui-kbd\]\s*\{\s*display: none;/,
   );
 });
 
@@ -190,23 +198,21 @@ test('lists rules as cards that expand in place when the builder is narrow', () 
   const cards = normalized.slice(at);
   assert.match(
     cards,
-    /\[data-part='rule'\],\[data-ui='filter-bar'\]\[data-part='builder'\]\[data-part='rule'\]\[data-operands='0'\]\{background-color:var\(--_surface\);border:var\(--_border-width\)solidvar\(--_edge\);/,
+    /\[data-part-rule\],\[data-ui-filter-bar\]\[data-part-builder\]\[data-part-rule\]\[data-operands='0'\]\{background-color:var\(--_surface\);border:var\(--_border-width\)solidvar\(--_edge\);/,
   );
   assert.ok(
     cards.includes(
-      "[data-part='rule']:not([data-expanded]):is([data-part='field'],[data-part='operator'],[data-part='operand']){display:none;visibility:hidden;}",
+      '[data-part-rule]:not([data-expanded]):is([data-part-field],[data-part-operator],[data-part-operand]){display:none;visibility:hidden;}',
     ),
   );
   assert.match(
     cards,
     /border-inline-start:var\(--slotted-border-width-medium,2px\)solidvar\(--_edge\);/,
   );
-  assert.ok(
-    cards.includes("[data-part='rules']>[data-part='conjunction']:first-child{display:none;}"),
-  );
+  assert.ok(cards.includes('[data-part-rules]>[data-part-conjunction]:first-child{display:none;}'));
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='builder'][data-part='rule-summary']{display:none;visibility:hidden;}",
+      '[data-ui-filter-bar][data-part-builder][data-part-rule-summary]{display:none;visibility:hidden;}',
     ),
   );
 });
@@ -217,15 +223,14 @@ test('lists rules as cards that expand in place when the builder is narrow', () 
  * with the filled state — a pinned field with a condition is a chip.
  */
 test('draws an empty pinned field as a dashed slot, and no accent', () => {
-  const pill =
-    normalized.split("[data-ui='filter-bar'][data-part='pill']{")[1]?.split('}')[0] ?? '';
+  const pill = normalized.split('[data-ui-filter-bar][data-part-pill]{')[1]?.split('}')[0] ?? '';
   assert.match(pill, /background-color:transparent;/);
   assert.match(pill, /border:var\(--_border-width\)dashedvar\(--_edge\);/);
   assert.match(pill, /color:var\(--_muted\);/);
   assert.doesNotMatch(pill, /box-shadow/);
   assert.doesNotMatch(normalized, /data-filtered|--_filtered/);
   assert.ok(
-    normalized.includes("[data-part='pill']>[data-ui='icon']{--slotted-icon-size:var(--_icon);"),
+    normalized.includes('[data-part-pill]>[data-ui-icon]{--slotted-icon-size:var(--_icon);'),
   );
   assert.doesNotMatch(declarations, /mask-image/);
 });
@@ -237,8 +242,7 @@ test('draws an empty pinned field as a dashed slot, and no accent', () => {
  * curve. A segment's ring is drawn inward, as every inner control's is.
  */
 test('writes a chip as one capsule of segments with inward rings', () => {
-  const chip =
-    normalized.split("[data-ui='filter-bar'][data-part='chip']{")[1]?.split('}')[0] ?? '';
+  const chip = normalized.split('[data-ui-filter-bar][data-part-chip]{')[1]?.split('}')[0] ?? '';
   assert.match(chip, /block-size:var\(--_height\);/);
   assert.match(chip, /border:var\(--_border-width\)solidvar\(--_edge\);/);
   assert.match(chip, /border-radius:var\(--_radius\);/);
@@ -246,22 +250,22 @@ test('writes a chip as one capsule of segments with inward rings', () => {
   assert.doesNotMatch(chip, /overflow/);
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='chip']>*+*{border-inline-start:var(--_border-width)solidvar(--_seam);}",
+      '[data-ui-filter-bar][data-part-chip]>*+*{border-inline-start:var(--_border-width)solidvar(--_seam);}',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='chip']>:focus-visible{outline:var(--slotted-focus-ring-width,2px)solidvar(--slotted-focus-ring-color,Highlight);outline-offset:calc(var(--slotted-focus-ring-width,2px)*-1);}",
+      '[data-ui-filter-bar][data-part-chip]>:focus-visible{outline:var(--slotted-focus-ring-width,2px)solidvar(--slotted-focus-ring-color,Highlight);outline-offset:calc(var(--slotted-focus-ring-width,2px)*-1);}',
     ),
   );
-  assert.ok(normalized.includes("[data-part='chip'][data-incomplete]{border-style:dashed;"));
+  assert.ok(normalized.includes('[data-part-chip][data-incomplete]{border-style:dashed;'));
   assert.match(
     normalized,
-    /\[data-part='chip'\]>:first-child\{border-end-start-radius:var\(--_radius\);/,
+    /\[data-part-chip\]>:first-child\{border-end-start-radius:var\(--_radius\);/,
   );
   assert.match(
     normalized,
-    /\[data-part='chip'\]>:last-child\{border-end-end-radius:var\(--_radius\);/,
+    /\[data-part-chip\]>:last-child\{border-end-end-radius:var\(--_radius\);/,
   );
 });
 
@@ -269,22 +273,22 @@ test('writes a chip as one capsule of segments with inward rings', () => {
 test('sizes a builder row’s remove and draws no cross in CSS', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='rule']>[data-part='remove']>[data-ui='icon']{--slotted-icon-size:var(--_icon);}",
+      '[data-part-rule]>[data-part-remove]>[data-ui-icon]{--slotted-icon-size:var(--_icon);}',
     ),
   );
-  assert.doesNotMatch(declarations, /\[data-part='(chip-)?remove'\]::after/);
+  assert.doesNotMatch(declarations, /\[data-part-(chip-)?remove\]::after/);
 });
 
 /** The field's name, the operator and the value are isolated runs, so a right-to-left name beside an ISO date reorders nothing. */
 test('isolates the field name from its sentence', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='pill']>span:not([data-ui='icon']){min-inline-size:0;overflow:hidden;text-overflow:ellipsis;unicode-bidi:isolate;}",
+      '[data-part-pill]>span:not([data-ui-icon]){min-inline-size:0;overflow:hidden;text-overflow:ellipsis;unicode-bidi:isolate;}',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='chip']>*>span:not([data-ui]),[data-ui='filter-bar'][data-part='chip-operator']{unicode-bidi:isolate;}",
+      '[data-ui-filter-bar][data-part-chip]>*>span:not([data-ui]),[data-ui-filter-bar][data-part-chip-operator]{unicode-bidi:isolate;}',
     ),
   );
 });
@@ -293,7 +297,7 @@ test('isolates the field name from its sentence', () => {
 test('reads the page property for sticky', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-sticky]{background-color:var(--_surface);inset-block-start:var(--slotted-page-sticky-top,0px);",
+      '[data-ui-filter-bar][data-sticky]{background-color:var(--_surface);inset-block-start:var(--slotted-page-sticky-top,0px);',
     ),
   );
   assert.ok(normalized.includes('z-index:var(--slotted-z-index-sticky,100)'));
@@ -304,7 +308,7 @@ test('borrows the ring for every control of its own', () => {
   for (const part of ['pill', 'more']) {
     assert.ok(
       normalized.includes(
-        `[data-part='${part}']:focus-visible{outline:var(--slotted-focus-ring-width,2px)solidvar(--slotted-focus-ring-color,Highlight);outline-offset:var(--slotted-focus-ring-offset,2px);}`,
+        `[data-part-${part.toLowerCase()}]:focus-visible{outline:var(--slotted-focus-ring-width,2px)solidvar(--slotted-focus-ring-color,Highlight);outline-offset:var(--slotted-focus-ring-offset,2px);}`,
       ),
       `${part} draws the shared ring`,
     );
@@ -350,13 +354,13 @@ test('reaches the operator and the operand through a display-contents wrapper', 
   for (const part of ['operator', 'operand']) {
     assert.doesNotMatch(
       normalized,
-      new RegExp(`\\[data-part='rule'\\][^{,]*>\\[data-part='${part}'\\]`),
+      new RegExp(`\\[data-part-rule\\][^{,]*>\\[data-part-${part}\\]`),
       `rule reaches ${part} as a child`,
     );
   }
   assert.ok(
     normalized.includes(
-      "[data-part='rule']:is([data-part='operator'],[data-part='operand']){grid-column:1/-1;}",
+      '[data-part-rule]:is([data-part-operator],[data-part-operand]){grid-column:1/-1;}',
     ),
     'the stacked rule spans both parts across the row',
   );
@@ -375,7 +379,7 @@ test("gives a narrow bar's end controls a line of their own", () => {
   );
   assert.match(
     narrow,
-    /\[data-ui='filter-bar'\]>\[data-part='frame'\]:has\(>\[data-part='end'\]:not\(:empty\)\)\{grid-template-areas:'search''bar''end''count';\}/,
+    /\[data-ui-filter-bar\]>\[data-part-frame\]:has\(>\[data-part-end\]:not\(:empty\)\)\{grid-template-areas:'search''bar''end''count';\}/,
   );
 });
 
@@ -389,7 +393,7 @@ test("gives a narrow bar's end controls a line of their own", () => {
 test('starts every member at the top of its line and centres the count in a control height', () => {
   const count =
     normalized
-      .split("[data-ui='filter-bar']>[data-part='frame']>[data-part='count']{")
+      .split('[data-ui-filter-bar]>[data-part-frame]>[data-part-count]{')
       .find((block) => block.startsWith('color:'))
       ?.split('}')[0] ?? '';
   assert.match(count, /padding-block:max\(0px,calc\(\(var\(--_height\)-1lh\)\/2\)\);/);
@@ -399,12 +403,12 @@ test('starts every member at the top of its line and centres the count in a cont
    * placed in this bar — the column manager's trigger chip took this padding
    * and grew to the button's height.
    */
-  assert.ok(!/\[data-ui='filter-bar'\]\s+\[data-part='count'\]/.test(declarations));
-  assert.ok(!/\[data-loading\]\s+\[data-part='count'\]/.test(declarations));
+  assert.ok(!/\[data-ui-filter-bar\]\s+\[data-part-count\]/.test(declarations));
+  assert.ok(!/\[data-loading\]\s+\[data-part-count\]/.test(declarations));
   const narrow = normalized.slice(normalized.indexOf('(max-width:36rem)'));
   assert.match(
     narrow,
-    /\[data-ui='filter-bar'\]>\[data-part='frame'\]>\[data-part='count'\]\{justify-self:start;padding-block:0;\}/,
+    /\[data-ui-filter-bar\]>\[data-part-frame\]>\[data-part-count\]\{justify-self:start;padding-block:0;\}/,
   );
 });
 
@@ -418,7 +422,7 @@ test('starts every member at the top of its line and centres the count in a cont
 test('keeps a line of its type for the count while the first answer is on its way', () => {
   const count =
     normalized
-      .split("[data-ui='filter-bar']>[data-part='frame']>[data-part='count']{")
+      .split('[data-ui-filter-bar]>[data-part-frame]>[data-part-count]{')
       .find((block) => block.startsWith('color:'))
       ?.split('}')[0] ?? '';
   assert.match(count, /min-block-size:1lh/);
@@ -434,8 +438,7 @@ test('makes the builder row’s remove and more full touch targets on a coarse p
   const at = normalized.indexOf('@media(pointer:coarse){');
   assert.notEqual(at, -1, 'a coarse-pointer block');
   const coarse = normalized.slice(at);
-  const selector =
-    "[data-ui='filter-bar']:is([data-part='more'],[data-part='rule']>[data-part='remove'])";
+  const selector = '[data-ui-filter-bar]:is([data-part-more],[data-part-rule]>[data-part-remove])';
   const halo = coarse.split(`${selector}::before{`)[1]?.split('}')[0] ?? '';
   assert.match(
     halo,
@@ -445,7 +448,7 @@ test('makes the builder row’s remove and more full touch targets on a coarse p
   assert.doesNotMatch(box, /background-clip|padding-block|margin-block/);
   assert.ok(
     normalized.includes(
-      "[data-ui='filter-bar'][data-part='more']{align-items:center;appearance:none;background:none;block-size:var(--_height);",
+      '[data-ui-filter-bar][data-part-more]{align-items:center;appearance:none;background:none;block-size:var(--_height);',
     ),
   );
 });

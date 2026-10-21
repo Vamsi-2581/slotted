@@ -28,14 +28,17 @@
 <section data-scene="default">
   <div
     data-ui="field"
+    data-ui-field=""
     data-part="root"
+    data-part-root=""
     data-size="md"
     data-label-placement="top"
     data-necessity="mark"
   >
-    <label data-part="label" for="default-control">E-mail</label>
+    <label data-part="label" data-part-label="" for="default-control">E-mail</label>
     <input
       data-part="control"
+      data-part-control=""
       id="default-control"
       type="email"
       aria-describedby="default-description"
@@ -43,34 +46,39 @@
     />
     <p
       data-ui="inline-message"
+      data-ui-inline-message=""
       data-mark="none"
       data-part="root"
+      data-part-root=""
       data-tone="secondary"
       data-size="sm"
       data-live="off"
       id="default-description"
     >
-      <span aria-hidden="true" data-part="icon"></span>
-      <span data-part="text">Usaremos este endereço para a cobrança.</span>
+      <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+      <span data-part="text" data-part-text="">Usaremos este endereço para a cobrança.</span>
     </p>
   </div>
 </section>
 
 <section data-scene="necessity">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
     >
-      <label data-part="label" for="necessity-mark"
-        >CNPJ<span aria-hidden="true" data-part="mark">*</span></label
+      <label data-part="label" data-part-label="" for="necessity-mark"
+        >CNPJ<span aria-hidden="true" data-part="mark" data-part-mark="">*</span></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="necessity-mark"
         aria-required="true"
         value="12.345.678/0001-90"
@@ -78,17 +86,20 @@
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="words"
       data-required
     >
-      <label data-part="label" for="necessity-required"
-        >CNPJ<span data-part="mark">(required)</span></label
+      <label data-part="label" data-part-label="" for="necessity-required"
+        >CNPJ<span data-part="mark" data-part-mark="">(required)</span></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="necessity-required"
         aria-required="true"
         value="12.345.678/0001-90"
@@ -96,27 +107,32 @@
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="words"
     >
-      <label data-part="label" for="necessity-optional"
-        >Inscrição estadual<span data-part="mark">(optional)</span></label
+      <label data-part="label" data-part-label="" for="necessity-optional"
+        >Inscrição estadual<span data-part="mark" data-part-mark="">(optional)</span></label
       >
-      <input data-part="control" id="necessity-optional" />
+      <input data-part="control" data-part-control="" id="necessity-optional" />
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="optional"
       data-required
     >
-      <label data-part="label" for="necessity-only-required">Razão social</label>
+      <label data-part="label" data-part-label="" for="necessity-only-required">Razão social</label>
       <input
         data-part="control"
+        data-part-control=""
         id="necessity-only-required"
         aria-required="true"
         value="Sirius Group"
@@ -124,159 +140,212 @@
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="optional"
     >
-      <label data-part="label" for="necessity-only-optional"
-        >Nome fantasia<span data-part="mark">(optional)</span></label
+      <label data-part="label" data-part-label="" for="necessity-only-optional"
+        >Nome fantasia<span data-part="mark" data-part-mark="">(optional)</span></label
       >
-      <input data-part="control" id="necessity-only-optional" />
+      <input data-part="control" data-part-control="" id="necessity-only-optional" />
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="none"
       data-required
     >
-      <label data-part="label" for="necessity-none">Razão social</label>
-      <input data-part="control" id="necessity-none" aria-required="true" value="Sirius Group" />
+      <label data-part="label" data-part-label="" for="necessity-none">Razão social</label>
+      <input
+        data-part="control"
+        data-part-control=""
+        id="necessity-none"
+        aria-required="true"
+        value="Sirius Group"
+      />
     </div>
   </div>
 </section>
 
 <section data-scene="placement">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="side"
       data-necessity="mark"
     >
-      <label data-part="label" for="placement-side">Razão social</label>
+      <label data-part="label" data-part-label="" for="placement-side">Razão social</label>
       <input
         data-part="control"
+        data-part-control=""
         id="placement-side"
         value="Sirius Group Tecnologia"
         aria-describedby="placement-side-description"
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         id="placement-side-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Como consta no cartão CNPJ.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Como consta no cartão CNPJ.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="side"
       data-necessity="mark"
     >
-      <label data-part="label" for="placement-wrap">Endereço de correspondência da matriz</label>
-      <textarea data-part="control" id="placement-wrap" rows="3">Avenida Paulista, 1000</textarea>
+      <label data-part="label" data-part-label="" for="placement-wrap"
+        >Endereço de correspondência da matriz</label
+      >
+      <textarea data-part="control" data-part-control="" id="placement-wrap" rows="3">
+Avenida Paulista, 1000</textarea>
     </div>
   </div>
 </section>
 
 <section data-scene="sizes">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-label-placement="top"
       data-necessity="mark"
     >
-      <label data-part="label" for="size-sm">Apelido</label>
-      <input data-part="control" id="size-sm" value="sm" aria-describedby="size-sm-description" />
+      <label data-part="label" data-part-label="" for="size-sm">Apelido</label>
+      <input
+        data-part="control"
+        data-part-control=""
+        id="size-sm"
+        value="sm"
+        aria-describedby="size-sm-description"
+      />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         id="size-sm-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Aparece nos relatórios.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Aparece nos relatórios.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
     >
-      <label data-part="label" for="size-md">Apelido</label>
-      <input data-part="control" id="size-md" value="md" aria-describedby="size-md-description" />
+      <label data-part="label" data-part-label="" for="size-md">Apelido</label>
+      <input
+        data-part="control"
+        data-part-control=""
+        id="size-md"
+        value="md"
+        aria-describedby="size-md-description"
+      />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         id="size-md-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Aparece nos relatórios.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Aparece nos relatórios.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="lg"
       data-label-placement="top"
       data-necessity="mark"
     >
-      <label data-part="label" for="size-lg">Apelido</label>
-      <input data-part="control" id="size-lg" value="lg" aria-describedby="size-lg-description" />
+      <label data-part="label" data-part-label="" for="size-lg">Apelido</label>
+      <input
+        data-part="control"
+        data-part-control=""
+        id="size-lg"
+        value="lg"
+        aria-describedby="size-lg-description"
+      />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="md"
         data-live="off"
         id="size-lg-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Aparece nos relatórios.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Aparece nos relatórios.</span>
       </p>
     </div>
   </div>
 </section>
 
 <section data-scene="states">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
       data-invalid
     >
-      <label data-part="label" for="state-invalid"
-        >CNPJ<span aria-hidden="true" data-part="mark">*</span></label
+      <label data-part="label" data-part-label="" for="state-invalid"
+        >CNPJ<span aria-hidden="true" data-part="mark" data-part-mark="">*</span></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="state-invalid"
         aria-invalid="true"
         aria-required="true"
@@ -285,41 +354,50 @@
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         id="state-invalid-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Somente números, com filial e dígito.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Somente números, com filial e dígito.</span>
       </p>
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
         id="state-invalid-error"
       >
-        <span data-part="prefix">Error:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Faltam seis dígitos.</span>
+        <span data-part="prefix" data-part-prefix="">Error:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Faltam seis dígitos.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-readonly
     >
-      <label data-part="label" for="state-readonly">Identificador da conta</label>
+      <label data-part="label" data-part-label="" for="state-readonly"
+        >Identificador da conta</label
+      >
       <input
         data-part="control"
+        data-part-control=""
         id="state-readonly"
         readonly
         value="acc_9f2b7c41"
@@ -327,31 +405,36 @@
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         id="state-readonly-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Gerado na criação da conta e copiável.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Gerado na criação da conta e copiável.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
       data-disabled
     >
-      <label data-part="label" for="state-disabled"
-        >Centro de custo<span aria-hidden="true" data-part="mark">*</span></label
+      <label data-part="label" data-part-label="" for="state-disabled"
+        >Centro de custo<span aria-hidden="true" data-part="mark" data-part-mark="">*</span></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="state-disabled"
         disabled
         aria-required="true"
@@ -360,77 +443,91 @@
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         data-disabled
         id="state-disabled-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Disponível depois que a unidade for escolhida.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text=""
+          >Disponível depois que a unidade for escolhida.</span
+        >
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-invalid
     >
-      <label data-part="label" for="state-reserve">Telefone</label>
+      <label data-part="label" data-part-label="" for="state-reserve">Telefone</label>
       <input
         data-part="control"
+        data-part-control=""
         id="state-reserve"
         aria-describedby="state-reserve-error"
         value="(11) 90000-0000"
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
         data-reserve
         id="state-reserve-error"
       >
-        <span data-part="prefix">Error:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text"></span>
+        <span data-part="prefix" data-part-prefix="">Error:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text=""></span>
       </p>
     </div>
   </div>
 </section>
 
 <section data-scene="counter">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
     >
-      <label data-part="label" for="counter-under">Descrição pública</label>
-      <span data-part="counter">64/140</span>
-      <textarea data-part="control" id="counter-under" rows="2">
+      <label data-part="label" data-part-label="" for="counter-under">Descrição pública</label>
+      <span data-part="counter" data-part-counter="">64/140</span>
+      <textarea data-part="control" data-part-control="" id="counter-under" rows="2">
 Integramos folha, ponto e benefícios em um só lugar.</textarea>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-invalid
     >
-      <label data-part="label" for="counter-over">Descrição pública</label>
-      <span data-part="counter" data-invalid>148/140</span>
+      <label data-part="label" data-part-label="" for="counter-over">Descrição pública</label>
+      <span data-part="counter" data-part-counter="" data-invalid>148/140</span>
       <textarea
         data-part="control"
+        data-part-control=""
         id="counter-over"
         rows="3"
         aria-invalid="true"
@@ -439,63 +536,71 @@ Integramos folha, ponto e benefícios em um só lugar.</textarea>
 Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento contábil da competência em um só lugar.</textarea>
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
         id="counter-over-error"
       >
-        <span data-part="prefix">Error:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Corte oito caracteres.</span>
+        <span data-part="prefix" data-part-prefix="">Error:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Corte oito caracteres.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="side"
       data-necessity="mark"
     >
-      <label data-part="label" for="counter-side">Assunto</label>
-      <span data-part="counter">12/60</span>
-      <input data-part="control" id="counter-side" value="Fatura março" />
+      <label data-part="label" data-part-label="" for="counter-side">Assunto</label>
+      <span data-part="counter" data-part-counter="">12/60</span>
+      <input data-part="control" data-part-control="" id="counter-side" value="Fatura março" />
     </div>
   </div>
 </section>
 
 <section data-scene="header">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
     >
-      <div data-part="header">
-        <label data-part="label" for="header-password"
-          >Senha<span aria-hidden="true" data-part="mark">*</span></label
+      <div data-part="header" data-part-header="">
+        <label data-part="label" data-part-label="" for="header-password"
+          >Senha<span aria-hidden="true" data-part="mark" data-part-mark="">*</span></label
         >
         <button
           data-part="help"
+          data-part-help=""
           type="button"
           aria-label="Mais informações"
           aria-describedby="header-password-help"
         >
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-question"></svg
           ></span>
-          <span data-part="help-text" id="header-password-help" hidden
+          <span data-part="help-text" data-part-help-text="" id="header-password-help" hidden
             >No mínimo oito caracteres, com letras e números.</span
           >
         </button>
-        <a data-part="action" href="#recuperar">Esqueceu a senha?</a>
+        <a data-part="action" data-part-action="" href="#recuperar">Esqueceu a senha?</a>
       </div>
       <input
         data-part="control"
+        data-part-control=""
         id="header-password"
         type="password"
         aria-required="true"
@@ -505,115 +610,142 @@ Integramos folha, ponto, benefícios, admissão, desligamento e o fechamento con
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
     >
-      <div data-part="header">
-        <label data-part="label" for="header-endpoint">Endpoint da API</label>
+      <div data-part="header" data-part-header="">
+        <label data-part="label" data-part-label="" for="header-endpoint">Endpoint da API</label>
         <button
           data-part="help"
+          data-part-help=""
           type="button"
           aria-label="Mais informações"
           aria-describedby="header-endpoint-help"
         >
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-question"></svg
           ></span>
-          <span data-part="help-text" id="header-endpoint-help" hidden
+          <span data-part="help-text" data-part-help-text="" id="header-endpoint-help" hidden
             >O endereço base que recebe as notificações.</span
           >
         </button>
-        <span data-part="indicator" id="header-endpoint-indicator"
+        <span data-part="indicator" data-part-indicator="" id="header-endpoint-indicator"
           ><span
             data-ui="badge"
+            data-ui-badge=""
             data-part="root"
+            data-part-root=""
             data-tone="accent"
             data-variant="soft"
             data-size="sm"
             data-shape="square"
-            ><span data-part="label">Beta</span></span
+            ><span data-part="label" data-part-label="">Beta</span></span
           ></span
         >
       </div>
       <input
         data-part="control"
+        data-part-control=""
         id="header-endpoint"
         aria-describedby="header-endpoint-indicator header-endpoint-help header-endpoint-description"
         value="https://api.sirius.com.br"
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         id="header-endpoint-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Use HTTPS; o certificado é verificado a cada envio.</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text=""
+          >Use HTTPS; o certificado é verificado a cada envio.</span
+        >
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
     >
-      <div data-part="header">
-        <label data-part="label" for="header-bio">Apresentação</label>
-        <button data-part="action" type="button">Gerar com IA</button>
-        <span data-part="counter" id="header-bio-counter">24/160</span>
+      <div data-part="header" data-part-header="">
+        <label data-part="label" data-part-label="" for="header-bio">Apresentação</label>
+        <button data-part="action" data-part-action="" type="button">Gerar com IA</button>
+        <span data-part="counter" data-part-counter="" id="header-bio-counter">24/160</span>
       </div>
-      <textarea data-part="control" id="header-bio" rows="2" aria-describedby="header-bio-counter">
+      <textarea
+        data-part="control"
+        data-part-control=""
+        id="header-bio"
+        rows="2"
+        aria-describedby="header-bio-counter"
+      >
 Engenheira e contribuidora.</textarea>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
     >
-      <div data-part="header">
-        <label data-part="label" for="header-long"
-          >Endereço de correspondência da matriz<span aria-hidden="true" data-part="mark"
+      <div data-part="header" data-part-header="">
+        <label data-part="label" data-part-label="" for="header-long"
+          >Endereço de correspondência da matriz<span
+            aria-hidden="true"
+            data-part="mark"
+            data-part-mark=""
             >*</span
           ></label
         >
         <button
           data-part="help"
+          data-part-help=""
           type="button"
           aria-label="Mais informações"
           aria-describedby="header-long-help"
         >
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-question"></svg
           ></span>
-          <span data-part="help-text" id="header-long-help" hidden
+          <span data-part="help-text" data-part-help-text="" id="header-long-help" hidden
             >Recebe as notas fiscais em papel.</span
           >
         </button>
-        <span data-part="indicator" id="header-long-indicator"
+        <span data-part="indicator" data-part-indicator="" id="header-long-indicator"
           ><span
             data-ui="badge"
+            data-ui-badge=""
             data-part="root"
+            data-part-root=""
             data-tone="warning"
             data-variant="soft"
             data-size="sm"
             data-shape="square"
-            ><span data-part="label">Obrigatório para PJ</span>
+            ><span data-part="label" data-part-label="">Obrigatório para PJ</span>
           </span></span
         >
-        <button data-part="action" type="button">Usar o de cobrança</button>
-        <span data-part="counter" id="header-long-counter">0/120</span>
+        <button data-part="action" data-part-action="" type="button">Usar o de cobrança</button>
+        <span data-part="counter" data-part-counter="" id="header-long-counter">0/120</span>
       </div>
       <input
         data-part="control"
+        data-part-control=""
         id="header-long"
         aria-required="true"
         aria-describedby="header-long-indicator header-long-help header-long-counter"
@@ -621,41 +753,47 @@ Engenheira e contribuidora.</textarea>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-disabled
     >
-      <div data-part="header">
-        <label data-part="label" for="header-disabled">Centro de custo</label>
+      <div data-part="header" data-part-header="">
+        <label data-part="label" data-part-label="" for="header-disabled">Centro de custo</label>
         <button
           data-part="help"
+          data-part-help=""
           type="button"
           aria-label="Mais informações"
           aria-describedby="header-disabled-help"
         >
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-question"></svg
           ></span>
-          <span data-part="help-text" id="header-disabled-help" hidden
+          <span data-part="help-text" data-part-help-text="" id="header-disabled-help" hidden
             >Liberado depois que a unidade for escolhida.</span
           >
         </button>
-        <span data-part="indicator" id="header-disabled-indicator"
+        <span data-part="indicator" data-part-indicator="" id="header-disabled-indicator"
           ><span
             data-ui="badge"
+            data-ui-badge=""
             data-part="root"
+            data-part-root=""
             data-tone="secondary"
             data-variant="soft"
             data-size="sm"
             data-shape="square"
-            ><span data-part="label">Pro</span>
+            ><span data-part="label" data-part-label="">Pro</span>
           </span></span
         >
       </div>
       <input
         data-part="control"
+        data-part-control=""
         id="header-disabled"
         disabled
         aria-describedby="header-disabled-indicator header-disabled-help"
@@ -666,33 +804,37 @@ Engenheira e contribuidora.</textarea>
 </section>
 
 <section data-scene="header-side">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="side"
       data-necessity="mark"
     >
-      <div data-part="header">
-        <label data-part="label" for="side-password">Senha</label>
+      <div data-part="header" data-part-header="">
+        <label data-part="label" data-part-label="" for="side-password">Senha</label>
         <button
           data-part="help"
+          data-part-help=""
           type="button"
           aria-label="Mais informações"
           aria-describedby="side-password-help"
         >
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-question"></svg
           ></span>
-          <span data-part="help-text" id="side-password-help" hidden
+          <span data-part="help-text" data-part-help-text="" id="side-password-help" hidden
             >No mínimo oito caracteres, com letras e números.</span
           >
         </button>
-        <a data-part="action" href="#recuperar">Esqueceu a senha?</a>
+        <a data-part="action" data-part-action="" href="#recuperar">Esqueceu a senha?</a>
       </div>
       <input
         data-part="control"
+        data-part-control=""
         id="side-password"
         type="password"
         aria-describedby="side-password-help"
@@ -701,17 +843,20 @@ Engenheira e contribuidora.</textarea>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="side"
       data-necessity="mark"
     >
-      <div data-part="header">
-        <label data-part="label" for="side-subject">Assunto</label>
-        <span data-part="counter" id="side-subject-counter">12/60</span>
+      <div data-part="header" data-part-header="">
+        <label data-part="label" data-part-label="" for="side-subject">Assunto</label>
+        <span data-part="counter" data-part-counter="" id="side-subject-counter">12/60</span>
       </div>
       <input
         data-part="control"
+        data-part-control=""
         id="side-subject"
         aria-describedby="side-subject-counter"
         value="Fatura março"
@@ -724,31 +869,36 @@ Engenheira e contribuidora.</textarea>
   <div style="padding-block-start: 3.5rem">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
     >
-      <div data-part="header" style="position: relative">
-        <label data-part="label" for="help-open">Prazo de pagamento</label>
+      <div data-part="header" data-part-header="" style="position: relative">
+        <label data-part="label" data-part-label="" for="help-open">Prazo de pagamento</label>
         <button
           data-part="help"
+          data-part-help=""
           type="button"
           aria-label="Mais informações"
           aria-describedby="help-open-help"
           data-open
           aria-expanded="true"
         >
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-question"></svg
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-question"></svg
           ></span>
-          <span data-part="help-text" id="help-open-help" hidden
+          <span data-part="help-text" data-part-help-text="" id="help-open-help" hidden
             >Dias corridos a partir da emissão da nota.</span
           >
         </button>
         <div
           data-ui="tooltip"
+          data-ui-tooltip=""
           data-part="root"
+          data-part-root=""
           data-side="top"
           data-align="center"
           data-variant="inverse"
@@ -765,63 +915,81 @@ Engenheira e contribuidora.</textarea>
             --slotted-positioner-transform-origin: center bottom;
           "
         >
-          <div data-part="arrow"></div>
-          <div data-part="content" role="tooltip" aria-hidden="true">
+          <div data-part="arrow" data-part-arrow=""></div>
+          <div data-part="content" data-part-content="" role="tooltip" aria-hidden="true">
             Dias corridos a partir da emissão da nota.
           </div>
         </div>
       </div>
-      <input data-part="control" id="help-open" aria-describedby="help-open-help" value="30" />
+      <input
+        data-part="control"
+        data-part-control=""
+        id="help-open"
+        aria-describedby="help-open-help"
+        value="30"
+      />
     </div>
   </div>
 </section>
 
 <section data-scene="content">
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="side"
       data-necessity="words"
       data-required
     >
-      <label data-part="label" for="content-long"
-        >Kraftfahrzeug-Haftpflichtversicherungsnummer<span data-part="mark">(required)</span>
+      <label data-part="label" data-part-label="" for="content-long"
+        >Kraftfahrzeug-Haftpflichtversicherungsnummer<span data-part="mark" data-part-mark=""
+          >(required)</span
+        >
       </label>
       <input
         data-part="control"
+        data-part-control=""
         id="content-long"
         aria-required="true"
         aria-describedby="content-long-description"
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-size="sm"
         data-live="off"
         id="content-long-description"
       >
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text"
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text=""
           >sha256:9f2b7c41a8d3e05f6c1b4a97e2d80f3c5b6a1d4e7f0938271a6b5c4d3e2f1a09</span
         >
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-invalid
     >
-      <label data-part="label" for="content-rtl" lang="ar" dir="rtl">رقم التعريف الضريبي</label>
-      <span data-part="counter">3/14</span>
+      <label data-part="label" data-part-label="" for="content-rtl" lang="ar" dir="rtl"
+        >رقم التعريف الضريبي</label
+      >
+      <span data-part="counter" data-part-counter="">3/14</span>
       <input
         data-part="control"
+        data-part-control=""
         id="content-rtl"
         lang="ar"
         dir="rtl"
@@ -831,8 +999,10 @@ Engenheira e contribuidora.</textarea>
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
@@ -840,9 +1010,9 @@ Engenheira e contribuidora.</textarea>
         lang="ar"
         dir="rtl"
       >
-        <span data-part="prefix">خطأ:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">الرقم غير مكتمل.</span>
+        <span data-part="prefix" data-part-prefix="">خطأ:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">الرقم غير مكتمل.</span>
       </p>
     </div>
   </div>
@@ -851,21 +1021,24 @@ Engenheira e contribuidora.</textarea>
 <section data-scene="form-errors">
   <!-- The picture R5's limit is about: four fields of one form, every one of
        them in error, one under the other. -->
-  <div data-ui="stack" data-part="root" data-gap="7">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="7">
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
       data-invalid
     >
-      <label data-part="label" for="form-error-name"
-        >Razão social<span aria-hidden="true" data-part="mark">*</span></label
+      <label data-part="label" data-part-label="" for="form-error-name"
+        >Razão social<span aria-hidden="true" data-part="mark" data-part-mark="">*</span></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="form-error-name"
         aria-invalid="true"
         aria-required="true"
@@ -874,32 +1047,37 @@ Engenheira e contribuidora.</textarea>
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
         id="form-error-name-error"
       >
-        <span data-part="prefix">Error:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Informe a razão social completa.</span>
+        <span data-part="prefix" data-part-prefix="">Error:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Informe a razão social completa.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
       data-invalid
     >
-      <label data-part="label" for="form-error-document"
-        >CNPJ<span aria-hidden="true" data-part="mark">*</span></label
+      <label data-part="label" data-part-label="" for="form-error-document"
+        >CNPJ<span aria-hidden="true" data-part="mark" data-part-mark="">*</span></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="form-error-document"
         aria-invalid="true"
         aria-required="true"
@@ -908,32 +1086,39 @@ Engenheira e contribuidora.</textarea>
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
         id="form-error-document-error"
       >
-        <span data-part="prefix">Error:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Faltam seis dígitos.</span>
+        <span data-part="prefix" data-part-prefix="">Error:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Faltam seis dígitos.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
       data-invalid
     >
-      <label data-part="label" for="form-error-mail"
-        >E-mail de cobrança<span aria-hidden="true" data-part="mark">*</span></label
+      <label data-part="label" data-part-label="" for="form-error-mail"
+        >E-mail de cobrança<span aria-hidden="true" data-part="mark" data-part-mark=""
+          >*</span
+        ></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="form-error-mail"
         aria-invalid="true"
         aria-required="true"
@@ -942,32 +1127,37 @@ Engenheira e contribuidora.</textarea>
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
         id="form-error-mail-error"
       >
-        <span data-part="prefix">Error:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">Endereço incompleto.</span>
+        <span data-part="prefix" data-part-prefix="">Error:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">Endereço incompleto.</span>
       </p>
     </div>
     <div
       data-ui="field"
+      data-ui-field=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
       data-required
       data-invalid
     >
-      <label data-part="label" for="form-error-code"
-        >Código do plano<span aria-hidden="true" data-part="mark">*</span></label
+      <label data-part="label" data-part-label="" for="form-error-code"
+        >Código do plano<span aria-hidden="true" data-part="mark" data-part-mark="">*</span></label
       >
       <input
         data-part="control"
+        data-part-control=""
         id="form-error-code"
         aria-invalid="true"
         aria-required="true"
@@ -976,16 +1166,18 @@ Engenheira e contribuidora.</textarea>
       />
       <p
         data-ui="inline-message"
+        data-ui-inline-message=""
         data-mark="none"
         data-part="root"
+        data-part-root=""
         data-tone="danger"
         data-size="sm"
         data-live="off"
         id="form-error-code-error"
       >
-        <span data-part="prefix">Error:</span>
-        <span aria-hidden="true" data-part="icon"></span>
-        <span data-part="text">O código tem seis caracteres.</span>
+        <span data-part="prefix" data-part-prefix="">Error:</span>
+        <span aria-hidden="true" data-part="icon" data-part-icon=""></span>
+        <span data-part="text" data-part-text="">O código tem seis caracteres.</span>
       </p>
     </div>
   </div>

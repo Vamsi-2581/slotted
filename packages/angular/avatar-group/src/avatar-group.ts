@@ -93,7 +93,7 @@ function provideGroupPaint() {
   ],
   template: `<ng-content></ng-content>
     @if (surplus() > 0 && summary() !== undefined) {
-      <li data-part="overflow">
+      <li data-part="overflow" data-part-overflow="">
         <span slAvatar tone="secondary" [name]="overflowName()" [initials]="'+' + summary()"></span>
       </li>
     }`,
@@ -102,7 +102,9 @@ function provideGroupPaint() {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'avatar-group',
+    'data-ui-avatar-group': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-layout]': 'layout()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-shape]': 'resolvedShape()',

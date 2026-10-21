@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/inline/inline.css';
 
 import type { InlineProps, InlineRootProps } from './inline.types';
@@ -16,7 +17,7 @@ import type { InlineProps, InlineRootProps } from './inline.types';
  * the order they are read in, by a screen reader and by the Tab key alike.
  */
 export function Inline({ align, gap, justify, render, wrap, ...nativeProps }: InlineProps) {
-  const rootProps: InlineRootProps = {
+  const rootProps: InlineRootProps = keyedProps({
     ...nativeProps,
     ...(align === undefined ? {} : { 'data-align': align }),
     ...(gap === undefined ? {} : { 'data-gap': String(gap) }),
@@ -24,7 +25,7 @@ export function Inline({ align, gap, justify, render, wrap, ...nativeProps }: In
     ...(wrap === undefined ? {} : { 'data-wrap': wrap }),
     'data-part': 'root',
     'data-ui': 'inline',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

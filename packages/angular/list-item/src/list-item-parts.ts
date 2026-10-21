@@ -13,7 +13,7 @@ import { Directive } from '@angular/core';
   selector: '[slListItemStart]',
   standalone: true,
   exportAs: 'slListItemStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlListItemStart {}
 
@@ -22,7 +22,7 @@ export class SlListItemStart {}
   selector: '[slListItemBody]',
   standalone: true,
   exportAs: 'slListItemBody',
-  host: { 'data-part': 'body' },
+  host: { 'data-part': 'body', 'data-part-body': '' },
 })
 export class SlListItemBody {}
 
@@ -35,7 +35,7 @@ export class SlListItemBody {}
   selector: '[slListItemLabel]',
   standalone: true,
   exportAs: 'slListItemLabel',
-  host: { 'data-part': 'label' },
+  host: { 'data-part': 'label', 'data-part-label': '' },
 })
 export class SlListItemLabel {}
 
@@ -44,7 +44,7 @@ export class SlListItemLabel {}
   selector: '[slListItemDescription]',
   standalone: true,
   exportAs: 'slListItemDescription',
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlListItemDescription {}
 
@@ -58,7 +58,7 @@ export class SlListItemDescription {}
   selector: '[slListItemEnd]',
   standalone: true,
   exportAs: 'slListItemEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlListItemEnd {}
 
@@ -73,6 +73,6 @@ export class SlListItemEnd {}
   selector: '[slListItemActions]',
   standalone: true,
   exportAs: 'slListItemActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlListItemActions {}

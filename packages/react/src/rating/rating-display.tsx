@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/rating/rating.css';
 
 import { ratingMessages } from '@slotted/core/i18n';
@@ -38,8 +39,12 @@ export function RatingSymbolLayers({
   const symbol = renderSymbol === undefined ? <RatingStar /> : renderSymbol({ index, fill });
   return (
     <>
-      <span data-part="symbol">{symbol}</span>
-      <span data-part="fill">{symbol}</span>
+      <span data-part="symbol" data-part-symbol="">
+        {symbol}
+      </span>
+      <span data-part="fill" data-part-fill="">
+        {symbol}
+      </span>
     </>
   );
 }
@@ -89,7 +94,7 @@ export function RatingDisplay({
   const numbers = new Intl.NumberFormat(resolvedLocale);
   const largest = Math.max(0, ...(distribution ?? []));
 
-  const rootProps: RatingRootProps = {
+  const rootProps: RatingRootProps = keyedProps({
     ...nativeProps,
     'aria-label':
       ariaLabel ??
@@ -102,10 +107,11 @@ export function RatingDisplay({
           })),
     children: (
       <>
-        <div data-part="symbols">
+        <div data-part="symbols" data-part-symbols="">
           {fills.map((fill, index) => (
             <span
               data-part="item"
+              data-part-item=""
               key={index}
               style={{ '--slotted-rating-fill': String(fill) } as CSSProperties}
             >
@@ -114,15 +120,16 @@ export function RatingDisplay({
           ))}
         </div>
         {showValue === false ? null : (
-          <span data-part="value" aria-hidden="true">
+          <span data-part="value" data-part-value="" aria-hidden="true">
             {formatRating(shown, resolvedLocale)}
           </span>
         )}
         {resolvedVariant === 'histogram' && distribution !== undefined ? (
-          <span data-part="histogram" aria-hidden="true">
+          <span data-part="histogram" data-part-histogram="" aria-hidden="true">
             {distribution.map((part, index) => (
               <span
                 data-part="bar"
+                data-part-bar=""
                 key={index}
                 style={
                   {
@@ -136,7 +143,7 @@ export function RatingDisplay({
           </span>
         ) : null}
         {count === undefined ? null : (
-          <span data-part="count" aria-hidden="true">
+          <span data-part="count" data-part-count="" aria-hidden="true">
             {resolvedVariant === 'histogram' ? numbers.format(count) : `(${numbers.format(count)})`}
           </span>
         )}
@@ -150,7 +157,7 @@ export function RatingDisplay({
     ...(resolvedVariant === 'full' ? {} : { 'data-variant': resolvedVariant }),
     role: role ?? 'img',
     style,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }

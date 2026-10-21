@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { CardRegionProps, CardRegionRootProps } from './card.types';
 
 /**
@@ -15,7 +16,7 @@ import type { CardRegionProps, CardRegionRootProps } from './card.types';
  * prohibition, and a second target inside a label is a target nobody can hit.
  */
 export function CardSelection({ render, ...nativeProps }: CardRegionProps) {
-  const rootProps: CardRegionRootProps = { ...nativeProps, 'data-part': 'selection' };
+  const rootProps: CardRegionRootProps = keyedProps({ ...nativeProps, 'data-part': 'selection' });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

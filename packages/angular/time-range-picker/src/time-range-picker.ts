@@ -156,10 +156,11 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlTimeRangePicker), multi: true },
     { provide: NG_VALIDATORS, useExisting: forwardRef(() => SlTimeRangePicker), multi: true },
   ],
-  template: `<div data-part="control" (focusout)="onControlFocusOut($event)">
+  template: `<div data-part="control" data-part-control="" (focusout)="onControlFocusOut($event)">
       <button
         #trigger
         data-part="trigger"
+        data-part-trigger=""
         type="button"
         aria-haspopup="dialog"
         [attr.aria-label]="triggerLabel()"
@@ -169,14 +170,18 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
         (click)="toggle($event)"
         (keydown)="onTriggerKeyDown($event)"
       >
-        <span data-part="summary" [attr.data-placeholder]="summary() === null ? '' : null">{{
-          summary() ?? t('choose')
-        }}</span>
+        <span
+          data-part="summary"
+          data-part-summary=""
+          [attr.data-placeholder]="summary() === null ? '' : null"
+          >{{ summary() ?? t('choose') }}</span
+        >
         <span slIcon><svg slGlyph name="clock"></svg></span>
       </button>
       @if (clearable() && held() !== null) {
         <button
           data-part="clear"
+          data-part-clear=""
           type="button"
           [attr.aria-label]="t('clear')"
           [disabled]="!editable()"
@@ -187,32 +192,43 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
       }
       <input
         data-part="hidden-input"
+        data-part-hidden-input=""
         type="hidden"
         [attr.name]="startName()"
         [value]="startIso()"
       />
-      <input data-part="hidden-input" type="hidden" [attr.name]="endName()" [value]="endIso()" />
+      <input
+        data-part="hidden-input"
+        data-part-hidden-input=""
+        type="hidden"
+        [attr.name]="endName()"
+        [value]="endIso()"
+      />
     </div>
 
     @if (isOpen()) {
       <div
         #layer
         data-ui="time-range-picker"
+        data-ui-time-range-picker=""
         data-part="positioner"
+        data-part-positioner=""
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
       >
         <div
           data-part="content"
+          data-part-content=""
           role="dialog"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
         >
-          <div data-part="head">
-            <div data-part="tabs" role="tablist">
+          <div data-part="head" data-part-head="">
+            <div data-part="tabs" data-part-tabs="" role="tablist">
               @for (position of positions; track position) {
                 <button
                   data-part="tab"
+                  data-part-tab=""
                   role="tab"
                   type="button"
                   [attr.id]="contentId + '-tab-' + position"
@@ -226,12 +242,17 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
                   (click)="selectTab(position, $event)"
                   (keydown)="onTabKeyDown($event)"
                 >
-                  <span data-part="tab-label">{{ labelFor(position) }}</span>
-                  <span data-part="tab-value">{{ tabValue(position) }}</span>
+                  <span data-part="tab-label" data-part-tab-label="">{{ labelFor(position) }}</span>
+                  <span data-part="tab-value" data-part-tab-value="">{{ tabValue(position) }}</span>
                 </button>
               }
             </div>
-            <div #fieldBox data-part="field" [attr.data-position]="currentPosition()">
+            <div
+              #fieldBox
+              data-part="field"
+              data-part-field=""
+              [attr.data-position]="currentPosition()"
+            >
               <div
                 slTimeField
                 #field="slTimeField"
@@ -257,6 +278,7 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
             </div>
             <button
               data-part="now"
+              data-part-now=""
               type="button"
               [disabled]="!editable()"
               (click)="chooseNow($event)"
@@ -265,28 +287,36 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
             </button>
             <span
               data-part="hint"
+              data-part-hint=""
               [attr.id]="contentId + '-hint'"
               [attr.data-invalid]="hintProblem() === undefined ? null : ''"
               >{{ hint() }}</span
             >
             <span
               data-part="length"
+              data-part-length=""
               aria-live="polite"
               [attr.data-pending]="pending() === null ? null : ''"
               >{{ spokenLength() }}</span
             >
             @if (limitText() !== null) {
-              <span data-part="limit">{{ limitText() }}</span>
+              <span data-part="limit" data-part-limit="">{{ limitText() }}</span>
             }
           </div>
           <ng-content select="[slTimeRangePickerPresets]" />
           @if (currentPosition(); as position) {
-            <div data-part="panel" [attr.id]="contentId + '-panel'" [attr.data-position]="position">
+            <div
+              data-part="panel"
+              data-part-panel=""
+              [attr.id]="contentId + '-panel'"
+              [attr.data-position]="position"
+            >
               @if (lists()[position].length === 0) {
-                <div data-part="empty">{{ t('empty') }}</div>
+                <div data-part="empty" data-part-empty="">{{ t('empty') }}</div>
               } @else {
                 <div
                   data-part="list"
+                  data-part-list=""
                   role="listbox"
                   [attr.aria-labelledby]="contentId + '-tab-' + position"
                   [attr.aria-describedby]="hint() === '' ? null : contentId + '-hint'"
@@ -300,6 +330,7 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
                   @for (option of lists()[position]; track $index) {
                     <div
                       data-part="option"
+                      data-part-option=""
                       role="option"
                       [attr.aria-selected]="isSelected(position, option)"
                       [attr.aria-disabled]="option.unavailable ? 'true' : null"
@@ -318,7 +349,9 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
                       } @else {
                         {{ labels()[position][$index] }}
                         @if (durationOf(position, option); as duration) {
-                          <span data-part="option-duration">{{ duration }}</span>
+                          <span data-part="option-duration" data-part-option-duration="">{{
+                            duration
+                          }}</span>
                         }
                       }
                     </div>
@@ -327,9 +360,9 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
               }
             </div>
           }
-          <div data-part="footer">
+          <div data-part="footer" data-part-footer="">
             <ng-content select="[slTimeRangePickerFooter]" />
-            <button data-part="done" type="button" (click)="done($event)">
+            <button data-part="done" data-part-done="" type="button" (click)="done($event)">
               {{ t('done') }}
             </button>
           </div>
@@ -341,7 +374,9 @@ function other(position: TimeRangePickerPosition): TimeRangePickerPosition {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'time-range-picker',
+    'data-ui-time-range-picker': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-granularity]': 'resolvedGranularity()',
@@ -1332,6 +1367,7 @@ export class SlTimeRangePicker implements ControlValueAccessor, Validator, OnIni
   exportAs: 'slTimeRangePickerPreset',
   host: {
     'data-part': 'preset',
+    'data-part-preset': '',
     type: 'button',
     '[attr.data-selected]': "selected() ? '' : null",
     '(click)': 'choose($event)',

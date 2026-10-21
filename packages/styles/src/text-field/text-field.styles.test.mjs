@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/text-field/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./text-field.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./text-field.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./text-field.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.textField;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
@@ -36,7 +49,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -65,12 +81,12 @@ test('insets a button at either end concentrically with the frame', () => {
   );
   assert.match(
     rule(
-      `${root}:has(>:is([data-part='clear'],[data-part='copy'],[data-part='reveal']):not([hidden]):last-child,>[data-part='end']:last-child>[data-part='action']:last-child)`,
+      `${root}:has(>:is([data-part-clear],[data-part-copy],[data-part-reveal]):not([hidden]):last-child,>[data-part-end]:last-child>[data-part-action]:last-child)`,
     ),
     /padding-inline-end:var\(--_inset\)/,
   );
   assert.match(
-    rule(`${root}:has(>[data-part='start']:first-child>[data-part='action']:first-child)`),
+    rule(`${root}:has(>[data-part-start]:first-child>[data-part-action]:first-child)`),
     /padding-inline-start:var\(--_inset\)/,
   );
 });
@@ -81,7 +97,7 @@ test('gives the frame the box and the control the value', () => {
   assert.match(frame, /display:flex/);
   assert.match(frame, /min-inline-size:0/);
 
-  const input = rule(`${ui}>[data-part='input']`);
+  const input = rule(`${ui}>[data-part-input]`);
   assert.match(input, /border:0/);
   assert.match(input, /background-color:transparent/);
   assert.match(input, /outline:none/);
@@ -134,7 +150,7 @@ test('draws every button inside the frame and keeps the target minimum', () => {
   );
 
   const action = rule(
-    `${ui}>:is([data-part='clear'],[data-part='copy'],[data-part='reveal']),${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']`,
+    `${ui}>:is([data-part-clear],[data-part-copy],[data-part-reveal]),${ui}>:is([data-part-start],[data-part-end])>[data-part-action]`,
   );
   assert.match(action, /min-inline-size:var\(--_action-size\)/);
   assert.match(action, /block-size:var\(--_action-size\)/);
@@ -143,7 +159,7 @@ test('draws every button inside the frame and keeps the target minimum', () => {
   assert.match(action, /--slotted-icon-size:var\(--_icon-size\)/);
 
   const target = rule(
-    `${ui}>:is([data-part='clear'],[data-part='copy'],[data-part='reveal'])::after,${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']::after`,
+    `${ui}>:is([data-part-clear],[data-part-copy],[data-part-reveal])::after,${ui}>:is([data-part-start],[data-part-end])>[data-part-action]::after`,
   );
   assert.match(target, /position:absolute/);
   assert.match(
@@ -161,7 +177,7 @@ test('draws every button inside the frame and keeps the target minimum', () => {
  */
 test('pads a labelled action and keeps an icon action square', () => {
   const labelled = rule(
-    `${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']:not([aria-label],[aria-labelledby])`,
+    `${ui}>:is([data-part-start],[data-part-end])>[data-part-action]:not([aria-label],[aria-labelledby])`,
   );
   assert.match(labelled, /padding-inline:var\(--slotted-space-3,0\.375rem\)/);
   assert.match(
@@ -179,11 +195,11 @@ test('pads a labelled action and keeps an icon action square', () => {
  */
 test('aligns a text adornment optically with a glyph one', () => {
   const adornment = rule(
-    `${ui}>[data-part='start']:not(:has(svg,img,[data-ui='icon'],[data-part='action'])),${ui}>[data-part='end']:not(:has(svg,img,[data-ui='icon'],[data-part='action']))`,
+    `${ui}>[data-part-start]:not(:has(svg,img,[data-ui-icon],[data-part-action])),${ui}>[data-part-end]:not(:has(svg,img,[data-ui-icon],[data-part-action]))`,
   );
   assert.match(adornment, /padding-inline:calc\(var\(--_icon-size\) \/ 8\)/);
   assert.match(
-    rule(`${ui}>[data-part='start'],${ui}>[data-part='end']`),
+    rule(`${ui}>[data-part-start],${ui}>[data-part-end]`),
     /unicode-bidi:plaintext/,
     'the optical inset replaced the bidi isolation instead of joining it',
   );
@@ -200,11 +216,11 @@ test('lifts the frame at rest, in the state colour on focus, and never while dis
     /box-shadow:var\(--slotted-text-field-shadow,var\(--slotted-control-shadow,none\)\)/,
   );
   assert.match(
-    rule(`${root}:has(>[data-part='input']:focus-visible)`),
+    rule(`${root}:has(>[data-part-input]:focus-visible)`),
     /box-shadow:var\(--slotted-control-shadow-focus-geometry,[^)]*\) var\(--slotted-focus-ring-color/,
   );
   assert.match(
-    rule(`${root}[data-disabled],${root}:has(>[data-part='input']:disabled)`),
+    rule(`${root}[data-disabled],${root}:has(>[data-part-input]:disabled)`),
     /box-shadow:none/,
   );
 });
@@ -250,7 +266,7 @@ test('draws an invalid frame with a thicker edge, at rest and under focus', () =
   );
   assert.ok(invalid.includes('box-shadow:var(--_invalid-edge)'), 'no edge at rest');
   assert.ok(
-    rule(`${root}[data-invalid]:has(>[data-part='input']:focus-visible)`).includes(
+    rule(`${root}[data-invalid]:has(>[data-part-input]:focus-visible)`).includes(
       'box-shadow:var(--_invalid-edge),var(--slotted-control-shadow-focus-geometry,0 1px 4px -1px) var(--slotted-focus-ring-color,Highlight)',
     ),
     'no edge under focus',
@@ -265,7 +281,7 @@ test('draws an invalid frame with a thicker edge, at rest and under focus', () =
 test('takes the plain variant’s edge past the ring drawn inside it', () => {
   assert.ok(
     rule(
-      `${root}[data-variant='plain'][data-invalid]:has(>[data-part='input']:focus-visible)`,
+      `${root}[data-variant='plain'][data-invalid]:has(>[data-part-input]:focus-visible)`,
     ).includes(
       'box-shadow:inset 0 0 0 calc(var(--slotted-focus-ring-offset,2px) - var(--slotted-control-border-width,1px) + var(--_invalid-edge-width)) var(--_invalid-edge-color)',
     ),
@@ -286,7 +302,7 @@ test('keeps the invalid width under forced colours', () => {
   );
   assert.match(
     forced,
-    /\[data-variant='plain'\]\[data-invalid\]:has\(>\[data-part='input'\]:focus-visible\)\{outline:calc\(var\(--slotted-focus-ring-width,2px\) \+ var\(--_invalid-edge-width\)\) double/,
+    /\[data-variant='plain'\]\[data-invalid\]:has\(>\[data-part-input\]:focus-visible\)\{outline:calc\(var\(--slotted-focus-ring-width,2px\) \+ var\(--_invalid-edge-width\)\) double/,
   );
 });
 
@@ -299,10 +315,10 @@ test('paints no glyph itself', () => {
  * The family draws its own clear button, so WebKit's would be the second one.
  */
 test('withdraws the search decorations the platform would add', () => {
-  assert.ok(normalized.includes("[data-part='input']::-webkit-search-cancel-button"));
+  assert.ok(normalized.includes('[data-part-input]::-webkit-search-cancel-button'));
   assert.match(
     rule(
-      `${ui}>[data-part='input']::-webkit-search-cancel-button,${ui}>[data-part='input']::-webkit-search-decoration`,
+      `${ui}>[data-part-input]::-webkit-search-cancel-button,${ui}>[data-part-input]::-webkit-search-decoration`,
     ),
     /appearance:none/,
   );
@@ -315,7 +331,7 @@ test('withdraws the search decorations the platform would add', () => {
  * owns instead of in the browser's yellow.
  */
 test('repaints autofill in the theme rather than erasing the signal', () => {
-  const autofill = rule(`${ui}>[data-part='input']:autofill`);
+  const autofill = rule(`${ui}>[data-part-input]:autofill`);
   assert.match(autofill, /box-shadow:inset 0 0 0 100px/);
   assert.match(
     autofill,
@@ -331,12 +347,12 @@ test('repaints autofill in the theme rather than erasing the signal', () => {
  */
 test('rings the frame for the control, and each button for itself', () => {
   assert.match(
-    rule(`${root}:has(>[data-part='input']:focus-visible)`),
+    rule(`${root}:has(>[data-part-input]:focus-visible)`),
     /outline:var\(--slotted-focus-ring-width,2px\) solid/,
   );
   assert.match(
     rule(
-      `${ui}>:is([data-part='clear'],[data-part='copy'],[data-part='reveal']):focus-visible,${ui}>:is([data-part='start'],[data-part='end'])>[data-part='action']:focus-visible`,
+      `${ui}>:is([data-part-clear],[data-part-copy],[data-part-reveal]):focus-visible,${ui}>:is([data-part-start],[data-part-end])>[data-part-action]:focus-visible`,
     ),
     /outline-offset:calc\(var\(--slotted-focus-ring-offset,2px\) \* -1\)/,
   );
@@ -349,9 +365,9 @@ test('rings the frame for the control, and each button for itself', () => {
  * may not reintroduce it.
  */
 test('answers a control the browser disabled without telling it', () => {
-  assert.ok(normalized.includes(`${root}:has(>[data-part='input']:disabled)`));
+  assert.ok(normalized.includes(`${root}:has(>[data-part-input]:disabled)`));
   assert.match(
-    rule(`${root}[data-disabled],${root}:has(>[data-part='input']:disabled)`),
+    rule(`${root}[data-disabled],${root}:has(>[data-part-input]:disabled)`),
     /cursor:not-allowed/,
   );
 });

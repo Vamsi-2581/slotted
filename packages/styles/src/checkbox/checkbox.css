@@ -20,7 +20,7 @@
    * `data-indeterminate` are still written, because they are what a consumer
    * styles against.
    */
-  [data-ui='checkbox'][data-part='root'] {
+  [data-ui-checkbox][data-part-root] {
     /**
      * The box is the selection scale's square: 16px at `md`, the same square
      * Radix, Carbon and Primer all draw, and the theme states it once. It does
@@ -107,11 +107,11 @@
    * so the two pseudo-elements take the root's direction rather than the
    * label's, or they land on the far side of the row.
    */
-  [data-ui='checkbox'][data-part='root'] {
+  [data-ui-checkbox][data-part-root] {
     --_direction: ltr;
   }
 
-  [data-ui='checkbox'][data-part='root']:dir(rtl) {
+  [data-ui-checkbox][data-part-root]:dir(rtl) {
     --_direction: rtl;
   }
 
@@ -124,7 +124,7 @@
    * with it. The text, the gap and the tile's inset still follow density.
    */
 
-  [data-ui='checkbox'][data-part='root'][data-size='sm'] {
+  [data-ui-checkbox][data-part-root][data-size='sm'] {
     --_size: var(--slotted-checkbox-size, var(--slotted-selection-size-sm, 14px));
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_gap: var(--slotted-control-label-gap-sm, 8px);
@@ -134,7 +134,7 @@
     );
   }
 
-  [data-ui='checkbox'][data-part='root'][data-size='md'] {
+  [data-ui-checkbox][data-part-root][data-size='md'] {
     --_size: var(--slotted-checkbox-size, var(--slotted-selection-size-md, 16px));
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-label-gap-md, 12px);
@@ -144,7 +144,7 @@
     );
   }
 
-  [data-ui='checkbox'][data-part='root'][data-size='lg'] {
+  [data-ui-checkbox][data-part-root][data-size='lg'] {
     --_size: var(--slotted-checkbox-size, var(--slotted-selection-size-lg, 18px));
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_gap: var(--slotted-control-label-gap-lg, 12px);
@@ -156,7 +156,7 @@
 
   /* ── The box ──────────────────────────────────────────────────────────── */
 
-  [data-ui='checkbox'] [data-part='control'] {
+  [data-ui-checkbox] [data-part-control] {
     appearance: none;
     background-color: var(--slotted-checkbox-background, var(--slotted-surface, Canvas));
     /**
@@ -202,7 +202,7 @@
    * edge at every step.
    */
 
-  [data-ui='checkbox'] [data-part='indicator'] {
+  [data-ui-checkbox] [data-part-indicator] {
     --slotted-icon-size: var(--_mark-size);
 
     block-size: var(--_mark-size);
@@ -239,8 +239,8 @@
       opacity var(--slotted-duration-medium) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
-  [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+  [data-ui-checkbox] [data-part-control]:checked + [data-part-indicator],
+  [data-ui-checkbox] [data-part-control]:indeterminate + [data-part-indicator] {
     clip-path: inset(0% 0% 0% 0%);
     opacity: 1;
   }
@@ -251,9 +251,9 @@
    * in and only its opacity moves.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='checkbox'] [data-part='indicator'],
-    [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
-    [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+    [data-ui-checkbox] [data-part-indicator],
+    [data-ui-checkbox] [data-part-control]:checked + [data-part-indicator],
+    [data-ui-checkbox] [data-part-control]:indeterminate + [data-part-indicator] {
       clip-path: none;
       transition: opacity var(--slotted-duration-medium) var(--slotted-control-transition-easing);
     }
@@ -271,7 +271,7 @@
    * block of the target and the halo, which stand on the box outside it.
    */
 
-  [data-ui='checkbox'] [data-part='label'] {
+  [data-ui-checkbox] [data-part-label] {
     cursor: pointer;
     grid-column: 2;
     grid-row: 1;
@@ -285,11 +285,11 @@
    * in Arabic inside a row in Portuguese put it on the far side, against
    * nothing, with the text against the control.
    */
-  [data-ui='checkbox'][data-part='root']:has(> [data-part='label']) {
+  [data-ui-checkbox][data-part-root]:has(> [data-part-label]) {
     column-gap: var(--_gap);
   }
 
-  [data-ui='checkbox'][data-part='root']:not([data-variant='tile']) [data-part='label'] {
+  [data-ui-checkbox][data-part-root]:not([data-variant='tile']) [data-part-label] {
     justify-self: start;
     position: relative;
   }
@@ -341,7 +341,7 @@
    * The tile has neither. Its surface is the target and answers the pointer
    * itself, and its label's `::after` stretches over that surface instead.
    */
-  [data-ui='checkbox'][data-part='root']:not([data-variant='tile']) [data-part='label']::before {
+  [data-ui-checkbox][data-part-root]:not([data-variant='tile']) [data-part-label]::before {
     block-size: var(--_target);
     content: '';
     direction: var(--_direction);
@@ -352,7 +352,7 @@
     z-index: -1;
   }
 
-  [data-ui='checkbox'][data-part='root']:not([data-variant='tile']) [data-part='label']::after {
+  [data-ui-checkbox][data-part-root]:not([data-variant='tile']) [data-part-label]::after {
     background-color: var(--slotted-checkbox-halo-color, var(--slotted-tone-accent-text));
     border-radius: calc(
       var(--slotted-checkbox-radius, var(--slotted-radius-xs, 2px)) + var(--_halo-spread)
@@ -379,27 +379,26 @@
    * on the end side against 4px on the start. So the gap goes, the target ends
    * where the box ends, and the wash stands at the halo spread on all four sides.
    */
-  [data-ui='checkbox'][data-part='root']:is(
-      [data-label-hidden],
-      :has(> [data-part='label']:empty)
-    ):not([data-label-placement='start']) {
+  [data-ui-checkbox][data-part-root]:is([data-label-hidden], :has(> [data-part-label]:empty)):not(
+      [data-label-placement='start']
+    ) {
     column-gap: 0;
   }
 
-  [data-ui='checkbox'][data-part='root']:is(
-      [data-label-hidden],
-      :has(> [data-part='label']:empty)
-    ):not([data-label-placement='start'], [data-variant='tile'])
-    [data-part='label']::before {
+  [data-ui-checkbox][data-part-root]:is([data-label-hidden], :has(> [data-part-label]:empty)):not(
+      [data-label-placement='start'],
+      [data-variant='tile']
+    )
+    [data-part-label]::before {
     /* Ending where the box ends, as everywhere: the root ends there too. */
     inset-inline-start: calc(-1 * var(--_target));
   }
 
-  [data-ui='checkbox'][data-part='root']:is(
-      [data-label-hidden],
-      :has(> [data-part='label']:empty)
-    ):not([data-label-placement='start'], [data-variant='tile'])
-    [data-part='label']::after {
+  [data-ui-checkbox][data-part-root]:is([data-label-hidden], :has(> [data-part-label]:empty)):not(
+      [data-label-placement='start'],
+      [data-variant='tile']
+    )
+    [data-part-label]::after {
     inset-inline-end: calc(-1 * var(--_halo-spread));
     inset-inline-start: calc(-1 * (var(--_size) + var(--_halo-spread)));
   }
@@ -409,7 +408,7 @@
    * label: inside, it would join the accessible name, and a paragraph of help
    * text that toggles a value when it is clicked is a paragraph nobody reads.
    */
-  [data-ui='checkbox'] [data-part='description'] {
+  [data-ui-checkbox] [data-part-description] {
     color: var(--slotted-checkbox-description-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-checkbox-description-font-size, var(--slotted-font-size-xs, 0.75rem));
     grid-column: 2;
@@ -427,7 +426,7 @@
    * number in both arrangements and in both writing directions.
    */
 
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] {
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] {
     /**
      * `1fr` and not `max-content`, which was tried first and looked better in
      * one row than in five: `max-content` sizes each item's first column from
@@ -440,26 +439,26 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='control'],
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='indicator'] {
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] [data-part-control],
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] [data-part-indicator] {
     grid-area: 1 / 2;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label'],
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='description'] {
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] [data-part-label],
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] [data-part-description] {
     grid-column: 1;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label'] {
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] [data-part-label] {
     justify-self: stretch;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label']::before {
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] [data-part-label]::before {
     inset-inline-end: calc(-1 * (var(--_size) + var(--_gap)));
     inset-inline-start: auto;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-label-placement='start'] [data-part='label']::after {
+  [data-ui-checkbox][data-part-root][data-label-placement='start'] [data-part-label]::after {
     inset-inline-end: calc(-1 * (var(--_size) + var(--_gap) + var(--_halo-spread)));
     inset-inline-start: calc(-1.5 * var(--_halo-spread));
   }
@@ -477,38 +476,37 @@
    * The halo lights from the box and from the label alike, because both are
    * the same target — the label is what toggles the control.
    */
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:hover:not(:disabled) {
+  [data-ui-checkbox][data-part-root]:not([data-readonly]) [data-part-control]:hover:not(:disabled) {
     border-color: var(--slotted-checkbox-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:hover:not(:disabled)
-    ~ [data-part='label']::after,
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:not(:disabled)
-    ~ [data-part='label']:hover::after {
+  [data-ui-checkbox][data-part-root]:not([data-readonly])
+    [data-part-control]:hover:not(:disabled)
+    ~ [data-part-label]::after,
+  [data-ui-checkbox][data-part-root]:not([data-readonly])
+    [data-part-control]:not(:disabled)
+    ~ [data-part-label]:hover::after {
     opacity: var(--slotted-selection-halo-opacity, 0.12);
   }
 
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:active:not(:disabled) {
+  [data-ui-checkbox][data-part-root]:not([data-readonly])
+    [data-part-control]:active:not(:disabled) {
     background-color: var(
       --slotted-checkbox-active-background,
       var(--slotted-tone-accent-subtle-active)
     );
   }
 
-  [data-ui='checkbox'] [data-part='control']:checked,
-  [data-ui='checkbox'] [data-part='control']:indeterminate {
+  [data-ui-checkbox] [data-part-control]:checked,
+  [data-ui-checkbox] [data-part-control]:indeterminate {
     background-color: var(--slotted-checkbox-checked-background, var(--slotted-tone-accent-solid));
     border-color: var(--slotted-checkbox-checked-border-color, var(--slotted-tone-accent-solid));
   }
 
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:checked:hover:not(:disabled),
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:indeterminate:hover:not(:disabled) {
+  [data-ui-checkbox][data-part-root]:not([data-readonly])
+    [data-part-control]:checked:hover:not(:disabled),
+  [data-ui-checkbox][data-part-root]:not([data-readonly])
+    [data-part-control]:indeterminate:hover:not(:disabled) {
     background-color: var(
       --slotted-checkbox-checked-hover-background,
       var(--slotted-tone-accent-solid-hover)
@@ -519,10 +517,10 @@
     );
   }
 
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:checked:active:not(:disabled),
-  [data-ui='checkbox'][data-part='root']:not([data-readonly])
-    [data-part='control']:indeterminate:active:not(:disabled) {
+  [data-ui-checkbox][data-part-root]:not([data-readonly])
+    [data-part-control]:checked:active:not(:disabled),
+  [data-ui-checkbox][data-part-root]:not([data-readonly])
+    [data-part-control]:indeterminate:active:not(:disabled) {
     background-color: var(
       --slotted-checkbox-checked-active-background,
       var(--slotted-tone-accent-solid-active)
@@ -533,7 +531,7 @@
     );
   }
 
-  [data-ui='checkbox'] [data-part='control']:focus-visible {
+  [data-ui-checkbox] [data-part-control]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -543,7 +541,7 @@
    * reads one name, so pointing it at the invalid colour moves the outline
    * without a second focus rule existing anywhere.
    */
-  [data-ui='checkbox'][data-part='root'][data-invalid] {
+  [data-ui-checkbox][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-checkbox-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -561,7 +559,7 @@
    * shadow does not. The box keeps its size, because the border box is what is
    * measured.
    */
-  [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control'] {
+  [data-ui-checkbox][data-part-root][data-invalid] [data-part-control] {
     border-width: calc(
       var(--slotted-checkbox-border-width, var(--slotted-border-width-medium, 1.5px)) +
         var(--slotted-checkbox-invalid-edge-width, var(--slotted-control-invalid-edge-width, 1px))
@@ -569,8 +567,8 @@
     border-color: var(--slotted-checkbox-invalid-border-color, var(--slotted-tone-danger-border));
   }
 
-  [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:checked,
-  [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:indeterminate {
+  [data-ui-checkbox][data-part-root][data-invalid] [data-part-control]:checked,
+  [data-ui-checkbox][data-part-root][data-invalid] [data-part-control]:indeterminate {
     background-color: var(
       --slotted-checkbox-invalid-checked-background,
       var(--slotted-tone-danger-solid)
@@ -598,13 +596,13 @@
    * disabled. Only the ground and the pointer say the value is not the
    * reader's to move.
    */
-  [data-ui='checkbox'][data-part='root'][data-readonly] [data-part='control'],
-  [data-ui='checkbox'][data-part='root'][data-readonly] [data-part='label'] {
+  [data-ui-checkbox][data-part-root][data-readonly] [data-part-control],
+  [data-ui-checkbox][data-part-root][data-readonly] [data-part-label] {
     cursor: default;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-readonly]
-    [data-part='control']:not(:checked):not(:indeterminate) {
+  [data-ui-checkbox][data-part-root][data-readonly]
+    [data-part-control]:not(:checked):not(:indeterminate) {
     background-color: var(
       --slotted-checkbox-readonly-background,
       /**
@@ -621,8 +619,8 @@
    * `:disabled` beside `[data-disabled]`, because a disabled `fieldset`
    * disables every control inside it and tells none of them.
    */
-  [data-ui='checkbox'][data-part='root'][data-disabled] [data-part='control'],
-  [data-ui='checkbox'] [data-part='control']:disabled {
+  [data-ui-checkbox][data-part-root][data-disabled] [data-part-control],
+  [data-ui-checkbox] [data-part-control]:disabled {
     background-color: var(
       --slotted-checkbox-disabled-background,
       var(--slotted-disabled-background)
@@ -631,7 +629,7 @@
     cursor: not-allowed;
   }
 
-  [data-ui='checkbox'] [data-part='control']:disabled + [data-part='indicator'] {
+  [data-ui-checkbox] [data-part-control]:disabled + [data-part-indicator] {
     color: var(--slotted-checkbox-disabled-mark-color, var(--slotted-disabled-foreground));
   }
 
@@ -642,10 +640,10 @@
    * checkbox in a disabled group would otherwise keep a full-contrast label on
    * a control nobody can reach.
    */
-  [data-ui='checkbox'][data-part='root'][data-disabled] [data-part='label'],
-  [data-ui='checkbox'][data-part='root'][data-disabled] [data-part='description'],
-  [data-ui='checkbox'] [data-part='control']:disabled ~ [data-part='label'],
-  [data-ui='checkbox'] [data-part='control']:disabled ~ [data-part='description'] {
+  [data-ui-checkbox][data-part-root][data-disabled] [data-part-label],
+  [data-ui-checkbox][data-part-root][data-disabled] [data-part-description],
+  [data-ui-checkbox] [data-part-control]:disabled ~ [data-part-label],
+  [data-ui-checkbox] [data-part-control]:disabled ~ [data-part-description] {
     color: var(--slotted-checkbox-disabled-color, var(--slotted-disabled-foreground));
     cursor: not-allowed;
   }
@@ -671,7 +669,7 @@
    * equal height is a `grid` around the items and nothing this family adds.
    */
 
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'] {
+  [data-ui-checkbox][data-part-root][data-variant='tile'] {
     /* The description sits one step nearer its label inside a frame (CK2):
        the tile's own inset already holds the pair apart from everything else,
        and the plain variant's distance read as a third row inside the box. */
@@ -713,7 +711,7 @@
    * outright and a width is not. `card` draws its own edge the same way and for
    * the same two reasons.
    */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']::before {
+  [data-ui-checkbox][data-part-root][data-variant='tile']::before {
     border: calc(var(--_tile-edge-width) + var(--_tile-invalid-edge, 0px)) solid var(--_tile-edge);
     border-radius: inherit;
     content: '';
@@ -735,7 +733,7 @@
    * description, a button in the corner — sets `position: relative` on itself,
    * for the same reason a card's footer does.
    */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'] [data-part='label']::after {
+  [data-ui-checkbox][data-part-root][data-variant='tile'] [data-part-label]::after {
     content: '';
     inset: 0;
     position: absolute;
@@ -752,10 +750,10 @@
    * pointer made a tile look less chosen than it was.
    */
 
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):not(
+  [data-ui-checkbox][data-part-root][data-variant='tile']:not([data-readonly]):not(
       [data-disabled]
-    ):has([data-part='control']:not(:disabled)):not(
-      :has([data-part='control']:is(:checked, :indeterminate))
+    ):has([data-part-control]:not(:disabled)):not(
+      :has([data-part-control]:is(:checked, :indeterminate))
     ):hover {
     --_tile-surface: var(
       --slotted-checkbox-tile-hover-background,
@@ -767,10 +765,10 @@
     );
   }
 
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):not(
+  [data-ui-checkbox][data-part-root][data-variant='tile']:not([data-readonly]):not(
       [data-disabled]
-    ):has([data-part='control']:not(:disabled)):not(
-      :has([data-part='control']:is(:checked, :indeterminate))
+    ):has([data-part-control]:not(:disabled)):not(
+      :has([data-part-control]:is(:checked, :indeterminate))
     ):active {
     --_tile-surface: var(
       --slotted-checkbox-tile-active-background,
@@ -784,8 +782,8 @@
    * difference a reader has to look for across a row of five, and the tint
    * alone is a difference the `high-contrast` scheme flattens to nothing.
    */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):has(
-      [data-part='control']:is(:checked, :indeterminate)
+  [data-ui-checkbox][data-part-root][data-variant='tile']:not([data-readonly]):has(
+      [data-part-control]:is(:checked, :indeterminate)
     ) {
     --_tile-edge: var(
       --slotted-checkbox-tile-checked-border-color,
@@ -800,8 +798,8 @@
    * value is real and stays visible, and a read-only set then reads as a set of
    * secondary grounds with one accent edge on the choice that was made.
    */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):has(
-      [data-part='control']:is(:checked, :indeterminate)
+  [data-ui-checkbox][data-part-root][data-variant='tile']:not([data-readonly]):has(
+      [data-part-control]:is(:checked, :indeterminate)
     ) {
     --_tile-surface: var(
       --slotted-checkbox-tile-checked-background,
@@ -818,16 +816,16 @@
    * merely hovered. Carbon moves the ground because its selected fill is not at
    * the end of its own scale; here it is.
    */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']:not([data-readonly]):not(
+  [data-ui-checkbox][data-part-root][data-variant='tile']:not([data-readonly]):not(
       [data-disabled]
-    ):has([data-part='control']:is(:checked, :indeterminate):not(:disabled)):hover {
+    ):has([data-part-control]:is(:checked, :indeterminate):not(:disabled)):hover {
     --_tile-edge: var(
       --slotted-checkbox-tile-checked-hover-border-color,
       var(--slotted-tone-accent-solid-hover)
     );
   }
 
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid] {
+  [data-ui-checkbox][data-part-root][data-variant='tile'][data-invalid] {
     --_tile-edge: var(
       --slotted-checkbox-tile-invalid-border-color,
       var(--slotted-tone-danger-border)
@@ -840,8 +838,8 @@
     );
   }
 
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid]:has(
-      [data-part='control']:is(:checked, :indeterminate)
+  [data-ui-checkbox][data-part-root][data-variant='tile'][data-invalid]:has(
+      [data-part-control]:is(:checked, :indeterminate)
     ) {
     --_tile-surface: var(
       --slotted-checkbox-tile-invalid-checked-background,
@@ -855,7 +853,7 @@
 
   /* Read-only keeps the ink and the tab stop; only the ground and the pointer
      say the value is not the reader's to move. */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-readonly] {
+  [data-ui-checkbox][data-part-root][data-variant='tile'][data-readonly] {
     --_tile-surface: var(
       --slotted-checkbox-tile-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -874,8 +872,8 @@
     cursor: default;
   }
 
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-disabled],
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']:has([data-part='control']:disabled) {
+  [data-ui-checkbox][data-part-root][data-variant='tile'][data-disabled],
+  [data-ui-checkbox][data-part-root][data-variant='tile']:has([data-part-control]:disabled) {
     --_tile-surface: var(
       --slotted-checkbox-tile-disabled-background,
       var(--slotted-disabled-background)
@@ -896,14 +894,12 @@
    * which reads as two controls. The tile is what the pointer and the keyboard
    * are addressing, so the tile is what the ring is about.
    */
-  [data-ui='checkbox'][data-part='root'][data-variant='tile']:has(
-      [data-part='control']:focus-visible
-    ) {
+  [data-ui-checkbox][data-part-root][data-variant='tile']:has([data-part-control]:focus-visible) {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='checkbox'][data-part='root'][data-variant='tile'] [data-part='control']:focus-visible {
+  [data-ui-checkbox][data-part-root][data-variant='tile'] [data-part-control]:focus-visible {
     outline: none;
   }
 
@@ -917,13 +913,13 @@
    * theme cannot.
    */
   @media (forced-colors: active) {
-    [data-ui='checkbox'] [data-part='control'] {
+    [data-ui-checkbox] [data-part-control] {
       background-color: Field;
       border-color: FieldText;
     }
 
-    [data-ui='checkbox'] [data-part='control']:checked,
-    [data-ui='checkbox'] [data-part='control']:indeterminate {
+    [data-ui-checkbox] [data-part-control]:checked,
+    [data-ui-checkbox] [data-part-control]:indeterminate {
       background-color: Highlight;
       border-color: Highlight;
     }
@@ -936,8 +932,8 @@
      * comes back as an outline in the page's colour inside it; a focused one
      * draws its ring double.
      */
-    [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:checked,
-    [data-ui='checkbox'][data-part='root'][data-invalid] [data-part='control']:indeterminate {
+    [data-ui-checkbox][data-part-root][data-invalid] [data-part-control]:checked,
+    [data-ui-checkbox][data-part-root][data-invalid] [data-part-control]:indeterminate {
       background-color: Highlight;
       border-color: CanvasText;
       outline: var(
@@ -961,10 +957,9 @@
       );
     }
 
-    [data-ui='checkbox'][data-part='root'][data-invalid]
-      [data-part='control']:checked:focus-visible,
-    [data-ui='checkbox'][data-part='root'][data-invalid]
-      [data-part='control']:indeterminate:focus-visible {
+    [data-ui-checkbox][data-part-root][data-invalid] [data-part-control]:checked:focus-visible,
+    [data-ui-checkbox][data-part-root][data-invalid]
+      [data-part-control]:indeterminate:focus-visible {
       outline: calc(
           var(--slotted-focus-ring-width, 2px) +
             var(
@@ -976,35 +971,35 @@
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='checkbox'] [data-part='control']:checked + [data-part='indicator'],
-    [data-ui='checkbox'] [data-part='control']:indeterminate + [data-part='indicator'] {
+    [data-ui-checkbox] [data-part-control]:checked + [data-part-indicator],
+    [data-ui-checkbox] [data-part-control]:indeterminate + [data-part-indicator] {
       color: HighlightText;
     }
 
-    [data-ui='checkbox'][data-part='root'][data-invalid]
-      [data-part='control']:checked
-      + [data-part='indicator'],
-    [data-ui='checkbox'][data-part='root'][data-invalid]
-      [data-part='control']:indeterminate
-      + [data-part='indicator'] {
+    [data-ui-checkbox][data-part-root][data-invalid]
+      [data-part-control]:checked
+      + [data-part-indicator],
+    [data-ui-checkbox][data-part-root][data-invalid]
+      [data-part-control]:indeterminate
+      + [data-part-indicator] {
       color: HighlightText;
     }
 
     /* A tile's invalid edge is the danger pair, which the theme maps to the
        page's white; it takes the system's text colour instead. */
-    [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid],
-    [data-ui='checkbox'][data-part='root'][data-variant='tile'][data-invalid]:has(
-        [data-part='control']:is(:checked, :indeterminate)
+    [data-ui-checkbox][data-part-root][data-variant='tile'][data-invalid],
+    [data-ui-checkbox][data-part-root][data-variant='tile'][data-invalid]:has(
+        [data-part-control]:is(:checked, :indeterminate)
       ) {
       --_tile-edge: CanvasText;
     }
 
-    [data-ui='checkbox'] [data-part='control']:disabled {
+    [data-ui-checkbox] [data-part-control]:disabled {
       background-color: Field;
       border-color: GrayText;
     }
 
-    [data-ui='checkbox'] [data-part='control']:disabled + [data-part='indicator'] {
+    [data-ui-checkbox] [data-part-control]:disabled + [data-part-indicator] {
       color: GrayText;
     }
   }

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -369,7 +370,7 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
 
   if (!mounted) return null;
 
-  const rootProps: TooltipLayerRootProps = {
+  const rootProps: TooltipLayerRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-align': align,
@@ -380,7 +381,7 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
     'data-variant': tooltip.variant,
     onPointerEnter: compose(nativeProps.onPointerEnter, onPointerEnter),
     onPointerLeave: compose(nativeProps.onPointerLeave, onPointerLeave),
-  };
+  });
 
   const element =
     render === undefined ? (
@@ -396,14 +397,14 @@ export function TooltipLayer({ children, ref, render, ...nativeProps }: TooltipL
 export function TooltipContent({ children, ref, render, ...nativeProps }: TooltipContentProps) {
   const tooltip = useTooltip();
 
-  const rootProps: TooltipContentRootProps = {
+  const rootProps: TooltipContentRootProps = keyedProps({
     ...nativeProps,
     children,
     ...(tooltip.describes === 'none' ? { 'aria-hidden': true } : {}),
     'data-part': 'content',
     id: tooltip.contentId,
     role: 'tooltip',
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
@@ -427,11 +428,11 @@ export function TooltipArrow({ ref, render, ...nativeProps }: TooltipArrowProps)
 
   if (!tooltip.showArrow) return null;
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     'aria-hidden': true as const,
     'data-part': 'arrow',
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={setNode} />;

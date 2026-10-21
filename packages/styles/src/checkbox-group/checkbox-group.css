@@ -5,7 +5,7 @@
    * The group arranges the checkboxes and holds the value; every box draws
    * itself, because `checkbox` is the family beside this one rather than a part
    * of it. Nothing here selects into that family: a rule reaching
-   * `[data-ui='checkbox']` from this stylesheet would make one family's DOM part
+   * `[data-ui-checkbox]` from this stylesheet would make one family's DOM part
    * of another's contract, and moving a box inside a wrapper would then change
    * its appearance with no test to notice.
    *
@@ -14,7 +14,7 @@
    * named group, and a second one named by the same legend is the same group
    * announced twice.
    */
-  [data-ui='checkbox-group'][data-part='root'] {
+  [data-ui-checkbox-group][data-part-root] {
     --_gap: var(--slotted-control-gap-md, 8px);
 
     display: flex;
@@ -33,7 +33,7 @@
    * the same stated reason: two choices have to read as further apart than a
    * box and its own label.
    */
-  [data-ui='checkbox-group'][data-part='root']:has([data-part='description']) {
+  [data-ui-checkbox-group][data-part-root]:has([data-part-description]) {
     row-gap: var(--slotted-checkbox-group-gap, calc(var(--_gap) * 2));
   }
 
@@ -41,7 +41,7 @@
    * Horizontal wraps rather than scrolls or clips. A row of choices that runs
    * past the container is a row whose last option nobody can see.
    */
-  [data-ui='checkbox-group'][data-part='root'][data-orientation='horizontal'] {
+  [data-ui-checkbox-group][data-part-root][data-orientation='horizontal'] {
     /** Twice the control gap: two choices have to read as further apart than a
         box and its own label. */
     column-gap: calc(var(--_gap) * 2);
@@ -56,15 +56,15 @@
    * them through the binding rather than through a descendant selector.
    */
 
-  [data-ui='checkbox-group'][data-part='root'][data-size='sm'] {
+  [data-ui-checkbox-group][data-part-root][data-size='sm'] {
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='checkbox-group'][data-part='root'][data-size='md'] {
+  [data-ui-checkbox-group][data-part-root][data-size='md'] {
     --_gap: var(--slotted-control-gap-md, 8px);
   }
 
-  [data-ui='checkbox-group'][data-part='root'][data-size='lg'] {
+  [data-ui-checkbox-group][data-part-root][data-size='lg'] {
     --_gap: var(--slotted-control-gap-lg, 8px);
   }
 }

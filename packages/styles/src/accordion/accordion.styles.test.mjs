@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/accordion/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./accordion.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./accordion.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./accordion.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,7 +30,7 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.accordion;
 
 test('lives in the component layer', () => {
@@ -42,12 +55,12 @@ test('renders its one part, and the items it is a group of', () => {
  */
 test('selects nothing inside the family its items are', () => {
   assert.ok(
-    !new RegExp(`\\[data-ui='${contract.itemFamily}'\\]`).test(declarations),
+    !new RegExp(`\\[data-ui-${contract.itemFamily}\\]`).test(declarations),
     'the group reaches into the item family',
   );
   for (const part of ['trigger', 'panel', 'indicator', 'label']) {
     assert.ok(
-      !normalized.includes(`[data-part='${part}']`),
+      !normalized.includes(`[data-part-${part.toLowerCase()}]`),
       `the group styles the item's ${part} part`,
     );
   }

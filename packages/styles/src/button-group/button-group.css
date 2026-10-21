@@ -27,7 +27,7 @@
    * The group paints one thing and only one: the seam between two joined solid
    * controls. That rule is documented where it is written.
    */
-  [data-ui='button-group'] {
+  [data-ui-button-group] {
     --_radius: var(--slotted-control-radius, 4px);
     --_overlap: calc(-1 * var(--slotted-control-border-width, 1px));
     /**
@@ -71,13 +71,13 @@
    * that holds it, so the toolbar beside it drifts by half a centimetre for a
    * reason nobody can see in the markup.
    */
-  [data-ui='button-group']:empty {
+  [data-ui-button-group]:empty {
     display: none;
   }
 
   /* ── Orientation ──────────────────────────────────────────────────────── */
 
-  [data-ui='button-group'][data-orientation='vertical'] {
+  [data-ui-button-group][data-orientation='vertical'] {
     --_join-main: 0;
     --_join-cross: var(--_radius);
     --_overlap-inline: 0;
@@ -88,19 +88,19 @@
 
   /* ── Across the flow ──────────────────────────────────────────────────── */
 
-  [data-ui='button-group'][data-align='start'] {
+  [data-ui-button-group][data-align='start'] {
     align-items: start;
   }
 
-  [data-ui='button-group'][data-align='center'] {
+  [data-ui-button-group][data-align='center'] {
     align-items: center;
   }
 
-  [data-ui='button-group'][data-align='end'] {
+  [data-ui-button-group][data-align='end'] {
     align-items: end;
   }
 
-  [data-ui='button-group'][data-align='stretch'] {
+  [data-ui-button-group][data-align='stretch'] {
     align-items: stretch;
   }
 
@@ -112,30 +112,30 @@
    * shrinks to its content, which is what a pair of actions beside a sentence
    * needs and what every surveyed implementation defaults to.
    */
-  [data-ui='button-group'][data-justify] {
+  [data-ui-button-group][data-justify] {
     display: flex;
     inline-size: 100%;
   }
 
-  [data-ui='button-group'][data-justify='start'] {
+  [data-ui-button-group][data-justify='start'] {
     justify-content: start;
   }
 
-  [data-ui='button-group'][data-justify='center'] {
+  [data-ui-button-group][data-justify='center'] {
     justify-content: center;
   }
 
-  [data-ui='button-group'][data-justify='end'] {
+  [data-ui-button-group][data-justify='end'] {
     justify-content: end;
   }
 
-  [data-ui='button-group'][data-justify='between'] {
+  [data-ui-button-group][data-justify='between'] {
     justify-content: space-between;
   }
 
   /* ── Full width ───────────────────────────────────────────────────────── */
 
-  [data-ui='button-group'][data-full-width] {
+  [data-ui-button-group][data-full-width] {
     display: flex;
     inline-size: 100%;
   }
@@ -149,8 +149,8 @@
    * along the flow would distribute height instead, which is not what anyone
    * asking for a full-width group meant.
    */
-  [data-ui='button-group'][data-full-width]:not([data-orientation='vertical'])
-    > :not([data-part='separator']) {
+  [data-ui-button-group][data-full-width]:not([data-orientation='vertical'])
+    > :not([data-part-separator]) {
     flex: 1 1 0;
     min-inline-size: 0;
   }
@@ -166,15 +166,15 @@
    * square from the control height, and shrinking it would take it below the
    * target size its own family guarantees.
    */
-  [data-ui='button-group'] > :not([data-part='separator']):not([data-shape]) {
+  [data-ui-button-group] > :not([data-part-separator]):not([data-shape]) {
     min-inline-size: 0;
   }
 
-  [data-ui='button-group'] > [data-shape] {
+  [data-ui-button-group] > [data-shape] {
     flex: none;
   }
 
-  [data-ui='button-group'] > :not([data-ui='button-group']) {
+  [data-ui-button-group] > :not([data-ui-button-group]) {
     border-radius: 0;
   }
 
@@ -183,18 +183,18 @@
    * bar takes no column of its own, so the control after it shares an edge
    * with the control before it exactly like every other neighbour pair.
    */
-  [data-ui='button-group'] > :not(:first-child):not([data-part='separator']) {
+  [data-ui-button-group] > :not(:first-child):not([data-part-separator]) {
     margin-block-start: var(--_overlap-block);
     margin-inline-start: var(--_overlap-inline);
   }
 
-  [data-ui='button-group'] > :first-child {
+  [data-ui-button-group] > :first-child {
     border-end-start-radius: var(--_join-main);
     border-start-end-radius: var(--_join-cross);
     border-start-start-radius: var(--_radius);
   }
 
-  [data-ui='button-group'] > :last-child {
+  [data-ui-button-group] > :last-child {
     border-end-end-radius: var(--_radius);
     border-end-start-radius: var(--_join-cross);
     border-start-end-radius: var(--_join-main);
@@ -206,7 +206,7 @@
    * came out with one square corner. Measured on the harness before this rule
    * existed: 4/4/4/0. A lone control keeps all four.
    */
-  [data-ui='button-group'] > :only-child {
+  [data-ui-button-group] > :only-child {
     border-radius: var(--_radius);
   }
 
@@ -220,17 +220,17 @@
    * bar, so inside another group every corner of a run is squared and only
    * the two on the ends of the outer bar are put back.
    */
-  [data-ui='button-group'] [data-ui='button-group'] > :not([data-part='separator']) {
+  [data-ui-button-group] [data-ui-button-group] > :not([data-part-separator]) {
     border-radius: 0;
   }
 
-  [data-ui='button-group'] > [data-ui='button-group']:first-child > :first-child {
+  [data-ui-button-group] > [data-ui-button-group]:first-child > :first-child {
     border-end-start-radius: var(--_join-main);
     border-start-end-radius: var(--_join-cross);
     border-start-start-radius: var(--_radius);
   }
 
-  [data-ui='button-group'] > [data-ui='button-group']:last-child > :last-child {
+  [data-ui-button-group] > [data-ui-button-group]:last-child > :last-child {
     border-end-end-radius: var(--_radius);
     border-end-start-radius: var(--_join-cross);
     border-start-end-radius: var(--_join-main);
@@ -258,19 +258,15 @@
    * fifth, and it is a name the contract declares rather than a selector
    * repeated for weight.
    */
-  [data-ui='button-group'][data-part='root']
-    > [data-ui='button'][data-variant='outline'][data-pressed],
-  [data-ui='button-group'][data-part='root']
-    > [data-ui='button'][data-variant='outline'][data-disabled],
-  [data-ui='button-group'][data-part='root'] > [data-ui='button'][data-variant='outline']:disabled {
+  [data-ui-button-group][data-part-root] > [data-ui-button][data-variant='outline'][data-pressed],
+  [data-ui-button-group][data-part-root] > [data-ui-button][data-variant='outline'][data-disabled],
+  [data-ui-button-group][data-part-root] > [data-ui-button][data-variant='outline']:disabled {
     border-color: var(--slotted-control-border-color, ButtonBorder);
   }
 
-  [data-ui='button-group'][data-part='root']
-    > [data-ui='button'][data-variant='ghost'][data-pressed],
-  [data-ui='button-group'][data-part='root']
-    > [data-ui='button'][data-variant='ghost'][data-disabled],
-  [data-ui='button-group'][data-part='root'] > [data-ui='button'][data-variant='ghost']:disabled {
+  [data-ui-button-group][data-part-root] > [data-ui-button][data-variant='ghost'][data-pressed],
+  [data-ui-button-group][data-part-root] > [data-ui-button][data-variant='ghost'][data-disabled],
+  [data-ui-button-group][data-part-root] > [data-ui-button][data-variant='ghost']:disabled {
     border-color: transparent;
   }
 
@@ -297,19 +293,19 @@
    * not the last run gives it up too: the next run's first control follows it
    * in the same column.
    */
-  [data-ui='button-group'][data-part='root']:not([data-orientation='vertical'])
-    > [data-ui='button']:not(:last-child),
-  [data-ui='button-group'][data-part='root']:not([data-orientation='vertical'])
-    > [data-ui='button-group']:not(:last-child)
-    > [data-ui='button']:last-child {
+  [data-ui-button-group][data-part-root]:not([data-orientation='vertical'])
+    > [data-ui-button]:not(:last-child),
+  [data-ui-button-group][data-part-root]:not([data-orientation='vertical'])
+    > [data-ui-button-group]:not(:last-child)
+    > [data-ui-button]:last-child {
     border-inline-end-color: transparent;
   }
 
-  [data-ui='button-group'][data-part='root'][data-orientation='vertical']
-    > [data-ui='button']:not(:last-child),
-  [data-ui='button-group'][data-part='root'][data-orientation='vertical']
-    > [data-ui='button-group']:not(:last-child)
-    > [data-ui='button']:last-child {
+  [data-ui-button-group][data-part-root][data-orientation='vertical']
+    > [data-ui-button]:not(:last-child),
+  [data-ui-button-group][data-part-root][data-orientation='vertical']
+    > [data-ui-button-group]:not(:last-child)
+    > [data-ui-button]:last-child {
     border-block-end-color: transparent;
   }
 
@@ -333,37 +329,37 @@
    * `data-tone`, which `button` declares in public, so this is composition
    * against a contract rather than against internal DOM.
    */
-  [data-ui='button-group'] > [data-tone='accent'] {
+  [data-ui-button-group] > [data-tone='accent'] {
     --_seam: var(--slotted-tone-accent-solid-active);
   }
 
-  [data-ui='button-group'] > [data-tone='secondary'] {
+  [data-ui-button-group] > [data-tone='secondary'] {
     --_seam: var(--slotted-tone-secondary-solid-active);
   }
 
-  [data-ui='button-group'] > [data-tone='neutral'] {
+  [data-ui-button-group] > [data-tone='neutral'] {
     --_seam: var(--slotted-tone-neutral-solid-active);
   }
 
-  [data-ui='button-group'] > [data-tone='success'] {
+  [data-ui-button-group] > [data-tone='success'] {
     --_seam: var(--slotted-tone-success-solid-active);
   }
 
-  [data-ui='button-group'] > [data-tone='warning'] {
+  [data-ui-button-group] > [data-tone='warning'] {
     --_seam: var(--slotted-tone-warning-solid-active);
   }
 
-  [data-ui='button-group'] > [data-tone='danger'] {
+  [data-ui-button-group] > [data-tone='danger'] {
     --_seam: var(--slotted-tone-danger-solid-active);
   }
 
-  [data-ui='button-group'][data-part='root']:not([data-orientation='vertical'])
-    > [data-ui='button'][data-variant='solid']:not(:first-child) {
+  [data-ui-button-group][data-part-root]:not([data-orientation='vertical'])
+    > [data-ui-button][data-variant='solid']:not(:first-child) {
     border-inline-start-color: var(--_seam, ButtonBorder);
   }
 
-  [data-ui='button-group'][data-part='root'][data-orientation='vertical']
-    > [data-ui='button'][data-variant='solid']:not(:first-child) {
+  [data-ui-button-group][data-part-root][data-orientation='vertical']
+    > [data-ui-button][data-variant='solid']:not(:first-child) {
     border-block-start-color: var(--_seam, ButtonBorder);
   }
 
@@ -374,8 +370,8 @@
    * in those libraries a touched control repaints its own edge; here the edge
    * is the group's, so nothing about it changes and there is nothing to lift.
    */
-  [data-ui='button-group'] > *:focus-visible,
-  [data-ui='button-group'] > *:has(:focus-visible) {
+  [data-ui-button-group] > *:focus-visible,
+  [data-ui-button-group] > *:has(:focus-visible) {
     z-index: 1;
   }
 
@@ -385,7 +381,7 @@
    * the rule above would have taken it away, and this puts it back.
    */
   @media (forced-colors: active) {
-    [data-ui='button-group'][data-part='root'] > [data-ui='button'][data-pressed] {
+    [data-ui-button-group][data-part-root] > [data-ui-button][data-pressed] {
       border-color: Highlight;
     }
   }
@@ -413,7 +409,7 @@
    * than as a boundary. Nothing about the bar's shape changes now — the
    * corners, the height and the overlap are what they are without the rule.
    */
-  [data-ui='button-group'] > [data-part='separator'] {
+  [data-ui-button-group] > [data-part-separator] {
     background: none;
     block-size: 0;
     border: 0;
@@ -437,23 +433,23 @@
    * a rule inside a filled run is the seam, drawn where the consumer asked
    * for it.
    */
-  [data-ui='button-group'][data-part='root']:not([data-orientation='vertical'])
-    > [data-part='separator']
-    + [data-ui='button']:not([data-variant='solid']),
-  [data-ui='button-group'][data-part='root']:not([data-orientation='vertical'])
-    > [data-part='separator']
-    + [data-ui='button-group']
-    > [data-ui='button']:first-child:not([data-variant='solid']) {
+  [data-ui-button-group][data-part-root]:not([data-orientation='vertical'])
+    > [data-part-separator]
+    + [data-ui-button]:not([data-variant='solid']),
+  [data-ui-button-group][data-part-root]:not([data-orientation='vertical'])
+    > [data-part-separator]
+    + [data-ui-button-group]
+    > [data-ui-button]:first-child:not([data-variant='solid']) {
     border-inline-start-color: var(--slotted-text-muted, ButtonBorder);
   }
 
-  [data-ui='button-group'][data-part='root'][data-orientation='vertical']
-    > [data-part='separator']
-    + [data-ui='button']:not([data-variant='solid']),
-  [data-ui='button-group'][data-part='root'][data-orientation='vertical']
-    > [data-part='separator']
-    + [data-ui='button-group']
-    > [data-ui='button']:first-child:not([data-variant='solid']) {
+  [data-ui-button-group][data-part-root][data-orientation='vertical']
+    > [data-part-separator]
+    + [data-ui-button]:not([data-variant='solid']),
+  [data-ui-button-group][data-part-root][data-orientation='vertical']
+    > [data-part-separator]
+    + [data-ui-button-group]
+    > [data-ui-button]:first-child:not([data-variant='solid']) {
     border-block-start-color: var(--slotted-text-muted, ButtonBorder);
   }
 }

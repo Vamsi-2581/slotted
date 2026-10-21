@@ -58,16 +58,29 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
          as their capability is on, and leave through hidden, so the stylesheet
          can take them out as well as bring them in. -->
     @if (loading() !== undefined) {
-      <span data-part="busy" data-ui="spinner" aria-hidden="true" [hidden]="!loading()"></span>
+      <span
+        data-part="busy"
+        data-part-busy=""
+        data-ui="spinner"
+        data-ui-spinner=""
+        aria-hidden="true"
+        [hidden]="!loading()"
+      ></span>
     }
     @if (control()?.password()) {
-      <span data-part="caps-lock" aria-hidden="true" [hidden]="!control()!.capsLock()">
+      <span
+        data-part="caps-lock"
+        data-part-caps-lock=""
+        aria-hidden="true"
+        [hidden]="!control()!.capsLock()"
+      >
         <span slIcon><svg slGlyph name="caps-lock"></svg></span>
       </span>
     }
     @if (clearable()) {
       <button
         data-part="clear"
+        data-part-clear=""
         type="button"
         [hidden]="!showClear()"
         [attr.aria-label]="t('clear')"
@@ -79,6 +92,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
     @if (copyable()) {
       <button
         data-part="copy"
+        data-part-copy=""
         type="button"
         [hidden]="!showCopy()"
         [attr.aria-label]="t('copy')"
@@ -96,6 +110,7 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
     @if (showReveal()) {
       <button
         data-part="reveal"
+        data-part-reveal=""
         type="button"
         [attr.aria-label]="t('reveal')"
         [attr.aria-pressed]="control()!.revealed()"
@@ -114,7 +129,9 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'text-field',
+    'data-ui-text-field': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-mono]': "resolvedMono() ? '' : null",

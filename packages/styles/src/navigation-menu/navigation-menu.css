@@ -75,7 +75,7 @@
    * start, and the panel's border, its inset and the link's own inset add up
    * to the control's inline padding.
    */
-  [data-ui='navigation-menu'] {
+  [data-ui-navigation-menu] {
     --_control-height: var(--slotted-control-height-md, 34px);
     --_control-padding: var(--slotted-control-padding-inline-md, 13px);
     --_control-font-size: var(--slotted-control-font-size-md, 13px);
@@ -172,7 +172,7 @@
     position: relative;
   }
 
-  [data-ui='navigation-menu']:dir(rtl) {
+  [data-ui-navigation-menu]:dir(rtl) {
     --_inline-sign: -1;
   }
 
@@ -180,8 +180,8 @@
    * An open root rises to the popover layer and no further: a constant
    * z-index on a nav would put the row above a dialog's scrim.
    */
-  [data-ui='navigation-menu']:has(
-    > [data-part='list'] > [data-part='item'] > [data-part='content'][data-open]
+  [data-ui-navigation-menu]:has(
+    > [data-part-list] > [data-part-item] > [data-part-content][data-open]
   ) {
     z-index: var(--slotted-z-index-popover, 1100);
   }
@@ -192,7 +192,7 @@
    * it. While it is closed nothing transitions: the script writes the next
    * section's numbers before it opens, and they are simply there.
    */
-  [data-ui='navigation-menu']:has(> [data-part='viewport'][data-open]) {
+  [data-ui-navigation-menu]:has(> [data-part-viewport][data-open]) {
     transition:
       --slotted-navigation-menu-viewport-inline-size var(--slotted-duration-medium)
         var(--slotted-easing-standard),
@@ -206,7 +206,7 @@
         var(--slotted-easing-standard);
   }
 
-  [data-ui='navigation-menu'][data-size='sm'] {
+  [data-ui-navigation-menu][data-size='sm'] {
     --_control-height: var(--slotted-control-height-sm, 30px);
     --_control-padding: var(--slotted-control-padding-inline-sm, 10px);
     --_control-font-size: var(--slotted-control-font-size-sm, 12px);
@@ -214,7 +214,7 @@
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='navigation-menu'][data-size='lg'] {
+  [data-ui-navigation-menu][data-size='lg'] {
     --_control-height: var(--slotted-control-height-lg, 38px);
     --_control-padding: var(--slotted-control-padding-inline-lg, 16px);
     --_control-font-size: var(--slotted-control-font-size-lg, 14px);
@@ -222,7 +222,7 @@
     --_gap: var(--slotted-control-gap-md, 8px);
   }
 
-  [data-ui='navigation-menu'] > [data-part='list'] {
+  [data-ui-navigation-menu] > [data-part-list] {
     align-items: center;
     display: flex;
     gap: var(--_list-gap);
@@ -231,7 +231,7 @@
     padding: 0;
   }
 
-  [data-ui='navigation-menu'] > [data-part='list'] > [data-part='item'] {
+  [data-ui-navigation-menu] > [data-part-list] > [data-part-item] {
     display: flex;
   }
 
@@ -244,8 +244,8 @@
    */
   /* Held at the specificity of one attribute, so the current, open and
      disabled rules below win over it without restating the path. */
-  :where([data-ui='navigation-menu'] > [data-part='list'] > [data-part='item'])
-    > :is([data-part='trigger'], [data-part='link']) {
+  :where([data-ui-navigation-menu] > [data-part-list] > [data-part-item])
+    > :is([data-part-trigger], [data-part-link]) {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -270,34 +270,34 @@
     white-space: nowrap;
   }
 
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']:not([data-disabled])
-    > [data-part='trigger']:enabled:hover,
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']:not([data-disabled])
-    > [data-part='link']:not([data-disabled], [data-current], [aria-current='page']):hover {
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]:not([data-disabled])
+    > [data-part-trigger]:enabled:hover,
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]:not([data-disabled])
+    > [data-part-link]:not([data-disabled], [data-current], [aria-current='page']):hover {
     background-color: var(--_hover-background);
   }
 
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']:not([data-disabled])
-    > [data-part='trigger']:enabled:active,
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']:not([data-disabled])
-    > [data-part='link']:not([data-disabled], [data-current], [aria-current='page']):active {
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]:not([data-disabled])
+    > [data-part-trigger]:enabled:active,
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]:not([data-disabled])
+    > [data-part-link]:not([data-disabled], [data-current], [aria-current='page']):active {
     background-color: var(--_active-background);
     transition-duration: var(--slotted-duration-instant);
   }
 
   /** An open section holds the ground the pointer gave it. */
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='trigger'][data-open]:enabled {
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-trigger][data-open]:enabled {
     background-color: var(--_hover-background);
   }
 
@@ -306,34 +306,34 @@
    * closed: the accent ink on the resting ground. The ground stays the
    * pointer's, so an open current section reads open first.
    */
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='trigger'][data-current]:enabled {
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-trigger][data-current]:enabled {
     color: var(--_current-color);
   }
 
-  [data-ui='navigation-menu'] [data-part='link']:is([data-current], [aria-current='page']) {
+  [data-ui-navigation-menu] [data-part-link]:is([data-current], [aria-current='page']) {
     background-color: var(--_current-background);
     box-shadow: inset 0 0 0 var(--_border-width) var(--_current-edge);
     color: var(--_current-color);
   }
 
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='link']:is([data-current], [aria-current='page']) {
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-link]:is([data-current], [aria-current='page']) {
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='navigation-menu'] [data-part='trigger']:disabled,
-  [data-ui='navigation-menu'] [data-part='link'][data-disabled],
-  [data-ui='navigation-menu'] [data-part='content'] [data-part='link'][data-disabled] {
+  [data-ui-navigation-menu] [data-part-trigger]:disabled,
+  [data-ui-navigation-menu] [data-part-link][data-disabled],
+  [data-ui-navigation-menu] [data-part-content] [data-part-link][data-disabled] {
     color: var(--_disabled-color);
     cursor: not-allowed;
   }
 
-  [data-ui='navigation-menu'] :is([data-part='trigger'], [data-part='link']):focus-visible {
+  [data-ui-navigation-menu] :is([data-part-trigger], [data-part-link]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -344,7 +344,7 @@
    * `directional`; a vertical root draws `chevron-right` in a directional box
    * and does not turn it, because the section opens where it already points.
    */
-  [data-ui='navigation-menu'] [data-part='indicator'] {
+  [data-ui-navigation-menu] [data-part-indicator] {
     --slotted-icon-size: var(--_icon-size);
 
     display: flex;
@@ -352,16 +352,16 @@
     margin-inline-end: calc(-1 * var(--slotted-space-2, 0.25rem));
   }
 
-  [data-ui='navigation-menu'] [data-part='indicator'] > [data-ui='icon'] {
+  [data-ui-navigation-menu] [data-part-indicator] > [data-ui-icon] {
     transition: rotate var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
-  [data-ui='navigation-menu']:not([data-orientation='vertical'])
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='trigger'][data-open]
-    > [data-part='indicator']
-    > [data-ui='icon'] {
+  [data-ui-navigation-menu]:not([data-orientation='vertical'])
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-trigger][data-open]
+    > [data-part-indicator]
+    > [data-ui-icon] {
     rotate: 0.5turn;
   }
 
@@ -378,7 +378,7 @@
    * exit curve, never longer than it arrived. The arrival is a keyframe, the
    * reason `menu` gives: only a surface the script has placed arrives.
    */
-  [data-ui='navigation-menu'] > [data-part='viewport'] {
+  [data-ui-navigation-menu] > [data-part-viewport] {
     background-color: var(--_surface);
     border: var(--_border-width) solid var(--_border-color);
     border-radius: var(--_viewport-radius);
@@ -398,18 +398,18 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='navigation-menu'] > [data-part='viewport'][data-positioned] {
+  [data-ui-navigation-menu] > [data-part-viewport][data-positioned] {
     display: block;
   }
 
-  [data-ui='navigation-menu'] > [data-part='viewport'][data-open] {
+  [data-ui-navigation-menu] > [data-part-viewport][data-open] {
     opacity: 1;
     pointer-events: auto;
     translate: 0 0;
     transition: none;
   }
 
-  [data-ui='navigation-menu'] > [data-part='viewport'][data-open][data-positioned] {
+  [data-ui-navigation-menu] > [data-part-viewport][data-open][data-positioned] {
     animation: slotted-navigation-menu-enter-down var(--slotted-duration-medium)
       var(--slotted-easing-enter);
   }
@@ -420,7 +420,7 @@
    * trigger never leaves the region that keeps the panel open. It paints
    * nothing.
    */
-  [data-ui='navigation-menu'] > [data-part='viewport']::before {
+  [data-ui-navigation-menu] > [data-part-viewport]::before {
     content: '';
     inset-block-end: 100%;
     inset-inline: 0;
@@ -454,7 +454,7 @@
    * face the row, so it reads as the surface reaching for its trigger. It
    * slides from trigger to trigger with the surface.
    */
-  [data-ui='navigation-menu'] > [data-part='viewport'] > [data-part='arrow'] {
+  [data-ui-navigation-menu] > [data-part-viewport] > [data-part-arrow] {
     background-color: var(--_surface);
     border-block-start: var(--_border-width) solid var(--_border-color);
     border-inline-start: var(--_border-width) solid var(--_border-color);
@@ -479,7 +479,7 @@
    * width under inline-size containment measures nothing. The space the
    * script measured caps it.
    */
-  [data-ui='navigation-menu'] > [data-part='list'] > [data-part='item'] > [data-part='content'] {
+  [data-ui-navigation-menu] > [data-part-list] > [data-part-item] > [data-part-content] {
     --_columns: 1;
     --_content-size: calc(
       var(--_columns) * var(--_column-size) + (var(--_columns) - 1) * var(--_column-gap) + 2 *
@@ -536,10 +536,7 @@
     z-index: 1;
   }
 
-  [data-ui='navigation-menu']:dir(rtl)
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'] {
+  [data-ui-navigation-menu]:dir(rtl) > [data-part-list] > [data-part-item] > [data-part-content] {
     clip-path: inset(
       0 0 max(0px, calc(100% - var(--slotted-navigation-menu-viewport-block-size)))
         max(0px, calc(100% - var(--slotted-navigation-menu-viewport-inline-size))) round
@@ -547,31 +544,25 @@
     );
   }
 
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'][data-columns='2'] {
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content][data-columns='2'] {
     --_columns: 2;
   }
 
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'][data-columns='3'] {
+  [data-ui-navigation-menu]
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content][data-columns='3'] {
     --_columns: 3;
   }
 
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'][hidden] {
+  [data-ui-navigation-menu] > [data-part-list] > [data-part-item] > [data-part-content][hidden] {
     display: none;
   }
 
-  [data-ui='navigation-menu']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'][data-open] {
+  [data-ui-navigation-menu] > [data-part-list] > [data-part-item] > [data-part-content][data-open] {
     opacity: 1;
     transition: none;
   }
@@ -581,12 +572,10 @@
    * panel paints one itself: a static render, a snippet and a server render
    * show the whole panel where it stands.
    */
-  [data-ui='navigation-menu']:not([data-nested]):not(
-      :has(> [data-part='viewport'][data-positioned])
-    )
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'] {
+  [data-ui-navigation-menu]:not([data-nested]):not(:has(> [data-part-viewport][data-positioned]))
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content] {
     background-color: var(--_surface);
     border-color: var(--_border-color);
     box-shadow: var(--_shadow);
@@ -600,22 +589,22 @@
    * duration step longer. The directions are logical: `from-end` is the
    * section after this one in reading order.
    */
-  [data-ui='navigation-menu'] [data-part='content'][data-motion='from-end'] {
+  [data-ui-navigation-menu] [data-part-content][data-motion='from-end'] {
     animation: slotted-navigation-menu-from-end var(--slotted-duration-medium)
       var(--slotted-easing-enter) both;
   }
 
-  [data-ui='navigation-menu'] [data-part='content'][data-motion='from-start'] {
+  [data-ui-navigation-menu] [data-part-content][data-motion='from-start'] {
     animation: slotted-navigation-menu-from-start var(--slotted-duration-medium)
       var(--slotted-easing-enter) both;
   }
 
-  [data-ui='navigation-menu'] [data-part='content'][data-motion='to-end'] {
+  [data-ui-navigation-menu] [data-part-content][data-motion='to-end'] {
     animation: slotted-navigation-menu-to-end var(--slotted-duration-short)
       var(--slotted-easing-exit) both;
   }
 
-  [data-ui='navigation-menu'] [data-part='content'][data-motion='to-start'] {
+  [data-ui-navigation-menu] [data-part-content][data-motion='to-start'] {
     animation: slotted-navigation-menu-to-start var(--slotted-duration-short)
       var(--slotted-easing-exit) both;
   }
@@ -649,13 +638,11 @@
   }
 
   /** A list or a footer straight in the panel spans every column. */
-  [data-ui='navigation-menu']
-    [data-part='content']
-    > :is([data-part='links'], [data-part='footer']) {
+  [data-ui-navigation-menu] [data-part-content] > :is([data-part-links], [data-part-footer]) {
     grid-column: 1 / -1;
   }
 
-  [data-ui='navigation-menu'] [data-part='links'] {
+  [data-ui-navigation-menu] [data-part-links] {
     display: grid;
     gap: var(--_column-gap);
     grid-template-columns: repeat(var(--_columns, 1), minmax(0, 1fr));
@@ -665,7 +652,7 @@
   }
 
   /** A group is one column; its list is one column inside it. */
-  [data-ui='navigation-menu'] [data-part='group'] > [data-part='links'] {
+  [data-ui-navigation-menu] [data-part-group] > [data-part-links] {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -675,19 +662,19 @@
    * the panel falls to one.
    */
   @container slotted-navigation-menu-content (inline-size < 480px) {
-    [data-ui='navigation-menu'] [data-part='links'] {
+    [data-ui-navigation-menu] [data-part-links] {
       grid-template-columns: minmax(0, 1fr);
     }
   }
 
-  [data-ui='navigation-menu'] [data-part='group'] {
+  [data-ui-navigation-menu] [data-part-group] {
     display: flex;
     flex-direction: column;
     gap: var(--slotted-space-1, 0.125rem);
     min-inline-size: 0;
   }
 
-  [data-ui='navigation-menu'] [data-part='group-label'] {
+  [data-ui-navigation-menu] [data-part-group-label] {
     color: var(--_muted-color);
     font-size: var(--_secondary-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -704,7 +691,7 @@
    * own — a column gap is drawn even when the mark is absent — so the mark
    * holds its margin and a link with no mark starts its title at the inset.
    */
-  [data-ui='navigation-menu'] [data-part='content'] [data-part='link'] {
+  [data-ui-navigation-menu] [data-part-content] [data-part-link] {
     border-radius: var(--_radius);
     box-sizing: border-box;
     color: var(--_color);
@@ -728,9 +715,7 @@
   }
 
   /** A link of plain words is a row at the control's height, its text centred in it. */
-  [data-ui='navigation-menu']
-    [data-part='content']
-    [data-part='link']:not(:has([data-part='label'])) {
+  [data-ui-navigation-menu] [data-part-content] [data-part-link]:not(:has([data-part-label])) {
     align-content: center;
     display: grid;
     grid-template-areas: none;
@@ -738,34 +723,34 @@
     padding-block: 0;
   }
 
-  [data-ui='navigation-menu']
-    [data-part='content']
-    [data-part='link']:not([data-disabled], [data-current], [aria-current='page']):hover {
+  [data-ui-navigation-menu]
+    [data-part-content]
+    [data-part-link]:not([data-disabled], [data-current], [aria-current='page']):hover {
     background-color: var(--_hover-background);
   }
 
-  [data-ui='navigation-menu']
-    [data-part='content']
-    [data-part='link']:not([data-disabled], [data-current], [aria-current='page']):active {
+  [data-ui-navigation-menu]
+    [data-part-content]
+    [data-part-link]:not([data-disabled], [data-current], [aria-current='page']):active {
     background-color: var(--_active-background);
     transition-duration: var(--slotted-duration-instant);
   }
 
   /* The panel's row rule above is as specific as the shared current rule and later; restated here. */
-  [data-ui='navigation-menu']
-    [data-part='content']
-    [data-part='link']:is([data-current], [aria-current='page']) {
+  [data-ui-navigation-menu]
+    [data-part-content]
+    [data-part-link]:is([data-current], [aria-current='page']) {
     color: var(--_current-color);
   }
 
-  [data-ui='navigation-menu']
-    [data-part='content']
-    [data-part='link']:is([data-current], [aria-current='page'])
-    > [data-part='description'] {
+  [data-ui-navigation-menu]
+    [data-part-content]
+    [data-part-link]:is([data-current], [aria-current='page'])
+    > [data-part-description] {
     color: inherit;
   }
 
-  [data-ui='navigation-menu'] [data-part='content'] [data-part='link']:focus-visible {
+  [data-ui-navigation-menu] [data-part-content] [data-part-link]:focus-visible {
     outline-offset: 0;
   }
 
@@ -774,7 +759,7 @@
    * title's baseline at the midpoint of the capitals' and the lowercase
    * letters' centres — the briefing's rule for a mark beside a line of text.
    */
-  [data-ui='navigation-menu'] [data-part='link'] > [data-part='icon'] {
+  [data-ui-navigation-menu] [data-part-link] > [data-part-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     color: var(--_muted-color);
@@ -784,30 +769,30 @@
     transition: color var(--_duration) var(--_easing);
   }
 
-  [data-ui='navigation-menu'] [data-part='link'] > [data-part='icon'] > [data-ui='icon'] {
+  [data-ui-navigation-menu] [data-part-link] > [data-part-icon] > [data-ui-icon] {
     display: inline-block;
     vertical-align: calc((1cap + 1ex) / 4 - var(--_icon-size) / 2);
   }
 
-  [data-ui='navigation-menu']
-    [data-part='link']:not([data-disabled], [data-current], [aria-current='page']):hover
-    > [data-part='icon'] {
+  [data-ui-navigation-menu]
+    [data-part-link]:not([data-disabled], [data-current], [aria-current='page']):hover
+    > [data-part-icon] {
     color: var(--_color);
   }
 
-  [data-ui='navigation-menu']
-    [data-part='link']:is([data-current], [aria-current='page'], [data-disabled])
-    > [data-part='icon'] {
+  [data-ui-navigation-menu]
+    [data-part-link]:is([data-current], [aria-current='page'], [data-disabled])
+    > [data-part-icon] {
     color: inherit;
   }
 
-  [data-ui='navigation-menu'] [data-part='link'] > [data-part='label'] {
+  [data-ui-navigation-menu] [data-part-link] > [data-part-label] {
     font-weight: var(--slotted-font-weight-medium, 500);
     grid-area: label;
     min-inline-size: 0;
   }
 
-  [data-ui='navigation-menu'] [data-part='link'] > [data-part='description'] {
+  [data-ui-navigation-menu] [data-part-link] > [data-part-description] {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     color: var(--_muted-color);
@@ -820,12 +805,12 @@
     overflow: hidden;
   }
 
-  [data-ui='navigation-menu'] [data-part='link'][data-disabled] > [data-part='description'] {
+  [data-ui-navigation-menu] [data-part-link][data-disabled] > [data-part-description] {
     color: inherit;
   }
 
   /** The panel's last row, under a rule that runs the panel's inner width. */
-  [data-ui='navigation-menu'] [data-part='footer'] {
+  [data-ui-navigation-menu] [data-part-footer] {
     align-items: center;
     border-block-start: var(--_border-width) solid var(--_border-color);
     display: flex;
@@ -844,25 +829,25 @@
    * the open trigger's top. The surface arrives along the inline axis it
    * opens on, the lateral case R7 names for a submenu.
    */
-  [data-ui='navigation-menu'][data-orientation='vertical'] > [data-part='list'] {
+  [data-ui-navigation-menu][data-orientation='vertical'] > [data-part-list] {
     align-items: stretch;
     flex-direction: column;
     inline-size: 100%;
   }
 
-  [data-ui='navigation-menu'][data-orientation='vertical']
-    > [data-part='list']
-    > [data-part='item']
-    > :is([data-part='trigger'], [data-part='link']) {
+  [data-ui-navigation-menu][data-orientation='vertical']
+    > [data-part-list]
+    > [data-part-item]
+    > :is([data-part-trigger], [data-part-link]) {
     flex: 1 1 auto;
     justify-content: space-between;
   }
 
-  [data-ui='navigation-menu'][data-orientation='vertical'] > [data-part='viewport'],
-  [data-ui='navigation-menu'][data-orientation='vertical']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'] {
+  [data-ui-navigation-menu][data-orientation='vertical'] > [data-part-viewport],
+  [data-ui-navigation-menu][data-orientation='vertical']
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content] {
     inset-block-start: var(--slotted-navigation-menu-viewport-block-start, 0px);
     inset-inline-start: calc(
       var(--slotted-navigation-menu-viewport-inline-start, 100%) + var(--_offset)
@@ -870,12 +855,12 @@
   }
 
   /* Without script a vertical panel stands beside the column. */
-  [data-ui='navigation-menu'][data-orientation='vertical']:not([data-nested]):not(
-      :has(> [data-part='viewport'][data-positioned])
+  [data-ui-navigation-menu][data-orientation='vertical']:not([data-nested]):not(
+      :has(> [data-part-viewport][data-positioned])
     )
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'] {
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content] {
     inset-inline-start: calc(100% + var(--_offset));
   }
 
@@ -885,48 +870,44 @@
    * edge; the script decides it and writes `data-placement`. Under the
    * trigger the surface arrives, points and bridges as it does under a row.
    */
-  [data-ui='navigation-menu'][data-orientation='vertical'][data-placement='below']:not(
-      [data-nested]
-    )
-    > [data-part='viewport'],
-  [data-ui='navigation-menu'][data-orientation='vertical'][data-placement='below']:not(
-      [data-nested]
-    )
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'] {
+  [data-ui-navigation-menu][data-orientation='vertical'][data-placement='below']:not([data-nested])
+    > [data-part-viewport],
+  [data-ui-navigation-menu][data-orientation='vertical'][data-placement='below']:not([data-nested])
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content] {
     inset-block-start: calc(
       var(--slotted-navigation-menu-viewport-block-start, 100%) + var(--_offset)
     );
     inset-inline-start: var(--slotted-navigation-menu-viewport-inline-start, 0px);
   }
 
-  [data-ui='navigation-menu'][data-orientation='vertical']:not([data-placement='below'])
-    > [data-part='viewport'] {
+  [data-ui-navigation-menu][data-orientation='vertical']:not([data-placement='below'])
+    > [data-part-viewport] {
     translate: calc(-1 * var(--_inline-sign) * var(--_enter-distance)) 0;
   }
 
-  [data-ui='navigation-menu'][data-orientation='vertical']:not([data-placement='below'])
-    > [data-part='viewport'][data-open] {
+  [data-ui-navigation-menu][data-orientation='vertical']:not([data-placement='below'])
+    > [data-part-viewport][data-open] {
     translate: 0 0;
   }
 
-  [data-ui='navigation-menu'][data-orientation='vertical']:not([data-placement='below'])
-    > [data-part='viewport'][data-open][data-positioned] {
+  [data-ui-navigation-menu][data-orientation='vertical']:not([data-placement='below'])
+    > [data-part-viewport][data-open][data-positioned] {
     animation-name: slotted-navigation-menu-enter-from-start;
   }
 
-  [data-ui='navigation-menu'][data-orientation='vertical']:not([data-placement='below'])
-    > [data-part='viewport']::before {
+  [data-ui-navigation-menu][data-orientation='vertical']:not([data-placement='below'])
+    > [data-part-viewport]::before {
     block-size: auto;
     inline-size: calc(var(--_offset) + var(--_border-width));
     inset-block: 0;
     inset-inline: auto 100%;
   }
 
-  [data-ui='navigation-menu'][data-orientation='vertical']:not([data-placement='below'])
-    > [data-part='viewport']
-    > [data-part='arrow'] {
+  [data-ui-navigation-menu][data-orientation='vertical']:not([data-placement='below'])
+    > [data-part-viewport]
+    > [data-part-arrow] {
     inset-block-start: calc(
       var(--slotted-navigation-menu-arrow-offset, 50%) - var(--_arrow-size) / 2
     );
@@ -935,14 +916,12 @@
   }
 
   /* Under the trigger, the chevron turns to point where the panel went. */
-  [data-ui='navigation-menu'][data-orientation='vertical'][data-placement='below']:not(
-      [data-nested]
-    )
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='trigger'][data-open]
-    > [data-part='indicator']
-    > [data-ui='icon'] {
+  [data-ui-navigation-menu][data-orientation='vertical'][data-placement='below']:not([data-nested])
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-trigger][data-open]
+    > [data-part-indicator]
+    > [data-ui-icon] {
     rotate: calc(var(--_inline-sign) * 0.25turn);
   }
 
@@ -955,7 +934,7 @@
    * one. It draws no viewport; its height is the taller of its list and its
    * open section, which the script measures into the same property.
    */
-  [data-ui='navigation-menu'][data-nested] {
+  [data-ui-navigation-menu][data-nested] {
     --_nested-list-size: var(--slotted-navigation-menu-nested-list-size, 11rem);
 
     grid-column: 1 / -1;
@@ -967,7 +946,7 @@
    * root's whole height — the taller of the two — rather than the section's,
    * which left a gap under a section shorter than the list.
    */
-  [data-ui='navigation-menu'][data-nested]::before {
+  [data-ui-navigation-menu][data-nested]::before {
     background-color: var(--_border-color);
     content: '';
     inline-size: var(--_border-width);
@@ -976,19 +955,19 @@
     position: absolute;
   }
 
-  [data-ui='navigation-menu'][data-nested] > [data-part='list'] {
+  [data-ui-navigation-menu][data-nested] > [data-part-list] {
     align-self: flex-start;
     inline-size: var(--_nested-list-size);
   }
 
-  [data-ui='navigation-menu'][data-nested] > [data-part='viewport'] {
+  [data-ui-navigation-menu][data-nested] > [data-part-viewport] {
     display: none;
   }
 
-  [data-ui='navigation-menu'][data-nested]
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content'] {
+  [data-ui-navigation-menu][data-nested]
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content] {
     border: 0;
     border-radius: 0;
     clip-path: none;
@@ -1003,25 +982,25 @@
 
   /* Stillness keeps the fades and drops every movement (R7). */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='navigation-menu'] > [data-part='viewport'],
-    [data-ui='navigation-menu'][data-orientation='vertical'] > [data-part='viewport'] {
+    [data-ui-navigation-menu] > [data-part-viewport],
+    [data-ui-navigation-menu][data-orientation='vertical'] > [data-part-viewport] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='navigation-menu'] > [data-part='viewport'][data-open][data-positioned],
-    [data-ui='navigation-menu'][data-orientation='vertical']
-      > [data-part='viewport'][data-open][data-positioned] {
+    [data-ui-navigation-menu] > [data-part-viewport][data-open][data-positioned],
+    [data-ui-navigation-menu][data-orientation='vertical']
+      > [data-part-viewport][data-open][data-positioned] {
       animation-name: slotted-navigation-menu-fade;
     }
 
-    [data-ui='navigation-menu']
-      [data-part='content']:is([data-motion='from-end'], [data-motion='from-start']) {
+    [data-ui-navigation-menu]
+      [data-part-content]:is([data-motion='from-end'], [data-motion='from-start']) {
       animation-name: slotted-navigation-menu-fade;
     }
 
-    [data-ui='navigation-menu']
-      [data-part='content']:is([data-motion='to-end'], [data-motion='to-start']) {
+    [data-ui-navigation-menu]
+      [data-part-content]:is([data-motion='to-end'], [data-motion='to-start']) {
       animation: none;
       opacity: 0;
     }

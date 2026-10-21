@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import type { MouseEvent } from 'react';
 
@@ -50,7 +51,7 @@ export function TableOfContentsItem({
     [current, depth, value],
   );
 
-  const rootProps: TableOfContentsItemRootProps = {
+  const rootProps: TableOfContentsItemRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -60,7 +61,7 @@ export function TableOfContentsItem({
     'data-value': value,
     ref,
     style,
-  };
+  });
 
   return (
     <TableOfContentsItemContext.Provider value={context}>
@@ -101,7 +102,7 @@ export function TableOfContentsLink({
     list.navigate(item.value, activationReason(event), event.nativeEvent);
   };
 
-  const rootProps: TableOfContentsLinkRootProps = {
+  const rootProps: TableOfContentsLinkRootProps = keyedProps({
     ...nativeProps,
     ...(item.current ? { 'aria-current': 'location' as const } : {}),
     children,
@@ -116,7 +117,7 @@ export function TableOfContentsLink({
       else if (ref !== null && ref !== undefined) ref.current = node;
     },
     style,
-  };
+  });
 
   return render === undefined ? <a {...rootProps} /> : render(rootProps);
 }
@@ -130,13 +131,13 @@ export function TableOfContentsGroup({
   style,
   ...nativeProps
 }: TableOfContentsGroupProps) {
-  const rootProps: TableOfContentsGroupRootProps = {
+  const rootProps: TableOfContentsGroupRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
     'data-part': 'group',
     ref,
     style,
-  };
+  });
   return render === undefined ? <ol {...rootProps} /> : render(rootProps);
 }

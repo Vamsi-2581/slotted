@@ -558,7 +558,7 @@ describe('SlMenu three levels deep', () => {
     <sl-menu #account aria-describedby="help">
       <div slMenuHeader>
         <span aria-hidden="true">AL</span>
-        <span data-part="label">Ada Lovelace</span>
+        <span data-part="label" data-part-label="">Ada Lovelace</span>
         <span slMenuItemDescription>ada@analytical.engine</span>
       </div>
       <button slMenuItem>Inbox <span slMenuItemMeta>12</span></button>
@@ -639,7 +639,7 @@ describe('SlMenuTrigger on the library button', () => {
 @Directive({
   selector: '[probePart]',
   standalone: true,
-  host: { '[attr.data-part]': '"menu-trigger"' },
+  host: { '[attr.data-part]': '"menu-trigger"', '[attr.data-part-menu-trigger]': "''" },
 })
 class ProbePart {}
 

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/date-field/date-field.css';
 
 import {
@@ -466,7 +467,11 @@ export function DateField({
 
   const children: ReactNode = (
     <>
-      {start === undefined ? null : <span data-part="start">{start}</span>}
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
       <div
         aria-describedby={[describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined}
         aria-disabled={resolvedDisabled === true ? true : undefined}
@@ -480,6 +485,7 @@ export function DateField({
         aria-readonly={resolvedReadOnly === true ? true : undefined}
         aria-required={resolvedRequired === true ? true : undefined}
         data-part="segments"
+        data-part-segments=""
         id={id ?? field?.ids.control}
         onPaste={onPaste}
         role="group"
@@ -487,7 +493,12 @@ export function DateField({
         {pattern.map((part, index) => {
           if (part.type === 'literal') {
             return (
-              <span aria-hidden="true" data-part="literal" key={`literal-${String(index)}`}>
+              <span
+                aria-hidden="true"
+                data-part="literal"
+                data-part-literal=""
+                key={`literal-${String(index)}`}
+              >
                 {part.value}
               </span>
             );
@@ -513,19 +524,30 @@ export function DateField({
         })}
       </div>
       {/* The whole date in words, for the group's own accessible name. */}
-      <span data-part="value-text" hidden id={valueTextId}>
+      <span data-part="value-text" data-part-value-text="" hidden id={valueTextId}>
         {spoken}
       </span>
       {showClear ? (
-        <button aria-label={t('clear')} data-part="clear" onClick={clear} type="button">
+        <button
+          aria-label={t('clear')}
+          data-part="clear"
+          data-part-clear=""
+          onClick={clear}
+          type="button"
+        >
           <Icon>
             <Glyph name="x" />
           </Icon>
         </button>
       ) : null}
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
       <input
         data-part="hidden-input"
+        data-part-hidden-input=""
         name={name}
         readOnly
         type="hidden"
@@ -540,7 +562,7 @@ export function DateField({
     </>
   );
 
-  const rootProps: DateFieldRootProps = {
+  const rootProps: DateFieldRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -556,7 +578,7 @@ export function DateField({
     'data-variant': resolvedVariant,
     onMouseDown: onRootMouseDown,
     ref: rootRef,
-  };
+  });
 
   return render === undefined ? (
     <div {...(rootProps as DateFieldRootProps & { ref?: React.Ref<HTMLDivElement> })} />
@@ -661,6 +683,7 @@ function Segment({
       aria-valuetext={spoken}
       data-field={field}
       data-part="segment"
+      data-part-segment=""
       {...(raw === null ? { 'data-placeholder': '' } : {})}
       onBlur={onBlur}
       onFocus={onFocus}

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/date-picker/date-picker.css';
 
 import {
@@ -484,19 +485,26 @@ function Picker({
   const surface: ReactNode = mounted ? (
     <div
       data-part="positioner"
+      data-part-positioner=""
       data-presentation={sheet ? 'sheet' : 'popover'}
       data-ui="date-picker"
+      data-ui-date-picker=""
       ref={setLayerNode}
       {...(isOpen ? { 'data-open': '' } : {})}
     >
       <div
         aria-label={spoken}
         data-part="content"
+        data-part-content=""
         id={contentId}
         onKeyDown={onContentKeyDown}
         role="dialog"
       >
-        {presets === undefined ? null : <div data-part="presets">{presets}</div>}
+        {presets === undefined ? null : (
+          <div data-part="presets" data-part-presets="">
+            {presets}
+          </div>
+        )}
         <Calendar
           fixedWeeks={fixedWeeks}
           granularity={granularity}
@@ -521,14 +529,18 @@ function Picker({
           weekNumbers={weekNumbers}
           {...(firstDayOfWeek === undefined ? {} : { firstDayOfWeek })}
         />
-        {footer === undefined ? null : <div data-part="footer">{footer}</div>}
+        {footer === undefined ? null : (
+          <div data-part="footer" data-part-footer="">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   ) : null;
 
   const children: ReactNode = (
     <>
-      <div data-part="control" onKeyDown={onControlKeyDown}>
+      <div data-part="control" data-part-control="" onKeyDown={onControlKeyDown}>
         <DateField
           calendar={resolvedCalendar}
           clearable={clearable}
@@ -541,6 +553,7 @@ function Picker({
               aria-haspopup="dialog"
               aria-label={spoken}
               data-part="trigger"
+              data-part-trigger=""
               disabled={!editable}
               onClick={(event) => setOpen(!isOpen, 'pointer', event)}
               ref={triggerRef}
@@ -573,7 +586,7 @@ function Picker({
     </>
   );
 
-  const rootProps: DatePickerRootProps = {
+  const rootProps: DatePickerRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -589,7 +602,7 @@ function Picker({
     'data-ui': 'date-picker',
     'data-variant': resolvedVariant,
     ref: rootRef,
-  };
+  });
 
   return (
     <>

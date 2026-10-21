@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/list-item/list-item.css';
 
 import { createContext, useContext } from 'react';
@@ -62,7 +63,7 @@ export function ListItem({
   const resolvedTruncate = (truncate ?? defaults.truncate) === true;
   const resolvedVariant = variant ?? list?.variant ?? 'plain';
 
-  const rootProps: ListItemRootProps = {
+  const rootProps: ListItemRootProps = keyedProps({
     ...nativeProps,
     /* The bullet is the dot glyph in a part of its own before the row's
        content; the number is a counter the stylesheet writes, because it is
@@ -70,7 +71,7 @@ export function ListItem({
     children:
       resolvedMarker === 'bullet' ? (
         <>
-          <span aria-hidden="true" data-part="marker">
+          <span aria-hidden="true" data-part="marker" data-part-marker="">
             <Icon>
               <Glyph name="dot" />
             </Icon>
@@ -95,7 +96,7 @@ export function ListItem({
     'data-tone': resolvedTone,
     'data-ui': 'list-item',
     'data-variant': resolvedVariant,
-  };
+  });
 
   const element = render === undefined ? <li {...rootProps} /> : render(rootProps);
 

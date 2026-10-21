@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useId } from 'react';
 
 import { useList } from './list';
@@ -36,27 +37,38 @@ export function ListSection({
      `aria-labelledby`, and a reader who lands inside the group is told which
      group it is. `labelProps` and `listProps` reach each element for the id or
      the class a page owns. */
-  const rootProps: ListSectionRootProps = {
+  const rootProps: ListSectionRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
         <Heading
           data-part="section-label"
+          data-part-section-label=""
           id={labelId}
           {...(sticky ? { 'data-sticky': '' } : {})}
           data-variant={labelVariant}
           {...labelProps}
         >
           {label}
-          {end === undefined || end === null ? null : <span data-part="section-end">{end}</span>}
+          {end === undefined || end === null ? null : (
+            <span data-part="section-end" data-part-section-end="">
+              {end}
+            </span>
+          )}
         </Heading>
-        <NestedList aria-labelledby={labelId} data-part="section-list" role="list" {...listProps}>
+        <NestedList
+          aria-labelledby={labelId}
+          data-part="section-list"
+          data-part-section-list=""
+          role="list"
+          {...listProps}
+        >
           {children}
         </NestedList>
       </>
     ),
     'data-part': 'section',
-  };
+  });
 
   return render === undefined ? <li {...rootProps} /> : render(rootProps);
 }
@@ -71,7 +83,7 @@ export function ListSection({
  * page's, and `result-state` is what goes in here.
  */
 export function ListEmpty({ render, ...nativeProps }: ListEmptyProps) {
-  const rootProps: ListSectionRootProps = { ...nativeProps, 'data-part': 'empty' };
+  const rootProps: ListSectionRootProps = keyedProps({ ...nativeProps, 'data-part': 'empty' });
 
   return render === undefined ? <li {...rootProps} /> : render(rootProps);
 }

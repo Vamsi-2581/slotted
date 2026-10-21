@@ -16,7 +16,7 @@ import { SlStatCard } from './stat-card';
   selector: '[slStatCardHeader]',
   standalone: true,
   exportAs: 'slStatCardHeader',
-  host: { 'data-part': 'header' },
+  host: { 'data-part': 'header', 'data-part-header': '' },
 })
 export class SlStatCardHeader {}
 
@@ -29,7 +29,7 @@ export class SlStatCardHeader {}
   selector: '[slStatCardLabel]',
   standalone: true,
   exportAs: 'slStatCardLabel',
-  host: { 'data-part': 'label', '[attr.id]': 'id' },
+  host: { 'data-part': 'label', 'data-part-label': '', '[attr.id]': 'id' },
 })
 export class SlStatCardLabel {
   private readonly card = inject(SlStatCard);
@@ -42,7 +42,7 @@ export class SlStatCardLabel {
   selector: '[slStatCardStatus]',
   standalone: true,
   exportAs: 'slStatCardStatus',
-  host: { 'data-part': 'status' },
+  host: { 'data-part': 'status', 'data-part-status': '' },
 })
 export class SlStatCardStatus {}
 
@@ -51,7 +51,7 @@ export class SlStatCardStatus {}
   selector: '[slStatCardAction]',
   standalone: true,
   exportAs: 'slStatCardAction',
-  host: { 'data-part': 'action' },
+  host: { 'data-part': 'action', 'data-part-action': '' },
 })
 export class SlStatCardAction {}
 
@@ -60,7 +60,7 @@ export class SlStatCardAction {}
   selector: '[slStatCardFigure]',
   standalone: true,
   exportAs: 'slStatCardFigure',
-  host: { 'data-part': 'figure' },
+  host: { 'data-part': 'figure', 'data-part-figure': '' },
 })
 export class SlStatCardFigure {}
 
@@ -69,7 +69,7 @@ export class SlStatCardFigure {}
   selector: '[slStatCardUnit]',
   standalone: true,
   exportAs: 'slStatCardUnit',
-  host: { 'data-part': 'unit' },
+  host: { 'data-part': 'unit', 'data-part-unit': '' },
 })
 export class SlStatCardUnit {}
 
@@ -77,7 +77,7 @@ export class SlStatCardUnit {}
   selector: '[slStatCardPeriod]',
   standalone: true,
   exportAs: 'slStatCardPeriod',
-  host: { 'data-part': 'period' },
+  host: { 'data-part': 'period', 'data-part-period': '' },
 })
 export class SlStatCardPeriod {}
 
@@ -97,7 +97,11 @@ export class SlStatCardPeriod {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slStatCardComparison',
-  host: { 'data-part': 'comparison', '[attr.hidden]': 'shown() ? null : ""' },
+  host: {
+    'data-part': 'comparison',
+    'data-part-comparison': '',
+    '[attr.hidden]': 'shown() ? null : ""',
+  },
 })
 export class SlStatCardComparison {
   protected readonly card = inject(SlStatCard);
@@ -121,7 +125,7 @@ export class SlStatCardComparison {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slStatCardTrend',
-  host: { 'data-part': 'trend', '[attr.hidden]': 'shown() ? null : ""' },
+  host: { 'data-part': 'trend', 'data-part-trend': '', '[attr.hidden]': 'shown() ? null : ""' },
 })
 export class SlStatCardTrend {
   protected readonly card = inject(SlStatCard);
@@ -133,7 +137,7 @@ export class SlStatCardTrend {
   selector: '[slStatCardMessage]',
   standalone: true,
   exportAs: 'slStatCardMessage',
-  host: { 'data-part': 'message', '[attr.hidden]': 'shown() ? null : ""' },
+  host: { 'data-part': 'message', 'data-part-message': '', '[attr.hidden]': 'shown() ? null : ""' },
 })
 export class SlStatCardMessage {
   private readonly card = inject(SlStatCard);

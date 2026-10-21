@@ -82,41 +82,48 @@ const toArray = (value: number | readonly number[]): number[] =>
   standalone: true,
   exportAs: 'slSlider',
   template: `@if (resolvedValueLabel() !== 'none') {
-      <output data-part="output" [attr.for]="controlId()">{{ outputText() }}</output>
+      <output data-part="output" data-part-output="" [attr.for]="controlId()">{{
+        outputText()
+      }}</output>
     }
     <div
       data-part="control"
+      data-part-control=""
       (pointerdown)="onPointerDown($event)"
       (pointermove)="onPointerMove($event)"
       (pointerup)="onPointerUp($event)"
       (pointercancel)="onPointerUp($event)"
     >
-      <div data-part="track" #track>
+      <div data-part="track" data-part-track="" #track>
         <div
           data-part="indicator"
+          data-part-indicator=""
           [style.--_start]="span().start"
           [style.--_end]="span().end"
         ></div>
         @for (mark of markList(); track mark.value) {
           <span
             data-part="mark"
+            data-part-mark=""
             [attr.data-edge]="edgeOf(mark.value)"
             [style.--_position]="percentOf(mark.value)"
           >
             @if (mark.label !== undefined) {
-              <span data-part="mark-label">{{ mark.label }}</span>
+              <span data-part="mark-label" data-part-mark-label="">{{ mark.label }}</span>
             }
           </span>
         }
         @for (thumbValue of values(); track $index) {
           <div
             data-part="thumb"
+            data-part-thumb=""
             [attr.data-index]="$index"
             [attr.data-active]="dragging() === $index ? '' : null"
             [style.--_position]="percentOf(thumbValue)"
           >
             <input
               data-part="input"
+              data-part-input=""
               type="range"
               [attr.id]="$index === 0 ? controlId() : controlId() + '-' + $index"
               [attr.name]="submissionName()"
@@ -136,7 +143,9 @@ const toArray = (value: number | readonly number[]): number[] =>
               (keydown)="onKeyDown($index, $event)"
               (blur)="onTouched()"
             />
-            <span data-part="bubble" aria-hidden="true">{{ valueTextOf(thumbValue) }}</span>
+            <span data-part="bubble" data-part-bubble="" aria-hidden="true">{{
+              valueTextOf(thumbValue)
+            }}</span>
           </div>
         }
       </div>
@@ -147,7 +156,9 @@ const toArray = (value: number | readonly number[]): number[] =>
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlSlider), multi: true }],
   host: {
     'data-ui': 'slider',
+    'data-ui-slider': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'resolvedOrientation()',
     '[attr.data-value-label]': 'resolvedValueLabel()',

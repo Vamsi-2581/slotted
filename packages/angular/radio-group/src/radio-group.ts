@@ -88,7 +88,9 @@ export interface SlRadioGroupItem {
   ],
   host: {
     'data-ui': 'radio-group',
+    'data-ui-radio-group': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'resolvedRole()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'resolvedOrientation()',

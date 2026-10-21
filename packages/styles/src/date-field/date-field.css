@@ -13,7 +13,7 @@
    * application's — so the value reaches a form through a hidden input, which
    * is the decision `currency-field` already took for a number.
    */
-  [data-ui='date-field'][data-part='root'] {
+  [data-ui-date-field][data-part-root] {
     /**
      * Type, height, inline padding, gap and glyph size come from the control
      * scales — the only ones the theme restates per density — so a date in a
@@ -69,7 +69,7 @@
    * begin from it — the arithmetic `text-field` records, holding at every step
    * and every density.
    */
-  [data-ui='date-field'][data-part='root']:has(> [data-part='clear']:last-child) {
+  [data-ui-date-field][data-part-root]:has(> [data-part-clear]:last-child) {
     padding-inline-end: max(
       0px,
       calc(var(--_padding-inline) - (var(--_action-size) - var(--_icon-size)) / 2)
@@ -81,7 +81,7 @@
    * and puts the date at the reading edge, so an empty field and a full one
    * start in the same place.
    */
-  [data-ui='date-field'] [data-part='segments'] {
+  [data-ui-date-field] [data-part-segments] {
     align-items: center;
     /**
      * It says what it is before it is pressed. A date is typed, so the pointer
@@ -116,7 +116,7 @@
    * `9` and one showing `09` therefore occupy the same column, and the two
    * separators never step sideways under the pointer.
    */
-  [data-ui='date-field'] [data-part='segment'] {
+  [data-ui-date-field] [data-part-segment] {
     --_digits: 2;
 
     background-color: transparent;
@@ -148,7 +148,7 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='date-field'] [data-part='segment'][data-field='year'] {
+  [data-ui-date-field] [data-part-segment][data-field='year'] {
     --_digits: 4;
   }
 
@@ -158,7 +158,7 @@
    * reader's own words rather than in English — and a date being typed has to
    * keep saying what is still missing.
    */
-  [data-ui='date-field'] [data-part='segment'][data-placeholder] {
+  [data-ui-date-field] [data-part-segment][data-placeholder] {
     color: var(--slotted-date-field-placeholder-color, var(--slotted-text-muted, GrayText));
   }
 
@@ -167,7 +167,7 @@
    * name already carries the whole date in words, so a screen reader reading
    * "slash" between two numbers would be reading punctuation aloud.
    */
-  [data-ui='date-field'] [data-part='literal'] {
+  [data-ui-date-field] [data-part-literal] {
     color: var(--slotted-date-field-literal-color, var(--slotted-text-muted, GrayText));
     flex: 0 0 auto;
     /* Its own bidi run: a slash between two numbers takes the paragraph's
@@ -182,7 +182,7 @@
    * holding an `md` control is a field and a control disagreeing about one row.
    */
 
-  [data-ui='date-field'][data-part='root'][data-size='sm'] {
+  [data-ui-date-field][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
@@ -190,7 +190,7 @@
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-sm, 14px));
   }
 
-  [data-ui='date-field'][data-part='root'][data-size='md'] {
+  [data-ui-date-field][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -198,7 +198,7 @@
     --_icon-size: max(var(--_icon-floor), var(--slotted-control-icon-size-md, 16px));
   }
 
-  [data-ui='date-field'][data-part='root'][data-size='lg'] {
+  [data-ui-date-field][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -212,7 +212,7 @@
    * shows one frame twice rather than two frames.
    */
 
-  [data-ui='date-field'][data-part='root'][data-variant='subtle'] {
+  [data-ui-date-field][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-date-field-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -223,7 +223,7 @@
     );
   }
 
-  [data-ui='date-field'][data-part='root'][data-variant='plain'] {
+  [data-ui-date-field][data-part-root][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -236,8 +236,8 @@
    * the value: an adornment annotates, and a reader looking for the date
    * should not have to step over it.
    */
-  [data-ui='date-field'] > [data-part='start'],
-  [data-ui='date-field'] > [data-part='end'] {
+  [data-ui-date-field] > [data-part-start],
+  [data-ui-date-field] > [data-part-end] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -249,8 +249,8 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='date-field'] > [data-part='start'] > svg,
-  [data-ui='date-field'] > [data-part='end'] > svg {
+  [data-ui-date-field] > [data-part-start] > svg,
+  [data-ui-date-field] > [data-part-end] > svg {
     block-size: var(--_icon-size);
     inline-size: var(--_icon-size);
   }
@@ -261,7 +261,7 @@
    * character, and held to the target minimum by the family rather than by the
    * page.
    */
-  [data-ui='date-field'] > [data-part='clear'] {
+  [data-ui-date-field] > [data-part-clear] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -291,7 +291,7 @@
    * larger one alone, which is the correction `docs/token-foundation.md`
    * leaves to the family rather than to the theme.
    */
-  [data-ui='date-field'] > [data-part='clear']::after {
+  [data-ui-date-field] > [data-part-clear]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -302,28 +302,28 @@
      the hit area above grows to 44 pixels around them. After an end
      adornment — a picker's trigger — it does not reach back across it. */
   @media (pointer: coarse) {
-    [data-ui='date-field'] > [data-part='clear']::after {
+    [data-ui-date-field] > [data-part-clear]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='date-field'] > [data-part='end'] + [data-part='clear']::after {
+    [data-ui-date-field] > [data-part-end] + [data-part-clear]::after {
       inset-inline-start: 0;
     }
   }
 
   /* The cross is drawn at the control's own icon step. */
-  [data-ui='date-field'] > [data-part='clear'] {
+  [data-ui-date-field] > [data-part-clear] {
     --slotted-icon-size: var(--_icon-size);
   }
 
-  [data-ui='date-field'] > [data-part='clear']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-date-field] > [data-part-clear]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-date-field-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='date-field'] > [data-part='clear']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-date-field] > [data-part-clear]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-date-field-action-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -336,7 +336,7 @@
    * and a ring around the whole frame would sit still while focus moved inside
    * it.
    */
-  [data-ui='date-field'] > [data-part='clear']:focus-visible {
+  [data-ui-date-field] > [data-part-clear]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -347,13 +347,13 @@
    * one it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='date-field'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-date-field][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     ) {
     border-color: var(--slotted-date-field-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='date-field'][data-part='root'][data-variant='subtle']:hover:not([data-disabled]):not(
+  [data-ui-date-field][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -362,7 +362,7 @@
     );
   }
 
-  [data-ui='date-field'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+  [data-ui-date-field][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -393,7 +393,7 @@
    * `:focus-visible`, a clicked field answered a keystroke and looked exactly
    * as it had before the press.
    */
-  [data-ui='date-field'][data-part='root']:has([data-part='segment']:focus) {
+  [data-ui-date-field][data-part-root]:has([data-part-segment]:focus) {
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -407,12 +407,12 @@
    * shadow that appears only under focus is a cell that changes size when it
    * is used.
    */
-  [data-ui='date-field'][data-part='root'][data-variant='plain']:has([data-part='segment']:focus) {
+  [data-ui-date-field][data-part-root][data-variant='plain']:has([data-part-segment]:focus) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='date-field'] [data-part='segment']:focus {
+  [data-ui-date-field] [data-part-segment]:focus {
     background-color: var(
       --slotted-date-field-segment-focus-background,
       var(--slotted-tone-accent-solid)
@@ -428,7 +428,7 @@
    * ring is retargeted rather than repainted, so the frame's outline, the
    * shadow under it and the ring on the clear button all move at once.
    */
-  [data-ui='date-field'][data-part='root'][data-invalid] {
+  [data-ui-date-field][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-date-field-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -453,15 +453,15 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='date-field'][data-part='root'][data-invalid]:has([data-part='segment']:focus) {
+  [data-ui-date-field][data-part-root][data-invalid]:has([data-part-segment]:focus) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='date-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-      [data-part='segment']:focus
+  [data-ui-date-field][data-part-root][data-variant='plain'][data-invalid]:has(
+      [data-part-segment]:focus
     ) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
@@ -479,21 +479,21 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='date-field'][data-part='root'][data-invalid] {
+    [data-ui-date-field][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='date-field'][data-part='root'][data-invalid]:has([data-part='segment']:focus) {
+    [data-ui-date-field][data-part-root][data-invalid]:has([data-part-segment]:focus) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='date-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-        [data-part='segment']:focus
+    [data-ui-date-field][data-part-root][data-variant='plain'][data-invalid]:has(
+        [data-part-segment]:focus
       ) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
@@ -508,13 +508,13 @@
    * mistakable for disabled: the value is still real and still submitted. The
    * ground says "not yours to change" and the ink says nothing at all.
    */
-  [data-ui='date-field'][data-part='root'][data-readonly],
-  [data-ui='date-field'][data-part='root'][data-readonly] [data-part='segments'],
-  [data-ui='date-field'][data-part='root'][data-readonly] [data-part='segment'] {
+  [data-ui-date-field][data-part-root][data-readonly],
+  [data-ui-date-field][data-part-root][data-readonly] [data-part-segments],
+  [data-ui-date-field][data-part-root][data-readonly] [data-part-segment] {
     cursor: default;
   }
 
-  [data-ui='date-field'][data-part='root'][data-readonly] {
+  [data-ui-date-field][data-part-root][data-readonly] {
     background-color: var(
       --slotted-date-field-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -526,7 +526,7 @@
    * date nobody can read is a field nobody can check, and a disabled form
    * still has to say what it holds.
    */
-  [data-ui='date-field'][data-part='root'][data-disabled] {
+  [data-ui-date-field][data-part-root][data-disabled] {
     background-color: var(
       --slotted-date-field-disabled-background,
       var(--slotted-disabled-background)
@@ -538,22 +538,22 @@
     cursor: not-allowed;
   }
 
-  [data-ui='date-field'][data-part='root'][data-disabled] [data-part='segments'],
-  [data-ui='date-field'][data-part='root'][data-disabled] [data-part='segment'] {
+  [data-ui-date-field][data-part-root][data-disabled] [data-part-segments],
+  [data-ui-date-field][data-part-root][data-disabled] [data-part-segment] {
     cursor: not-allowed;
   }
 
-  [data-ui='date-field'][data-part='root'][data-disabled] > [data-part='start'],
-  [data-ui='date-field'][data-part='root'][data-disabled] > [data-part='end'],
-  [data-ui='date-field'][data-part='root'][data-disabled] [data-part='literal'],
-  [data-ui='date-field'][data-part='root'][data-disabled] [data-part='segment'][data-placeholder] {
+  [data-ui-date-field][data-part-root][data-disabled] > [data-part-start],
+  [data-ui-date-field][data-part-root][data-disabled] > [data-part-end],
+  [data-ui-date-field][data-part-root][data-disabled] [data-part-literal],
+  [data-ui-date-field][data-part-root][data-disabled] [data-part-segment][data-placeholder] {
     color: var(--slotted-disabled-foreground);
   }
 
   @media (forced-colors: active) {
     /* A transparent border has no system colour to be remapped to, so the
        `plain` control would lose its only edge where an edge matters most. */
-    [data-ui='date-field'][data-part='root'][data-variant='plain'] {
+    [data-ui-date-field][data-part-root][data-variant='plain'] {
       border-color: ButtonBorder;
     }
   }

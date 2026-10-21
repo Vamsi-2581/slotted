@@ -12,6 +12,6 @@ import { Directive } from '@angular/core';
   selector: '[slContainerBreakout]',
   standalone: true,
   exportAs: 'slContainerBreakout',
-  host: { 'data-part': 'breakout' },
+  host: { 'data-part': 'breakout', 'data-part-breakout': '' },
 })
 export class SlContainerBreakout {}

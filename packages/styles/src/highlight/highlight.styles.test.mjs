@@ -3,6 +3,17 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/highlight/contract.json', import.meta.url),
@@ -12,16 +23,18 @@ const contract = JSON.parse(
 /** The package's source root, one level up: every family is a sibling. */
 const source = new URL('..', import.meta.url).pathname;
 const css = readFileSync(new URL('./highlight.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./highlight.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./highlight.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
   .replace(/\s*([{};,:])\s*/g, '$1')
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
-const ui = `[data-ui='${contract.ui}']`;
-const match = `${ui} [data-part='match']`;
-const disabled = `${ui}:is([data-disabled],[data-disabled] *) [data-part='match']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const match = `${ui} [data-part-match]`;
+const disabled = `${ui}:is([data-disabled],[data-disabled] *) [data-part-match]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -43,7 +56,7 @@ test('paints the match through the root, and the root not at all', () => {
   assert.deepEqual(contract.members.highlight.parts, ['root', 'match']);
   assert.notEqual(rule(match), '');
   assert.equal(rule(ui), '');
-  assert.equal(rule(`${ui}[data-part='root']`), '');
+  assert.equal(rule(`${ui}[data-part-root]`), '');
   assert.match(fragment, /data-ui="highlight" data-part="root"/);
   assert.match(fragment, /<mark data-part="match">/);
   assert.doesNotMatch(fragment, /<mark[^>]*data-ui=/);
@@ -172,7 +185,7 @@ test('leaves no family painting the mark on its own', () => {
         /\/\*[\s\S]*?\*\//g,
         '',
       );
-      if (/\[data-part=['"]match['"]\]\s*(?:,[^{]*)?\{/.test(other)) {
+      if (/\[data-part-match\]\s*(?:,[^{]*)?\{/.test(other)) {
         offenders.push(`${entry.name}/${file}`);
       }
     }

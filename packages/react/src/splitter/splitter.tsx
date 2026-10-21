@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/splitter/splitter.css';
 import {
   anchorsAtStart,
@@ -511,7 +512,7 @@ export function Splitter({
     requestValue(clamp(defaultValue), 'pointer', event);
   };
 
-  const props = {
+  const props = keyedProps({
     ...rest,
     'aria-controls': rest['aria-controls'] ?? regionId,
     'aria-disabled': disabled ? true : undefined,
@@ -535,12 +536,12 @@ export function Splitter({
     tabIndex: rest.tabIndex ?? 0,
     children: (
       <>
-        <span aria-hidden="true" data-part="line" />
-        <span aria-hidden="true" data-part="grip" />
-        <span aria-hidden="true" data-part="line" />
+        <span aria-hidden="true" data-part="line" data-part-line="" />
+        <span aria-hidden="true" data-part="grip" data-part-grip="" />
+        <span aria-hidden="true" data-part="line" data-part-line="" />
       </>
     ),
-  };
+  });
 
   if (render !== undefined) return render(props);
   return <div {...props} />;

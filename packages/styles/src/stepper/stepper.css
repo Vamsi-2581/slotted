@@ -11,7 +11,7 @@
    * that retunes the control scale moves the whole stepper together instead of
    * leaving the connector behind.
    */
-  [data-ui='stepper'] {
+  [data-ui-stepper] {
     --_marker: var(--slotted-stepper-marker-size, var(--slotted-control-height-md, 34px));
     --_gap: var(--slotted-stepper-gap, var(--slotted-control-gap-md, 8px));
     --_rule: var(--slotted-stepper-connector-thickness, var(--slotted-border-width-thick, 2px));
@@ -74,34 +74,34 @@
    * line rather than beside it.
    */
 
-  [data-ui='stepper'] [data-part='list'] {
+  [data-ui-stepper] [data-part-list] {
     display: flex;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  [data-ui='stepper'][data-orientation='horizontal'] [data-part='list'] {
+  [data-ui-stepper][data-orientation='horizontal'] [data-part-list] {
     align-items: flex-start;
     flex-direction: row;
   }
 
-  [data-ui='stepper'][data-orientation='vertical'] [data-part='list'] {
+  [data-ui-stepper][data-orientation='vertical'] [data-part-list] {
     flex-direction: column;
   }
 
-  [data-ui='stepper'] [data-part='item'] {
+  [data-ui-stepper] [data-part-item] {
     display: flex;
     position: relative;
   }
 
-  [data-ui='stepper'][data-orientation='horizontal'] [data-part='item'] {
+  [data-ui-stepper][data-orientation='horizontal'] [data-part-item] {
     flex: 1 1 0;
     /* A label longer than its column wraps instead of widening the column. */
     min-inline-size: 0;
   }
 
-  [data-ui='stepper'][data-orientation='vertical'] [data-part='item'] {
+  [data-ui-stepper][data-orientation='vertical'] [data-part-item] {
     flex-direction: column;
   }
 
@@ -114,7 +114,7 @@
    * component.
    */
 
-  [data-ui='stepper'] [data-part='trigger'] {
+  [data-ui-stepper] [data-part-trigger] {
     align-items: center;
     appearance: none;
     background: none;
@@ -131,8 +131,8 @@
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='stepper'] button[data-part='trigger'],
-  [data-ui='stepper'] a[data-part='trigger'] {
+  [data-ui-stepper] button[data-part-trigger],
+  [data-ui-stepper] a[data-part-trigger] {
     cursor: pointer;
   }
 
@@ -142,7 +142,7 @@
    * The stack is centred so the marker sits over the middle of its own label
    * rather than over the middle of the column.
    */
-  [data-ui='stepper'][data-label-placement='bottom'] [data-part='trigger'] {
+  [data-ui-stepper][data-label-placement='bottom'] [data-part-trigger] {
     align-items: center;
     flex-direction: column;
     /**
@@ -156,7 +156,7 @@
     text-align: center;
   }
 
-  [data-ui='stepper'] [data-part='trigger']:focus-visible {
+  [data-ui-stepper] [data-part-trigger]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -172,7 +172,7 @@
    * progress that does not depend on colour.
    */
 
-  [data-ui='stepper'] [data-part='marker'] {
+  [data-ui-stepper] [data-part-marker] {
     /**
      * The colour of the glyph drawn over the number, held on the marker rather
      * than stated on the glyph's box. Reading it through one custom property
@@ -224,7 +224,7 @@
    * takes the accent's text colour: it is where they are, not where they have
    * been, so it stays an outline and does not fill.
    */
-  [data-ui='stepper'] [data-current] [data-part='marker'] {
+  [data-ui-stepper] [data-current] [data-part-marker] {
     border-color: var(--slotted-stepper-marker-border-current, var(--_done-line));
     color: var(--slotted-stepper-marker-color-current, var(--slotted-tone-accent-text, Highlight));
   }
@@ -234,12 +234,12 @@
    * check, because a reader scanning the row counts filled discs rather than
    * reading five numbers.
    */
-  [data-ui='stepper'] [data-complete]:not([data-current], [data-invalid]) [data-part='marker'] {
+  [data-ui-stepper] [data-complete]:not([data-current], [data-invalid]) [data-part-marker] {
     background-color: var(--slotted-stepper-marker-surface-complete, var(--_done-line));
     border-color: var(--slotted-stepper-marker-surface-complete, var(--_done-line));
   }
 
-  [data-ui='stepper'] [data-invalid] [data-part='marker'] {
+  [data-ui-stepper] [data-invalid] [data-part-marker] {
     --_mark: var(
       --slotted-stepper-marker-color-invalid,
       var(--slotted-tone-danger-on-solid, MarkText)
@@ -255,7 +255,7 @@
     );
   }
 
-  [data-ui='stepper'] [data-disabled]:not([data-invalid]) [data-part='marker'] {
+  [data-ui-stepper] [data-disabled]:not([data-invalid]) [data-part-marker] {
     background-color: transparent;
     border-color: var(--slotted-disabled-border, GrayText);
     color: var(--slotted-disabled-foreground, GrayText);
@@ -284,11 +284,11 @@
    * each other. The capture is what said so — the two marks overlap into a
    * shape that is neither.
    */
-  [data-ui='stepper'] :is([data-complete], [data-invalid]) [data-part='marker'] {
+  [data-ui-stepper] :is([data-complete], [data-invalid]) [data-part-marker] {
     color: transparent;
   }
 
-  [data-ui='stepper'] [data-part='marker'] > [data-ui='icon'] {
+  [data-ui-stepper] [data-part-marker] > [data-ui-icon] {
     --slotted-icon-size: var(--_mark-size);
 
     color: var(--_mark);
@@ -310,7 +310,7 @@
    * complete, because the number is what says where the reader is in a
    * sequence and a check would say they had left it.
    */
-  [data-ui='stepper'] [data-current]:not([data-invalid]) [data-part='marker'] {
+  [data-ui-stepper] [data-current]:not([data-invalid]) [data-part-marker] {
     color: var(--slotted-stepper-marker-color-current, var(--slotted-tone-accent-text, Highlight));
   }
 
@@ -321,7 +321,7 @@
    * where it was.
    */
 
-  [data-ui='stepper'] [data-part='label'] {
+  [data-ui-stepper] [data-part-label] {
     color: var(--_muted);
     font-weight: var(--slotted-stepper-label-weight, var(--slotted-font-weight-medium, 500));
     line-height: var(--slotted-stepper-line-height, var(--slotted-line-height-sm, 1.45));
@@ -329,19 +329,19 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='stepper'] :is([data-current], [data-complete]) [data-part='label'] {
+  [data-ui-stepper] :is([data-current], [data-complete]) [data-part-label] {
     color: var(--_strong);
   }
 
-  [data-ui='stepper'] [data-invalid] [data-part='label'] {
+  [data-ui-stepper] [data-invalid] [data-part-label] {
     color: var(--slotted-stepper-label-color-invalid, var(--slotted-tone-danger-text, MarkText));
   }
 
-  [data-ui='stepper'] [data-disabled]:not([data-invalid]) [data-part='label'] {
+  [data-ui-stepper] [data-disabled]:not([data-invalid]) [data-part-label] {
     color: var(--slotted-disabled-foreground, GrayText);
   }
 
-  [data-ui='stepper'] [data-part='description'] {
+  [data-ui-stepper] [data-part-description] {
     color: var(--_muted);
     display: block;
     font-size: var(--slotted-stepper-description-font-size, var(--slotted-font-size-xs, 0.75rem));
@@ -354,10 +354,10 @@
    * on the label rather than on the whole column: the column is mostly empty
    * space, and a fill across it would read as a selected row.
    */
-  [data-ui='stepper']
-    [data-part='item']:not([data-disabled], [data-loading])
-    :is(button, a)[data-part='trigger']:hover
-    [data-part='label'] {
+  [data-ui-stepper]
+    [data-part-item]:not([data-disabled], [data-loading])
+    :is(button, a)[data-part-trigger]:hover
+    [data-part-label] {
     color: var(--_strong);
     text-decoration-color: currentColor;
     text-decoration-line: underline;
@@ -378,10 +378,10 @@
    * the danger tone, and a press that replaced either would be a press that
    * also changed what the step is.
    */
-  [data-ui='stepper']
-    [data-part='item']:not([data-disabled], [data-loading])
-    :is(button, a)[data-part='trigger']:active
-    [data-part='marker'] {
+  [data-ui-stepper]
+    [data-part-item]:not([data-disabled], [data-loading])
+    :is(button, a)[data-part-trigger]:active
+    [data-part-marker] {
     box-shadow: inset 0 0 0 var(--_marker) var(--_state-press);
   }
 
@@ -399,7 +399,7 @@
    * centre at every density.
    */
 
-  [data-ui='stepper'] [data-part='separator'] {
+  [data-ui-stepper] [data-part-separator] {
     background-color: var(--_pending-line);
     display: block;
     flex: none;
@@ -415,7 +415,7 @@
    * consumer marked completion would stay grey through every flow that never
    * claims it.
    */
-  [data-ui='stepper'] [data-part='separator'][data-complete] {
+  [data-ui-stepper] [data-part-separator][data-complete] {
     background-color: var(--_done-line);
   }
 
@@ -427,8 +427,8 @@
    * knows how wide a label is, so nothing can position around it — but a flex
    * item can be told to take the rest.
    */
-  [data-ui='stepper'][data-orientation='horizontal'][data-label-placement='end']
-    [data-part='separator'] {
+  [data-ui-stepper][data-orientation='horizontal'][data-label-placement='end']
+    [data-part-separator] {
     align-self: center;
     block-size: var(--_rule);
     flex: 1 1 auto;
@@ -437,8 +437,7 @@
     position: static;
   }
 
-  [data-ui='stepper'][data-orientation='horizontal'][data-label-placement='end']
-    [data-part='trigger'] {
+  [data-ui-stepper][data-orientation='horizontal'][data-label-placement='end'] [data-part-trigger] {
     flex: 0 1 auto;
     min-inline-size: 0;
   }
@@ -448,8 +447,8 @@
    * centres. The columns are equal, so the next centre is exactly one column
    * away, and both ends are derived from the marker rather than stated.
    */
-  [data-ui='stepper'][data-orientation='horizontal'][data-label-placement='bottom']
-    [data-part='separator'] {
+  [data-ui-stepper][data-orientation='horizontal'][data-label-placement='bottom']
+    [data-part-separator] {
     block-size: var(--_rule);
     inset-block-start: calc(0.5 * (var(--_marker) - var(--_rule)));
     inset-inline-end: calc(-50% + 0.5 * var(--_marker) + var(--_gap));
@@ -469,7 +468,7 @@
    * tall, and `--_gap` at both ends of a step gap of one rem left a rule of
    * no length at all; a quarter rem leaves half the step gap drawn.
    */
-  [data-ui='stepper'][data-orientation='vertical'] [data-part='separator'] {
+  [data-ui-stepper][data-orientation='vertical'] [data-part-separator] {
     --_rule-room: var(--slotted-stepper-connector-gap, var(--slotted-space-2, 0.25rem));
 
     inline-size: var(--_rule);
@@ -484,7 +483,7 @@
    * binding does not render the element at all; this is what a consumer who
    * renders one anyway gets, and it is nothing.
    */
-  [data-ui='stepper'] [data-part='item']:last-child [data-part='separator'] {
+  [data-ui-stepper] [data-part-item]:last-child [data-part-separator] {
     display: none;
   }
 
@@ -494,8 +493,8 @@
    * centres over the column and the connector runs between two centres.
    */
 
-  [data-ui='stepper'][data-orientation='horizontal'][data-label-placement='bottom']
-    [data-part='trigger'] {
+  [data-ui-stepper][data-orientation='horizontal'][data-label-placement='bottom']
+    [data-part-trigger] {
     inline-size: 100%;
   }
 
@@ -505,24 +504,24 @@
    * step lines up with its name rather than with its number.
    */
 
-  [data-ui='stepper'][data-orientation='vertical'] [data-part='item'] {
+  [data-ui-stepper][data-orientation='vertical'] [data-part-item] {
     padding-block-end: var(--slotted-stepper-step-gap, var(--slotted-space-6, 1rem));
   }
 
-  [data-ui='stepper'][data-orientation='vertical'] [data-part='item']:last-child {
+  [data-ui-stepper][data-orientation='vertical'] [data-part-item]:last-child {
     padding-block-end: 0;
   }
 
-  [data-ui='stepper'][data-orientation='vertical'] [data-part='panel'] {
+  [data-ui-stepper][data-orientation='vertical'] [data-part-panel] {
     margin-inline-start: calc(var(--_marker) + var(--_gap));
     padding-block-start: var(--slotted-stepper-panel-gap, var(--slotted-space-4, 0.5rem));
   }
 
-  [data-ui='stepper'][data-orientation='horizontal'] [data-part='panel'] {
+  [data-ui-stepper][data-orientation='horizontal'] [data-part-panel] {
     padding-block-start: var(--slotted-stepper-panel-gap, var(--slotted-space-6, 1rem));
   }
 
-  [data-ui='stepper'] [data-part='panel']:focus-visible {
+  [data-ui-stepper] [data-part-panel]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -540,23 +539,23 @@
    */
 
   @container slotted-stepper (max-width: 30rem) {
-    [data-ui='stepper'][data-orientation='horizontal'] [data-part='list'] {
+    [data-ui-stepper][data-orientation='horizontal'] [data-part-list] {
       align-items: stretch;
       flex-direction: column;
     }
 
-    [data-ui='stepper'][data-orientation='horizontal'] [data-part='item'] {
+    [data-ui-stepper][data-orientation='horizontal'] [data-part-item] {
       flex: none;
       flex-direction: column;
       padding-block-end: var(--slotted-stepper-step-gap, var(--slotted-space-6, 1rem));
       padding-inline-end: 0;
     }
 
-    [data-ui='stepper'][data-orientation='horizontal'] [data-part='item']:last-child {
+    [data-ui-stepper][data-orientation='horizontal'] [data-part-item]:last-child {
       padding-block-end: 0;
     }
 
-    [data-ui='stepper'][data-orientation='horizontal'][data-label-placement] [data-part='trigger'] {
+    [data-ui-stepper][data-orientation='horizontal'][data-label-placement] [data-part-trigger] {
       align-items: center;
       flex-direction: row;
       inline-size: auto;
@@ -578,8 +577,7 @@
      * adds no weight of its own. Without it the row's own connector geometry
      * survived the reflow and the column drew four-pixel dots down its side.
      */
-    [data-ui='stepper'][data-orientation='horizontal'][data-label-placement]
-      [data-part='separator'] {
+    [data-ui-stepper][data-orientation='horizontal'][data-label-placement] [data-part-separator] {
       block-size: auto;
       flex: none;
       inline-size: var(--_rule);
@@ -592,7 +590,7 @@
       position: absolute;
     }
 
-    [data-ui='stepper'][data-orientation='horizontal'][data-label-placement] [data-part='panel'] {
+    [data-ui-stepper][data-orientation='horizontal'][data-label-placement] [data-part-panel] {
       margin-inline-start: calc(var(--_marker) + var(--_gap));
       padding-block-start: var(--slotted-stepper-panel-gap, var(--slotted-space-4, 0.5rem));
     }
@@ -609,17 +607,15 @@
    */
 
   @media (forced-colors: active) {
-    [data-ui='stepper'] [data-part='separator'] {
+    [data-ui-stepper] [data-part-separator] {
       background-color: GrayText;
     }
 
-    [data-ui='stepper'] [data-part='separator'][data-complete] {
+    [data-ui-stepper] [data-part-separator][data-complete] {
       background-color: Highlight;
     }
 
-    [data-ui='stepper']
-      :is([data-complete], [data-invalid]):not([data-current])
-      [data-part='marker'] {
+    [data-ui-stepper] :is([data-complete], [data-invalid]):not([data-current]) [data-part-marker] {
       background-color: Highlight;
       border-color: Highlight;
       color: HighlightText;

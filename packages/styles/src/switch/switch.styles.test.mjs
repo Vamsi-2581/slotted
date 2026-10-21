@@ -4,6 +4,17 @@ import test from 'node:test';
 
 import { STATE_PRECEDENCE } from '../../../../specs/contract.schema.mjs';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/switch/contract.json', import.meta.url),
@@ -11,7 +22,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./switch.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./switch.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./switch.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -19,8 +32,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.switch;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
@@ -38,7 +51,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -55,7 +71,7 @@ test('renders every part in at least one harness scene', () => {
  * this one *is* the hit area.
  */
 test('leaves the control invisible, operable and over the pill it answers', () => {
-  const control = rule(`${ui}>[data-part='control']`);
+  const control = rule(`${ui}>[data-part-control]`);
   assert.match(control, /appearance:none/);
   assert.match(control, /opacity:0/);
   assert.match(control, /grid-area:1 \/ 1/);
@@ -64,7 +80,7 @@ test('leaves the control invisible, operable and over the pill it answers', () =
   /* The track shares the cell and comes later in the DOM, so without this it
      paints over the control and swallows every press on the pill. */
   assert.match(control, /z-index:1/);
-  assert.match(rule(`${ui}>[data-part='track']`), /pointer-events:none/);
+  assert.match(rule(`${ui}>[data-part-track]`), /pointer-events:none/);
   assert.doesNotMatch(control, /display:none|visibility:hidden/);
 });
 
@@ -83,7 +99,7 @@ test('leaves the control invisible, operable and over the pill it answers', () =
  * contributes to the row is the pill.
  */
 test('holds the target minimum on the control alone', () => {
-  const control = rule(`${ui}>[data-part='control']`);
+  const control = rule(`${ui}>[data-part-control]`);
   assert.match(control, /block-size:var\(--_target-block\)/);
   assert.match(
     rule(root),
@@ -97,7 +113,7 @@ test('holds the target minimum on the control alone', () => {
     control,
     /margin-block-start:calc\(var\(--_lift\) \+ \(var\(--_track-block\) - var\(--_target-block\)\) \/ 2\)/,
   );
-  for (const part of [root, `${ui}>[data-part='label']`]) {
+  for (const part of [root, `${ui}>[data-part-label]`]) {
     assert.doesNotMatch(
       rule(part),
       /min-block-size:var\(--slotted-target-min,24px\)/,
@@ -105,7 +121,7 @@ test('holds the target minimum on the control alone', () => {
     );
   }
   /* The label's padding is optical now: it centres the words on the pill. */
-  assert.match(rule(`${ui}>[data-part='label']`), /padding-block:var\(--_label-slack\)/);
+  assert.match(rule(`${ui}>[data-part-label]`), /padding-block:var\(--_label-slack\)/);
   assert.match(
     rule(root),
     /--_label-slack:max\(0px,\(var\(--_track-block\) - var\(--_font-size\) \* var\(--_line-height\)\) \/ 2\)/,
@@ -138,7 +154,7 @@ test('derives its geometry from the control scales', () => {
  * `packages/styles/src/logical.test.mjs` exists to prevent one step earlier.
  */
 test('moves the thumb along the writing direction, through the motion scale', () => {
-  const thumb = rule(`${ui}>[data-part='track']>[data-part='thumb']`);
+  const thumb = rule(`${ui}>[data-part-track]>[data-part-thumb]`);
   assert.match(thumb, /inset-inline-start:var\(--_gutter\)/);
   assert.match(thumb, /transition:inset-inline-start var\(--slotted-control-transition-duration\)/);
   assert.doesNotMatch(normalized, /translate:[^;]*var\(--_travel\)/);
@@ -156,7 +172,7 @@ test('moves the thumb along the writing direction, through the motion scale', ()
  * geometry from the theme's glyph scale rather than a character.
  */
 test('draws the mark as the glyph element, never as a mask or a character', () => {
-  const mark = rule(`${ui}>[data-part='track']>[data-part='thumb']>[data-ui='icon']`);
+  const mark = rule(`${ui}>[data-part-track]>[data-part-thumb]>[data-ui-icon]`);
   assert.match(mark, /block-size:70%/);
   assert.match(mark, /inline-size:70%/);
   assert.match(mark, /color:var\(--slotted-switch-mark-color,var\(--slotted-tone-accent-solid\)\)/);
@@ -172,11 +188,11 @@ test('draws the mark as the glyph element, never as a mask or a character', () =
  */
 test('lays the label beside the pill and the description under the label', () => {
   assert.match(rule(root), /grid-template-columns:auto minmax\(0,1fr\)/);
-  const label = rule(`${ui}>[data-part='label']`);
+  const label = rule(`${ui}>[data-part-label]`);
   assert.match(label, /grid-column:2/);
   assert.match(label, /grid-row:1/);
   assert.match(label, /overflow-wrap:anywhere/);
-  const description = rule(`${ui}>[data-part='description']`);
+  const description = rule(`${ui}>[data-part-description]`);
   assert.match(description, /grid-column:2/);
   assert.match(description, /grid-row:2/);
   assert.match(description, /padding-block-start:var\(--_description-gap\)/);
@@ -194,25 +210,25 @@ test('lays the label beside the pill and the description under the label', () =>
  * presses the switch.
  */
 test('opens the gap on the grid and keeps it pressable in both arrangements', () => {
-  assert.match(rule(`${root}:has(>[data-part='label'])`), /column-gap:var\(--_gap\)/);
+  assert.match(rule(`${root}:has(>[data-part-label])`), /column-gap:var\(--_gap\)/);
   for (const selector of [
-    `${ui}>[data-part='label']`,
-    `${ui}>[data-part='description']`,
-    `${root}[data-label-placement='start']>[data-part='label'],${root}[data-label-placement='start']>[data-part='description']`,
+    `${ui}>[data-part-label]`,
+    `${ui}>[data-part-description]`,
+    `${root}[data-label-placement='start']>[data-part-label],${root}[data-label-placement='start']>[data-part-description]`,
   ]) {
     assert.doesNotMatch(rule(selector), /padding-inline/, `${selector} pads the gap again`);
   }
   /* Beside the pill the label hugs its words; before it, it takes the row. */
-  assert.ok(normalized.includes(`${ui}>[data-part='label']{justify-self:start;}`));
+  assert.ok(normalized.includes(`${ui}>[data-part-label]{justify-self:start;}`));
   assert.match(
-    rule(`${root}[data-label-placement='start']>[data-part='label']`),
+    rule(`${root}[data-label-placement='start']>[data-part-label]`),
     /justify-self:stretch/,
   );
-  const reach = rule(`${root}:has(>[data-part='label'])>[data-part='control']`);
+  const reach = rule(`${root}:has(>[data-part-label])>[data-part-control]`);
   assert.match(reach, /inline-size:calc\(var\(--_track-inline\) \+ var\(--_gap\)\)/);
   assert.match(reach, /margin-inline-end:calc\(-1 \* var\(--_gap\)\)/);
   assert.match(
-    rule(`${root}[data-label-placement='start']:has(>[data-part='label'])>[data-part='control']`),
+    rule(`${root}[data-label-placement='start']:has(>[data-part-label])>[data-part-control]`),
     /margin-inline-end:0;margin-inline-start:calc\(-1 \* var\(--_gap\)\)/,
   );
 });
@@ -229,7 +245,7 @@ test('swaps the two columns for the label-first arrangement', () => {
   );
   assert.ok(
     normalized.includes(
-      `${root}[data-label-placement='start']>[data-part='control'],${root}[data-label-placement='start']>[data-part='track']{grid-area:1 / 2;}`,
+      `${root}[data-label-placement='start']>[data-part-control],${root}[data-label-placement='start']>[data-part-track]{grid-area:1 / 2;}`,
     ),
     'the control does not move to the second column',
   );
@@ -240,10 +256,10 @@ test('swaps the two columns for the label-first arrangement', () => {
  * sees, and it answers the transparent control over it.
  */
 test('draws one ring, on the part a reader can see', () => {
-  const focus = rule(`${root}:has(>[data-part='control']:focus-visible)>[data-part='track']`);
+  const focus = rule(`${root}:has(>[data-part-control]:focus-visible)>[data-part-track]`);
   assert.match(focus, /outline:var\(--slotted-focus-ring-width,2px\) solid/);
   assert.match(focus, /outline-offset:var\(--slotted-focus-ring-offset,2px\)/);
-  assert.match(rule(`${ui}>[data-part='control']`), /outline:none/);
+  assert.match(rule(`${ui}>[data-part-control]`), /outline:none/);
 });
 
 /**
@@ -267,7 +283,7 @@ test('answers the element as well as the attribute for every shared state', () =
   for (const state of ['checked', 'disabled']) {
     const pseudo = state === 'checked' ? ':checked' : ':disabled';
     assert.ok(
-      normalized.includes(`:has(>[data-part='control']${pseudo})`),
+      normalized.includes(`:has(>[data-part-control]${pseudo})`),
       `${state} is read from the attribute alone`,
     );
   }
@@ -287,7 +303,7 @@ test('holds the mark back for the state that outranks it', () => {
   );
   assert.ok(
     normalized.includes(
-      `${root}:is([data-checked],:has(>[data-part='control']:checked)):not([data-loading])>[data-part='track']>[data-part='thumb']>[data-ui='icon']{opacity:1;}`,
+      `${root}:is([data-checked],:has(>[data-part-control]:checked)):not([data-loading])>[data-part-track]>[data-part-thumb]>[data-ui-icon]{opacity:1;}`,
     ),
     'a loading switch still shows the mark it is not sure about',
   );
@@ -304,7 +320,7 @@ test('paints read-only as hollow rather than as grey, in both states', () => {
     'the precedence this rule depends on has moved',
   );
   const readonlyChecked = rule(
-    `${root}[data-readonly]:is([data-checked],:has(>[data-part='control']:checked))>[data-part='track']`,
+    `${root}[data-readonly]:is([data-checked],:has(>[data-part-control]:checked))>[data-part-track]`,
   );
   assert.match(readonlyChecked, /background-color:var\(--slotted-switch-readonly-background/);
   assert.match(readonlyChecked, /--slotted-control-border-color/);
@@ -318,7 +334,7 @@ test('paints read-only as hollow rather than as grey, in both states', () => {
  * saves moves the row under the pointer.
  */
 test('stops the pending arc under reduced motion, and never resizes while it runs', () => {
-  const arc = rule(`${root}[data-loading]>[data-part='track']>[data-part='thumb']::after`);
+  const arc = rule(`${root}[data-loading]>[data-part-track]>[data-part-thumb]::after`);
   assert.match(arc, /animation:slotted-switch-pending var\(--slotted-duration-loop\)/);
   assert.match(arc, /infinite/);
   assert.doesNotMatch(arc, /inline-size|block-size/, 'the arc changes the thumb’s box');

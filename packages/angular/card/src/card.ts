@@ -31,7 +31,9 @@ export type { CardFill, CardOrientation, CardSize } from './card-defaults';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'card',
+    'data-ui-card': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-orientation]': 'resolvedOrientation()',
     '[attr.data-fill]': 'resolvedFill()',
     '[attr.data-size]': 'resolvedSize()',

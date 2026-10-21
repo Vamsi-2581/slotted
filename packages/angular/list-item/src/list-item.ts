@@ -53,7 +53,7 @@ export type {
      the number is a counter the stylesheet writes, because it is text rather
      than an icon. */
   template: `@if (resolvedMarker() === 'bullet') {
-      <span data-part="marker" aria-hidden="true"
+      <span data-part="marker" data-part-marker="" aria-hidden="true"
         ><span slIcon><svg slGlyph name="dot"></svg></span
       ></span>
     }
@@ -63,7 +63,9 @@ export type {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'list-item',
+    'data-ui-list-item': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-marker]': 'resolvedMarker()',

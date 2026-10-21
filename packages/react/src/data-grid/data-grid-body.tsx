@@ -1,3 +1,4 @@
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import {
   GROUP_ROW_PREFIX,
   POPIN_COLUMN_ID,
@@ -19,7 +20,7 @@ import {
   EXPANDER_COLUMN,
   SELECTION_COLUMN,
 } from './data-grid-constants';
-import { useDataGridInternal } from './data-grid-context';
+import { useDataGridInternal, useDataGridRow } from './data-grid-context';
 import { cellText } from '@slotted/core/grid';
 
 interface BodyProps<Row> {
@@ -49,7 +50,7 @@ export function DataGridBody<Row>({
     .filter((node): node is GridNode<Row> => node !== undefined && !nodes.includes(node));
 
   return (
-    <div data-part="body" role="rowgroup" style={bodyStyle}>
+    <div data-part="body" data-part-body="" role="rowgroup" style={bodyStyle}>
       {[...nodes, ...extra].map((node, offset) => {
         const index = firstIndex + offset;
         const rowIndex = headerRowCount + 1 + (node.kind === 'row' ? node.index : index);
@@ -84,7 +85,7 @@ export function DataGridPinnedRows<Row>({
   nodes: readonly Extract<GridNode<Row>, { kind: 'row' }>[];
 }) {
   return (
-    <div data-edge={edge} data-part="pinned-rows" role="rowgroup">
+    <div data-edge={edge} data-part="pinned-rows" data-part-pinned-rows="" role="rowgroup">
       {nodes.map((node, offset) => (
         <BodyRow<Row>
           index={-1}
@@ -106,7 +107,11 @@ export function DataGridPinnedRows<Row>({
  * the start and stands in the middle of what the reader sees.
  */
 export function DataGridEmpty({ children }: { children: ReactNode }) {
-  return <div data-part="empty">{children}</div>;
+  return (
+    <div data-part="empty" data-part-empty="">
+      {children}
+    </div>
+  );
 }
 
 interface RowProps<Row> {
@@ -117,8 +122,9 @@ interface RowProps<Row> {
 }
 
 function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
-  const grid = useDataGridInternal<Row>();
   const key = node.key;
+  const store = useDataGridRow<Row>(key);
+  const grid = store.latest();
   const selected = grid.isSelected(key);
   const disabled = grid.isDisabled(key);
   const current = grid.current !== null && grid.current.row === key;
@@ -126,13 +132,12 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
   const expanded = grid.isExpanded(key) && (grid.treeColumn === null || node.childCount === 0);
   const loadingChildren = grid.isLoadingChildren(key);
   const editing = grid.edit !== null && grid.edit.cell.row === key;
-  const attachRowDraggable = grid.attachRowDraggable;
   const attach = useCallback(
     (element: HTMLDivElement | null) => {
       measure?.(index, element);
-      attachRowDraggable(element, key);
+      store.grid.attachRowDraggable(element, key);
     },
-    [measure, index, attachRowDraggable, key],
+    [measure, index, store, key],
   );
 
   return (
@@ -145,6 +150,7 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
             : undefined
         }
         data-part="row"
+        data-part-row=""
         data-row={key}
         ref={attach}
         role="row"
@@ -172,6 +178,7 @@ function BodyRowInner<Row>({ index, measure, node, rowIndex }: RowProps<Row>) {
         <div
           aria-rowindex={rowIndex + 1}
           data-part="detail"
+          data-part-detail=""
           data-row={`${key}:detail`}
           id={grid.detailId(key)}
           role="row"
@@ -206,6 +213,7 @@ function SelectionCell<Row>({ rowKey }: { rowKey: string }) {
       aria-colindex={1}
       data-column={SELECTION_COLUMN}
       data-part="selection"
+      data-part-selection=""
       role="gridcell"
       style={{ '--slotted-data-grid-column': '1' } as CSSProperties}
       tabIndex={current ? 0 : -1}
@@ -251,6 +259,7 @@ function DragHandleCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'r
       data-column={DRAG_COLUMN}
       data-kind="drag"
       data-part="cell"
+      data-part-cell=""
       role="gridcell"
       style={{ '--slotted-data-grid-column': String(index) } as CSSProperties}
       tabIndex={current ? 0 : -1}
@@ -265,6 +274,7 @@ function DragHandleCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'r
         aria-disabled={grid.rowsReorderable ? undefined : true}
         aria-label={grid.t('reorderRow', { row: grid.rowLabelOf(node.key) })}
         data-part="row-handle"
+        data-part-row-handle=""
         {...(grid.rowsReorderable ? {} : { 'data-disabled': '' })}
         tabIndex={current ? 0 : -1}
         type="button"
@@ -293,6 +303,7 @@ function ExpanderCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row
       data-column={EXPANDER_COLUMN}
       data-kind="expander"
       data-part="cell"
+      data-part-cell=""
       role="gridcell"
       style={{ '--slotted-data-grid-column': String(index) } as CSSProperties}
       tabIndex={current ? 0 : -1}
@@ -309,6 +320,7 @@ function ExpanderCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row
           aria-expanded={open}
           aria-label={grid.t(open ? 'collapse' : 'expand')}
           data-part="expander"
+          data-part-expander=""
           onClick={(event) => grid.toggleExpanded(node.key, event)}
           tabIndex={current ? 0 : -1}
           type="button"
@@ -361,6 +373,7 @@ function BodyCell<Row>({
       aria-selected={grid.selectionMode === 'range' && range.inside ? true : undefined}
       aria-invalid={invalid ? true : undefined}
       data-part={part}
+      {...selectorKeyProps('part', part)}
       data-text={column.text}
       role={part === 'row-header' ? 'rowheader' : 'gridcell'}
       style={
@@ -399,6 +412,7 @@ function BodyCell<Row>({
             aria-expanded={node.open}
             aria-label={grid.t(node.open ? 'collapse' : 'expand')}
             data-part="tree-toggle"
+            data-part-tree-toggle=""
             onClick={(event) => {
               event.stopPropagation();
               grid.toggleBranch(key, event);
@@ -415,11 +429,11 @@ function BodyCell<Row>({
             </Icon>
           </button>
         ) : (
-          <span aria-hidden data-part="tree-toggle" data-empty="" />
+          <span aria-hidden data-part="tree-toggle" data-part-tree-toggle="" data-empty="" />
         )
       ) : null}
       {editing ? (
-        <div data-part="editor">
+        <div data-part="editor" data-part-editor="">
           {grid.renderEditorContent({
             row: node.row,
             rowKey: key,
@@ -467,6 +481,7 @@ function PopinCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row' }
       aria-colindex={grid.popinIndex}
       data-column={POPIN_COLUMN_ID}
       data-part="popin"
+      data-part-popin=""
       role="gridcell"
       style={{ '--slotted-data-grid-column': '1 / -1' } as CSSProperties}
       tabIndex={current ? 0 : -1}
@@ -480,10 +495,19 @@ function PopinCell<Row>({ node }: { node: Extract<GridNode<Row>, { kind: 'row' }
       {...(current ? { 'data-current': '' } : {})}
     >
       {grid.popinColumns.map((column) => (
-        <div data-field={column.id} data-part="popin-field" key={column.id}>
-          {column.column.label ? <span data-part="popin-label">{column.column.label}</span> : null}
+        <div
+          data-field={column.id}
+          data-part="popin-field"
+          data-part-popin-field=""
+          key={column.id}
+        >
+          {column.column.label ? (
+            <span data-part="popin-label" data-part-popin-label="">
+              {column.column.label}
+            </span>
+          ) : null}
           {/* Read only: an edit happens in a visible cell, the detail or the record. */}
-          <div data-part="popin-value" data-text={column.text}>
+          <div data-part="popin-value" data-part-popin-value="" data-text={column.text}>
             {grid.renderCellContent({
               row: node.row,
               rowKey: key,
@@ -526,6 +550,7 @@ function GroupRow<Row>({
       aria-level={node.level}
       aria-rowindex={rowIndex}
       data-part="group-row"
+      data-part-group-row=""
       data-row={cursorRow}
       role="row"
       style={{ '--slotted-data-grid-level': String(node.level) } as CSSProperties}
@@ -550,6 +575,7 @@ function GroupRow<Row>({
           aria-expanded={node.expanded}
           aria-label={grid.t(node.expanded ? 'collapseGroup' : 'expandGroup', { group: node.text })}
           data-part="group-toggle"
+          data-part-group-toggle=""
           onClick={(event) => {
             event.stopPropagation();
             grid.toggleGroup(node.key, event);
@@ -616,11 +642,12 @@ export function DataGridLoader<Row>({ rows, rowSize }: { rows: number; rowSize: 
     <div
       aria-hidden
       data-part="loader"
+      data-part-loader=""
       role="rowgroup"
       style={{ '--slotted-data-grid-loader-row-size': `${rowSize}px` } as CSSProperties}
     >
       {Array.from({ length: rows }, (_unused, row) => (
-        <div data-part="row" key={row} role="row">
+        <div data-part="row" data-part-row="" key={row} role="row">
           {grid.columnIds.map((columnId, index) => (
             <div
               key={columnId}
@@ -669,13 +696,14 @@ export function DataGridSummary<Row>({
   const popinCell = { row: SUMMARY_ROW, column: POPIN_COLUMN_ID };
   const popinHere = current && grid.current?.column === POPIN_COLUMN_ID;
   return (
-    <div data-part="summary" role="rowgroup">
+    <div data-part="summary" data-part-summary="" role="rowgroup">
       <div aria-rowindex={rowIndex} data-row={SUMMARY_ROW} role="row">
         {grid.columnIds.slice(0, gutterCount).map((columnId, index) => (
           <div
             aria-colindex={index + 1}
             data-column={columnId}
             data-part="summary-cell"
+            data-part-summary-cell=""
             key={columnId}
             role="gridcell"
             style={{ '--slotted-data-grid-column': String(index + 1) } as CSSProperties}
@@ -692,6 +720,7 @@ export function DataGridSummary<Row>({
               {...columnAttributes(column)}
               aria-colindex={index}
               data-part="summary-cell"
+              data-part-summary-cell=""
               key={column.id}
               role="gridcell"
               style={cellStyle(column, index)}
@@ -712,6 +741,7 @@ export function DataGridSummary<Row>({
             aria-colindex={grid.popinIndex}
             data-column={POPIN_COLUMN_ID}
             data-part="popin"
+            data-part-popin=""
             role="gridcell"
             style={{ '--slotted-data-grid-column': '1 / -1' } as CSSProperties}
             tabIndex={popinHere ? 0 : -1}
@@ -723,11 +753,18 @@ export function DataGridSummary<Row>({
             {...(popinHere ? { 'data-current': '' } : {})}
           >
             {grid.popinAggregated.map((column) => (
-              <div data-field={column.id} data-part="popin-field" key={column.id}>
+              <div
+                data-field={column.id}
+                data-part="popin-field"
+                data-part-popin-field=""
+                key={column.id}
+              >
                 {column.column.label ? (
-                  <span data-part="popin-label">{column.column.label}</span>
+                  <span data-part="popin-label" data-part-popin-label="">
+                    {column.column.label}
+                  </span>
                 ) : null}
-                <div data-part="popin-value">
+                <div data-part="popin-value" data-part-popin-value="">
                   <span>{textOf(column)}</span>
                 </div>
               </div>

@@ -22,7 +22,7 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -35,7 +35,7 @@ function messagePlots() {
     .map(([, selector, body]) => ({ selector, body }))
     .filter(
       ({ selector }) =>
-        selector.includes("[data-part='plot']") && /\[data-part='(empty|error)'\]/.test(selector),
+        selector.includes('[data-part-plot]') && /\[data-part-(empty|error)\]/.test(selector),
     );
 }
 
@@ -64,8 +64,8 @@ test('paints no grid behind an empty or failed plot, only its baseline, and keep
     /background:linear-gradient\(var\(--_chart-grid\),var\(--_chart-grid\)\) 0 100% \/ 100% 1px no-repeat content-box;/,
     'the baseline is not the one layer painted',
   );
-  assert.match(rule(`${ui} [data-part='plot']`), /min-block-size:var\(--_plot-size\)/);
-  const message = rule(`${ui}:is([data-part='empty'],[data-part='error'])`);
+  assert.match(rule(`${ui} [data-part-plot]`), /min-block-size:var\(--_plot-size\)/);
+  const message = rule(`${ui}:is([data-part-empty],[data-part-error])`);
   assert.match(message, /inset:0/);
   assert.match(message, /position:absolute/);
 });
@@ -81,7 +81,7 @@ test('draws the table region ring for a focus from the keyboard only', () => {
   );
   const ring = rules.filter(
     (selector) =>
-      selector.includes("[data-part='table-region']") && selector.includes(':focus-visible'),
+      selector.includes('[data-part-table-region]') && selector.includes(':focus-visible'),
   );
   assert.ok(ring.length > 0, 'the region has a ring');
   for (const selector of ring) {
@@ -89,7 +89,7 @@ test('draws the table region ring for a focus from the keyboard only', () => {
   }
   const flat = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
   assert.ok(
-    flat.includes("[data-part='table-region']:focus { outline: none; }"),
+    flat.includes('[data-part-table-region]:focus { outline: none; }'),
     'the browser’s own ring is suppressed for a focus from the pointer',
   );
 });

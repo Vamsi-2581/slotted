@@ -52,156 +52,247 @@
   <div class="nm-room">
     <nav
       data-ui="navigation-menu"
+      data-ui-navigation-menu=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       aria-label="Principal"
       data-arrow
       data-default-value="produtos"
     >
-      <ul data-part="list">
-        <li data-part="item" data-value="produtos">
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="produtos">
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm-produtos"
           >
-            Produtos<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Produtos<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm-produtos" data-columns="2" hidden>
-            <ul data-part="links">
+          <div data-part="content" data-part-content="" id="nm-produtos" data-columns="2" hidden>
+            <ul data-part="links" data-part-links="">
               <li>
-                <a data-part="link" href="#armazem"
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="inbox"></svg></span></span
-                  ><span data-part="label">Armazém</span
-                  ><span data-part="description">Entradas, saídas e inventário por local.</span></a
+                <a data-part="link" data-part-link="" href="#armazem"
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="inbox"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label="">Armazém</span
+                  ><span data-part="description" data-part-description=""
+                    >Entradas, saídas e inventário por local.</span
+                  ></a
                 >
               </li>
               <li>
-                <a data-part="link" href="#frota" aria-current="page" data-current
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="trending-up"></svg></span></span
-                  ><span data-part="label">Frota</span
-                  ><span data-part="description">Rotas, consumo e manutenção dos veículos.</span></a
+                <a data-part="link" data-part-link="" href="#frota" aria-current="page" data-current
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="trending-up"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label="">Frota</span
+                  ><span data-part="description" data-part-description=""
+                    >Rotas, consumo e manutenção dos veículos.</span
+                  ></a
                 >
               </li>
               <li>
-                <a data-part="link" href="#faturacao"
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="file-text"></svg></span></span
-                  ><span data-part="label">Faturação</span
-                  ><span data-part="description"
+                <a data-part="link" data-part-link="" href="#faturacao"
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="file-text"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label="">Faturação</span
+                  ><span data-part="description" data-part-description=""
                     >Faturas, notas de crédito e reconciliação.</span
                   ></a
                 >
               </li>
               <li>
-                <a data-part="link" href="#agenda"
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="calendar"></svg></span></span
-                  ><span data-part="label">Agenda</span
-                  ><span data-part="description">Janelas de carga e entregas marcadas.</span></a
+                <a data-part="link" data-part-link="" href="#agenda"
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="calendar"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label="">Agenda</span
+                  ><span data-part="description" data-part-description=""
+                    >Janelas de carga e entregas marcadas.</span
+                  ></a
                 >
               </li>
               <li>
-                <a data-part="link" href="#clientes"
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="person"></svg></span></span
-                  ><span data-part="label">Clientes</span
-                  ><span data-part="description">Contas, contactos e condições comerciais.</span></a
+                <a data-part="link" data-part-link="" href="#clientes"
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="person"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label="">Clientes</span
+                  ><span data-part="description" data-part-description=""
+                    >Contas, contactos e condições comerciais.</span
+                  ></a
                 >
               </li>
               <li>
-                <a data-part="link" href="#relatorios" data-disabled aria-disabled="true"
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="presentation"></svg></span></span
-                  ><span data-part="label">Relatórios</span
-                  ><span data-part="description">Disponível no plano Empresa.</span></a
+                <a
+                  data-part="link"
+                  data-part-link=""
+                  href="#relatorios"
+                  data-disabled
+                  aria-disabled="true"
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="presentation"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label="">Relatórios</span
+                  ><span data-part="description" data-part-description=""
+                    >Disponível no plano Empresa.</span
+                  ></a
                 >
               </li>
             </ul>
-            <div data-part="footer">
+            <div data-part="footer" data-part-footer="">
               <span class="nm-note">Novo: previsão de procura por armazém.</span>
               <a class="nm-cta" href="#todos">Ver todos</a>
             </div>
           </div>
         </li>
-        <li data-part="item" data-value="solucoes">
+        <li data-part="item" data-part-item="" data-value="solucoes">
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm-solucoes"
           >
-            Soluções<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Soluções<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm-solucoes" data-columns="3" hidden>
-            <div data-part="group" role="group" aria-labelledby="nm-g1">
-              <div data-part="group-label" id="nm-g1">Por setor</div>
-              <ul data-part="links">
-                <li><a data-part="link" href="#retalho">Retalho</a></li>
-                <li><a data-part="link" href="#industria">Indústria</a></li>
-                <li><a data-part="link" href="#saude">Saúde</a></li>
+          <div data-part="content" data-part-content="" id="nm-solucoes" data-columns="3" hidden>
+            <div data-part="group" data-part-group="" role="group" aria-labelledby="nm-g1">
+              <div data-part="group-label" data-part-group-label="" id="nm-g1">Por setor</div>
+              <ul data-part="links" data-part-links="">
+                <li><a data-part="link" data-part-link="" href="#retalho">Retalho</a></li>
+                <li><a data-part="link" data-part-link="" href="#industria">Indústria</a></li>
+                <li><a data-part="link" data-part-link="" href="#saude">Saúde</a></li>
               </ul>
             </div>
-            <div data-part="group" role="group" aria-labelledby="nm-g2">
-              <div data-part="group-label" id="nm-g2">Por dimensão</div>
-              <ul data-part="links">
-                <li><a data-part="link" href="#pme">Pequenas empresas</a></li>
-                <li><a data-part="link" href="#media">Média dimensão</a></li>
-                <li><a data-part="link" href="#grandes">Grandes contas</a></li>
+            <div data-part="group" data-part-group="" role="group" aria-labelledby="nm-g2">
+              <div data-part="group-label" data-part-group-label="" id="nm-g2">Por dimensão</div>
+              <ul data-part="links" data-part-links="">
+                <li><a data-part="link" data-part-link="" href="#pme">Pequenas empresas</a></li>
+                <li><a data-part="link" data-part-link="" href="#media">Média dimensão</a></li>
+                <li><a data-part="link" data-part-link="" href="#grandes">Grandes contas</a></li>
               </ul>
             </div>
-            <div data-part="group" role="group" aria-labelledby="nm-g3">
-              <div data-part="group-label" id="nm-g3">Por equipa</div>
-              <ul data-part="links">
-                <li><a data-part="link" href="#operacoes">Operações</a></li>
-                <li><a data-part="link" href="#financas">Finanças</a></li>
-                <li><a data-part="link" href="#comercial">Comercial</a></li>
+            <div data-part="group" data-part-group="" role="group" aria-labelledby="nm-g3">
+              <div data-part="group-label" data-part-group-label="" id="nm-g3">Por equipa</div>
+              <ul data-part="links" data-part-links="">
+                <li><a data-part="link" data-part-link="" href="#operacoes">Operações</a></li>
+                <li><a data-part="link" data-part-link="" href="#financas">Finanças</a></li>
+                <li><a data-part="link" data-part-link="" href="#comercial">Comercial</a></li>
               </ul>
             </div>
           </div>
         </li>
-        <li data-part="item" data-value="documentacao">
-          <a data-part="link" href="#documentacao">Documentação</a>
+        <li data-part="item" data-part-item="" data-value="documentacao">
+          <a data-part="link" data-part-link="" href="#documentacao">Documentação</a>
         </li>
-        <li data-part="item" data-value="empresa">
+        <li data-part="item" data-part-item="" data-value="empresa">
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm-empresa"
           >
-            Empresa<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Empresa<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm-empresa" hidden>
-            <ul data-part="links">
-              <li><a data-part="link" href="#sobre">Sobre nós</a></li>
-              <li><a data-part="link" href="#carreiras">Carreiras</a></li>
-              <li><a data-part="link" href="#imprensa">Imprensa</a></li>
-              <li><a data-part="link" href="#contactos">Contactos</a></li>
+          <div data-part="content" data-part-content="" id="nm-empresa" hidden>
+            <ul data-part="links" data-part-links="">
+              <li><a data-part="link" data-part-link="" href="#sobre">Sobre nós</a></li>
+              <li><a data-part="link" data-part-link="" href="#carreiras">Carreiras</a></li>
+              <li><a data-part="link" data-part-link="" href="#imprensa">Imprensa</a></li>
+              <li><a data-part="link" data-part-link="" href="#contactos">Contactos</a></li>
             </ul>
           </div>
         </li>
       </ul>
-      <div data-part="viewport"><span data-part="arrow" aria-hidden="true"></span></div>
+      <div data-part="viewport" data-part-viewport="">
+        <span data-part="arrow" data-part-arrow="" aria-hidden="true"></span>
+      </div>
     </nav>
   </div>
 </section>
@@ -210,73 +301,87 @@
   <div class="nm-room" data-room="short" style="min-block-size: 440px">
     <nav
       data-ui="navigation-menu"
+      data-ui-navigation-menu=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       aria-label="Secções"
       data-default-value="solucoes"
     >
-      <ul data-part="list">
-        <li data-part="item" data-value="produtos">
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="produtos">
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm2-produtos"
           >
-            Produtos<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Produtos<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm2-produtos" hidden>
-            <ul data-part="links">
-              <li><a data-part="link" href="#armazem">Armazém</a></li>
-              <li><a data-part="link" href="#frota">Frota</a></li>
+          <div data-part="content" data-part-content="" id="nm2-produtos" hidden>
+            <ul data-part="links" data-part-links="">
+              <li><a data-part="link" data-part-link="" href="#armazem">Armazém</a></li>
+              <li><a data-part="link" data-part-link="" href="#frota">Frota</a></li>
             </ul>
           </div>
         </li>
-        <li data-part="item" data-value="solucoes">
+        <li data-part="item" data-part-item="" data-value="solucoes">
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm2-solucoes"
           >
-            Soluções<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Soluções<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm2-solucoes" data-columns="3" hidden>
-            <div data-part="group" role="group" aria-labelledby="nm2-g1">
-              <div data-part="group-label" id="nm2-g1">Por setor</div>
-              <ul data-part="links">
-                <li><a data-part="link" href="#retalho">Retalho</a></li>
-                <li><a data-part="link" href="#industria">Indústria</a></li>
-                <li><a data-part="link" href="#saude">Saúde</a></li>
+          <div data-part="content" data-part-content="" id="nm2-solucoes" data-columns="3" hidden>
+            <div data-part="group" data-part-group="" role="group" aria-labelledby="nm2-g1">
+              <div data-part="group-label" data-part-group-label="" id="nm2-g1">Por setor</div>
+              <ul data-part="links" data-part-links="">
+                <li><a data-part="link" data-part-link="" href="#retalho">Retalho</a></li>
+                <li><a data-part="link" data-part-link="" href="#industria">Indústria</a></li>
+                <li><a data-part="link" data-part-link="" href="#saude">Saúde</a></li>
               </ul>
             </div>
-            <div data-part="group" role="group" aria-labelledby="nm2-g2">
-              <div data-part="group-label" id="nm2-g2">Por dimensão</div>
-              <ul data-part="links">
-                <li><a data-part="link" href="#pme">Pequenas empresas</a></li>
-                <li><a data-part="link" href="#media">Média dimensão</a></li>
-                <li><a data-part="link" href="#grandes">Grandes contas</a></li>
+            <div data-part="group" data-part-group="" role="group" aria-labelledby="nm2-g2">
+              <div data-part="group-label" data-part-group-label="" id="nm2-g2">Por dimensão</div>
+              <ul data-part="links" data-part-links="">
+                <li><a data-part="link" data-part-link="" href="#pme">Pequenas empresas</a></li>
+                <li><a data-part="link" data-part-link="" href="#media">Média dimensão</a></li>
+                <li><a data-part="link" data-part-link="" href="#grandes">Grandes contas</a></li>
               </ul>
             </div>
-            <div data-part="group" role="group" aria-labelledby="nm2-g3">
-              <div data-part="group-label" id="nm2-g3">Por equipa</div>
-              <ul data-part="links">
-                <li><a data-part="link" href="#operacoes">Operações</a></li>
-                <li><a data-part="link" href="#financas">Finanças</a></li>
-                <li><a data-part="link" href="#comercial">Comercial</a></li>
+            <div data-part="group" data-part-group="" role="group" aria-labelledby="nm2-g3">
+              <div data-part="group-label" data-part-group-label="" id="nm2-g3">Por equipa</div>
+              <ul data-part="links" data-part-links="">
+                <li><a data-part="link" data-part-link="" href="#operacoes">Operações</a></li>
+                <li><a data-part="link" data-part-link="" href="#financas">Finanças</a></li>
+                <li><a data-part="link" data-part-link="" href="#comercial">Comercial</a></li>
               </ul>
             </div>
           </div>
         </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
   </div>
 </section>
@@ -285,54 +390,76 @@
   <div class="nm-room" data-room="short">
     <nav
       data-ui="navigation-menu"
+      data-ui-navigation-menu=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       aria-label="Estados"
     >
-      <ul data-part="list">
-        <li data-part="item" data-value="produtos">
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="produtos">
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm3-produtos"
             data-current
           >
-            Produtos<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Produtos<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm3-produtos" hidden>
-            <ul data-part="links">
-              <li><a data-part="link" href="#frota" aria-current="page" data-current>Frota</a></li>
+          <div data-part="content" data-part-content="" id="nm3-produtos" hidden>
+            <ul data-part="links" data-part-links="">
+              <li>
+                <a data-part="link" data-part-link="" href="#frota" aria-current="page" data-current
+                  >Frota</a
+                >
+              </li>
             </ul>
           </div>
         </li>
-        <li data-part="item" data-value="precos">
-          <a data-part="link" href="#precos" aria-current="page" data-current>Preços</a>
+        <li data-part="item" data-part-item="" data-value="precos">
+          <a data-part="link" data-part-link="" href="#precos" aria-current="page" data-current
+            >Preços</a
+          >
         </li>
-        <li data-part="item" data-value="parceiros" data-disabled>
+        <li data-part="item" data-part-item="" data-value="parceiros" data-disabled>
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm3-parceiros"
             disabled
           >
-            Parceiros<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Parceiros<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm3-parceiros" hidden></div>
+          <div data-part="content" data-part-content="" id="nm3-parceiros" hidden></div>
         </li>
-        <li data-part="item" data-value="blogue" data-disabled>
-          <a data-part="link" href="#blogue" aria-disabled="true" data-disabled>Blogue</a>
+        <li data-part="item" data-part-item="" data-value="blogue" data-disabled>
+          <a data-part="link" data-part-link="" href="#blogue" aria-disabled="true" data-disabled
+            >Blogue</a
+          >
         </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
   </div>
 </section>
@@ -341,46 +468,76 @@
   <div class="nm-room" data-room="side">
     <nav
       data-ui="navigation-menu"
+      data-ui-navigation-menu=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="vertical"
       aria-label="Lateral"
       data-arrow
       data-default-value="ajuda"
     >
-      <ul data-part="list">
-        <li data-part="item" data-value="inicio"><a data-part="link" href="#inicio">Início</a></li>
-        <li data-part="item" data-value="ajuda">
-          <button data-part="trigger" type="button" aria-expanded="false" aria-controls="nm4-ajuda">
-            Ajuda<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="inicio">
+          <a data-part="link" data-part-link="" href="#inicio">Início</a>
+        </li>
+        <li data-part="item" data-part-item="" data-value="ajuda">
+          <button
+            data-part="trigger"
+            data-part-trigger=""
+            type="button"
+            aria-expanded="false"
+            aria-controls="nm4-ajuda"
+          >
+            Ajuda<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                data-directional
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm4-ajuda" hidden>
-            <ul data-part="links">
-              <li><a data-part="link" href="#guias">Guias</a></li>
-              <li><a data-part="link" href="#api">Referência da API</a></li>
-              <li><a data-part="link" href="#estado">Estado do serviço</a></li>
+          <div data-part="content" data-part-content="" id="nm4-ajuda" hidden>
+            <ul data-part="links" data-part-links="">
+              <li><a data-part="link" data-part-link="" href="#guias">Guias</a></li>
+              <li><a data-part="link" data-part-link="" href="#api">Referência da API</a></li>
+              <li><a data-part="link" data-part-link="" href="#estado">Estado do serviço</a></li>
             </ul>
           </div>
         </li>
-        <li data-part="item" data-value="conta">
-          <button data-part="trigger" type="button" aria-expanded="false" aria-controls="nm4-conta">
-            Conta<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+        <li data-part="item" data-part-item="" data-value="conta">
+          <button
+            data-part="trigger"
+            data-part-trigger=""
+            type="button"
+            aria-expanded="false"
+            aria-controls="nm4-conta"
+          >
+            Conta<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                data-directional
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm4-conta" hidden>
-            <ul data-part="links">
-              <li><a data-part="link" href="#perfil">Perfil</a></li>
-              <li><a data-part="link" href="#faturas">Faturas</a></li>
+          <div data-part="content" data-part-content="" id="nm4-conta" hidden>
+            <ul data-part="links" data-part-links="">
+              <li><a data-part="link" data-part-link="" href="#perfil">Perfil</a></li>
+              <li><a data-part="link" data-part-link="" href="#faturas">Faturas</a></li>
             </ul>
           </div>
         </li>
       </ul>
-      <div data-part="viewport"><span data-part="arrow" aria-hidden="true"></span></div>
+      <div data-part="viewport" data-part-viewport="">
+        <span data-part="arrow" data-part-arrow="" aria-hidden="true"></span>
+      </div>
     </nav>
   </div>
 </section>
@@ -389,92 +546,155 @@
   <div class="nm-room" data-room="tall" style="min-block-size: 300px">
     <nav
       data-ui="navigation-menu"
+      data-ui-navigation-menu=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       aria-label="Catálogo"
       data-default-value="catalogo"
     >
-      <ul data-part="list">
-        <li data-part="item" data-value="catalogo">
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="catalogo">
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="false"
             aria-controls="nm5-catalogo"
           >
-            Catálogo<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Catálogo<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm5-catalogo" data-columns="3" hidden>
+          <div data-part="content" data-part-content="" id="nm5-catalogo" data-columns="3" hidden>
             <div
               data-ui="navigation-menu"
+              data-ui-navigation-menu=""
               data-part="root"
+              data-part-root=""
               data-nested
               data-orientation="vertical"
               data-size="md"
               data-default-value="ferramentas"
             >
-              <ul data-part="list">
-                <li data-part="item" data-value="ferramentas">
+              <ul data-part="list" data-part-list="">
+                <li data-part="item" data-part-item="" data-value="ferramentas">
                   <button
                     data-part="trigger"
+                    data-part-trigger=""
                     type="button"
                     aria-expanded="false"
                     aria-controls="nm5-ferramentas"
                   >
-                    Ferramentas<span data-part="indicator" aria-hidden="true"
-                      ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-                        ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+                    Ferramentas<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+                      ><span
+                        data-ui="icon"
+                        data-ui-icon=""
+                        data-part="root"
+                        data-part-root=""
+                        data-directional
+                        aria-hidden="true"
+                        ><svg
+                          data-part="glyph"
+                          data-part-glyph=""
+                          data-glyph="chevron-right"
+                        ></svg></span
                     ></span>
                   </button>
-                  <div data-part="content" id="nm5-ferramentas" data-columns="2" hidden>
-                    <ul data-part="links">
-                      <li><a data-part="link" href="#manuais">Manuais</a></li>
-                      <li><a data-part="link" href="#eletricas">Elétricas</a></li>
-                      <li><a data-part="link" href="#medicao">Medição</a></li>
-                      <li><a data-part="link" href="#corte">Corte</a></li>
+                  <div
+                    data-part="content"
+                    data-part-content=""
+                    id="nm5-ferramentas"
+                    data-columns="2"
+                    hidden
+                  >
+                    <ul data-part="links" data-part-links="">
+                      <li><a data-part="link" data-part-link="" href="#manuais">Manuais</a></li>
+                      <li><a data-part="link" data-part-link="" href="#eletricas">Elétricas</a></li>
+                      <li><a data-part="link" data-part-link="" href="#medicao">Medição</a></li>
+                      <li><a data-part="link" data-part-link="" href="#corte">Corte</a></li>
                     </ul>
                   </div>
                 </li>
-                <li data-part="item" data-value="embalagem">
+                <li data-part="item" data-part-item="" data-value="embalagem">
                   <button
                     data-part="trigger"
+                    data-part-trigger=""
                     type="button"
                     aria-expanded="false"
                     aria-controls="nm5-embalagem"
                   >
-                    Embalagem<span data-part="indicator" aria-hidden="true"
-                      ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-                        ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+                    Embalagem<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+                      ><span
+                        data-ui="icon"
+                        data-ui-icon=""
+                        data-part="root"
+                        data-part-root=""
+                        data-directional
+                        aria-hidden="true"
+                        ><svg
+                          data-part="glyph"
+                          data-part-glyph=""
+                          data-glyph="chevron-right"
+                        ></svg></span
                     ></span>
                   </button>
-                  <div data-part="content" id="nm5-embalagem" data-columns="2" hidden>
-                    <ul data-part="links">
-                      <li><a data-part="link" href="#caixas">Caixas</a></li>
-                      <li><a data-part="link" href="#paletes">Paletes</a></li>
-                      <li><a data-part="link" href="#filme">Filme e fita</a></li>
+                  <div
+                    data-part="content"
+                    data-part-content=""
+                    id="nm5-embalagem"
+                    data-columns="2"
+                    hidden
+                  >
+                    <ul data-part="links" data-part-links="">
+                      <li><a data-part="link" data-part-link="" href="#caixas">Caixas</a></li>
+                      <li><a data-part="link" data-part-link="" href="#paletes">Paletes</a></li>
+                      <li><a data-part="link" data-part-link="" href="#filme">Filme e fita</a></li>
                     </ul>
                   </div>
                 </li>
-                <li data-part="item" data-value="seguranca">
+                <li data-part="item" data-part-item="" data-value="seguranca">
                   <button
                     data-part="trigger"
+                    data-part-trigger=""
                     type="button"
                     aria-expanded="false"
                     aria-controls="nm5-seguranca"
                   >
-                    Segurança<span data-part="indicator" aria-hidden="true"
-                      ><span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-                        ><svg data-part="glyph" data-glyph="chevron-right"></svg></span
+                    Segurança<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+                      ><span
+                        data-ui="icon"
+                        data-ui-icon=""
+                        data-part="root"
+                        data-part-root=""
+                        data-directional
+                        aria-hidden="true"
+                        ><svg
+                          data-part="glyph"
+                          data-part-glyph=""
+                          data-glyph="chevron-right"
+                        ></svg></span
                     ></span>
                   </button>
-                  <div data-part="content" id="nm5-seguranca" data-columns="2" hidden>
-                    <ul data-part="links">
-                      <li><a data-part="link" href="#epi">Proteção individual</a></li>
-                      <li><a data-part="link" href="#sinal">Sinalização</a></li>
+                  <div
+                    data-part="content"
+                    data-part-content=""
+                    id="nm5-seguranca"
+                    data-columns="2"
+                    hidden
+                  >
+                    <ul data-part="links" data-part-links="">
+                      <li>
+                        <a data-part="link" data-part-link="" href="#epi">Proteção individual</a>
+                      </li>
+                      <li><a data-part="link" data-part-link="" href="#sinal">Sinalização</a></li>
                     </ul>
                   </div>
                 </li>
@@ -482,59 +702,103 @@
             </div>
           </div>
         </li>
-        <li data-part="item" data-value="marcas"><a data-part="link" href="#marcas">Marcas</a></li>
+        <li data-part="item" data-part-item="" data-value="marcas">
+          <a data-part="link" data-part-link="" href="#marcas">Marcas</a>
+        </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
   </div>
 </section>
 
 <section data-scene="size" data-widths="720">
   <div style="display: grid; gap: 12px">
-    <nav data-ui="navigation-menu" data-part="root" data-size="sm" aria-label="Pequeno">
-      <ul data-part="list">
-        <li data-part="item" data-value="a">
-          <button data-part="trigger" type="button" aria-expanded="false">
-            Produtos<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+    <nav
+      data-ui="navigation-menu"
+      data-ui-navigation-menu=""
+      data-part="root"
+      data-part-root=""
+      data-size="sm"
+      aria-label="Pequeno"
+    >
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="a">
+          <button data-part="trigger" data-part-trigger="" type="button" aria-expanded="false">
+            Produtos<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" hidden></div>
+          <div data-part="content" data-part-content="" hidden></div>
         </li>
-        <li data-part="item" data-value="b"><a data-part="link" href="#b">Documentação</a></li>
+        <li data-part="item" data-part-item="" data-value="b">
+          <a data-part="link" data-part-link="" href="#b">Documentação</a>
+        </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
-    <nav data-ui="navigation-menu" data-part="root" data-size="md" aria-label="Médio">
-      <ul data-part="list">
-        <li data-part="item" data-value="a">
-          <button data-part="trigger" type="button" aria-expanded="false">
-            Produtos<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+    <nav
+      data-ui="navigation-menu"
+      data-ui-navigation-menu=""
+      data-part="root"
+      data-part-root=""
+      data-size="md"
+      aria-label="Médio"
+    >
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="a">
+          <button data-part="trigger" data-part-trigger="" type="button" aria-expanded="false">
+            Produtos<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" hidden></div>
+          <div data-part="content" data-part-content="" hidden></div>
         </li>
-        <li data-part="item" data-value="b"><a data-part="link" href="#b">Documentação</a></li>
+        <li data-part="item" data-part-item="" data-value="b">
+          <a data-part="link" data-part-link="" href="#b">Documentação</a>
+        </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
-    <nav data-ui="navigation-menu" data-part="root" data-size="lg" aria-label="Grande">
-      <ul data-part="list">
-        <li data-part="item" data-value="a">
-          <button data-part="trigger" type="button" aria-expanded="false">
-            Produtos<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+    <nav
+      data-ui="navigation-menu"
+      data-ui-navigation-menu=""
+      data-part="root"
+      data-part-root=""
+      data-size="lg"
+      aria-label="Grande"
+    >
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="a">
+          <button data-part="trigger" data-part-trigger="" type="button" aria-expanded="false">
+            Produtos<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" hidden></div>
+          <div data-part="content" data-part-content="" hidden></div>
         </li>
-        <li data-part="item" data-value="b"><a data-part="link" href="#b">Documentação</a></li>
+        <li data-part="item" data-part-item="" data-value="b">
+          <a data-part="link" data-part-link="" href="#b">Documentação</a>
+        </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
   </div>
 </section>
@@ -543,29 +807,54 @@
   <div class="nm-room" data-room="short" style="min-block-size: 330px">
     <nav
       data-ui="navigation-menu"
+      data-ui-navigation-menu=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       aria-label="Conteúdo extremo"
       data-default-value="longo"
     >
-      <ul data-part="list">
-        <li data-part="item" data-value="longo">
-          <button data-part="trigger" type="button" aria-expanded="false" aria-controls="nm7-longo">
-            Gestão de armazéns e distribuição<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="longo">
+          <button
+            data-part="trigger"
+            data-part-trigger=""
+            type="button"
+            aria-expanded="false"
+            aria-controls="nm7-longo"
+          >
+            Gestão de armazéns e distribuição<span
+              data-part="indicator"
+              data-part-indicator=""
+              aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm7-longo" data-columns="2" hidden>
-            <ul data-part="links">
+          <div data-part="content" data-part-content="" id="nm7-longo" data-columns="2" hidden>
+            <ul data-part="links" data-part-links="">
               <li>
-                <a data-part="link" href="#x1"
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="inbox"></svg></span></span
-                  ><span data-part="label"
+                <a data-part="link" data-part-link="" href="#x1"
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="inbox"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label=""
                     >Planeamento de reabastecimento entre armazéns regionais</span
-                  ><span data-part="description"
+                  ><span data-part="description" data-part-description=""
                     >Calcula transferências entre armazéns a partir da procura prevista, dos prazos
                     de entrega dos fornecedores e do stock de segurança definido por artigo e por
                     local.</span
@@ -573,27 +862,39 @@
                 >
               </li>
               <li>
-                <a data-part="link" href="#x2"
-                  ><span data-part="label">Sem marca</span
-                  ><span data-part="description"
+                <a data-part="link" data-part-link="" href="#x2"
+                  ><span data-part="label" data-part-label="">Sem marca</span
+                  ><span data-part="description" data-part-description=""
                     >Um link rico sem ícone começa o título na margem.</span
                   ></a
                 >
               </li>
               <li>
-                <a data-part="link" href="#x3"
-                  ><span data-part="icon"
-                    ><span data-ui="icon" data-part="root" aria-hidden="true"
-                      ><svg data-part="glyph" data-glyph="file"></svg></span></span
-                  ><span data-part="label">Referência_de_artigo_sem_espaços_ABCDEFGHIJ</span
-                  ><span data-part="description">Uma cadeia sem quebra.</span></a
+                <a data-part="link" data-part-link="" href="#x3"
+                  ><span data-part="icon" data-part-icon=""
+                    ><span
+                      data-ui="icon"
+                      data-ui-icon=""
+                      data-part="root"
+                      data-part-root=""
+                      aria-hidden="true"
+                      ><svg
+                        data-part="glyph"
+                        data-part-glyph=""
+                        data-glyph="file"
+                      ></svg></span></span
+                  ><span data-part="label" data-part-label=""
+                    >Referência_de_artigo_sem_espaços_ABCDEFGHIJ</span
+                  ><span data-part="description" data-part-description=""
+                    >Uma cadeia sem quebra.</span
+                  ></a
                 >
               </li>
             </ul>
           </div>
         </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
   </div>
 </section>
@@ -602,36 +903,46 @@
   <div class="nm-room" data-room="short" style="min-block-size: 200px">
     <nav
       data-ui="navigation-menu"
+      data-ui-navigation-menu=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       aria-label="Sem script"
       data-static
     >
-      <ul data-part="list">
-        <li data-part="item" data-value="empresa" data-open>
+      <ul data-part="list" data-part-list="">
+        <li data-part="item" data-part-item="" data-value="empresa" data-open>
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-expanded="true"
             aria-controls="nm8-empresa"
             data-open
           >
-            Empresa<span data-part="indicator" aria-hidden="true"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+            Empresa<span data-part="indicator" data-part-indicator="" aria-hidden="true"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
-          <div data-part="content" id="nm8-empresa" data-open>
-            <ul data-part="links">
-              <li><a data-part="link" href="#sobre">Sobre nós</a></li>
-              <li><a data-part="link" href="#carreiras">Carreiras</a></li>
-              <li><a data-part="link" href="#imprensa">Imprensa</a></li>
+          <div data-part="content" data-part-content="" id="nm8-empresa" data-open>
+            <ul data-part="links" data-part-links="">
+              <li><a data-part="link" data-part-link="" href="#sobre">Sobre nós</a></li>
+              <li><a data-part="link" data-part-link="" href="#carreiras">Carreiras</a></li>
+              <li><a data-part="link" data-part-link="" href="#imprensa">Imprensa</a></li>
             </ul>
           </div>
         </li>
-        <li data-part="item" data-value="precos"><a data-part="link" href="#precos">Preços</a></li>
+        <li data-part="item" data-part-item="" data-value="precos">
+          <a data-part="link" data-part-link="" href="#precos">Preços</a>
+        </li>
       </ul>
-      <div data-part="viewport"></div>
+      <div data-part="viewport" data-part-viewport=""></div>
     </nav>
   </div>
 </section>

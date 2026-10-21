@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/avatar/avatar.css';
 
 import { useCallback, useState } from 'react';
@@ -128,13 +129,14 @@ export function Avatar({
              person twice, and would name them differently before it loads. */
           alt: '',
           'data-part': 'image',
+          ...selectorKeyProps('part', 'image'),
           onError: handleError,
           onLoad: handleLoad,
           ref: measure,
           src,
         };
 
-  const rootProps: AvatarRootProps = {
+  const rootProps: AvatarRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -143,7 +145,7 @@ export function Avatar({
         ) : (
           renderImage(imageProps)
         )}
-        <span data-part="fallback">
+        <span data-part="fallback" data-part-fallback="">
           {/* No picture and no name to take initials from: the person glyph. */}
           {children ??
             (letters === '' ? (
@@ -175,7 +177,7 @@ export function Avatar({
       : { 'aria-label': name, role: 'img' }),
     /* An explicit role the consumer wrote is never replaced by an inferred one. */
     ...(role === undefined ? {} : { role }),
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

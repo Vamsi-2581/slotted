@@ -18,7 +18,7 @@
    * overflow trigger. Everything else a reader sees belongs to the control the
    * consumer placed.
    */
-  [data-ui='action-bar'] {
+  [data-ui-action-bar] {
     /**
      * The bar's own rhythm, from the control scales, so the three densities
      * move it without a rule of their own.
@@ -56,7 +56,7 @@
     padding-inline: var(--slotted-action-bar-inset-inline, var(--_inset-inline));
   }
 
-  [data-ui='action-bar'][data-size='sm'] {
+  [data-ui-action-bar][data-size='sm'] {
     --_gap: var(--slotted-control-gap-sm, 0.375rem);
     --_inset-block: var(--slotted-space-3, 0.375rem);
     --_inset-inline: var(--slotted-space-4, 0.5rem);
@@ -66,7 +66,7 @@
     --_separator-inset: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='action-bar'][data-size='lg'] {
+  [data-ui-action-bar][data-size='lg'] {
     --_gap: var(--slotted-control-gap-lg, 0.5rem);
     --_inset-block: var(--slotted-space-5, 0.75rem);
     --_inset-inline: var(--slotted-space-6, 1rem);
@@ -82,8 +82,8 @@
    * still consumes the gap of the column that holds it — and, under `raised`,
    * draws a rule straight across the screen with nothing under it.
    */
-  [data-ui='action-bar']:not(:has([data-part='actions'] > *:not([hidden]))):not(
-      :has([data-part='status'])
+  [data-ui-action-bar]:not(:has([data-part-actions] > *:not([hidden]))):not(
+      :has([data-part-status])
     ) {
     display: none;
   }
@@ -99,7 +99,7 @@
    * or above a table. It takes the surface and one hairline at the top, which
    * is the whole of the separation a bar at the end of a region needs.
    */
-  [data-ui='action-bar'][data-variant='raised'] {
+  [data-ui-action-bar][data-variant='raised'] {
     background-color: var(--slotted-action-bar-background, var(--slotted-surface, Canvas));
     border-block-start: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-action-bar-border-color, var(--slotted-border-subtle, ButtonBorder));
@@ -120,7 +120,7 @@
    * of the surveyed implementations composes with the page's own chrome; each
    * of them fixes the bar and then compensates.
    */
-  [data-ui='action-bar'][data-sticky] {
+  [data-ui-action-bar][data-sticky] {
     inset-block-end: var(--slotted-page-sticky-bottom, 0px);
     position: sticky;
     z-index: var(--slotted-z-index-sticky, 100);
@@ -133,13 +133,13 @@
    * existence under the reader's hands is the jump
    * `docs/component-features.md` §11 forbids by name.
    */
-  [data-ui='action-bar'][data-status] {
+  [data-ui-action-bar][data-status] {
     transition:
       translate var(--_duration) var(--_easing),
       opacity var(--_duration) var(--_easing);
   }
 
-  [data-ui='action-bar']:is([data-status='entering'], [data-status='exiting']) {
+  [data-ui-action-bar]:is([data-status='entering'], [data-status='exiting']) {
     opacity: 0;
     translate: 0 100%;
   }
@@ -151,7 +151,7 @@
    * what is selected. It takes what is left over and gives way first, so a long
    * message shortens itself rather than pushing the actions off the bar.
    */
-  [data-ui='action-bar'] [data-part='status'] {
+  [data-ui-action-bar] [data-part-status] {
     align-items: center;
     color: var(--slotted-action-bar-status-color, var(--slotted-text-muted, GrayText));
     display: flex;
@@ -171,7 +171,7 @@
    * action and never the last action itself. The property is logical, so the
    * anchor mirrors with the bar in a right-to-left document.
    */
-  [data-ui='action-bar'] [data-part='actions'] {
+  [data-ui-action-bar] [data-part-actions] {
     align-items: center;
     display: flex;
     flex: 0 0 auto;
@@ -196,12 +196,12 @@
    * buttons, Polaris puts them at the end, Fluent at the start. The anchor is
    * what `end` is, so the other two are the ones that state a margin.
    */
-  [data-ui='action-bar'][data-align='start'] [data-part='actions'] {
+  [data-ui-action-bar][data-align='start'] [data-part-actions] {
     justify-content: flex-start;
     margin-inline: 0 auto;
   }
 
-  [data-ui='action-bar'][data-align='center'] [data-part='actions'] {
+  [data-ui-action-bar][data-align='center'] [data-part-actions] {
     justify-content: center;
     margin-inline: auto;
   }
@@ -210,8 +210,7 @@
    * A bar with no status region at all still puts its run where `align` says,
    * which without this is where the first `auto` margin happens to leave it.
    */
-  [data-ui='action-bar'][data-align='center']:not(:has([data-part='status']))
-    [data-part='actions'] {
+  [data-ui-action-bar][data-align='center']:not(:has([data-part-status])) [data-part-actions] {
     margin-inline: auto;
   }
 
@@ -225,7 +224,7 @@
    * It paints nothing: everything a reader sees inside it belongs to the
    * control the consumer placed.
    */
-  [data-ui='action-bar'] [data-part='action'] {
+  [data-ui-action-bar] [data-part-action] {
     align-items: center;
     display: inline-flex;
     flex: none;
@@ -239,8 +238,8 @@
    * and without this every collapsed unit stays on the bar and the collapse
    * does nothing at all.
    */
-  [data-ui='action-bar']
-    :is([data-part='action'], [data-part='separator'], [data-part='overflow'])[hidden] {
+  [data-ui-action-bar]
+    :is([data-part-action], [data-part-separator], [data-part-overflow])[hidden] {
     display: none;
   }
 
@@ -257,7 +256,7 @@
    * It is a part of this family rather than the `divider` family because its
    * geometry belongs to the bar: it is measured against the controls beside it.
    */
-  [data-ui='action-bar'] [data-part='separator'] {
+  [data-ui-action-bar] [data-part-separator] {
     align-self: stretch;
     background-color: var(
       --slotted-action-bar-separator-color,
@@ -283,7 +282,7 @@
    * Its accessible name carries the count, so what a reader hears is a number
    * rather than three dots.
    */
-  [data-ui='action-bar'] [data-part='overflow'] {
+  [data-ui-action-bar] [data-part-overflow] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -321,7 +320,7 @@
   }
 
   /* The ground moves under the pointer and nothing else does. */
-  [data-ui='action-bar'] [data-part='overflow']:not(:disabled):hover {
+  [data-ui-action-bar] [data-part-overflow]:not(:disabled):hover {
     background-color: var(
       --slotted-action-bar-overflow-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -329,7 +328,7 @@
     color: var(--slotted-action-bar-overflow-hover-color, var(--slotted-text, CanvasText));
   }
 
-  [data-ui='action-bar'] [data-part='overflow']:not(:disabled):active {
+  [data-ui-action-bar] [data-part-overflow]:not(:disabled):active {
     background-color: var(
       --slotted-action-bar-overflow-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -341,7 +340,7 @@
    * reader who moved the pointer off the trigger loses every sign of which
    * control the layer belongs to.
    */
-  [data-ui='action-bar'] [data-part='overflow'][data-open] {
+  [data-ui-action-bar] [data-part-overflow][data-open] {
     background-color: var(
       --slotted-action-bar-overflow-open-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -355,12 +354,12 @@
    * looking operable, and it answers neither hover nor press, which is the
    * precedence `docs/state-and-events.md` fixes.
    */
-  [data-ui='action-bar'] [data-part='overflow']:disabled {
+  [data-ui-action-bar] [data-part-overflow]:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: default;
   }
 
-  [data-ui='action-bar'] [data-part='overflow']:focus-visible {
+  [data-ui-action-bar] [data-part-overflow]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -389,7 +388,7 @@
      * the order a form is read in, and only the paint is reversed. `stretch`
      * fills the column, because a column of natural widths is a ragged edge.
      */
-    [data-ui='action-bar'] [data-part='actions'] {
+    [data-ui-action-bar] [data-part-actions] {
       --_stacked: 1;
 
       align-items: stretch;
@@ -398,7 +397,7 @@
       margin-inline: 0;
     }
 
-    [data-ui='action-bar'] [data-part='action'] > * {
+    [data-ui-action-bar] [data-part-action] > * {
       inline-size: 100%;
     }
 
@@ -409,7 +408,7 @@
      * painted at the top of the column by the reversal, which is where the
      * action that confirms belongs.
      */
-    [data-ui='action-bar'] [data-part='overflow'] {
+    [data-ui-action-bar] [data-part-overflow] {
       display: none;
     }
 
@@ -417,7 +416,7 @@
      * A rule that divided two controls in a row divides two rows here, so it
      * turns with them.
      */
-    [data-ui='action-bar'] [data-part='separator'] {
+    [data-ui-action-bar] [data-part-separator] {
       block-size: var(--slotted-border-width-thin, 1px);
       inline-size: auto;
       margin-block: calc(var(--_gap) / 2);
@@ -425,14 +424,14 @@
       min-block-size: 0;
     }
 
-    [data-ui='action-bar'] [data-part='status'] {
+    [data-ui-action-bar] [data-part-status] {
       flex: 1 1 100%;
     }
 
     /* What the consumer put in the status, addressed as the part's child and
        never by a class of its own: while the bar is a column the status fills
        the row, as an action does two rules above. */
-    [data-ui='action-bar'] [data-part='status'] > * {
+    [data-ui-action-bar] [data-part-status] > * {
       align-content: space-between;
       inline-size: 100%;
     }
@@ -447,7 +446,7 @@
    * destructive action and a frequent one is still there to read.
    */
   @media (forced-colors: active) {
-    [data-ui='action-bar'] [data-part='separator'] {
+    [data-ui-action-bar] [data-part-separator] {
       background-color: CanvasText;
       forced-color-adjust: none;
     }

@@ -20,7 +20,7 @@
    * beside it — the answer Spectrum, Chakra and Ant Design all reached, and
    * the opposite of the coloured pill Primer and Atlassian draw.
    */
-  [data-ui='status-indicator'][data-part='root'] {
+  [data-ui-status-indicator][data-part-root] {
     /**
      * Type and glyph come from the control scales, the only ones the theme
      * restates per density, so a status shrinks with the row it sits in. The
@@ -127,7 +127,7 @@
    * in greyscale as well as in `light`.
    */
 
-  [data-ui='status-indicator'][data-part='root'][data-status='neutral'] {
+  [data-ui-status-indicator][data-part-root][data-status='neutral'] {
     /**
      * The one neutral the theme calibrates against the surface rather than
      * against a control, and the only fill that makes this dot read as filled.
@@ -145,12 +145,12 @@
     --_text: var(--slotted-tone-secondary-text);
   }
 
-  [data-ui='status-indicator'][data-part='root'][data-status='info'] {
+  [data-ui-status-indicator][data-part-root][data-status='info'] {
     --_solid: var(--slotted-tone-accent-solid);
     --_text: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='status-indicator'][data-part='root'][data-status='success'] {
+  [data-ui-status-indicator][data-part-root][data-status='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_text: var(--slotted-tone-success-text);
   }
@@ -161,13 +161,13 @@
    * light, the fill itself in dark and black in `high-contrast` — an edge that
    * reads as the dot's own rim rather than as a second colour around it.
    */
-  [data-ui='status-indicator'][data-part='root'][data-status='warning'] {
+  [data-ui-status-indicator][data-part-root][data-status='warning'] {
     --_edge: var(--slotted-tone-warning-border);
     --_solid: var(--slotted-tone-warning-solid);
     --_text: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='status-indicator'][data-part='root'][data-status='danger'] {
+  [data-ui-status-indicator][data-part-root][data-status='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_text: var(--slotted-tone-danger-text);
   }
@@ -178,7 +178,7 @@
    * has no halo of its own; the ring is drawn where the halo of a lit dot
    * ends, below.
    */
-  [data-ui='status-indicator'][data-part='root'][data-status='unknown'] {
+  [data-ui-status-indicator][data-part-root][data-status='unknown'] {
     --_edge: var(--slotted-border-strong);
     --_halo: transparent;
     --_solid: transparent;
@@ -192,13 +192,13 @@
    * the mark left the ring the size of a dot around a sixteen-pixel glyph, and
    * one and three quarter pixels above where it belonged.
    */
-  [data-ui='status-indicator'][data-part='root'][data-mark='icon'] {
+  [data-ui-status-indicator][data-part-root][data-mark='icon'] {
     --_mark-size: var(--_glyph-size);
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='status-indicator'][data-part='root'][data-size='sm'] {
+  [data-ui-status-indicator][data-part-root][data-size='sm'] {
     --_dot-size: var(--slotted-space-3, 0.375rem);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
@@ -206,7 +206,7 @@
     --_halo-width: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='status-indicator'][data-part='root'][data-size='lg'] {
+  [data-ui-status-indicator][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_glyph-size: var(--slotted-control-icon-size-lg, 18px);
   }
@@ -219,7 +219,7 @@
    * number saying how. It is the rule `skeleton` uses to sit an inline bar on
    * a line of type, applied to a box rather than to a baseline.
    */
-  [data-ui='status-indicator'] [data-part='mark'] {
+  [data-ui-status-indicator] [data-part-mark] {
     block-size: var(--_mark-size);
     box-sizing: border-box;
     flex: none;
@@ -227,7 +227,7 @@
     margin-block-start: var(--_pulse-inset);
   }
 
-  [data-ui='status-indicator'][data-mark='dot'] [data-part='mark'] {
+  [data-ui-status-indicator][data-mark='dot'] [data-part-mark] {
     background-color: var(--_solid, ButtonFace);
     border: var(--_rim-width) solid var(--_rim, CanvasText);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -239,7 +239,7 @@
    * to `neutral` and `unknown` sharing a tone, and it is the only mark in the
    * family that says something by what it is missing.
    */
-  [data-ui='status-indicator'][data-mark='dot'][data-status='unknown'] [data-part='mark'] {
+  [data-ui-status-indicator][data-mark='dot'][data-status='unknown'] [data-part-mark] {
     border: 0;
     position: relative;
   }
@@ -253,7 +253,7 @@
    * neighbours, and read as a speck rather than as a status. `outline` is
    * reserved for the focus ring (`focus-ring.test.mjs`).
    */
-  [data-ui='status-indicator'][data-mark='dot'][data-status='unknown'] [data-part='mark']::before {
+  [data-ui-status-indicator][data-mark='dot'][data-status='unknown'] [data-part-mark]::before {
     border: var(--slotted-border-width-thick, 2px) dashed var(--_rim);
     border-radius: var(--slotted-radius-full, 9999px);
     box-sizing: border-box;
@@ -278,7 +278,7 @@
    * binding puts the status's glyph inside. `flex` rather than a line box, so
    * no strut of the root's line-height pushes the glyph off the box.
    */
-  [data-ui='status-indicator'][data-mark='icon'] [data-part='mark'] {
+  [data-ui-status-indicator][data-mark='icon'] [data-part-mark] {
     --slotted-icon-size: var(--_mark-size);
 
     color: var(--_text, CanvasText);
@@ -302,7 +302,7 @@
    * first column was auto-sized. `break-word` keeps the longest word as the
    * minimum and breaks only what still does not fit.
    */
-  [data-ui='status-indicator'] [data-part='label'] {
+  [data-ui-status-indicator] [data-part-label] {
     margin-inline-start: var(--_gap);
     min-inline-size: 0;
     overflow-wrap: break-word;
@@ -315,7 +315,7 @@
    * empty, and a gap in front of an empty box puts a bare dot off the centre
    * of the cell it was meant to sit in.
    */
-  [data-ui='status-indicator'] [data-part='label']:has(> [data-part='announcement']) {
+  [data-ui-status-indicator] [data-part-label]:has(> [data-part-announcement]) {
     margin-inline-start: 0;
   }
 
@@ -326,7 +326,7 @@
    * root an `<a>` or a `<button>`, and a ring that appears only where a family
    * expects focus is a ring that goes missing.
    */
-  [data-ui='status-indicator'][data-part='root']:focus-visible {
+  [data-ui-status-indicator][data-part-root]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -340,7 +340,7 @@
    * text role, a step hover does not take. The offset is `link`'s own 0.15em
    * (dossier § 4).
    */
-  [data-ui='status-indicator'][data-part='root']:any-link {
+  [data-ui-status-indicator][data-part-root]:any-link {
     text-decoration-color: transparent;
     text-decoration-line: underline;
     text-decoration-thickness: from-font;
@@ -350,11 +350,11 @@
       text-decoration-color var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='status-indicator'][data-part='root']:any-link:not([data-disabled]):hover {
+  [data-ui-status-indicator][data-part-root]:any-link:not([data-disabled]):hover {
     text-decoration-color: currentColor;
   }
 
-  [data-ui='status-indicator'][data-part='root']:any-link:not([data-disabled]):active {
+  [data-ui-status-indicator][data-part-root]:any-link:not([data-disabled]):active {
     color: var(--slotted-text-muted, GrayText);
     text-decoration-color: currentColor;
   }
@@ -402,11 +402,11 @@
    * stacking context so the wave can sit under the mark (`z-index: -1`)
    * without falling behind the surface the indicator is drawn on.
    */
-  [data-ui='status-indicator'][data-pulse] {
+  [data-ui-status-indicator][data-pulse] {
     isolation: isolate;
   }
 
-  [data-ui='status-indicator'][data-pulse]::after {
+  [data-ui-status-indicator][data-pulse]::after {
     animation: slotted-status-indicator-pulse var(--slotted-duration-loop-slow)
       var(--slotted-easing-enter) infinite;
     background-color: var(--_rim);
@@ -429,7 +429,7 @@
    * carried by the tone, the glyph and the word, as it is under reduced
    * motion.
    */
-  [data-ui='status-indicator'][data-mark='icon'][data-pulse]::after {
+  [data-ui-status-indicator][data-mark='icon'][data-pulse]::after {
     content: none;
   }
 
@@ -440,7 +440,7 @@
    * and the status is left to the parts that were always carrying it.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='status-indicator'][data-pulse]::after {
+    [data-ui-status-indicator][data-pulse]::after {
       animation: none;
       content: none;
     }
@@ -465,16 +465,16 @@
    * rule: the system sets `box-shadow` to `none`.
    */
   @media (forced-colors: active) {
-    [data-ui='status-indicator'][data-mark='dot'] [data-part='mark'] {
+    [data-ui-status-indicator][data-mark='dot'] [data-part-mark] {
       background-color: CanvasText;
       border-color: CanvasText;
     }
 
-    [data-ui='status-indicator'][data-mark='dot'][data-status='unknown'] [data-part='mark'] {
+    [data-ui-status-indicator][data-mark='dot'][data-status='unknown'] [data-part-mark] {
       background-color: Canvas;
     }
 
-    [data-ui='status-indicator'][data-pulse]::after {
+    [data-ui-status-indicator][data-pulse]::after {
       content: none;
     }
   }

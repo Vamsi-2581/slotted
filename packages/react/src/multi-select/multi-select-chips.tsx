@@ -129,14 +129,16 @@ function Chip({ count, index, label, value }: ChipProps) {
     return (
       <span
         data-part="root"
+        data-part-root=""
         data-size="sm"
         data-ui="tag"
+        data-ui-tag=""
         data-value={value}
         data-variant="soft"
         ref={cell}
         role="gridcell"
       >
-        <span data-part="body">
+        <span data-part="body" data-part-body="">
           <input
             aria-label={label}
             autoFocus
@@ -170,8 +172,10 @@ function Chip({ count, index, label, value }: ChipProps) {
           : undefined
       }
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-ui="tag"
+      data-ui-tag=""
       data-value={value}
       data-variant="soft"
       onKeyDown={onKeyDown}
@@ -180,13 +184,16 @@ function Chip({ count, index, label, value }: ChipProps) {
       tabIndex={-1}
       {...(frozen ? { 'data-disabled': '' } : {})}
     >
-      <span data-part="body">
-        <span data-part="label">{label}</span>
+      <span data-part="body" data-part-body="">
+        <span data-part="label" data-part-label="">
+          {label}
+        </span>
       </span>
       {frozen ? null : (
         <button
           aria-label={multiSelect.t('remove', { label })}
           data-part="remove"
+          data-part-remove=""
           onClick={onRemove}
           tabIndex={-1}
           type="button"
@@ -294,7 +301,7 @@ export function ChipRow({ children }: ChipRowProps) {
   }, [multiSelect.value]);
 
   return (
-    <div data-part="chips" ref={row} role="row">
+    <div data-part="chips" data-part-chips="" ref={row} role="row">
       {multiSelect.value.map((value, index) => (
         <Chip
           count={multiSelect.value.length}
@@ -317,8 +324,10 @@ export function ChipRow({ children }: ChipRowProps) {
         <span
           data-count=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-ui="tag"
+          data-ui-tag=""
           data-variant="outline"
           hidden
           onClick={(event) => multiSelect.setOpen(true, 'pointer', event.nativeEvent)}
@@ -326,8 +335,8 @@ export function ChipRow({ children }: ChipRowProps) {
           role="gridcell"
           tabIndex={-1}
         >
-          <span data-part="body">
-            <span data-part="label">{`+${Math.max(hidden, 1)}`}</span>
+          <span data-part="body" data-part-body="">
+            <span data-part="label" data-part-label="">{`+${Math.max(hidden, 1)}`}</span>
           </span>
         </span>
       ) : null}

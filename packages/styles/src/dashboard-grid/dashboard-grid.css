@@ -15,7 +15,7 @@
    * sunken surface, with each widget a raised card on it; the page decides
    * that ground, and every mark below is drawn to read on it.
    */
-  [data-ui='dashboard-grid'] {
+  [data-ui-dashboard-grid] {
     --_gap: var(--slotted-dashboard-grid-gap, var(--slotted-space-6, 1rem));
     --_row: var(--slotted-dashboard-grid-row-size, 4.5rem);
     --_cols: var(--_dg-columns-expanded, 12);
@@ -29,7 +29,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='dashboard-grid'] > [data-part='grid'] {
+  [data-ui-dashboard-grid] > [data-part-grid] {
     display: grid;
     gap: var(--_gap);
     grid-auto-rows: var(--_row);
@@ -43,8 +43,8 @@
   }
 
   /* `display: grid` above would otherwise override the attribute. */
-  [data-ui='dashboard-grid'] [data-part='grid'][hidden],
-  [data-ui='dashboard-grid'] [data-part='widget'][hidden] {
+  [data-ui-dashboard-grid] [data-part-grid][hidden],
+  [data-ui-dashboard-grid] [data-part-widget][hidden] {
     display: none;
   }
 
@@ -52,14 +52,14 @@
    * In the expanded class every widget stands at its own cell. The DOM holds
    * them by row, then column, so the order a reader walks is the picture's.
    */
-  [data-ui='dashboard-grid'] :is([data-part='widget'], [data-part='placeholder']) {
+  [data-ui-dashboard-grid] :is([data-part-widget], [data-part-placeholder]) {
     grid-column: var(--_dg-x, auto) / span var(--_dg-w, 4);
     grid-row: var(--_dg-y, auto) / span var(--_dg-h, 2);
     min-block-size: 0;
     min-inline-size: 0;
   }
 
-  [data-ui='dashboard-grid'] [data-part='widget'] {
+  [data-ui-dashboard-grid] [data-part-widget] {
     display: flex;
     position: relative;
   }
@@ -72,29 +72,29 @@
    * CSS refuses a custom property in a container condition.
    */
   @container dashboard-grid (width < 1024px) {
-    [data-ui='dashboard-grid'] > [data-part='grid'] {
+    [data-ui-dashboard-grid] > [data-part-grid] {
       --_cols: var(--_dg-columns-medium, 6);
     }
 
-    [data-ui='dashboard-grid'] :is([data-part='widget'], [data-part='placeholder']) {
+    [data-ui-dashboard-grid] :is([data-part-widget], [data-part-placeholder]) {
       grid-column: auto / span var(--_dg-span-medium, 3);
       grid-row: auto / span var(--_dg-h, 2);
     }
   }
 
   @container dashboard-grid (width < 600px) {
-    [data-ui='dashboard-grid'] > [data-part='grid'] {
+    [data-ui-dashboard-grid] > [data-part-grid] {
       --_cols: var(--_dg-columns-compact, 1);
 
       grid-auto-rows: auto;
     }
 
-    [data-ui='dashboard-grid'] :is([data-part='widget'], [data-part='placeholder']) {
+    [data-ui-dashboard-grid] :is([data-part-widget], [data-part-placeholder]) {
       grid-column: 1 / -1;
       grid-row: auto;
     }
 
-    [data-ui='dashboard-grid'] [data-part='placeholder'] {
+    [data-ui-dashboard-grid] [data-part-placeholder] {
       min-block-size: calc(var(--_row) * 2);
     }
   }
@@ -107,14 +107,14 @@
    * than the cell grows into it, so a chart or a figure uses the height the
    * reader gave the widget rather than stopping at its own size step.
    */
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-ui='card'] {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-ui-card] {
     flex: 1 1 auto;
     min-block-size: 0;
     min-inline-size: 0;
     transition: box-shadow var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-ui='card'] > [data-part='body'] {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-ui-card] > [data-part-body] {
     /* A chart's plot takes whatever height the widget leaves it, down to a
        floor of one and a half rows, instead of its own size step. */
     --slotted-chart-plot-block-size: calc(var(--_row) * 1.5);
@@ -128,11 +128,11 @@
   /* The content grows into a taller cell and never shrinks under its own
      height: shrunk, it overflowed its own box, and the body scrolled only that
      overflow, so its last rows and the end padding stayed out of reach. */
-  [data-ui='dashboard-grid']
-    [data-part='widget']
-    > [data-ui='card']
-    > [data-part='body']
-    > :not([data-part='busy-indicator']) {
+  [data-ui-dashboard-grid]
+    [data-part-widget]
+    > [data-ui-card]
+    > [data-part-body]
+    > :not([data-part-busy-indicator]) {
     flex: 1 0 auto;
   }
 
@@ -141,7 +141,7 @@
    * medium step, semibold, two lines and then an ellipsis. The clamp never
    * removes a word from the DOM, and the article is named by the whole of it.
    */
-  [data-ui='dashboard-grid'] [data-part='widget'] [data-part='title'] {
+  [data-ui-dashboard-grid] [data-part-widget] [data-part-title] {
     -webkit-box-orient: vertical;
     color: var(--slotted-dashboard-grid-title-color, var(--slotted-text, CanvasText));
     display: -webkit-box;
@@ -165,7 +165,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='dashboard-grid'] [data-part='widget'] [data-part='description'] {
+  [data-ui-dashboard-grid] [data-part-widget] [data-part-description] {
     color: var(--slotted-dashboard-grid-description-color, var(--slotted-text-muted, GrayText));
     font-size: var(--slotted-font-size-sm, 0.75rem);
     line-height: var(--slotted-line-height-sm, 1.5);
@@ -175,7 +175,7 @@
 
   /* The corner of the header: the consumer's actions, then the way to the
      widget's own page, on the title's row without adding to its height. */
-  [data-ui='dashboard-grid'] [data-part='widget'] [data-part='actions'] {
+  [data-ui-dashboard-grid] [data-part-widget] [data-part-actions] {
     flex-wrap: nowrap;
     gap: var(--slotted-space-1, 0.125rem);
     margin-block: calc(
@@ -199,19 +199,19 @@
    * its own: the family does not know what the body holds, but does know its
    * box — the grid fixed it.
    */
-  [data-ui='dashboard-grid'] [data-part='widget'] [data-part='skeleton'] {
+  [data-ui-dashboard-grid] [data-part-widget] [data-part-skeleton] {
     display: flex;
     flex-direction: column;
     min-block-size: var(--slotted-space-12, 4rem);
   }
 
-  [data-ui='dashboard-grid'] [data-part='widget'] [data-part='skeleton'] > [data-ui='skeleton'] {
+  [data-ui-dashboard-grid] [data-part-widget] [data-part-skeleton] > [data-ui-skeleton] {
     block-size: auto;
     flex: 1 1 auto;
     inline-size: 100%;
   }
 
-  [data-ui='dashboard-grid'] [data-part='widget'] [data-part='message'] {
+  [data-ui-dashboard-grid] [data-part-widget] [data-part-message] {
     align-content: center;
     display: grid;
     justify-items: center;
@@ -222,7 +222,7 @@
    * the body, where Grafana draws its panel's. It is aria-hidden: the article
    * carries `aria-busy`, which is the fact, and the line is only its picture.
    */
-  [data-ui='dashboard-grid'] [data-part='widget'] [data-part='busy-indicator'] {
+  [data-ui-dashboard-grid] [data-part-widget] [data-part-busy-indicator] {
     background-color: var(--_accent);
     block-size: var(--slotted-border-width-medium, 2px);
     inset-block-start: 0;
@@ -233,7 +233,7 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    [data-ui='dashboard-grid'] [data-part='widget'] [data-part='busy-indicator'] {
+    [data-ui-dashboard-grid] [data-part-widget] [data-part-busy-indicator] {
       animation: slotted-dashboard-grid-busy var(--slotted-duration-loop-slow) linear infinite;
       background-color: transparent;
       background-image: linear-gradient(to right, transparent, var(--_accent) 50%, transparent);
@@ -244,7 +244,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='dashboard-grid'] [data-part='widget'] [data-part='busy-indicator'] {
+    [data-ui-dashboard-grid] [data-part-widget] [data-part-busy-indicator] {
       animation: none;
     }
   }
@@ -266,7 +266,7 @@
    * the card's hairline and the smallest lift — so on the sunken page it reads
    * as a tool laid over the dashboard rather than a stripe cut into it.
    */
-  [data-ui='dashboard-grid'] > [data-part='edit-bar'] {
+  [data-ui-dashboard-grid] > [data-part-edit-bar] {
     align-items: center;
     background-color: var(
       --slotted-dashboard-grid-edit-bar-background,
@@ -284,19 +284,19 @@
   }
 
   @starting-style {
-    [data-ui='dashboard-grid'] > [data-part='edit-bar'] {
+    [data-ui-dashboard-grid] > [data-part-edit-bar] {
       opacity: 0;
       translate: 0 calc(var(--slotted-space-4, 0.5rem) * -1);
     }
   }
 
-  [data-ui='dashboard-grid'] > [data-part='edit-bar'] {
+  [data-ui-dashboard-grid] > [data-part-edit-bar] {
     transition:
       opacity var(--slotted-duration-medium) var(--slotted-easing-enter),
       translate var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
-  [data-ui='dashboard-grid'] > [data-part='edit-bar'] > [data-part='edit-status'] {
+  [data-ui-dashboard-grid] > [data-part-edit-bar] > [data-part-edit-status] {
     color: var(--slotted-text-muted, GrayText);
     flex: 1 1 20rem;
     font-size: var(--slotted-font-size-sm, 0.75rem);
@@ -305,7 +305,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='dashboard-grid'] > [data-part='edit-bar'] > [data-part='edit-actions'] {
+  [data-ui-dashboard-grid] > [data-part-edit-bar] > [data-part-edit-actions] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -325,7 +325,7 @@
    * dot that shows marks a free cell; a dot on the crossing of two gaps
    * showed between cards and under them, where no widget can land.
    */
-  [data-ui='dashboard-grid'] > [data-part='grid']::before {
+  [data-ui-dashboard-grid] > [data-part-grid]::before {
     background-image: radial-gradient(
       circle at calc((100% - var(--_gap)) / 2) calc((100% - var(--_gap)) / 2),
       var(--slotted-dashboard-grid-lattice-color, var(--slotted-border-strong, currentColor))
@@ -341,27 +341,27 @@
     transition: opacity var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
-  [data-ui='dashboard-grid'][data-editing] > [data-part='grid'] {
+  [data-ui-dashboard-grid][data-editing] > [data-part-grid] {
     min-block-size: calc(var(--_row) * 2 + var(--_gap));
   }
 
-  [data-ui='dashboard-grid'][data-editing] > [data-part='grid']::before {
+  [data-ui-dashboard-grid][data-editing] > [data-part-grid]::before {
     opacity: 0.7;
   }
 
   /* While a widget is carried or pulled the lattice is what it snaps to, so
      it comes forward. The attribute is on the grid, in the compound it styles:
      a browser invalidates by attribute name, and on the root ahead of
-     `> [data-part='grid']` it restyled every element with a `data-part`
+     `> [data-part-grid]` it restyled every element with a `data-part`
      under the root as a widget was picked up and as it was dropped. */
-  [data-ui='dashboard-grid'] > [data-part='grid'][data-gesture]::before {
+  [data-ui-dashboard-grid] > [data-part-grid][data-gesture]::before {
     opacity: 1;
   }
 
   /* Below the expanded class the widgets flow, so no cell is a place to drop
      on and the lattice would be specks in the gaps. */
   @container dashboard-grid (width < 1024px) {
-    [data-ui='dashboard-grid'] > [data-part='grid']::before {
+    [data-ui-dashboard-grid] > [data-part-grid]::before {
       display: none;
     }
   }
@@ -370,20 +370,20 @@
 
   /* The whole card is a place to pick the widget up from; its controls keep
      their own cursor because each is its own target. */
-  [data-ui='dashboard-grid'][data-editing] [data-part='widget'][data-movable] > [data-ui='card'] {
+  [data-ui-dashboard-grid][data-editing] [data-part-widget][data-movable] > [data-ui-card] {
     cursor: grab;
   }
 
-  [data-ui='dashboard-grid'][data-editing]
-    [data-part='widget'][data-movable]
-    > [data-ui='card']
+  [data-ui-dashboard-grid][data-editing]
+    [data-part-widget][data-movable]
+    > [data-ui-card]
     :is(a, button, input, select, textarea, [tabindex]) {
     cursor: auto;
   }
 
-  [data-ui='dashboard-grid'][data-editing]
-    [data-part='widget']:not([data-loading]):hover
-    > [data-ui='card'] {
+  [data-ui-dashboard-grid][data-editing]
+    [data-part-widget]:not([data-loading]):hover
+    > [data-ui-card] {
     box-shadow: var(--slotted-shadow-sm);
   }
 
@@ -395,7 +395,7 @@
    * pill is drawn on the raised surface with the control's own edge, so it
    * reads as part of the card rather than as a button beside it.
    */
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='handle'] {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-handle] {
     --_pill-inline: var(--slotted-dashboard-grid-handle-inline-size, 2.25rem);
     --_pill-block: var(--slotted-dashboard-grid-handle-block-size, 1rem);
 
@@ -430,7 +430,7 @@
   }
 
   @starting-style {
-    [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='handle'] {
+    [data-ui-dashboard-grid] [data-part-widget] > [data-part-handle] {
       opacity: 0;
       translate: 0 var(--slotted-space-3, 0.375rem);
     }
@@ -438,7 +438,7 @@
 
   /* The pill is small to the eye and not to the hand: the hit area reaches
      the target floor on both axes. */
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='handle']::before {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-handle]::before {
     content: '';
     inset: calc((var(--slotted-target-min, 24px) - var(--_pill-block)) / -2)
       calc(var(--slotted-space-4, 0.5rem) * -1);
@@ -446,28 +446,28 @@
   }
 
   /* The grip is an `icon` the binding draws; the pill gives it its size. */
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='handle'] > [data-ui='icon'] {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-handle] > [data-ui-icon] {
     --slotted-icon-size: var(--slotted-dashboard-grid-handle-glyph-size, 0.875rem);
   }
 
-  [data-ui='dashboard-grid'][data-editing]
-    [data-part='widget']:not([data-loading]):hover
-    > [data-part='handle'] {
+  [data-ui-dashboard-grid][data-editing]
+    [data-part-widget]:not([data-loading]):hover
+    > [data-part-handle] {
     border-color: var(--slotted-border-strong, ButtonBorder);
     color: var(--slotted-text, CanvasText);
   }
 
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='handle']:focus-visible {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-handle]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   /* Carried, or its menu open: the pill takes the accent, the one mark on the
      page that says which widget the reader has in hand. */
-  [data-ui='dashboard-grid']
-    [data-part='widget']:is([data-dragging], [data-resizing])
-    > [data-part='handle'],
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='handle'][aria-expanded='true'] {
+  [data-ui-dashboard-grid]
+    [data-part-widget]:is([data-dragging], [data-resizing])
+    > [data-part-handle],
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-handle][aria-expanded='true'] {
     background-color: var(--_accent);
     border-color: var(--_accent);
     color: var(--slotted-tone-accent-on-solid, HighlightText);
@@ -482,7 +482,7 @@
    * are quiet until the widget is under the pointer, and always shown to a
    * finger, which has no hover.
    */
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='resize-handle'] {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-resize-handle] {
     --_hit: var(--slotted-dashboard-grid-resize-hit, 0.75rem);
     --_mark: var(--slotted-border-strong, currentColor);
 
@@ -493,30 +493,30 @@
     z-index: 2;
   }
 
-  [data-ui='dashboard-grid'][data-editing]
-    [data-part='widget']:not([data-loading]):hover
-    > [data-part='resize-handle'],
-  [data-ui='dashboard-grid'][data-editing]
-    [data-part='widget']:focus-within
-    > [data-part='resize-handle'],
-  [data-ui='dashboard-grid'] [data-part='widget'][data-resizing] > [data-part='resize-handle'] {
+  [data-ui-dashboard-grid][data-editing]
+    [data-part-widget]:not([data-loading]):hover
+    > [data-part-resize-handle],
+  [data-ui-dashboard-grid][data-editing]
+    [data-part-widget]:focus-within
+    > [data-part-resize-handle],
+  [data-ui-dashboard-grid] [data-part-widget][data-resizing] > [data-part-resize-handle] {
     opacity: 1;
   }
 
   @media (pointer: coarse) {
-    [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='resize-handle'] {
+    [data-ui-dashboard-grid] [data-part-widget] > [data-part-resize-handle] {
       --_hit: var(--slotted-target-comfortable, 44px);
 
       opacity: 1;
     }
 
-    [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='handle'] {
+    [data-ui-dashboard-grid] [data-part-widget] > [data-part-handle] {
       --_pill-inline: var(--slotted-dashboard-grid-handle-inline-size-coarse, 2.75rem);
       --_pill-block: var(--slotted-dashboard-grid-handle-block-size-coarse, 1.25rem);
     }
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle']::before {
+  [data-ui-dashboard-grid] [data-part-resize-handle]::before {
     background-color: var(--_mark);
     border-radius: var(--slotted-radius-full, 9999px);
     content: '';
@@ -529,68 +529,67 @@
       inline-size var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='dashboard-grid']
-    [data-part='resize-handle']:is([data-edge='start'], [data-edge='end']) {
+  [data-ui-dashboard-grid] [data-part-resize-handle]:is([data-edge='start'], [data-edge='end']) {
     cursor: ew-resize;
     inline-size: var(--_hit);
     inset-block: calc(var(--_radius) + var(--_hit) / 2);
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='start'] {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='start'] {
     inset-inline-start: calc(var(--_hit) / -2);
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='end'] {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='end'] {
     inset-inline-end: calc(var(--_hit) / -2);
   }
 
-  [data-ui='dashboard-grid']
-    [data-part='resize-handle']:is([data-edge='start'], [data-edge='end'])::before {
+  [data-ui-dashboard-grid]
+    [data-part-resize-handle]:is([data-edge='start'], [data-edge='end'])::before {
     block-size: var(--slotted-dashboard-grid-resize-pill, 1.75rem);
     inline-size: var(--slotted-border-width-thick, 3px);
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom'] {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom'] {
     block-size: var(--_hit);
     cursor: ns-resize;
     inset-block-end: calc(var(--_hit) / -2);
     inset-inline: calc(var(--_radius) + var(--_hit) / 2);
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom']::before {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom']::before {
     block-size: var(--slotted-border-width-thick, 3px);
     inline-size: var(--slotted-dashboard-grid-resize-pill, 1.75rem);
   }
 
-  [data-ui='dashboard-grid']
-    [data-part='resize-handle']:is([data-edge='bottom-start'], [data-edge='bottom-end']) {
+  [data-ui-dashboard-grid]
+    [data-part-resize-handle]:is([data-edge='bottom-start'], [data-edge='bottom-end']) {
     block-size: calc(var(--_hit) * 1.5);
     inline-size: calc(var(--_hit) * 1.5);
     inset-block-end: calc(var(--_hit) / -2);
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom-end'] {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom-end'] {
     cursor: nwse-resize;
     inset-inline-end: calc(var(--_hit) / -2);
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom-start'] {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom-start'] {
     cursor: nesw-resize;
     inset-inline-start: calc(var(--_hit) / -2);
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom-end']:dir(rtl) {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom-end']:dir(rtl) {
     cursor: nesw-resize;
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom-start']:dir(rtl) {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom-start']:dir(rtl) {
     cursor: nwse-resize;
   }
 
   /* The corner mark is an arc on the card's own corner: a quarter of a ring
      whose radius is the card's, drawn over the card's edge. */
-  [data-ui='dashboard-grid']
-    [data-part='resize-handle']:is([data-edge='bottom-start'], [data-edge='bottom-end'])::before {
+  [data-ui-dashboard-grid]
+    [data-part-resize-handle]:is([data-edge='bottom-start'], [data-edge='bottom-end'])::before {
     background-color: transparent;
     block-size: var(--_radius);
     border-block-end: var(--slotted-border-width-thick, 3px) solid var(--_mark);
@@ -601,13 +600,13 @@
     margin: 0;
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom-end']::before {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom-end']::before {
     border-end-end-radius: var(--_radius);
     border-inline-end: var(--slotted-border-width-thick, 3px) solid var(--_mark);
     inset-inline-end: calc(var(--_hit) / 2 - var(--slotted-border-width-thin, 1px));
   }
 
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-edge='bottom-start']::before {
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-edge='bottom-start']::before {
     border-end-start-radius: var(--_radius);
     border-inline-start: var(--slotted-border-width-thick, 3px) solid var(--_mark);
     inset-inline-start: calc(var(--_hit) / 2 - var(--slotted-border-width-thin, 1px));
@@ -615,21 +614,21 @@
 
   /* Under the pointer, and while it is pulled, the mark takes the accent and
      the edge pill grows, so the reader sees which side answers. */
-  [data-ui='dashboard-grid'] [data-part='resize-handle']:not([data-disabled]):hover,
-  [data-ui='dashboard-grid'] [data-part='resize-handle'][data-active] {
+  [data-ui-dashboard-grid] [data-part-resize-handle]:not([data-disabled]):hover,
+  [data-ui-dashboard-grid] [data-part-resize-handle][data-active] {
     --_mark: var(--_accent);
   }
 
-  [data-ui='dashboard-grid']
-    [data-part='resize-handle']:is([data-edge='start'], [data-edge='end']):is(
+  [data-ui-dashboard-grid]
+    [data-part-resize-handle]:is([data-edge='start'], [data-edge='end']):is(
       :not([data-disabled]):hover,
       [data-active]
     )::before {
     block-size: var(--slotted-dashboard-grid-resize-pill-active, 2.75rem);
   }
 
-  [data-ui='dashboard-grid']
-    [data-part='resize-handle'][data-edge='bottom']:is(
+  [data-ui-dashboard-grid]
+    [data-part-resize-handle][data-edge='bottom']:is(
       :not([data-disabled]):hover,
       [data-active]
     )::before {
@@ -639,9 +638,9 @@
   /* The medium class flows the widgets, so a widget's start is where the one
      before it ends: there is no start edge to pull. */
   @container dashboard-grid (width < 1024px) {
-    [data-ui='dashboard-grid']
-      [data-part='widget']
-      > [data-part='resize-handle']:is([data-edge='start'], [data-edge='bottom-start']) {
+    [data-ui-dashboard-grid]
+      [data-part-widget]
+      > [data-part-resize-handle]:is([data-edge='start'], [data-edge='bottom-start']) {
       display: none;
     }
   }
@@ -649,7 +648,7 @@
   /* A phone reads a dashboard as one column as tall as its content: there is
      no size to pull, only an order to change. */
   @container dashboard-grid (width < 600px) {
-    [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='resize-handle'] {
+    [data-ui-dashboard-grid] [data-part-widget] > [data-part-resize-handle] {
       display: none;
     }
   }
@@ -665,7 +664,7 @@
    * would land in is the placeholder, and the widgets around it make room as
    * the placeholder moves.
    */
-  [data-ui='dashboard-grid'] [data-part='widget']:is([data-dragging], [data-resizing]) {
+  [data-ui-dashboard-grid] [data-part-widget]:is([data-dragging], [data-resizing]) {
     grid-column: auto;
     grid-row: auto;
     position: absolute;
@@ -674,14 +673,14 @@
 
   /* Picked up: lifted by the largest shadow on the scale. It is not scaled —
      a card of text grown by two per cent is two per cent blurred (R7). */
-  [data-ui='dashboard-grid'] [data-part='widget'][data-dragging] {
+  [data-ui-dashboard-grid] [data-part-widget][data-dragging] {
     cursor: grabbing;
   }
 
   /* A shadow is dark on a dark page, so the widget in hand also takes a
      hairline of the accent: in the dark scheme it is what lifts the card, and
      in the light one it says which card is held. */
-  [data-ui='dashboard-grid'] [data-part='widget'][data-dragging] > [data-ui='card'] {
+  [data-ui-dashboard-grid] [data-part-widget][data-dragging] > [data-ui-card] {
     box-shadow:
       var(--slotted-shadow-lg),
       0 0 0 var(--slotted-border-width-thin, 1px)
@@ -689,7 +688,7 @@
   }
 
   /* Pulled: the card follows the pointer at any size, lifted a step less. */
-  [data-ui='dashboard-grid'] [data-part='widget'][data-resizing] > [data-ui='card'] {
+  [data-ui-dashboard-grid] [data-part-widget][data-resizing] > [data-ui-card] {
     box-shadow:
       var(--slotted-shadow-md),
       0 0 0 var(--slotted-border-width-thin, 1px)
@@ -702,7 +701,7 @@
    * No dashes and no fill that competes with the widget over it — it is a
    * shape the reader aims at, not a second object.
    */
-  [data-ui='dashboard-grid'] > [data-part='grid'] > [data-part='placeholder'] {
+  [data-ui-dashboard-grid] > [data-part-grid] > [data-part-placeholder] {
     background-color: color-mix(in oklab, var(--_accent) 10%, transparent);
     border: var(--slotted-border-width-thin, 1px) solid
       color-mix(in oklab, var(--_accent) 55%, transparent);
@@ -716,7 +715,7 @@
    * corner the reader is pulling: the only text on screen during the gesture,
    * where the eye already is.
    */
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='size-readout'] {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-size-readout] {
     background-color: var(--_accent);
     border-radius: var(--slotted-radius-full, 9999px);
     box-shadow: var(--slotted-shadow-sm);
@@ -735,15 +734,13 @@
     z-index: 4;
   }
 
-  [data-ui='dashboard-grid'] [data-part='widget'] > [data-part='size-readout'][data-edge='start'],
-  [data-ui='dashboard-grid']
-    [data-part='widget']
-    > [data-part='size-readout'][data-edge='bottom-start'] {
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-size-readout][data-edge='start'],
+  [data-ui-dashboard-grid] [data-part-widget] > [data-part-size-readout][data-edge='bottom-start'] {
     inset-inline: var(--slotted-space-5, 0.75rem) auto;
   }
 
   /* A grid with nothing visible. */
-  [data-ui='dashboard-grid'] > [data-part='empty'] {
+  [data-ui-dashboard-grid] > [data-part-empty] {
     min-block-size: calc(var(--_row) * 2 + var(--_gap));
   }
 }

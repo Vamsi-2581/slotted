@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/attachment/attachment.css';
 
 import { createRemovalFocus } from '@slotted/core/focus';
@@ -92,7 +93,7 @@ export function AttachmentGroup({
     [ref],
   );
 
-  const rootProps: AttachmentGroupRootProps = {
+  const rootProps: AttachmentGroupRootProps = keyedProps({
     tabIndex: -1,
     ...nativeProps,
     'data-layout': resolvedLayout,
@@ -101,7 +102,7 @@ export function AttachmentGroup({
     'data-size': resolvedSize,
     'data-ui': 'attachment',
     ref: attach,
-  } as AttachmentGroupRootProps;
+  }) as AttachmentGroupRootProps;
 
   const value = useMemo(
     () => ({ layout: resolvedLayout, orientation, size }),
@@ -187,7 +188,7 @@ export function Attachment({
     t,
   };
 
-  const rootProps: AttachmentRootProps = {
+  const rootProps: AttachmentRootProps = keyedProps({
     ...nativeProps,
     ...(loading ? { 'aria-busy': true } : {}),
     ...(disabled ? { 'data-disabled': '' } : {}),
@@ -208,7 +209,7 @@ export function Attachment({
       event.preventDefault();
       request('keyboard', event);
     },
-  };
+  });
 
   const element =
     render !== undefined ? (

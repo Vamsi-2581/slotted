@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { SyntheticEvent } from 'react';
 
 import { ButtonContent } from './button-content';
@@ -46,7 +47,7 @@ export function ButtonLink({
     return true;
   };
 
-  const rootProps: ButtonLinkRootProps = {
+  const rootProps: ButtonLinkRootProps = keyedProps({
     ...anchorProps,
     ...rootData({ disabled, fullWidth, justify, ...appearance }),
     'aria-disabled': disabled || undefined,
@@ -82,7 +83,7 @@ export function ButtonLink({
       if (event.key === 'Enter' && block(event)) return;
       onKeyDownCapture?.(event);
     },
-  };
+  });
 
   return render === undefined ? <a {...rootProps} /> : render(rootProps);
 }

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/aspect-ratio/aspect-ratio.css';
 
 import type { CSSProperties } from 'react';
@@ -45,7 +46,7 @@ export function resolveAspectRatio(ratio: AspectRatioValue): {
 export function AspectRatio({ children, ratio, render, style, ...nativeProps }: AspectRatioProps) {
   const { attribute, token } = resolveAspectRatio(ratio);
 
-  const rootProps: AspectRatioRootProps = {
+  const rootProps: AspectRatioRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'root',
@@ -56,7 +57,7 @@ export function AspectRatio({ children, ratio, render, style, ...nativeProps }: 
       token === undefined
         ? style
         : ({ ...style, '--slotted-aspect-ratio': token } as CSSProperties),
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

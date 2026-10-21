@@ -148,7 +148,9 @@ export class SlDetailPanelSection {
   ],
   host: {
     'data-ui': 'detail-panel',
+    'data-ui-detail-panel': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-aside]': 'resolvedAside()',
     '[attr.data-level]': 'resolvedLevel()',

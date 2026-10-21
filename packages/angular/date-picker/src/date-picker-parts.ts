@@ -11,7 +11,7 @@ import { Directive } from '@angular/core';
   selector: '[slDatePickerPresets]',
   standalone: true,
   exportAs: 'slDatePickerPresets',
-  host: { 'data-part': 'presets' },
+  host: { 'data-part': 'presets', 'data-part-presets': '' },
 })
 export class SlDatePickerPresets {}
 
@@ -20,6 +20,6 @@ export class SlDatePickerPresets {}
   selector: '[slDatePickerFooter]',
   standalone: true,
   exportAs: 'slDatePickerFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlDatePickerFooter {}

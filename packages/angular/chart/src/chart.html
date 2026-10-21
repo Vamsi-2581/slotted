@@ -1,15 +1,16 @@
 @let current = chartModel(); @if (title() !== undefined || description() !== undefined ||
 resolvedToolbar() !== 'none') {
-<figcaption data-part="header">
+<figcaption data-part="header" data-part-header="">
   <div>
     <div>
       @if (title() !== undefined) {
-      <span data-part="title" [id]="id + '-title'">{{ title() }}</span>
+      <span data-part="title" data-part-title="" [id]="id + '-title'">{{ title() }}</span>
       } @if (help() !== undefined) {
       <button
         #helpControl
         type="button"
         data-part="help"
+        data-part-help=""
         [attr.aria-label]="t('help')"
         [attr.aria-controls]="id + '-help'"
         [attr.aria-expanded]="layerOpen()['help'] ?? false"
@@ -22,6 +23,7 @@ resolvedToolbar() !== 'none') {
         #helpLayer
         popover="auto"
         data-part="help-content"
+        data-part-help-content=""
         role="note"
         [id]="id + '-help'"
         (toggle)="onLayerToggle('help', $event, helpControl, 'start', false)"
@@ -31,15 +33,18 @@ resolvedToolbar() !== 'none') {
       }
     </div>
     @if (description() !== undefined) {
-    <span data-part="description" [id]="id + '-description'">{{ description() }}</span>
+    <span data-part="description" data-part-description="" [id]="id + '-description'"
+      >{{ description() }}</span
+    >
     }
   </div>
-  <div data-part="actions"><ng-content select="[slChartActions]" /></div>
+  <div data-part="actions" data-part-actions=""><ng-content select="[slChartActions]" /></div>
   <!-- The box stands in every state, so the header's words wrap at one width; it
        holds nothing a reader can reach until the plot has something to act on. -->
   @if (resolvedToolbar() !== 'none') { @let ready = usable();
   <div
     data-part="toolbar"
+    data-part-toolbar=""
     [attr.role]="ready ? 'toolbar' : null"
     [attr.aria-label]="ready ? t('toolbar') : null"
     [attr.aria-hidden]="ready ? null : 'true'"
@@ -50,6 +55,7 @@ resolvedToolbar() !== 'none') {
     <button
       type="button"
       data-part="zoom-reset"
+      data-part-zoom-reset=""
       [attr.aria-label]="t('resetZoom')"
       [attr.title]="t('resetZoom')"
       (click)="resetZoomFromToolbar($event)"
@@ -60,6 +66,7 @@ resolvedToolbar() !== 'none') {
     <button
       type="button"
       data-part="view-toggle"
+      data-part-view-toggle=""
       [attr.aria-label]="t('tableView')"
       [attr.title]="t('tableView')"
       [attr.aria-pressed]="tableOpen()"
@@ -71,6 +78,7 @@ resolvedToolbar() !== 'none') {
     <button
       type="button"
       data-part="fullscreen-toggle"
+      data-part-fullscreen-toggle=""
       [attr.aria-label]="fullscreen() ? t('exitFullscreen') : t('fullscreen')"
       [attr.title]="fullscreen() ? t('exitFullscreen') : t('fullscreen')"
       (click)="requestFullscreen(!fullscreen(), pressReason(), $event)"
@@ -81,6 +89,7 @@ resolvedToolbar() !== 'none') {
       #menuControl
       type="button"
       data-part="menu-trigger"
+      data-part-menu-trigger=""
       aria-haspopup="menu"
       [attr.aria-label]="t('more')"
       [attr.title]="t('more')"
@@ -94,6 +103,7 @@ resolvedToolbar() !== 'none') {
       #menu
       popover="auto"
       data-part="menu"
+      data-part-menu=""
       role="menu"
       [attr.aria-label]="t('more')"
       (toggle)="onLayerToggle('menu', $event, menuControl, 'end')"
@@ -103,6 +113,7 @@ resolvedToolbar() !== 'none') {
         type="button"
         role="menuitem"
         data-part="menu-item"
+        data-part-menu-item=""
         data-action="view"
         (click)="menuAction('view', $event)"
       >
@@ -112,6 +123,7 @@ resolvedToolbar() !== 'none') {
         type="button"
         role="menuitem"
         data-part="menu-item"
+        data-part-menu-item=""
         data-action="fullscreen"
         (click)="menuAction('fullscreen', $event)"
       >
@@ -121,6 +133,7 @@ resolvedToolbar() !== 'none') {
         type="button"
         role="menuitem"
         data-part="menu-item"
+        data-part-menu-item=""
         data-action="csv"
         (click)="menuAction('csv', $event)"
       >
@@ -130,6 +143,7 @@ resolvedToolbar() !== 'none') {
         type="button"
         role="menuitem"
         data-part="menu-item"
+        data-part-menu-item=""
         data-action="image"
         (click)="menuAction('image', $event)"
       >
@@ -143,6 +157,7 @@ resolvedToolbar() !== 'none') {
 <div
   #legendRow
   data-part="legend"
+  data-part-legend=""
   [attr.role]="legendWaiting() ? null : legendInteractive() ? 'toolbar' : 'list'"
   [attr.aria-label]="legendWaiting() ? null : t('legend')"
   (keydown)="onLegendKeyDown($event)"
@@ -150,7 +165,9 @@ resolvedToolbar() !== 'none') {
   @if (legendWaiting()) { @for (line of repeat(3); track line) {
   <span
     data-ui="skeleton"
+    data-ui-skeleton=""
     data-part="root"
+    data-part-root=""
     data-shape="block"
     data-size="md"
     data-animation="shimmer"
@@ -166,6 +183,7 @@ resolvedToolbar() !== 'none') {
     #moreControl
     type="button"
     data-part="legend-more"
+    data-part-legend-more=""
     aria-haspopup="true"
     [attr.aria-label]="legendMoreName()"
     [hidden]="collapsed().length === 0"
@@ -180,6 +198,7 @@ resolvedToolbar() !== 'none') {
     #moreLayer
     popover="auto"
     data-part="menu"
+    data-part-menu=""
     role="group"
     [attr.aria-label]="t('legend')"
     (toggle)="onLayerToggle('more', $event, moreControl, 'start')"
@@ -199,6 +218,7 @@ resolvedToolbar() !== 'none') {
   <button
     type="button"
     data-part="legend-item"
+    data-part-legend-item=""
     [attr.data-key]="entry.key"
     [attr.data-slot]="color.slot"
     [attr.data-tone]="color.tone"
@@ -221,6 +241,7 @@ resolvedToolbar() !== 'none') {
   <span
     role="listitem"
     data-part="legend-item"
+    data-part-legend-item=""
     [attr.data-key]="entry.key"
     [attr.data-slot]="color.slot"
     [attr.data-tone]="color.tone"
@@ -242,17 +263,21 @@ resolvedToolbar() !== 'none') {
   } @else {
   <span
     data-part="legend-marker"
+    data-part-legend-marker=""
     [attr.data-kind]="entry.kind === 'area' || entry.kind === 'bar' || entry.kind === 'pie' ? 'bar' : entry.kind"
     [attr.data-stroke]="strokeOf(entry)"
   ></span>
-  <span data-part="legend-label" [attr.title]="entry.label">{{ entry.label }}</span>
+  <span data-part="legend-label" data-part-legend-label="" [attr.title]="entry.label"
+    >{{ entry.label }}</span
+  >
   @if (legendValues()) {
-  <span data-part="legend-value">{{ legendValue(entry) }}</span>
+  <span data-part="legend-value" data-part-legend-value="">{{ legendValue(entry) }}</span>
   } }
 </ng-template>
 <div
   #plot
   data-part="plot"
+  data-part-plot=""
   role="group"
   tabindex="0"
   [attr.aria-roledescription]="t('roledescription')"
@@ -267,6 +292,7 @@ resolvedToolbar() !== 'none') {
   @let overlayNow = overlay();
   <div
     data-part="crosshair"
+    data-part-crosshair=""
     [hidden]="!overlayNow.crosshair"
     [attr.data-band]="overlayNow.crosshair?.isBand ? '' : null"
     [attr.data-orientation]="current?.orientation ?? 'vertical'"
@@ -277,10 +303,17 @@ resolvedToolbar() !== 'none') {
     [style.--slotted-chart-frame-start]="px(overlayNow.crosshair?.frame?.start)"
     [style.--slotted-chart-frame-size]="px(overlayNow.crosshair?.frame?.size)"
   ></div>
-  <div #canvas data-part="canvas" aria-hidden="true" [hidden]="!drawable()"></div>
+  <div
+    #canvas
+    data-part="canvas"
+    data-part-canvas=""
+    aria-hidden="true"
+    [hidden]="!drawable()"
+  ></div>
   @for (marker of overlayNow.markers; track marker.key) { @let markerColor = colorOf(marker.color);
   <div
     data-part="marker"
+    data-part-marker=""
     aria-hidden="true"
     [attr.data-slot]="markerColor.slot"
     [attr.data-tone]="markerColor.tone"
@@ -294,6 +327,7 @@ resolvedToolbar() !== 'none') {
   <div
     #tooltipBox
     data-part="tooltip"
+    data-part-tooltip=""
     aria-hidden="true"
     [attr.data-open]="overlayNow.tooltip ? '' : null"
     [attr.data-docked]="overlayNow.docked ? '' : null"
@@ -303,13 +337,14 @@ resolvedToolbar() !== 'none') {
       *ngTemplateOutlet="custom.template; context: { $implicit: overlayNow.tooltip, model: current }"
     />
     } @else {
-    <div data-part="tooltip-title">{{ overlayNow.tooltip.title }}</div>
+    <div data-part="tooltip-title" data-part-tooltip-title="">{{ overlayNow.tooltip.title }}</div>
     @for (note of overlayNow.tooltip.notes; track note) {
-    <div data-part="tooltip-note">{{ note }}</div>
+    <div data-part="tooltip-note" data-part-tooltip-note="">{{ note }}</div>
     } @for (item of overlayNow.tooltip.items; track item.series + item.label) { @let itemColor =
     colorOf(item.color);
     <div
       data-part="tooltip-item"
+      data-part-tooltip-item=""
       [attr.data-current]="overlayNow.tooltip.items.length > 1 && item.current ? '' : null"
       [attr.data-slot]="itemColor.slot"
       [attr.data-tone]="itemColor.tone"
@@ -318,40 +353,44 @@ resolvedToolbar() !== 'none') {
       @if (resolvedTooltip().indicator !== 'none') {
       <span
         data-part="tooltip-marker"
+        data-part-tooltip-marker=""
         [attr.data-kind]="markerKind(item.kind, resolvedTooltip().indicator)"
         [attr.data-stroke]="strokeOf(item)"
       ></span>
       }
-      <span data-part="tooltip-label">{{ item.label }}</span>
-      <span data-part="tooltip-value"
+      <span data-part="tooltip-label" data-part-tooltip-label="">{{ item.label }}</span>
+      <span data-part="tooltip-value" data-part-tooltip-value=""
         >{{ item.share ? item.share + ' · ' + item.formatted : item.formatted }}</span
       >
     </div>
     } @if (overlayNow.tooltip.total; as total) {
-    <div data-part="tooltip-total">
+    <div data-part="tooltip-total" data-part-tooltip-total="">
       <span>{{ t('total') }}</span>
-      <span data-part="tooltip-value">{{ total.formatted }}</span>
+      <span data-part="tooltip-value" data-part-tooltip-value="">{{ total.formatted }}</span>
     </div>
     } } }
   </div>
   @if (drawable() && current?.shape === 'pie' && (current?.series[0]?.innerRadius ?? 0) > 0) {
-  <div data-part="center" aria-hidden="true">
+  <div data-part="center" data-part-center="" aria-hidden="true">
     @if (centerTemplate(); as custom) {
     <ng-container *ngTemplateOutlet="custom.template; context: { $implicit: current }" />
     } @else {
-    <span data-part="center-value">{{ current!.series[0]!.format(current!.total) }}</span>
-    <span data-part="center-label">{{ t('total') }}</span>
+    <span data-part="center-value" data-part-center-value=""
+      >{{ current!.series[0]!.format(current!.total) }}</span
+    >
+    <span data-part="center-label" data-part-center-label="">{{ t('total') }}</span>
     }
   </div>
   } @if (table(); as rows) {
   <div
     #tableRegion
     data-part="table-region"
+    data-part-table-region=""
     role="region"
     tabindex="0"
     [attr.aria-labelledby]="title() !== undefined ? id + '-title' : null"
   >
-    <table data-part="table">
+    <table data-part="table" data-part-table="">
       <caption>
         {{ title() }}
       </caption>
@@ -376,12 +415,26 @@ resolvedToolbar() !== 'none') {
     </table>
   </div>
   } @if (loading()) {
-  <div data-part="skeleton" aria-hidden="true" [attr.data-kind]="skeletonKind()">
-    <div data-ui="skeleton" data-part="region" data-animation="shimmer" data-loading>
+  <div
+    data-part="skeleton"
+    data-part-skeleton=""
+    aria-hidden="true"
+    [attr.data-kind]="skeletonKind()"
+  >
+    <div
+      data-ui="skeleton"
+      data-ui-skeleton=""
+      data-part="region"
+      data-part-region=""
+      data-animation="shimmer"
+      data-loading
+    >
       @if (skeletonKind() === 'pie') {
       <span
         data-ui="skeleton"
+        data-ui-skeleton=""
         data-part="root"
+        data-part-root=""
         data-shape="circle"
         data-size="md"
         data-animation="shimmer"
@@ -393,7 +446,9 @@ resolvedToolbar() !== 'none') {
         @for (line of repeat(5); track line) {
         <span
           data-ui="skeleton"
+          data-ui-skeleton=""
           data-part="root"
+          data-part-root=""
           data-shape="block"
           data-size="md"
           data-animation="shimmer"
@@ -406,7 +461,9 @@ resolvedToolbar() !== 'none') {
         @for (mark of repeat(skeletonKind() === 'bar' ? 7 : 2); track mark) {
         <span
           data-ui="skeleton"
+          data-ui-skeleton=""
           data-part="root"
+          data-part-root=""
           data-shape="block"
           data-size="md"
           data-animation="shimmer"
@@ -419,7 +476,9 @@ resolvedToolbar() !== 'none') {
         @for (line of repeat(6); track line) {
         <span
           data-ui="skeleton"
+          data-ui-skeleton=""
           data-part="root"
+          data-part-root=""
           data-shape="block"
           data-size="md"
           data-animation="shimmer"
@@ -432,65 +491,77 @@ resolvedToolbar() !== 'none') {
     </div>
   </div>
   } @else if (failed()) {
-  <div data-part="error">
+  <div data-part="error" data-part-error="">
     @if (errorTemplate(); as custom) {
     <ng-container *ngTemplateOutlet="custom.template" />
     } @else {
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-status="error"
       data-reach="section"
       data-align="center"
       data-live="polite"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content" role="status"><div data-part="title">{{ t('error') }}</div></div>
-      <div data-part="actions">
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="">{{ t('error') }}</div>
+      </div>
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="outline"
           data-tone="secondary"
           data-size="sm"
           type="button"
           (click)="onRetry()"
         >
-          <span data-part="label">{{ t('retry') }}</span>
+          <span data-part="label" data-part-label="">{{ t('retry') }}</span>
         </button>
       </div>
     </section>
     }
   </div>
   } @else if (current?.empty; as reason) {
-  <div data-part="empty">
+  <div data-part="empty" data-part-empty="">
     @if (emptyTemplate(); as custom) {
     <ng-container *ngTemplateOutlet="custom.template; context: { $implicit: reason }" />
     } @else {
     <section
       data-ui="result-state"
+      data-ui-result-state=""
       data-part="root"
+      data-part-root=""
       data-reach="section"
       data-align="center"
       data-live="polite"
       [attr.data-status]="reason === 'all-hidden' ? 'no-results' : 'empty'"
     >
-      <div data-part="media" aria-hidden="true"></div>
-      <div data-part="content" role="status">
-        <div data-part="title">{{ reason === 'all-hidden' ? t('allHidden') : t('noData') }}</div>
+      <div data-part="media" data-part-media="" aria-hidden="true"></div>
+      <div data-part="content" data-part-content="" role="status">
+        <div data-part="title" data-part-title="">
+          {{ reason === 'all-hidden' ? t('allHidden') : t('noData') }}
+        </div>
       </div>
       @if (reason === 'all-hidden') {
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-variant="outline"
           data-tone="secondary"
           data-size="sm"
           type="button"
           (click)="showAll($event)"
         >
-          <span data-part="label">{{ t('showAll') }}</span>
+          <span data-part="label" data-part-label="">{{ t('showAll') }}</span>
         </button>
       </div>
       }
@@ -498,5 +569,5 @@ resolvedToolbar() !== 'none') {
     }
   </div>
   }
-  <p data-part="summary" [id]="id + '-summary'">{{ summary() }}</p>
+  <p data-part="summary" data-part-summary="" [id]="id + '-summary'">{{ summary() }}</p>
 </div>

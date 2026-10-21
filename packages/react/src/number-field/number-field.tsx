@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/number-field/number-field.css';
 
 import { numberFieldMessages } from '@slotted/core/i18n';
@@ -530,6 +531,7 @@ export function NumberField({
         aria-controls={id ?? field?.ids.control}
         aria-label={t(part)}
         data-part={part}
+        {...selectorKeyProps('part', part)}
         disabled={inert || (direction === 1 ? atMax : atMin)}
         key={part}
         onLostPointerCapture={stopRepeating}
@@ -559,7 +561,7 @@ export function NumberField({
       autoComplete="off"
       autoCorrect="off"
       spellCheck={false}
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'input')}
       aria-describedby={[describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined}
       aria-invalid={ariaInvalid ?? (resolvedInvalid === true ? true : undefined)}
       aria-required={ariaRequired ?? (field?.required === true ? true : undefined)}
@@ -567,7 +569,7 @@ export function NumberField({
       aria-valuemin={min}
       aria-valuenow={parsed ?? undefined}
       aria-valuetext={text === '' ? undefined : text}
-      data-part="input"
+
       disabled={resolvedDisabled}
       id={id ?? field?.ids.control}
       inputMode={inputMode ?? derivedInputMode}
@@ -635,7 +637,7 @@ export function NumberField({
       : resolvedStepper === 'split'
         ? [stepperButton(-1), stepperButton(1)]
         : [
-            <span data-part="stepper" key="stepper">
+            <span data-part="stepper" data-part-stepper="" key="stepper">
               {stepperButton(1)}
               {stepperButton(-1)}
             </span>,
@@ -649,9 +651,17 @@ export function NumberField({
   const children: ReactNode = (
     <NumberFieldScrubContext.Provider value={scrubContext}>
       {resolvedStepper === 'split' ? steppers?.[0] : null}
-      {start === undefined ? null : <span data-part="start">{start}</span>}
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
       {control}
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
       {resolvedStepper === 'split' ? steppers?.[1] : steppers}
       {name === undefined ? null : (
         <input
@@ -664,7 +674,7 @@ export function NumberField({
     </NumberFieldScrubContext.Provider>
   );
 
-  const rootProps: NumberFieldRootProps = {
+  const rootProps: NumberFieldRootProps = keyedProps({
     children,
     className,
     style,
@@ -677,7 +687,7 @@ export function NumberField({
     'data-stepper': resolvedStepper,
     'data-ui': 'number-field',
     'data-variant': resolvedVariant,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -721,9 +731,9 @@ export function NumberFieldScrub({
 
   return (
     <span
-      {...props}
+      {...withSelectorKey(props, 'part', 'scrub')}
       aria-hidden={ariaHidden}
-      data-part="scrub"
+
       data-scrubbing={active ? '' : undefined}
       onLostPointerCapture={finish(onLostPointerCapture)}
       onPointerCancel={finish(onPointerCancel)}

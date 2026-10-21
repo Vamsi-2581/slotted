@@ -16,7 +16,7 @@
    * mirrors its state onto the frame rather than styling through, so a control
    * used outside a field looks the same as one inside it.
    */
-  [data-ui='currency-field'][data-part='root'] {
+  [data-ui-currency-field][data-part-root] {
     /**
      * Type, height, inline padding, gap and glyph size all come from the
      * control scales — the only ones the theme restates per density — so an
@@ -126,7 +126,7 @@
    * the reader's eye, and under cents-first entry every keystroke rewrites the
    * whole string — so the setting matters more here than anywhere else.
    */
-  [data-ui='currency-field'] > [data-part='input'] {
+  [data-ui-currency-field] > [data-part-input] {
     background-color: transparent;
     /* The frame's border box, not its content box: on a coarse pointer the frame
        is the touch target's height and the control it holds is too. Stretched
@@ -160,7 +160,7 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='currency-field'] > [data-part='input']::placeholder {
+  [data-ui-currency-field] > [data-part-input]::placeholder {
     color: var(--slotted-currency-field-placeholder-color, var(--slotted-text-muted, GrayText));
     text-overflow: ellipsis;
   }
@@ -176,19 +176,19 @@
    * means "the document's end edge, whatever the run inside is doing".
    */
 
-  [data-ui='currency-field'][data-align='end'] > [data-part='input'] {
+  [data-ui-currency-field][data-align='end'] > [data-part-input] {
     text-align: right;
   }
 
-  [data-ui='currency-field'][data-align='end']:dir(rtl) > [data-part='input'] {
+  [data-ui-currency-field][data-align='end']:dir(rtl) > [data-part-input] {
     text-align: left;
   }
 
-  [data-ui='currency-field'][data-align='start'] > [data-part='input'] {
+  [data-ui-currency-field][data-align='start'] > [data-part-input] {
     text-align: left;
   }
 
-  [data-ui='currency-field'][data-align='start']:dir(rtl) > [data-part='input'] {
+  [data-ui-currency-field][data-align='start']:dir(rtl) > [data-part-input] {
     text-align: right;
   }
 
@@ -198,7 +198,7 @@
    * control beside it. One library, one scale.
    */
 
-  [data-ui='currency-field'][data-part='root'][data-size='sm'] {
+  [data-ui-currency-field][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
@@ -207,7 +207,7 @@
     --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='currency-field'][data-part='root'][data-size='md'] {
+  [data-ui-currency-field][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -216,7 +216,7 @@
     --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
-  [data-ui='currency-field'][data-part='root'][data-size='lg'] {
+  [data-ui-currency-field][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -232,7 +232,7 @@
    * nothing at rest, which is what a dense table of amounts needs.
    */
 
-  [data-ui='currency-field'][data-part='root'][data-variant='subtle'] {
+  [data-ui-currency-field][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-currency-field-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -246,7 +246,7 @@
   /* No edge, no lift, no ground and no corner of its own: the cell it sits in
      is the box, the row is the ground, a cell has no corner, and the resting
      shadow would draw the cell where there is none. */
-  [data-ui='currency-field'][data-part='root'][data-variant='plain'] {
+  [data-ui-currency-field][data-part-root][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -259,7 +259,7 @@
    * its only edge exactly where an edge matters most.
    */
   @media (forced-colors: active) {
-    [data-ui='currency-field'][data-part='root'][data-variant='plain'] {
+    [data-ui-currency-field][data-part-root][data-variant='plain'] {
       border-color: ButtonBorder;
     }
   }
@@ -271,8 +271,8 @@
    * holds, is selected with it, is copied with it and is parsed back out of
    * it. This one is none of those things, which is the whole distinction.
    */
-  [data-ui='currency-field'] > [data-part='start'],
-  [data-ui='currency-field'] > [data-part='end'] {
+  [data-ui-currency-field] > [data-part-start],
+  [data-ui-currency-field] > [data-part-end] {
     align-items: center;
     color: var(--slotted-currency-field-adornment-color, var(--slotted-text-muted, GrayText));
     display: inline-flex;
@@ -290,8 +290,8 @@
     --slotted-icon-size: var(--_icon-size);
   }
 
-  [data-ui='currency-field'] > [data-part='start'] > svg,
-  [data-ui='currency-field'] > [data-part='end'] > svg {
+  [data-ui-currency-field] > [data-part-start] > svg,
+  [data-ui-currency-field] > [data-part-end] > svg {
     block-size: var(--_icon-size);
     inline-size: var(--_icon-size);
   }
@@ -302,8 +302,8 @@
    * advance width. An adornment that draws no glyph takes the margin the glyph
    * box already has, on both sides — the measurement `text-field` derived.
    */
-  [data-ui='currency-field'] > [data-part='start']:not(:has(svg, img, [data-ui='icon'])),
-  [data-ui='currency-field'] > [data-part='end']:not(:has(svg, img, [data-ui='icon'])) {
+  [data-ui-currency-field] > [data-part-start]:not(:has(svg, img, [data-ui-icon])),
+  [data-ui-currency-field] > [data-part-end]:not(:has(svg, img, [data-ui-icon])) {
     padding-inline: calc(var(--_icon-size) / 8);
   }
 
@@ -317,12 +317,11 @@
    * mark is not a button, it has no ground to change, and the cursor alone
    * said nothing a reader would look at.
    */
-  [data-ui='currency-field']
-    > :is([data-part='start'], [data-part='end']):has(> [data-part='scrub']) {
+  [data-ui-currency-field] > :is([data-part-start], [data-part-end]):has(> [data-part-scrub]) {
     align-self: stretch;
   }
 
-  [data-ui='currency-field'] [data-part='scrub'] {
+  [data-ui-currency-field] [data-part-scrub] {
     align-items: center;
     align-self: stretch;
     cursor: ew-resize;
@@ -339,12 +338,12 @@
     -webkit-user-select: none;
   }
 
-  [data-ui='currency-field']:not([data-disabled]):not([data-readonly])
-    [data-part='scrub']:is(:hover, [data-scrubbing]) {
+  [data-ui-currency-field]:not([data-disabled]):not([data-readonly])
+    [data-part-scrub]:is(:hover, [data-scrubbing]) {
     color: var(--slotted-currency-field-scrub-active-color, var(--slotted-text, CanvasText));
   }
 
-  [data-ui='currency-field']:is([data-disabled], [data-readonly]) [data-part='scrub'] {
+  [data-ui-currency-field]:is([data-disabled], [data-readonly]) [data-part-scrub] {
     cursor: default;
     touch-action: auto;
   }
@@ -357,9 +356,9 @@
    * `aria-controls`. Their glyphs are the `Glyph` element the binding
    * renders: a character is never an icon.
    */
-  [data-ui='currency-field'] > [data-part='stepper'] > button,
-  [data-ui='currency-field'] > [data-part='decrement'],
-  [data-ui='currency-field'] > [data-part='increment'] {
+  [data-ui-currency-field] > [data-part-stepper] > button,
+  [data-ui-currency-field] > [data-part-decrement],
+  [data-ui-currency-field] > [data-part-increment] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -383,8 +382,8 @@
 
   /* The `icon` box inside each button is drawn at the control's own icon
      step rather than at the icon family's default. */
-  [data-ui='currency-field'] [data-part='decrement'],
-  [data-ui='currency-field'] [data-part='increment'] {
+  [data-ui-currency-field] [data-part-decrement],
+  [data-ui-currency-field] [data-part-increment] {
     --slotted-icon-size: var(--_icon-size);
   }
 
@@ -397,7 +396,7 @@
    * more do not change with the reading direction, where a chevron along the
    * inline axis would read as "previous" and "next" and would have to mirror.
    */
-  [data-ui='currency-field'][data-stepper='stacked'] [data-part='increment'] > [data-ui='icon'] {
+  [data-ui-currency-field][data-stepper='stacked'] [data-part-increment] > [data-ui-icon] {
     rotate: 0.5turn;
   }
 
@@ -410,11 +409,11 @@
    * column and its halves are one surface. The paint gives the inset back to
    * the pointer: each half's hit area reaches the frame.
    */
-  [data-ui='currency-field'][data-part='root'][data-stepper='stacked'] {
+  [data-ui-currency-field][data-part-root][data-stepper='stacked'] {
     padding-inline-end: 0;
   }
 
-  [data-ui='currency-field'] > [data-part='stepper'] {
+  [data-ui-currency-field] > [data-part-stepper] {
     align-self: stretch;
     box-sizing: content-box;
     display: flex;
@@ -425,26 +424,26 @@
     padding-inline-end: var(--_column-inset);
   }
 
-  [data-ui='currency-field'] > [data-part='stepper'] > button {
+  [data-ui-currency-field] > [data-part-stepper] > button {
     /* Two halves of the column, whatever the frame's height turns out to be. */
     block-size: 50%;
     border-radius: var(--_column-radius);
     inline-size: 100%;
   }
 
-  [data-ui='currency-field']
-    > [data-part='stepper']
-    > :is([data-part='increment'], [data-part='decrement'])::after {
+  [data-ui-currency-field]
+    > [data-part-stepper]
+    > :is([data-part-increment], [data-part-decrement])::after {
     content: '';
     inset-inline: 0 calc(var(--_column-inset) * -1);
     position: absolute;
   }
 
-  [data-ui='currency-field'] > [data-part='stepper'] > [data-part='increment']::after {
+  [data-ui-currency-field] > [data-part-stepper] > [data-part-increment]::after {
     inset-block: calc(var(--_column-inset) * -1) 0;
   }
 
-  [data-ui='currency-field'] > [data-part='stepper'] > [data-part='decrement']::after {
+  [data-ui-currency-field] > [data-part-stepper] > [data-part-decrement]::after {
     inset-block: 0 calc(var(--_column-inset) * -1);
   }
 
@@ -459,7 +458,7 @@
    * percentage falls back to the `<svg>`'s own square, and two of them plus the
    * divider would stand taller than the value and grow the frame.
    */
-  [data-ui='currency-field'] > [data-part='stepper'] > button > [data-ui='icon'] {
+  [data-ui-currency-field] > [data-part-stepper] > button > [data-ui-icon] {
     block-size: min(var(--_icon-size), 100%);
     contain: size;
   }
@@ -470,23 +469,23 @@
    * frame's padding is that inset on both sides. No rule divides a button from
    * the value: the ground it paints is its edge.
    */
-  [data-ui='currency-field'][data-part='root'][data-stepper='split'] {
+  [data-ui-currency-field][data-part-root][data-stepper='split'] {
     gap: 0;
     padding-inline: var(--_inset);
   }
 
-  [data-ui='currency-field'][data-stepper='split'] > [data-part='decrement'],
-  [data-ui='currency-field'][data-stepper='split'] > [data-part='increment'] {
+  [data-ui-currency-field][data-stepper='split'] > [data-part-decrement],
+  [data-ui-currency-field][data-stepper='split'] > [data-part-increment] {
     block-size: var(--_action-size);
     border-radius: var(--_action-radius);
     inline-size: var(--_action-size);
   }
 
-  [data-ui='currency-field'][data-stepper='split'] > [data-part='start'] {
+  [data-ui-currency-field][data-stepper='split'] > [data-part-start] {
     padding-inline-start: var(--_gap);
   }
 
-  [data-ui='currency-field'][data-stepper='split'] > [data-part='end'] {
+  [data-ui-currency-field][data-stepper='split'] > [data-part-end] {
     padding-inline-end: var(--_gap);
   }
 
@@ -501,7 +500,7 @@
    * stepper beside it would otherwise be five pixels off every amount without
    * one — which is the comparison `align="end"` exists to make.
    */
-  [data-ui='currency-field'][data-stepper='split'] > [data-part='input'] {
+  [data-ui-currency-field][data-stepper='split'] > [data-part-input] {
     padding-inline: var(--_padding-inline);
   }
 
@@ -511,8 +510,8 @@
    * 24 in both axes. This grows the target to the minimum and leaves a larger
    * one alone — the correction `docs/token-foundation.md` leaves to the family.
    */
-  [data-ui='currency-field'][data-stepper='split'] > [data-part='decrement']::after,
-  [data-ui='currency-field'][data-stepper='split'] > [data-part='increment']::after {
+  [data-ui-currency-field][data-stepper='split'] > [data-part-decrement]::after,
+  [data-ui-currency-field][data-stepper='split'] > [data-part-increment]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -528,14 +527,14 @@
    * value's edge and past the frame's.
    */
   @media (pointer: coarse) {
-    [data-ui='currency-field'][data-stepper='split']
-      > :is([data-part='decrement'], [data-part='increment'])::after {
+    [data-ui-currency-field][data-stepper='split']
+      > :is([data-part-decrement], [data-part-increment])::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='currency-field']
-      > [data-part='stepper']
-      > :is([data-part='increment'], [data-part='decrement'])::after {
+    [data-ui-currency-field]
+      > [data-part-stepper]
+      > :is([data-part-increment], [data-part-decrement])::after {
       inset-inline: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
   }
@@ -546,16 +545,16 @@
    * ones it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='currency-field'] [data-part='decrement']:hover:not(:disabled),
-  [data-ui='currency-field'] [data-part='increment']:hover:not(:disabled) {
+  [data-ui-currency-field] [data-part-decrement]:hover:not(:disabled),
+  [data-ui-currency-field] [data-part-increment]:hover:not(:disabled) {
     background-color: var(
       --slotted-currency-field-stepper-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='currency-field'] [data-part='decrement']:active:not(:disabled),
-  [data-ui='currency-field'] [data-part='increment']:active:not(:disabled) {
+  [data-ui-currency-field] [data-part-decrement]:active:not(:disabled),
+  [data-ui-currency-field] [data-part-increment]:active:not(:disabled) {
     background-color: var(
       --slotted-currency-field-stepper-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -568,8 +567,8 @@
    * says it as well as the ink: the disabled foreground and the resting
    * stepper colour are two steps of one neutral.
    */
-  [data-ui='currency-field'] [data-part='decrement']:disabled,
-  [data-ui='currency-field'] [data-part='increment']:disabled {
+  [data-ui-currency-field] [data-part-decrement]:disabled,
+  [data-ui-currency-field] [data-part-increment]:disabled {
     background-color: var(
       --slotted-currency-field-stepper-disabled-background,
       var(--slotted-disabled-background)
@@ -583,15 +582,15 @@
    * touch and a screen-reader cursor activating one directly. It sits inside
    * the frame's own edge, so the ring never doubles the border.
    */
-  [data-ui='currency-field'] [data-part='decrement']:focus-visible,
-  [data-ui='currency-field'] [data-part='increment']:focus-visible {
+  [data-ui-currency-field] [data-part-decrement]:focus-visible,
+  [data-ui-currency-field] [data-part-increment]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   /* ── Frame states ─────────────────────────────────────────────────────── */
 
-  [data-ui='currency-field'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-currency-field][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     ) {
     border-color: var(
@@ -600,16 +599,16 @@
     );
   }
 
-  [data-ui='currency-field'][data-part='root'][data-variant='subtle']:hover:not(
-      [data-disabled]
-    ):not([data-readonly]):not([data-invalid]) {
+  [data-ui-currency-field][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
+      [data-readonly]
+    ):not([data-invalid]) {
     background-color: var(
       --slotted-currency-field-subtle-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='currency-field'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+  [data-ui-currency-field][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -625,7 +624,7 @@
    * matches `:focus-visible` on a text input for a pointer press as well as for
    * a Tab, which is right for a control whose caret is the thing that moved.
    */
-  [data-ui='currency-field'][data-part='root']:has(> [data-part='input']:focus-visible) {
+  [data-ui-currency-field][data-part-root]:has(> [data-part-input]:focus-visible) {
     /* The resting shadow, recoloured: the lift under the control and the ring
        around it are one colour, and the state decides which colour that is. */
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
@@ -641,8 +640,8 @@
    * shadow that appears only under focus is a cell that changes size when it
    * is used.
    */
-  [data-ui='currency-field'][data-part='root'][data-variant='plain']:has(
-      > [data-part='input']:focus-visible
+  [data-ui-currency-field][data-part-root][data-variant='plain']:has(
+      > [data-part-input]:focus-visible
     ) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
@@ -655,7 +654,7 @@
    * colour on the element moves the outline, the shadow and both steppers'
    * rings at once.
    */
-  [data-ui='currency-field'][data-part='root'][data-invalid] {
+  [data-ui-currency-field][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-currency-field-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -683,17 +682,15 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='currency-field'][data-part='root'][data-invalid]:has(
-      > [data-part='input']:focus-visible
-    ) {
+  [data-ui-currency-field][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='currency-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-      > [data-part='input']:focus-visible
+  [data-ui-currency-field][data-part-root][data-variant='plain'][data-invalid]:has(
+      > [data-part-input]:focus-visible
     ) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
@@ -711,23 +708,21 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='currency-field'][data-part='root'][data-invalid] {
+    [data-ui-currency-field][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='currency-field'][data-part='root'][data-invalid]:has(
-        > [data-part='input']:focus-visible
-      ) {
+    [data-ui-currency-field][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='currency-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-        > [data-part='input']:focus-visible
+    [data-ui-currency-field][data-part-root][data-variant='plain'][data-invalid]:has(
+        > [data-part-input]:focus-visible
       ) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
@@ -743,7 +738,7 @@
    * ground says "not yours to change", the edge steps down to the separator
    * weight, and the ink stays at full strength.
    */
-  [data-ui='currency-field'][data-part='root'][data-readonly] {
+  [data-ui-currency-field][data-part-root][data-readonly] {
     background-color: var(
       --slotted-currency-field-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -760,8 +755,8 @@
    * because a control can be disabled by something that never told it so: a
    * disabled `fieldset` disables every control inside it.
    */
-  [data-ui='currency-field'][data-part='root'][data-disabled],
-  [data-ui='currency-field'][data-part='root']:has(> [data-part='input']:disabled) {
+  [data-ui-currency-field][data-part-root][data-disabled],
+  [data-ui-currency-field][data-part-root]:has(> [data-part-input]:disabled) {
     background-color: var(
       --slotted-currency-field-disabled-background,
       var(--slotted-disabled-background)
@@ -780,8 +775,8 @@
    * Muted to the colour the theme measures rather than faded by opacity: an
    * amount nobody can read is a field nobody can check.
    */
-  [data-ui='currency-field'][data-part='root'][data-disabled] > [data-part='start'],
-  [data-ui='currency-field'][data-part='root'][data-disabled] > [data-part='end'] {
+  [data-ui-currency-field][data-part-root][data-disabled] > [data-part-start],
+  [data-ui-currency-field][data-part-root][data-disabled] > [data-part-end] {
     color: var(--slotted-disabled-foreground);
   }
 
@@ -796,7 +791,7 @@
    * digits; elsewhere the control takes the line and `align` places the
    * amount in it.
    */
-  [data-ui='currency-field'][data-part='root'][data-appearance='display'] {
+  [data-ui-currency-field][data-part-root][data-appearance='display'] {
     --_font-size: var(
       --slotted-currency-field-display-font-size,
       var(--slotted-font-size-4xl, 2rem)
@@ -813,7 +808,7 @@
     line-height: var(--slotted-line-height-4xl, 1.2);
   }
 
-  [data-ui='currency-field'][data-part='root'][data-appearance='display'] > [data-part='symbol'] {
+  [data-ui-currency-field][data-part-root][data-appearance='display'] > [data-part-symbol] {
     color: var(--slotted-currency-field-symbol-color, var(--slotted-text-muted, GrayText));
     flex: none;
     font-size: var(
@@ -824,18 +819,18 @@
     letter-spacing: 0;
   }
 
-  [data-ui='currency-field'][data-part='root'][data-appearance='display'] > [data-part='input'] {
+  [data-ui-currency-field][data-part-root][data-appearance='display'] > [data-part-input] {
     align-self: auto;
     margin-block: 0;
   }
 
   @supports (field-sizing: content) {
-    [data-ui='currency-field'][data-part='root'][data-appearance='display'] {
+    [data-ui-currency-field][data-part-root][data-appearance='display'] {
       inline-size: fit-content;
       max-inline-size: 100%;
     }
 
-    [data-ui='currency-field'][data-part='root'][data-appearance='display'] > [data-part='input'] {
+    [data-ui-currency-field][data-part-root][data-appearance='display'] > [data-part-input] {
       field-sizing: content;
       flex: 0 1 auto;
       min-inline-size: 1ch;
@@ -847,7 +842,7 @@
    * and doubles, which is the focus indicator; invalid, it takes the danger
    * colour. No ground, no corner and no resting lift.
    */
-  [data-ui='currency-field'][data-part='root'][data-appearance='display'] {
+  [data-ui-currency-field][data-part-root][data-appearance='display'] {
     background-color: transparent;
     border-color: transparent;
     border-block-end-color: var(
@@ -859,8 +854,8 @@
     padding-inline: 0;
   }
 
-  [data-ui='currency-field'][data-part='root'][data-appearance='display']:has(
-      > [data-part='input']:focus-visible
+  [data-ui-currency-field][data-part-root][data-appearance='display']:has(
+      > [data-part-input]:focus-visible
     ) {
     border-block-end-color: var(--slotted-text, CanvasText);
     box-shadow: inset 0 calc(-1 * var(--slotted-border-width-thin, 1px)) 0
@@ -868,39 +863,39 @@
     outline: none;
   }
 
-  [data-ui='currency-field'][data-part='root'][data-appearance='display'][data-invalid] {
+  [data-ui-currency-field][data-part-root][data-appearance='display'][data-invalid] {
     border-block-end-color: var(--slotted-tone-danger-border, CanvasText);
     box-shadow: none;
   }
 
-  [data-ui='currency-field'][data-part='root'][data-appearance='display'][data-invalid]:has(
-      > [data-part='input']:focus-visible
+  [data-ui-currency-field][data-part-root][data-appearance='display'][data-invalid]:has(
+      > [data-part-input]:focus-visible
     ) {
     box-shadow: inset 0 calc(-1 * var(--_invalid-edge-width)) 0 var(--_invalid-edge-color);
   }
 
-  [data-ui='currency-field'][data-part='root'][data-appearance='display']:has(
-      > [data-part='input']:disabled
+  [data-ui-currency-field][data-part-root][data-appearance='display']:has(
+      > [data-part-input]:disabled
     ) {
     border-block-end-color: var(--slotted-disabled-border, GrayText);
   }
 
   @media (forced-colors: active) {
-    [data-ui='currency-field'][data-part='root'][data-appearance='display'] {
+    [data-ui-currency-field][data-part-root][data-appearance='display'] {
       border-block-end-color: ButtonBorder;
     }
 
     /* A shadow is not painted under forced colours, so the doubled rule of
        focus is a wider border there. */
-    [data-ui='currency-field'][data-part='root'][data-appearance='display']:has(
-        > [data-part='input']:focus-visible
+    [data-ui-currency-field][data-part-root][data-appearance='display']:has(
+        > [data-part-input]:focus-visible
       ) {
       border-block-end-color: Highlight;
       border-block-end-width: calc(2 * var(--slotted-border-width-thin, 1px));
     }
 
-    [data-ui='currency-field'][data-part='root'][data-appearance='display'][data-invalid]:has(
-        > [data-part='input']:focus-visible
+    [data-ui-currency-field][data-part-root][data-appearance='display'][data-invalid]:has(
+        > [data-part-input]:focus-visible
       ) {
       border-block-end-color: Highlight;
       border-block-end-width: calc(

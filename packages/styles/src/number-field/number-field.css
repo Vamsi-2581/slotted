@@ -16,7 +16,7 @@
    * mirrors its state onto the frame rather than styling through, so a control
    * used outside a field looks the same as one inside it.
    */
-  [data-ui='number-field'][data-part='root'] {
+  [data-ui-number-field][data-part-root] {
     /**
      * Type, height, inline padding, gap and glyph size all come from the
      * control scales — the only ones the theme restates per density — so an
@@ -127,7 +127,7 @@
    * moves under the reader's eye, and no other family has a stronger claim on
    * the setting.
    */
-  [data-ui='number-field'] > [data-part='input'] {
+  [data-ui-number-field] > [data-part-input] {
     background-color: transparent;
     /* The frame's border box, not its content box: on a coarse pointer the frame
        is the touch target's height and the control it holds is too. Stretched
@@ -176,11 +176,11 @@
    * "the document's start edge, whatever the run inside is doing", so the
    * alignment is named once, under a guard that is itself the direction.
    */
-  [data-ui='number-field']:dir(rtl) > [data-part='input'] {
+  [data-ui-number-field]:dir(rtl) > [data-part-input] {
     text-align: right;
   }
 
-  [data-ui='number-field'] > [data-part='input']::placeholder {
+  [data-ui-number-field] > [data-part-input]::placeholder {
     color: var(--slotted-number-field-placeholder-color, var(--slotted-text-muted, GrayText));
     text-overflow: ellipsis;
   }
@@ -191,7 +191,7 @@
    * control beside it. One library, one scale.
    */
 
-  [data-ui='number-field'][data-part='root'][data-size='sm'] {
+  [data-ui-number-field][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
@@ -200,7 +200,7 @@
     --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='number-field'][data-part='root'][data-size='md'] {
+  [data-ui-number-field][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -209,7 +209,7 @@
     --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
-  [data-ui='number-field'][data-part='root'][data-size='lg'] {
+  [data-ui-number-field][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -225,7 +225,7 @@
    * which is what a dense table needs.
    */
 
-  [data-ui='number-field'][data-part='root'][data-variant='subtle'] {
+  [data-ui-number-field][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-number-field-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -239,7 +239,7 @@
   /* No edge, no lift, no ground and no corner of its own: the cell it sits in
      is the box, the row is the ground, a cell has no corner, and the resting
      shadow would draw the cell where there is none. */
-  [data-ui='number-field'][data-part='root'][data-variant='plain'] {
+  [data-ui-number-field][data-part-root][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -252,7 +252,7 @@
    * its only edge exactly where an edge matters most.
    */
   @media (forced-colors: active) {
-    [data-ui='number-field'][data-part='root'][data-variant='plain'] {
+    [data-ui-number-field][data-part-root][data-variant='plain'] {
       border-color: ButtonBorder;
     }
   }
@@ -263,8 +263,8 @@
    * inside the value — a currency, a percent sign, a unit — is `format`'s job
    * and arrives through `Intl` as part of the string the control holds.
    */
-  [data-ui='number-field'] > [data-part='start'],
-  [data-ui='number-field'] > [data-part='end'] {
+  [data-ui-number-field] > [data-part-start],
+  [data-ui-number-field] > [data-part-end] {
     align-items: center;
     color: var(--slotted-number-field-adornment-color, var(--slotted-text-muted, GrayText));
     display: inline-flex;
@@ -282,8 +282,8 @@
     --slotted-icon-size: var(--_icon-size);
   }
 
-  [data-ui='number-field'] > [data-part='start'] > svg,
-  [data-ui='number-field'] > [data-part='end'] > svg {
+  [data-ui-number-field] > [data-part-start] > svg,
+  [data-ui-number-field] > [data-part-end] > svg {
     block-size: var(--_icon-size);
     inline-size: var(--_icon-size);
   }
@@ -294,8 +294,8 @@
    * advance width. An adornment that draws no glyph takes the margin the glyph
    * box already has, on both sides — the measurement `text-field` derived.
    */
-  [data-ui='number-field'] > [data-part='start']:not(:has(svg, img, [data-ui='icon'])),
-  [data-ui='number-field'] > [data-part='end']:not(:has(svg, img, [data-ui='icon'])) {
+  [data-ui-number-field] > [data-part-start]:not(:has(svg, img, [data-ui-icon])),
+  [data-ui-number-field] > [data-part-end]:not(:has(svg, img, [data-ui-icon])) {
     padding-inline: calc(var(--_icon-size) / 8);
   }
 
@@ -308,12 +308,11 @@
    * mark is not a button, it has no ground to change, and the cursor alone
    * said nothing a reader would look at.
    */
-  [data-ui='number-field']
-    > :is([data-part='start'], [data-part='end']):has(> [data-part='scrub']) {
+  [data-ui-number-field] > :is([data-part-start], [data-part-end]):has(> [data-part-scrub]) {
     align-self: stretch;
   }
 
-  [data-ui='number-field'] [data-part='scrub'] {
+  [data-ui-number-field] [data-part-scrub] {
     align-items: center;
     align-self: stretch;
     cursor: ew-resize;
@@ -330,12 +329,12 @@
     -webkit-user-select: none;
   }
 
-  [data-ui='number-field']:not([data-disabled]):not([data-readonly])
-    [data-part='scrub']:is(:hover, [data-scrubbing]) {
+  [data-ui-number-field]:not([data-disabled]):not([data-readonly])
+    [data-part-scrub]:is(:hover, [data-scrubbing]) {
     color: var(--slotted-number-field-scrub-active-color, var(--slotted-text, CanvasText));
   }
 
-  [data-ui='number-field']:is([data-disabled], [data-readonly]) [data-part='scrub'] {
+  [data-ui-number-field]:is([data-disabled], [data-readonly]) [data-part-scrub] {
     cursor: default;
     touch-action: auto;
   }
@@ -347,9 +346,9 @@
    * screen-reader cursor still reaches them. Their glyphs are the `Glyph`
    * element the binding renders: a character is never an icon.
    */
-  [data-ui='number-field'] > [data-part='stepper'] > button,
-  [data-ui='number-field'] > [data-part='decrement'],
-  [data-ui='number-field'] > [data-part='increment'] {
+  [data-ui-number-field] > [data-part-stepper] > button,
+  [data-ui-number-field] > [data-part-decrement],
+  [data-ui-number-field] > [data-part-increment] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -373,8 +372,8 @@
 
   /* The `icon` box inside each button is drawn at the control's own icon
      step rather than at the icon family's default. */
-  [data-ui='number-field'] [data-part='decrement'],
-  [data-ui='number-field'] [data-part='increment'] {
+  [data-ui-number-field] [data-part-decrement],
+  [data-ui-number-field] [data-part-increment] {
     --slotted-icon-size: var(--_icon-size);
   }
 
@@ -389,7 +388,7 @@
    * would have to be mirrored in a right-to-left document; less and more do not
    * change with the reading direction.
    */
-  [data-ui='number-field'][data-stepper='stacked'] [data-part='increment'] > [data-ui='icon'] {
+  [data-ui-number-field][data-stepper='stacked'] [data-part-increment] > [data-ui-icon] {
     rotate: 0.5turn;
   }
 
@@ -403,11 +402,11 @@
    * halves are one surface. The paint gives the inset back to the pointer:
    * each half's hit area reaches the frame below.
    */
-  [data-ui='number-field'][data-part='root'][data-stepper='stacked'] {
+  [data-ui-number-field][data-part-root][data-stepper='stacked'] {
     padding-inline-end: 0;
   }
 
-  [data-ui='number-field'] > [data-part='stepper'] {
+  [data-ui-number-field] > [data-part-stepper] {
     align-self: stretch;
     box-sizing: content-box;
     display: flex;
@@ -418,26 +417,26 @@
     padding-inline-end: var(--_column-inset);
   }
 
-  [data-ui='number-field'] > [data-part='stepper'] > button {
+  [data-ui-number-field] > [data-part-stepper] > button {
     /* Two halves of the column, whatever the frame's height turns out to be. */
     block-size: 50%;
     border-radius: var(--_column-radius);
     inline-size: 100%;
   }
 
-  [data-ui='number-field']
-    > [data-part='stepper']
-    > :is([data-part='increment'], [data-part='decrement'])::after {
+  [data-ui-number-field]
+    > [data-part-stepper]
+    > :is([data-part-increment], [data-part-decrement])::after {
     content: '';
     inset-inline: 0 calc(var(--_column-inset) * -1);
     position: absolute;
   }
 
-  [data-ui='number-field'] > [data-part='stepper'] > [data-part='increment']::after {
+  [data-ui-number-field] > [data-part-stepper] > [data-part-increment]::after {
     inset-block: calc(var(--_column-inset) * -1) 0;
   }
 
-  [data-ui='number-field'] > [data-part='stepper'] > [data-part='decrement']::after {
+  [data-ui-number-field] > [data-part-stepper] > [data-part-decrement]::after {
     inset-block: 0 calc(var(--_column-inset) * -1);
   }
 
@@ -456,7 +455,7 @@
    * percentage falls back to the `<svg>`'s own square, and two of them plus the
    * divider stood a pixel taller than the value and grew the frame.
    */
-  [data-ui='number-field'] > [data-part='stepper'] > button > [data-ui='icon'] {
+  [data-ui-number-field] > [data-part-stepper] > button > [data-ui-icon] {
     block-size: min(var(--_icon-size), 100%);
     contain: size;
   }
@@ -469,28 +468,28 @@
    * the two buttons, which is where a quantity belongs. No rule divides a
    * button from the value: the ground it paints is its edge.
    */
-  [data-ui='number-field'][data-part='root'][data-stepper='split'] {
+  [data-ui-number-field][data-part-root][data-stepper='split'] {
     gap: 0;
     padding-inline: var(--_inset);
   }
 
-  [data-ui='number-field'][data-stepper='split'] > [data-part='decrement'],
-  [data-ui='number-field'][data-stepper='split'] > [data-part='increment'] {
+  [data-ui-number-field][data-stepper='split'] > [data-part-decrement],
+  [data-ui-number-field][data-stepper='split'] > [data-part-increment] {
     block-size: var(--_action-size);
     border-radius: var(--_action-radius);
     inline-size: var(--_action-size);
   }
 
-  [data-ui='number-field'][data-stepper='split'] > [data-part='input'] {
+  [data-ui-number-field][data-stepper='split'] > [data-part-input] {
     padding-inline: var(--_gap);
     text-align: center;
   }
 
-  [data-ui='number-field'][data-stepper='split'] > [data-part='start'] {
+  [data-ui-number-field][data-stepper='split'] > [data-part-start] {
     padding-inline-start: var(--_gap);
   }
 
-  [data-ui='number-field'][data-stepper='split'] > [data-part='end'] {
+  [data-ui-number-field][data-stepper='split'] > [data-part-end] {
     padding-inline-end: var(--_gap);
   }
 
@@ -506,8 +505,8 @@
    * small target. That shortfall is the arrangement's own, and `split` is the
    * answer to it.
    */
-  [data-ui='number-field'][data-stepper='split'] > [data-part='decrement']::after,
-  [data-ui='number-field'][data-stepper='split'] > [data-part='increment']::after {
+  [data-ui-number-field][data-stepper='split'] > [data-part-decrement]::after,
+  [data-ui-number-field][data-stepper='split'] > [data-part-increment]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -525,14 +524,14 @@
    * inline axis, over the value's edge and past the frame's.
    */
   @media (pointer: coarse) {
-    [data-ui='number-field'][data-stepper='split']
-      > :is([data-part='decrement'], [data-part='increment'])::after {
+    [data-ui-number-field][data-stepper='split']
+      > :is([data-part-decrement], [data-part-increment])::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='number-field']
-      > [data-part='stepper']
-      > :is([data-part='increment'], [data-part='decrement'])::after {
+    [data-ui-number-field]
+      > [data-part-stepper]
+      > :is([data-part-increment], [data-part-decrement])::after {
       inset-inline: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
   }
@@ -543,16 +542,16 @@
    * ones it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='number-field'] [data-part='decrement']:hover:not(:disabled),
-  [data-ui='number-field'] [data-part='increment']:hover:not(:disabled) {
+  [data-ui-number-field] [data-part-decrement]:hover:not(:disabled),
+  [data-ui-number-field] [data-part-increment]:hover:not(:disabled) {
     background-color: var(
       --slotted-number-field-stepper-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='number-field'] [data-part='decrement']:active:not(:disabled),
-  [data-ui='number-field'] [data-part='increment']:active:not(:disabled) {
+  [data-ui-number-field] [data-part-decrement]:active:not(:disabled),
+  [data-ui-number-field] [data-part-increment]:active:not(:disabled) {
     background-color: var(
       --slotted-number-field-stepper-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -566,8 +565,8 @@
    * drawing them, because a number field without its stepper is a different
    * component and a disabled form still has to say what it holds.
    */
-  [data-ui='number-field'] [data-part='decrement']:disabled,
-  [data-ui='number-field'] [data-part='increment']:disabled {
+  [data-ui-number-field] [data-part-decrement]:disabled,
+  [data-ui-number-field] [data-part-increment]:disabled {
     /**
      * The ground as well as the ink. The disabled foreground and the resting
      * stepper colour are two steps of one neutral and differ by about a shade,
@@ -589,21 +588,21 @@
    * path on touch and a screen-reader cursor activating one directly. It sits
    * inside the frame's own edge, so the ring never doubles the border.
    */
-  [data-ui='number-field'] [data-part='decrement']:focus-visible,
-  [data-ui='number-field'] [data-part='increment']:focus-visible {
+  [data-ui-number-field] [data-part-decrement]:focus-visible,
+  [data-ui-number-field] [data-part-increment]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   /* ── Frame states ─────────────────────────────────────────────────────── */
 
-  [data-ui='number-field'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-number-field][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     ) {
     border-color: var(--slotted-number-field-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='number-field'][data-part='root'][data-variant='subtle']:hover:not([data-disabled]):not(
+  [data-ui-number-field][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -612,7 +611,7 @@
     );
   }
 
-  [data-ui='number-field'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+  [data-ui-number-field][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -628,7 +627,7 @@
    * matches `:focus-visible` on a text input for a pointer press as well as for
    * a Tab, which is right for a control whose caret is the thing that moved.
    */
-  [data-ui='number-field'][data-part='root']:has(> [data-part='input']:focus-visible) {
+  [data-ui-number-field][data-part-root]:has(> [data-part-input]:focus-visible) {
     /* The resting shadow, recoloured: the lift under the control and the ring
        around it are one colour, and the state decides which colour that is. */
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
@@ -644,8 +643,8 @@
    * shadow that appears only under focus is a cell that changes size when it
    * is used.
    */
-  [data-ui='number-field'][data-part='root'][data-variant='plain']:has(
-      > [data-part='input']:focus-visible
+  [data-ui-number-field][data-part-root][data-variant='plain']:has(
+      > [data-part-input]:focus-visible
     ) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
@@ -658,7 +657,7 @@
    * colour on the element moves the outline, the shadow and both steppers'
    * rings at once.
    */
-  [data-ui='number-field'][data-part='root'][data-invalid] {
+  [data-ui-number-field][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-number-field-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -686,17 +685,15 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='number-field'][data-part='root'][data-invalid]:has(
-      > [data-part='input']:focus-visible
-    ) {
+  [data-ui-number-field][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='number-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-      > [data-part='input']:focus-visible
+  [data-ui-number-field][data-part-root][data-variant='plain'][data-invalid]:has(
+      > [data-part-input]:focus-visible
     ) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
@@ -714,23 +711,21 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='number-field'][data-part='root'][data-invalid] {
+    [data-ui-number-field][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='number-field'][data-part='root'][data-invalid]:has(
-        > [data-part='input']:focus-visible
-      ) {
+    [data-ui-number-field][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='number-field'][data-part='root'][data-variant='plain'][data-invalid]:has(
-        > [data-part='input']:focus-visible
+    [data-ui-number-field][data-part-root][data-variant='plain'][data-invalid]:has(
+        > [data-part-input]:focus-visible
       ) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
@@ -745,7 +740,7 @@
    * mistakable for disabled: the value is still real and still submitted. The
    * ground says "not yours to change" and the ink says nothing at all.
    */
-  [data-ui='number-field'][data-part='root'][data-readonly] {
+  [data-ui-number-field][data-part-root][data-readonly] {
     background-color: var(
       --slotted-number-field-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -773,8 +768,8 @@
    * disabled `fieldset` disables every control inside it, and the control has
    * no way to know.
    */
-  [data-ui='number-field'][data-part='root'][data-disabled],
-  [data-ui='number-field'][data-part='root']:has(> [data-part='input']:disabled) {
+  [data-ui-number-field][data-part-root][data-disabled],
+  [data-ui-number-field][data-part-root]:has(> [data-part-input]:disabled) {
     background-color: var(
       --slotted-number-field-disabled-background,
       var(--slotted-disabled-background)
@@ -790,8 +785,8 @@
    * Muted to the colour the theme measures rather than faded by opacity: a
    * value nobody can read is a field nobody can check.
    */
-  [data-ui='number-field'][data-part='root'][data-disabled] > [data-part='start'],
-  [data-ui='number-field'][data-part='root'][data-disabled] > [data-part='end'] {
+  [data-ui-number-field][data-part-root][data-disabled] > [data-part-start],
+  [data-ui-number-field][data-part-root][data-disabled] > [data-part-end] {
     color: var(--slotted-disabled-foreground);
   }
 }

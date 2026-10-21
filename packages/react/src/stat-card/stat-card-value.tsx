@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/stat-card/stat-card.css';
 
 import { useMemo } from 'react';
@@ -35,6 +36,6 @@ export function StatCardValue({
     (children ?? formatted)
   );
 
-  const props = { ...nativeProps, children: content, 'data-part': 'value' };
+  const props = keyedProps({ ...nativeProps, children: content, 'data-part': 'value' });
   return render === undefined ? <span {...props} /> : render(props);
 }

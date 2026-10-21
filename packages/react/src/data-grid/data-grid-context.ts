@@ -10,7 +10,7 @@ import type {
   SortDirection,
 } from '@slotted/core/grid';
 import type { DataGridMessages, FamilyTranslator } from '@slotted/core/i18n';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useSyncExternalStore } from 'react';
 import type { KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
 
 import type {
@@ -226,4 +226,190 @@ export function useDataGridInternal<Row = unknown>(): DataGridInternal<Row> {
   if (context === undefined)
     throw new Error('Every DataGrid part must be rendered inside DataGrid.');
   return context as DataGridInternal<Row>;
+}
+
+/**
+ * Fields a row reads for its own key only. A change to one re-renders the rows
+ * whose answer for their key changed, never the whole window.
+ */
+const ROW_SCOPED = new Set<string>([
+  'changedOf',
+  'current',
+  'detailId',
+  'draggingRow',
+  'edit',
+  'hasPopinCell',
+  'isDisabled',
+  'isExpanded',
+  'isLoadingChildren',
+  'isSelected',
+  'rangeBounds',
+  'rangeInfo',
+  'rowLabelOf',
+]);
+
+/**
+ * Fields a row and its cells never read while rendering: handlers called from
+ * an event, read through the proxy at that moment, and the header's and the
+ * footer's figures. A change to one re-renders no row.
+ */
+const ROW_IGNORED = new Set<string>([
+  'activate',
+  'allState',
+  'announce',
+  'anchorToButton',
+  'attachDraggable',
+  'attachRowDraggable',
+  'autofit',
+  'beginRange',
+  'cancelEdit',
+  'commitEdit',
+  'extendRange',
+  'focused',
+  'hide',
+  'moveColumn',
+  'onCellBlur',
+  'onCellClick',
+  'onCellDoubleClick',
+  'onCellFocus',
+  'onCellKeyDown',
+  'onCellPointerDown',
+  'onCellPointerEnter',
+  'onHeaderContextMenu',
+  'onManageColumns',
+  'pin',
+  'pressSort',
+  'rangeDragging',
+  'rangeSummary',
+  'resizeBy',
+  'resizeTo',
+  'selectableCount',
+  'selectedCount',
+  'setCurrent',
+  'setDraft',
+  'setFilter',
+  'setFilterOpen',
+  'setMenuOpen',
+  'setResizing',
+  'setSort',
+  'startEdit',
+  'tabStop',
+  'toggleAll',
+  'toggleBranch',
+  'toggleExpanded',
+  'toggleGroup',
+  'toggleSelected',
+]);
+
+/**
+ * What a body row subscribes to instead of the grid context.
+ *
+ * The context value is a new object whenever the selection, the cursor, the
+ * window or a handler changes, and a row that read it re-rendered with every
+ * other row on each of them: a selection click rendered the whole window. The
+ * store holds the latest value, counts the changes every row must answer (a
+ * column, a renderer, the language), and each row renders again only when that
+ * count or its own answers change.
+ *
+ * `grid` is a stable proxy over the latest value, and it is what the context
+ * carries. A context whose value changed re-renders every consumer under it,
+ * a memoised row's cells included, so the context never changes: every part
+ * that is not a memoised row re-renders with the root that renders it, and
+ * reads the latest value through the proxy; a handler a cell calls is the
+ * current one although the cell did not re-render.
+ */
+export interface DataGridRowStore<Row> {
+  readonly grid: DataGridInternal<Row>;
+  readonly latest: () => DataGridInternal<Row>;
+  readonly set: (value: DataGridInternal<Row>) => void;
+  readonly publish: () => void;
+  readonly subscribe: (listener: () => void) => () => void;
+  readonly signature: (key: string) => string;
+}
+
+export function createDataGridRowStore<Row>(initial: DataGridInternal<Row>): DataGridRowStore<Row> {
+  let value = initial;
+  let version = 0;
+  const listeners = new Set<() => void>();
+
+  const grid = new Proxy({} as DataGridInternal<Row>, {
+    get: (_, property) => (value as unknown as Record<PropertyKey, unknown>)[property],
+    has: (_, property) => property in value,
+  });
+
+  return {
+    grid,
+    latest: () => value,
+    set: (next) => {
+      if (next === value) return;
+      const before = value as unknown as Record<string, unknown>;
+      const after = next as unknown as Record<string, unknown>;
+      for (const field of Object.keys(after)) {
+        if (ROW_SCOPED.has(field) || ROW_IGNORED.has(field)) continue;
+        if (before[field] !== after[field]) {
+          version += 1;
+          break;
+        }
+      }
+      value = next;
+    },
+    publish: () => {
+      for (const listener of listeners) listener();
+    },
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    signature: (key) => {
+      const current = value.current;
+      const edit = value.edit;
+      const cells = value.columnIds
+        .map((column) => {
+          const cell = { row: key, column };
+          const range = value.rangeInfo(cell);
+          return `${range.inside ? 1 : 0}${range.edges.join('')}${value.changedOf(cell) ?? ''}`;
+        })
+        .join(',');
+      return [
+        version,
+        value.isSelected(key) ? 1 : 0,
+        value.isDisabled(key) ? 1 : 0,
+        value.isExpanded(key) ? 1 : 0,
+        value.isLoadingChildren(key) ? 1 : 0,
+        value.hasPopinCell(key) ? 1 : 0,
+        value.draggingRow === key ? 1 : 0,
+        current !== null && current.row === key ? current.column : '',
+        edit !== null && edit.cell.row === key ? editVersion(edit) : '',
+        value.detailId(key),
+        value.rowLabelOf(key),
+        cells,
+      ].join('|');
+    },
+  };
+}
+
+/** One number per edit session object, so a new draft is a new signature. */
+const editVersions = new WeakMap<EditSession, number>();
+let nextEditVersion = 0;
+function editVersion(edit: EditSession): number {
+  let known = editVersions.get(edit);
+  if (known === undefined) {
+    nextEditVersion += 1;
+    known = nextEditVersion;
+    editVersions.set(edit, known);
+  }
+  return known;
+}
+
+export const DataGridRowStoreContext = createContext<DataGridRowStore<unknown> | undefined>(
+  undefined,
+);
+
+/** The latest grid for a row, re-rendering the row only when its signature changes. */
+export function useDataGridRow<Row>(key: string): DataGridRowStore<Row> {
+  const store = useContext(DataGridRowStoreContext) as DataGridRowStore<Row> | undefined;
+  if (store === undefined) throw new Error('Every DataGrid part must be rendered inside DataGrid.');
+  const signature = () => store.signature(key);
+  useSyncExternalStore(store.subscribe, signature, signature);
+  return store;
 }

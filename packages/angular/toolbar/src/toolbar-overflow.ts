@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
@@ -64,6 +65,7 @@ import type { ToolbarOverflowLabel } from './toolbar';
     <button
       #trigger
       data-part="overflow"
+      data-part-overflow=""
       type="button"
       [slMenuTriggerFor]="surface"
       [attr.aria-label]="name()"
@@ -143,7 +145,7 @@ export class SlToolbarOverflow {
        * spread after the menu's; here the two writers are directives on one
        * element and the last one wins.
        */
-      element.setAttribute('data-part', 'overflow');
+      writeSelectorKey(element, 'part', 'overflow');
 
       /* The bar measures the control, so it has to hold it. */
       this.toolbar.registerTrigger(element);

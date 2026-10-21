@@ -65,8 +65,8 @@ export function Loader({
     'aria-label': ariaLabel,
     children: (
       <>
-        <div data-part="track">
-          <div data-part="indicator" />
+        <div data-part="track" data-part-track="">
+          <div data-part="indicator" data-part-indicator="" />
         </div>
         {progressLabel(resolved)}
       </>

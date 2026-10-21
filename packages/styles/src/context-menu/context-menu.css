@@ -6,7 +6,7 @@
    *   ┌─ root ─ the target ─ data-open ─ data-pressed ──────────────┐
    *   │  the consumer's content: a row, a card, a canvas             │
    *   └──────────────────────────────────────────────────────────────┘
-   *           ┌─ [data-ui='menu'] ─ unchanged ─┐  ← anchored to the point
+   *           ┌─ [data-ui-menu] ─ unchanged ─┐  ← anchored to the point
    *
    * The family owns this one part and no surface: the menu that opens is
    * `menu`, imported as it is, the way `menubar` holds it. Radix's context menu
@@ -20,7 +20,7 @@
    * stylesheet owns is the three moments the family adds to the region: the
    * long press, the open menu, and the browser's own menu taking over.
    */
-  [data-ui='context-menu'] {
+  [data-ui-context-menu] {
     /* The mark Finder and Explorer leave on the row whose menu is showing:
        one line, inward, in the colour that separates two surfaces. A consumer
        whose target already shows its selection sets the width to `0`. */
@@ -36,7 +36,7 @@
    * platform at `touchstart`, before any state the family writes could apply.
    */
   @media (pointer: coarse) {
-    [data-ui='context-menu'] {
+    [data-ui-context-menu] {
       -webkit-touch-callout: none;
     }
   }
@@ -47,7 +47,7 @@
    * then: a target that is text stays selectable at rest, and a mouse never
    * sets the state at all.
    */
-  [data-ui='context-menu'][data-pressed] {
+  [data-ui-context-menu][data-pressed] {
     -webkit-user-select: none;
     user-select: none;
   }
@@ -66,11 +66,11 @@
    * positioned at rest rather than only while open, so nothing inside the
    * region moves at the moment the menu appears.
    */
-  [data-ui='context-menu'] {
+  [data-ui-context-menu] {
     position: relative;
   }
 
-  [data-ui='context-menu']::after {
+  [data-ui-context-menu]::after {
     border-radius: inherit;
     box-shadow: inset 0 0 0 var(--_mark-width) transparent;
     content: '';
@@ -80,7 +80,7 @@
     transition: box-shadow var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='context-menu'][data-open]::after {
+  [data-ui-context-menu][data-open]::after {
     box-shadow: inset 0 0 0 var(--_mark-width) var(--_mark-color);
   }
 
@@ -90,7 +90,7 @@
    * region the reader can see they are on. The open mark is gone by the time
    * focus returns, so the two are never drawn together.
    */
-  [data-ui='context-menu']:focus-visible {
+  [data-ui-context-menu]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }

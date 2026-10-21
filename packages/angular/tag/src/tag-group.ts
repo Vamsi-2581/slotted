@@ -42,7 +42,9 @@ const CONTROL_SELECTOR = '[data-part="body"]:is(a, button), [data-part="remove"]
   exportAs: 'slTagGroup',
   host: {
     'data-ui': 'tag',
+    'data-ui-tag': '',
     'data-part': 'group',
+    'data-part-group': '',
     tabindex: '-1',
     '[attr.data-orientation]': 'orientation()',
     '[attr.role]': 'role()',

@@ -24,47 +24,73 @@
 
 <section data-scene="live">
   <div class="harness-frame">
-    <div data-ui="message-scroller" data-part="root" data-live>
-      <div data-part="viewport" role="region" aria-label="Mensagens" tabindex="0" data-pending>
-        <div data-part="content" role="log" aria-relevant="additions">
-          <div data-part="item">
-            <div data-part="separator" data-sticky><span>Ontem</span></div>
+    <div
+      data-ui="message-scroller"
+      data-ui-message-scroller=""
+      data-part="root"
+      data-part-root=""
+      data-live
+    >
+      <div
+        data-part="viewport"
+        data-part-viewport=""
+        role="region"
+        aria-label="Mensagens"
+        tabindex="0"
+        data-pending
+      >
+        <div data-part="content" data-part-content="" role="log" aria-relevant="additions">
+          <div data-part="item" data-part-item="">
+            <div data-part="separator" data-part-separator="" data-sticky><span>Ontem</span></div>
           </div>
-          <div data-part="item" data-message-id="q1" data-anchor="true">
+          <div data-part="item" data-part-item="" data-message-id="q1" data-anchor="true">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="end"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Tu"
             >
-              <div data-part="body">
-                <div data-ui="message" data-part="bubble" data-variant="solid" data-tone="accent">
-                  <div data-part="content">
+              <div data-part="body" data-part-body="">
+                <div
+                  data-ui="message"
+                  data-ui-message=""
+                  data-part="bubble"
+                  data-part-bubble=""
+                  data-variant="solid"
+                  data-tone="accent"
+                >
+                  <div data-part="content" data-part-content="">
                     O webhook da Stripe está a devolver 500 em charge.refunded.
                   </div>
                 </div>
               </div>
             </article>
           </div>
-          <div data-part="item" data-message-id="a1">
+          <div data-part="item" data-part-item="" data-message-id="a1">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="start"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Assistente"
             >
-              <div data-part="body">
+              <div data-part="body" data-part-body="">
                 <div
                   data-ui="message"
+                  data-ui-message=""
                   data-part="bubble"
+                  data-part-bubble=""
                   data-variant="plain"
                   data-tone="secondary"
                 >
-                  <div data-part="content">
+                  <div data-part="content" data-part-content="">
                     O handler falha antes de confirmar, por isso a Stripe volta a entregar o mesmo
                     evento. Cada nova tentativa passa pelo mesmo caminho e a fila cresce em vez de
                     esvaziar.
@@ -73,39 +99,54 @@
               </div>
             </article>
           </div>
-          <div data-part="item" data-message-id="q2" data-anchor="true">
+          <div data-part="item" data-part-item="" data-message-id="q2" data-anchor="true">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="end"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Tu"
             >
-              <div data-part="body">
-                <div data-ui="message" data-part="bubble" data-variant="solid" data-tone="accent">
-                  <div data-part="content">O que está a falhar, exatamente?</div>
+              <div data-part="body" data-part-body="">
+                <div
+                  data-ui="message"
+                  data-ui-message=""
+                  data-part="bubble"
+                  data-part-bubble=""
+                  data-variant="solid"
+                  data-tone="accent"
+                >
+                  <div data-part="content" data-part-content="">
+                    O que está a falhar, exatamente?
+                  </div>
                 </div>
               </div>
             </article>
           </div>
-          <div data-part="item" data-message-id="a2">
+          <div data-part="item" data-part-item="" data-message-id="a2">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="start"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Assistente"
             >
-              <div data-part="body">
+              <div data-part="body" data-part-body="">
                 <div
                   data-ui="message"
+                  data-ui-message=""
                   data-part="bubble"
+                  data-part-bubble=""
                   data-variant="plain"
                   data-tone="secondary"
                 >
-                  <div data-part="content">
+                  <div data-part="content" data-part-content="">
                     O ramo do reembolso lê charge.payment_intent, que vem a null nos reembolsos
                     criados no dashboard. O null chega ao helper de procura, que falha antes de o
                     200 sair.
@@ -114,42 +155,57 @@
               </div>
             </article>
           </div>
-          <div data-part="item">
-            <div data-part="separator" data-sticky><span>Hoje</span></div>
+          <div data-part="item" data-part-item="">
+            <div data-part="separator" data-part-separator="" data-sticky><span>Hoje</span></div>
           </div>
-          <div data-part="item" data-message-id="q3" data-anchor="true">
+          <div data-part="item" data-part-item="" data-message-id="q3" data-anchor="true">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="end"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Tu"
             >
-              <div data-part="body">
-                <div data-ui="message" data-part="bubble" data-variant="solid" data-tone="accent">
-                  <div data-part="content">Dá-me o patch mais pequeno que desbloqueie a fila.</div>
+              <div data-part="body" data-part-body="">
+                <div
+                  data-ui="message"
+                  data-ui-message=""
+                  data-part="bubble"
+                  data-part-bubble=""
+                  data-variant="solid"
+                  data-tone="accent"
+                >
+                  <div data-part="content" data-part-content="">
+                    Dá-me o patch mais pequeno que desbloqueie a fila.
+                  </div>
                 </div>
               </div>
             </article>
           </div>
-          <div data-part="item" data-message-id="a3">
+          <div data-part="item" data-part-item="" data-message-id="a3">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="start"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Assistente"
             >
-              <div data-part="body">
+              <div data-part="body" data-part-body="">
                 <div
                   data-ui="message"
+                  data-ui-message=""
                   data-part="bubble"
+                  data-part-bubble=""
                   data-variant="plain"
                   data-tone="secondary"
                 >
-                  <div data-part="content">
+                  <div data-part="content" data-part-content="">
                     Devolve 200 assim que a assinatura for verificada e faz o reembolso numa fila.
                     Um webhook confirma a receção, não o sucesso.
                   </div>
@@ -161,6 +217,7 @@
       </div>
       <button
         data-part="jump"
+        data-part-jump=""
         data-direction="end"
         data-active="false"
         type="button"
@@ -168,8 +225,8 @@
         inert
         tabindex="-1"
       >
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="arrow-left"></svg
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="arrow-left"></svg
         ></span>
       </button>
     </div>
@@ -177,123 +234,172 @@
   <div class="harness-controls">
     <button
       data-ui="button"
+      data-ui-button=""
       data-part="root"
+      data-part-root=""
       data-tone="secondary"
       data-variant="outline"
       data-size="sm"
       type="button"
       data-action="ask"
     >
-      <span data-part="label">Enviar pergunta</span>
+      <span data-part="label" data-part-label="">Enviar pergunta</span>
     </button>
     <button
       data-ui="button"
+      data-ui-button=""
       data-part="root"
+      data-part-root=""
       data-tone="secondary"
       data-variant="outline"
       data-size="sm"
       type="button"
       data-action="stream"
     >
-      <span data-part="label">Resposta em streaming</span>
+      <span data-part="label" data-part-label="">Resposta em streaming</span>
     </button>
     <button
       data-ui="button"
+      data-ui-button=""
       data-part="root"
+      data-part-root=""
       data-tone="secondary"
       data-variant="outline"
       data-size="sm"
       type="button"
       data-action="older"
     >
-      <span data-part="label">Carregar anteriores</span>
+      <span data-part="label" data-part-label="">Carregar anteriores</span>
     </button>
     <button
       data-ui="button"
+      data-ui-button=""
       data-part="root"
+      data-part-root=""
       data-tone="secondary"
       data-variant="outline"
       data-size="sm"
       type="button"
       data-action="jump"
     >
-      <span data-part="label">Ir para a primeira pergunta</span>
+      <span data-part="label" data-part-label="">Ir para a primeira pergunta</span>
     </button>
   </div>
 </section>
 
 <section data-scene="states">
   <div class="harness-frame">
-    <div data-ui="message-scroller" data-part="root" data-scrollable="start end">
+    <div
+      data-ui="message-scroller"
+      data-ui-message-scroller=""
+      data-part="root"
+      data-part-root=""
+      data-scrollable="start end"
+    >
       <div
         data-part="viewport"
+        data-part-viewport=""
         role="region"
         aria-label="Mensagens"
         tabindex="0"
         data-scrollable="start end"
       >
-        <div data-part="content" role="log" aria-relevant="additions">
-          <div data-part="loader" role="status">
-            <span data-ui="spinner" aria-hidden="true"></span
+        <div data-part="content" data-part-content="" role="log" aria-relevant="additions">
+          <div data-part="loader" data-part-loader="" role="status">
+            <span data-ui="spinner" data-ui-spinner="" aria-hidden="true"></span
             ><span>A carregar mensagens anteriores</span>
           </div>
-          <div data-part="item">
-            <div data-part="separator" data-sticky><span>Segunda, 28 de setembro</span></div>
+          <div data-part="item" data-part-item="">
+            <div data-part="separator" data-part-separator="" data-sticky>
+              <span>Segunda, 28 de setembro</span>
+            </div>
           </div>
-          <div data-part="item" data-message-id="s1" data-anchor="true" data-current>
+          <div
+            data-part="item"
+            data-part-item=""
+            data-message-id="s1"
+            data-anchor="true"
+            data-current
+          >
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="end"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Tu"
             >
-              <div data-part="body">
-                <div data-ui="message" data-part="bubble" data-variant="solid" data-tone="accent">
-                  <div data-part="content">Porque é que o export saiu vazio na sexta?</div>
+              <div data-part="body" data-part-body="">
+                <div
+                  data-ui="message"
+                  data-ui-message=""
+                  data-part="bubble"
+                  data-part-bubble=""
+                  data-variant="solid"
+                  data-tone="accent"
+                >
+                  <div data-part="content" data-part-content="">
+                    Porque é que o export saiu vazio na sexta?
+                  </div>
                 </div>
               </div>
             </article>
           </div>
-          <div data-part="item" data-message-id="s2">
+          <div data-part="item" data-part-item="" data-message-id="s2">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="start"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Assistente"
             >
-              <div data-part="body">
+              <div data-part="body" data-part-body="">
                 <div
                   data-ui="message"
+                  data-ui-message=""
                   data-part="bubble"
+                  data-part-bubble=""
                   data-variant="plain"
                   data-tone="secondary"
                 >
-                  <div data-part="content">
+                  <div data-part="content" data-part-content="">
                     A vista guardada tinha um intervalo de datas que excluía tudo o que era recente.
                   </div>
                 </div>
               </div>
             </article>
           </div>
-          <div data-part="item">
-            <div data-part="unread"><span>Novas mensagens</span></div>
+          <div data-part="item" data-part-item="">
+            <div data-part="unread" data-part-unread=""><span>Novas mensagens</span></div>
           </div>
-          <div data-part="item" data-message-id="s3">
+          <div data-part="item" data-part-item="" data-message-id="s3">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="start"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Marta Silva"
             >
-              <div data-part="body">
-                <div data-ui="message" data-part="bubble" data-variant="soft" data-tone="secondary">
-                  <div data-part="content">Já corrigi o filtro no workspace do cliente.</div>
+              <div data-part="body" data-part-body="">
+                <div
+                  data-ui="message"
+                  data-ui-message=""
+                  data-part="bubble"
+                  data-part-bubble=""
+                  data-variant="soft"
+                  data-tone="secondary"
+                >
+                  <div data-part="content" data-part-content="">
+                    Já corrigi o filtro no workspace do cliente.
+                  </div>
                 </div>
               </div>
             </article>
@@ -302,15 +408,16 @@
       </div>
       <button
         data-part="jump"
+        data-part-jump=""
         data-direction="end"
         data-active="true"
         type="button"
         aria-label="Ir para a mais recente, 3 novas"
       >
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="arrow-left"></svg
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="arrow-left"></svg
         ></span>
-        <span data-part="jump-count">3 novas</span>
+        <span data-part="jump-count" data-part-jump-count="">3 novas</span>
       </button>
     </div>
   </div>
@@ -318,38 +425,64 @@
 
 <section data-scene="short">
   <div class="harness-frame">
-    <div data-ui="message-scroller" data-part="root">
-      <div data-part="viewport" role="region" aria-label="Mensagens" tabindex="0">
-        <div data-part="content" role="log" aria-relevant="additions">
-          <div data-part="item" data-message-id="h1" data-anchor="true">
+    <div data-ui="message-scroller" data-ui-message-scroller="" data-part="root" data-part-root="">
+      <div
+        data-part="viewport"
+        data-part-viewport=""
+        role="region"
+        aria-label="Mensagens"
+        tabindex="0"
+      >
+        <div data-part="content" data-part-content="" role="log" aria-relevant="additions">
+          <div data-part="item" data-part-item="" data-message-id="h1" data-anchor="true">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="end"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Tu"
             >
-              <div data-part="body">
-                <div data-ui="message" data-part="bubble" data-variant="solid" data-tone="accent">
-                  <div data-part="content">Olá. Ainda há vagas na formação de quinta?</div>
+              <div data-part="body" data-part-body="">
+                <div
+                  data-ui="message"
+                  data-ui-message=""
+                  data-part="bubble"
+                  data-part-bubble=""
+                  data-variant="solid"
+                  data-tone="accent"
+                >
+                  <div data-part="content" data-part-content="">
+                    Olá. Ainda há vagas na formação de quinta?
+                  </div>
                 </div>
               </div>
             </article>
           </div>
-          <div data-part="item" data-message-id="h2">
+          <div data-part="item" data-part-item="" data-message-id="h2">
             <article
               data-ui="message"
+              data-ui-message=""
               data-part="root"
+              data-part-root=""
               data-align="start"
               data-layout="bubble"
               data-actions="hover"
               aria-label="Assistente"
             >
-              <div data-part="body">
-                <div data-ui="message" data-part="bubble" data-variant="soft" data-tone="secondary">
-                  <div data-part="content">
-                    <span data-part="typing" role="img" aria-label="A escrever"
+              <div data-part="body" data-part-body="">
+                <div
+                  data-ui="message"
+                  data-ui-message=""
+                  data-part="bubble"
+                  data-part-bubble=""
+                  data-variant="soft"
+                  data-tone="secondary"
+                >
+                  <div data-part="content" data-part-content="">
+                    <span data-part="typing" data-part-typing="" role="img" aria-label="A escrever"
                       ><span></span><span></span><span></span
                     ></span>
                   </div>
@@ -361,6 +494,7 @@
       </div>
       <button
         data-part="jump"
+        data-part-jump=""
         data-direction="end"
         data-active="false"
         type="button"
@@ -368,8 +502,8 @@
         inert
         tabindex="-1"
       >
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="arrow-left"></svg
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="arrow-left"></svg
         ></span>
       </button>
     </div>
@@ -391,7 +525,7 @@
     item.setAttribute('data-part', 'item');
     item.setAttribute('data-message-id', id);
     if (anchor) item.setAttribute('data-anchor', 'true');
-    item.innerHTML = `<article data-ui="message" data-part="root" data-align="${own ? 'end' : 'start'}" data-layout="bubble" data-actions="hover"><div data-part="body"><div data-ui="message" data-part="bubble" data-variant="${own ? 'solid' : 'plain'}" data-tone="${own ? 'accent' : 'secondary'}"><div data-part="content"></div></div></div></article>`;
+    item.innerHTML = `<article data-ui="message" data-ui-message="" data-part="root" data-part-root="" data-align="${own ? 'end' : 'start'}" data-layout="bubble" data-actions="hover"><div data-part="body" data-part-body=""><div data-ui="message" data-ui-message="" data-part="bubble" data-part-bubble="" data-variant="${own ? 'solid' : 'plain'}" data-tone="${own ? 'accent' : 'secondary'}"><div data-part="content" data-part-content=""></div></div></div></article>`;
     item.querySelector('[data-part="content"]').textContent = text;
     return item;
   }

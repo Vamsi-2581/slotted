@@ -3,7 +3,7 @@
    * The outer frame of a route: the regions that do not change when the
    * content does.
    *
-   *   div[data-ui=app-shell]
+   *   div[data-ui-app-shell]
    *   ├─ skip ▸ a · a · a
    *   ├─ banner ▸ brand ▸ nav-toggle · … | centre ▸ … | actions ▸ …
    *   ├─ nav ▸ nav-header · nav-body · nav-footer
@@ -67,7 +67,7 @@
    * focus and the scroll position where the reader left them; Carbon remounts
    * its side nav between the two and loses both.
    */
-  [data-ui='app-shell'] {
+  [data-ui-app-shell] {
     /**
      * The air around anything the frame holds. Composed from the control gap
      * rather than stated on the space scale, so it answers density: a dense
@@ -281,16 +281,16 @@
     position: relative;
   }
 
-  [data-ui='app-shell'][data-nav-size='sm'] {
+  [data-ui-app-shell][data-nav-size='sm'] {
     --_nav-size: var(--slotted-app-shell-nav-size-sm, 13rem);
   }
-  [data-ui='app-shell'][data-nav-size='lg'] {
+  [data-ui-app-shell][data-nav-size='lg'] {
     --_nav-size: var(--slotted-app-shell-nav-size-lg, 18rem);
   }
-  [data-ui='app-shell'][data-aside-size='sm'] {
+  [data-ui-app-shell][data-aside-size='sm'] {
     --_aside-size: var(--slotted-app-shell-aside-size-sm, 16rem);
   }
-  [data-ui='app-shell'][data-aside-size='lg'] {
+  [data-ui-app-shell][data-aside-size='lg'] {
     --_aside-size: var(--slotted-app-shell-aside-size-lg, 26rem);
   }
 
@@ -302,7 +302,7 @@
    * toolbar makes `100vh` taller than the space there is, and `100dvh` is the
    * space there is.
    */
-  [data-ui='app-shell'][data-scroll='content'] {
+  [data-ui-app-shell][data-scroll='content'] {
     block-size: 100%;
     /**
      * Both axes, under `content` alone: the shell's height is the space it was
@@ -321,14 +321,14 @@
    * focused: the reader who does not need it never meets it, and the reader
    * who does finds it before the chrome.
    */
-  [data-ui='app-shell'] > [data-part='skip'] {
+  [data-ui-app-shell] > [data-part-skip] {
     inset-block-start: 0;
     inset-inline-start: 0;
     position: absolute;
     z-index: var(--slotted-z-index-popover, 1100);
   }
 
-  [data-ui='app-shell'] > [data-part='skip'] > a {
+  [data-ui-app-shell] > [data-part-skip] > a {
     background-color: var(--_canvas);
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--slotted-control-radius, 4px);
@@ -348,7 +348,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='app-shell'] > [data-part='skip'] > a:focus-visible {
+  [data-ui-app-shell] > [data-part-skip] > a:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
     translate: 0 0;
@@ -369,7 +369,7 @@
    * in the family reads the query — the bar carries an application's own search
    * and its own account, and those are the things that shed a label first.
    */
-  [data-ui='app-shell'] > [data-part='banner'] {
+  [data-ui-app-shell] > [data-part-banner] {
     align-items: center;
     background-color: var(--slotted-app-shell-banner-surface, transparent);
     color: var(
@@ -386,7 +386,7 @@
     padding-inline: var(--_edge);
   }
 
-  [data-ui='app-shell'] [data-part='brand'] {
+  [data-ui-app-shell] [data-part-brand] {
     align-items: center;
     display: flex;
     flex: 0 1 auto;
@@ -405,13 +405,13 @@
    * shortens instead; the control is exempt, because a control that shrinks
    * below its target is a defect of a different kind.
    */
-  [data-ui='app-shell'] [data-part='brand'] > *:not([data-part='nav-toggle']) {
+  [data-ui-app-shell] [data-part-brand] > *:not([data-part-nav-toggle]) {
     min-inline-size: 0;
     overflow: var(--slotted-app-shell-brand-overflow, hidden);
     text-overflow: ellipsis;
     white-space: var(--slotted-app-shell-brand-wrap, nowrap);
   }
-  [data-ui='app-shell'] > [data-part='banner'] > [data-part='actions'] {
+  [data-ui-app-shell] > [data-part-banner] > [data-part-actions] {
     align-items: center;
     display: flex;
     flex: 0 1 auto;
@@ -426,7 +426,7 @@
    * defect of a different kind from a bar that has run out of room. What runs
    * out of room is the middle, which is what `centre` is for.
    */
-  [data-ui='app-shell'] > [data-part='banner'] > [data-part='actions'] > * {
+  [data-ui-app-shell] > [data-part-banner] > [data-part-actions] > * {
     flex-shrink: 0;
   }
 
@@ -438,7 +438,7 @@
    * is the consumer's; that it may be narrower than what it holds is the
    * shell's, for the reason `actions` carries `min-inline-size: 0`.
    */
-  [data-ui='app-shell'] > [data-part='banner'] > [data-part='centre'] {
+  [data-ui-app-shell] > [data-part-banner] > [data-part-centre] {
     align-items: center;
     display: flex;
     flex: 1 1 auto;
@@ -452,7 +452,7 @@
    * destination shows at that width — a mark alone, a mark and a word — is
    * `side-navigation`'s decision to take against the room it has.
    */
-  [data-ui='app-shell'] > [data-part='nav'] {
+  [data-ui-app-shell] > [data-part-nav] {
     background-color: var(--slotted-app-shell-nav-surface, transparent);
     box-sizing: border-box;
     color: var(
@@ -497,8 +497,8 @@
    * two-line block its own air; without it both were crushed against the group
    * heading below and the frame's footer beneath.
    */
-  [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-header'],
-  [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-footer'] {
+  [data-ui-app-shell] > [data-part-nav] > [data-part-nav-header],
+  [data-ui-app-shell] > [data-part-nav] > [data-part-nav-footer] {
     align-items: center;
     display: flex;
     flex: 0 0 auto;
@@ -524,9 +524,9 @@
    * one of them — the rule over the foot — still runs the column's full width,
    * and a strip of the rail's own beside the column needs none.
    */
-  [data-ui='app-shell']
-    > [data-part='nav']
-    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {
+  [data-ui-app-shell]
+    > [data-part-nav]
+    > :is([data-part-nav-header], [data-part-nav-body], [data-part-nav-footer]) {
     /**
      * Published where it pads, beside the row geometry the root publishes:
      * `side-navigation` reads it to keep its rows' box on the edge it had,
@@ -550,7 +550,7 @@
    * between open and rail, the rows stand wider than the body, and an `auto`
    * inline axis drew a horizontal bar for the length of the transition.
    */
-  [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-body'] {
+  [data-ui-app-shell] > [data-part-nav] > [data-part-nav-body] {
     align-items: stretch;
     display: flex;
     flex: 1 1 auto;
@@ -568,7 +568,7 @@
     scrollbar-width: thin;
   }
 
-  [data-ui='app-shell'] > [data-part='main'] {
+  [data-ui-app-shell] > [data-part-main] {
     background-color: var(
       --slotted-app-shell-main-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
@@ -588,7 +588,7 @@
     min-block-size: 0;
     min-inline-size: 0;
   }
-  [data-ui='app-shell'][data-scroll='content'] > [data-part='main'] {
+  [data-ui-app-shell][data-scroll='content'] > [data-part-main] {
     overflow: auto;
   }
 
@@ -605,7 +605,7 @@
    * Strict containment keeps the travelling bar's per-frame layout inside
    * this box, and its paint inside the corners.
    */
-  [data-ui='app-shell'] > [data-part='progress'] {
+  [data-ui-app-shell] > [data-part-progress] {
     contain: strict;
     grid-area: 2 / 2 / 3 / 3;
     inset-block-start: calc(-1 * var(--_progress-lift, 0px));
@@ -621,15 +621,15 @@
    * with it; the bar holds the top of the viewport once the banner, which is
    * not sticky there, has gone.
    */
-  [data-ui='app-shell'][data-scroll='document'] > [data-part='progress'] {
+  [data-ui-app-shell][data-scroll='document'] > [data-part-progress] {
     --slotted-progress-indicator-position: sticky;
   }
 
   /** A skip link's destination takes focus; it draws no ring for a pointer. */
-  [data-ui='app-shell'] > [data-part='main']:focus {
+  [data-ui-app-shell] > [data-part-main]:focus {
     outline: none;
   }
-  [data-ui='app-shell'] > [data-part='main']:focus-visible {
+  [data-ui-app-shell] > [data-part-main]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -644,7 +644,7 @@
    * the thing it shows or nothing — and a region at nought pixels that still
    * lays its children out puts content outside the box that owns it.
    */
-  [data-ui='app-shell'] > [data-part='aside'] {
+  [data-ui-app-shell] > [data-part-aside] {
     background-color: var(
       --slotted-app-shell-aside-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
@@ -660,10 +660,10 @@
     min-block-size: 0;
     min-inline-size: 0;
   }
-  [data-ui='app-shell'][data-scroll='content'] > [data-part='aside'] {
+  [data-ui-app-shell][data-scroll='content'] > [data-part-aside] {
     overflow: auto;
   }
-  [data-ui='app-shell']:not([data-aside-mode='overlay']) > [data-part='aside']:not([data-open]) {
+  [data-ui-app-shell]:not([data-aside-mode='overlay']) > [data-part-aside]:not([data-open]) {
     display: none;
   }
 
@@ -674,8 +674,8 @@
    * foot holds the actions that close its task. Both stand on the row inset
    * plus the edge, so the title's left edge is the content card's.
    */
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-header'],
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-footer'] {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-header],
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-footer] {
     align-items: center;
     display: flex;
     flex: 0 0 auto;
@@ -685,18 +685,18 @@
     padding-block: var(--_row-inset);
     padding-inline: calc(var(--_row-inset) + var(--_row-gap));
   }
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-header'] {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-header] {
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
   /** The title takes the room and the control keeps its own. */
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-header'] > :not([data-part]) {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-header] > :not([data-part]) {
     flex: 1 1 auto;
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-footer'] {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-footer] {
     justify-content: flex-end;
   }
   /**
@@ -704,7 +704,7 @@
    * stands on the inset the head and the foot stand on, so what it holds lines
    * up with the pane's title and no consumer pads it by hand.
    */
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-body'] {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-body] {
     flex: 1 1 auto;
     min-block-size: 0;
     min-inline-size: 0;
@@ -720,7 +720,7 @@
     scrollbar-width: thin;
   }
   /* Content that brings its own inset — a page, a detail panel, a list to the edges. */
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-body'][data-inset='none'] {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-body][data-inset='none'] {
     padding: 0;
   }
 
@@ -738,7 +738,7 @@
    * At rest it draws nothing; under the hand, the drag and the keyboard its
    * outer border becomes the line, and the keyboard alone adds the ring.
    */
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer'] {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] {
     --_resizer-thickness: var(--slotted-space-6, 1rem);
     --_resizer-reach: var(--slotted-target-min, 24px);
     background: transparent;
@@ -755,29 +755,27 @@
     transition: border-color var(--_duration) var(--_easing);
     z-index: 1;
   }
-  [data-ui='app-shell'][data-nav-side='end'] > [data-part='aside'] > [data-part='aside-resizer'] {
+  [data-ui-app-shell][data-nav-side='end'] > [data-part-aside] > [data-part-aside-resizer] {
     border-inline-end-width: var(--slotted-border-width-thick, 2px);
     border-inline-start-width: 0;
     inset-inline-end: 0;
     inset-inline-start: auto;
   }
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer']::before {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer]::before {
     content: '';
     inset-block: 0;
     inset-inline: calc((var(--_resizer-reach) - var(--_resizer-thickness)) / -2);
     position: absolute;
   }
-  [data-ui='app-shell']
-    > [data-part='aside']
-    > [data-part='aside-resizer']:not([data-disabled]):hover,
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer']:focus-visible,
-  [data-ui='app-shell'][data-dragging] > [data-part='aside'] > [data-part='aside-resizer'] {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer]:not([data-disabled]):hover,
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer]:focus-visible,
+  [data-ui-app-shell][data-dragging] > [data-part-aside] > [data-part-aside-resizer] {
     border-color: var(
       --slotted-app-shell-resizer-color,
       var(--slotted-border-strong, ButtonBorder)
     );
   }
-  [data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer']:focus-visible {
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -789,7 +787,7 @@
    * where a product does have one — a licence, a status, an environment — and
    * it takes only the height of its own line.
    */
-  [data-ui='app-shell'] > [data-part='footer'] {
+  [data-ui-app-shell] > [data-part-footer] {
     align-items: center;
     background-color: var(--slotted-app-shell-footer-surface, transparent);
     color: var(
@@ -811,7 +809,7 @@
    * it. What it is a containing block for is the shell rather than the
    * viewport, because `container-type` contains layout.
    */
-  [data-ui='app-shell'] > [data-part='layer'] {
+  [data-ui-app-shell] > [data-part-layer] {
     display: contents;
   }
 
@@ -825,7 +823,7 @@
    * finding — the closed strip had twelve pixels to its right, where the
    * content card begins, and nothing to its left.
    */
-  [data-ui='app-shell'][data-canvas='inset'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='inset'] > [data-part-nav] {
     /* The navigation stands on the sunken frame, which the secondary tone's
        hover is 0.011 lighter than in the light scheme: a row's hover was the
        frame itself. Both steps are recomputed from the ground it stands on. */
@@ -846,23 +844,23 @@
     margin-block: var(--_gutter);
     margin-inline-start: var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='floating'] > [data-part='main'],
-  [data-ui='app-shell'][data-canvas='floating'] > [data-part='aside'],
-  [data-ui='app-shell'][data-canvas='inset'] > [data-part='main'],
-  [data-ui='app-shell'][data-canvas='inset'] > [data-part='aside'] {
+  [data-ui-app-shell][data-canvas='floating'] > [data-part-main],
+  [data-ui-app-shell][data-canvas='floating'] > [data-part-aside],
+  [data-ui-app-shell][data-canvas='inset'] > [data-part-main],
+  [data-ui-app-shell][data-canvas='inset'] > [data-part-aside] {
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--_radius);
     box-shadow: var(--_elevation);
     margin-block: var(--_gutter);
     margin-inline: var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='floating'] > [data-part='aside'],
-  [data-ui='app-shell'][data-canvas='inset'] > [data-part='aside'] {
+  [data-ui-app-shell][data-canvas='floating'] > [data-part-aside],
+  [data-ui-app-shell][data-canvas='inset'] > [data-part-aside] {
     margin-inline-start: 0;
   }
-  [data-ui='app-shell'][data-canvas='floating'] > [data-part='footer'],
-  [data-ui='app-shell'][data-canvas='panel'] > [data-part='footer'],
-  [data-ui='app-shell'][data-canvas='inset'] > [data-part='footer'] {
+  [data-ui-app-shell][data-canvas='floating'] > [data-part-footer],
+  [data-ui-app-shell][data-canvas='panel'] > [data-part-footer],
+  [data-ui-app-shell][data-canvas='inset'] > [data-part-footer] {
     padding-block-start: 0;
   }
   /**
@@ -873,8 +871,8 @@
    * for the seam the gutter used to draw. Keyed on the mode, as every layer
    * rule is; the width answers only for a shell not yet measured, below.
    */
-  [data-ui='app-shell'][data-canvas='floating'][data-nav-mode='overlay'] > [data-part='main'],
-  [data-ui='app-shell'][data-canvas='inset'][data-nav-mode='overlay'] > [data-part='main'] {
+  [data-ui-app-shell][data-canvas='floating'][data-nav-mode='overlay'] > [data-part-main],
+  [data-ui-app-shell][data-canvas='inset'][data-nav-mode='overlay'] > [data-part-main] {
     border-block-end: 0;
     border-inline: 0;
     border-radius: 0;
@@ -889,33 +887,33 @@
    * carries the ground. Stated as the same six properties, so a product that
    * repaints one region keeps its choice under either plane.
    */
-  [data-ui='app-shell'][data-canvas='flush'] {
+  [data-ui-app-shell][data-canvas='flush'] {
     --_edge: var(--_row-inset);
     --_nav-edges: var(--_seam-width);
     --_nav-inset: var(--_row-inset);
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='banner'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-banner] {
     background-color: var(
       --slotted-app-shell-banner-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
     );
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-nav] {
     background-color: var(
       --slotted-app-shell-nav-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
     );
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='main'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-main] {
     background-color: var(--slotted-app-shell-main-surface, transparent);
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='aside'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-aside] {
     background-color: var(
       --slotted-app-shell-aside-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
     );
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='footer'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-footer] {
     background-color: var(
       --slotted-app-shell-footer-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
@@ -927,33 +925,33 @@
    * off-centre on this plane once; none at all put every row's ground against
    * the screen's edge and against the seam.
    */
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-nav] {
     padding-block: var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='banner'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-banner] {
     border-block-end: var(--_seam);
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='footer'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-footer] {
     border-block-start: var(--_seam);
   }
-  [data-ui='app-shell'][data-canvas='flush'] > [data-part='aside'] {
+  [data-ui-app-shell][data-canvas='flush'] > [data-part-aside] {
     border-block-start: var(--_seam);
   }
   /* The seams inside a region: wherever regions touch without a gutter, which
      is every seam of `flush` and every seam inside the `panel` card. */
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel'])
-    > [data-part='nav']
-    > [data-part='nav-footer'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel'])
+    > [data-part-nav]
+    > [data-part-nav-footer] {
     border-block-start: var(--_seam);
   }
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel'])
-    > [data-part='aside']
-    > [data-part='aside-header'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel'])
+    > [data-part-aside]
+    > [data-part-aside-header] {
     border-block-end: var(--_seam);
   }
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel'])
-    > [data-part='aside']
-    > [data-part='aside-footer'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel'])
+    > [data-part-aside]
+    > [data-part-aside-footer] {
     border-block-start: var(--_seam);
   }
 
@@ -967,7 +965,7 @@
    * mark column and a row's inset each side, and the card's edge is added to
    * it rather than taken from the marks.
    */
-  [data-ui='app-shell'][data-canvas='floating'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='floating'] > [data-part-nav] {
     background-color: var(
       --slotted-app-shell-nav-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
@@ -980,12 +978,12 @@
   }
   /* A card has an edge the column never had: the rows stand one inset in, as
      they do on the overlay card, and the bar's rows stand over them. */
-  [data-ui='app-shell'][data-canvas='floating'] {
+  [data-ui-app-shell][data-canvas='floating'] {
     --_edge: calc(var(--_gutter) + var(--_rule-width) + var(--_row-inset));
     --_nav-edges: calc(2 * var(--_rule-width));
     --_nav-inset: var(--_row-inset);
   }
-  [data-ui='app-shell'][data-canvas='floating'][data-nav-side='end'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='floating'][data-nav-side='end'] > [data-part-nav] {
     margin-inline: 0 var(--_gutter);
   }
 
@@ -1004,11 +1002,11 @@
    * A layer is a phone's arrangement, and a phone has no room for a frame: the
    * card goes wherever the navigation is a layer, as the inset card does.
    */
-  [data-ui='app-shell']:is(
+  [data-ui-app-shell]:is(
       [data-canvas='floating'],
       [data-canvas='inset']
     )[data-primary='main']::before,
-  [data-ui='app-shell'][data-canvas='panel']::before {
+  [data-ui-app-shell][data-canvas='panel']::before {
     background-color: var(
       --slotted-app-shell-main-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface))
@@ -1021,17 +1019,14 @@
     margin: var(--_gutter);
     min-inline-size: 0;
   }
-  [data-ui='app-shell'][data-canvas='panel']::before {
+  [data-ui-app-shell][data-canvas='panel']::before {
     grid-area: 2 / 1 / 3 / -1;
     margin: 0;
   }
-  [data-ui='app-shell'][data-canvas='panel']:is(
-      [data-primary='nav'],
-      [data-primary='main']
-    )::before {
+  [data-ui-app-shell][data-canvas='panel']:is([data-primary='nav'], [data-primary='main'])::before {
     grid-area: 1 / 1 / 3 / -1;
   }
-  [data-ui='app-shell'][data-nav-mode='overlay'][data-canvas]::before {
+  [data-ui-app-shell][data-nav-mode='overlay'][data-canvas]::before {
     content: none;
   }
 
@@ -1043,37 +1038,37 @@
    * and keeps its ground with the card's lower corners. Between them is a
    * seam, and `separation` decides it.
    */
-  [data-ui='app-shell']:is([data-canvas='floating'], [data-canvas='inset'])[data-primary='main']
-    > [data-part='banner'] {
+  [data-ui-app-shell]:is([data-canvas='floating'], [data-canvas='inset'])[data-primary='main']
+    > [data-part-banner] {
     margin-block-start: calc(var(--_gutter) + var(--_rule-width));
     margin-inline: calc(var(--_gutter) + var(--_rule-width));
     padding-inline: 0;
   }
-  [data-ui='app-shell']:is([data-canvas='floating'], [data-canvas='inset'])[data-primary='main']
-    > [data-part='main'] {
+  [data-ui-app-shell]:is([data-canvas='floating'], [data-canvas='inset'])[data-primary='main']
+    > [data-part-main] {
     border: none;
     border-radius: 0 0 var(--_inner-radius) var(--_inner-radius);
     box-shadow: none;
     margin-block: 0 calc(var(--_gutter) + var(--_rule-width));
     margin-inline: calc(var(--_gutter) + var(--_rule-width));
   }
-  [data-ui='app-shell'][data-primary='main'] > [data-part='banner'],
-  [data-ui='app-shell'][data-primary='main'][data-nav-side='end'] > [data-part='banner'],
-  [data-ui='app-shell'][data-canvas='panel'][data-primary='nav'] > [data-part='banner'],
-  [data-ui='app-shell'][data-canvas='panel'][data-primary='nav'][data-nav-side='end']
-    > [data-part='banner'] {
+  [data-ui-app-shell][data-primary='main'] > [data-part-banner],
+  [data-ui-app-shell][data-primary='main'][data-nav-side='end'] > [data-part-banner],
+  [data-ui-app-shell][data-canvas='panel'][data-primary='nav'] > [data-part-banner],
+  [data-ui-app-shell][data-canvas='panel'][data-primary='nav'][data-nav-side='end']
+    > [data-part-banner] {
     border-block-end: var(--_seam);
     grid-column: 2 / 3;
   }
-  [data-ui='app-shell'][data-primary='main'][data-nav-mode='overlay'] > [data-part='banner'] {
+  [data-ui-app-shell][data-primary='main'][data-nav-mode='overlay'] > [data-part-banner] {
     margin: 0;
     padding-inline: var(--_edge);
   }
-  [data-ui='app-shell']:is(
+  [data-ui-app-shell]:is(
       [data-canvas='floating'],
       [data-canvas='inset']
     )[data-primary='main'][data-nav-mode='overlay']
-    > [data-part='main'] {
+    > [data-part-main] {
     border-radius: 0;
     margin: 0;
   }
@@ -1092,80 +1087,80 @@
    * measured below the compact width keeps it for one frame: the root cannot
    * query its own width, and that frame is the cost.
    */
-  [data-ui='app-shell'][data-canvas='panel'] {
+  [data-ui-app-shell][data-canvas='panel'] {
     --_edge: calc(var(--_rule-width) + var(--_row-inset));
     --_nav-edges: var(--_seam-width);
     --_nav-inset: var(--_row-inset);
   }
   /* Once the navigation is a layer the card beside the bar is gone, and the
      bar's rows stand where the inset plane's do. */
-  [data-ui='app-shell'][data-canvas='floating'][data-nav-mode='overlay'],
-  [data-ui='app-shell'][data-canvas='panel'][data-nav-mode='overlay'] {
+  [data-ui-app-shell][data-canvas='floating'][data-nav-mode='overlay'],
+  [data-ui-app-shell][data-canvas='panel'][data-nav-mode='overlay'] {
     --_edge: var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']) {
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']) {
     box-sizing: border-box;
     padding-block-end: var(--_gutter);
     padding-inline: var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']):is(
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']):is(
       [data-primary='nav'],
       [data-primary='main']
     ) {
     padding-block-start: var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']) > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']) > [data-part-nav] {
     border-end-start-radius: var(--_inner-radius);
     border-start-start-radius: var(--_inner-radius);
     margin: var(--_rule-width) 0 var(--_rule-width) var(--_rule-width);
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay'])[data-nav-side='end']
-    > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay'])[data-nav-side='end']
+    > [data-part-nav] {
     border-radius: 0 var(--_inner-radius) var(--_inner-radius) 0;
     margin: var(--_rule-width) var(--_rule-width) var(--_rule-width) 0;
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']) > [data-part='main'] {
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']) > [data-part-main] {
     border-end-end-radius: var(--_inner-radius);
     margin-block-end: var(--_rule-width);
     margin-inline-end: var(--_rule-width);
   }
-  [data-ui='app-shell'][data-canvas='panel'][data-primary='banner']:not([data-nav-mode='overlay'])
-    > [data-part='main'] {
+  [data-ui-app-shell][data-canvas='panel'][data-primary='banner']:not([data-nav-mode='overlay'])
+    > [data-part-main] {
     border-start-end-radius: var(--_inner-radius);
     margin-block-start: var(--_rule-width);
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']):not(
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']):not(
       [data-primary='banner']
     )
-    > [data-part='banner'] {
+    > [data-part-banner] {
     margin-block-start: var(--_rule-width);
     margin-inline-end: var(--_rule-width);
   }
   /* The corner the content shares with the card is the pane's once the pane
      stands beside it. */
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']):has(
-      > [data-part='aside'][data-open]
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']):has(
+      > [data-part-aside][data-open]
     )
-    > [data-part='main'] {
+    > [data-part-main] {
     border-end-end-radius: 0;
     border-start-end-radius: 0;
     margin-inline-end: 0;
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']):has(
-      > [data-part='aside'][data-open]
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']):has(
+      > [data-part-aside][data-open]
     )
-    > [data-part='banner'] {
+    > [data-part-banner] {
     margin-inline-end: 0;
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']):not(
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']):not(
       [data-aside-mode='overlay']
     )
-    > [data-part='aside'] {
+    > [data-part-aside] {
     border-end-end-radius: var(--_inner-radius);
     border-start-end-radius: var(--_inner-radius);
     margin: var(--_rule-width) var(--_rule-width) var(--_rule-width) 0;
   }
-  [data-ui='app-shell'][data-canvas='panel'][data-nav-mode='overlay'] > [data-part='main'] {
+  [data-ui-app-shell][data-canvas='panel'][data-nav-mode='overlay'] > [data-part-main] {
     border-block-start: var(--_rule-width) solid var(--_rule);
   }
 
@@ -1183,14 +1178,14 @@
    * gives it once the navigation is a layer — the frame is the box of `main`
    * and covers that edge already.
    */
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-primary='main']),
-  [data-ui='app-shell'][data-canvas='panel'][data-primary='nav'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-primary='main']),
+  [data-ui-app-shell][data-canvas='panel'][data-primary='nav'] {
     --_progress-lift: var(--_seam-width);
   }
-  [data-ui='app-shell'][data-canvas='panel'][data-primary='banner'] {
+  [data-ui-app-shell][data-canvas='panel'][data-primary='banner'] {
     --_progress-lift: var(--_rule-width);
   }
-  [data-ui='app-shell'][data-canvas='panel'][data-nav-mode='overlay'] {
+  [data-ui-app-shell][data-canvas='panel'][data-nav-mode='overlay'] {
     --_progress-lift: 0px;
   }
 
@@ -1205,46 +1200,45 @@
    * their originals in the narrow query below. `app-shell.styles.test.mjs`
    * holds every rule that gives `main` a margin or a radius to its twin.
    */
-  [data-ui='app-shell'][data-canvas='floating'] > [data-part='progress'],
-  [data-ui='app-shell'][data-canvas='inset'] > [data-part='progress'] {
+  [data-ui-app-shell][data-canvas='floating'] > [data-part-progress],
+  [data-ui-app-shell][data-canvas='inset'] > [data-part-progress] {
     border-radius: var(--_radius);
     margin-block: var(--_gutter);
     margin-inline: var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='floating'][data-nav-mode='overlay'] > [data-part='progress'],
-  [data-ui='app-shell'][data-canvas='inset'][data-nav-mode='overlay'] > [data-part='progress'] {
+  [data-ui-app-shell][data-canvas='floating'][data-nav-mode='overlay'] > [data-part-progress],
+  [data-ui-app-shell][data-canvas='inset'][data-nav-mode='overlay'] > [data-part-progress] {
     border-radius: 0;
     margin: 0;
   }
-  [data-ui='app-shell']:is([data-canvas='floating'], [data-canvas='inset'])[data-primary='main']
-    > [data-part='progress'] {
+  [data-ui-app-shell]:is([data-canvas='floating'], [data-canvas='inset'])[data-primary='main']
+    > [data-part-progress] {
     border-radius: 0 0 var(--_inner-radius) var(--_inner-radius);
     margin-block: 0 calc(var(--_gutter) + var(--_rule-width));
     margin-inline: calc(var(--_gutter) + var(--_rule-width));
   }
-  [data-ui='app-shell']:is(
+  [data-ui-app-shell]:is(
       [data-canvas='floating'],
       [data-canvas='inset']
     )[data-primary='main'][data-nav-mode='overlay']
-    > [data-part='progress'] {
+    > [data-part-progress] {
     border-radius: 0;
     margin: 0;
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay'])
-    > [data-part='progress'] {
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']) > [data-part-progress] {
     border-end-end-radius: var(--_inner-radius);
     margin-block-end: var(--_rule-width);
     margin-inline-end: var(--_rule-width);
   }
-  [data-ui='app-shell'][data-canvas='panel'][data-primary='banner']:not([data-nav-mode='overlay'])
-    > [data-part='progress'] {
+  [data-ui-app-shell][data-canvas='panel'][data-primary='banner']:not([data-nav-mode='overlay'])
+    > [data-part-progress] {
     border-start-end-radius: var(--_inner-radius);
     margin-block-start: var(--_rule-width);
   }
-  [data-ui='app-shell'][data-canvas='panel']:not([data-nav-mode='overlay']):has(
-      > [data-part='aside'][data-open]
+  [data-ui-app-shell][data-canvas='panel']:not([data-nav-mode='overlay']):has(
+      > [data-part-aside][data-open]
     )
-    > [data-part='progress'] {
+    > [data-part-progress] {
     border-end-end-radius: 0;
     border-start-end-radius: 0;
     margin-inline-end: 0;
@@ -1258,7 +1252,7 @@
    * seams the region and its parts draw, and `transparent` removes them. The
    * tone rules below state the same two declarations at a higher specificity.
    */
-  [data-ui='app-shell'] > [data-part] {
+  [data-ui-app-shell] > [data-part] {
     --_rule: var(--slotted-app-shell-border-color, var(--slotted-border-subtle, ButtonBorder));
     --_seam: var(--_rule-width) solid var(--_rule);
   }
@@ -1279,12 +1273,12 @@
    * where it is declared, and a region carrying a scheme of its own must mix
    * its own ink.
    */
-  [data-ui='app-shell'][data-separation='tone'],
-  [data-ui='app-shell'][data-separation='tone'] > [data-part] {
+  [data-ui-app-shell][data-separation='tone'],
+  [data-ui-app-shell][data-separation='tone'] > [data-part] {
     --_seam: none;
     --_seam-width: 0px;
   }
-  [data-ui='app-shell'][data-canvas='flush'][data-separation='tone'] > [data-part='footer'] {
+  [data-ui-app-shell][data-canvas='flush'][data-separation='tone'] > [data-part-footer] {
     --_ground: var(
       --slotted-app-shell-footer-surface,
       var(
@@ -1293,8 +1287,8 @@
       )
     );
   }
-  [data-ui='app-shell'][data-canvas='flush'][data-separation='tone']:not([data-primary='main'])
-    > [data-part='banner'] {
+  [data-ui-app-shell][data-canvas='flush'][data-separation='tone']:not([data-primary='main'])
+    > [data-part-banner] {
     --_ground: var(
       --slotted-app-shell-banner-surface,
       var(
@@ -1303,8 +1297,8 @@
       )
     );
   }
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel'])[data-separation='tone']
-    > [data-part='nav'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel'])[data-separation='tone']
+    > [data-part-nav] {
     --_ground: var(
       --slotted-app-shell-nav-surface,
       var(
@@ -1313,8 +1307,8 @@
       )
     );
   }
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel'])[data-separation='tone']
-    > [data-part='aside'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel'])[data-separation='tone']
+    > [data-part-aside] {
     --_ground: var(
       --slotted-app-shell-aside-surface,
       var(
@@ -1323,18 +1317,18 @@
       )
     );
   }
-  [data-ui='app-shell'][data-separation='tone'] > [data-part='nav'] > [data-part='nav-rail'] {
+  [data-ui-app-shell][data-separation='tone'] > [data-part-nav] > [data-part-nav-rail] {
     --_ground: var(
       --slotted-app-shell-tone-surface,
       color-mix(in oklab, var(--slotted-surface), var(--slotted-text) 4.5%)
     );
   }
-  [data-ui='app-shell'][data-canvas='flush'][data-separation='tone']:not([data-primary='main'])
-    > [data-part='banner'],
-  [data-ui='app-shell'][data-canvas='flush'][data-separation='tone'] > [data-part='footer'],
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel'])[data-separation='tone']
-    > :is([data-part='nav'], [data-part='aside']),
-  [data-ui='app-shell'][data-separation='tone'] > [data-part='nav'] > [data-part='nav-rail'] {
+  [data-ui-app-shell][data-canvas='flush'][data-separation='tone']:not([data-primary='main'])
+    > [data-part-banner],
+  [data-ui-app-shell][data-canvas='flush'][data-separation='tone'] > [data-part-footer],
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel'])[data-separation='tone']
+    > :is([data-part-nav], [data-part-aside]),
+  [data-ui-app-shell][data-separation='tone'] > [data-part-nav] > [data-part-nav-rail] {
     --slotted-tone-secondary-subtle-hover: color-mix(
       in oklab,
       var(--_ground),
@@ -1350,7 +1344,7 @@
   }
   /* The content keeps the surface under a toned frame: on the flush plane it
      carried the sunken ground, which is 0.014 from the tone. */
-  [data-ui='app-shell'][data-canvas='flush'][data-separation='tone'] > [data-part='main'] {
+  [data-ui-app-shell][data-canvas='flush'][data-separation='tone'] > [data-part-main] {
     background-color: var(
       --slotted-app-shell-main-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
@@ -1370,12 +1364,12 @@
    * on the way in. `:has()` recognises the part, so no script writes an
    * attribute and a server render has the grid on its first paint.
    */
-  [data-ui='app-shell'] > [data-part='nav']:has(> [data-part='nav-rail']) {
+  [data-ui-app-shell] > [data-part-nav]:has(> [data-part-nav-rail]) {
     display: grid;
     grid-template-columns: var(--_rail-size) minmax(var(--_nav-size), 1fr);
     grid-template-rows: auto minmax(0, 1fr) auto;
   }
-  [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-rail'] {
+  [data-ui-app-shell] > [data-part-nav] > [data-part-nav-rail] {
     align-items: center;
     border-inline-end: var(--_seam);
     box-sizing: border-box;
@@ -1389,47 +1383,43 @@
     padding-block: var(--_row-inset);
     scrollbar-width: none;
   }
-  [data-ui='app-shell']
-    > [data-part='nav']:has(> [data-part='nav-rail'])
-    > [data-part='nav-header'] {
+  [data-ui-app-shell] > [data-part-nav]:has(> [data-part-nav-rail]) > [data-part-nav-header] {
     grid-area: 1 / 2 / 2 / 3;
   }
-  [data-ui='app-shell'] > [data-part='nav']:has(> [data-part='nav-rail']) > [data-part='nav-body'] {
+  [data-ui-app-shell] > [data-part-nav]:has(> [data-part-nav-rail]) > [data-part-nav-body] {
     grid-area: 2 / 2 / 3 / 3;
   }
-  [data-ui='app-shell']
-    > [data-part='nav']:has(> [data-part='nav-rail'])
-    > [data-part='nav-footer'] {
+  [data-ui-app-shell] > [data-part-nav]:has(> [data-part-nav-rail]) > [data-part-nav-footer] {
     grid-area: 3 / 2 / 4 / 3;
   }
   /* The strip's rule is an edge, and a row whose ground meets it reads as a
      column with no padding. */
-  [data-ui='app-shell']
-    > [data-part='nav']:has(> [data-part='nav-rail'])
-    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {
+  [data-ui-app-shell]
+    > [data-part-nav]:has(> [data-part-nav-rail])
+    > :is([data-part-nav-header], [data-part-nav-body], [data-part-nav-footer]) {
     padding-inline-start: calc(var(--_row-inset) + var(--_row-ring-inset));
     transition: visibility var(--_duration) step-start;
   }
-  [data-ui='app-shell'][data-nav-mode='inline'][data-open]
-    > [data-part='nav']:has(> [data-part='nav-rail']) {
+  [data-ui-app-shell][data-nav-mode='inline'][data-open]
+    > [data-part-nav]:has(> [data-part-nav-rail]) {
     inline-size: calc(var(--_rail-size) + var(--_nav-size) + var(--_nav-edges));
   }
   /* Closed, the region is the strip and its edges: the strip holds a row's
      inset on each side of its marks already. */
-  [data-ui='app-shell'][data-nav-mode='inline']:not([data-open])
-    > [data-part='nav']:has(> [data-part='nav-rail']) {
+  [data-ui-app-shell][data-nav-mode='inline']:not([data-open])
+    > [data-part-nav]:has(> [data-part-nav-rail]) {
     inline-size: calc(var(--_rail-size) + var(--_nav-edges));
   }
-  [data-ui='app-shell'][data-nav-mode='inline']:not([data-open])
-    > [data-part='nav']:has(> [data-part='nav-rail'])
-    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {
+  [data-ui-app-shell][data-nav-mode='inline']:not([data-open])
+    > [data-part-nav]:has(> [data-part-nav-rail])
+    > :is([data-part-nav-header], [data-part-nav-body], [data-part-nav-footer]) {
     transition: visibility var(--_duration) step-end;
     visibility: hidden;
   }
   /* A closed strip is the region's edge, and the edge is the plane's to draw. */
-  [data-ui='app-shell'][data-nav-mode='inline']:not([data-open])
-    > [data-part='nav']
-    > [data-part='nav-rail'] {
+  [data-ui-app-shell][data-nav-mode='inline']:not([data-open])
+    > [data-part-nav]
+    > [data-part-nav-rail] {
     border-inline-end: none;
   }
 
@@ -1442,8 +1432,8 @@
    * a forced-colours rule of its own for.
    */
   @media (forced-colors: active) {
-    [data-ui='app-shell'][data-separation='tone'],
-    [data-ui='app-shell'][data-separation='tone'] > [data-part] {
+    [data-ui-app-shell][data-separation='tone'],
+    [data-ui-app-shell][data-separation='tone'] > [data-part] {
       --_seam: var(--_rule-width) solid CanvasText;
       --_seam-width: var(--_rule-width);
     }
@@ -1464,8 +1454,8 @@
    * The pane's control is the same control: the same box, the same ink, the
    * same pair of marks. What differs is which way the artwork faces, below.
    */
-  [data-ui='app-shell'] [data-part='nav-toggle'],
-  [data-ui='app-shell'] [data-part='aside-toggle'] {
+  [data-ui-app-shell] [data-part-nav-toggle],
+  [data-ui-app-shell] [data-part-aside-toggle] {
     --slotted-icon-size: var(--slotted-control-icon-size-md, 16px);
 
     background-color: transparent;
@@ -1502,37 +1492,31 @@
    * navigation's turns. The box is not `directional`: which side the region
    * stands on is this family's fact, not the reading direction's alone.
    */
-  [data-ui='app-shell'][data-nav-side='end'] [data-part='nav-toggle'] > [data-ui='icon'],
-  [dir='rtl'] [data-ui='app-shell'] [data-part='nav-toggle'] > [data-ui='icon'],
-  [data-ui='app-shell']:not([data-nav-side='end']) [data-part='aside-toggle'] > [data-ui='icon'],
-  [dir='rtl']
-    [data-ui='app-shell'][data-nav-side='end']
-    [data-part='aside-toggle']
-    > [data-ui='icon'] {
+  [data-ui-app-shell][data-nav-side='end'] [data-part-nav-toggle] > [data-ui-icon],
+  [dir='rtl'] [data-ui-app-shell] [data-part-nav-toggle] > [data-ui-icon],
+  [data-ui-app-shell]:not([data-nav-side='end']) [data-part-aside-toggle] > [data-ui-icon],
+  [dir='rtl'] [data-ui-app-shell][data-nav-side='end'] [data-part-aside-toggle] > [data-ui-icon] {
     scale: -1 1;
   }
+  [dir='rtl'] [data-ui-app-shell][data-nav-side='end'] [data-part-nav-toggle] > [data-ui-icon],
   [dir='rtl']
-    [data-ui='app-shell'][data-nav-side='end']
-    [data-part='nav-toggle']
-    > [data-ui='icon'],
-  [dir='rtl']
-    [data-ui='app-shell']:not([data-nav-side='end'])
-    [data-part='aside-toggle']
-    > [data-ui='icon'] {
+    [data-ui-app-shell]:not([data-nav-side='end'])
+    [data-part-aside-toggle]
+    > [data-ui-icon] {
     scale: 1 1;
   }
 
-  [data-ui='app-shell'] [data-part='nav-toggle']:enabled:hover,
-  [data-ui='app-shell'] [data-part='aside-toggle']:enabled:hover {
+  [data-ui-app-shell] [data-part-nav-toggle]:enabled:hover,
+  [data-ui-app-shell] [data-part-aside-toggle]:enabled:hover {
     background-color: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
     color: currentcolor;
   }
-  [data-ui='app-shell'] [data-part='nav-toggle']:enabled:active,
-  [data-ui='app-shell'] [data-part='aside-toggle']:enabled:active {
+  [data-ui-app-shell] [data-part-nav-toggle]:enabled:active,
+  [data-ui-app-shell] [data-part-aside-toggle]:enabled:active {
     background-color: var(--slotted-tone-secondary-subtle-active, ButtonFace);
   }
-  [data-ui='app-shell'] [data-part='nav-toggle']:focus-visible,
-  [data-ui='app-shell'] [data-part='aside-toggle']:focus-visible {
+  [data-ui-app-shell] [data-part-nav-toggle]:focus-visible,
+  [data-ui-app-shell] [data-part-aside-toggle]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -1546,33 +1530,33 @@
    */
   /* The rail holds the parts' ring inset on each side as well, so a control
      at the mark's size keeps its focus ring inside the body beside the gutter. */
-  [data-ui='app-shell'][data-nav-mode='inline'] > [data-part='nav'] {
+  [data-ui-app-shell][data-nav-mode='inline'] > [data-part-nav] {
     inline-size: calc(
       var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_row-ring-inset)) + var(--_nav-edges)
     );
   }
-  [data-ui='app-shell'][data-nav-mode='inline'][data-open] > [data-part='nav'] {
+  [data-ui-app-shell][data-nav-mode='inline'][data-open] > [data-part-nav] {
     inline-size: var(--_nav-size);
   }
   /**
    * The rail centres its marks, all three rows together: a head centred over a
    * body that is not reads as two columns in one strip.
    */
-  [data-ui='app-shell'][data-nav-mode='inline']:not([data-open])
-    > [data-part='nav']
-    > [data-part='nav-header'],
-  [data-ui='app-shell'][data-nav-mode='inline']:not([data-open])
-    > [data-part='nav']
-    > [data-part='nav-footer'] {
+  [data-ui-app-shell][data-nav-mode='inline']:not([data-open])
+    > [data-part-nav]
+    > [data-part-nav-header],
+  [data-ui-app-shell][data-nav-mode='inline']:not([data-open])
+    > [data-part-nav]
+    > [data-part-nav-footer] {
     /* Two marks in one end of a rail — the control and the account — stand
        one over the other: the rail is one mark column wide, so a row of two
        is a row that overflows it. */
     flex-wrap: wrap;
     justify-content: center;
   }
-  [data-ui='app-shell'][data-nav-mode='inline']:not([data-open])
-    > [data-part='nav']
-    > [data-part='nav-body'] {
+  [data-ui-app-shell][data-nav-mode='inline']:not([data-open])
+    > [data-part-nav]
+    > [data-part-nav-body] {
     align-items: center;
   }
   /**
@@ -1585,35 +1569,35 @@
    * `hidden` does not animate, because it is a removal rather than a change of
    * width.
    */
-  [data-ui='app-shell'][data-nav-mode='inline'][data-collapsed-to='hidden']:not([data-open])
-    > [data-part='nav'] {
+  [data-ui-app-shell][data-nav-mode='inline'][data-collapsed-to='hidden']:not([data-open])
+    > [data-part-nav] {
     display: none;
   }
 
-  [data-ui='app-shell'][data-nav-side='end'] > [data-part='nav'] {
+  [data-ui-app-shell][data-nav-side='end'] > [data-part-nav] {
     grid-area: 2 / 3 / 3 / 4;
   }
-  [data-ui='app-shell'][data-canvas='inset'][data-nav-side='end'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='inset'][data-nav-side='end'] > [data-part-nav] {
     margin-inline: 0 var(--_gutter);
   }
-  [data-ui='app-shell'][data-canvas='flush'][data-nav-side='end'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='flush'][data-nav-side='end'] > [data-part-nav] {
     padding-inline: 0 var(--_gutter);
   }
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel']) > [data-part='nav'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel']) > [data-part-nav] {
     border-inline-end: var(--_seam);
   }
-  [data-ui='app-shell']:is([data-canvas='flush'], [data-canvas='panel'])[data-nav-side='end']
-    > [data-part='nav'] {
+  [data-ui-app-shell]:is([data-canvas='flush'], [data-canvas='panel'])[data-nav-side='end']
+    > [data-part-nav] {
     border-inline-end: none;
     border-inline-start: var(--_seam);
   }
 
   /** Reaching the corner: the navigation spans every row instead. */
-  [data-ui='app-shell']:is([data-primary='nav'], [data-primary='main']) > [data-part='nav'] {
+  [data-ui-app-shell]:is([data-primary='nav'], [data-primary='main']) > [data-part-nav] {
     grid-area: 1 / 1 / -1 / 2;
   }
-  [data-ui='app-shell']:is([data-primary='nav'], [data-primary='main'])[data-nav-side='end']
-    > [data-part='nav'] {
+  [data-ui-app-shell]:is([data-primary='nav'], [data-primary='main'])[data-nav-side='end']
+    > [data-part-nav] {
     grid-area: 1 / 3 / -1 / 4;
   }
   /**
@@ -1621,22 +1605,22 @@
    * and whatever the bar carries sit on one line rather than being two headers
    * of different sizes in the same row of the screen.
    */
-  [data-ui='app-shell']:is([data-primary='nav'], [data-primary='main'])
-    > [data-part='nav']
-    > [data-part='nav-header'] {
+  [data-ui-app-shell]:is([data-primary='nav'], [data-primary='main'])
+    > [data-part-nav]
+    > [data-part-nav-header] {
     /* The head's own padding is inside the banner's height, or the mark stands
        its padding lower than the bar beside it. */
     box-sizing: border-box;
     min-block-size: var(--_banner-size);
   }
-  [data-ui='app-shell']:is([data-primary='nav'], [data-primary='main']) > [data-part='banner'],
-  [data-ui='app-shell']:is([data-primary='nav'], [data-primary='main']) > [data-part='footer'] {
+  [data-ui-app-shell]:is([data-primary='nav'], [data-primary='main']) > [data-part-banner],
+  [data-ui-app-shell]:is([data-primary='nav'], [data-primary='main']) > [data-part-footer] {
     grid-column: 2 / -1;
   }
-  [data-ui='app-shell']:is([data-primary='nav'], [data-primary='main'])[data-nav-side='end']
-    > [data-part='banner'],
-  [data-ui='app-shell']:is([data-primary='nav'], [data-primary='main'])[data-nav-side='end']
-    > [data-part='footer'] {
+  [data-ui-app-shell]:is([data-primary='nav'], [data-primary='main'])[data-nav-side='end']
+    > [data-part-banner],
+  [data-ui-app-shell]:is([data-primary='nav'], [data-primary='main'])[data-nav-side='end']
+    > [data-part-footer] {
     grid-column: 1 / -2;
   }
   /**
@@ -1645,8 +1629,8 @@
    * `panel` the banner is inside the card whether the column or the content
    * is primary, so `nav` draws what `main` draws there.
    */
-  [data-ui='app-shell'][data-primary='main'] > [data-part='banner'],
-  [data-ui='app-shell'][data-canvas='panel'][data-primary='nav'] > [data-part='banner'] {
+  [data-ui-app-shell][data-primary='main'] > [data-part-banner],
+  [data-ui-app-shell][data-canvas='panel'][data-primary='nav'] > [data-part-banner] {
     grid-column: 2 / 3;
   }
 
@@ -1667,7 +1651,7 @@
    * puts the veil over the bar as well: the reader then has no fixed point on
    * the screen at all.
    */
-  [data-ui='app-shell'][data-nav-mode='overlay'] > [data-part='nav'] {
+  [data-ui-app-shell][data-nav-mode='overlay'] > [data-part-nav] {
     /* A layer has an edge on every plane, so its rows stand one inset in. The
        inset is read by the parts, which take it from here. */
     --_nav-inset: var(--_row-inset);
@@ -1696,14 +1680,14 @@
     visibility: hidden;
     z-index: var(--slotted-z-index-overlay, 1000);
   }
-  [data-ui='app-shell'][data-nav-mode='overlay'][data-open] > [data-part='nav'] {
+  [data-ui-app-shell][data-nav-mode='overlay'][data-open] > [data-part-nav] {
     transition:
       translate var(--_duration) var(--slotted-easing-enter, cubic-bezier(0.05, 0.7, 0.1, 1)),
       visibility var(--_duration) step-start;
     translate: 0 0;
     visibility: visible;
   }
-  [data-ui='app-shell'][data-nav-mode='overlay'][data-nav-side='end'] > [data-part='nav'] {
+  [data-ui-app-shell][data-nav-mode='overlay'][data-nav-side='end'] > [data-part-nav] {
     inset-inline-end: 0;
     inset-inline-start: auto;
     translate: 100% 0;
@@ -1721,9 +1705,9 @@
    * three parts: the marks keep one column, and a consumer's header row that
    * writes the same inset stays over them.
    */
-  [data-ui='app-shell'][data-canvas='floating'][data-nav-mode='overlay'] > [data-part='nav'],
-  [data-ui='app-shell'][data-canvas='panel'][data-nav-mode='overlay'] > [data-part='nav'],
-  [data-ui='app-shell'][data-canvas='inset'][data-nav-mode='overlay'] > [data-part='nav'] {
+  [data-ui-app-shell][data-canvas='floating'][data-nav-mode='overlay'] > [data-part-nav],
+  [data-ui-app-shell][data-canvas='panel'][data-nav-mode='overlay'] > [data-part-nav],
+  [data-ui-app-shell][data-canvas='inset'][data-nav-mode='overlay'] > [data-part-nav] {
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--_radius);
     box-shadow: var(--slotted-shadow-lg);
@@ -1731,14 +1715,14 @@
     margin-inline-start: var(--_gutter);
     translate: calc(-100% - var(--_gutter)) 0;
   }
-  [data-ui='app-shell']:not([data-canvas='flush'])[data-nav-mode='overlay'][data-nav-side='end']
-    > [data-part='nav'] {
+  [data-ui-app-shell]:not([data-canvas='flush'])[data-nav-mode='overlay'][data-nav-side='end']
+    > [data-part-nav] {
     margin-inline-end: var(--_gutter);
     margin-inline-start: 0;
     translate: calc(100% + var(--_gutter)) 0;
   }
-  [data-ui='app-shell']:not([data-canvas='flush'])[data-nav-mode='overlay'][data-open]
-    > [data-part='nav'] {
+  [data-ui-app-shell]:not([data-canvas='flush'])[data-nav-mode='overlay'][data-open]
+    > [data-part-nav] {
     translate: 0 0;
   }
 
@@ -1750,7 +1734,7 @@
    * every inline distance. It slides in from the end the navigation is not on,
    * which is the end the pane stands at as a column.
    */
-  [data-ui='app-shell'][data-aside-mode='overlay'] > [data-part='aside'] {
+  [data-ui-app-shell][data-aside-mode='overlay'] > [data-part-aside] {
     background-color: var(
       --slotted-app-shell-aside-surface,
       var(--slotted-app-shell-canvas, var(--slotted-surface, Canvas))
@@ -1773,21 +1757,21 @@
     visibility: hidden;
     z-index: var(--slotted-z-index-overlay, 1000);
   }
-  [data-ui='app-shell'][data-aside-mode='overlay'] > [data-part='aside'][data-open] {
+  [data-ui-app-shell][data-aside-mode='overlay'] > [data-part-aside][data-open] {
     transition:
       translate var(--_duration) var(--slotted-easing-enter, cubic-bezier(0.05, 0.7, 0.1, 1)),
       visibility var(--_duration) step-start;
     translate: 0 0;
     visibility: visible;
   }
-  [data-ui='app-shell'][data-aside-mode='overlay'][data-nav-side='end'] > [data-part='aside'] {
+  [data-ui-app-shell][data-aside-mode='overlay'][data-nav-side='end'] > [data-part-aside] {
     inset-inline-end: auto;
     inset-inline-start: 0;
     translate: -100% 0;
   }
-  [data-ui='app-shell'][data-canvas='floating'][data-aside-mode='overlay'] > [data-part='aside'],
-  [data-ui='app-shell'][data-canvas='panel'][data-aside-mode='overlay'] > [data-part='aside'],
-  [data-ui='app-shell'][data-canvas='inset'][data-aside-mode='overlay'] > [data-part='aside'] {
+  [data-ui-app-shell][data-canvas='floating'][data-aside-mode='overlay'] > [data-part-aside],
+  [data-ui-app-shell][data-canvas='panel'][data-aside-mode='overlay'] > [data-part-aside],
+  [data-ui-app-shell][data-canvas='inset'][data-aside-mode='overlay'] > [data-part-aside] {
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--_radius);
     box-shadow: var(--slotted-shadow-lg);
@@ -1795,14 +1779,14 @@
     margin-inline-end: var(--_gutter);
     translate: calc(100% + var(--_gutter)) 0;
   }
-  [data-ui='app-shell']:not([data-canvas='flush'])[data-aside-mode='overlay'][data-nav-side='end']
-    > [data-part='aside'] {
+  [data-ui-app-shell]:not([data-canvas='flush'])[data-aside-mode='overlay'][data-nav-side='end']
+    > [data-part-aside] {
     margin-inline-end: 0;
     margin-inline-start: var(--_gutter);
     translate: calc(-100% - var(--_gutter)) 0;
   }
-  [data-ui='app-shell']:not([data-canvas='flush'])[data-aside-mode='overlay']
-    > [data-part='aside'][data-open] {
+  [data-ui-app-shell]:not([data-canvas='flush'])[data-aside-mode='overlay']
+    > [data-part-aside][data-open] {
     translate: 0 0;
   }
 
@@ -1825,12 +1809,12 @@
    * rather than of mode, so the width answers it and the width alone.
    */
   @container slotted-app-shell (inline-size >= 600px) {
-    [data-ui='app-shell']:not([data-nav-mode]) > [data-part='nav'] {
+    [data-ui-app-shell]:not([data-nav-mode]) > [data-part-nav] {
       inline-size: calc(
         var(--_rail-size) + 2 * (var(--_nav-inset) + var(--_row-ring-inset)) + var(--_nav-edges)
       );
     }
-    [data-ui='app-shell']:not([data-nav-mode])[data-open] > [data-part='nav'] {
+    [data-ui-app-shell]:not([data-nav-mode])[data-open] > [data-part-nav] {
       inline-size: var(--_nav-size);
     }
 
@@ -1842,63 +1826,60 @@
        the unit resolves against the shell's own inline size from inside this
        `auto` track, where a percentage would resolve against the track the
        pane itself sizes. */
-    [data-ui='app-shell']:not([data-aside-mode='overlay']) > [data-part='aside'] {
+    [data-ui-app-shell]:not([data-aside-mode='overlay']) > [data-part-aside] {
       grid-area: 2 / 3 / 3 / 4;
       inline-size: var(--slotted-app-shell-aside-extent, var(--_aside-size));
       position: relative;
     }
-    [data-ui='app-shell']:not([data-aside-mode='overlay'])
-      > [data-part='aside']
-      > [data-part='aside-resizer']:not([hidden]) {
+    [data-ui-app-shell]:not([data-aside-mode='overlay'])
+      > [data-part-aside]
+      > [data-part-aside-resizer]:not([hidden]) {
       display: block;
     }
-    [data-ui='app-shell']:not([data-aside-mode='overlay'])[data-nav-side='end']
-      > [data-part='aside'] {
+    [data-ui-app-shell]:not([data-aside-mode='overlay'])[data-nav-side='end'] > [data-part-aside] {
       grid-area: 2 / 1 / 3 / 2;
     }
     /* Under `primary="main"` the pane, as a column, stands beside the card
        that holds the banner and the content, so it spans the banner's row. */
-    [data-ui='app-shell']:not([data-aside-mode='overlay'])[data-primary='main']
-      > [data-part='aside'],
-    [data-ui='app-shell']:not([data-aside-mode='overlay'])[data-canvas='panel'][data-primary='nav']
-      > [data-part='aside'] {
+    [data-ui-app-shell]:not([data-aside-mode='overlay'])[data-primary='main'] > [data-part-aside],
+    [data-ui-app-shell]:not([data-aside-mode='overlay'])[data-canvas='panel'][data-primary='nav']
+      > [data-part-aside] {
       grid-row: 1 / 3;
     }
-    [data-ui='app-shell']:not([data-aside-mode='overlay']):is(
+    [data-ui-app-shell]:not([data-aside-mode='overlay']):is(
         [data-canvas='floating'],
         [data-canvas='inset']
       )[data-nav-side='end']
-      > [data-part='aside'] {
+      > [data-part-aside] {
       margin-inline: var(--_gutter) 0;
     }
-    [data-ui='app-shell']:not([data-aside-mode='overlay'])[data-canvas='flush']
-      > [data-part='aside'] {
+    [data-ui-app-shell]:not([data-aside-mode='overlay'])[data-canvas='flush'] > [data-part-aside] {
       border-block-start: none;
     }
-    [data-ui='app-shell']:not([data-aside-mode='overlay']):is(
+    [data-ui-app-shell]:not([data-aside-mode='overlay']):is(
         [data-canvas='flush'],
         [data-canvas='panel']
       )
-      > [data-part='aside'] {
+      > [data-part-aside] {
       border-inline-start: var(--_seam);
     }
-    [data-ui='app-shell']:not([data-aside-mode='overlay']):is(
+    [data-ui-app-shell]:not([data-aside-mode='overlay']):is(
         [data-canvas='flush'],
         [data-canvas='panel']
       )[data-nav-side='end']
-      > [data-part='aside'] {
+      > [data-part-aside] {
       border-inline-end: var(--_seam);
       border-inline-start: none;
     }
   }
 
   @container slotted-app-shell (inline-size < 600px) {
-    [data-ui='app-shell']:not([data-nav-mode]) > [data-part='nav'] {
+    [data-ui-app-shell]:not([data-nav-mode]) > [data-part-nav] {
       display: none;
     }
     /* The content flush to the frame, as it is once the mode says overlay. */
-    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='floating'] > [data-part='main'],
-    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='inset'] > [data-part='main'] {
+    [data-ui-app-shell]:not([data-nav-mode])[data-canvas='floating'] > [data-part-main],
+    [data-ui-app-shell]:not([data-nav-mode])[data-canvas='inset'] > [data-part-main] {
       border-block-end: 0;
       border-inline: 0;
       border-radius: 0;
@@ -1908,33 +1889,33 @@
     /* The card of `primary="main"` goes with the gutter. The root cannot
        query its own width, but its pseudo-element is a child of the query
        container and reads it. */
-    [data-ui='app-shell']:not([data-nav-mode]):is(
+    [data-ui-app-shell]:not([data-nav-mode]):is(
         [data-canvas='floating'],
         [data-canvas='inset']
       )[data-primary='main']::before {
       content: none;
     }
-    [data-ui='app-shell']:not([data-nav-mode])[data-primary='main'] > [data-part='banner'] {
+    [data-ui-app-shell]:not([data-nav-mode])[data-primary='main'] > [data-part-banner] {
       margin: 0;
       padding-inline: var(--_edge);
     }
-    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='panel'] > [data-part='main'] {
+    [data-ui-app-shell]:not([data-nav-mode])[data-canvas='panel'] > [data-part-main] {
       border-block-start: var(--_rule-width) solid var(--_rule);
       border-radius: 0;
     }
-    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='floating'] > [data-part='progress'],
-    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='inset'] > [data-part='progress'] {
+    [data-ui-app-shell]:not([data-nav-mode])[data-canvas='floating'] > [data-part-progress],
+    [data-ui-app-shell]:not([data-nav-mode])[data-canvas='inset'] > [data-part-progress] {
       border-radius: 0;
       margin: 0;
     }
-    [data-ui='app-shell']:not([data-nav-mode])[data-canvas='panel'] > [data-part='progress'] {
+    [data-ui-app-shell]:not([data-nav-mode])[data-canvas='panel'] > [data-part-progress] {
       border-radius: 0;
     }
-    [data-ui='app-shell']:not([data-aside-mode='overlay']):is(
+    [data-ui-app-shell]:not([data-aside-mode='overlay']):is(
         [data-canvas='floating'],
         [data-canvas='inset']
       )
-      > [data-part='aside'] {
+      > [data-part-aside] {
       margin-inline: var(--_gutter);
     }
     /* A row under the content takes at most half the shell, so the content
@@ -1942,14 +1923,14 @@
        left the content a line high, with the pane scrolling and the content
        gone. Only where the shell owns its height; under `document` the page
        scrolls and the row takes its content's height. */
-    [data-ui='app-shell'][data-scroll='content']:not([data-aside-mode='overlay'])
-      > [data-part='aside'] {
+    [data-ui-app-shell][data-scroll='content']:not([data-aside-mode='overlay'])
+      > [data-part-aside] {
       max-block-size: 50cqb;
     }
     /* The pane as a row under the content, in the inline mode alone: a pane
        whose mode is not yet decided draws nothing at a narrow width, the safe
        half of the answer, for the reason the navigation draws nothing. */
-    [data-ui='app-shell']:not([data-aside-mode]) > [data-part='aside'] {
+    [data-ui-app-shell]:not([data-aside-mode]) > [data-part-aside] {
       display: none;
     }
   }
@@ -1957,7 +1938,7 @@
   /* ── The veil ────────────────────────────────────────────────────────── */
 
   /** It stops where the panel stops, so the bar above stays a fixed point. */
-  [data-ui='app-shell'] > [data-part='scrim'] {
+  [data-ui-app-shell] > [data-part-scrim] {
     background-color: var(--_scrim);
     grid-area: 2 / 1 / -1 / -1;
     inset: 0;
@@ -1966,8 +1947,8 @@
     transition: opacity var(--_duration) var(--_easing);
     z-index: calc(var(--slotted-z-index-overlay, 1000) - 1);
   }
-  [data-ui='app-shell'] > [data-part='scrim'][data-status='entering'],
-  [data-ui='app-shell'] > [data-part='scrim'][data-status='exiting'] {
+  [data-ui-app-shell] > [data-part-scrim][data-status='entering'],
+  [data-ui-app-shell] > [data-part-scrim][data-status='exiting'] {
     opacity: 0;
   }
 }

@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { useContext, useEffect } from 'react';
 import type { KeyboardEvent, MouseEvent, ReactElement } from 'react';
 
@@ -18,7 +19,7 @@ type Part = { render?: ((props: MessageRootProps) => ReactElement) | undefined }
 
 function part<P extends Part>(name: string, element: 'div' | 'span') {
   return function MessagePart({ render, ...nativeProps }: P) {
-    const rootProps = { ...(nativeProps as MessageRootProps), 'data-part': name };
+    const rootProps = withSelectorKey(nativeProps as MessageRootProps, 'part', name);
     if (render !== undefined) return render(rootProps);
     return element === 'div' ? <div {...rootProps} /> : <span {...rootProps} />;
   };
@@ -47,17 +48,17 @@ export function MessageAuthor({ id, render, ...nativeProps }: MessageSpanProps) 
     registerAuthor(true);
     return () => registerAuthor(false);
   }, [registerAuthor]);
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     ...nativeProps,
     'data-part': 'author',
     id: id ?? message.authorId,
-  };
+  });
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }
 
 /** The hour, as a `time` element; `dateTime` is the machine-readable instant. */
 export function MessageTime({ render, ...nativeProps }: MessageTimeProps) {
-  const rootProps = { ...nativeProps, 'data-part': 'time' } as MessageRootProps;
+  const rootProps = keyedProps({ ...nativeProps, 'data-part': 'time' }) as MessageRootProps;
   return render === undefined ? <time {...(rootProps as MessageTimeProps)} /> : render(rootProps);
 }
 
@@ -82,7 +83,7 @@ export function MessageReceipt({ children, render, status, ...nativeProps }: Mes
   const word = message.t(resolved);
   const glyph = resolved === 'failed' ? undefined : RECEIPT_GLYPH[resolved];
 
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     ...nativeProps,
     children:
       children ??
@@ -98,19 +99,19 @@ export function MessageReceipt({ children, render, status, ...nativeProps }: Mes
       )),
     'data-part': 'receipt',
     'data-status': resolved,
-  };
+  });
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }
 
 /** The message's own actions — copy, reply, rate — as a toolbar the row reveals. */
 export function MessageActions({ render, ...nativeProps }: MessagePartProps) {
   const { t } = useMessage();
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     'aria-label': t('actions'),
     role: 'toolbar',
     ...nativeProps,
     'data-part': 'actions',
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -119,7 +120,11 @@ export function MessageActions({ render, ...nativeProps }: MessagePartProps) {
  * status region: a step that becomes current is read once, in words.
  */
 export function MessageActivity({ render, ...nativeProps }: MessagePartProps) {
-  const rootProps: MessageRootProps = { role: 'status', ...nativeProps, 'data-part': 'activity' };
+  const rootProps: MessageRootProps = keyedProps({
+    role: 'status',
+    ...nativeProps,
+    'data-part': 'activity',
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -137,12 +142,12 @@ export function MessageActivityStep({
       </Icon>
     ) : status === 'current' ? (
       <span aria-hidden="true">
-        <span aria-hidden="true" data-ui="spinner" />
+        <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" />
       </span>
     ) : (
       <span aria-hidden="true" />
     );
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     ...(status === 'current' ? { 'aria-current': 'step' as const } : {}),
     ...nativeProps,
     children: (
@@ -154,7 +159,7 @@ export function MessageActivityStep({
     ...(status === 'complete' ? { 'data-complete': '' } : {}),
     ...(status === 'current' ? { 'data-current': '' } : {}),
     'data-part': 'activity-step',
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
@@ -177,7 +182,7 @@ export function MessageVersions({
   const step = (delta: number) => (event: MouseEvent<HTMLButtonElement>) =>
     requestVersion(version + delta, reasonOf(event), event);
 
-  const rootProps: MessageRootProps = {
+  const rootProps: MessageRootProps = keyedProps({
     'aria-label': t('versions'),
     role: 'group',
     ...nativeProps,
@@ -186,6 +191,7 @@ export function MessageVersions({
         <button
           aria-label={t('previousVersion')}
           data-part="version-previous"
+          data-part-version-previous=""
           disabled={version <= 0}
           onClick={step(-1)}
           type="button"
@@ -194,12 +200,13 @@ export function MessageVersions({
             <Glyph name="chevron-right" />
           </Icon>
         </button>
-        <span aria-live="polite" data-part="version-label">
+        <span aria-live="polite" data-part="version-label" data-part-version-label="">
           {t('versionLabel', { current: version + 1, total: versionCount })}
         </span>
         <button
           aria-label={t('nextVersion')}
           data-part="version-next"
+          data-part-version-next=""
           disabled={version >= versionCount - 1}
           onClick={step(1)}
           type="button"
@@ -221,6 +228,6 @@ export function MessageVersions({
       event.preventDefault();
       requestVersion(version + (event.key === forward ? 1 : -1), 'keyboard', event);
     },
-  };
+  });
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

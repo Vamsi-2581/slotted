@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/detail-panel/detail-panel.css';
 
 import { detailPanelMessages } from '@slotted/core/i18n';
@@ -248,7 +249,7 @@ export function DetailPanel({
     t,
   };
 
-  const rootProps: DetailPanelRootProps = {
+  const rootProps: DetailPanelRootProps = keyedProps({
     ...nativeProps,
     ...(ariaLabel !== undefined
       ? { 'aria-label': ariaLabel }
@@ -264,7 +265,7 @@ export function DetailPanel({
       <PageHeaderDefaultsProvider level={resolvedLevel} size={resolvedSize}>
         {children}
         {footer !== undefined && footer !== null && footer !== false ? (
-          <footer data-part="footer">
+          <footer data-part="footer" data-part-footer="">
             <Container inset={page?.inset} size={page?.width}>
               {footer}
             </Container>
@@ -284,7 +285,7 @@ export function DetailPanel({
     'data-status': resolvedStatus,
     'data-ui': 'detail-panel',
     style,
-  };
+  });
 
   return (
     <DetailPanelContext.Provider value={context}>

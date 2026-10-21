@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/sparkline/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./sparkline.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./sparkline.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./sparkline.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,7 +30,7 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const { parts } = contract.members.sparkline;
 
 /** Every innermost rule, with the at-rule it sits in. */
@@ -71,7 +84,7 @@ test('styles every part the contract declares, and the harness renders each', ()
   for (const part of parts) {
     if (part === 'root') continue;
     assert.ok(
-      normalized.includes(`[data-part='${part}']`),
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
       `${part} is a part the sheet never paints`,
     );
     assert.ok(fragment.includes(`data-part="${part}"`), `${part} never appears in the harness`);
@@ -124,12 +137,12 @@ test('resolves colour as tone, then series, then the container, then the first s
 test('draws every stroke in screen pixels rather than in grid units', () => {
   for (const part of ['line', 'reference']) {
     assert.ok(
-      body(`${ui} [data-part='${part}']`).includes('vector-effect:non-scaling-stroke'),
+      body(`${ui} [data-part-${part.toLowerCase()}]`).includes('vector-effect:non-scaling-stroke'),
       `${part}`,
     );
   }
   assert.ok(
-    body(`${ui} [data-part='ring'],${ui} [data-part='marker']`).includes(
+    body(`${ui} [data-part-ring],${ui} [data-part-marker]`).includes(
       'vector-effect:non-scaling-stroke',
     ),
   );
@@ -141,11 +154,11 @@ test('draws every stroke in screen pixels rather than in grid units', () => {
  * that stays round on a stretched grid.
  */
 test('draws the marker and its ring as round-capped strokes, the ring in the ground', () => {
-  const shared = body(`${ui} [data-part='ring'],${ui} [data-part='marker']`);
+  const shared = body(`${ui} [data-part-ring],${ui} [data-part-marker]`);
   assert.ok(shared.includes('stroke-linecap:round'));
   assert.ok(shared.includes('fill:none'));
-  assert.ok(body(`${ui} [data-part='marker']`).includes('stroke-width:var(--_marker)'));
-  const ring = body(`${ui} [data-part='ring']`);
+  assert.ok(body(`${ui} [data-part-marker]`).includes('stroke-width:var(--_marker)'));
+  const ring = body(`${ui} [data-part-ring]`);
   assert.ok(ring.includes('stroke:var(--_ring-color)'));
   assert.ok(ring.includes('stroke-width:calc(var(--_marker) + 2 * var(--_ring))'));
   assert.ok(
@@ -156,7 +169,7 @@ test('draws the marker and its ring as round-capped strokes, the ring in the gro
 });
 
 test('washes the area with the colour faded to nothing, without minting a gradient id', () => {
-  const area = body(`${ui} [data-part='area']`);
+  const area = body(`${ui} [data-part-area]`);
   assert.ok(area.includes('fill:var(--_color)'));
   assert.ok(area.includes('mask-image:linear-gradient(to bottom,black,transparent)'));
   assert.doesNotMatch(declarations, /url\(#/, 'no in-document reference');
@@ -168,27 +181,27 @@ test('washes the area with the colour faded to nothing, without minting a gradie
  * `--slotted-border-strong` lends its 3:1 to the mix in every scheme.
  */
 test('dims every bar but the current one by mixing, not by fading', () => {
-  assert.ok(body(`${ui} [data-part='bar']`).includes('fill:var(--_bar-dim)'));
-  assert.doesNotMatch(body(`${ui} [data-part='bar']`), /opacity/);
+  assert.ok(body(`${ui} [data-part-bar]`).includes('fill:var(--_bar-dim)'));
+  assert.doesNotMatch(body(`${ui} [data-part-bar]`), /opacity/);
   assert.ok(body(ui).includes('--slotted-border-strong'));
-  assert.equal(body(`${ui} [data-part='bar'][data-current]`), 'fill:var(--_color);');
+  assert.equal(body(`${ui} [data-part-bar][data-current]`), 'fill:var(--_color);');
 });
 
 test('dashes the reference so it is read as not data before its colour is', () => {
-  const reference = body(`${ui} [data-part='reference']`);
+  const reference = body(`${ui} [data-part-reference]`);
   assert.ok(reference.includes('stroke-dasharray:'));
   assert.ok(reference.includes('stroke:var(--_reference-color)'));
 });
 
 /** The series reads from the right in a right-to-left document, as the text does. */
 test('mirrors the drawing in a right-to-left document', () => {
-  assert.equal(body(`${ui}:dir(rtl) [data-part='plot']`), 'transform:scaleX(-1);');
+  assert.equal(body(`${ui}:dir(rtl) [data-part-plot]`), 'transform:scaleX(-1);');
 });
 
 test('moves a path from the motion scale when its data changes', () => {
   for (const part of ['line', 'area', 'bar']) {
     assert.match(
-      body(`${ui} [data-part='${part}']`),
+      body(`${ui} [data-part-${part.toLowerCase()}]`),
       /transition:d var\(--slotted-duration-medium\) var\(--slotted-easing-standard\)/,
       part,
     );
@@ -202,10 +215,10 @@ test('moves a path from the motion scale when its data changes', () => {
  */
 test('answers forced colours for the bars, the wash and the ring', () => {
   const media = '@media (forced-colors:active)';
-  assert.equal(body(`${ui} [data-part='area']`, media), 'display:none;');
-  assert.equal(body(`${ui} [data-part='bar']`, media), 'fill:GrayText;');
-  assert.equal(body(`${ui} [data-part='bar'][data-current]`, media), 'fill:CanvasText;');
-  assert.equal(body(`${ui} [data-part='ring']`, media), 'stroke:Canvas;');
+  assert.equal(body(`${ui} [data-part-area]`, media), 'display:none;');
+  assert.equal(body(`${ui} [data-part-bar]`, media), 'fill:GrayText;');
+  assert.equal(body(`${ui} [data-part-bar][data-current]`, media), 'fill:CanvasText;');
+  assert.equal(body(`${ui} [data-part-ring]`, media), 'stroke:Canvas;');
 });
 
 test('exercises every axis value and the states the drawing can be in', () => {

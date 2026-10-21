@@ -3,6 +3,7 @@
  * A family that renders another's identifier and does not import its sheet
  * draws an element with no rules at all.
  */
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/tags-input/tags-input.css';
 import '@slotted/styles/tag/tag.css';
 
@@ -666,8 +667,10 @@ export function TagsInput({
     onFocus: onFrameFocus,
     'data-overflow': resolved.overflow,
     'data-part': 'root',
+    ...selectorKeyProps('part', 'root'),
     'data-size': resolved.size,
     'data-ui': 'tags-input',
+    ...selectorKeyProps('ui', 'tags-input'),
     'data-variant': resolved.variant,
     ...(resolved.fullWidth ? { 'data-full-width': '' } : {}),
     ...(resolved.disabled ? { 'data-disabled': '' } : {}),
@@ -691,10 +694,11 @@ export function TagsInput({
           ownLabel === undefined && field !== undefined ? field.ids.label : undefined
         }
         data-part="control"
+        data-part-control=""
         role="grid"
       >
         <ChipRow context={chipsContext} describedBy={hintId} label={count}>
-          <span data-part="field" role="gridcell">
+          <span data-part="field" data-part-field="" role="gridcell">
             <input
               {...native}
               aria-describedby={describedBy === '' ? undefined : describedBy}
@@ -709,6 +713,7 @@ export function TagsInput({
                     'aria-activedescendant': active < 0 ? undefined : optionId(active),
                   })}
               data-part="input"
+              data-part-input=""
               disabled={resolved.disabled}
               id={native.id ?? field?.ids.control ?? inputId}
               onBlur={compose(native.onBlur, onBlur)}
@@ -725,24 +730,31 @@ export function TagsInput({
         </ChipRow>
       </div>
       {counter === null ? null : (
-        <span aria-hidden="true" data-part="counter">
+        <span aria-hidden="true" data-part="counter" data-part-counter="">
           {counter}
         </span>
       )}
       {showClear ? (
-        <button aria-label={t('clear')} data-part="clear" onClick={onClear} type="button">
+        <button
+          aria-label={t('clear')}
+          data-part="clear"
+          data-part-clear=""
+          onClick={onClear}
+          type="button"
+        >
           <Icon>
             <Glyph name="x" />
           </Icon>
         </button>
       ) : null}
-      <span data-part="hint" id={hintId}>
+      <span data-part="hint" data-part-hint="" id={hintId}>
         {hint}
       </span>
       {popup ? (
         <div
           aria-label={t('suggestions')}
           data-part="suggestions"
+          data-part-suggestions=""
           id={listboxId}
           ref={setListNode}
           role="listbox"
@@ -751,6 +763,7 @@ export function TagsInput({
             <div
               aria-selected={index === active}
               data-part="suggestion"
+              data-part-suggestion=""
               {...(index === active ? { 'data-highlighted': '' } : {})}
               id={optionId(index)}
               key={`${index}-${entry}`}

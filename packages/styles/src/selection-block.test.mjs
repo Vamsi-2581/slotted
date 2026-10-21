@@ -42,7 +42,7 @@ for (const { family, part } of FAMILIES) {
     const css = stylesheet(family);
     const second = rule(
       css,
-      `[data-part='${part}'][data-selected] + [data-part='${part}'][data-selected]`,
+      `[data-part-${part.toLowerCase()}][data-selected] + [data-part-${part.toLowerCase()}][data-selected]`,
     );
     assert.ok(second, `${family} draws no rule for the second of two selected ${part}s`);
     assert.match(
@@ -54,7 +54,7 @@ for (const { family, part } of FAMILIES) {
 
     const first = rule(
       css,
-      `[data-part='${part}'][data-selected]:has(+ [data-part='${part}'][data-selected])`,
+      `[data-part-${part.toLowerCase()}][data-selected]:has(+ [data-part-${part.toLowerCase()}][data-selected])`,
     );
     assert.ok(first, `${family} draws no rule for the first of two selected ${part}s`);
     assert.match(

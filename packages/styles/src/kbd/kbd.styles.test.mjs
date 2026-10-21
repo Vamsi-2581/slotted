@@ -2,11 +2,24 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/kbd/contract.json', import.meta.url), 'utf8'),
 );
 const css = readFileSync(new URL('./kbd.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./kbd.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./kbd.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -20,9 +33,9 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
-const shortcut = `${ui}[data-part='shortcut']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
+const shortcut = `${ui}[data-part-shortcut]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -39,7 +52,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.kbd.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -52,8 +68,7 @@ test('styles every part the contract declares', () => {
 test('names the family and the part together, so the combination is never a key', () => {
   for (const selector of normalized.matchAll(/(^|\})([^{}@]+)\{/g)) {
     for (const part of (selector[2] ?? '').split(',')) {
-      if (!part.includes(`[data-part='shortcut']`) && !part.includes(`[data-part='root']`))
-        continue;
+      if (!part.includes(`[data-part-shortcut]`) && !part.includes(`[data-part-root]`)) continue;
       assert.ok(part.includes(ui), `"${part.trim()}" reaches a part without naming the family`);
     }
   }
@@ -116,7 +131,7 @@ test('centres the legend in a cell instead of in the line box it opened', () => 
  * to the cap and the baseline, and here they paint into the inset.
  */
 test('gives the legend a box of its own, and trims it where the engine can', () => {
-  assert.ok(normalized.includes(`${ui} [data-part='legend']`));
+  assert.ok(normalized.includes(`${ui} [data-part-legend]`));
 
   const guarded = normalized.split('@supports (text-box:trim-both cap alphabetic){')[1] ?? '';
   const supported = guarded.split('}')[0];
@@ -131,7 +146,7 @@ test('gives the legend a box of its own, and trims it where the engine can', () 
  * name that disappears when a consumer forgets an import is not one.
  */
 test('hides the spoken word itself, rather than depending on another family', () => {
-  const name = rule(`${ui} [data-part='name']`);
+  const name = rule(`${ui} [data-part-name]`);
   assert.ok(name.includes('position:absolute'));
   assert.ok(name.includes('clip-path:inset(50%)'));
   assert.ok(name.includes('inline-size:1px'));
@@ -253,7 +268,7 @@ test('lets the bare key inherit, and never fills the two that own no ground', ()
  * them.
  */
 test('sets a mark in the interface face, and does not trim it to a Latin band', () => {
-  const mark = `${ui} [data-part='legend'][data-legend='symbol']`;
+  const mark = `${ui} [data-part-legend][data-legend='symbol']`;
   /* Two rules carry this selector, and the trim one is inside `@supports`. */
   const painted = normalized.split(`${mark}{`).at(-1) ?? '';
   assert.ok(painted.includes('font-family:var(--slotted-kbd-symbol-font-family'));
@@ -316,7 +331,7 @@ test('dims the whole combination, separator included', () => {
   assert.ok(disabled.includes('--_color:var(--slotted-disabled-foreground'));
   assert.ok(disabled.includes('--_background:var(--slotted-disabled-background'));
   assert.ok(
-    rule(`${ui}[data-disabled] [data-part='separator']`).includes(
+    rule(`${ui}[data-disabled] [data-part-separator]`).includes(
       'color:var(--slotted-disabled-foreground',
     ),
   );

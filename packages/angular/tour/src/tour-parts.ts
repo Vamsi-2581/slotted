@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
@@ -49,6 +50,7 @@ export class SlTourCard {
   standalone: true,
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     tabindex: '-1',
     '[attr.role]': 'role ?? "dialog"',
     '[attr.aria-labelledby]': 'label === null ? tour.titleId : null',
@@ -77,6 +79,7 @@ export class SlTourContent {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'media',
+    'data-part-media': '',
     '[attr.hidden]': 'shown() ? null : ""',
   },
 })
@@ -91,7 +94,11 @@ export class SlTourMedia {
   );
 }
 
-@Directive({ selector: '[slTourHeader]', standalone: true, host: { 'data-part': 'header' } })
+@Directive({
+  selector: '[slTourHeader]',
+  standalone: true,
+  host: { 'data-part': 'header', 'data-part-header': '' },
+})
 export class SlTourHeader {}
 
 /** “2 of 5”, counting the steps available now; hidden in a tour of one step. */
@@ -103,6 +110,7 @@ export class SlTourHeader {}
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'progress',
+    'data-part-progress': '',
     '[attr.hidden]': 'tour.total() > 1 ? null : ""',
   },
 })
@@ -122,6 +130,7 @@ export class SlTourProgress {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'close',
+    'data-part-close': '',
     type: 'button',
     '[attr.aria-label]': "label ?? tour.t('close')",
     '[attr.hidden]': 'tour.showClose() ? null : ""',
@@ -140,7 +149,7 @@ export class SlTourClose {
   template: `<ng-content>{{ tour.current()?.title }}</ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'title', '[id]': 'tour.titleId' },
+  host: { 'data-part': 'title', 'data-part-title': '', '[id]': 'tour.titleId' },
 })
 export class SlTourTitle {
   protected readonly tour = inject(SL_TOUR);
@@ -155,6 +164,7 @@ export class SlTourTitle {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'description',
+    'data-part-description': '',
     '[id]': 'tour.descriptionId',
     '[attr.hidden]': 'tour.hasDescription() ? null : ""',
   },
@@ -177,6 +187,7 @@ export class SlTourDescription {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'body',
+    'data-part-body': '',
     '[attr.hidden]': 'shown() ? null : ""',
   },
 })
@@ -191,7 +202,11 @@ export class SlTourBody {
   );
 }
 
-@Directive({ selector: '[slTourFooter]', standalone: true, host: { 'data-part': 'footer' } })
+@Directive({
+  selector: '[slTourFooter]',
+  standalone: true,
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
+})
 export class SlTourFooter {}
 
 /**
@@ -205,7 +220,7 @@ abstract class TourAction {
 
   constructor(part: string) {
     const host = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement;
-    afterNextRender(() => host.setAttribute('data-part', part));
+    afterNextRender(() => writeSelectorKey(host, 'part', part));
   }
 }
 

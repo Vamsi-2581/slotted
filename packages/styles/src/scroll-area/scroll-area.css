@@ -34,7 +34,7 @@
    * mask is not on. `root` is that element: it holds the border, the radius and
    * the maximum, and `viewport` inside it holds the scroll and the veil.
    */
-  [data-ui='scroll-area'] {
+  [data-ui-scroll-area] {
     /**
      * How far the veil reaches in from an edge that has content behind it.
      *
@@ -77,7 +77,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='scroll-area'] > [data-part='viewport'] {
+  [data-ui-scroll-area] > [data-part-viewport] {
     /**
      * One length per logical edge: the veil's reach where that end of the
      * content is out of view, and nothing where it is showing.
@@ -205,7 +205,7 @@
    * attribute form would then paint the veil on the edge the reader can already
    * see.
    */
-  [data-ui='scroll-area']:dir(rtl) > [data-part='viewport'] {
+  [data-ui-scroll-area]:dir(rtl) > [data-part-viewport] {
     --_fade-left: var(--_scroll-area-fade-inline-end);
     --_fade-right: var(--_scroll-area-fade-inline-start);
   }
@@ -220,21 +220,21 @@
    * `@supports` is needed for that — an unknown declaration is discarded at
    * parse time and the cascade does the rest.
    */
-  [data-ui='scroll-area'][data-axis='block'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-axis='block'] > [data-part-viewport] {
     overflow-x: hidden;
     overflow-y: auto;
     overflow-inline: hidden;
     overflow-block: auto;
   }
 
-  [data-ui='scroll-area'][data-axis='inline'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-axis='inline'] > [data-part-viewport] {
     overflow-x: auto;
     overflow-y: hidden;
     overflow-inline: auto;
     overflow-block: hidden;
   }
 
-  [data-ui='scroll-area'][data-axis='both'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-axis='both'] > [data-part-viewport] {
     overflow: auto;
   }
 
@@ -243,17 +243,17 @@
    * "reserve the bar whether or not it is needed". It is stated per axis so it
    * does not turn a one-axis area into a two-axis one.
    */
-  [data-ui='scroll-area'][data-scrollbars='always'][data-axis='block'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-scrollbars='always'][data-axis='block'] > [data-part-viewport] {
     overflow-y: scroll;
     overflow-block: scroll;
   }
 
-  [data-ui='scroll-area'][data-scrollbars='always'][data-axis='inline'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-scrollbars='always'][data-axis='inline'] > [data-part-viewport] {
     overflow-x: scroll;
     overflow-inline: scroll;
   }
 
-  [data-ui='scroll-area'][data-scrollbars='always'][data-axis='both'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-scrollbars='always'][data-axis='both'] > [data-part-viewport] {
     overflow: scroll;
   }
 
@@ -266,7 +266,7 @@
    * and why this value is worth having at all: an area with no bar and no veil
    * says nothing.
    */
-  [data-ui='scroll-area'][data-scrollbars='none'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-scrollbars='none'] > [data-part-viewport] {
     scrollbar-width: none;
   }
 
@@ -279,7 +279,7 @@
    * state — `packages/styles/src/states.test.mjs` — rather than a state this
    * family holds: a scrollport is not a control and has no disabled form.
    */
-  [data-ui='scroll-area'][data-scrollbars='hover'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-scrollbars='hover'] > [data-part-viewport] {
     scrollbar-color: transparent transparent;
     transition:
       scrollbar-color var(--slotted-duration-short) var(--slotted-easing-standard),
@@ -289,29 +289,28 @@
       --_scroll-area-fade-inline-end var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='scroll-area'][data-scrollbars='hover']:not([data-disabled]):hover
-    > [data-part='viewport'],
-  [data-ui='scroll-area'][data-scrollbars='hover']:focus-within > [data-part='viewport'] {
+  [data-ui-scroll-area][data-scrollbars='hover']:not([data-disabled]):hover > [data-part-viewport],
+  [data-ui-scroll-area][data-scrollbars='hover']:focus-within > [data-part-viewport] {
     scrollbar-color: var(--_thumb) var(--_track);
   }
 
   /* ── The gutter ────────────────────────────────────────────────────────── */
 
-  [data-ui='scroll-area'][data-gutter='auto'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-gutter='auto'] > [data-part-viewport] {
     scrollbar-gutter: auto;
   }
 
-  [data-ui='scroll-area'][data-gutter='both-edges'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-gutter='both-edges'] > [data-part-viewport] {
     scrollbar-gutter: stable both-edges;
   }
 
   /* ── Scroll chaining ───────────────────────────────────────────────────── */
 
-  [data-ui='scroll-area'][data-overscroll='auto'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-overscroll='auto'] > [data-part-viewport] {
     overscroll-behavior: auto;
   }
 
-  [data-ui='scroll-area'][data-overscroll='none'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-overscroll='none'] > [data-part-viewport] {
     overscroll-behavior: none;
   }
 
@@ -322,31 +321,31 @@
    * code block. These come after the two above, so a chosen `none` holds the
    * scrolling axis and lets the other through.
    */
-  [data-ui='scroll-area'][data-axis='inline'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-axis='inline'] > [data-part-viewport] {
     overscroll-behavior-y: auto;
     overscroll-behavior-block: auto;
   }
 
-  [data-ui='scroll-area'][data-axis='block'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-axis='block'] > [data-part-viewport] {
     overscroll-behavior-x: auto;
     overscroll-behavior-inline: auto;
   }
 
   /* ── The veil, edge by edge ────────────────────────────────────────────── */
 
-  [data-ui='scroll-area'][data-at-block-start] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-at-block-start] > [data-part-viewport] {
     --_scroll-area-fade-block-start: 0px;
   }
 
-  [data-ui='scroll-area'][data-at-block-end] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-at-block-end] > [data-part-viewport] {
     --_scroll-area-fade-block-end: 0px;
   }
 
-  [data-ui='scroll-area'][data-at-inline-start] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-at-inline-start] > [data-part-viewport] {
     --_scroll-area-fade-inline-start: 0px;
   }
 
-  [data-ui='scroll-area'][data-at-inline-end] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-at-inline-end] > [data-part-viewport] {
     --_scroll-area-fade-inline-end: 0px;
   }
 
@@ -355,7 +354,7 @@
    * scroller holds what the reader has already passed, and a product that
    * would rather not dim it says so here.
    */
-  [data-ui='scroll-area'][data-fade='end'] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-fade='end'] > [data-part-viewport] {
     --_scroll-area-fade-block-start: 0px;
     --_scroll-area-fade-inline-start: 0px;
   }
@@ -365,7 +364,7 @@
    * the element on its own compositing layer, and a long list pays for that on
    * every frame.
    */
-  [data-ui='scroll-area'][data-fade='none'] > [data-part='viewport'],
+  [data-ui-scroll-area][data-fade='none'] > [data-part-viewport],
   /**
    * A vertical writing mode turns the box, and a gradient cannot be given a
    * logical direction. Rather than veil the wrong two edges, the family veils
@@ -373,7 +372,7 @@
    * affordance there draws it from them. The binding writes `data-sideways`
    * because only script can read a writing mode.
    */
-  [data-ui='scroll-area'][data-sideways] > [data-part='viewport'] {
+  [data-ui-scroll-area][data-sideways] > [data-part-viewport] {
     mask-image: none;
   }
 
@@ -391,7 +390,7 @@
    * `min-inline-size: fit-content` so a row wider than the scrollport widens
    * this box with it, and the inset survives at the far end.
    */
-  [data-ui='scroll-area'] > [data-part='viewport'] > [data-part='content'] {
+  [data-ui-scroll-area] > [data-part-viewport] > [data-part-content] {
     box-sizing: border-box;
     min-inline-size: fit-content;
     padding: var(--slotted-scroll-area-inset, var(--slotted-space-5, 0.75rem));
@@ -416,12 +415,10 @@
    * `:focus-visible` (`createFocusOrigin`). The browser's own ring on the
    * viewport is suppressed: the frame draws the one ring.
    */
-  [data-ui='scroll-area'] > [data-part='viewport']:focus {
+  [data-ui-scroll-area] > [data-part-viewport]:focus {
     outline: none;
   }
-  [data-ui='scroll-area']:has(
-    > [data-part='viewport']:focus-visible[data-focus-origin='keyboard']
-  ) {
+  [data-ui-scroll-area]:has(> [data-part-viewport]:focus-visible[data-focus-origin='keyboard']) {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -435,8 +432,8 @@
    * sentence.
    */
   @media print {
-    [data-ui='scroll-area'],
-    [data-ui='scroll-area'] > [data-part='viewport'] {
+    [data-ui-scroll-area],
+    [data-ui-scroll-area] > [data-part-viewport] {
       max-block-size: none;
       max-inline-size: none;
       overflow: visible;
@@ -450,7 +447,7 @@
    * the system's own, which is what `scrollbar-color: auto` means.
    */
   @media (forced-colors: active) {
-    [data-ui='scroll-area'] > [data-part='viewport'] {
+    [data-ui-scroll-area] > [data-part-viewport] {
       mask-image: none;
       scrollbar-color: auto;
     }

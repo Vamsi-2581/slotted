@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import type { MouseEvent, ReactElement } from 'react';
 
 import { Button } from '../button';
@@ -41,7 +42,7 @@ function asPart(
   render: ((props: ButtonRootProps) => ReactElement) | undefined,
 ): (props: ButtonRootProps) => ReactElement {
   return (props) => {
-    const named = { ...props, 'data-part': part } as ButtonRootProps;
+    const named = withSelectorKey(props, 'part', part);
     return render === undefined ? <button {...named} /> : render(named);
   };
 }
@@ -64,8 +65,8 @@ function composed(
  */
 export function WizardActions({ end, ref, start, ...nativeProps }: WizardActionsProps) {
   return (
-    <div {...nativeProps} data-part="actions" ref={ref}>
-      <div data-part="actions-start">
+    <div {...withSelectorKey(nativeProps, 'part', 'actions')} ref={ref}>
+      <div data-part="actions-start" data-part-actions-start="">
         {start ?? (
           <>
             <WizardCancel />
@@ -74,7 +75,7 @@ export function WizardActions({ end, ref, start, ...nativeProps }: WizardActions
           </>
         )}
       </div>
-      <div data-part="actions-end">
+      <div data-part="actions-end" data-part-actions-end="">
         {end ?? (
           <>
             <WizardSkip />
@@ -218,7 +219,7 @@ export function WizardDraftStatus() {
             })
           : '';
   return (
-    <span data-part="draft-status" role="status">
+    <span data-part="draft-status" data-part-draft-status="" role="status">
       {text}
     </span>
   );
@@ -237,6 +238,7 @@ export function WizardEdit({ children, onClick, ref, step, ...nativeProps }: Wiz
     <button
       aria-disabled={unavailable ? true : undefined}
       data-part="edit"
+      data-part-edit=""
       {...nativeProps}
       onClick={composed(onClick, (event) => {
         if (unavailable) return;
@@ -249,7 +251,9 @@ export function WizardEdit({ children, onClick, ref, step, ...nativeProps }: Wiz
       {target === undefined ? null : (
         <>
           {' '}
-          <span data-ui="visually-hidden">{target.label}</span>
+          <span data-ui="visually-hidden" data-ui-visually-hidden="">
+            {target.label}
+          </span>
         </>
       )}
     </button>

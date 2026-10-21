@@ -55,7 +55,7 @@ import {
    * arrow mirrors in a right-to-left document, which is what `directional` is.
    */
   // prettier-ignore
-  template: `<ng-content></ng-content>@if (newTab()) {&#8288;<span aria-hidden="true" data-part="external-icon"><span slIcon directional><svg slGlyph name="external"></svg></span></span><span data-part="external-hint" data-ui="visually-hidden">{{ hint() }}</span>&#8288;}`,
+  template: `<ng-content></ng-content>@if (newTab()) {&#8288;<span aria-hidden="true" data-part="external-icon" data-part-external-icon=""><span slIcon directional><svg slGlyph name="external"></svg></span></span><span data-part="external-hint" data-part-external-hint="" data-ui="visually-hidden" data-ui-visually-hidden="">{{ hint() }}</span>&#8288;}`,
   styleUrls: [
     '../../../styles/src/link/link.css',
     '../../../styles/src/visually-hidden/visually-hidden.css',
@@ -65,7 +65,9 @@ import {
   exportAs: 'slLink',
   host: {
     'data-ui': 'link',
+    'data-ui-link': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-underline]': 'underlineValue()',
     '[attr.data-variant]': 'variantValue()',
     '[attr.data-visited]': 'visitedValue() ? "" : null',

@@ -75,6 +75,7 @@ let sequence = 0;
     'aria-hidden': 'true',
     focusable: 'false',
     'data-part': 'glyph',
+    'data-part-glyph': '',
     '[attr.data-glyph]': 'name()',
     '[attr.viewBox]': 'viewBox',
     '[attr.data-solid]': "solid() ? '' : null",

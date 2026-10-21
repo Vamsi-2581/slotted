@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/badge/badge.css';
 
 import { formatCount } from '@slotted/core/count';
@@ -71,16 +72,24 @@ export function Badge({
    */
   const content = (
     <>
-      {start === undefined ? null : <span data-part="start">{start}</span>}
-      <span data-part="label">
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
+      <span data-part="label" data-part-label="">
         {resolvedShape === 'dot' ? null : counted}
         {children}
       </span>
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
     </>
   );
 
-  const rootProps: BadgeRootProps = {
+  const rootProps: BadgeRootProps = keyedProps({
     ...nativeProps,
     children: content,
     'data-part': 'root',
@@ -92,7 +101,7 @@ export function Badge({
     /* An explicit role the consumer wrote is never replaced by an inferred one. */
     ...(role === undefined ? {} : { role }),
     ...(role === undefined && ROLE[live] !== undefined ? { role: ROLE[live] } : {}),
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

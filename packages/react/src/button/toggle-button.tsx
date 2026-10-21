@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { buttonMessages } from '@slotted/core/i18n';
 
 import { useMessages } from '../i18n';
@@ -54,7 +55,7 @@ export function ToggleButton({
   const t = useMessages(buttonMessages, messages);
   const state = usePressed({ defaultPressed, onPressedChange, pressed });
 
-  const rootProps: ButtonRootProps = {
+  const rootProps: ButtonRootProps = keyedProps({
     ...nativeProps,
     ...rootData({ disabled, fullWidth, justify, loading, pressed: state.pressed, ...appearance }),
     'aria-disabled': inert.ariaDisabled,
@@ -83,7 +84,7 @@ export function ToggleButton({
       onClickCapture?.(event);
     },
     type,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }

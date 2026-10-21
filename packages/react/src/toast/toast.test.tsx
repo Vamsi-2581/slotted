@@ -408,8 +408,10 @@ describe('composition', () => {
       <ToastRegion attach="inline">
         {(message) => (
           <Toast key={message.id} message={message}>
-            <div data-part="content">
-              <div data-part="title">{String(message.data.title)}</div>
+            <div data-part="content" data-part-content="">
+              <div data-part="title" data-part-title="">
+                {String(message.data.title)}
+              </div>
             </div>
           </Toast>
         )}

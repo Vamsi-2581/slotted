@@ -9,7 +9,7 @@ import { afterNextRender, Directive, ElementRef, inject, Renderer2 } from '@angu
   selector: '[slProseLead]',
   standalone: true,
   exportAs: 'slProseLead',
-  host: { 'data-part': 'lead' },
+  host: { 'data-part': 'lead', 'data-part-lead': '' },
 })
 export class SlProseLead {}
 
@@ -24,7 +24,7 @@ export class SlProseLead {}
   selector: '[slProseAnchor]',
   standalone: true,
   exportAs: 'slProseAnchor',
-  host: { 'data-part': 'anchor' },
+  host: { 'data-part': 'anchor', 'data-part-anchor': '' },
 })
 export class SlProseAnchor {
   private readonly host = inject(ElementRef<HTMLElement>);
@@ -71,7 +71,7 @@ export class SlProseAnchor {
   selector: '[slProseExclude]',
   standalone: true,
   exportAs: 'slProseExclude',
-  host: { 'data-part': 'exclude' },
+  host: { 'data-part': 'exclude', 'data-part-exclude': '' },
 })
 export class SlProseExclude {}
 
@@ -80,6 +80,6 @@ export class SlProseExclude {}
   selector: '[slProseFootnotes]',
   standalone: true,
   exportAs: 'slProseFootnotes',
-  host: { 'data-part': 'footnotes' },
+  host: { 'data-part': 'footnotes', 'data-part-footnotes': '' },
 })
 export class SlProseFootnotes {}

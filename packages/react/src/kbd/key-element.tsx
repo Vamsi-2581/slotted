@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { ReactNode } from 'react';
 
 import type { KbdPlatform, ResolvedKey } from '@slotted/core/keys';
@@ -53,19 +54,24 @@ export function KeyElement({
   const name = resolved?.name;
   const symbolic = resolved?.symbolic === true;
 
-  const rootProps: KbdRootProps = {
+  const rootProps: KbdRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
         <span
           data-part="legend"
+          data-part-legend=""
           {...(symbolic ? { 'data-legend': 'symbol' } : {})}
           /* The mark is not read; the word beside it is. */
           {...(name === undefined ? {} : { 'aria-hidden': true })}
         >
           {shown}
         </span>
-        {name === undefined ? null : <span data-part="name">{name}</span>}
+        {name === undefined ? null : (
+          <span data-part="name" data-part-name="">
+            {name}
+          </span>
+        )}
       </>
     ),
     'data-part': 'root',
@@ -75,7 +81,7 @@ export function KeyElement({
     ...(resolved?.token === undefined ? {} : { 'data-key': resolved.token }),
     ...(platform === undefined ? {} : { 'data-platform': platform }),
     ...(disabled ? { 'data-disabled': '' as const } : {}),
-  };
+  });
 
   return render === undefined ? <kbd {...rootProps} /> : render(rootProps);
 }

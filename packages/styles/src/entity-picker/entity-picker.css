@@ -23,7 +23,7 @@
    * ground of two chosen rows are `combobox`'s decisions, and the chips row is
    * `multi-select`'s. They are repeated rather than shared for the reason
    * `combobox.css` gives about `select`: a stylesheet that painted
-   * `[data-ui='combobox']` from here would make one family's selector match
+   * `[data-ui-combobox]` from here would make one family's selector match
    * the other's DOM.
    *
    * What is this family's own is the record: a row two lines tall with the
@@ -35,7 +35,7 @@
 
   /* ── The root ─────────────────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'][data-part='root'] {
+  [data-ui-entity-picker][data-part-root] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -65,12 +65,12 @@
     min-inline-size: 0;
   }
 
-  [data-ui='entity-picker'][data-part='root']:not([data-full-width]) {
+  [data-ui-entity-picker][data-part-root]:not([data-full-width]) {
     display: inline-flex;
     inline-size: auto;
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-size='sm'] {
+  [data-ui-entity-picker][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
@@ -78,7 +78,7 @@
     --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-size='lg'] {
+  [data-ui-entity-picker][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -105,22 +105,22 @@
    * width is its chevron. 11rem holds "Opportunities" at `lg`; 45% leaves the
    * field the larger share at 240 pixels.
    */
-  [data-ui='entity-picker'] > [data-part='scope'] {
+  [data-ui-entity-picker] > [data-part-scope] {
     display: flex;
     flex: 0 0 var(--slotted-entity-picker-scope-inline-size, min(11rem, 45%));
     min-inline-size: 0;
   }
 
-  [data-ui='entity-picker'] > [data-part='scope'] > [data-ui='select'][data-part='root'] {
+  [data-ui-entity-picker] > [data-part-scope] > [data-ui-select][data-part-root] {
     inline-size: 100%;
   }
 
-  [data-ui='entity-picker'] > [data-part='scope'] > [data-ui='select'][data-part='root'] {
+  [data-ui-entity-picker] > [data-part-scope] > [data-ui-select][data-part-root] {
     border-end-end-radius: 0;
     border-start-end-radius: 0;
   }
 
-  [data-ui='entity-picker'] > [data-part='scope'] + [data-part='control'] {
+  [data-ui-entity-picker] > [data-part-scope] + [data-part-control] {
     border-end-start-radius: 0;
     border-start-start-radius: 0;
     margin-inline-start: calc(-1 * var(--slotted-control-border-width, 1px));
@@ -133,16 +133,16 @@
    * only. The box being pointed at, focused, open or invalid stands over the
    * seam, so its edge is whole on all four sides.
    */
-  [data-ui='entity-picker']:not([data-disabled]) > [data-part='scope']:is(:hover, :focus-within),
-  [data-ui='entity-picker']:not([data-disabled]) > [data-part='control']:is(:hover, :focus-within),
-  [data-ui='entity-picker']:is([data-open], [data-invalid]) > [data-part='control'] {
+  [data-ui-entity-picker]:not([data-disabled]) > [data-part-scope]:is(:hover, :focus-within),
+  [data-ui-entity-picker]:not([data-disabled]) > [data-part-control]:is(:hover, :focus-within),
+  [data-ui-entity-picker]:is([data-open], [data-invalid]) > [data-part-control] {
     position: relative;
     z-index: 1;
   }
 
   /* ── The frame ────────────────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'] > [data-part='control'] {
+  [data-ui-entity-picker] > [data-part-control] {
     align-items: center;
     background-color: var(
       --slotted-entity-picker-background,
@@ -181,7 +181,7 @@
    * that a text field cannot. Hidden from assistive technology: the input
    * already carries the name.
    */
-  [data-ui='entity-picker'] > [data-part='control'] > [data-part='selection'] {
+  [data-ui-entity-picker] > [data-part-control] > [data-part-selection] {
     --slotted-avatar-size-xs: var(--_chip-media);
 
     display: inline-flex;
@@ -191,7 +191,7 @@
 
   /* ── The input ────────────────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'] > [data-part='control'] [data-part='input'] {
+  [data-ui-entity-picker] > [data-part-control] [data-part-input] {
     background-color: transparent;
     border: 0;
     color: inherit;
@@ -206,17 +206,17 @@
 
   /* In single the input is the frame's own row, stretched to its border box
      as `combobox`'s is, so on a coarse pointer the control is the target. */
-  [data-ui='entity-picker'] > [data-part='control'] > [data-part='input'] {
+  [data-ui-entity-picker] > [data-part-control] > [data-part-input] {
     align-self: stretch;
     margin-block: calc(var(--slotted-control-border-width, 1px) * -1);
   }
 
-  [data-ui='entity-picker'] > [data-part='control'] [data-part='input']::placeholder {
+  [data-ui-entity-picker] > [data-part-control] [data-part-input]::placeholder {
     color: var(--slotted-entity-picker-placeholder-color, var(--slotted-text-muted, GrayText));
     text-overflow: ellipsis;
   }
 
-  [data-ui='entity-picker'] > [data-part='control'] [data-part='input']:autofill {
+  [data-ui-entity-picker] > [data-part-control] [data-part-input]:autofill {
     box-shadow: inset 0 0 0 100px
       var(--slotted-entity-picker-autofill-background, var(--slotted-tone-accent-surface));
     -webkit-text-fill-color: var(--slotted-entity-picker-color, var(--slotted-text, CanvasText));
@@ -224,7 +224,7 @@
 
   /* ── The chips (multiple) ─────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'] > [data-part='control'] > [data-part='values'] {
+  [data-ui-entity-picker] > [data-part-control] > [data-part-values] {
     align-self: stretch;
     display: flex;
     flex: 1 1 auto;
@@ -233,11 +233,11 @@
 
   /* The boundary between what is chosen and what acts on it is the row's own
      gap, not the frame's tight one (`multi-select`). */
-  [data-ui='entity-picker'] > [data-part='control'] > [data-part='values'] + * {
+  [data-ui-entity-picker] > [data-part-control] > [data-part-values] + * {
     margin-inline-start: var(--_row-gap);
   }
 
-  [data-ui='entity-picker'] > [data-part='control'] [data-part='chips'] {
+  [data-ui-entity-picker] > [data-part-control] [data-part-chips] {
     --slotted-control-inner-size: var(--_inner-size);
 
     align-content: safe center;
@@ -258,7 +258,7 @@
     scrollbar-width: none;
   }
 
-  [data-ui='entity-picker'] > [data-part='control'] [data-part='chips']::-webkit-scrollbar {
+  [data-ui-entity-picker] > [data-part-control] [data-part-chips]::-webkit-scrollbar {
     display: none;
   }
 
@@ -275,9 +275,9 @@
    * chip only has to not fight it; the row clips rather than scrolls, and the
    * chips' own focus ring is drawn inside them for that reason.
    */
-  [data-ui='entity-picker'][data-part='root']:not([data-overflow='wrap'])
-    > [data-part='control']
-    [data-part='chips'] {
+  [data-ui-entity-picker][data-part-root]:not([data-overflow='wrap'])
+    > [data-part-control]
+    [data-part-chips] {
     flex-wrap: nowrap;
     max-block-size: none;
     overflow: hidden;
@@ -292,18 +292,18 @@
    * chip that had already shrunk measured as fitting (the reference page
    * showed "Ana S…" beside room to spare).
    */
-  [data-ui='entity-picker'][data-part='root']:not([data-overflow='wrap'])
-    > [data-part='control']
-    [data-part='chips']
-    > [data-part='field'] {
+  [data-ui-entity-picker][data-part-root]:not([data-overflow='wrap'])
+    > [data-part-control]
+    [data-part-chips]
+    > [data-part-field] {
     flex: 1 0 var(--slotted-entity-picker-field-min, 2.5rem);
   }
 
-  [data-ui='entity-picker'][data-part='root']:not([data-overflow='wrap'])
-    > [data-part='control']
-    [data-part='chips']
-    > :not([data-part='field'], [hidden]):first-child:not(
-      :has(~ [data-ui='tag']:not([hidden], [data-count]))
+  [data-ui-entity-picker][data-part-root]:not([data-overflow='wrap'])
+    > [data-part-control]
+    [data-part-chips]
+    > :not([data-part-field], [hidden]):first-child:not(
+      :has(~ [data-ui-tag]:not([hidden], [data-count]))
     ) {
     flex-shrink: 1;
     /* Never a sliver: its face, three letters and its remove button. Below
@@ -312,7 +312,7 @@
   }
 
   /* The count is a chip that never gives way and never shrinks. */
-  [data-ui='entity-picker'] > [data-part='control'] [data-part='chips'] > [data-count] {
+  [data-ui-entity-picker] > [data-part-control] [data-part-chips] > [data-count] {
     cursor: pointer;
     flex: none;
   }
@@ -322,7 +322,7 @@
    * settles for a couple of characters, as in `multi-select`; in one line it
    * is what the collapse leaves room for.
    */
-  [data-ui='entity-picker'] > [data-part='control'] [data-part='field'] {
+  [data-ui-entity-picker] > [data-part-control] [data-part-field] {
     align-items: center;
     display: flex;
     flex: 1 1 var(--slotted-entity-picker-field-basis, 4rem);
@@ -330,10 +330,7 @@
     min-inline-size: var(--slotted-entity-picker-field-min, 2.5rem);
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    [data-part='chips']
-    > :not([data-part='field']) {
+  [data-ui-entity-picker] > [data-part-control] [data-part-chips] > :not([data-part-field]) {
     flex: 0 0 auto;
     max-inline-size: 100%;
     min-block-size: var(--_row-size);
@@ -347,30 +344,30 @@
    * the body the same air at its start, so the circle sits in the pill's end
    * the way the pill's end is round. The rest of the chip is `tag`'s.
    */
-  [data-ui='entity-picker']
-    > [data-part='control']
-    [data-part='chips']
+  [data-ui-entity-picker]
+    > [data-part-control]
+    [data-part-chips]
     > [data-ui]
-    > [data-part='body']
-    > [data-part='start'] {
+    > [data-part-body]
+    > [data-part-start] {
     --slotted-avatar-size-xs: var(--_chip-media);
 
     block-size: var(--_chip-media);
     inline-size: var(--_chip-media);
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    [data-part='chips']
+  [data-ui-entity-picker]
+    > [data-part-control]
+    [data-part-chips]
     > [data-ui]
-    > [data-part='body']:has(> [data-part='start']) {
+    > [data-part-body]:has(> [data-part-start]) {
     padding-inline-start: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    [data-part='chips']
-    > :not([data-part='field']):focus-visible {
+  [data-ui-entity-picker]
+    > [data-part-control]
+    [data-part-chips]
+    > :not([data-part-field]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
@@ -383,12 +380,12 @@
    * and a chip that is not yet a value is drawn as an outline, like the one
    * that never will be.
    */
-  [data-ui='entity-picker']
-    > [data-part='control']
-    [data-part='chips']
+  [data-ui-entity-picker]
+    > [data-part-control]
+    [data-part-chips]
     > [data-ui][data-loading]
-    > [data-part='body']
-    [data-ui='skeleton'] {
+    > [data-part-body]
+    [data-ui-skeleton] {
     --slotted-skeleton-inline-size: 5em;
   }
 
@@ -398,20 +395,17 @@
    * and the alert mark where a value has a face. The word is muted, never
    * struck through — the record may exist and be out of this reader's reach.
    */
-  [data-ui='entity-picker']
-    > [data-part='control']
-    [data-part='chips']
-    > [data-ui][data-unresolved] {
+  [data-ui-entity-picker] > [data-part-control] [data-part-chips] > [data-ui][data-unresolved] {
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    [data-part='chips']
+  [data-ui-entity-picker]
+    > [data-part-control]
+    [data-part-chips]
     > [data-ui][data-unresolved]
-    > [data-part='body']
-    > [data-part='start']
-    > [data-ui='icon'] {
+    > [data-part-body]
+    > [data-part-start]
+    > [data-ui-icon] {
     /* The alert mark is a `Glyph` the binding draws in the face's place, at the
        chip's icon step rather than stretched to the face's box. */
     block-size: var(--_icon-size);
@@ -420,9 +414,7 @@
 
   /* ── The two buttons inside the frame ─────────────────────────────────── */
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    > :is([data-part='clear'], [data-part='trigger']) {
+  [data-ui-entity-picker] > [data-part-control] > :is([data-part-clear], [data-part-trigger]) {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -446,9 +438,9 @@
   }
 
   /* The hit area, recovered outside the paint (R2). */
-  [data-ui='entity-picker']
-    > [data-part='control']
-    > :is([data-part='clear'], [data-part='trigger'])::after {
+  [data-ui-entity-picker]
+    > [data-part-control]
+    > :is([data-part-clear], [data-part-trigger])::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -459,35 +451,33 @@
      the hit area above grows to 44 pixels around them. Side by side, neither
      button reaches across the edge the two share. */
   @media (pointer: coarse) {
-    [data-ui='entity-picker']
-      > [data-part='control']
-      > :is([data-part='clear'], [data-part='trigger'])::after {
+    [data-ui-entity-picker]
+      > [data-part-control]
+      > :is([data-part-clear], [data-part-trigger])::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='entity-picker']
-      > [data-part='control']
-      > [data-part='clear']:has(+ [data-part='trigger']:not([hidden]))::after {
+    [data-ui-entity-picker]
+      > [data-part-control]
+      > [data-part-clear]:has(+ [data-part-trigger]:not([hidden]))::after {
       inset-inline-end: 0;
     }
 
-    [data-ui='entity-picker']
-      > [data-part='control']
-      > [data-part='clear']:not([hidden])
-      + [data-part='trigger']::after {
+    [data-ui-entity-picker]
+      > [data-part-control]
+      > [data-part-clear]:not([hidden])
+      + [data-part-trigger]::after {
       inset-inline-start: 0;
     }
   }
 
   /* The cross and the chevron are `Glyph` elements the binding draws, sized
      here to the control's icon step. */
-  [data-ui='entity-picker']
-    > [data-part='control']
-    > :is([data-part='clear'], [data-part='trigger']) {
+  [data-ui-entity-picker] > [data-part-control] > :is([data-part-clear], [data-part-trigger]) {
     --slotted-icon-size: var(--_icon-size);
   }
 
-  [data-ui='entity-picker'] > [data-part='control'] > [data-part='trigger'] > [data-part='arrow'] {
+  [data-ui-entity-picker] > [data-part-control] > [data-part-trigger] > [data-part-arrow] {
     align-items: center;
     block-size: var(--_icon-size);
     display: flex;
@@ -495,59 +485,59 @@
     justify-content: center;
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    > [data-part='trigger']
-    > [data-part='arrow']
-    > [data-ui='icon'] {
+  [data-ui-entity-picker]
+    > [data-part-control]
+    > [data-part-trigger]
+    > [data-part-arrow]
+    > [data-ui-icon] {
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='entity-picker'][data-open]
-    > [data-part='control']
-    > [data-part='trigger']
-    > [data-part='arrow']
-    > [data-ui='icon'] {
+  [data-ui-entity-picker][data-open]
+    > [data-part-control]
+    > [data-part-trigger]
+    > [data-part-arrow]
+    > [data-ui-icon] {
     rotate: 180deg;
   }
 
   /* The ring where the chevron stands, drawn by `spinner/spinner.css`. */
-  [data-ui='entity-picker'] > [data-part='control'] > [data-part='trigger'] > [data-part='busy'] {
+  [data-ui-entity-picker] > [data-part-control] > [data-part-trigger] > [data-part-busy] {
     --slotted-spinner-size: var(--_icon-size);
 
     color: var(--slotted-entity-picker-action-color, var(--slotted-text-muted, GrayText));
     flex: none;
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    > :is([data-part='clear'], [data-part='trigger']):hover:not(:disabled):not([data-disabled]) {
+  [data-ui-entity-picker]
+    > [data-part-control]
+    > :is([data-part-clear], [data-part-trigger]):hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-entity-picker-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    > :is([data-part='clear'], [data-part='trigger']):active:not(:disabled):not([data-disabled]) {
+  [data-ui-entity-picker]
+    > [data-part-control]
+    > :is([data-part-clear], [data-part-trigger]):active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-entity-picker-action-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='entity-picker']
-    > [data-part='control']
-    > :is([data-part='clear'], [data-part='trigger']):focus-visible {
+  [data-ui-entity-picker]
+    > [data-part-control]
+    > :is([data-part-clear], [data-part-trigger]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   /* ── Variant ──────────────────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'][data-part='root'][data-variant='subtle'] > [data-part='control'] {
+  [data-ui-entity-picker][data-part-root][data-variant='subtle'] > [data-part-control] {
     background-color: var(
       --slotted-entity-picker-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -559,7 +549,7 @@
   }
 
   /* The cell it sits in is the box (the plain-variant rule). */
-  [data-ui='entity-picker'][data-part='root'][data-variant='plain'] > [data-part='control'] {
+  [data-ui-entity-picker][data-part-root][data-variant='plain'] > [data-part-control] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -567,37 +557,37 @@
   }
 
   @media (forced-colors: active) {
-    [data-ui='entity-picker'][data-part='root'][data-variant='plain'] > [data-part='control'] {
+    [data-ui-entity-picker][data-part-root][data-variant='plain'] > [data-part-control] {
       border-color: ButtonBorder;
     }
   }
 
   /* ── States on the frame ──────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'][data-part='root']:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-entity-picker][data-part-root]:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     )
-    > [data-part='control']:hover {
+    > [data-part-control]:hover {
     border-color: var(
       --slotted-entity-picker-hover-border-color,
       var(--slotted-tone-accent-border)
     );
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-variant='subtle']:not([data-disabled]):not(
+  [data-ui-entity-picker][data-part-root][data-variant='subtle']:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid])
-    > [data-part='control']:hover {
+    > [data-part-control]:hover {
     background-color: var(
       --slotted-entity-picker-subtle-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-variant='plain']:not([data-disabled]):not(
+  [data-ui-entity-picker][data-part-root][data-variant='plain']:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid])
-    > [data-part='control']:hover {
+    > [data-part-control]:hover {
     background-color: var(
       --slotted-entity-picker-plain-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -605,32 +595,31 @@
     border-color: transparent;
   }
 
-  [data-ui='entity-picker'] > [data-part='control']:has([data-part='input']:focus-visible) {
+  [data-ui-entity-picker] > [data-part-control]:has([data-part-input]:focus-visible) {
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-variant='plain']
-    > [data-part='control']:has([data-part='input']:focus-visible) {
+  [data-ui-entity-picker][data-part-root][data-variant='plain']
+    > [data-part-control]:has([data-part-input]:focus-visible) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-open]:not([data-disabled])
-    > [data-part='control'] {
+  [data-ui-entity-picker][data-part-root][data-open]:not([data-disabled]) > [data-part-control] {
     border-color: var(--slotted-entity-picker-open-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-invalid] {
+  [data-ui-entity-picker][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-entity-picker-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-invalid] > [data-part='control'] {
+  [data-ui-entity-picker][data-part-root][data-invalid] > [data-part-control] {
     --_invalid-edge-width: var(
       --slotted-entity-picker-invalid-edge-width,
       var(--slotted-control-invalid-edge-width, 1px)
@@ -654,16 +643,15 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='entity-picker'][data-invalid]
-    > [data-part='control']:has([data-part='input']:focus-visible) {
+  [data-ui-entity-picker][data-invalid] > [data-part-control]:has([data-part-input]:focus-visible) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-variant='plain'][data-invalid]
-    > [data-part='control']:has([data-part='input']:focus-visible) {
+  [data-ui-entity-picker][data-part-root][data-variant='plain'][data-invalid]
+    > [data-part-control]:has([data-part-input]:focus-visible) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
     box-shadow: inset 0 0 0
@@ -680,22 +668,22 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='entity-picker'][data-part='root'][data-invalid] > [data-part='control'] {
+    [data-ui-entity-picker][data-part-root][data-invalid] > [data-part-control] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='entity-picker'][data-invalid]
-      > [data-part='control']:has([data-part='input']:focus-visible) {
+    [data-ui-entity-picker][data-invalid]
+      > [data-part-control]:has([data-part-input]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='entity-picker'][data-part='root'][data-variant='plain'][data-invalid]
-      > [data-part='control']:has([data-part='input']:focus-visible) {
+    [data-ui-entity-picker][data-part-root][data-variant='plain'][data-invalid]
+      > [data-part-control]:has([data-part-input]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: calc(
@@ -704,22 +692,22 @@
     }
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-readonly] > [data-part='control'] {
+  [data-ui-entity-picker][data-part-root][data-readonly] > [data-part-control] {
     background-color: var(
       --slotted-entity-picker-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-readonly]
-    > [data-part='control']
-    > [data-part='trigger']
-    > [data-part='arrow'] {
+  [data-ui-entity-picker][data-part-root][data-readonly]
+    > [data-part-control]
+    > [data-part-trigger]
+    > [data-part-arrow] {
     opacity: 0.5;
   }
 
-  [data-ui='entity-picker'][data-part='root'][data-disabled] > [data-part='control'],
-  [data-ui='entity-picker'] > [data-part='control']:has([data-part='input']:disabled) {
+  [data-ui-entity-picker][data-part-root][data-disabled] > [data-part-control],
+  [data-ui-entity-picker] > [data-part-control]:has([data-part-input]:disabled) {
     background-color: var(
       --slotted-entity-picker-disabled-background,
       var(--slotted-disabled-background)
@@ -734,18 +722,18 @@
   }
 
   /* A disabled face is a quieter face: the ink recedes, the photograph with it. */
-  [data-ui='entity-picker'][data-part='root'][data-disabled]
-    > [data-part='control']
+  [data-ui-entity-picker][data-part-root][data-disabled]
+    > [data-part-control]
     :is(
-      [data-part='selection'],
-      [data-part='chips'] > [data-ui] > [data-part='body'] > [data-part='start']
+      [data-part-selection],
+      [data-part-chips] > [data-ui] > [data-part-body] > [data-part-start]
     ) {
     opacity: 0.6;
   }
 
   /* ── The layer ────────────────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'][data-part='positioner'] {
+  [data-ui-entity-picker][data-part-positioner] {
     --_surface: var(--slotted-entity-picker-surface, var(--slotted-surface-raised, #ffffff));
     --_text: var(--slotted-entity-picker-content-text, var(--slotted-text, #0f172a));
     --_muted: var(--slotted-entity-picker-content-text-muted, var(--slotted-text-muted, #5b6b7f));
@@ -798,30 +786,30 @@
     z-index: calc(var(--slotted-z-index-popover, 1100) + var(--slotted-layer-depth, 0));
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-side='top'] {
+  [data-ui-entity-picker][data-part-positioner][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
-  [data-ui='entity-picker'][data-part='positioner']:is([data-side='left'], [data-side='right']) {
+  [data-ui-entity-picker][data-part-positioner]:is([data-side='left'], [data-side='right']) {
     translate: 0 0;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-open] {
+  [data-ui-entity-picker][data-part-positioner][data-open] {
     opacity: 1;
     transition: none;
     translate: 0 0;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-open][data-positioned] {
+  [data-ui-entity-picker][data-part-positioner][data-open][data-positioned] {
     animation: slotted-entity-picker-enter-down var(--slotted-duration-medium)
       var(--slotted-easing-enter);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'] {
+  [data-ui-entity-picker][data-part-positioner][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-entity-picker-enter-up;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-open][data-positioned]:is(
+  [data-ui-entity-picker][data-part-positioner][data-open][data-positioned]:is(
       [data-side='left'],
       [data-side='right']
     ) {
@@ -849,37 +837,37 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='entity-picker'][data-part='positioner'],
-    [data-ui='entity-picker'][data-part='positioner'][data-side='top'],
-    [data-ui='entity-picker'][data-part='positioner'][data-side='left'],
-    [data-ui='entity-picker'][data-part='positioner'][data-side='right'] {
+    [data-ui-entity-picker][data-part-positioner],
+    [data-ui-entity-picker][data-part-positioner][data-side='top'],
+    [data-ui-entity-picker][data-part-positioner][data-side='left'],
+    [data-ui-entity-picker][data-part-positioner][data-side='right'] {
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
       translate: 0 0;
     }
 
-    [data-ui='entity-picker'][data-part='positioner'][data-open][data-positioned],
-    [data-ui='entity-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'],
-    [data-ui='entity-picker'][data-part='positioner'][data-open][data-positioned][data-side='left'],
-    [data-ui='entity-picker'][data-part='positioner'][data-open][data-positioned][data-side='right'] {
+    [data-ui-entity-picker][data-part-positioner][data-open][data-positioned],
+    [data-ui-entity-picker][data-part-positioner][data-open][data-positioned][data-side='top'],
+    [data-ui-entity-picker][data-part-positioner][data-open][data-positioned][data-side='left'],
+    [data-ui-entity-picker][data-part-positioner][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-entity-picker-fade;
     }
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-detached] {
+  [data-ui-entity-picker][data-part-positioner][data-detached] {
     visibility: hidden;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-width='anchor'] {
+  [data-ui-entity-picker][data-part-positioner][data-width='anchor'] {
     inline-size: var(--slotted-positioner-anchor-width, auto);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-width='content'] {
+  [data-ui-entity-picker][data-part-positioner][data-width='content'] {
     inline-size: max-content;
     max-inline-size: min(var(--_measure), var(--slotted-positioner-available-width, 100vw));
     min-inline-size: var(--slotted-positioner-anchor-width, auto);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-size='sm'] {
+  [data-ui-entity-picker][data-part-positioner][data-size='sm'] {
     --_item-inset: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_item-height: var(--slotted-control-height-sm, 30px);
     --_content-font-size: var(--slotted-control-font-size-sm, 12px);
@@ -889,7 +877,7 @@
     --_media-size: var(--slotted-avatar-size-xs, 24px);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'][data-size='lg'] {
+  [data-ui-entity-picker][data-part-positioner][data-size='lg'] {
     --_item-inset: var(--slotted-control-padding-inline-lg, 1rem);
     --_item-height: var(--slotted-control-height-lg, 38px);
     --_content-font-size: var(--slotted-control-font-size-lg, 14px);
@@ -906,7 +894,7 @@
    * short fact, the check. A column no row fills is `auto` and takes nothing,
    * so a list with `media="none"` starts its words at the row's inset.
    */
-  [data-ui='entity-picker'] > [data-part='content'] {
+  [data-ui-entity-picker] > [data-part-content] {
     background: var(--_surface);
     border: var(--_border-width) solid var(--_border-color);
     border-radius: var(--_content-radius);
@@ -938,19 +926,19 @@
    * same wait. They stay pressable — each is still a record the reader can
    * choose.
    */
-  [data-ui='entity-picker']
-    > [data-part='content'][data-loading]
-    > :is([data-part='group'], [data-part='item']) {
+  [data-ui-entity-picker]
+    > [data-part-content][data-loading]
+    > :is([data-part-group], [data-part-item]) {
     opacity: 0.55;
     transition: opacity var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='entity-picker'] > [data-part='content'][data-loading] {
+  [data-ui-entity-picker] > [data-part-content][data-loading] {
     cursor: progress;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='group'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-group] {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
@@ -958,11 +946,11 @@
 
   /* Two sections are separated by a step of air, not by a rule: the heading
      already says where one ends. */
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='group'] + [data-part='group'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-group] + [data-part-group] {
     margin-block-start: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='group-label'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-group-label] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -974,7 +962,7 @@
 
   /* ── The record ───────────────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='item'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item] {
     /* The tracks keep their content's height and the pair is centred in the
        row's minimum, so a mark placed at the start of a track is on the
        words' line: stretched tracks put the words 3px under their glyph. */
@@ -1000,53 +988,51 @@
     user-select: none;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item']:has(> [data-part='description']) {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item]:has(> [data-part-description]) {
     grid-template-rows: auto auto;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='item'][data-current] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item][data-current] {
     background-color: var(--_highlight);
     /* A ring as well as a ground: nothing on this surface holds focus. */
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px)
       var(--slotted-entity-picker-highlight-ring, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='item']:not([data-disabled]):active {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item]:not([data-disabled]):active {
     background-color: var(--_highlight-active);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='item'][data-selected] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item][data-selected] {
     color: var(--_selected-color);
   }
 
   /* Two chosen neighbours are one block (LB2, `selection-block.test.mjs`). */
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item'][data-selected]
-    + [data-part='item'][data-selected] {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item][data-selected]
+    + [data-part-item][data-selected] {
     border-start-end-radius: 0;
     border-start-start-radius: 0;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item'][data-selected]:has(+ [data-part='item'][data-selected]) {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item][data-selected]:has(+ [data-part-item][data-selected]) {
     border-end-end-radius: 0;
     border-end-start-radius: 0;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item'][data-selected]
-    > [data-part='label'] {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item][data-selected]
+    > [data-part-label] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='item'][data-disabled] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item][data-disabled] {
     color: var(--slotted-disabled-foreground, #64748b);
     cursor: not-allowed;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item'][data-disabled][data-current] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item][data-disabled][data-current] {
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px)
       var(--slotted-disabled-border, #cbd5e1);
     color: var(--slotted-disabled-foreground, #64748b);
@@ -1057,7 +1043,7 @@
    * one block — who, then which one — and a one-line record's face is centred
    * on its one line. The column's width is the face's, plus the gap.
    */
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='media'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-media] {
     --slotted-avatar-size-xs: var(--_media-size);
 
     align-self: center;
@@ -1068,12 +1054,12 @@
     margin-inline-end: var(--_column-gap);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='media']:empty {
+  [data-ui-entity-picker][data-part-positioner] [data-part-media]:empty {
     block-size: var(--_content-icon-size);
     inline-size: var(--_media-size);
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='label'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-label] {
     -webkit-box-orient: vertical;
     display: -webkit-box;
     grid-column: 2;
@@ -1099,7 +1085,7 @@
    * text aligns to its own direction, and a Latin name stood at the left of
    * a right-to-left row, a column away from its face.
    */
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='description'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-description] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     /* Under the short fact too: that column holds nothing on this line. */
@@ -1115,9 +1101,9 @@
     white-space: nowrap;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item'][data-disabled]
-    > [data-part='description'] {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item][data-disabled]
+    > [data-part-description] {
     color: inherit;
   }
 
@@ -1126,7 +1112,7 @@
    * the name's line and not centred on the record, because it is read with
    * the name ("Ana Silva · Admin"), and it never wraps.
    */
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='meta'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-meta] {
     align-self: start;
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
@@ -1148,7 +1134,7 @@
    * tall with the glyph centred in it, as `combobox` draws it. Centred on a
    * two-line record it stood nine pixels above the name (`audit.mjs`).
    */
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='indicator'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-indicator] {
     --slotted-icon-size: var(--_content-icon-size);
 
     align-items: center;
@@ -1164,16 +1150,16 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item'][data-selected]
-    > [data-part='indicator'] {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item][data-selected]
+    > [data-part-indicator] {
     opacity: 1;
   }
 
   /* A record with no short fact gives its column to the name. */
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item']:not(:has(> [data-part='meta']))
-    > [data-part='label'] {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item]:not(:has(> [data-part-meta]))
+    > [data-part-label] {
     grid-column: 2 / 4;
   }
 
@@ -1182,9 +1168,9 @@
    * it; the check and the short fact are centred with the name there, where
    * on a two-line record they stand on the name's line.
    */
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item']:not(:has(> [data-part='description']))
-    > :is([data-part='indicator'], [data-part='meta']) {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item]:not(:has(> [data-part-description]))
+    > :is([data-part-indicator], [data-part-meta]) {
     align-self: center;
   }
 
@@ -1195,14 +1181,13 @@
    * column so its words start where every name starts: the plus to create,
    * the turning arrow to search again, each a `Glyph` the binding draws.
    */
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item']:is([data-create], [data-retry]) {
+  [data-ui-entity-picker][data-part-positioner] [data-part-item]:is([data-create], [data-retry]) {
     color: var(--slotted-entity-picker-offer-color, var(--slotted-tone-accent-text));
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='item']:is([data-create], [data-retry])
-    > [data-part='media'] {
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-item]:is([data-create], [data-retry])
+    > [data-part-media] {
     --slotted-icon-size: var(--_content-icon-size);
 
     align-items: center;
@@ -1216,8 +1201,8 @@
 
   /* ── Error, empty, status ─────────────────────────────────────────────── */
 
-  [data-ui='entity-picker'][data-part='positioner']
-    :is([data-part='empty'], [data-part='status'], [data-part='error']) {
+  [data-ui-entity-picker][data-part-positioner]
+    :is([data-part-empty], [data-part-status], [data-part-error]) {
     color: var(--_muted);
     grid-column: 1 / -1;
     min-inline-size: min(12rem, 100%);
@@ -1228,7 +1213,7 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='status']:empty {
+  [data-ui-entity-picker][data-part-positioner] [data-part-status]:empty {
     display: none;
   }
 
@@ -1239,7 +1224,7 @@
    * option. It stands on the row's inset like every row, not centred like
    * the empty sentence: it is the first of two rows that belong together.
    */
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='error'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-error] {
     align-items: center;
     color: var(--_text);
     display: flex;
@@ -1248,7 +1233,7 @@
     text-align: start;
   }
 
-  [data-ui='entity-picker'][data-part='positioner'] [data-part='error'] > [data-ui='icon'] {
+  [data-ui-entity-picker][data-part-positioner] [data-part-error] > [data-ui-icon] {
     --slotted-icon-size: var(--_content-icon-size);
 
     color: var(--slotted-entity-picker-error-color, var(--slotted-tone-danger-text));
@@ -1264,16 +1249,13 @@
    * same inset, column gap and height, so the answer lands in the boxes that
    * waited for it. The lengths differ the way names do.
    */
-  [data-ui='entity-picker'][data-part='positioner']
-    :is([data-part='placeholder'], [data-part='more']) {
+  [data-ui-entity-picker][data-part-positioner] :is([data-part-placeholder], [data-part-more]) {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    :is([data-part='placeholder'], [data-part='more'])
-    > * {
+  [data-ui-entity-picker][data-part-positioner] :is([data-part-placeholder], [data-part-more]) > * {
     align-items: center;
     display: grid;
     grid-column: 1 / -1;
@@ -1285,8 +1267,8 @@
     padding-inline: var(--_item-inset);
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    :is([data-part='placeholder'], [data-part='more'])
+  [data-ui-entity-picker][data-part-positioner]
+    :is([data-part-placeholder], [data-part-more])
     > *
     > :first-child {
     --slotted-skeleton-size: var(--_media-size);
@@ -1297,8 +1279,8 @@
   }
 
   /* Each line stands in the line box of the text it holds the place of. */
-  [data-ui='entity-picker'][data-part='positioner']
-    :is([data-part='placeholder'], [data-part='more'])
+  [data-ui-entity-picker][data-part-positioner]
+    :is([data-part-placeholder], [data-part-more])
     > *
     > :nth-child(2) {
     --slotted-skeleton-inline-size: 62%;
@@ -1308,8 +1290,8 @@
     margin-block: calc((1lh - 1cap) / 2);
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    :is([data-part='placeholder'], [data-part='more'])
+  [data-ui-entity-picker][data-part-positioner]
+    :is([data-part-placeholder], [data-part-more])
     > *
     > :nth-child(3) {
     --slotted-skeleton-inline-size: 44%;
@@ -1321,29 +1303,29 @@
     margin-block: calc((1lh - 1cap) / 2);
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='placeholder']
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-placeholder]
     > :nth-child(2)
     > :nth-child(2) {
     --slotted-skeleton-inline-size: 48%;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='placeholder']
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-placeholder]
     > :nth-child(2)
     > :nth-child(3) {
     --slotted-skeleton-inline-size: 58%;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='placeholder']
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-placeholder]
     > :nth-child(3)
     > :nth-child(2) {
     --slotted-skeleton-inline-size: 70%;
   }
 
-  [data-ui='entity-picker'][data-part='positioner']
-    [data-part='placeholder']
+  [data-ui-entity-picker][data-part-positioner]
+    [data-part-placeholder]
     > :nth-child(3)
     > :nth-child(3) {
     --slotted-skeleton-inline-size: 36%;
@@ -1352,14 +1334,13 @@
   /* ── Forced colours ───────────────────────────────────────────────────── */
 
   @media (forced-colors: active) {
-    [data-ui='entity-picker'][data-part='positioner'] [data-part='item'][data-current] {
+    [data-ui-entity-picker][data-part-positioner] [data-part-item][data-current] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='entity-picker'][data-part='positioner']
-      [data-part='item'][data-disabled][data-current] {
+    [data-ui-entity-picker][data-part-positioner] [data-part-item][data-disabled][data-current] {
       background-color: Highlight;
       color: GrayText;
     }

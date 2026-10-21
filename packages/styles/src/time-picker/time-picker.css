@@ -27,7 +27,7 @@
    * list, and the length of it is answered by where the panel opens, by
    * type-ahead, and by PageUp and PageDown.
    */
-  [data-ui='time-picker'][data-part='root'] {
+  [data-ui-time-picker][data-part-root] {
     display: block;
     /* The anchor the positioner measures is the control, and a block root
        lets the frame take the width the form gave it. */
@@ -40,7 +40,7 @@
    * It draws no frame: the `time-field` inside it draws its own, and the
    * trigger is handed to that field's `end` slot by the binding.
    */
-  [data-ui='time-picker'] [data-part='control'] {
+  [data-ui-time-picker] [data-part-control] {
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
     --_height: var(--slotted-control-height-md, 34px);
 
@@ -51,12 +51,12 @@
     position: relative;
   }
 
-  [data-ui='time-picker'][data-part='root'][data-size='sm'] [data-part='control'] {
+  [data-ui-time-picker][data-part-root][data-size='sm'] [data-part-control] {
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
     --_height: var(--slotted-control-height-sm, 30px);
   }
 
-  [data-ui='time-picker'][data-part='root'][data-size='lg'] [data-part='control'] {
+  [data-ui-time-picker][data-part-root][data-size='lg'] [data-part-control] {
     --_icon-size: var(--slotted-control-icon-size-lg, 18px);
     --_height: var(--slotted-control-height-lg, 38px);
   }
@@ -77,7 +77,7 @@
    * does not turn while the surface is open either. It is a `Glyph` the
    * binding draws inside an `icon` box, at the field's icon step.
    */
-  [data-ui='time-picker'] [data-part='trigger'] {
+  [data-ui-time-picker] [data-part-trigger] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -122,7 +122,7 @@
 
   /* The hit area, recovered outside the paint, exactly as every other inner
      control in the library recovers it. */
-  [data-ui='time-picker'] [data-part='trigger']::after {
+  [data-ui-time-picker] [data-part-trigger]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -133,25 +133,25 @@
      the hit area above grows to 44 pixels around them. Before the field's
      clear it does not reach across it. */
   @media (pointer: coarse) {
-    [data-ui='time-picker'] [data-part='trigger']::after {
+    [data-ui-time-picker] [data-part-trigger]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='time-picker']
-      [data-part='end']:has(+ [data-part='clear']:not([hidden]))
-      > [data-part='trigger']::after {
+    [data-ui-time-picker]
+      [data-part-end]:has(+ [data-part-clear]:not([hidden]))
+      > [data-part-trigger]::after {
       inset-inline-end: 0;
     }
   }
 
-  [data-ui='time-picker'] [data-part='trigger']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-time-picker] [data-part-trigger]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-time-picker-trigger-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='time-picker'] [data-part='trigger']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-time-picker] [data-part-trigger]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-time-picker-trigger-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -160,19 +160,19 @@
 
   /* Its own ring: tabbing from the last segment to the trigger has to move
      something visible, and the frame's ring would sit still. */
-  [data-ui='time-picker'] [data-part='trigger']:focus-visible {
+  [data-ui-time-picker] [data-part-trigger]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='time-picker'][data-part='root'][data-invalid] {
+  [data-ui-time-picker][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-time-picker-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
   }
 
-  [data-ui='time-picker'] [data-part='trigger']:disabled {
+  [data-ui-time-picker] [data-part-trigger]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -183,7 +183,7 @@
    * onto. The painted surface is one element in, as every anchored family in
    * the library is built.
    */
-  [data-ui='time-picker'][data-part='positioner'] {
+  [data-ui-time-picker][data-part-positioner] {
     /* Only the block inset: the positioner writes `left` and never `right`,
        and `inset-inline-start` would resolve to `right` in a right-to-left
        document and win over the measured value. */
@@ -207,16 +207,16 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='time-picker'][data-part='positioner'][data-side='top'] {
+  [data-ui-time-picker][data-part-positioner][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* A lateral side has no block direction to arrive from, so it only fades. */
-  [data-ui='time-picker'][data-part='positioner']:is([data-side='left'], [data-side='right']) {
+  [data-ui-time-picker][data-part-positioner]:is([data-side='left'], [data-side='right']) {
     translate: 0 0;
   }
 
-  [data-ui='time-picker'][data-part='positioner'][data-open] {
+  [data-ui-time-picker][data-part-positioner][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -230,16 +230,16 @@
    * harness, a docs snippet — is simply there, and is photographed where it
    * stands.
    */
-  [data-ui='time-picker'][data-part='positioner'][data-open][data-positioned] {
+  [data-ui-time-picker][data-part-positioner][data-open][data-positioned] {
     animation: slotted-time-picker-enter-down var(--slotted-duration-medium)
       var(--slotted-easing-enter);
   }
 
-  [data-ui='time-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'] {
+  [data-ui-time-picker][data-part-positioner][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-time-picker-enter-up;
   }
 
-  [data-ui='time-picker'][data-part='positioner'][data-open][data-positioned]:is(
+  [data-ui-time-picker][data-part-positioner][data-open][data-positioned]:is(
       [data-side='left'],
       [data-side='right']
     ) {
@@ -268,25 +268,25 @@
 
   /* Stillness keeps the fade and drops the movement. */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='time-picker'][data-part='positioner'],
-    [data-ui='time-picker'][data-part='positioner'][data-side='top'],
-    [data-ui='time-picker'][data-part='positioner'][data-side='left'],
-    [data-ui='time-picker'][data-part='positioner'][data-side='right'] {
+    [data-ui-time-picker][data-part-positioner],
+    [data-ui-time-picker][data-part-positioner][data-side='top'],
+    [data-ui-time-picker][data-part-positioner][data-side='left'],
+    [data-ui-time-picker][data-part-positioner][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='time-picker'][data-part='positioner'][data-open][data-positioned],
-    [data-ui='time-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'],
-    [data-ui='time-picker'][data-part='positioner'][data-open][data-positioned][data-side='left'],
-    [data-ui='time-picker'][data-part='positioner'][data-open][data-positioned][data-side='right'] {
+    [data-ui-time-picker][data-part-positioner][data-open][data-positioned],
+    [data-ui-time-picker][data-part-positioner][data-open][data-positioned][data-side='top'],
+    [data-ui-time-picker][data-part-positioner][data-open][data-positioned][data-side='left'],
+    [data-ui-time-picker][data-part-positioner][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-time-picker-fade;
     }
   }
 
   /* The anchor scrolled out of its own clipper. The list is still open and
      still belongs to a control the reader can no longer see. */
-  [data-ui='time-picker'][data-part='positioner'][data-detached] {
+  [data-ui-time-picker][data-part-positioner][data-detached] {
     visibility: hidden;
   }
 
@@ -303,7 +303,7 @@
    * produce a column too tight to read a time in, and capped so a wide form
    * does not stretch one column of times across a page.
    */
-  [data-ui='time-picker'] [data-part='content'] {
+  [data-ui-time-picker] [data-part-content] {
     background-color: var(--slotted-time-picker-surface, var(--slotted-surface-raised, Canvas));
     border: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-time-picker-content-border-color, var(--slotted-border-subtle, ButtonBorder));
@@ -360,7 +360,7 @@
    * surface shrink-wraps its two columns instead, capped by the room the
    * positioner measured.
    */
-  [data-ui='time-picker'] [data-part='content']:has([data-part='presets']) {
+  [data-ui-time-picker] [data-part-content]:has([data-part-presets]) {
     grid-template-areas: 'presets head' 'presets list' 'footer footer';
     grid-template-columns: auto minmax(9rem, 1fr);
     inline-size: auto;
@@ -371,7 +371,7 @@
    * The head: one press for the current time, which is what a reader who never
    * discovers that `+` opens an expression still has.
    */
-  [data-ui='time-picker'] [data-part='head'] {
+  [data-ui-time-picker] [data-part-head] {
     align-items: center;
     display: flex;
     gap: var(--slotted-space-2, 0.25rem);
@@ -380,7 +380,7 @@
     padding-block-end: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='time-picker'] [data-part='now'] {
+  [data-ui-time-picker] [data-part-now] {
     appearance: none;
     background-color: transparent;
     border: 0;
@@ -398,14 +398,14 @@
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='time-picker'] [data-part='now']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-time-picker] [data-part-now]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-time-picker-option-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='time-picker'] [data-part='now']:focus-visible {
+  [data-ui-time-picker] [data-part-now]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -415,7 +415,7 @@
    * the shift" is a business clock, and a library that guessed at one would be
    * guessing at an industry. What it ships is the column they stand in.
    */
-  [data-ui='time-picker'] [data-part='presets'] {
+  [data-ui-time-picker] [data-part-presets] {
     align-items: flex-start;
     border-inline-end: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-time-picker-content-border-color, var(--slotted-border-subtle, ButtonBorder));
@@ -432,7 +432,7 @@
    * density and every type step, and scrolled rather than truncated: a day of
    * quarter-hours is ninety-six rows and every one of them is choosable.
    */
-  [data-ui='time-picker'] [data-part='list'] {
+  [data-ui-time-picker] [data-part-list] {
     display: flex;
     flex-direction: column;
     /**
@@ -466,7 +466,7 @@
    * to read: `09:15` says more at a glance than a `15` in a column of minutes,
    * and the column shape exists for the steps where a flat list cannot.
    */
-  [data-ui='time-picker'] [data-part='option'] {
+  [data-ui-time-picker] [data-part-option] {
     align-items: center;
     background-color: transparent;
     border-radius: var(--slotted-time-picker-option-radius, var(--slotted-radius-sm, 4px));
@@ -508,8 +508,8 @@
    * `disabled` half of `STATE_PRECEDENCE` and nothing else, which is why this
    * one was found by a reader rather than by a test.
    */
-  [data-ui='time-picker']
-    [data-part='option']:hover:not([data-disabled]):not([data-selected]):not([data-current]) {
+  [data-ui-time-picker]
+    [data-part-option]:hover:not([data-disabled]):not([data-selected]):not([data-current]) {
     background-color: var(
       --slotted-time-picker-option-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -522,19 +522,19 @@
    * focusable row in the library draws, inset so it is not clipped by the
    * scroller's own edge. It stands down for the chosen row, which outranks it.
    */
-  [data-ui='time-picker'] [data-part='option'][data-current]:not([data-selected]) {
+  [data-ui-time-picker] [data-part-option][data-current]:not([data-selected]) {
     background-color: var(
       --slotted-time-picker-option-current-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='time-picker'] [data-part='option']:focus-visible {
+  [data-ui-time-picker] [data-part-option]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='time-picker'] [data-part='option'][data-selected] {
+  [data-ui-time-picker] [data-part-option][data-selected] {
     background-color: var(
       --slotted-time-picker-option-selected-background,
       var(--slotted-tone-accent-solid)
@@ -549,7 +549,7 @@
    * same blue and a visible change. A row that swapped colour family under the
    * pointer read as a different row, and that is the defect this pair replaces.
    */
-  [data-ui='time-picker'] [data-part='option'][data-selected]:hover:not([data-disabled]) {
+  [data-ui-time-picker] [data-part-option][data-selected]:hover:not([data-disabled]) {
     background-color: var(
       --slotted-time-picker-option-selected-hover-background,
       var(--slotted-tone-accent-solid-hover)
@@ -562,7 +562,7 @@
    * cannot infer — and it is muted to the colour the theme measures rather
    * than faded by opacity, so it stays readable.
    */
-  [data-ui='time-picker'] [data-part='option'][data-disabled] {
+  [data-ui-time-picker] [data-part-option][data-disabled] {
     background-color: transparent;
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
@@ -573,7 +573,7 @@
    * every step. It is a sentence rather than an empty box: MUI draws nothing
    * here and Ant draws an empty column, and both read as a broken component.
    */
-  [data-ui='time-picker'] [data-part='empty'] {
+  [data-ui-time-picker] [data-part-empty] {
     align-items: center;
     color: var(--slotted-time-picker-label-color, var(--slotted-text-muted, GrayText));
     display: flex;
@@ -585,7 +585,7 @@
     text-wrap: balance;
   }
 
-  [data-ui='time-picker'] [data-part='footer'] {
+  [data-ui-time-picker] [data-part-footer] {
     align-items: center;
     border-block-start: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-time-picker-content-border-color, var(--slotted-border-subtle, ButtonBorder));
@@ -605,7 +605,7 @@
    * ask, and the question really is how much screen there is.
    */
   @media (max-width: 480px) and (pointer: coarse) {
-    [data-ui='time-picker'][data-part='positioner'][data-presentation='sheet'] {
+    [data-ui-time-picker][data-part-positioner][data-presentation='sheet'] {
       /* The positioner's own measurement is overridden here on purpose: a
          sheet is not placed against an anchor, it is placed against the
          screen. */
@@ -614,12 +614,11 @@
       translate: 0 var(--slotted-space-9, 2rem);
     }
 
-    [data-ui='time-picker'][data-part='positioner'][data-presentation='sheet'][data-open] {
+    [data-ui-time-picker][data-part-positioner][data-presentation='sheet'][data-open] {
       translate: 0 0;
     }
 
-    [data-ui='time-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='content'] {
+    [data-ui-time-picker][data-part-positioner][data-presentation='sheet'] [data-part-content] {
       border-end-end-radius: 0;
       border-end-start-radius: 0;
       border-inline: 0;
@@ -629,12 +628,11 @@
 
     /* A sheet has the screen's height to spend, so the list takes more of it
        rather than staying at the popover's eight rows and a half. */
-    [data-ui='time-picker'][data-part='positioner'][data-presentation='sheet'] [data-part='list'] {
+    [data-ui-time-picker][data-part-positioner][data-presentation='sheet'] [data-part-list] {
       max-block-size: 50vh;
     }
 
-    [data-ui='time-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='presets'] {
+    [data-ui-time-picker][data-part-positioner][data-presentation='sheet'] [data-part-presets] {
       /* Beside the list there is no room for a column of shortcuts, so they
          become a row above it and keep their labels. */
       border-inline-end: 0;
@@ -651,13 +649,13 @@
     /* The chosen row and the highlighted row both lose their painted grounds,
        so each says what it is with a system pair the operating system
        guarantees legible together. */
-    [data-ui='time-picker'] [data-part='option'][data-selected] {
+    [data-ui-time-picker] [data-part-option][data-selected] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='time-picker'] [data-part='option'][data-current]:not([data-selected]) {
+    [data-ui-time-picker] [data-part-option][data-current]:not([data-selected]) {
       outline: var(--slotted-focus-ring-width, 2px) solid Highlight;
       outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
     }

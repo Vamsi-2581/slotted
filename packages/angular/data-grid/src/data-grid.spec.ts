@@ -25,6 +25,7 @@ import contract from '../../../../specs/components/data-grid/contract.json';
 import { SELECTION_COLUMN, SlDataGrid } from './data-grid';
 import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
+  DataGridLoadMoreTrigger,
   DataGridActivateEvent,
   DataGridColumnOverflow,
   DataGridColumnStateRequest,
@@ -134,6 +135,8 @@ const COLUMNS: GridColumn<Shipment>[] = [
       [error]="error()"
       [totalCount]="totalCount()"
       [hasMore]="hasMore()"
+      [loadMoreTrigger]="loadMoreTrigger()"
+      [loadMoreFailed]="loadMoreFailed()"
       [(query)]="query"
       [(columnState)]="columnState"
       [(value)]="value"
@@ -171,6 +174,8 @@ class Host {
   readonly error = signal<string | null | undefined>(undefined);
   readonly totalCount = signal<number | undefined>(undefined);
   readonly hasMore = signal<boolean | undefined>(undefined);
+  readonly loadMoreTrigger = signal<DataGridLoadMoreTrigger | undefined>(undefined);
+  readonly loadMoreFailed = signal(false);
   readonly detail = signal(false);
   readonly query = signal<GridQuery>(emptyQuery());
   readonly columnState = signal<Partial<GridColumnState> | undefined>(undefined);
@@ -486,6 +491,29 @@ describe('SlDataGrid', () => {
     fixture.detectChanges();
     expect(root().getAttribute('aria-rowcount')).toBe('3413');
     expect(root().querySelector('[data-range]')!.textContent).toContain('9–12 of 3,412');
+  });
+
+  /**
+   * A server that pages by date sends its rows already ordered for grouping;
+   * in server mode the grid emitted one plain row per row and ignored the
+   * query's group. It groups what it is given, in the order given.
+   */
+  it('groups the rows a server sent, in their order, in server mode', () => {
+    host.rows.set([
+      { ...ROWS[0]!, id: 'D1', shipped: '2026-09-13' },
+      { ...ROWS[1]!, id: 'D2', shipped: '2026-09-13' },
+      { ...ROWS[2]!, id: 'D3', shipped: '2026-09-12' },
+      { ...ROWS[3]!, id: 'D4', shipped: '2026-09-12' },
+      { ...ROWS[0]!, id: 'D5', shipped: '2026-09-11' },
+      { ...ROWS[1]!, id: 'D6', shipped: '2026-09-11' },
+    ]);
+    host.totalCount.set(6);
+    host.query.set({ ...emptyQuery(), group: ['shipped'] });
+    fixture.detectChanges();
+    const groups = root().querySelectorAll('[data-part="group-row"]');
+    expect(groups).toHaveLength(3);
+    for (const group of groups) expect(group.textContent).toContain('2 rows');
+    expect(root().querySelectorAll('[data-part="row"]')).toHaveLength(6);
   });
 
   it('groups, with counts and aggregates, and closes a group with the left arrow', () => {
@@ -853,8 +881,44 @@ describe('SlDataGrid', () => {
     expect(root().getAttribute('aria-busy')).toBe('true');
   });
 
-  it('offers load more when the total is unknown and more exists', () => {
+  /**
+   * A grid that loads its next page on its own offered a Load more control as
+   * well, whose purpose the reader could not tell. Under the default trigger
+   * the footer says the page is loading, and a control appears only to retry
+   * a page that failed.
+   */
+  it('offers no Load more control by default, and a status while the page loads', () => {
     host.hasMore.set(true);
+    host.query.set(emptyQuery({ cursor: null, size: 4 }));
+    fixture.detectChanges();
+    const footerButtons = () =>
+      [...fixture.nativeElement.querySelectorAll('[data-part="footer"] button')].map(
+        (button: HTMLButtonElement) => button.textContent?.trim(),
+      );
+    expect(footerButtons()).not.toContain('Load more');
+    expect(fixture.nativeElement.querySelector('[data-range]').textContent).toContain('1–4');
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-loading-more]').textContent).toContain(
+      'Loading more rows',
+    );
+  });
+
+  it('offers a retry after a failed page, and asks for it from the control', () => {
+    host.hasMore.set(true);
+    host.loadMoreFailed.set(true);
+    host.query.set(emptyQuery({ cursor: null, size: 4 }));
+    fixture.detectChanges();
+    const before = host.loads;
+    [...fixture.nativeElement.querySelectorAll('[data-part="footer"] button')]
+      .find((button: HTMLButtonElement) => button.textContent?.trim() === 'Try again')!
+      .click();
+    expect(host.loads).toBe(before + 1);
+  });
+
+  it('offers Load more under the button trigger', () => {
+    host.hasMore.set(true);
+    host.loadMoreTrigger.set('button');
     host.query.set(emptyQuery({ cursor: null, size: 4 }));
     fixture.detectChanges();
     expect(root().getAttribute('aria-rowcount')).toBe('0');
@@ -862,7 +926,6 @@ describe('SlDataGrid', () => {
       .find((button: HTMLButtonElement) => button.textContent?.trim() === 'Load more')!
       .click();
     expect(host.loads).toBeGreaterThanOrEqual(1);
-    expect(fixture.nativeElement.querySelector('[data-range]').textContent).toContain('1–4');
   });
 });
 

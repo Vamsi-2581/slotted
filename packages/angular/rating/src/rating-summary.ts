@@ -77,17 +77,19 @@ interface SummaryBucket {
   exportAs: 'slRatingSummary',
   imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlRatingDisplay],
   template: `<ng-template #levelLabel let-level
-      ><span data-part="level-label"
+      ><span data-part="level-label" data-part-level-label=""
         ><span>{{ level }}</span
         ><span slIcon><svg slGlyph name="star"></svg></span></span
     ></ng-template>
-    <div data-part="aggregate">
+    <div data-part="aggregate" data-part-aggregate="">
       @if (summary().total > 0) {
-        <span data-part="value">{{ averageText() }}</span>
-        <span data-part="scale">{{ scaleText() }}</span>
+        <span data-part="value" data-part-value="">{{ averageText() }}</span>
+        <span data-part="scale" data-part-scale="">{{ scaleText() }}</span>
       }
       @if (insight(); as conclusion) {
-        <span data-part="insight" [attr.data-tone]="conclusion.tone">{{ conclusion.text }}</span>
+        <span data-part="insight" data-part-insight="" [attr.data-tone]="conclusion.tone">{{
+          conclusion.text
+        }}</span>
       }
       @if (resolvedVariant() === 'bars') {
         <div
@@ -101,15 +103,20 @@ interface SummaryBucket {
           [locale]="resolvedLocale()"
         ></div>
       }
-      <span data-part="count">{{ countText() }}</span>
+      <span data-part="count" data-part-count="">{{ countText() }}</span>
     </div>
     @if (resolvedVariant() === 'bars') {
-      <ul data-part="distribution" [attr.aria-label]="t('distributionLabel')">
+      <ul
+        data-part="distribution"
+        data-part-distribution=""
+        [attr.aria-label]="t('distributionLabel')"
+      >
         @for (level of highestFirst(); track level.level) {
           <li>
             @if (filterable()) {
               <button
                 data-part="level"
+                data-part-level=""
                 type="button"
                 [attr.aria-pressed]="level.pressed ? 'true' : 'false'"
                 [attr.data-pressed]="level.pressed ? '' : null"
@@ -120,7 +127,12 @@ interface SummaryBucket {
                 <ng-container *ngTemplateOutlet="levelBody; context: { $implicit: level }" />
               </button>
             } @else {
-              <div data-part="level" role="group" [attr.aria-label]="level.label">
+              <div
+                data-part="level"
+                data-part-level=""
+                role="group"
+                [attr.aria-label]="level.label"
+              >
                 <ng-container *ngTemplateOutlet="levelBody; context: { $implicit: level }" />
               </div>
             }
@@ -130,18 +142,26 @@ interface SummaryBucket {
       <ng-template #levelBody let-level
         ><ng-container *ngTemplateOutlet="levelLabel; context: { $implicit: level.level }" /><span
           data-part="track"
+          data-part-track=""
           aria-hidden="true"
-          ><span data-part="indicator" [style.--slotted-rating-share]="level.share"></span></span
-        ><span data-part="level-count">{{ level.countText }}</span></ng-template
+          ><span
+            data-part="indicator"
+            data-part-indicator=""
+            [style.--slotted-rating-share]="level.share"
+          ></span></span
+        ><span data-part="level-count" data-part-level-count="">{{
+          level.countText
+        }}</span></ng-template
       >
     } @else {
-      <div data-part="plot">
-        <div data-part="field">
-          <div data-part="columns">
+      <div data-part="plot" data-part-plot="">
+        <div data-part="field" data-part-field="">
+          <div data-part="columns" data-part-columns="">
             @for (level of lowestFirst(); track level.level) {
               @if (filterable()) {
                 <button
                   data-part="column"
+                  data-part-column=""
                   type="button"
                   [attr.aria-pressed]="level.pressed ? 'true' : 'false'"
                   [attr.data-pressed]="level.pressed ? '' : null"
@@ -150,43 +170,46 @@ interface SummaryBucket {
                   [style.--slotted-rating-share]="level.peak"
                   (click)="toggle(level.level, $event)"
                 >
-                  <span data-part="bar"></span>
+                  <span data-part="bar" data-part-bar=""></span>
                 </button>
               } @else {
                 <div
                   data-part="column"
+                  data-part-column=""
                   role="group"
                   [attr.aria-label]="level.label"
                   [style.--slotted-rating-share]="level.peak"
                 >
-                  <span data-part="bar"></span>
+                  <span data-part="bar" data-part-bar=""></span>
                 </div>
               }
             }
           </div>
           @if (summary().total > 0) {
-            <span data-part="interval" aria-hidden="true"></span>
-            <span data-part="mean" aria-hidden="true"
-              ><span data-part="mean-label">{{ averageText() }}</span></span
+            <span data-part="interval" data-part-interval="" aria-hidden="true"></span>
+            <span data-part="mean" data-part-mean="" aria-hidden="true"
+              ><span data-part="mean-label" data-part-mean-label="">{{ averageText() }}</span></span
             >
           }
         </div>
-        <div data-part="axis" aria-hidden="true">
+        <div data-part="axis" data-part-axis="" aria-hidden="true">
           @for (level of lowestFirst(); track level.level) {
-            <span data-part="tick"
+            <span data-part="tick" data-part-tick=""
               ><ng-container
                 *ngTemplateOutlet="levelLabel; context: { $implicit: level.level }"
-              /><span data-part="tick-share">{{ level.shareText }}</span></span
+              /><span data-part="tick-share" data-part-tick-share="">{{
+                level.shareText
+              }}</span></span
             >
           }
         </div>
       </div>
       @if (summary().total > 0) {
-        <p data-part="sentiment">
+        <p data-part="sentiment" data-part-sentiment="">
           @for (bucket of buckets(); track bucket.key) {
-            <span data-part="bucket" [attr.data-tone]="bucket.tone"
-              ><span data-part="swatch" aria-hidden="true"></span>{{ bucket.before
-              }}<strong>{{ bucket.share }}</strong
+            <span data-part="bucket" data-part-bucket="" [attr.data-tone]="bucket.tone"
+              ><span data-part="swatch" data-part-swatch="" aria-hidden="true"></span
+              >{{ bucket.before }}<strong>{{ bucket.share }}</strong
               >{{ bucket.after }}</span
             >
           }
@@ -198,7 +221,9 @@ interface SummaryBucket {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'rating',
+    'data-ui-rating': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-variant]': "resolvedVariant() === 'bars' ? 'summary' : 'spectrum'",
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-tone]': 'resolvedTone()',

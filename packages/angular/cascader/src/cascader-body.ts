@@ -57,7 +57,11 @@ export class SlCascaderNode<T = unknown> {
   template: `
     @let view = engine().view();
     @if (view.crumbs.length > 0) {
-      <nav data-part="breadcrumb" [attr.aria-label]="engine().t('breadcrumb')">
+      <nav
+        data-part="breadcrumb"
+        data-part-breadcrumb=""
+        [attr.aria-label]="engine().t('breadcrumb')"
+      >
         @for (crumb of view.crumbs; track $index) {
           @if (!$first) {
             <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
@@ -66,6 +70,7 @@ export class SlCascaderNode<T = unknown> {
             <button
               type="button"
               data-part="crumb"
+              data-part-crumb=""
               data-collapsed
               [attr.aria-label]="backLabel(crumb.target)"
               (click)="goTo(crumb.target, $event)"
@@ -76,6 +81,7 @@ export class SlCascaderNode<T = unknown> {
             <button
               type="button"
               data-part="crumb"
+              data-part-crumb=""
               [attr.aria-current]="crumb.current ? 'location' : null"
               (click)="onCrumb(crumb, $event)"
             >
@@ -90,6 +96,7 @@ export class SlCascaderNode<T = unknown> {
     }
     <div
       data-part="panel"
+      data-part-panel=""
       role="tree"
       [id]="treeId()"
       [attr.tabindex]="focusable() ? 0 : null"
@@ -102,19 +109,27 @@ export class SlCascaderNode<T = unknown> {
       (keydown)="treeKeydown.emit($event)"
     >
       @if (view.searching) {
-        <div data-part="column" role="group" [attr.aria-label]="engine().t('search')">
+        <div
+          data-part="column"
+          data-part-column=""
+          role="group"
+          [attr.aria-label]="engine().t('search')"
+        >
           @for (node of view.results; track node.key) {
             <ng-container *ngTemplateOutlet="row; context: { $implicit: node }" />
           }
           @if (view.results.length === 0) {
-            <div data-part="empty">{{ noResults() }}</div>
+            <div data-part="empty" data-part-empty="">{{ noResults() }}</div>
           }
-          <div data-part="status" role="status">{{ resultCount(view.results.length) }}</div>
+          <div data-part="status" data-part-status="" role="status">
+            {{ resultCount(view.results.length) }}
+          </div>
         </div>
       } @else {
         @for (column of view.columns; track column.parent ?? '') {
           <div
             data-part="column"
+            data-part-column=""
             role="group"
             [attr.aria-label]="engine().labelOf(column.parent)"
             [attr.aria-busy]="column.pending && !column.failed ? true : null"
@@ -124,13 +139,20 @@ export class SlCascaderNode<T = unknown> {
             }
             @if (column.pending && !column.failed) {
               @for (index of [0, 1, 2]; track index) {
-                <div data-part="loader" aria-hidden="true">
-                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+                <div data-part="loader" data-part-loader="" aria-hidden="true">
+                  <span
+                    data-ui="skeleton"
+                    data-ui-skeleton=""
+                    data-part="root"
+                    data-part-root=""
+                    data-shape="text"
+                    data-loading
+                  ></span>
                 </div>
               }
             }
             @if (column.failed && column.parent !== undefined) {
-              <div data-part="status" role="status">
+              <div data-part="status" data-part-status="" role="status">
                 {{ failedLabel(column.parent) }}
                 <button
                   slButton
@@ -144,7 +166,7 @@ export class SlCascaderNode<T = unknown> {
               </div>
             }
             @if (!column.pending && !column.failed && column.nodes.length === 0) {
-              <div data-part="empty">{{ engine().t('empty') }}</div>
+              <div data-part="empty" data-part-empty="">{{ engine().t('empty') }}</div>
             }
           </div>
         }
@@ -154,6 +176,7 @@ export class SlCascaderNode<T = unknown> {
     <ng-template #row let-node>
       <div
         data-part="node"
+        data-part-node=""
         role="treeitem"
         [id]="nodeId()(node.key)"
         [attr.aria-level]="view.searching ? null : node.level"
@@ -181,11 +204,11 @@ export class SlCascaderNode<T = unknown> {
         (pointerleave)="cancelHover()"
       >
         @if (engine().multiple) {
-          <span data-part="indicator"
+          <span data-part="indicator" data-part-indicator=""
             ><span slIcon><svg slGlyph [name]="node.indeterminate ? 'minus' : 'check'"></svg></span
           ></span>
         }
-        <span data-part="label">
+        <span data-part="label" data-part-label="">
           @if (nodeTemplate(); as template) {
             <ng-container
               *ngTemplateOutlet="
@@ -200,21 +223,21 @@ export class SlCascaderNode<T = unknown> {
           }
         </span>
         @if (descriptionOf(node, view.searching); as description) {
-          <span data-part="description">{{ description }}</span>
+          <span data-part="description" data-part-description="">{{ description }}</span>
         }
         @if (metaOf(node); as meta) {
-          <span data-part="meta" aria-hidden="true">{{ meta }}</span>
+          <span data-part="meta" data-part-meta="" aria-hidden="true">{{ meta }}</span>
         }
         @if (node.branch) {
-          <span data-part="expander" aria-hidden="true">
+          <span data-part="expander" data-part-expander="" aria-hidden="true">
             @if (node.loading) {
-              <span data-ui="spinner" data-part="root"></span>
+              <span data-ui="spinner" data-ui-spinner="" data-part="root" data-part-root=""></span>
             } @else {
               <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
             }
           </span>
         } @else if (!engine().multiple) {
-          <span data-part="indicator"
+          <span data-part="indicator" data-part-indicator=""
             ><span slIcon><svg slGlyph name="check"></svg></span
           ></span>
         }

@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createArrowNavigation, tabbables } from '@slotted/core/focus';
 import { createPointerIntent } from '@slotted/core/pointer-intent';
@@ -308,9 +309,9 @@ export function MenuTrigger({
        whichever trigger the reader left, and a `tabIndex` written here every
        render would take it back. An item of a surface is never a tab stop. */
     ...(parent !== null
-      ? { role: 'menuitem', 'data-part': 'item', tabIndex: -1 }
+      ? { role: 'menuitem', 'data-part': 'item', ...selectorKeyProps('part', 'item'), tabIndex: -1 }
       : onBar
-        ? { role: 'menuitem', 'data-part': 'trigger' }
+        ? { role: 'menuitem', 'data-part': 'trigger', ...selectorKeyProps('part', 'trigger') }
         : {}),
     onClick: compose(nativeProps.onClick, onClick),
     onKeyDown: compose(nativeProps.onKeyDown, onKeyDown),
@@ -687,7 +688,7 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
 
   if (!mounted) return null;
 
-  const rootProps: MenuContentRootProps = {
+  const rootProps: MenuContentRootProps = keyedProps({
     'data-align': align,
     /**
      * A layer kept in the document by `lazy` or `eager` is closed, and a closed
@@ -700,17 +701,17 @@ export function MenuContent({ children, loading, ref, render, ...nativeProps }: 
     'data-size': menu.size,
     'data-ui': 'menu',
     'data-width': menu.width,
-  };
+  });
 
   const element = (
     <div {...rootProps} ref={setLayer}>
       <div
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'content')}
         aria-busy={loading === true ? true : undefined}
         aria-describedby={describedBy}
         aria-labelledby={nativeProps['aria-label'] === undefined ? menu.triggerId : undefined}
         data-loading={loading === true ? '' : undefined}
-        data-part="content"
+
         id={menu.contentId}
         onKeyDown={compose(nativeProps.onKeyDown, onKeyDown)}
         ref={setSurfaceNode}

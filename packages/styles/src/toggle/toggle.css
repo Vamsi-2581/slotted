@@ -24,7 +24,7 @@
    * some, so the ring is held off the edge at the foundation's offset, where
    * the joined bar draws it inward.
    */
-  [data-ui='toggle'][data-part='root'] {
+  [data-ui-toggle][data-part-root] {
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_font-size: var(--slotted-control-font-size-md, 13px);
@@ -93,7 +93,7 @@
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='toggle'][data-part='root'][data-size='sm'] {
+  [data-ui-toggle][data-part-root][data-size='sm'] {
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
@@ -101,7 +101,7 @@
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='toggle'][data-part='root'][data-size='lg'] {
+  [data-ui-toggle][data-part-root][data-size='lg'] {
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
@@ -118,12 +118,12 @@
    * words: the Angular binding projects the words into a box it always
    * renders, and a box with nothing in it must not hold the gap open either.
    */
-  [data-ui='toggle'][data-part='root']:not(:has([data-part='label']:not(:empty))) {
+  [data-ui-toggle][data-part-root]:not(:has([data-part-label]:not(:empty))) {
     inline-size: var(--_height);
     padding-inline: 0;
   }
 
-  [data-ui='toggle'] [data-part='label']:empty {
+  [data-ui-toggle] [data-part-label]:empty {
     display: none;
   }
 
@@ -132,7 +132,7 @@
    * from its container, and a bare glyph host such as `ng-icon` reads the
    * slot's font-size, so both are the glyph scale.
    */
-  [data-ui='toggle'] [data-part='icon'] {
+  [data-ui-toggle] [data-part-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     block-size: var(--_icon-size);
@@ -142,7 +142,7 @@
     inline-size: var(--_icon-size);
   }
 
-  [data-ui='toggle'] [data-part='icon'] > * {
+  [data-ui-toggle] [data-part-icon] > * {
     block-size: 100%;
     display: block;
     inline-size: 100%;
@@ -155,7 +155,7 @@
    * whole in the DOM — the library's rule is that truncation never removes
    * content.
    */
-  [data-ui='toggle'] [data-part='label'] {
+  [data-ui-toggle] [data-part-label] {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -163,7 +163,7 @@
 
   /* ── The edge ─────────────────────────────────────────────────────────── */
 
-  [data-ui='toggle'][data-part='root'][data-variant='outline'] {
+  [data-ui-toggle][data-part-root][data-variant='outline'] {
     border-color: var(--_border-color);
     /* A framed control lifts off its ground at rest, as button's outline does. */
     box-shadow: var(--slotted-toggle-shadow, var(--slotted-control-shadow, none));
@@ -177,7 +177,7 @@
    * `STATE_PRECEDENCE` sets. Both variants take the edge: a ghost toggle that
    * is on has become a framed thing, and the edge is half of what says so.
    */
-  [data-ui='toggle'][data-part='root'][data-pressed]:not(:disabled):not([data-disabled]) {
+  [data-ui-toggle][data-part-root][data-pressed]:not(:disabled):not([data-disabled]) {
     background: var(
       --slotted-toggle-pressed-background,
       var(--slotted-tone-accent-subtle-active, Highlight)
@@ -198,18 +198,14 @@
    * is on answers the pointer on the accent ground's own steps, so the two
    * states share no surface in any of theirs.
    */
-  [data-ui='toggle'][data-part='root']:hover:not(:disabled):not([data-disabled]):not(
-      [data-pressed]
-    ) {
+  [data-ui-toggle][data-part-root]:hover:not(:disabled):not([data-disabled]):not([data-pressed]) {
     background: var(
       --slotted-toggle-hover-background,
       var(--slotted-tone-secondary-subtle-hover, ButtonFace)
     );
   }
 
-  [data-ui='toggle'][data-part='root']:active:not(:disabled):not([data-disabled]):not(
-      [data-pressed]
-    ) {
+  [data-ui-toggle][data-part-root]:active:not(:disabled):not([data-disabled]):not([data-pressed]) {
     background: var(
       --slotted-toggle-active-background,
       var(--slotted-tone-secondary-subtle-active, ButtonFace)
@@ -220,14 +216,14 @@
     transition-duration: var(--slotted-duration-instant);
   }
 
-  [data-ui='toggle'][data-part='root'][data-pressed]:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-toggle][data-part-root][data-pressed]:hover:not(:disabled):not([data-disabled]) {
     background: var(
       --slotted-toggle-pressed-hover-background,
       var(--slotted-tone-accent-subtle-hover, Highlight)
     );
   }
 
-  [data-ui='toggle'][data-part='root'][data-pressed]:active:not(:disabled):not([data-disabled]) {
+  [data-ui-toggle][data-part-root][data-pressed]:active:not(:disabled):not([data-disabled]) {
     background: var(
       --slotted-toggle-pressed-background,
       var(--slotted-tone-accent-subtle-active, Highlight)
@@ -241,18 +237,18 @@
    * The same chip `toggle-group` draws: a rounded item with the control edge,
    * pressed in the neutral tone's ink.
    */
-  [data-ui='toggle'][data-part='root'][data-variant='chips'] {
+  [data-ui-toggle][data-part-root][data-variant='chips'] {
     border-color: var(--_border-color);
     border-radius: var(--slotted-toggle-chips-radius, var(--slotted-radius-full, 9999px));
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-pressed]:not(:disabled):not(
+  [data-ui-toggle][data-part-root][data-variant='chips'][data-pressed]:not(:disabled):not(
       [data-disabled]
     ),
-  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-pressed]:active:not(
-      :disabled
-    ):not([data-disabled]) {
+  [data-ui-toggle][data-part-root][data-variant='chips'][data-pressed]:active:not(:disabled):not(
+      [data-disabled]
+    ) {
     background: var(
       --slotted-toggle-chips-pressed-background,
       var(--slotted-tone-neutral-solid, CanvasText)
@@ -264,15 +260,15 @@
     color: var(--slotted-toggle-chips-pressed-color, var(--slotted-tone-neutral-on-solid, Canvas));
   }
 
-  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-pressed]:hover:not(:disabled):not(
+  [data-ui-toggle][data-part-root][data-variant='chips'][data-pressed]:hover:not(:disabled):not(
       [data-disabled]
     ) {
     background: var(--slotted-tone-neutral-solid-hover, CanvasText);
     border-color: var(--slotted-tone-neutral-solid-hover, CanvasText);
   }
 
-  [data-ui='toggle'][data-part='root'][data-variant='chips']:disabled,
-  [data-ui='toggle'][data-part='root'][data-variant='chips'][data-disabled] {
+  [data-ui-toggle][data-part-root][data-variant='chips']:disabled,
+  [data-ui-toggle][data-part-root][data-variant='chips'][data-disabled] {
     border-color: var(--slotted-disabled-border, GrayText);
   }
 
@@ -282,7 +278,7 @@
    * A standalone control has room around it, so the ring is held off the
    * edge the way every other control in the library holds it.
    */
-  [data-ui='toggle'][data-part='root']:focus-visible {
+  [data-ui-toggle][data-part-root]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -293,15 +289,15 @@
    * `[data-disabled]` as well as `:disabled`, because a control taken out of
    * action with a `fieldset` carries no attribute of its own.
    */
-  [data-ui='toggle'][data-part='root']:disabled,
-  [data-ui='toggle'][data-part='root'][data-disabled] {
+  [data-ui-toggle][data-part-root]:disabled,
+  [data-ui-toggle][data-part-root][data-disabled] {
     background: transparent;
     color: var(--slotted-toggle-disabled-color, var(--slotted-disabled-foreground, GrayText));
     cursor: not-allowed;
   }
 
-  [data-ui='toggle'][data-part='root'][data-variant='outline']:disabled,
-  [data-ui='toggle'][data-part='root'][data-variant='outline'][data-disabled] {
+  [data-ui-toggle][data-part-root][data-variant='outline']:disabled,
+  [data-ui-toggle][data-part-root][data-variant='outline'][data-disabled] {
     border-color: var(
       --slotted-toggle-disabled-border-color,
       var(--slotted-disabled-border, GrayText)
@@ -317,8 +313,8 @@
    * cannot change. In `high-contrast` the ground is the page's own white, and
    * the edge is then the only thing carrying it.
    */
-  [data-ui='toggle'][data-part='root'][data-pressed]:disabled,
-  [data-ui='toggle'][data-part='root'][data-pressed][data-disabled] {
+  [data-ui-toggle][data-part-root][data-pressed]:disabled,
+  [data-ui-toggle][data-part-root][data-pressed][data-disabled] {
     background: var(
       --slotted-toggle-disabled-pressed-background,
       var(--slotted-disabled-background, ButtonFace)

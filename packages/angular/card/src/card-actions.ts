@@ -9,6 +9,6 @@ import { Directive } from '@angular/core';
   selector: '[slCardActions]',
   standalone: true,
   exportAs: 'slCardActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlCardActions {}

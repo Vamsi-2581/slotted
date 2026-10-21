@@ -56,7 +56,12 @@ import { injectMessageScrollerDefaults } from './message-scroller-defaults';
   styleUrl: '../../../styles/src/message-scroller/message-scroller.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-ui': 'message-scroller', 'data-part': 'root' },
+  host: {
+    'data-ui': 'message-scroller',
+    'data-ui-message-scroller': '',
+    'data-part': 'root',
+    'data-part-root': '',
+  },
 })
 export class SlMessageScroller {
   readonly follow = input<boolean | undefined, boolean | string | undefined>(undefined, {
@@ -185,6 +190,7 @@ function scroller(): SlMessageScroller {
   standalone: true,
   host: {
     'data-part': 'viewport',
+    'data-part-viewport': '',
     role: 'region',
     '[attr.tabindex]': 'tabindex',
     '[attr.aria-label]': 'label()',
@@ -210,6 +216,7 @@ export class SlMessageScrollerViewport {
   standalone: true,
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     role: 'log',
     'aria-relevant': 'additions',
     '[attr.aria-busy]': "owner.busy() ? 'true' : null",
@@ -230,6 +237,7 @@ export class SlMessageScrollerContent {
   standalone: true,
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-message-id]': 'messageId() ?? null',
     '[attr.data-anchor]': "anchor() ? 'true' : null",
   },
@@ -246,7 +254,11 @@ export class SlMessageScrollerItem {
   template: '<span><ng-content></ng-content></span>',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'separator', '[attr.data-sticky]': "sticky() ? '' : null" },
+  host: {
+    'data-part': 'separator',
+    'data-part-separator': '',
+    '[attr.data-sticky]': "sticky() ? '' : null",
+  },
 })
 export class SlMessageScrollerSeparator {
   readonly sticky = input(false, { transform: booleanAttribute });
@@ -261,7 +273,7 @@ export class SlMessageScrollerSeparator {
   >`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'unread' },
+  host: { 'data-part': 'unread', 'data-part-unread': '' },
 })
 export class SlMessageScrollerUnread {
   protected readonly owner = scroller();
@@ -271,13 +283,13 @@ export class SlMessageScrollerUnread {
 @Component({
   selector: '[slMessageScrollerLoader]',
   standalone: true,
-  template: `<span aria-hidden="true" data-ui="spinner"></span
+  template: `<span aria-hidden="true" data-ui="spinner" data-ui-spinner=""></span
     ><span
       ><ng-content>{{ owner.t('loader') }}</ng-content></span
     >`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'loader', role: 'status' },
+  host: { 'data-part': 'loader', 'data-part-loader': '', role: 'status' },
 })
 export class SlMessageScrollerLoader {
   protected readonly owner = scroller();
@@ -295,12 +307,13 @@ export class SlMessageScrollerLoader {
   imports: [SlGlyph, SlIcon],
   template: `<span slIcon><svg slGlyph name="arrow-left"></svg></span>
     @if (words(); as count) {
-      <span data-part="jump-count">{{ count }}</span>
+      <span data-part="jump-count" data-part-jump-count="">{{ count }}</span>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'jump',
+    'data-part-jump': '',
     type: 'button',
     '[attr.data-direction]': 'direction()',
     '[attr.data-active]': 'active() ? "true" : "false"',

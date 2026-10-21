@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/otp-input/otp-input.css';
 
 import { currentSlots, normalizeSelection, sanitize, spreadPlaceholder } from '@slotted/core/otp';
@@ -287,12 +288,12 @@ export function OtpInput({
 
   const control = (
     <input
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'input')}
       aria-describedby={[describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined}
       aria-invalid={ariaInvalid ?? (resolvedInvalid === true ? true : undefined)}
       aria-required={ariaRequired ?? (field?.required === true ? true : undefined)}
       autoComplete={autoComplete}
-      data-part="input"
+
       disabled={resolvedDisabled}
       id={id ?? field?.ids.control}
       inputMode={inputMode ?? (type === 'numeric' ? 'numeric' : 'text')}
@@ -329,7 +330,14 @@ export function OtpInput({
   let index = 0;
   for (const [groupIndex, count] of partition(length, groups).entries()) {
     if (groupIndex > 0) {
-      boxes.push(<div aria-hidden="true" data-part="separator" key={`separator-${groupIndex}`} />);
+      boxes.push(
+        <div
+          aria-hidden="true"
+          data-part="separator"
+          data-part-separator=""
+          key={`separator-${groupIndex}`}
+        />,
+      );
     }
     const slots: ReactNode[] = [];
     for (let position = 0; position < count; position += 1, index += 1) {
@@ -339,6 +347,7 @@ export function OtpInput({
         <div
           data-index={index}
           data-part="slot"
+          data-part-slot=""
           key={index}
           {...(active.has(index) ? { 'data-current': '' } : {})}
           {...(shown === '' && placeholders[index] !== ''
@@ -350,13 +359,13 @@ export function OtpInput({
       );
     }
     boxes.push(
-      <div aria-hidden="true" data-part="group" key={`group-${groupIndex}`}>
+      <div aria-hidden="true" data-part="group" data-part-group="" key={`group-${groupIndex}`}>
         {slots}
       </div>,
     );
   }
 
-  const rootProps: OtpInputRootProps = {
+  const rootProps: OtpInputRootProps = keyedProps({
     children: (
       <>
         {control}
@@ -376,7 +385,7 @@ export function OtpInput({
     'data-size': resolvedSize,
     'data-ui': 'otp-input',
     'data-variant': resolvedVariant,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

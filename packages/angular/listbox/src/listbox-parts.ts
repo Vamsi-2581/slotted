@@ -38,6 +38,7 @@ export const OPTION_SELECTOR = "[data-part='option']";
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'option',
+    'data-part-option': '',
     role: 'option',
     '[attr.id]': 'id()',
     '[attr.data-key]': 'value()',
@@ -119,13 +120,14 @@ export class SlListboxOption {
   standalone: true,
   exportAs: 'slListboxGroup',
   template: `@if (label()) {
-      <div data-part="group-label" [attr.id]="labelId">{{ label() }}</div>
+      <div data-part="group-label" data-part-group-label="" [attr.id]="labelId">{{ label() }}</div>
     }
     <ng-content />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     role: 'group',
     '[attr.aria-labelledby]': 'label() ? labelId : null',
     '[attr.aria-label]': 'label() ? null : ariaLabel()',
@@ -160,7 +162,7 @@ export class SlListboxGroup {
   ></ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'indicator', 'aria-hidden': 'true' },
+  host: { 'data-part': 'indicator', 'data-part-indicator': '', 'aria-hidden': 'true' },
 })
 export class SlListboxIndicator {}
 
@@ -172,19 +174,23 @@ export class SlListboxIndicator {}
 @Directive({
   selector: '[slListboxIcon]',
   standalone: true,
-  host: { 'data-part': 'icon', 'aria-hidden': 'true' },
+  host: { 'data-part': 'icon', 'data-part-icon': '', 'aria-hidden': 'true' },
 })
 export class SlListboxIcon {}
 
 /** The option's primary text, and the only one of the three columns that gives way. */
-@Directive({ selector: '[slListboxLabel]', standalone: true, host: { 'data-part': 'label' } })
+@Directive({
+  selector: '[slListboxLabel]',
+  standalone: true,
+  host: { 'data-part': 'label', 'data-part-label': '' },
+})
 export class SlListboxLabel {}
 
 /** A second line under the label, for what the label cannot say on its own. */
 @Directive({
   selector: '[slListboxDescription]',
   standalone: true,
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlListboxDescription {}
 
@@ -192,7 +198,11 @@ export class SlListboxDescription {}
  * The value beside the name — a count, a price, a status word. `menu` calls the
  * same column `shortcut`, because a menu's third column holds a key binding.
  */
-@Directive({ selector: '[slListboxMeta]', standalone: true, host: { 'data-part': 'meta' } })
+@Directive({
+  selector: '[slListboxMeta]',
+  standalone: true,
+  host: { 'data-part': 'meta', 'data-part-meta': '' },
+})
 export class SlListboxMeta {}
 
 /**
@@ -204,7 +214,11 @@ export class SlListboxMeta {}
  * a message with a role of its own would be an owned element ARIA does not
  * permit.
  */
-@Directive({ selector: '[slListboxEmpty]', standalone: true, host: { 'data-part': 'empty' } })
+@Directive({
+  selector: '[slListboxEmpty]',
+  standalone: true,
+  host: { 'data-part': 'empty', 'data-part-empty': '' },
+})
 export class SlListboxEmpty {}
 
 /**
@@ -215,7 +229,7 @@ export class SlListboxEmpty {}
 @Directive({
   selector: '[slListboxLoader]',
   standalone: true,
-  host: { 'data-part': 'loader', role: 'option', 'aria-disabled': 'true' },
+  host: { 'data-part': 'loader', 'data-part-loader': '', role: 'option', 'aria-disabled': 'true' },
 })
 export class SlListboxLoader {}
 

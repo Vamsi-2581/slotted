@@ -3,7 +3,7 @@
    * ── The set ────────────────────────────────────────────────────────────
    *
    * A vertical run of related rows. The rows are `list-item`, a family of its
-   * own, and **no selector here reaches `[data-ui='list-item']`** — the rule
+   * own, and **no selector here reaches `[data-ui-list-item]`** — the rule
    * `accordion` and `collapsible` set for the same relationship. What the set
    * decides it hands to each row through the binding, as a `data-` attribute
    * the row's own stylesheet reads.
@@ -19,8 +19,8 @@
    * here and on `section-list`, which is what Safari and VoiceOver need once
    * the marker is removed.
    */
-  [data-ui='list'][data-part='root'],
-  [data-ui='list'] [data-part='section-list'] {
+  [data-ui-list][data-part-root],
+  [data-ui-list] [data-part-section-list] {
     /* The row's own number. The set opens the count; each group opens its own,
        so a numbered list of groups restarts rather than running through. */
     counter-reset: slotted-list-item;
@@ -37,7 +37,7 @@
     padding-inline: 0;
   }
 
-  [data-ui='list'][data-part='root'] {
+  [data-ui-list][data-part-root] {
     /* The distance between rows, and it is spent only by `separated`. The other
        three variants separate rows with a line or with nothing, so a gap there
        would be space the reader cannot account for. */
@@ -79,7 +79,7 @@
    * roomy settings list stand on the same page without either of them lying
    * about the density.
    */
-  [data-ui='list'][data-part='root'][data-size='sm'] {
+  [data-ui-list][data-part-root][data-size='sm'] {
     --_gap: var(--slotted-list-gap-sm, var(--slotted-space-2, 0.25rem));
     --_section-inset-block: var(
       --slotted-list-section-padding-block-sm,
@@ -92,7 +92,7 @@
     --_empty-inset: var(--slotted-list-empty-padding-sm, var(--slotted-space-6, 1rem));
   }
 
-  [data-ui='list'][data-part='root'][data-size='lg'] {
+  [data-ui-list][data-part-root][data-size='lg'] {
     --_gap: var(--slotted-list-gap-lg, var(--slotted-space-4, 0.5rem));
     --_section-inset-block: var(
       --slotted-list-section-padding-block-lg,
@@ -115,7 +115,7 @@
    *
    * `plain` and `ruled` draw nothing on the set.
    */
-  [data-ui='list'][data-part='root'][data-variant='framed'] {
+  [data-ui-list][data-part-root][data-variant='framed'] {
     background-color: var(--_surface);
     border: var(--_frame-width) solid var(--_frame-color);
     border-radius: var(--_frame-radius);
@@ -125,7 +125,7 @@
     overflow: clip;
   }
 
-  [data-ui='list'][data-part='root'][data-variant='separated'] {
+  [data-ui-list][data-part-root][data-variant='separated'] {
     row-gap: var(--_gap);
   }
 
@@ -135,7 +135,7 @@
    * React Aria each leave the heading loose among the rows instead, so a reader
    * hears a heading inside a set rather than a set with a name.
    */
-  [data-ui='list'] [data-part='section'] {
+  [data-ui-list] [data-part-section] {
     display: flex;
     flex-direction: column;
     min-inline-size: 0;
@@ -143,8 +143,8 @@
 
   /* A separated set gaps its groups too, and a group gaps its own rows. Both
      read the one distance the root declared. */
-  [data-ui='list'][data-variant='separated'] [data-part='section'],
-  [data-ui='list'][data-variant='separated'] [data-part='section-list'] {
+  [data-ui-list][data-variant='separated'] [data-part-section],
+  [data-ui-list][data-variant='separated'] [data-part-section-list] {
     row-gap: var(--_gap);
   }
 
@@ -153,7 +153,7 @@
    * titles under it stand in one column, which is the alignment that makes a
    * grouped list read as one list rather than as several.
    */
-  [data-ui='list'] [data-part='section-label'] {
+  [data-ui-list] [data-part-section-label] {
     color: var(--_section-color);
     font-size: var(--_section-font-size);
     font-weight: var(--_section-weight);
@@ -178,8 +178,8 @@
    * `disableGutters` leaves out: it removes the padding and leaves the line
    * inset, so a flush list draws a rule stopping short of the box it is in.
    */
-  [data-ui='list'][data-inset] [data-part='section-label'],
-  [data-ui='list'][data-inset] [data-part='empty'] {
+  [data-ui-list][data-inset] [data-part-section-label],
+  [data-ui-list][data-inset] [data-part-empty] {
     padding-inline: 0;
   }
 
@@ -195,14 +195,14 @@
    */
   /* A heading with an end sets the name at the start and the end content on
      the same line, at the end. */
-  [data-ui='list'] [data-part='section-label']:has(> [data-part='section-end']) {
+  [data-ui-list] [data-part-section-label]:has(> [data-part-section-end]) {
     align-items: baseline;
     display: flex;
     gap: var(--slotted-space-4, 0.5rem);
     justify-content: space-between;
   }
 
-  [data-ui='list'] [data-part='section-end'] {
+  [data-ui-list] [data-part-section-end] {
     flex: none;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -213,14 +213,14 @@
    * — a day of a phone list with its balance at the end. The sticky ground is
    * still the set's surface, so the rows passing under it are covered.
    */
-  [data-ui='list'] [data-part='section-label'][data-variant='ruled'] {
+  [data-ui-list] [data-part-section-label][data-variant='ruled'] {
     border-block-end: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-list-section-rule-color, var(--slotted-border-subtle, GrayText));
     color: var(--slotted-list-section-ruled-color, var(--slotted-text, CanvasText));
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='list'] [data-part='section-label'][data-sticky] {
+  [data-ui-list] [data-part-section-label][data-sticky] {
     background-color: var(--_surface);
     inset-block-start: 0;
     position: sticky;
@@ -236,7 +236,7 @@
    * The family supplies the box, the height and the muted ink. The words are
    * the page's, and `result-state` is what goes in here.
    */
-  [data-ui='list'] [data-part='empty'] {
+  [data-ui-list] [data-part-empty] {
     align-items: center;
     color: var(--_empty-color);
     display: flex;
@@ -261,7 +261,7 @@
    * loading panel. What is left for the set is the pointer, which is the one
    * signal that belongs to the box rather than to its content.
    */
-  [data-ui='list'][data-part='root'][data-loading] {
+  [data-ui-list][data-part-root][data-loading] {
     cursor: progress;
   }
 }

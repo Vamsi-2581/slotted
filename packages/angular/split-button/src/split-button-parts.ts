@@ -36,12 +36,14 @@ import type { SplitButtonValueReason } from './split-button';
   selector: 'button[slSplitButtonPrimary]',
   standalone: true,
   template: `<ng-content select="[slButtonStart]"></ng-content
-    ><span data-part="label"><ng-content></ng-content></span
+    ><span data-part="label" data-part-label=""><ng-content></ng-content></span
     ><ng-content select="[slButtonEnd]"></ng-content>
     @if (waiting() && !hasVisualSlot()) {
       <span
         data-part="indicator"
+        data-part-indicator=""
         data-ui="spinner"
+        data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="t('loading')"
       ></span>
@@ -57,6 +59,8 @@ import type { SplitButtonValueReason } from './split-button';
   providers: [{ provide: BUTTON_WAIT, useExisting: forwardRef(() => SlSplitButtonPrimary) }],
   host: {
     '[attr.data-part]': '"primary"',
+    '[attr.data-part-root]': 'null',
+    '[attr.data-part-primary]': "''",
     '[attr.data-disabled]': 'stateAttribute(resolvedDisabled())',
     '[attr.data-loading]': 'stateAttribute(resolvedLoading())',
   },
@@ -109,14 +113,16 @@ const OPENING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Enter', ' ']);
   standalone: true,
   imports: [SlGlyph, SlIcon],
   /* The chevron is drawn unless the consumer wrote content of their own. */
-  template: `<span data-part="icon"
+  template: `<span data-part="icon" data-part-icon=""
     ><ng-content
       ><span slIcon><svg slGlyph name="chevron-down"></svg></span
     ></ng-content>
     @if (waiting()) {
       <span
         data-part="indicator"
+        data-part-indicator=""
         data-ui="spinner"
+        data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="t('loading')"
       ></span>
@@ -133,6 +139,8 @@ const OPENING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Enter', ' ']);
   hostDirectives: [{ directive: SlMenuTrigger, inputs: ['slMenuTriggerFor'] }],
   host: {
     '[attr.data-part]': '"menu-trigger"',
+    '[attr.data-part-root]': 'null',
+    '[attr.data-part-menu-trigger]': "''",
     '[attr.data-disabled]': 'stateAttribute(resolvedDisabled())',
     '[attr.aria-disabled]': 'inert.ariaDisabled()',
     '[disabled]': 'inert.nativelyDisabled()',

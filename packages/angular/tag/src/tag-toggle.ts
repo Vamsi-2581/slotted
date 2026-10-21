@@ -80,13 +80,14 @@ class SelectionState {
   exportAs: 'slTagToggle',
   imports: [SlGlyph, SlIcon],
   /* The selection mark's check, which the sheet uncovers when the chip is on. */
-  template: `<span aria-hidden="true" data-part="indicator"
+  template: `<span aria-hidden="true" data-part="indicator" data-part-indicator=""
       ><span slIcon><svg slGlyph name="check"></svg></span></span
     >${TAG_BODY_TEMPLATE}`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'body',
+    'data-part-body': '',
     type: 'button',
     '[attr.aria-pressed]': 'isSelected()',
     '[attr.disabled]': "tag.disabled() ? '' : null",

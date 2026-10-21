@@ -8,7 +8,7 @@ import { Directive } from '@angular/core';
   selector: '[slDateTimeRangePickerPresets]',
   standalone: true,
   exportAs: 'slDateTimeRangePickerPresets',
-  host: { 'data-part': 'presets' },
+  host: { 'data-part': 'presets', 'data-part-presets': '' },
 })
 export class SlDateTimeRangePickerPresets {}
 
@@ -17,7 +17,7 @@ export class SlDateTimeRangePickerPresets {}
   selector: '[slDateTimeRangePickerFooter]',
   standalone: true,
   exportAs: 'slDateTimeRangePickerFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlDateTimeRangePickerFooter {}
 

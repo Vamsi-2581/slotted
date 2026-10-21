@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/description-list/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./description-list.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./description-list.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./description-list.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations.replace(/\s+/g, '');
 
@@ -19,7 +32,8 @@ test('lives in the component layer', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.descriptionList.parts) {
-    const selector = part === 'root' ? "[data-ui='description-list']{" : `[data-part='${part}']`;
+    const selector =
+      part === 'root' ? '[data-ui-description-list]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
 });
@@ -46,13 +60,13 @@ test('answers every value of every axis the contract names', () => {
  */
 test('keeps the query container out of the grid it resizes', () => {
   const root = normalized.slice(
-    normalized.indexOf("[data-ui='description-list']{"),
-    normalized.indexOf("[data-ui='description-list'][data-part='list']"),
+    normalized.indexOf('[data-ui-description-list]{'),
+    normalized.indexOf('[data-ui-description-list][data-part-list]'),
   );
   assert.ok(root.includes('container-type:inline-size'));
   assert.ok(root.includes('container-name:slotted-description-list'));
   assert.ok(!root.includes('grid-template-columns'));
-  assert.ok(normalized.includes("[data-part='list']{"));
+  assert.ok(normalized.includes('[data-part-list]{'));
 });
 
 /**
@@ -71,7 +85,7 @@ test('borrows the list tracks for every pair', () => {
  * the action track is declared only where an action is.
  */
 test('adds the action track only to a list that holds an action', () => {
-  assert.ok(normalized.includes("[data-part='list']:has([data-part='action'])"));
+  assert.ok(normalized.includes('[data-part-list]:has([data-part-action])'));
   assert.ok(normalized.includes('--_desc-col:2/-1'));
   assert.ok(normalized.includes('--_desc-col:2/-2'));
 });
@@ -114,7 +128,7 @@ test('collapses a span with the count that produced it', () => {
  * changes its mark as well as its colour.
  */
 test('paints a finished copy by its mark and not only by its colour', () => {
-  assert.ok(normalized.includes("[data-part='copy'][data-complete]{color:"));
+  assert.ok(normalized.includes('[data-part-copy][data-complete]{color:'));
   assert.match(
     fragment,
     /data-complete\s+data-part="copy"[^>]*>\s*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="check">/,
@@ -156,11 +170,11 @@ test('draws every mark it owns as geometry, and the missing value is not one', (
     /data-part="toggle"[^>]*>[^<]*<span data-ui="icon"[^>]*><svg data-part="glyph" data-glyph="chevron-down">/,
   );
   assert.ok(
-    !normalized.includes("[data-part='placeholder']:empty"),
+    !normalized.includes('[data-part-placeholder]:empty'),
     'the sheet draws a mark the bindings write',
   );
   assert.ok(
-    normalized.includes("[data-part='placeholder']{color:var(--_placeholder-ink)"),
+    normalized.includes('[data-part-placeholder]{color:var(--_placeholder-ink)'),
     'the missing value is not one step down from the value it stands in for',
   );
 });

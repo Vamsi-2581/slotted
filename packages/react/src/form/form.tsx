@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/form/form.css';
 
 import {
@@ -351,7 +352,7 @@ export function Form({
     </>
   );
 
-  const rootProps: FormRootProps = {
+  const rootProps: FormRootProps = keyedProps({
     children: content,
     className,
     style,
@@ -360,7 +361,7 @@ export function Form({
     ...(submitting ? { 'data-loading': '' } : {}),
     'data-part': 'root',
     'data-ui': 'form',
-  };
+  });
 
   /**
    * The root is a `form` and stays one. There is no `render` prop here, and the

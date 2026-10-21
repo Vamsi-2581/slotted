@@ -68,7 +68,9 @@ export function resolveAspectRatio(ratio: AspectRatioValue): {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'aspect-ratio',
+    'data-ui-aspect-ratio': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-ratio]': 'resolved().attribute',
     '[style.--slotted-aspect-ratio]': 'resolved().token',
   },

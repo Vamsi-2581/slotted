@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/skeleton/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./skeleton.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./skeleton.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./skeleton.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /** Collapsed rather than stripped, for the reason `badge` records. */
 const normalized = declarations
@@ -18,16 +31,16 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
-const text = `${ui}[data-part='text']`;
-const region = `${ui}[data-part='region']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
+const text = `${ui}[data-part-text]`;
+const region = `${ui}[data-part-region]`;
 const { defaults, parts } = contract.members.skeleton;
 
 /**
  * Every rule in the sheet, keyed on the whole selector list rather than on a
  * prefix of it. Splitting on a prefix reads the wrong rule the moment one
- * selector list ends with another: `[data-part='line']` is the tail of the
+ * selector list ends with another: `[data-part-line]` is the tail of the
  * base paint rule as well as a rule of its own, and the first version of this
  * file asserted the paragraph's geometry against the paint.
  */
@@ -36,7 +49,7 @@ const rules = collectRules(normalized);
 /**
  * A one-level walk rather than a regular expression. Two attempts with a
  * pattern read the wrong rule: one matched a selector list by its tail, so
- * `[data-part='line']` found the base paint rule it is the end of, and the
+ * `[data-part-line]` found the base paint rule it is the end of, and the
  * next consumed each closing brace and so skipped every other rule.
  */
 function collectRules(sheet) {
@@ -68,8 +81,8 @@ function rule(selector) {
   return rules.find((entry) => entry.selector === selector)?.body ?? '';
 }
 
-const paint = `${root}[data-loading],${text}[data-loading] [data-part='line']`;
-const line = `${ui} [data-part='line']`;
+const paint = `${root}[data-loading],${text}[data-loading] [data-part-line]`;
+const line = `${ui} [data-part-line]`;
 
 test('lives in the component layer', () => {
   assert.match(css, /@layer slotted\.components/);
@@ -87,10 +100,13 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part it paints, and leaves the announcement to the family that clips it', () => {
   for (const part of parts) {
     if (part === 'announcement') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
   assert.ok(
-    !normalized.includes(`[data-part='announcement']`),
+    !normalized.includes(`[data-part-announcement]`),
     'the announcement is clipped by visually-hidden, not by this sheet',
   );
   assert.match(fragment, /data-part="announcement"[^>]*|data-ui="visually-hidden"/);
@@ -105,7 +121,7 @@ test('styles every part it paints, and leaves the announcement to the family tha
 test('names the family and the part together, so the frame is never the box', () => {
   for (const { selector } of rules) {
     for (const part of selector.split(',')) {
-      if (!/\[data-part='(root|text|region)'\]/.test(part)) continue;
+      if (!/\[data-part-(root|text|region)\]/.test(part)) continue;
       assert.ok(part.includes(ui), `"${part.trim()}" reaches a part without naming the family`);
     }
   }
@@ -198,7 +214,7 @@ test('reserves exactly the line boxes the words will occupy', () => {
  */
 test('shortens the last row only when there is more than one', () => {
   assert.ok(
-    normalized.includes(`${ui} [data-part='line']:last-child:not(:only-child){`),
+    normalized.includes(`${ui} [data-part-line]:last-child:not(:only-child){`),
     'a lone row would be cut short',
   );
 });
@@ -247,7 +263,7 @@ test('steps out of layout once the content has arrived', () => {
 });
 
 const layers = (animation) =>
-  `${root}[data-animation='${animation}'][data-loading]::after,${ui}[data-animation='${animation}'][data-loading] [data-part='line']::after`;
+  `${root}[data-animation='${animation}'][data-loading]::after,${ui}[data-animation='${animation}'][data-loading] [data-part-line]::after`;
 
 /** The body of a `@keyframes` block, which the one-level walk does not reach. */
 function keyframes(name) {
@@ -275,7 +291,7 @@ test('animates only what the compositor runs, on a layer over the fill', () => {
   }
   for (const animation of ['pulse', 'shimmer']) {
     const body = rule(
-      `${root}[data-animation='pulse'][data-loading]::after,${root}[data-animation='shimmer'][data-loading]::after,${ui}[data-animation='pulse'][data-loading] [data-part='line']::after,${ui}[data-animation='shimmer'][data-loading] [data-part='line']::after`,
+      `${root}[data-animation='pulse'][data-loading]::after,${root}[data-animation='shimmer'][data-loading]::after,${ui}[data-animation='pulse'][data-loading] [data-part-line]::after,${ui}[data-animation='shimmer'][data-loading] [data-part-line]::after`,
     );
     assert.ok(
       body.includes('position:absolute'),
@@ -288,7 +304,7 @@ test('animates only what the compositor runs, on a layer over the fill', () => {
   }
   assert.ok(
     rule(
-      `${root}[data-loading]:not([data-animation='none']),${text}[data-loading]:not([data-animation='none']) [data-part='line']`,
+      `${root}[data-loading]:not([data-animation='none']),${text}[data-loading]:not([data-animation='none']) [data-part-line]`,
     ).includes('overflow:clip'),
     'the band would draw past the corners of the box',
   );
@@ -337,7 +353,7 @@ test('stops the endless loop under reduced motion rather than shortening it', ()
   const query = normalized.slice(normalized.indexOf('@media (prefers-reduced-motion:reduce)'));
   assert.ok(
     query.startsWith(
-      `@media (prefers-reduced-motion:reduce){${ui}::after,${ui} [data-part='line']::after{animation:none`,
+      `@media (prefers-reduced-motion:reduce){${ui}::after,${ui} [data-part-line]::after{animation:none`,
     ),
   );
 });
@@ -351,7 +367,7 @@ test('withdraws the sweep under forced colours, where a gradient is not replaced
   const query = normalized.slice(normalized.indexOf('@media (forced-colors:active)'));
   assert.ok(
     query.includes(
-      `${root}[data-loading]::after,${text}[data-loading] [data-part='line']::after{background-image:none`,
+      `${root}[data-loading]::after,${text}[data-loading] [data-part-line]::after{background-image:none`,
     ),
   );
 });
@@ -360,7 +376,7 @@ test('withdraws the sweep under forced colours, where a gradient is not replaced
 test('mirrors the sweep instead of shipping a second stylesheet', () => {
   assert.ok(
     rule(
-      `${root}[data-animation='shimmer'][data-loading]:dir(rtl)::after,${ui}[data-animation='shimmer'][data-loading]:dir(rtl) [data-part='line']::after`,
+      `${root}[data-animation='shimmer'][data-loading]:dir(rtl)::after,${ui}[data-animation='shimmer'][data-loading]:dir(rtl) [data-part-line]::after`,
     ).includes('animation-direction:reverse'),
   );
 });

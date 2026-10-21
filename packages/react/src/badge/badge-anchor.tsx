@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { CSSProperties } from 'react';
 
 import type { BadgeAnchorProps, BadgeAnchorRootProps } from './badge.types';
@@ -37,7 +38,7 @@ export function BadgeAnchor({
   ...nativeProps
 }: BadgeAnchorProps) {
   const correction = offsetStyle(offset);
-  const rootProps: BadgeAnchorRootProps = {
+  const rootProps: BadgeAnchorRootProps = keyedProps({
     ...nativeProps,
     'data-overlap': overlap,
     'data-part': 'anchor',
@@ -48,7 +49,7 @@ export function BadgeAnchor({
     ...(correction === undefined && style === undefined
       ? {}
       : { style: { ...style, ...correction } }),
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

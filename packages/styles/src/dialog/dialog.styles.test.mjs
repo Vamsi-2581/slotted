@@ -16,9 +16,9 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const panel = `${ui}>[data-part='viewport']>[data-part='content']`;
-const backdrop = `${ui}>[data-part='backdrop']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const panel = `${ui}>[data-part-viewport]>[data-part-content]`;
+const backdrop = `${ui}>[data-part-backdrop]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -41,13 +41,13 @@ function rule(selector) {
  * library moves.
  */
 test('lets the panel arrive by ink alone (DG4)', () => {
-  for (const selector of [panel, `${ui}[data-open]>[data-part='viewport']>[data-part='content']`]) {
+  for (const selector of [panel, `${ui}[data-open]>[data-part-viewport]>[data-part-content]`]) {
     const body = rule(selector);
     assert.ok(body.length > 0, `${selector} has no rule`);
     assert.ok(!/(?:^|;)(?:translate|scale|rotate|transform):/.test(body), `${selector} moves type`);
   }
   assert.ok(
-    !/translate|scale\(|transform:/.test(normalized.split("[data-part='header']")[0]),
+    !/translate|scale\(|transform:/.test(normalized.split('[data-part-header]')[0]),
     'the panel is moved by some other rule',
   );
 });
@@ -62,8 +62,8 @@ test('lets the panel arrive by ink alone (DG4)', () => {
 test('opens the scrim and the panel over one duration and one curve (DG4)', () => {
   const arrival = 'opacity var(--slotted-duration-long) var(--slotted-easing-standard)';
   for (const selector of [
-    `${ui}[data-open]>[data-part='backdrop']`,
-    `${ui}[data-open]>[data-part='viewport']>[data-part='content']`,
+    `${ui}[data-open]>[data-part-backdrop]`,
+    `${ui}[data-open]>[data-part-viewport]>[data-part-content]`,
   ]) {
     assert.equal(rule(selector).includes(`transition:${arrival.replace(/\s+/g, ' ')}`), true);
   }
@@ -98,11 +98,8 @@ test('hides the layer only while it is inert, never in the entering frame', () =
 test('leaves the page under a non-modal layer reachable by the pointer', () => {
   const modeless = `${ui}:not([data-modal])`;
   assert.match(rule(modeless), /pointer-events:none/);
-  assert.match(rule(`${modeless}>[data-part='backdrop']`), /visibility:hidden/);
-  assert.match(
-    rule(`${modeless}>[data-part='viewport']>[data-part='content']`),
-    /pointer-events:auto/,
-  );
+  assert.match(rule(`${modeless}>[data-part-backdrop]`), /visibility:hidden/);
+  assert.match(rule(`${modeless}>[data-part-viewport]>[data-part-content]`), /pointer-events:auto/);
 });
 
 /**

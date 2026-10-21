@@ -37,7 +37,9 @@ export type InlineWrap = 'wrap' | 'nowrap';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'inline',
+    'data-ui-inline': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-gap]': 'gap() ?? null',
     '[attr.data-align]': 'align() ?? null',
     /* `align` is also an obsolete HTML attribute a browser still honours on a

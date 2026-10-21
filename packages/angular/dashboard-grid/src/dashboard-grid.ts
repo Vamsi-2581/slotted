@@ -280,7 +280,9 @@ interface Slot {
   ],
   host: {
     'data-ui': 'dashboard-grid',
+    'data-ui-dashboard-grid': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-editing]': 'isEditing() ? "" : null',
     '[attr.aria-label]': 'null',
     '[attr.aria-labelledby]': 'null',
@@ -290,9 +292,11 @@ interface Slot {
   },
   template: `
     @if (isEditing() && resolvedEditBar()) {
-      <div data-part="edit-bar" role="group" [attr.aria-label]="t('editBar')">
-        <p data-part="edit-status" [id]="statusId">{{ t('editStatus') }}</p>
-        <div data-part="edit-actions">
+      <div data-part="edit-bar" data-part-edit-bar="" role="group" [attr.aria-label]="t('editBar')">
+        <p data-part="edit-status" data-part-edit-status="" [id]="statusId">
+          {{ t('editStatus') }}
+        </p>
+        <div data-part="edit-actions" data-part-edit-actions="">
           @if (hiddenTiles().length > 0) {
             <button
               slButton
@@ -349,13 +353,20 @@ interface Slot {
       </div>
     }
     @if (isEditing() && !resolvedEditBar()) {
-      <p data-part="edit-status" data-ui="visually-hidden" [id]="statusId">
+      <p
+        data-part="edit-status"
+        data-part-edit-status=""
+        data-ui="visually-hidden"
+        data-ui-visually-hidden=""
+        [id]="statusId"
+      >
         {{ t('editStatus') }}
       </p>
     }
     <ul
       #list
       data-part="grid"
+      data-part-grid=""
       [attr.data-gesture]="gesture() === null ? null : ''"
       role="list"
       [attr.aria-label]="ariaLabel() ?? null"
@@ -365,6 +376,7 @@ interface Slot {
       @for (slot of slots(); track slot.tile.key) {
         <li
           data-part="widget"
+          data-part-widget=""
           [attr.data-key]="slot.tile.key"
           [attr.data-status]="slot.widget.status()"
           [attr.data-loading]="slot.widget.painted() ? '' : null"
@@ -389,23 +401,37 @@ interface Slot {
             <div slCardHeader>
               @switch (levelOf(slot.widget)) {
                 @case (2) {
-                  <h2 data-part="title" [id]="titleId(slot.tile.key)">{{ slot.widget.title() }}</h2>
+                  <h2 data-part="title" data-part-title="" [id]="titleId(slot.tile.key)">
+                    {{ slot.widget.title() }}
+                  </h2>
                 }
                 @case (4) {
-                  <h4 data-part="title" [id]="titleId(slot.tile.key)">{{ slot.widget.title() }}</h4>
+                  <h4 data-part="title" data-part-title="" [id]="titleId(slot.tile.key)">
+                    {{ slot.widget.title() }}
+                  </h4>
                 }
                 @case (5) {
-                  <h5 data-part="title" [id]="titleId(slot.tile.key)">{{ slot.widget.title() }}</h5>
+                  <h5 data-part="title" data-part-title="" [id]="titleId(slot.tile.key)">
+                    {{ slot.widget.title() }}
+                  </h5>
                 }
                 @case (6) {
-                  <h6 data-part="title" [id]="titleId(slot.tile.key)">{{ slot.widget.title() }}</h6>
+                  <h6 data-part="title" data-part-title="" [id]="titleId(slot.tile.key)">
+                    {{ slot.widget.title() }}
+                  </h6>
                 }
                 @default {
-                  <h3 data-part="title" [id]="titleId(slot.tile.key)">{{ slot.widget.title() }}</h3>
+                  <h3 data-part="title" data-part-title="" [id]="titleId(slot.tile.key)">
+                    {{ slot.widget.title() }}
+                  </h3>
                 }
               }
               @if (slot.widget.description(); as description) {
-                <p data-part="description" [id]="titleId(slot.tile.key) + '-description'">
+                <p
+                  data-part="description"
+                  data-part-description=""
+                  [id]="titleId(slot.tile.key) + '-description'"
+                >
                   {{ description }}
                 </p>
               }
@@ -419,7 +445,9 @@ interface Slot {
                   @if (slot.widget.detailHref(); as href) {
                     <a
                       data-ui="button"
+                      data-ui-button=""
                       data-part="detail"
+                      data-part-detail=""
                       data-tone="secondary"
                       data-variant="ghost"
                       data-size="sm"
@@ -427,7 +455,7 @@ interface Slot {
                       [attr.href]="href"
                       [attr.aria-label]="t('detail', { title: slot.widget.title() })"
                       (click)="slot.widget.detail.emit($event)"
-                      ><span data-part="icon" aria-hidden="true"
+                      ><span data-part="icon" data-part-icon="" aria-hidden="true"
                         ><span slIcon directional><svg slGlyph name="external"></svg></span></span
                     ></a>
                   } @else if (slot.widget.detailable()) {
@@ -448,10 +476,14 @@ interface Slot {
             </div>
             <div slCardBody>
               @if (slot.widget.busy() && !slot.widget.painted()) {
-                <span data-part="busy-indicator" aria-hidden="true"></span>
+                <span
+                  data-part="busy-indicator"
+                  data-part-busy-indicator=""
+                  aria-hidden="true"
+                ></span>
               }
               @if (slot.widget.painted()) {
-                <div data-part="skeleton">
+                <div data-part="skeleton" data-part-skeleton="">
                   @if (slot.widget.hasSkeleton()) {
                     <ng-container [ngTemplateOutlet]="slot.widget.skeletonTemplate()" />
                   } @else {
@@ -459,7 +491,7 @@ interface Slot {
                   }
                 </div>
               } @else if (slot.widget.status() === 'empty') {
-                <div data-part="message">
+                <div data-part="message" data-part-message="">
                   <section slResultState status="empty" reach="section" align="center" live="off">
                     <div slResultStateContent>
                       <div slResultStateTitle>
@@ -477,7 +509,7 @@ interface Slot {
                   </section>
                 </div>
               } @else if (slot.widget.status() === 'error') {
-                <div data-part="message">
+                <div data-part="message" data-part-message="">
                   <section
                     slResultState
                     status="error"
@@ -625,6 +657,7 @@ interface Slot {
             @for (edge of edges; track edge) {
               <span
                 data-part="resize-handle"
+                data-part-resize-handle=""
                 aria-hidden="true"
                 [attr.data-edge]="edge"
                 [attr.data-active]="slot.edge === edge ? '' : null"
@@ -633,18 +666,27 @@ interface Slot {
             }
           }
           @if (slot.readout !== null) {
-            <span data-part="size-readout" aria-hidden="true" [attr.data-edge]="slot.edge">{{
-              slot.readout
-            }}</span>
+            <span
+              data-part="size-readout"
+              data-part-size-readout=""
+              aria-hidden="true"
+              [attr.data-edge]="slot.edge"
+              >{{ slot.readout }}</span
+            >
           }
         </li>
       }
       @if (placeholder(); as style) {
-        <li data-part="placeholder" aria-hidden="true" [style]="style"></li>
+        <li
+          data-part="placeholder"
+          data-part-placeholder=""
+          aria-hidden="true"
+          [style]="style"
+        ></li>
       }
     </ul>
     @if (slots().length === 0) {
-      <div data-part="empty">
+      <div data-part="empty" data-part-empty="">
         <section slResultState status="empty" reach="section" live="polite">
           <div slResultStateContent>
             <div slResultStateTitle>{{ t('empty') }}</div>

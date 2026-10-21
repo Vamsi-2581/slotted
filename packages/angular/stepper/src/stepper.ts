@@ -72,7 +72,9 @@ let counter = 0;
   exportAs: 'slStepper',
   host: {
     'data-ui': 'stepper',
+    'data-ui-stepper': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-orientation]': 'orientationValue()',
     '[attr.data-label-placement]': 'labelPlacementValue()',
     '[attr.data-navigation]': 'navigationValue()',
@@ -204,6 +206,7 @@ export class SlStepper {
   exportAs: 'slStepperList',
   host: {
     'data-part': 'list',
+    'data-part-list': '',
     '[attr.aria-label]': 'accessibleLabel()',
     '(keydown)': 'onKeydown($event)',
   },
@@ -278,6 +281,7 @@ export class SlStepperList {
           [attr.data-index]="index()"
           [id]="stepper.triggerId(index())"
           data-part="trigger"
+          data-part-trigger=""
         >
           <ng-container *ngTemplateOutlet="header"></ng-container>
         </span>
@@ -290,6 +294,7 @@ export class SlStepperList {
           [attr.href]="unreachable() ? null : (href() ?? null)"
           [id]="stepper.triggerId(index())"
           data-part="trigger"
+          data-part-trigger=""
           (click)="activate($event)"
         >
           <ng-container *ngTemplateOutlet="header"></ng-container>
@@ -302,6 +307,7 @@ export class SlStepperList {
           [attr.data-index]="index()"
           [id]="stepper.triggerId(index())"
           data-part="trigger"
+          data-part-trigger=""
           type="button"
           (click)="activate($event)"
         >
@@ -315,20 +321,21 @@ export class SlStepperList {
         [attr.data-complete]="travelled() ? '' : null"
         aria-hidden="true"
         data-part="separator"
+        data-part-separator=""
       ></span>
     }
 
     <ng-template #header>
-      <span aria-hidden="true" data-part="marker"
+      <span aria-hidden="true" data-part="marker" data-part-marker=""
         >{{ index() + 1 }}
         @if (mark(); as mark) {
           <span slIcon><svg slGlyph [name]="mark"></svg></span>
         }
       </span>
-      <span data-part="label">
+      <span data-part="label" data-part-label="">
         {{ label() }}
         @if (description()) {
-          <span data-part="description">{{ description() }}</span>
+          <span data-part="description" data-part-description="">{{ description() }}</span>
         }
       </span>
       <!--
@@ -336,7 +343,13 @@ export class SlStepperList {
         nothing separates two elements' text: without the comma a reader hears
         "CartStep 1 of 4".
       -->
-      <span data-part="status" data-ui="visually-hidden">{{ ', ' + announced() }}</span>
+      <span
+        data-part="status"
+        data-part-status=""
+        data-ui="visually-hidden"
+        data-ui-visually-hidden=""
+        >{{ ', ' + announced() }}</span
+      >
     </ng-template>
   `,
   styleUrls: [
@@ -348,6 +361,7 @@ export class SlStepperList {
   exportAs: 'slStepperStep',
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-current]': 'current() ? "" : null',
     '[attr.data-complete]': 'status() === "complete" ? "" : null',
     '[attr.data-invalid]': 'invalid() ? "" : null',
@@ -424,6 +438,7 @@ export class SlStepperStep {
   exportAs: 'slStepperPanel',
   host: {
     'data-part': 'panel',
+    'data-part-panel': '',
     role: 'group',
     tabindex: '-1',
     '[attr.id]': 'stepper.panelId(step.index())',

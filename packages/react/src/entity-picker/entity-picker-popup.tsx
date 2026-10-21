@@ -31,12 +31,28 @@ function SkeletonRow() {
       <span
         data-loading=""
         data-part="root"
+        data-part-root=""
         data-shape="circle"
         data-size="xs"
         data-ui="skeleton"
+        data-ui-skeleton=""
       />
-      <span data-loading="" data-part="root" data-shape="text" data-ui="skeleton" />
-      <span data-loading="" data-part="root" data-shape="text" data-ui="skeleton" />
+      <span
+        data-loading=""
+        data-part="root"
+        data-part-root=""
+        data-shape="text"
+        data-ui="skeleton"
+        data-ui-skeleton=""
+      />
+      <span
+        data-loading=""
+        data-part="root"
+        data-part-root=""
+        data-shape="text"
+        data-ui="skeleton"
+        data-ui-skeleton=""
+      />
     </div>
   );
 }
@@ -284,7 +300,7 @@ export function EntityPickerPopup() {
         picker.props.renderOption(entity, { current, disabled, query: picker.query, selected })
       ) : (
         <>
-          <span data-part="label">
+          <span data-part="label" data-part-label="">
             {picker.highlightMatch && picker.query !== '' ? (
               <Highlight locale={picker.locale} query={picker.query} text={entity.label} />
             ) : (
@@ -292,9 +308,15 @@ export function EntityPickerPopup() {
             )}
           </span>
           {entity.description === undefined ? null : (
-            <span data-part="description">{entity.description}</span>
+            <span data-part="description" data-part-description="">
+              {entity.description}
+            </span>
           )}
-          {entity.meta === undefined ? null : <span data-part="meta">{entity.meta}</span>}
+          {entity.meta === undefined ? null : (
+            <span data-part="meta" data-part-meta="">
+              {entity.meta}
+            </span>
+          )}
         </>
       );
     return (
@@ -302,6 +324,7 @@ export function EntityPickerPopup() {
         aria-disabled={disabled ? true : undefined}
         aria-selected={selected}
         data-part="item"
+        data-part-item=""
         data-value={key}
         id={picker.optionId(key)}
         key={key}
@@ -316,12 +339,12 @@ export function EntityPickerPopup() {
         {...(disabled ? { 'data-disabled': '' } : {})}
       >
         {picker.media === 'avatar' && entity.avatar !== null ? (
-          <span data-part="media">
+          <span data-part="media" data-part-media="">
             <EntityFace entity={entity} locale={picker.locale} />
           </span>
         ) : null}
         {content}
-        <span data-part="indicator">
+        <span data-part="indicator" data-part-indicator="">
           <Icon>
             <Glyph name="check" />
           </Icon>
@@ -338,6 +361,7 @@ export function EntityPickerPopup() {
     <div
       aria-selected={false}
       data-part="item"
+      data-part-item=""
       data-value={key}
       id={picker.optionId(key)}
       onClick={onPress}
@@ -348,12 +372,14 @@ export function EntityPickerPopup() {
       {...(picker.highlighted === key ? { 'data-current': '' } : {})}
       {...(picker.creating && key === CREATE_OPTION ? { 'data-loading': '' } : {})}
     >
-      <span aria-hidden="true" data-part="media">
+      <span aria-hidden="true" data-part="media" data-part-media="">
         <Icon>
           <Glyph name={key === CREATE_OPTION ? 'plus' : 'rotate-ccw'} />
         </Icon>
       </span>
-      <span data-part="label">{label}</span>
+      <span data-part="label" data-part-label="">
+        {label}
+      </span>
     </div>
   );
 
@@ -364,8 +390,10 @@ export function EntityPickerPopup() {
     <div
       data-align="start"
       data-part="positioner"
+      data-part-positioner=""
       data-size={picker.size}
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-width={picker.width}
       ref={setLayerNode}
       {...(picker.open ? {} : { inert: true })}
@@ -374,6 +402,7 @@ export function EntityPickerPopup() {
         aria-busy={search.status === 'loading' ? true : undefined}
         aria-label={picker.props['aria-label']}
         data-part="content"
+        data-part-content=""
         id={picker.contentId}
         ref={setSurfaceNode}
         role="listbox"
@@ -386,10 +415,15 @@ export function EntityPickerPopup() {
                 <div
                   aria-labelledby={`${headingPrefix}${section.key}`}
                   data-part="group"
+                  data-part-group=""
                   key={section.key}
                   role="group"
                 >
-                  <div data-part="group-label" id={`${headingPrefix}${section.key}`}>
+                  <div
+                    data-part="group-label"
+                    data-part-group-label=""
+                    id={`${headingPrefix}${section.key}`}
+                  >
                     {section.label}
                   </div>
                   {section.entities.map(option)}
@@ -400,14 +434,14 @@ export function EntityPickerPopup() {
             )
           : null}
         {firstPage && search.indicator ? (
-          <div aria-hidden="true" data-part="placeholder">
+          <div aria-hidden="true" data-part="placeholder" data-part-placeholder="">
             <SkeletonRow />
             <SkeletonRow />
             <SkeletonRow />
           </div>
         ) : null}
         {search.loadingMore && search.indicator ? (
-          <div aria-hidden="true" data-part="more">
+          <div aria-hidden="true" data-part="more" data-part-more="">
             <SkeletonRow />
           </div>
         ) : null}
@@ -418,7 +452,7 @@ export function EntityPickerPopup() {
             )
           : null}
         {failed ? (
-          <div data-part="error">
+          <div data-part="error" data-part-error="">
             <Icon>
               <Glyph name="circle-alert" />
             </Icon>
@@ -431,8 +465,12 @@ export function EntityPickerPopup() {
               picker.inputNode?.focus({ preventScroll: true });
             })
           : null}
-        {empty ? <div data-part="empty">{t('empty')}</div> : null}
-        <div aria-live="polite" data-part="status" role="status">
+        {empty ? (
+          <div data-part="empty" data-part-empty="">
+            {t('empty')}
+          </div>
+        ) : null}
+        <div aria-live="polite" data-part="status" data-part-status="" role="status">
           {message}
         </div>
       </div>

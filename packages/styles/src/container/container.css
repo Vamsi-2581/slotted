@@ -16,7 +16,7 @@
    * read against each other in one declaration instead of restating the
    * template four times.
    */
-  [data-ui='container'] {
+  [data-ui-container] {
     --_max: var(--slotted-container-content, 56rem);
     --_inset: var(--slotted-space-6, 1rem);
     --_start-track: 1fr;
@@ -48,7 +48,7 @@
    * failure WCAG SC 1.4.10 names. The column holds; what to do with the
    * overflow is the child's decision.
    */
-  [data-ui='container'] > * {
+  [data-ui-container] > * {
     grid-column: content;
     min-inline-size: 0;
   }
@@ -61,7 +61,7 @@
    * page — none of which the `50% - 50vw` recipe survives. Bounded content
    * returns inside it by nesting another container.
    */
-  [data-ui='container'] > [data-part='breakout'] {
+  [data-ui-container] > [data-part-breakout] {
     grid-column: full;
   }
 
@@ -82,15 +82,15 @@
    * widths: space stops at 4rem and is about separation, not extent. Three
    * values read by one family is not a scale, so they stay family tokens.
    */
-  [data-ui='container'][data-size='measure'] {
+  [data-ui-container][data-size='measure'] {
     --_max: var(--slotted-container-measure, 65ch);
   }
 
-  [data-ui='container'][data-size='content'] {
+  [data-ui-container][data-size='content'] {
     --_max: var(--slotted-container-content, 56rem);
   }
 
-  [data-ui='container'][data-size='wide'] {
+  [data-ui-container][data-size='wide'] {
     --_max: var(--slotted-container-wide, 80rem);
   }
 
@@ -109,11 +109,11 @@
    * and reads better at three thousand pixels than at nineteen hundred.
    * Neither removes the container: the gutters stay in both.
    */
-  [data-ui='container'][data-size='full'] {
+  [data-ui-container][data-size='full'] {
     --_max: var(--slotted-container-full, 120rem);
   }
 
-  [data-ui='container'][data-size='bleed'] {
+  [data-ui-container][data-size='bleed'] {
     --_max: 100%;
   }
 
@@ -124,55 +124,55 @@
    * composition decision, and a page frame that moved every time a table got
    * denser would be the page reflowing for no reason.
    */
-  [data-ui='container'][data-inset='0'] {
+  [data-ui-container][data-inset='0'] {
     --_inset: 0px;
   }
 
-  [data-ui='container'][data-inset='1'] {
+  [data-ui-container][data-inset='1'] {
     --_inset: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='container'][data-inset='2'] {
+  [data-ui-container][data-inset='2'] {
     --_inset: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='container'][data-inset='3'] {
+  [data-ui-container][data-inset='3'] {
     --_inset: var(--slotted-space-3, 0.375rem);
   }
 
-  [data-ui='container'][data-inset='4'] {
+  [data-ui-container][data-inset='4'] {
     --_inset: var(--slotted-space-4, 0.5rem);
   }
 
-  [data-ui='container'][data-inset='5'] {
+  [data-ui-container][data-inset='5'] {
     --_inset: var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='container'][data-inset='6'] {
+  [data-ui-container][data-inset='6'] {
     --_inset: var(--slotted-space-6, 1rem);
   }
 
-  [data-ui='container'][data-inset='7'] {
+  [data-ui-container][data-inset='7'] {
     --_inset: var(--slotted-space-7, 1.25rem);
   }
 
-  [data-ui='container'][data-inset='8'] {
+  [data-ui-container][data-inset='8'] {
     --_inset: var(--slotted-space-8, 1.5rem);
   }
 
-  [data-ui='container'][data-inset='9'] {
+  [data-ui-container][data-inset='9'] {
     --_inset: var(--slotted-space-9, 2rem);
   }
 
-  [data-ui='container'][data-inset='10'] {
+  [data-ui-container][data-inset='10'] {
     --_inset: var(--slotted-space-10, 2.5rem);
   }
 
-  [data-ui='container'][data-inset='11'] {
+  [data-ui-container][data-inset='11'] {
     --_inset: var(--slotted-space-11, 3rem);
   }
 
-  [data-ui='container'][data-inset='12'] {
+  [data-ui-container][data-inset='12'] {
     --_inset: var(--slotted-space-12, 4rem);
   }
 
@@ -183,16 +183,16 @@
    * direction, so a right-to-left document is the same component mirrored
    * rather than a second stylesheet.
    */
-  [data-ui='container'][data-align='center'] {
+  [data-ui-container][data-align='center'] {
     --_start-track: 1fr;
     --_end-track: 1fr;
   }
 
-  [data-ui='container'][data-align='start'] {
+  [data-ui-container][data-align='start'] {
     --_start-track: var(--_inset);
   }
 
-  [data-ui='container'][data-align='end'] {
+  [data-ui-container][data-align='end'] {
     --_end-track: var(--_inset);
   }
 }

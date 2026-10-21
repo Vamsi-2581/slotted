@@ -511,6 +511,7 @@ function MoneyInput() {
       aria-describedby={field?.describedBy}
       aria-invalid={field?.invalid === true ? true : undefined}
       data-part="control"
+      data-part-control=""
       defaultValue="R$ 1.250,00"
       disabled={field?.disabled}
       id={field?.ids.control}

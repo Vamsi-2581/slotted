@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { createPointerIntent } from '@slotted/core/pointer-intent';
 import type { PointerIntentHandle } from '@slotted/core/pointer-intent';
 import { computed, DestroyRef, Directive, effect, ElementRef, inject, input } from '@angular/core';
@@ -64,7 +65,7 @@ export class SlMenuTrigger {
        `slMenuItem`'s; only a bar's trigger takes them from here, written once
        because a bar's trigger is the bar's own element. */
     if (this.onBar) {
-      this.element.setAttribute('data-part', 'trigger');
+      writeSelectorKey(this.element, 'part', 'trigger');
       this.element.setAttribute('role', 'menuitem');
     }
 

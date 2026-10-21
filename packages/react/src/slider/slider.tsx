@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/slider/slider.css';
 
 import { createNumberFormat } from '@slotted/core/number';
@@ -354,31 +355,38 @@ export function Slider({
   const children: ReactNode = (
     <>
       {resolvedValueLabel === 'none' ? null : (
-        <output data-part="output" htmlFor={controlId}>
+        <output data-part="output" data-part-output="" htmlFor={controlId}>
           {values.map((thumbValue) => valueTextOf(thumbValue)).join(' – ')}
         </output>
       )}
       <div
         data-part="control"
+        data-part-control=""
         onPointerCancel={endDrag}
         onPointerDown={pointerDown}
         onPointerMove={pointerMove}
         onPointerUp={endDrag}
       >
-        <div data-part="track" ref={trackRef}>
+        <div data-part="track" data-part-track="" ref={trackRef}>
           <div
             data-part="indicator"
+            data-part-indicator=""
             style={spanStyle(fractionOfValue(spanStart, scale), fractionOfValue(spanEnd, scale))}
           />
           {marksList.map((mark) => (
             <span
               data-part="mark"
+              data-part-mark=""
               key={mark.value}
               style={positionStyle(fractionOfValue(mark.value, scale))}
               {...(mark.value === min ? { 'data-edge': 'start' } : {})}
               {...(mark.value === max ? { 'data-edge': 'end' } : {})}
             >
-              {mark.label === undefined ? null : <span data-part="mark-label">{mark.label}</span>}
+              {mark.label === undefined ? null : (
+                <span data-part="mark-label" data-part-mark-label="">
+                  {mark.label}
+                </span>
+              )}
             </span>
           ))}
           {values.map((thumbValue, index) => {
@@ -387,12 +395,13 @@ export function Slider({
               <div
                 data-index={index}
                 data-part="thumb"
+                data-part-thumb=""
                 key={index}
                 style={positionStyle(fractionOfValue(thumbValue, scale))}
                 {...(dragging === index ? { 'data-active': '' } : {})}
               >
                 <input
-                  {...nativeProps}
+                  {...withSelectorKey(nativeProps, 'part', 'input')}
                   aria-describedby={
                     [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined
                   }
@@ -402,7 +411,7 @@ export function Slider({
                   aria-readonly={resolvedReadOnly === true ? true : undefined}
                   aria-required={ariaRequired ?? (field?.required === true ? true : undefined)}
                   aria-valuetext={valueTextOf(thumbValue)}
-                  data-part="input"
+
                   disabled={resolvedDisabled}
                   form={form}
                   id={index === 0 ? controlId : `${controlId}-${index}`}
@@ -423,7 +432,7 @@ export function Slider({
                      and React refuses a controlled input with no handler. */
                   onChange={() => undefined}
                 />
-                <span aria-hidden="true" data-part="bubble">
+                <span aria-hidden="true" data-part="bubble" data-part-bubble="">
                   {valueTextOf(thumbValue)}
                 </span>
               </div>
@@ -434,7 +443,7 @@ export function Slider({
     </>
   );
 
-  const rootProps: SliderRootProps = {
+  const rootProps: SliderRootProps = keyedProps({
     children,
     className,
     style,
@@ -448,7 +457,7 @@ export function Slider({
     'data-size': resolvedSize,
     'data-ui': 'slider',
     'data-value-label': resolvedValueLabel,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

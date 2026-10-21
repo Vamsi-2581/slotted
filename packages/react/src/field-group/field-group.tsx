@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/field-group/field-group.css';
 
 import { fieldMessages } from '@slotted/core/i18n';
@@ -164,7 +165,7 @@ export function FieldGroup({
     t,
   };
 
-  const rootProps: FieldGroupRootProps = {
+  const rootProps: FieldGroupRootProps = keyedProps({
     ...nativeProps,
     'aria-describedby': merged,
     children,
@@ -178,7 +179,7 @@ export function FieldGroup({
     'data-size': resolvedSize,
     'data-ui': 'field-group',
     disabled,
-  };
+  });
 
   return (
     <FieldGroupContext.Provider value={value}>

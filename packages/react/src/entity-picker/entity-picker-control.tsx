@@ -1,3 +1,4 @@
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import { entityInitials, entityName, entityPickerKey } from '@slotted/core/entity-picker';
 import type { Entity } from '@slotted/core/entity-picker';
 import { moveIndex } from '@slotted/core/collection';
@@ -357,6 +358,7 @@ export function EntityPickerControl() {
       aria-readonly={picker.readOnly ? true : undefined}
       autoComplete="off"
       data-part="input"
+      data-part-input=""
       disabled={picker.disabled}
       id={inputId}
       onBlur={compose(onBlur, handleBlur)}
@@ -380,9 +382,11 @@ export function EntityPickerControl() {
   const rootProps: EntityPickerRootProps = {
     'data-overflow': picker.overflow,
     'data-part': 'root',
+    ...selectorKeyProps('part', 'root'),
     'data-selection-mode': multiple ? 'multiple' : 'single',
     'data-size': picker.size,
     'data-ui': 'entity-picker',
+    ...selectorKeyProps('ui', 'entity-picker'),
     'data-variant': picker.variant,
     ...(picker.fullWidth ? { 'data-full-width': '' } : {}),
     ...(picker.open ? { 'data-open': '' } : {}),
@@ -412,7 +416,7 @@ export function EntityPickerControl() {
   const children = (
     <>
       {scopes !== undefined && scopes.length > 0 ? (
-        <div data-part="scope">
+        <div data-part="scope" data-part-scope="">
           <Select
             disabled={picker.disabled || picker.readOnly}
             items={scopes.map((scope) => ({ value: scope.id, label: scope.label }))}
@@ -442,19 +446,19 @@ export function EntityPickerControl() {
           </Select>
         </div>
       ) : null}
-      <div data-part="control" ref={picker.setControlNode}>
+      <div data-part="control" data-part-control="" ref={picker.setControlNode}>
         {!multiple &&
         chosenEntity !== undefined &&
         chosenEntity.avatar !== null &&
         picker.media === 'avatar' &&
         picker.inputValue === chosenEntity.label ? (
-          <span aria-hidden="true" data-part="selection">
+          <span aria-hidden="true" data-part="selection" data-part-selection="">
             <EntityFace entity={chosenEntity} locale={picker.locale} />
           </span>
         ) : null}
         {multiple ? (
-          <div aria-label={chipLabel} data-part="values" role="grid">
-            <div data-part="chips" ref={chips} role="row">
+          <div aria-label={chipLabel} data-part="values" data-part-values="" role="grid">
+            <div data-part="chips" data-part-chips="" ref={chips} role="row">
               {chosen.map((chosenId) => (
                 <Chip id={chosenId} key={chosenId} renderChip={renderChip} />
               ))}
@@ -465,9 +469,11 @@ export function EntityPickerControl() {
                   })}
                   data-count=""
                   data-part="root"
+                  data-part-root=""
                   data-size="sm"
                   data-tone="secondary"
                   data-ui="tag"
+                  data-ui-tag=""
                   data-variant="outline"
                   hidden
                   onClick={(event) => {
@@ -480,12 +486,14 @@ export function EntityPickerControl() {
                   role="gridcell"
                   tabIndex={-1}
                 >
-                  <span data-part="body">
-                    <span data-part="label">{t('more', { count: Math.max(collapsed, 1) })}</span>
+                  <span data-part="body" data-part-body="">
+                    <span data-part="label" data-part-label="">
+                      {t('more', { count: Math.max(collapsed, 1) })}
+                    </span>
                   </span>
                 </span>
               ) : null}
-              <span data-part="field" role="gridcell">
+              <span data-part="field" data-part-field="" role="gridcell">
                 {input}
               </span>
             </div>
@@ -494,7 +502,13 @@ export function EntityPickerControl() {
           input
         )}
         {showClear ? (
-          <button aria-label={t('clear')} data-part="clear" onClick={onClear} type="button">
+          <button
+            aria-label={t('clear')}
+            data-part="clear"
+            data-part-clear=""
+            onClick={onClear}
+            type="button"
+          >
             <Icon>
               <Glyph name="x" />
             </Icon>
@@ -503,15 +517,22 @@ export function EntityPickerControl() {
         <button
           aria-label={t('trigger')}
           data-part="trigger"
+          data-part-trigger=""
           disabled={picker.disabled}
           onClick={toggle}
           tabIndex={-1}
           type="button"
         >
           {busy ? (
-            <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+            <span
+              aria-hidden="true"
+              data-part="busy"
+              data-part-busy=""
+              data-ui="spinner"
+              data-ui-spinner=""
+            />
           ) : (
-            <span data-part="arrow">
+            <span data-part="arrow" data-part-arrow="">
               <Icon>
                 <Glyph name="chevron-down" />
               </Icon>
@@ -602,9 +623,11 @@ function Chip({
       aria-busy={pending ? true : undefined}
       aria-label={name}
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-tone="secondary"
       data-ui="tag"
+      data-ui-tag=""
       data-value={id}
       data-variant={missing || pending ? 'outline' : 'soft'}
       onKeyDown={onKeyDown}
@@ -614,9 +637,9 @@ function Chip({
       {...(missing ? { 'data-unresolved': '' } : {})}
       {...(picker.disabled ? { 'data-disabled': '' } : {})}
     >
-      <span data-part="body">
+      <span data-part="body" data-part-body="">
         {picker.media === 'avatar' && entity?.avatar !== null ? (
-          <span data-part="start">
+          <span data-part="start" data-part-start="">
             {entity !== undefined ? (
               <EntityFace entity={entity} locale={picker.locale} />
             ) : pending ? (
@@ -624,9 +647,11 @@ function Chip({
                 aria-hidden="true"
                 data-loading=""
                 data-part="root"
+                data-part-root=""
                 data-shape="circle"
                 data-size="xs"
                 data-ui="skeleton"
+                data-ui-skeleton=""
               />
             ) : missing ? (
               <Icon>
@@ -635,14 +660,16 @@ function Chip({
             ) : null}
           </span>
         ) : null}
-        <span data-part="label">
+        <span data-part="label" data-part-label="">
           {pending ? (
             <span
               aria-hidden="true"
               data-loading=""
               data-part="root"
+              data-part-root=""
               data-shape="text"
               data-ui="skeleton"
+              data-ui-skeleton=""
             />
           ) : entity !== undefined && renderChip !== undefined ? (
             renderChip(entity)
@@ -655,6 +682,7 @@ function Chip({
         <button
           aria-label={t('remove', { label: entity?.label ?? shown })}
           data-part="remove"
+          data-part-remove=""
           onClick={onRemove}
           tabIndex={-1}
           type="button"

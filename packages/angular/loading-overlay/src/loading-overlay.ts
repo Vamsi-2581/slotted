@@ -85,37 +85,54 @@ export class SlLoadingOverlayIndicator {}
   imports: [SlLoader],
   template: `
     @if (liveValue() !== 'off') {
-      <span data-part="announcement" data-ui="visually-hidden" role="status">{{
-        announcement()
-      }}</span>
+      <span
+        data-part="announcement"
+        data-part-announcement=""
+        data-ui="visually-hidden"
+        data-ui-visually-hidden=""
+        role="status"
+        >{{ announcement() }}</span
+      >
     }
 
     @if (scope() === 'region') {
-      <div data-part="content" #content [attr.inert]="painted() ? '' : null">
+      <div data-part="content" data-part-content="" #content [attr.inert]="painted() ? '' : null">
         <ng-content />
       </div>
     }
 
     <div
       data-part="scrim"
+      data-part-scrim=""
       #scrim
       [attr.data-loading]="painted() ? '' : null"
       (keydown.escape)="onEscape($event)"
     >
       @if (mounted()) {
-        <div data-part="panel" #panel tabindex="-1">
-          <span data-part="indicator" [attr.data-default]="ownMark() ? '' : null">
+        <div data-part="panel" data-part-panel="" #panel tabindex="-1">
+          <span
+            data-part="indicator"
+            data-part-indicator=""
+            [attr.data-default]="ownMark() ? '' : null"
+          >
             <ng-content select="[slLoadingOverlayIndicator]">
               <div slLoader contained decorative [size]="sizeValue()"></div>
             </ng-content>
           </span>
-          <span aria-hidden="true" data-part="label">{{ labelValue() }}</span>
+          <span aria-hidden="true" data-part="label" data-part-label="">{{ labelValue() }}</span>
           @if (description(); as text) {
-            <span aria-hidden="true" data-part="description">{{ text }}</span>
+            <span aria-hidden="true" data-part="description" data-part-description="">{{
+              text
+            }}</span>
           }
           @if (cancellable()) {
             <ng-content select="[slLoadingOverlayCancel]">
-              <button data-part="cancel" type="button" (click)="requestCancel($event)">
+              <button
+                data-part="cancel"
+                data-part-cancel=""
+                type="button"
+                (click)="requestCancel($event)"
+              >
                 {{ t('cancel') }}
               </button>
             </ng-content>
@@ -134,7 +151,9 @@ export class SlLoadingOverlayIndicator {}
   exportAs: 'slLoadingOverlay',
   host: {
     'data-ui': 'loading-overlay',
+    'data-ui-loading-overlay': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-scope]': 'scope()',
     '[attr.data-size]': 'sizeValue()',
     '[attr.data-veil]': 'veilValue()',
@@ -422,6 +441,7 @@ function optionalNumber(value: unknown): number | undefined {
   standalone: true,
   host: {
     'data-part': 'cancel',
+    'data-part-cancel': '',
     '(click)': 'overlay.requestCancel($event)',
   },
 })

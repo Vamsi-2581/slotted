@@ -14,9 +14,9 @@
 
   The script writes four other families into a chart, and the builder reads
   which stylesheets to carry from the identifiers written here:
-  data-ui="skeleton" for the waiting plot, data-ui="result-state" for the empty
-  and failed plot, data-ui="button" for the actions a consumer composes, and
-  data-ui="icon" for the box each toolbar and help glyph is drawn in.
+  data-ui="skeleton" data-ui-skeleton="" for the waiting plot, data-ui="result-state" data-ui-result-state="" for the empty
+  and failed plot, data-ui="button" data-ui-button="" for the actions a consumer composes, and
+  data-ui="icon" data-ui-icon="" for the box each toolbar and help glyph is drawn in.
 -->
 <style>
   .h-note {
@@ -139,40 +139,94 @@
     each request with its reason.
   </p>
   <div class="h-controls" data-controls="playground"></div>
-  <figure data-ui="chart" data-part="root" data-example="playground"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="playground"
+  ></figure>
   <div class="h-readout" data-readout="playground"></div>
 </section>
 
 <section data-scene="line">
-  <figure data-ui="chart" data-part="root" data-example="line"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="line"
+  ></figure>
 </section>
 
 <section data-scene="area">
-  <figure data-ui="chart" data-part="root" data-example="area"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="area"
+  ></figure>
 </section>
 
 <section data-scene="bar">
-  <figure data-ui="chart" data-part="root" data-example="bar"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="bar"
+  ></figure>
 </section>
 
 <section data-scene="bar-horizontal">
-  <figure data-ui="chart" data-part="root" data-example="bar-horizontal"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="bar-horizontal"
+  ></figure>
 </section>
 
 <section data-scene="stacked">
-  <figure data-ui="chart" data-part="root" data-example="stacked"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="stacked"
+  ></figure>
 </section>
 
 <section data-scene="stacked-percent">
-  <figure data-ui="chart" data-part="root" data-example="stacked-percent"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="stacked-percent"
+  ></figure>
 </section>
 
 <section data-scene="combo">
-  <figure data-ui="chart" data-part="root" data-example="combo"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="combo"
+  ></figure>
 </section>
 
 <section data-scene="dual-axis">
-  <figure data-ui="chart" data-part="root" data-example="dual-axis"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="dual-axis"
+  ></figure>
 </section>
 
 <section data-scene="time-axis">
@@ -180,31 +234,73 @@
     Daily values across 29 March 2026, when much of Europe skips an hour. The axis reads wall-clock
     days, so every day is the same width.
   </p>
-  <figure data-ui="chart" data-part="root" data-example="time-axis"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="time-axis"
+  ></figure>
 </section>
 
 <section data-scene="log-scale">
-  <figure data-ui="chart" data-part="root" data-example="log-scale"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="log-scale"
+  ></figure>
 </section>
 
 <section data-scene="pie">
-  <figure data-ui="chart" data-part="root" data-example="pie"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="pie"
+  ></figure>
 </section>
 
 <section data-scene="donut">
-  <figure data-ui="chart" data-part="root" data-example="donut"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="donut"
+  ></figure>
 </section>
 
 <section data-scene="scatter">
-  <figure data-ui="chart" data-part="root" data-example="scatter"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="scatter"
+  ></figure>
 </section>
 
 <section data-scene="bubble">
-  <figure data-ui="chart" data-part="root" data-example="bubble"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="bubble"
+  ></figure>
 </section>
 
 <section data-scene="annotations">
-  <figure data-ui="chart" data-part="root" data-example="annotations"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="annotations"
+  ></figure>
 </section>
 
 <section data-scene="legend">
@@ -212,50 +308,128 @@
     Eight series, one per slot. Click to hide, Shift+click to isolate; Tab reaches the legend once
     and the arrows move inside it.
   </p>
-  <figure data-ui="chart" data-part="root" data-example="legend"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="legend"
+  ></figure>
 </section>
 
 <section data-scene="legend-values">
-  <figure data-ui="chart" data-part="root" data-example="legend-values"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="legend-values"
+  ></figure>
 </section>
 
 <section data-scene="tooltip-modes">
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="tooltip-axis"></figure>
-    <figure data-ui="chart" data-part="root" data-example="tooltip-item"></figure>
-    <figure data-ui="chart" data-part="root" data-example="tooltip-none"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tooltip-axis"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tooltip-item"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tooltip-none"
+    ></figure>
   </div>
 </section>
 
 <section data-scene="tooltip-custom">
-  <figure data-ui="chart" data-part="root" data-example="tooltip-custom"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="tooltip-custom"
+  ></figure>
 </section>
 
 <section data-scene="selection">
   <p class="h-note">Click a bar, or press Enter on the focused plot. The choice stays marked.</p>
-  <figure data-ui="chart" data-part="root" data-example="selection"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="selection"
+  ></figure>
 </section>
 
 <section data-scene="zoom">
   <p class="h-note">
     Ctrl+wheel or pinch to zoom, drag to pan, + and - on the focused plot, 0 or Escape to reset.
   </p>
-  <figure data-ui="chart" data-part="root" data-example="zoom"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="zoom"
+  ></figure>
 </section>
 
 <section data-scene="sync">
   <p class="h-note">Two charts owning one active point: the pointer on either moves both.</p>
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="sync-a"></figure>
-    <figure data-ui="chart" data-part="root" data-example="sync-b"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="sync-a"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="sync-b"
+    ></figure>
   </div>
 </section>
 
 <section data-scene="sizes">
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="size-sm"></figure>
-    <figure data-ui="chart" data-part="root" data-example="size-md"></figure>
-    <figure data-ui="chart" data-part="root" data-example="size-lg"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="size-sm"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="size-md"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="size-lg"
+    ></figure>
   </div>
 </section>
 
@@ -264,56 +438,140 @@
     Eleven series. The scale has eight slots and never cycles: the ninth on are drawn muted, each
     with its own dash, and the legend draws the dash beside the name.
   </p>
-  <figure data-ui="chart" data-part="root" data-example="many-series"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="many-series"
+  ></figure>
 </section>
 
 <section data-scene="large-data" data-widths="420 720">
   <p class="h-note">
     Twelve thousand points: the canvas renderer and LTTB sampling take over from SVG.
   </p>
-  <figure data-ui="chart" data-part="root" data-example="large-data"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="large-data"
+  ></figure>
 </section>
 
 <section data-scene="gaps">
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="gaps"></figure>
-    <figure data-ui="chart" data-part="root" data-example="gaps-connected"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="gaps"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="gaps-connected"
+    ></figure>
   </div>
 </section>
 
 <section data-scene="negative">
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="negative"></figure>
-    <figure data-ui="chart" data-part="root" data-example="negative-pie"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="negative"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="negative-pie"
+    ></figure>
   </div>
 </section>
 
 <section data-scene="long-labels">
-  <figure data-ui="chart" data-part="root" data-example="long-labels"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="long-labels"
+  ></figure>
 </section>
 
 <section data-scene="texture">
-  <figure data-ui="chart" data-part="root" data-example="texture"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="texture"
+  ></figure>
 </section>
 
 <section data-scene="loading">
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="loading-bar"></figure>
-    <figure data-ui="chart" data-part="root" data-example="loading-line"></figure>
-    <figure data-ui="chart" data-part="root" data-example="loading-pie"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="loading-bar"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="loading-line"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="loading-pie"
+    ></figure>
   </div>
 </section>
 
 <section data-scene="empty">
-  <figure data-ui="chart" data-part="root" data-example="empty"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="empty"
+  ></figure>
 </section>
 
 <section data-scene="all-hidden">
-  <figure data-ui="chart" data-part="root" data-example="all-hidden"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="all-hidden"
+  ></figure>
 </section>
 
 <section data-scene="error">
-  <figure data-ui="chart" data-part="root" data-example="error"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="error"
+  ></figure>
 </section>
 
 <section data-scene="dashboard" data-widths="360 720 1024">
@@ -323,19 +581,67 @@
     none changes height when its data lands, its table opens or its series change.
   </p>
   <div class="h-dashboard">
-    <figure data-ui="chart" data-part="root" data-example="tile-revenue"></figure>
-    <figure data-ui="chart" data-part="root" data-example="tile-loading"></figure>
-    <figure data-ui="chart" data-part="root" data-example="tile-channels"></figure>
-    <figure data-ui="chart" data-part="root" data-example="tile-status"></figure>
-    <figure data-ui="chart" data-part="root" data-example="tile-empty"></figure>
-    <figure data-ui="chart" data-part="root" data-example="tile-error"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tile-revenue"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tile-loading"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tile-channels"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tile-status"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tile-empty"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="tile-error"
+    ></figure>
   </div>
 </section>
 
 <section data-scene="card">
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="plain"></figure>
-    <figure data-ui="chart" data-part="root" data-example="card"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="plain"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="card"
+    ></figure>
   </div>
 </section>
 
@@ -346,13 +652,31 @@
     its menu, which then holds the table and full-screen controls too.
   </p>
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="toolbar-visible"></figure>
-    <figure data-ui="chart" data-part="root" data-example="toolbar-hover"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="toolbar-visible"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="toolbar-hover"
+    ></figure>
   </div>
 </section>
 
 <section data-scene="fullscreen" data-fixed>
-  <figure data-ui="chart" data-part="root" data-example="fullscreen"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="fullscreen"
+  ></figure>
 </section>
 
 <section data-scene="palette">
@@ -361,9 +685,27 @@
     against the rest), and a brand palette set with --slotted-chart-color-1…3 on a wrapper.
   </p>
   <div class="h-stack">
-    <figure data-ui="chart" data-part="root" data-example="palette-categorical"></figure>
-    <figure data-ui="chart" data-part="root" data-example="palette-sequential"></figure>
-    <figure data-ui="chart" data-part="root" data-example="palette-focus"></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="palette-categorical"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="palette-sequential"
+    ></figure>
+    <figure
+      data-ui="chart"
+      data-ui-chart=""
+      data-part="root"
+      data-part-root=""
+      data-example="palette-focus"
+    ></figure>
     <div
       style="
         --slotted-chart-color-1: #0f766e;
@@ -371,17 +713,35 @@
         --slotted-chart-color-3: #6d28d9;
       "
     >
-      <figure data-ui="chart" data-part="root" data-example="palette-brand"></figure>
+      <figure
+        data-ui="chart"
+        data-ui-chart=""
+        data-part="root"
+        data-part-root=""
+        data-example="palette-brand"
+      ></figure>
     </div>
   </div>
 </section>
 
 <section data-scene="help">
-  <figure data-ui="chart" data-part="root" data-example="help"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="help"
+  ></figure>
 </section>
 
 <section data-scene="table">
-  <figure data-ui="chart" data-part="root" data-example="table"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="table"
+  ></figure>
 </section>
 
 <section data-scene="accessibility">
@@ -389,7 +749,13 @@
     What assistive technology receives: the summary the plot is described by, and the sentence the
     live region says for the point the keyboard is on.
   </p>
-  <figure data-ui="chart" data-part="root" data-example="accessibility"></figure>
+  <figure
+    data-ui="chart"
+    data-ui-chart=""
+    data-part="root"
+    data-part-root=""
+    data-example="accessibility"
+  ></figure>
   <div class="h-readout" data-readout="accessibility"></div>
 </section>
 
@@ -865,20 +1231,29 @@
         const box = document.createDocumentFragment();
         const title = element(
           'div',
-          { 'data-part': 'tooltip-title' },
+          { 'data-part': 'tooltip-title', 'data-part-tooltip-title': '' },
           `${context.title} · ${BRL_K(value, 'pt-BR')}`,
         );
         const row = element('div', {
           'data-part': 'tooltip-item',
+          'data-part-tooltip-item': '',
           'data-current': '',
           'data-tone': change === null ? 'neutral' : change >= 0 ? 'success' : 'danger',
         });
         row.append(
-          element('span', { 'data-part': 'tooltip-marker', 'data-kind': 'line' }),
-          element('span', { 'data-part': 'tooltip-label' }, 'contra o mês anterior'),
+          element('span', {
+            'data-part': 'tooltip-marker',
+            'data-part-tooltip-marker': '',
+            'data-kind': 'line',
+          }),
           element(
             'span',
-            { 'data-part': 'tooltip-value' },
+            { 'data-part': 'tooltip-label', 'data-part-tooltip-label': '' },
+            'contra o mês anterior',
+          ),
+          element(
+            'span',
+            { 'data-part': 'tooltip-value', 'data-part-tooltip-value': '' },
             change === null
               ? '—'
               : new Intl.NumberFormat('pt-BR', {
@@ -1343,6 +1718,7 @@
           };
     for (const [attribute, value] of Object.entries({
       'data-part': 'glyph',
+      'data-part-glyph': '',
       'data-glyph': name,
       'aria-hidden': 'true',
       focusable: 'false',
@@ -1359,7 +1735,13 @@
       group.append(path);
     }
     svg.append(group);
-    const box = element('span', { 'data-ui': 'icon', 'data-part': 'root', 'aria-hidden': 'true' });
+    const box = element('span', {
+      'data-ui': 'icon',
+      'data-ui-icon': '',
+      'data-part': 'root',
+      'data-part-root': '',
+      'aria-hidden': 'true',
+    });
     box.append(svg);
     return box;
   }
@@ -1376,7 +1758,9 @@
   function skeletonBlock(shape = 'block') {
     return element('span', {
       'data-ui': 'skeleton',
+      'data-ui-skeleton': '',
       'data-part': 'root',
+      'data-part-root': '',
       'data-shape': shape,
       'data-size': 'md',
       'data-animation': 'shimmer',
@@ -1529,14 +1913,19 @@
     figure.replaceChildren();
 
     /* Header: the heading block, the consumer's actions, the toolbar. */
-    const header = element('figcaption', { 'data-part': 'header' });
+    const header = element('figcaption', { 'data-part': 'header', 'data-part-header': '' });
     const heading = element('div');
     const titleRow = element('div');
-    const title = element('span', { 'data-part': 'title', id: `${id}-title` }, config.title ?? '');
+    const title = element(
+      'span',
+      { 'data-part': 'title', 'data-part-title': '', id: `${id}-title` },
+      config.title ?? '',
+    );
     titleRow.append(title);
     if (config.help) {
       const help = element('button', {
         'data-part': 'help',
+        'data-part-help': '',
         type: 'button',
         'aria-label': messages.help,
         'aria-controls': `${id}-help`,
@@ -1544,7 +1933,12 @@
       help.append(glyphIcon('circle-info'));
       const helpContent = element(
         'div',
-        { 'data-part': 'help-content', id: `${id}-help`, role: 'note' },
+        {
+          'data-part': 'help-content',
+          'data-part-help-content': '',
+          id: `${id}-help`,
+          role: 'note',
+        },
         config.help,
       );
       layerFor(help, helpContent, { align: 'start', focusFirst: false });
@@ -1556,33 +1950,52 @@
       heading.append(
         element(
           'span',
-          { 'data-part': 'description', id: `${id}-description` },
+          { 'data-part': 'description', 'data-part-description': '', id: `${id}-description` },
           config.description,
         ),
       );
-    const actions = element('div', { 'data-part': 'actions' });
+    const actions = element('div', { 'data-part': 'actions', 'data-part-actions': '' });
     const toolbar = element('div', {
       'data-part': 'toolbar',
+      'data-part-toolbar': '',
       role: 'toolbar',
       'aria-label': messages.toolbar,
     });
     header.append(heading, actions, toolbar);
 
-    const legend = element('div', { 'data-part': 'legend' });
+    const legend = element('div', { 'data-part': 'legend', 'data-part-legend': '' });
     const plot = element('div', {
       'data-part': 'plot',
+      'data-part-plot': '',
       tabindex: 0,
       role: 'group',
       'aria-roledescription': messages.roledescription,
       'aria-labelledby': `${id}-title`,
       'aria-describedby': `${id}-summary`,
     });
-    const crosshair = element('div', { 'data-part': 'crosshair', hidden: true });
-    const canvas = element('div', { 'data-part': 'canvas', 'aria-hidden': 'true' });
-    const tooltip = element('div', { 'data-part': 'tooltip', 'aria-hidden': 'true' });
-    const summary = element('p', { 'data-part': 'summary', id: `${id}-summary` });
+    const crosshair = element('div', {
+      'data-part': 'crosshair',
+      'data-part-crosshair': '',
+      hidden: true,
+    });
+    const canvas = element('div', {
+      'data-part': 'canvas',
+      'data-part-canvas': '',
+      'aria-hidden': 'true',
+    });
+    const tooltip = element('div', {
+      'data-part': 'tooltip',
+      'data-part-tooltip': '',
+      'aria-hidden': 'true',
+    });
+    const summary = element('p', {
+      'data-part': 'summary',
+      'data-part-summary': '',
+      id: `${id}-summary`,
+    });
     const region = element('div', {
       'data-part': 'table-region',
+      'data-part-table-region': '',
       id: `${id}-table`,
       role: 'region',
       tabindex: 0,
@@ -1779,6 +2192,7 @@
          keeps only this control — the table and full-screen controls. */
       const trigger = element('button', {
         'data-part': 'menu-trigger',
+        'data-part-menu-trigger': '',
         type: 'button',
         'aria-label': messages.more,
         title: messages.more,
@@ -1787,13 +2201,20 @@
       trigger.append(glyphIcon('ellipsis'));
       const menu = element('div', {
         'data-part': 'menu',
+        'data-part-menu': '',
         role: 'menu',
         'aria-label': messages.more,
       });
       const item = (action, label, run) => {
         const button = element(
           'button',
-          { 'data-part': 'menu-item', 'data-action': action, type: 'button', role: 'menuitem' },
+          {
+            'data-part': 'menu-item',
+            'data-part-menu-item': '',
+            'data-action': action,
+            type: 'button',
+            role: 'menuitem',
+          },
           label,
         );
         const reasonOf = modality(button);
@@ -1830,13 +2251,15 @@
       if (config.exports) {
         const csv = element('button', {
           'data-ui': 'button',
+          'data-ui-button': '',
           'data-part': 'root',
+          'data-part-root': '',
           'data-variant': 'outline',
           'data-tone': 'secondary',
           'data-size': 'sm',
           type: 'button',
         });
-        csv.append(element('span', { 'data-part': 'label' }, 'Exportar'));
+        csv.append(element('span', { 'data-part': 'label', 'data-part-label': '' }, 'Exportar'));
         csv.addEventListener('click', () =>
           download(
             `${name}.csv`,
@@ -1855,25 +2278,37 @@
       const item = interactive
         ? element('button', {
             'data-part': 'legend-item',
+            'data-part-legend-item': '',
             type: 'button',
             'aria-pressed': String(entry.visible),
             'data-pressed': entry.visible,
             'data-key': entry.key,
           })
-        : element('span', { 'data-part': 'legend-item', role: 'listitem', 'data-key': entry.key });
+        : element('span', {
+            'data-part': 'legend-item',
+            'data-part-legend-item': '',
+            role: 'listitem',
+            'data-key': entry.key,
+          });
       colorAttributes(item, entry.color);
       item.append(
         element('span', {
           'data-part': 'legend-marker',
+          'data-part-legend-marker': '',
           'data-kind':
             entry.kind === 'area' || entry.kind === 'bar' || entry.kind === 'pie'
               ? 'bar'
               : entry.kind,
           'data-stroke': series && series.stroke !== 'solid' ? series.stroke : undefined,
         }),
-        element('span', { 'data-part': 'legend-label', title: entry.label }, entry.label),
+        element(
+          'span',
+          { 'data-part': 'legend-label', 'data-part-legend-label': '', title: entry.label },
+          entry.label,
+        ),
       );
-      if (config.legendValues) item.append(element('span', { 'data-part': 'legend-value' }));
+      if (config.legendValues)
+        item.append(element('span', { 'data-part': 'legend-value', 'data-part-legend-value': '' }));
       if (interactive) {
         const reasonOf = modality(item);
         item.addEventListener('click', (event) =>
@@ -1919,12 +2354,14 @@
 
       const more = element('button', {
         'data-part': 'legend-more',
+        'data-part-legend-more': '',
         type: 'button',
         hidden: true,
         'aria-haspopup': 'true',
       });
       const layer = element('div', {
         'data-part': 'menu',
+        'data-part-menu': '',
         role: 'group',
         'aria-label': messages.legend,
       });
@@ -2035,12 +2472,15 @@
             : 'bar';
         const skeleton = element('div', {
           'data-part': 'skeleton',
+          'data-part-skeleton': '',
           'data-kind': kind,
           'aria-hidden': 'true',
         });
         const regionNode = element('div', {
           'data-ui': 'skeleton',
+          'data-ui-skeleton': '',
           'data-part': 'region',
+          'data-part-region': '',
           'data-animation': 'shimmer',
           'data-loading': true,
         });
@@ -2084,15 +2524,23 @@
         return;
       }
       if (model?.shape === 'pie' && model.series[0].innerRadius > 0) {
-        const center = element('div', { 'data-part': 'center', 'aria-hidden': 'true' });
+        const center = element('div', {
+          'data-part': 'center',
+          'data-part-center': '',
+          'aria-hidden': 'true',
+        });
         const custom = config.center?.(model);
         center.append(
           element(
             'span',
-            { 'data-part': 'center-value' },
+            { 'data-part': 'center-value', 'data-part-center-value': '' },
             custom?.value ?? model.series[0].format(model.total),
           ),
-          element('span', { 'data-part': 'center-label' }, custom?.label ?? messages.total),
+          element(
+            'span',
+            { 'data-part': 'center-label', 'data-part-center-label': '' },
+            custom?.label ?? messages.total,
+          ),
         );
         plot.append(center);
       }
@@ -2102,26 +2550,37 @@
       const part = element('div', { 'data-part': status === 'error' ? 'error' : 'empty' });
       const box = element('section', {
         'data-ui': 'result-state',
+        'data-ui-result-state': '',
         'data-part': 'root',
+        'data-part-root': '',
         'data-status': status,
         'data-reach': 'section',
         'data-align': 'center',
         'data-live': 'polite',
       });
-      const content = element('div', { 'data-part': 'content', role: 'status' });
-      content.append(element('div', { 'data-part': 'title' }, text));
-      box.append(element('div', { 'data-part': 'media', 'aria-hidden': 'true' }), content);
+      const content = element('div', {
+        'data-part': 'content',
+        'data-part-content': '',
+        role: 'status',
+      });
+      content.append(element('div', { 'data-part': 'title', 'data-part-title': '' }, text));
+      box.append(
+        element('div', { 'data-part': 'media', 'data-part-media': '', 'aria-hidden': 'true' }),
+        content,
+      );
       if (action) {
-        const actionsNode = element('div', { 'data-part': 'actions' });
+        const actionsNode = element('div', { 'data-part': 'actions', 'data-part-actions': '' });
         const button = element('button', {
           'data-ui': 'button',
+          'data-ui-button': '',
           'data-part': 'root',
+          'data-part-root': '',
           'data-variant': 'outline',
           'data-tone': 'secondary',
           'data-size': 'sm',
           type: 'button',
         });
-        button.append(element('span', { 'data-part': 'label' }, action));
+        button.append(element('span', { 'data-part': 'label', 'data-part-label': '' }, action));
         button.addEventListener('click', onAction);
         actionsNode.append(button);
         box.append(actionsNode);
@@ -2143,7 +2602,7 @@
       region.replaceChildren();
       if (!open) return;
       const data = chartTable(model, { messages });
-      const table = element('table', { 'data-part': 'table' });
+      const table = element('table', { 'data-part': 'table', 'data-part-table': '' });
       const caption = element('caption', {}, config.title ?? '');
       if (data.omitted)
         caption.textContent += ` — ${fillMessage(messages.truncated, { shown: data.rows.length, count: data.rows.length + data.omitted })}`;
@@ -2228,6 +2687,7 @@
         if (at && series && series.kind !== 'bar' && model.shape !== 'pie') {
           const marker = element('div', {
             'data-part': 'marker',
+            'data-part-marker': '',
             'data-selected': true,
             'aria-hidden': 'true',
           });
@@ -2275,6 +2735,7 @@
           if (!spot) continue;
           const marker = element('div', {
             'data-part': 'marker',
+            'data-part-marker': '',
             'aria-hidden': 'true',
             'data-current': series.id === point.series,
           });
@@ -2314,11 +2775,18 @@
 
     function defaultTooltip(context) {
       const box = document.createDocumentFragment();
-      box.append(element('div', { 'data-part': 'tooltip-title' }, context.title));
+      box.append(
+        element(
+          'div',
+          { 'data-part': 'tooltip-title', 'data-part-tooltip-title': '' },
+          context.title,
+        ),
+      );
       const indicator = config.tooltip?.indicator;
       for (const item of context.items) {
         const row = element('div', {
           'data-part': 'tooltip-item',
+          'data-part-tooltip-item': '',
           'data-current': context.items.length > 1 && item.current,
         });
         colorAttributes(row, item.color);
@@ -2327,6 +2795,7 @@
           row.append(
             element('span', {
               'data-part': 'tooltip-marker',
+              'data-part-tooltip-marker': '',
               'data-kind':
                 indicator === 'line' || item.kind === 'line'
                   ? 'line'
@@ -2338,20 +2807,31 @@
           );
         }
         row.append(
-          element('span', { 'data-part': 'tooltip-label' }, item.label),
           element(
             'span',
-            { 'data-part': 'tooltip-value' },
+            { 'data-part': 'tooltip-label', 'data-part-tooltip-label': '' },
+            item.label,
+          ),
+          element(
+            'span',
+            { 'data-part': 'tooltip-value', 'data-part-tooltip-value': '' },
             item.share ? `${item.share} · ${item.formatted}` : item.formatted,
           ),
         );
         box.append(row);
       }
       if (context.total) {
-        const total = element('div', { 'data-part': 'tooltip-total' });
+        const total = element('div', {
+          'data-part': 'tooltip-total',
+          'data-part-tooltip-total': '',
+        });
         total.append(
           element('span', {}, messages.total),
-          element('span', { 'data-part': 'tooltip-value' }, context.total.formatted),
+          element(
+            'span',
+            { 'data-part': 'tooltip-value', 'data-part-tooltip-value': '' },
+            context.total.formatted,
+          ),
         );
         box.append(total);
       }

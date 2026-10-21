@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/result-state/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./result-state.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./result-state.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./result-state.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -23,8 +36,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.resultState;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
@@ -42,7 +55,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -55,7 +71,7 @@ test('styles every part the contract declares', () => {
 test('places the mark, the actions and the footer outside the region that announces', () => {
   for (const part of ['media', 'content', 'actions', 'footer']) {
     assert.ok(
-      normalized.includes(`${ui}>[data-part='${part}']`),
+      normalized.includes(`${ui}>[data-part-${part.toLowerCase()}]`),
       `${part} is not placed as a child of the root`,
     );
   }
@@ -94,7 +110,7 @@ test('paints no status, in no tone and with no mask', () => {
  * time and the box paints nothing.
  */
 test('withdraws the picture box when there is no picture', () => {
-  const empty = rule(`${ui}>[data-part='media']:empty`);
+  const empty = rule(`${ui}>[data-part-media]:empty`);
   assert.match(empty, /display:none/);
   assert.match(empty, /background:var\(--slotted-result-state-media\) center \/ contain no-repeat/);
   assert.match(empty, /block-size:var\(--_media-size\)/);
@@ -135,7 +151,7 @@ test('puts the words and the controls on one line at inline reach', () => {
   assert.match(base, /font-size:var\(--_title-font-size\)/);
   assert.match(base, /line-height:var\(--_title-line-height\)/);
 
-  const actions = rule(`${ui}[data-reach='inline']>[data-part='actions']`);
+  const actions = rule(`${ui}[data-reach='inline']>[data-part-actions]`);
   assert.match(actions, /block-size:1lh/);
   assert.match(actions, /align-self:start/);
   assert.match(actions, /align-content:center/);
@@ -144,7 +160,7 @@ test('puts the words and the controls on one line at inline reach', () => {
      its own height rather than squashing them into one. */
   assert.match(
     normalized.split('@container slotted-result-state (max-width:20rem){')[1] ?? '',
-    /\[data-reach='inline'\]>\[data-part='actions'\]\{block-size:auto/,
+    /\[data-reach='inline'\]>\[data-part-actions\]\{block-size:auto/,
   );
 });
 
@@ -198,7 +214,7 @@ test('answers density through the mark rather than through the words', () => {
  * and a reader who arrives has to see where they are.
  */
 test('paints focus and nothing else', () => {
-  assert.match(normalized, /\[data-ui='result-state'\]\[data-part='root'\]:focus-visible\{/);
+  assert.match(normalized, /\[data-ui-result-state\]\[data-part-root\]:focus-visible\{/);
   /* `:active` is excluded only where it selects: `forced-colors:active` is a
      media feature, not a state the family paints. */
   for (const state of [/:hover/, /:active[{,]/, /\[data-disabled/, /\[data-loading/]) {
@@ -218,7 +234,7 @@ test('paints focus and nothing else', () => {
 test('enters when it announces and leaves when it is hidden, on motion tokens alone', () => {
   assert.match(
     normalized,
-    /@starting-style\{\[data-ui='result-state'\]\[data-part='root'\]:is\(\[data-live='polite'\],\[data-live='assertive'\]\)/,
+    /@starting-style\{\[data-ui-result-state\]\[data-part-root\]:is\(\[data-live='polite'\],\[data-live='assertive'\]\)/,
   );
   const hidden = rule(`${root}[hidden]`);
   assert.match(hidden, /display:none/);
@@ -246,7 +262,7 @@ test('enters when it announces and leaves when it is hidden, on motion tokens al
 test('draws each illustration from neutral roles, mirrored in rtl and kept under forced colours', () => {
   for (const drawing of contract.axes.illustration.filter((value) => value !== 'none')) {
     assert.ok(
-      normalized.includes(`[data-illustration='${drawing}']>[data-part='media']`),
+      normalized.includes(`[data-illustration='${drawing}']>[data-part-media]`),
       `${drawing} draws nothing`,
     );
   }

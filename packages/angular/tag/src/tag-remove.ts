@@ -34,6 +34,7 @@ import { SlTag } from './tag';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'remove',
+    'data-part-remove': '',
     type: 'button',
     '[attr.aria-labelledby]': 'labelledBy()',
     '[attr.disabled]': "tag.removeRefused() ? '' : null",

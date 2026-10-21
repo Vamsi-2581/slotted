@@ -71,18 +71,21 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
   const selection = model.pendingSelection ?? model.selection;
 
   return (
-    <table aria-labelledby={titleId} data-part="month" role="grid">
+    <table aria-labelledby={titleId} data-part="month" data-part-month="" role="grid">
       <thead>
-        <tr data-part="weekdays">
+        <tr data-part="weekdays" data-part-weekdays="">
           {model.weekNumbers ? (
-            <th data-part="week-number-header" scope="col">
-              <span data-ui="visually-hidden">{model.t('weekNumber')}</span>
+            <th data-part="week-number-header" data-part-week-number-header="" scope="col">
+              <span data-ui="visually-hidden" data-ui-visually-hidden="">
+                {model.t('weekNumber')}
+              </span>
             </th>
           ) : null}
           {first.map((date) => (
             <th
               abbr={weekdayName(model, date, 'long')}
               data-part="weekday"
+              data-part-weekday=""
               key={toISODate(date)}
               scope="col"
             >
@@ -99,11 +102,12 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
           return (
             <tr
               data-part="week"
+              data-part-week=""
               key={toISODate(firstDay)}
               style={{ '--slotted-event-calendar-lanes': model.maxEvents } as CSSProperties}
             >
               {model.weekNumbers ? (
-                <th data-part="week-number" scope="row">
+                <th data-part="week-number" data-part-week-number="" scope="row">
                   {isoWeekNumber(firstDay)}
                 </th>
               ) : null}
@@ -132,6 +136,7 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
                     data-non-working={isWorkingDay(date, model.workingHours) ? undefined : ''}
                     data-outside-month={date.month === anchorMonth ? undefined : ''}
                     data-part="day"
+                    data-part-day=""
                     data-row="day"
                     data-selected={selected ? '' : undefined}
                     data-today={
@@ -141,11 +146,12 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
                     role="gridcell"
                     tabIndex={isSameDate(date, model.date) ? 0 : -1}
                   >
-                    <div data-part="day-header">
+                    <div data-part="day-header" data-part-day-header="">
                       <button
                         aria-label={fullDate(model, date)}
                         aria-haspopup={model.narrow ? 'dialog' : undefined}
                         data-part="day-number"
+                        data-part-day-number=""
                         id={numberId}
                         onClick={(clicked) =>
                           model.drill(date, clicked.detail === 0 ? 'keyboard' : 'pointer', clicked)
@@ -156,13 +162,15 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
                         {date.day}
                       </button>
                       {content === undefined || content === null ? null : (
-                        <div data-part="day-content">{content}</div>
+                        <div data-part="day-content" data-part-day-content="">
+                          {content}
+                        </div>
                       )}
-                      <span data-ui="visually-hidden" id={countId}>
+                      <span data-ui="visually-hidden" data-ui-visually-hidden="" id={countId}>
                         {model.t('events', { count })}
                       </span>
                     </div>
-                    <div data-part="day-events">
+                    <div data-part="day-events" data-part-day-events="">
                       {starting.map((segment) => {
                         const bar = segment.occurrence.allDay || isMultiDay(segment.occurrence);
                         return (
@@ -184,7 +192,11 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
                         );
                       })}
                       {continuing.map((segment) => (
-                        <span data-part="continuation" key={segment.occurrence.key}>
+                        <span
+                          data-part="continuation"
+                          data-part-continuation=""
+                          key={segment.occurrence.key}
+                        >
                           {model.t('titleContinues', { title: segment.occurrence.event.title })}
                         </span>
                       ))}
@@ -194,6 +206,7 @@ export function Month({ anchorMonth, occurrences, titleId, weeks }: MonthProps) 
                           aria-haspopup="dialog"
                           aria-label={model.t('moreEvents', { count: more })}
                           data-part="more"
+                          data-part-more=""
                           onClick={(clicked) => model.openMore(date, clicked.currentTarget)}
                           tabIndex={-1}
                           type="button"

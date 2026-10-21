@@ -96,7 +96,7 @@ interface Derived {
     <ng-template #layers>
       @if (projected() === undefined && src() !== undefined) {
         @if (sources().length > 0) {
-          <picture data-part="picture">
+          <picture data-part="picture" data-part-picture="">
             @for (source of sources(); track $index) {
               <source
                 [attr.srcset]="source.srcSet"
@@ -112,12 +112,12 @@ interface Derived {
         }
       }
       <ng-content select="img[slImageMedia]"></ng-content
-      ><span data-part="placeholder" aria-hidden="true">
+      ><span data-part="placeholder" data-part-placeholder="" aria-hidden="true">
         @if (resolvedPlaceholder() === 'blur' && placeholderSrc(); as preview) {
           <img alt="" [src]="preview" />
         }
         <ng-content select="[slImagePlaceholder]"></ng-content></span
-      ><span data-part="fallback"
+      ><span data-part="fallback" data-part-fallback=""
         ><ng-content select="[slImageFallback]"
           ><span slIcon><svg slGlyph name="image-off"></svg></span></ng-content
       ></span>
@@ -143,7 +143,9 @@ interface Derived {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'image',
+    'data-ui-image': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-fit]': 'resolvedFit()',
     '[attr.data-position]': 'positionAttribute()',

@@ -73,7 +73,9 @@
       <span data-demo-label>the second of three is checked</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -82,18 +84,25 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="range" value="day" />
-          <span data-part="label">Day</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="">
+          <input data-part="control" data-part-control="" type="radio" name="range" value="day" />
+          <span data-part="label" data-part-label="">Day</span>
         </label>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="range" value="week" checked />
-          <span data-part="label">Week</span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="range"
+            value="week"
+            checked
+          />
+          <span data-part="label" data-part-label="">Week</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="range" value="month" />
-          <span data-part="label">Month</span>
+        <label data-part="item" data-part-item="">
+          <input data-part="control" data-part-control="" type="radio" name="range" value="month" />
+          <span data-part="label" data-part-label="">Month</span>
         </label>
       </div>
     </div>
@@ -102,7 +111,9 @@
       <span data-demo-label>the first of five is checked · the widest label sets every column</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -111,26 +122,45 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 5; --slotted-segmented-control-index: 0"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="status" value="all" checked />
-          <span data-part="label">All</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="status"
+            value="all"
+            checked
+          />
+          <span data-part="label" data-part-label="">All</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="status" value="draft" />
-          <span data-part="label">Draft</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="status"
+            value="draft"
+          />
+          <span data-part="label" data-part-label="">Draft</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="status" value="sent" />
-          <span data-part="label">Sent</span>
+        <label data-part="item" data-part-item="">
+          <input data-part="control" data-part-control="" type="radio" name="status" value="sent" />
+          <span data-part="label" data-part-label="">Sent</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="status" value="overdue" />
-          <span data-part="label">Overdue</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="status"
+            value="overdue"
+          />
+          <span data-part="label" data-part-label="">Overdue</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="status" value="paid" />
-          <span data-part="label">Paid</span>
+        <label data-part="item" data-part-item="">
+          <input data-part="control" data-part-control="" type="radio" name="status" value="paid" />
+          <span data-part="label" data-part-label="">Paid</span>
         </label>
       </div>
     </div>
@@ -141,7 +171,9 @@
       >
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -150,17 +182,35 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 3"
       >
-        <label data-part="item">
-          <input data-part="control" type="radio" name="speed" value="standard" />
-          <span data-part="label">Standard</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="speed"
+            value="standard"
+          />
+          <span data-part="label" data-part-label="">Standard</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="speed" value="express" />
-          <span data-part="label">Express</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="speed"
+            value="express"
+          />
+          <span data-part="label" data-part-label="">Express</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="speed" value="overnight" />
-          <span data-part="label">Overnight</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="speed"
+            value="overnight"
+          />
+          <span data-part="label" data-part-label="">Overnight</span>
         </label>
       </div>
     </div>
@@ -173,7 +223,9 @@
       <span data-demo-label>sm</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="sm"
         data-orientation="horizontal"
         data-condense="none"
@@ -182,14 +234,27 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="view-sm" value="grid" checked />
-          <span data-part="label">Grid</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-sm"
+            value="grid"
+            checked
+          />
+          <span data-part="label" data-part-label="">Grid</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="view-sm" value="list" />
-          <span data-part="label">List</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-sm"
+            value="list"
+          />
+          <span data-part="label" data-part-label="">List</span>
         </label>
       </div>
     </div>
@@ -198,7 +263,9 @@
       <span data-demo-label>md</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -207,14 +274,27 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="view-md" value="grid" checked />
-          <span data-part="label">Grid</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-md"
+            value="grid"
+            checked
+          />
+          <span data-part="label" data-part-label="">Grid</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="view-md" value="list" />
-          <span data-part="label">List</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-md"
+            value="list"
+          />
+          <span data-part="label" data-part-label="">List</span>
         </label>
       </div>
     </div>
@@ -223,7 +303,9 @@
       <span data-demo-label>lg</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="lg"
         data-orientation="horizontal"
         data-condense="none"
@@ -232,14 +314,27 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="view-lg" value="grid" checked />
-          <span data-part="label">Grid</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-lg"
+            value="grid"
+            checked
+          />
+          <span data-part="label" data-part-label="">Grid</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="view-lg" value="list" />
-          <span data-part="label">List</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-lg"
+            value="list"
+          />
+          <span data-part="label" data-part-label="">List</span>
         </label>
       </div>
     </div>
@@ -248,7 +343,9 @@
       <span data-demo-label>icon and label together</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -257,10 +354,16 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 2"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="view-icons" value="grid" />
-          <span data-part="icon" aria-hidden="true">
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-icons"
+            value="grid"
+          />
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -275,11 +378,17 @@
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </svg>
           </span>
-          <span data-part="label">Grid</span>
+          <span data-part="label" data-part-label="">Grid</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="view-icons" value="list" />
-          <span data-part="icon" aria-hidden="true">
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-icons"
+            value="list"
+          />
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -291,11 +400,18 @@
               <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
             </svg>
           </span>
-          <span data-part="label">List</span>
+          <span data-part="label" data-part-label="">List</span>
         </label>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="view-icons" value="board" checked />
-          <span data-part="icon" aria-hidden="true">
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="view-icons"
+            value="board"
+            checked
+          />
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -309,7 +425,7 @@
               <rect x="17" y="4" width="4" height="13" rx="1" />
             </svg>
           </span>
-          <span data-part="label">Board</span>
+          <span data-part="label" data-part-label="">Board</span>
         </label>
       </div>
     </div>
@@ -322,7 +438,9 @@
       <span data-demo-label>vertical · the thumb moves in the block axis</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="vertical"
         data-condense="none"
@@ -330,18 +448,37 @@
         aria-label="Payment method"
         style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 2"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="payment" value="card" />
-          <span data-part="label">Card</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="payment"
+            value="card"
+          />
+          <span data-part="label" data-part-label="">Card</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="payment" value="transfer" />
-          <span data-part="label">Bank transfer</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="payment"
+            value="transfer"
+          />
+          <span data-part="label" data-part-label="">Bank transfer</span>
         </label>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="payment" value="invoice" checked />
-          <span data-part="label">Invoice</span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="payment"
+            value="invoice"
+            checked
+          />
+          <span data-part="label" data-part-label="">Invoice</span>
         </label>
       </div>
     </div>
@@ -354,7 +491,9 @@
       <span data-demo-label>one segment unavailable</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -363,18 +502,32 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 0"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="plan" value="starter" checked />
-          <span data-part="label">Starter</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan"
+            value="starter"
+            checked
+          />
+          <span data-part="label" data-part-label="">Starter</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="plan" value="team" />
-          <span data-part="label">Team</span>
+        <label data-part="item" data-part-item="">
+          <input data-part="control" data-part-control="" type="radio" name="plan" value="team" />
+          <span data-part="label" data-part-label="">Team</span>
         </label>
-        <label data-part="item" data-disabled>
-          <input data-part="control" type="radio" name="plan" value="enterprise" disabled />
-          <span data-part="label">Enterprise</span>
+        <label data-part="item" data-part-item="" data-disabled>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan"
+            value="enterprise"
+            disabled
+          />
+          <span data-part="label" data-part-label="">Enterprise</span>
         </label>
       </div>
     </div>
@@ -383,7 +536,9 @@
       <span data-demo-label>the whole control unavailable</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -393,18 +548,40 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item" data-disabled>
-          <input data-part="control" type="radio" name="plan-off" value="starter" disabled />
-          <span data-part="label">Starter</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="" data-disabled>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-off"
+            value="starter"
+            disabled
+          />
+          <span data-part="label" data-part-label="">Starter</span>
         </label>
-        <label data-part="item" data-checked data-disabled>
-          <input data-part="control" type="radio" name="plan-off" value="team" checked disabled />
-          <span data-part="label">Team</span>
+        <label data-part="item" data-part-item="" data-checked data-disabled>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-off"
+            value="team"
+            checked
+            disabled
+          />
+          <span data-part="label" data-part-label="">Team</span>
         </label>
-        <label data-part="item" data-disabled>
-          <input data-part="control" type="radio" name="plan-off" value="enterprise" disabled />
-          <span data-part="label">Enterprise</span>
+        <label data-part="item" data-part-item="" data-disabled>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-off"
+            value="enterprise"
+            disabled
+          />
+          <span data-part="label" data-part-label="">Enterprise</span>
         </label>
       </div>
     </div>
@@ -413,7 +590,9 @@
       <span data-demo-label>read-only · legible and focusable, and not a disabled control</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -424,18 +603,37 @@
         aria-readonly="true"
         style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="plan-ro" value="starter" />
-          <span data-part="label">Starter</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-ro"
+            value="starter"
+          />
+          <span data-part="label" data-part-label="">Starter</span>
         </label>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="plan-ro" value="team" checked />
-          <span data-part="label">Team</span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-ro"
+            value="team"
+            checked
+          />
+          <span data-part="label" data-part-label="">Team</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="plan-ro" value="enterprise" />
-          <span data-part="label">Enterprise</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-ro"
+            value="enterprise"
+          />
+          <span data-part="label" data-part-label="">Enterprise</span>
         </label>
       </div>
     </div>
@@ -444,7 +642,9 @@
       <span data-demo-label>invalid · the track's edge and the ring both take the danger step</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -455,17 +655,35 @@
         aria-invalid="true"
         style="--slotted-segmented-control-count: 3"
       >
-        <label data-part="item">
-          <input data-part="control" type="radio" name="plan-invalid" value="starter" />
-          <span data-part="label">Starter</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-invalid"
+            value="starter"
+          />
+          <span data-part="label" data-part-label="">Starter</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="plan-invalid" value="team" />
-          <span data-part="label">Team</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-invalid"
+            value="team"
+          />
+          <span data-part="label" data-part-label="">Team</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="plan-invalid" value="enterprise" />
-          <span data-part="label">Enterprise</span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="plan-invalid"
+            value="enterprise"
+          />
+          <span data-part="label" data-part-label="">Enterprise</span>
         </label>
       </div>
     </div>
@@ -478,7 +696,9 @@
       <span data-demo-label>icons alone · every segment is square and named by its label</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -487,10 +707,17 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="align" value="start" aria-label="Start" />
-          <span data-part="icon" aria-hidden="true">
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="align"
+            value="start"
+            aria-label="Start"
+          />
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -502,16 +729,17 @@
             </svg>
           </span>
         </label>
-        <label data-part="item" data-checked>
+        <label data-part="item" data-part-item="" data-checked>
           <input
             data-part="control"
+            data-part-control=""
             type="radio"
             name="align"
             value="center"
             checked
             aria-label="Center"
           />
-          <span data-part="icon" aria-hidden="true">
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -523,9 +751,16 @@
             </svg>
           </span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="align" value="end" aria-label="End" />
-          <span data-part="icon" aria-hidden="true">
+        <label data-part="item" data-part-item="">
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="align"
+            value="end"
+            aria-label="End"
+          />
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -549,7 +784,9 @@
       <div data-demo-frame>
         <div
           data-ui="segmented-control"
+          data-ui-segmented-control=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-orientation="horizontal"
           data-condense="icons"
@@ -559,10 +796,17 @@
           aria-orientation="horizontal"
           style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 0"
         >
-          <span data-part="indicator" aria-hidden="true"></span>
-          <label data-part="item" data-checked>
-            <input data-part="control" type="radio" name="report-wide" value="table" checked />
-            <span data-part="icon" aria-hidden="true">
+          <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+          <label data-part="item" data-part-item="" data-checked>
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="report-wide"
+              value="table"
+              checked
+            />
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -575,11 +819,17 @@
                 <path d="M3 10h18M9 10v10" />
               </svg>
             </span>
-            <span data-part="label">Table</span>
+            <span data-part="label" data-part-label="">Table</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="report-wide" value="chart" />
-            <span data-part="icon" aria-hidden="true">
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="report-wide"
+              value="chart"
+            />
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -591,11 +841,17 @@
                 <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
               </svg>
             </span>
-            <span data-part="label">Chart</span>
+            <span data-part="label" data-part-label="">Chart</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="report-wide" value="map" />
-            <span data-part="icon" aria-hidden="true">
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="report-wide"
+              value="map"
+            />
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -608,7 +864,7 @@
                 <path d="M9 4v14M15 6v14" />
               </svg>
             </span>
-            <span data-part="label">Map</span>
+            <span data-part="label" data-part-label="">Map</span>
           </label>
         </div>
       </div>
@@ -621,7 +877,9 @@
       <div data-demo-narrow>
         <div
           data-ui="segmented-control"
+          data-ui-segmented-control=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-orientation="horizontal"
           data-condense="icons"
@@ -631,10 +889,17 @@
           aria-orientation="horizontal"
           style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 0"
         >
-          <span data-part="indicator" aria-hidden="true"></span>
-          <label data-part="item" data-checked>
-            <input data-part="control" type="radio" name="report-narrow" value="table" checked />
-            <span data-part="icon" aria-hidden="true">
+          <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+          <label data-part="item" data-part-item="" data-checked>
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="report-narrow"
+              value="table"
+              checked
+            />
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -647,11 +912,17 @@
                 <path d="M3 10h18M9 10v10" />
               </svg>
             </span>
-            <span data-part="label">Table</span>
+            <span data-part="label" data-part-label="">Table</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="report-narrow" value="chart" />
-            <span data-part="icon" aria-hidden="true">
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="report-narrow"
+              value="chart"
+            />
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -663,11 +934,17 @@
                 <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
               </svg>
             </span>
-            <span data-part="label">Chart</span>
+            <span data-part="label" data-part-label="">Chart</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="report-narrow" value="map" />
-            <span data-part="icon" aria-hidden="true">
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="report-narrow"
+              value="map"
+            />
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -680,7 +957,7 @@
                 <path d="M9 4v14M15 6v14" />
               </svg>
             </span>
-            <span data-part="label">Map</span>
+            <span data-part="label" data-part-label="">Map</span>
           </label>
         </div>
       </div>
@@ -695,7 +972,9 @@
       <div data-demo-frame>
         <div
           data-ui="segmented-control"
+          data-ui-segmented-control=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-orientation="horizontal"
           data-condense="none"
@@ -705,18 +984,37 @@
           aria-orientation="horizontal"
           style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
         >
-          <span data-part="indicator" aria-hidden="true"></span>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="window" value="morning" />
-            <span data-part="label">Morning</span>
+          <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="window"
+              value="morning"
+            />
+            <span data-part="label" data-part-label="">Morning</span>
           </label>
-          <label data-part="item" data-checked>
-            <input data-part="control" type="radio" name="window" value="afternoon" checked />
-            <span data-part="label">Afternoon</span>
+          <label data-part="item" data-part-item="" data-checked>
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="window"
+              value="afternoon"
+              checked
+            />
+            <span data-part="label" data-part-label="">Afternoon</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="window" value="evening" />
-            <span data-part="label">Evening</span>
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="window"
+              value="evening"
+            />
+            <span data-part="label" data-part-label="">Evening</span>
           </label>
         </div>
       </div>
@@ -727,7 +1025,9 @@
       <div data-demo-narrow>
         <div
           data-ui="segmented-control"
+          data-ui-segmented-control=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-orientation="horizontal"
           data-condense="none"
@@ -737,14 +1037,27 @@
           aria-orientation="horizontal"
           style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
         >
-          <span data-part="indicator" aria-hidden="true"></span>
-          <label data-part="item" data-checked>
-            <input data-part="control" type="radio" name="frequency" value="now" checked />
-            <span data-part="label">Immediately</span>
+          <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+          <label data-part="item" data-part-item="" data-checked>
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="frequency"
+              value="now"
+              checked
+            />
+            <span data-part="label" data-part-label="">Immediately</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="frequency" value="digest" />
-            <span data-part="label">Once a day, in the evening digest</span>
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="frequency"
+              value="digest"
+            />
+            <span data-part="label" data-part-label="">Once a day, in the evening digest</span>
           </label>
         </div>
       </div>
@@ -754,7 +1067,9 @@
       <span data-demo-label>a right-to-left label inside a left-to-right page</span>
       <div
         data-ui="segmented-control"
+        data-ui-segmented-control=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-orientation="horizontal"
         data-condense="none"
@@ -763,14 +1078,21 @@
         aria-orientation="horizontal"
         style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
       >
-        <span data-part="indicator" aria-hidden="true"></span>
-        <label data-part="item" data-checked>
-          <input data-part="control" type="radio" name="language" value="ar" checked />
-          <span data-part="label" dir="rtl">العربية</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+        <label data-part="item" data-part-item="" data-checked>
+          <input
+            data-part="control"
+            data-part-control=""
+            type="radio"
+            name="language"
+            value="ar"
+            checked
+          />
+          <span data-part="label" data-part-label="" dir="rtl">العربية</span>
         </label>
-        <label data-part="item">
-          <input data-part="control" type="radio" name="language" value="en" />
-          <span data-part="label">English</span>
+        <label data-part="item" data-part-item="">
+          <input data-part="control" data-part-control="" type="radio" name="language" value="en" />
+          <span data-part="label" data-part-label="">English</span>
         </label>
       </div>
     </div>
@@ -782,12 +1104,21 @@
     <div data-demo-row>
       <span data-demo-label>in a form row · the control is the control height, to the pixel</span>
       <div data-demo-form-row>
-        <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
-          <input data-part="input" value="INV-2048" />
+        <div
+          data-ui="text-field"
+          data-ui-text-field=""
+          data-part="root"
+          data-part-root=""
+          data-size="md"
+          data-variant="outline"
+        >
+          <input data-part="input" data-part-input="" value="INV-2048" />
         </div>
         <div
           data-ui="segmented-control"
+          data-ui-segmented-control=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-orientation="horizontal"
           data-condense="none"
@@ -796,25 +1127,40 @@
           aria-orientation="horizontal"
           style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
         >
-          <span data-part="indicator" aria-hidden="true"></span>
-          <label data-part="item" data-checked>
-            <input data-part="control" type="radio" name="currency" value="brl" checked />
-            <span data-part="label">BRL</span>
+          <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+          <label data-part="item" data-part-item="" data-checked>
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="currency"
+              value="brl"
+              checked
+            />
+            <span data-part="label" data-part-label="">BRL</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="currency" value="usd" />
-            <span data-part="label">USD</span>
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="currency"
+              value="usd"
+            />
+            <span data-part="label" data-part-label="">USD</span>
           </label>
         </div>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Save</span>
+          <span data-part="label" data-part-label="">Save</span>
         </button>
       </div>
     </div>
@@ -822,12 +1168,21 @@
     <div data-demo-row>
       <span data-demo-label>sm · beside a small field and a small button</span>
       <div data-demo-form-row>
-        <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
-          <input data-part="input" value="INV-2048" />
+        <div
+          data-ui="text-field"
+          data-ui-text-field=""
+          data-part="root"
+          data-part-root=""
+          data-size="sm"
+          data-variant="outline"
+        >
+          <input data-part="input" data-part-input="" value="INV-2048" />
         </div>
         <div
           data-ui="segmented-control"
+          data-ui-segmented-control=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-orientation="horizontal"
           data-condense="none"
@@ -836,25 +1191,40 @@
           aria-orientation="horizontal"
           style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 1"
         >
-          <span data-part="indicator" aria-hidden="true"></span>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="currency-sm" value="brl" />
-            <span data-part="label">BRL</span>
+          <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="currency-sm"
+              value="brl"
+            />
+            <span data-part="label" data-part-label="">BRL</span>
           </label>
-          <label data-part="item" data-checked>
-            <input data-part="control" type="radio" name="currency-sm" value="usd" checked />
-            <span data-part="label">USD</span>
+          <label data-part="item" data-part-item="" data-checked>
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="currency-sm"
+              value="usd"
+              checked
+            />
+            <span data-part="label" data-part-label="">USD</span>
           </label>
         </div>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="sm"
           type="button"
         >
-          <span data-part="label">Save</span>
+          <span data-part="label" data-part-label="">Save</span>
         </button>
       </div>
     </div>
@@ -862,12 +1232,21 @@
     <div data-demo-row>
       <span data-demo-label>lg · beside a large field and a large button</span>
       <div data-demo-form-row>
-        <div data-ui="text-field" data-part="root" data-size="lg" data-variant="outline">
-          <input data-part="input" value="INV-2048" />
+        <div
+          data-ui="text-field"
+          data-ui-text-field=""
+          data-part="root"
+          data-part-root=""
+          data-size="lg"
+          data-variant="outline"
+        >
+          <input data-part="input" data-part-input="" value="INV-2048" />
         </div>
         <div
           data-ui="segmented-control"
+          data-ui-segmented-control=""
           data-part="root"
+          data-part-root=""
           data-size="lg"
           data-orientation="horizontal"
           data-condense="none"
@@ -876,25 +1255,40 @@
           aria-orientation="horizontal"
           style="--slotted-segmented-control-count: 2; --slotted-segmented-control-index: 0"
         >
-          <span data-part="indicator" aria-hidden="true"></span>
-          <label data-part="item" data-checked>
-            <input data-part="control" type="radio" name="currency-lg" value="brl" checked />
-            <span data-part="label">BRL</span>
+          <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+          <label data-part="item" data-part-item="" data-checked>
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="currency-lg"
+              value="brl"
+              checked
+            />
+            <span data-part="label" data-part-label="">BRL</span>
           </label>
-          <label data-part="item">
-            <input data-part="control" type="radio" name="currency-lg" value="usd" />
-            <span data-part="label">USD</span>
+          <label data-part="item" data-part-item="">
+            <input
+              data-part="control"
+              data-part-control=""
+              type="radio"
+              name="currency-lg"
+              value="usd"
+            />
+            <span data-part="label" data-part-label="">USD</span>
           </label>
         </div>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="lg"
           type="button"
         >
-          <span data-part="label">Save</span>
+          <span data-part="label" data-part-label="">Save</span>
         </button>
       </div>
     </div>
@@ -923,7 +1317,9 @@
     <span data-demo-label>on --slotted-surface</span>
     <div
       data-ui="segmented-control"
+      data-ui-segmented-control=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       data-condense="none"
@@ -932,18 +1328,37 @@
       aria-orientation="horizontal"
       style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
     >
-      <span data-part="indicator" aria-hidden="true"></span>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="ground-surface" value="day" />
-        <span data-part="label">Day</span>
+      <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+      <label data-part="item" data-part-item="">
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="ground-surface"
+          value="day"
+        />
+        <span data-part="label" data-part-label="">Day</span>
       </label>
-      <label data-part="item" data-checked>
-        <input data-part="control" type="radio" name="ground-surface" value="agenda" checked />
-        <span data-part="label">Agenda</span>
+      <label data-part="item" data-part-item="" data-checked>
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="ground-surface"
+          value="agenda"
+          checked
+        />
+        <span data-part="label" data-part-label="">Agenda</span>
       </label>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="ground-surface" value="journey" />
-        <span data-part="label">Journey</span>
+      <label data-part="item" data-part-item="">
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="ground-surface"
+          value="journey"
+        />
+        <span data-part="label" data-part-label="">Journey</span>
       </label>
     </div>
   </div>
@@ -951,7 +1366,9 @@
     <span data-demo-label>on --slotted-surface-sunken</span>
     <div
       data-ui="segmented-control"
+      data-ui-segmented-control=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       data-condense="none"
@@ -960,24 +1377,37 @@
       aria-orientation="horizontal"
       style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
     >
-      <span data-part="indicator" aria-hidden="true"></span>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="ground-surface-sunken" value="day" />
-        <span data-part="label">Day</span>
-      </label>
-      <label data-part="item" data-checked>
+      <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+      <label data-part="item" data-part-item="">
         <input
           data-part="control"
+          data-part-control=""
+          type="radio"
+          name="ground-surface-sunken"
+          value="day"
+        />
+        <span data-part="label" data-part-label="">Day</span>
+      </label>
+      <label data-part="item" data-part-item="" data-checked>
+        <input
+          data-part="control"
+          data-part-control=""
           type="radio"
           name="ground-surface-sunken"
           value="agenda"
           checked
         />
-        <span data-part="label">Agenda</span>
+        <span data-part="label" data-part-label="">Agenda</span>
       </label>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="ground-surface-sunken" value="journey" />
-        <span data-part="label">Journey</span>
+      <label data-part="item" data-part-item="">
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="ground-surface-sunken"
+          value="journey"
+        />
+        <span data-part="label" data-part-label="">Journey</span>
       </label>
     </div>
   </div>
@@ -985,7 +1415,9 @@
     <span data-demo-label>on --slotted-surface-raised</span>
     <div
       data-ui="segmented-control"
+      data-ui-segmented-control=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       data-condense="none"
@@ -994,24 +1426,37 @@
       aria-orientation="horizontal"
       style="--slotted-segmented-control-count: 3; --slotted-segmented-control-index: 1"
     >
-      <span data-part="indicator" aria-hidden="true"></span>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="ground-surface-raised" value="day" />
-        <span data-part="label">Day</span>
-      </label>
-      <label data-part="item" data-checked>
+      <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+      <label data-part="item" data-part-item="">
         <input
           data-part="control"
+          data-part-control=""
+          type="radio"
+          name="ground-surface-raised"
+          value="day"
+        />
+        <span data-part="label" data-part-label="">Day</span>
+      </label>
+      <label data-part="item" data-part-item="" data-checked>
+        <input
+          data-part="control"
+          data-part-control=""
           type="radio"
           name="ground-surface-raised"
           value="agenda"
           checked
         />
-        <span data-part="label">Agenda</span>
+        <span data-part="label" data-part-label="">Agenda</span>
       </label>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="ground-surface-raised" value="journey" />
-        <span data-part="label">Journey</span>
+      <label data-part="item" data-part-item="">
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="ground-surface-raised"
+          value="journey"
+        />
+        <span data-part="label" data-part-label="">Journey</span>
       </label>
     </div>
   </div>
@@ -1019,7 +1464,9 @@
     <span data-demo-label>narrower than its labels · each segment keeps to its column</span>
     <div
       data-ui="segmented-control"
+      data-ui-segmented-control=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-orientation="horizontal"
       data-condense="none"
@@ -1029,22 +1476,47 @@
       aria-orientation="horizontal"
       style="--slotted-segmented-control-count: 4; --slotted-segmented-control-index: 2"
     >
-      <span data-part="indicator" aria-hidden="true"></span>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="narrow" value="overview" />
-        <span data-part="label">Overview</span>
+      <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
+      <label data-part="item" data-part-item="">
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="narrow"
+          value="overview"
+        />
+        <span data-part="label" data-part-label="">Overview</span>
       </label>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="narrow" value="typography" />
-        <span data-part="label">Typography</span>
+      <label data-part="item" data-part-item="">
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="narrow"
+          value="typography"
+        />
+        <span data-part="label" data-part-label="">Typography</span>
       </label>
-      <label data-part="item" data-checked>
-        <input data-part="control" type="radio" name="narrow" value="payments" checked />
-        <span data-part="label">Payments</span>
+      <label data-part="item" data-part-item="" data-checked>
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="narrow"
+          value="payments"
+          checked
+        />
+        <span data-part="label" data-part-label="">Payments</span>
       </label>
-      <label data-part="item">
-        <input data-part="control" type="radio" name="narrow" value="lightyear" />
-        <span data-part="label">Lightyear</span>
+      <label data-part="item" data-part-item="">
+        <input
+          data-part="control"
+          data-part-control=""
+          type="radio"
+          name="narrow"
+          value="lightyear"
+        />
+        <span data-part="label" data-part-label="">Lightyear</span>
       </label>
     </div>
   </div>

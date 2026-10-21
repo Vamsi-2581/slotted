@@ -129,7 +129,7 @@ export interface DateTimePickerHighlight {
   standalone: true,
   exportAs: 'slDateTimePicker',
   imports: [NgTemplateOutlet, SlCalendar, SlDateTimeField, SlDateTimeFieldEnd, SlGlyph, SlIcon],
-  template: `<div data-part="control" (keydown)="onControlKeyDown($event)">
+  template: `<div data-part="control" data-part-control="" (keydown)="onControlKeyDown($event)">
       <div
         slDateTimeField
         #field="slDateTimeField"
@@ -163,6 +163,7 @@ export interface DateTimePickerHighlight {
           <button
             #trigger
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-haspopup="dialog"
             [attr.aria-label]="triggerLabel()"
@@ -182,12 +183,15 @@ export interface DateTimePickerHighlight {
       <div
         #layer
         data-ui="datetime-picker"
+        data-ui-datetime-picker=""
         data-part="positioner"
+        data-part-positioner=""
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
       >
         <div
           data-part="content"
+          data-part-content=""
           role="dialog"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
@@ -196,8 +200,8 @@ export interface DateTimePickerHighlight {
           [attr.data-open-to]="resolvedOpenTo()"
           (keydown)="onContentKeyDown($event)"
         >
-          <div data-part="head">
-            <span data-part="head-value">
+          <div data-part="head" data-part-head="">
+            <span data-part="head-value" data-part-head-value="">
               @if (held() !== null) {
                 {{ headValue() }}
               } @else {
@@ -210,14 +214,14 @@ export interface DateTimePickerHighlight {
               }
             </span>
             <ng-content select="[slDateTimePickerPresets]" />
-            <button data-part="now" type="button" (click)="chooseNow($event)">
+            <button data-part="now" data-part-now="" type="button" (click)="chooseNow($event)">
               <span slIcon size="sm"><svg slGlyph name="clock"></svg></span>
               {{ t('now') }}
             </button>
           </div>
 
-          <div data-part="panels">
-            <div #datePanel data-part="date-panel">
+          <div data-part="panels" data-part-panels="">
+            <div #datePanel data-part="date-panel" data-part-date-panel="">
               <div
                 slCalendar
                 #calendar="slCalendar"
@@ -240,13 +244,14 @@ export interface DateTimePickerHighlight {
               ></div>
             </div>
 
-            <div data-part="time-panel">
+            <div data-part="time-panel" data-part-time-panel="">
               @if (list().length === 0) {
-                <div data-part="empty">{{ t('empty') }}</div>
+                <div data-part="empty" data-part-empty="">{{ t('empty') }}</div>
               } @else {
                 <div
                   #rows
                   data-part="list"
+                  data-part-list=""
                   role="listbox"
                   [attr.aria-label]="listLabel()"
                   [attr.data-truncated]="truncated() ? '' : null"
@@ -255,6 +260,7 @@ export interface DateTimePickerHighlight {
                   @for (option of list(); track $index) {
                     <div
                       data-part="option"
+                      data-part-option=""
                       role="option"
                       [attr.aria-selected]="isSelected(option)"
                       [attr.aria-disabled]="option.unavailable ? 'true' : null"
@@ -292,7 +298,9 @@ export interface DateTimePickerHighlight {
   ],
   host: {
     'data-ui': 'datetime-picker',
+    'data-ui-datetime-picker': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-granularity]': 'resolvedGranularity()',

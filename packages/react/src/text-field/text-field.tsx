@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/text-field/text-field.css';
 
 import { writeToClipboard } from '@slotted/core/clipboard';
@@ -229,12 +230,12 @@ export function TextField({
 
   const control = (
     <input
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'input')}
       aria-busy={loading === true ? true : undefined}
       aria-describedby={[describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined}
       aria-invalid={ariaInvalid ?? (resolvedInvalid === true ? true : undefined)}
       aria-required={ariaRequired ?? (field?.required === true ? true : undefined)}
-      data-part="input"
+
       disabled={resolvedDisabled}
       id={id ?? field?.ids.control}
       maxLength={maxLength}
@@ -269,16 +270,27 @@ export function TextField({
 
   const children: ReactNode = (
     <>
-      {start === undefined ? null : <span data-part="start">{start}</span>}
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
       {control}
       {/* The ring, the mark and the two buttons below stay rendered for as
           long as their capability is on, and leave through `hidden`, so the
           stylesheet can take them out as well as bring them in. */}
       {loading === undefined ? null : (
-        <span aria-hidden="true" data-part="busy" data-ui="spinner" hidden={!loading} />
+        <span
+          aria-hidden="true"
+          data-part="busy"
+          data-part-busy=""
+          data-ui="spinner"
+          data-ui-spinner=""
+          hidden={!loading}
+        />
       )}
       {isPassword ? (
-        <span aria-hidden="true" data-part="caps-lock" hidden={!capsLock}>
+        <span aria-hidden="true" data-part="caps-lock" data-part-caps-lock="" hidden={!capsLock}>
           <Icon>
             <Glyph name="caps-lock" />
           </Icon>
@@ -288,6 +300,7 @@ export function TextField({
         <button
           aria-label={t('clear')}
           data-part="clear"
+          data-part-clear=""
           hidden={!showClear}
           onClick={clear}
           type="button"
@@ -301,6 +314,7 @@ export function TextField({
         <button
           aria-label={t('copy')}
           data-part="copy"
+          data-part-copy=""
           hidden={!showCopy}
           onClick={(event) => void copy(event)}
           type="button"
@@ -317,6 +331,7 @@ export function TextField({
           aria-label={t('reveal')}
           aria-pressed={isRevealed}
           data-part="reveal"
+          data-part-reveal=""
           onClick={toggleReveal}
           type="button"
         >
@@ -327,11 +342,15 @@ export function TextField({
           </Icon>
         </button>
       ) : null}
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
     </>
   );
 
-  const rootProps: TextFieldRootProps = {
+  const rootProps: TextFieldRootProps = keyedProps({
     children,
     className,
     style,
@@ -344,7 +363,7 @@ export function TextField({
     'data-size': resolvedSize,
     'data-ui': 'text-field',
     'data-variant': resolvedVariant,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -360,7 +379,11 @@ export function TextField({
  * ```
  */
 export function TextFieldAction({ render, type = 'button', ...nativeProps }: TextFieldActionProps) {
-  const props: TextFieldActionRootProps = { ...nativeProps, 'data-part': 'action', type };
+  const props: TextFieldActionRootProps = keyedProps({
+    ...nativeProps,
+    'data-part': 'action',
+    type,
+  });
   return render === undefined ? <button {...props} /> : render(props);
 }
 

@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createControllable } from '@slotted/core/state';
 import {
   connectorOf,
@@ -167,22 +168,23 @@ export function TimelineGroup({
   };
 
   const heading = (
-    <Heading data-part="group-label">
+    <Heading data-part="group-label" data-part-group-label="">
       {collapsible ? (
         <button
           aria-controls={listId}
           aria-expanded={isOpen}
           data-part="group-trigger"
+          data-part-group-trigger=""
           onClick={(event) => move(!isOpen, event.detail === 0 ? 'keyboard' : 'pointer', event)}
           type="button"
         >
-          <span aria-hidden="true" data-part="group-indicator">
+          <span aria-hidden="true" data-part="group-indicator" data-part-group-indicator="">
             <Icon>
               <Glyph name="chevron-down" />
             </Icon>
           </span>
           {label}
-          <span data-ui="visually-hidden">
+          <span data-ui="visually-hidden" data-ui-visually-hidden="">
             {isOpen ? timeline.t('collapse') : timeline.t('expand')}
           </span>
         </button>
@@ -194,16 +196,16 @@ export function TimelineGroup({
 
   const feed = timeline.mode === 'feed';
   const list = feed ? (
-    <div data-part="group-list" hidden={!isOpen} id={listId}>
+    <div data-part="group-list" data-part-group-list="" hidden={!isOpen} id={listId}>
       {layout.nodes}
     </div>
   ) : (
-    <ol data-part="group-list" hidden={!isOpen} id={listId}>
+    <ol data-part="group-list" data-part-group-list="" hidden={!isOpen} id={listId}>
       {layout.nodes}
     </ol>
   );
 
-  const rootProps: TimelineGroupRootProps = {
+  const rootProps: TimelineGroupRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -213,7 +215,7 @@ export function TimelineGroup({
     ),
     'data-open': isOpen ? '' : undefined,
     'data-part': 'group',
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref });
   return feed ? (
@@ -309,11 +311,15 @@ export function TimelineItem({
     ) : null;
 
   const body = (
-    <div data-part="content">
+    <div data-part="content" data-part-content="">
       {title === undefined ? null : (
-        <div data-part="title" id={id('title')}>
+        <div data-part="title" data-part-title="" id={id('title')}>
           {title}
-          {current ? <span data-ui="visually-hidden">{timeline.t('current')}</span> : null}
+          {current ? (
+            <span data-ui="visually-hidden" data-ui-visually-hidden="">
+              {timeline.t('current')}
+            </span>
+          ) : null}
         </div>
       )}
       {time === undefined ? null : (
@@ -322,21 +328,25 @@ export function TimelineItem({
         </TimelineTime>
       )}
       {actor === undefined ? null : (
-        <div data-part="actor" id={id('actor')}>
+        <div data-part="actor" data-part-actor="" id={id('actor')}>
           {actor}
         </div>
       )}
       {description === undefined ? null : (
-        <div data-part="description" id={id('description')}>
+        <div data-part="description" data-part-description="" id={id('description')}>
           {description}
         </div>
       )}
       {children}
-      {actions === undefined ? null : <div data-part="actions">{actions}</div>}
+      {actions === undefined ? null : (
+        <div data-part="actions" data-part-actions="">
+          {actions}
+        </div>
+      )}
     </div>
   );
 
-  const rootProps: TimelineItemRootProps = {
+  const rootProps: TimelineItemRootProps = keyedProps({
     ...nativeProps,
     ...(current ? { 'aria-current': true } : {}),
     ...(feed
@@ -356,16 +366,26 @@ export function TimelineItem({
     ...(loading ? { 'aria-busy': true } : {}),
     children: (
       <>
-        {opposite === undefined ? null : <div data-part="opposite">{opposite}</div>}
-        <div data-part="rail">
-          <span data-part="marker">
+        {opposite === undefined ? null : (
+          <div data-part="opposite" data-part-opposite="">
+            {opposite}
+          </div>
+        )}
+        <div data-part="rail" data-part-rail="">
+          <span data-part="marker" data-part-marker="">
             {loading ? (
-              <span aria-hidden="true" data-part="root" data-ui="spinner" />
+              <span
+                aria-hidden="true"
+                data-part="root"
+                data-part-root=""
+                data-ui="spinner"
+                data-ui-spinner=""
+              />
             ) : (
               (marker ?? check)
             )}
           </span>
-          {last ? null : <span aria-hidden="true" data-part="connector" />}
+          {last ? null : <span aria-hidden="true" data-part="connector" data-part-connector="" />}
         </div>
         {body}
       </>
@@ -378,7 +398,7 @@ export function TimelineItem({
     'data-side': resolvedSide,
     'data-tone': tone ?? timeline.tone,
     'data-variant': variant ?? timeline.variant,
-  };
+  });
 
   if (render !== undefined) return render({ ...rootProps, ref });
   return feed ? (
@@ -418,8 +438,8 @@ export function TimelineTime({
   return (
     <time
       {...(formatted.title === null ? {} : { title: formatted.title })}
-      {...nativeProps}
-      data-part="time"
+      {...withSelectorKey(nativeProps, 'part', 'time')}
+
       dateTime={formatted.dateTime}
       ref={ref}
     >

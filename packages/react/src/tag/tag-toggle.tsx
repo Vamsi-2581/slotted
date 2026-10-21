@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import { useId, useState } from 'react';
@@ -75,7 +76,7 @@ export function TagToggle({
     onRequest: (request) => onSelectedChange?.(request.value, request),
   });
 
-  const bodyProps: TagButtonBodyProps = {
+  const bodyProps: TagButtonBodyProps = keyedProps({
     ...nativeProps,
     'aria-pressed': state.value,
     children: (
@@ -83,7 +84,7 @@ export function TagToggle({
         end={end}
         indicator={
           /* The selection mark's check, which the sheet uncovers when the chip is on. */
-          <span aria-hidden="true" data-part="indicator">
+          <span aria-hidden="true" data-part="indicator" data-part-indicator="">
             <Icon>
               <Glyph name="check" />
             </Icon>
@@ -106,7 +107,7 @@ export function TagToggle({
       if (state.request(next, activationReason(event), event)) setUncontrolled(next);
     },
     type,
-  };
+  });
 
   return (
     <TagFrame

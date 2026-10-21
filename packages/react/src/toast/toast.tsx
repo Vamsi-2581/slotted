@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/toast/toast.css';
 
 import { createRemovalFocus } from '@slotted/core/focus';
@@ -310,13 +311,14 @@ export function ToastRegion({
     >
       <section
         aria-label={t('label')}
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'root')}
         data-attach={resolvedAttach}
-        data-part="root"
+
         data-placement={resolvedPlacement}
         data-stacking={resolvedStacking}
         data-swipe={String(resolvedSwipe)}
         data-ui="toast"
+        data-ui-toast=""
         {...(snapshot.paused ? { 'data-expanded': '' } : {})}
         onFocus={(event: FocusEvent<HTMLElement>) => {
           nativeProps.onFocus?.(event);
@@ -350,7 +352,7 @@ export function ToastRegion({
         style={style}
         tabIndex={nativeProps.tabIndex ?? -1}
       >
-        <ol data-part="list">
+        <ol data-part="list" data-part-list="">
           {snapshot.visible.map((message, index) =>
             children ? (
               children(message)

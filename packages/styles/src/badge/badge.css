@@ -16,7 +16,7 @@
    * that keeps an icon-only badge the same height as a text one, and the
    * minimum inline size that makes a one-figure pill a circle.
    */
-  [data-ui='badge'][data-part='root'] {
+  [data-ui-badge][data-part-root] {
     /**
      * Tone. The default is the one a badge carrying a value should speak in: a
      * badge with no tone stated is holding a number, not an opinion.
@@ -123,11 +123,11 @@
 
   /* ── Tone: which of the five semantic colours the badge speaks in ─────── */
 
-  [data-ui='badge'][data-part='root'][data-tone='secondary'] {
+  [data-ui-badge][data-part-root][data-tone='secondary'] {
     --_edge: var(--_border);
   }
 
-  [data-ui='badge'][data-part='root'][data-tone='accent'] {
+  [data-ui-badge][data-part-root][data-tone='accent'] {
     --_solid: var(--slotted-tone-accent-solid);
     --_on-solid: var(--slotted-tone-accent-on-solid);
     --_surface: var(--slotted-tone-accent-surface);
@@ -135,7 +135,7 @@
     --_text: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='badge'][data-part='root'][data-tone='success'] {
+  [data-ui-badge][data-part-root][data-tone='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_on-solid: var(--slotted-tone-success-on-solid);
     --_surface: var(--slotted-tone-success-surface);
@@ -143,7 +143,7 @@
     --_text: var(--slotted-tone-success-text);
   }
 
-  [data-ui='badge'][data-part='root'][data-tone='warning'] {
+  [data-ui-badge][data-part-root][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_on-solid: var(--slotted-tone-warning-on-solid);
     --_surface: var(--slotted-tone-warning-surface);
@@ -151,7 +151,7 @@
     --_text: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='badge'][data-part='root'][data-tone='danger'] {
+  [data-ui-badge][data-part-root][data-tone='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_on-solid: var(--slotted-tone-danger-on-solid);
     --_surface: var(--slotted-tone-danger-surface);
@@ -180,19 +180,19 @@
    * border looks like and disagree about which of them should wear it.
    */
 
-  [data-ui='badge'][data-part='root'][data-variant='solid'] {
+  [data-ui-badge][data-part-root][data-variant='solid'] {
     background-color: var(--_solid, ButtonFace);
     border-color: var(--_edge, ButtonFace);
     color: var(--_on-solid, ButtonText);
   }
 
-  [data-ui='badge'][data-part='root'][data-variant='soft'] {
+  [data-ui-badge][data-part-root][data-variant='soft'] {
     background-color: var(--_surface, ButtonFace);
     border-color: var(--_border, ButtonBorder);
     color: var(--_text, ButtonText);
   }
 
-  [data-ui='badge'][data-part='root'][data-variant='outline'] {
+  [data-ui-badge][data-part-root][data-variant='outline'] {
     background-color: transparent;
     border-color: var(--_border, ButtonBorder);
     color: var(--_text, ButtonText);
@@ -200,7 +200,7 @@
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='badge'][data-part='root'][data-size='sm'] {
+  [data-ui-badge][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     /* `0px` rather than `0`: a unitless zero inside the `--_block-size` sum
        makes the whole calculation invalid, and `min-block-size` silently fell
@@ -216,7 +216,7 @@
    * a rounding error: a 12px badge and a 13px badge should not carry visibly
    * different glyphs.
    */
-  [data-ui='badge'][data-part='root'][data-size='lg'] {
+  [data-ui-badge][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
     --_inset-block: var(--slotted-space-2, 0.25rem);
@@ -226,7 +226,7 @@
 
   /* ── Shape ────────────────────────────────────────────────────────────── */
 
-  [data-ui='badge'][data-part='root'][data-shape='square'] {
+  [data-ui-badge][data-part-root][data-shape='square'] {
     border-radius: var(--slotted-badge-radius, var(--slotted-radius-sm, 4px));
   }
 
@@ -244,7 +244,7 @@
    * A dot renders no value, so nothing is clipped. Text a consumer forces into
    * one overflows rather than disappearing.
    */
-  [data-ui='badge'][data-part='root'][data-shape='dot'] {
+  [data-ui-badge][data-part-root][data-shape='dot'] {
     block-size: var(--_dot-size);
     border-color: var(--slotted-badge-dot-border-color, var(--slotted-border-strong, CanvasText));
     border-radius: var(--slotted-radius-full, 9999px);
@@ -262,7 +262,7 @@
    * can make the root an `<a>` and a ring that appears only where a family
    * expects focus is a ring that goes missing.
    */
-  [data-ui='badge'][data-part='root']:focus-visible {
+  [data-ui-badge][data-part-root]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -293,14 +293,14 @@
    * below its content inside the flex root, which is the condition
    * `text-overflow` needs to have anything to do.
    */
-  [data-ui='badge'] [data-part='label'] {
+  [data-ui-badge] [data-part-label] {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   @supports (text-box: trim-both cap alphabetic) {
-    [data-ui='badge'] [data-part='label'] {
+    [data-ui-badge] [data-part-label] {
       /**
        * A descender and a tall diacritic both live outside a box trimmed to the
        * cap and the baseline, and `overflow: hidden` cut them off — visible in
@@ -323,8 +323,8 @@
    * from its container, and a bare glyph host such as `ng-icon` reads the
    * slot's font-size, so both are the glyph scale.
    */
-  [data-ui='badge'] [data-part='start'],
-  [data-ui='badge'] [data-part='end'] {
+  [data-ui-badge] [data-part-start],
+  [data-ui-badge] [data-part-end] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -338,8 +338,8 @@
     line-height: 1;
   }
 
-  [data-ui='badge'] [data-part='start'] > *,
-  [data-ui='badge'] [data-part='end'] > * {
+  [data-ui-badge] [data-part-start] > *,
+  [data-ui-badge] [data-part-end] > * {
     block-size: 100%;
     display: block;
     inline-size: 100%;
@@ -358,7 +358,7 @@
    * frame is read in. Everything else — which corner, how far in from it — is
    * written in logical insets and mirrors on its own.
    */
-  [data-ui='badge'][data-part='anchor'] {
+  [data-ui-badge][data-part-anchor] {
     --_dir: 1;
     /* Half the badge's own size. A proportion of the box rather than a step of
        any scale, which is why it is geometry here and not a token. */
@@ -389,25 +389,25 @@
     vertical-align: middle;
   }
 
-  [data-ui='badge'][data-part='anchor']:dir(rtl) {
+  [data-ui-badge][data-part-anchor]:dir(rtl) {
     --_dir: -1;
   }
 
-  [data-ui='badge'][data-part='anchor'][data-overlap='circle'] {
+  [data-ui-badge][data-part-anchor][data-overlap='circle'] {
     --_anchor-inset: 14%;
   }
 
-  [data-ui='badge'][data-part='anchor'][data-placement='top-start'],
-  [data-ui='badge'][data-part='anchor'][data-placement='bottom-start'] {
+  [data-ui-badge][data-part-anchor][data-placement='top-start'],
+  [data-ui-badge][data-part-anchor][data-placement='bottom-start'] {
     --_overhang-inline: -50%;
   }
 
-  [data-ui='badge'][data-part='anchor'][data-placement='bottom-start'],
-  [data-ui='badge'][data-part='anchor'][data-placement='bottom-end'] {
+  [data-ui-badge][data-part-anchor][data-placement='bottom-start'],
+  [data-ui-badge][data-part-anchor][data-placement='bottom-end'] {
     --_overhang-block: 50%;
   }
 
-  [data-ui='badge'][data-part='anchor'] > [data-ui='badge'][data-part='root'] {
+  [data-ui-badge][data-part-anchor] > [data-ui-badge][data-part-root] {
     /**
      * The ring is what separates the badge from whatever it is sitting on.
      * It is a token rather than a boolean, because a badge inside a card, a
@@ -424,23 +424,23 @@
     z-index: 1;
   }
 
-  [data-ui='badge'][data-part='anchor'][data-placement='top-end'] > [data-part='root'],
-  [data-ui='badge'][data-part='anchor'][data-placement='top-start'] > [data-part='root'] {
+  [data-ui-badge][data-part-anchor][data-placement='top-end'] > [data-part-root],
+  [data-ui-badge][data-part-anchor][data-placement='top-start'] > [data-part-root] {
     inset-block-start: var(--_anchor-inset);
   }
 
-  [data-ui='badge'][data-part='anchor'][data-placement='bottom-end'] > [data-part='root'],
-  [data-ui='badge'][data-part='anchor'][data-placement='bottom-start'] > [data-part='root'] {
+  [data-ui-badge][data-part-anchor][data-placement='bottom-end'] > [data-part-root],
+  [data-ui-badge][data-part-anchor][data-placement='bottom-start'] > [data-part-root] {
     inset-block-end: var(--_anchor-inset);
   }
 
-  [data-ui='badge'][data-part='anchor'][data-placement='top-end'] > [data-part='root'],
-  [data-ui='badge'][data-part='anchor'][data-placement='bottom-end'] > [data-part='root'] {
+  [data-ui-badge][data-part-anchor][data-placement='top-end'] > [data-part-root],
+  [data-ui-badge][data-part-anchor][data-placement='bottom-end'] > [data-part-root] {
     inset-inline-end: var(--_anchor-inset);
   }
 
-  [data-ui='badge'][data-part='anchor'][data-placement='top-start'] > [data-part='root'],
-  [data-ui='badge'][data-part='anchor'][data-placement='bottom-start'] > [data-part='root'] {
+  [data-ui-badge][data-part-anchor][data-placement='top-start'] > [data-part-root],
+  [data-ui-badge][data-part-anchor][data-placement='bottom-start'] > [data-part-root] {
     inset-inline-start: var(--_anchor-inset);
   }
 
@@ -455,7 +455,7 @@
    * from the page.
    */
   @media (forced-colors: active) {
-    [data-ui='badge'][data-part='root'] {
+    [data-ui-badge][data-part-root] {
       border-color: currentColor;
     }
   }

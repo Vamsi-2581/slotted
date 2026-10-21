@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createPresence } from '@slotted/core/presence';
 import {
   createContext,
@@ -68,7 +69,7 @@ export function NavigationMenuList({
   render,
   ...nativeProps
 }: NavigationMenuListProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'list' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'list' });
   if (render !== undefined) return render(rootProps);
   return <ul {...rootProps} ref={ref} />;
 }
@@ -129,14 +130,14 @@ export function NavigationMenuItem({
     [contentId, currents, disabled, open, reportCurrent, trigger, value],
   );
 
-  const rootProps: NavigationMenuItemRootProps = {
+  const rootProps: NavigationMenuItemRootProps = keyedProps({
     ...nativeProps,
     children,
     ...(disabled ? { 'data-disabled': '' as const } : {}),
     ...(open ? { 'data-open': '' as const } : {}),
     'data-part': 'item',
     'data-value': value,
-  };
+  });
 
   return (
     <ItemContext.Provider value={context}>
@@ -185,15 +186,15 @@ export function NavigationMenuTrigger({
       aria-controls={item.contentId}
       aria-expanded={item.open}
       {...(item.open ? { 'data-open': '' } : {})}
-      {...(item.hasCurrent ? { 'data-current': '' } : {})}
-      data-part="trigger"
+      {...withSelectorKey(item.hasCurrent ? { 'data-current': '' } : {}, 'part', 'trigger')}
+
       disabled={unavailable}
       onClick={handleClick}
       onPointerEnter={handlePointerEnter}
       ref={(node) => attach(node, item.setTrigger, ref)}
     >
       {children}
-      <span aria-hidden="true" data-part="indicator">
+      <span aria-hidden="true" data-part="indicator" data-part-indicator="">
         <Icon directional={vertical}>
           <Glyph name={vertical ? 'chevron-right' : 'chevron-down'} />
         </Icon>
@@ -234,7 +235,7 @@ export function NavigationMenuContent({
         ? motion.exit
         : null;
 
-  const rootProps: NavigationMenuContentRootProps = {
+  const rootProps: NavigationMenuContentRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-columns': String(columns),
@@ -243,7 +244,7 @@ export function NavigationMenuContent({
     'data-part': 'content',
     hidden: !item.open && !presence.mounted,
     id: item.contentId,
-  };
+  });
 
   return (
     <NavigationMenuContentContext.Provider value={true}>
@@ -295,7 +296,7 @@ export function NavigationMenuLink({
     if (closeOnSelect ?? navigation.closeOnSelect) navigation.select(event.nativeEvent);
   };
 
-  const rootProps: NavigationMenuLinkRootProps = {
+  const rootProps: NavigationMenuLinkRootProps = keyedProps({
     ...nativeProps,
     ...(isCurrent ? { 'aria-current': 'page' as const, 'data-current': '' as const } : {}),
     ...(disabled ? { 'aria-disabled': 'true' as const, 'data-disabled': '' as const } : {}),
@@ -303,7 +304,7 @@ export function NavigationMenuLink({
     'data-part': 'link',
     onClick: handleClick,
     ref: (node) => attach(node as HTMLAnchorElement | null, ref),
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <a {...(rootProps as NavigationMenuLinkRootProps & { ref: Ref<HTMLAnchorElement> })} />;
@@ -316,7 +317,7 @@ export function NavigationMenuLinks({
   render,
   ...nativeProps
 }: NavigationMenuLinksProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'links' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'links' });
   if (render !== undefined) return render(rootProps);
   return <ul {...rootProps} ref={ref} />;
 }
@@ -331,13 +332,13 @@ export function NavigationMenuGroup({
   ...nativeProps
 }: NavigationMenuGroupProps) {
   const labelId = useId();
-  const rootProps: NavigationMenuGroupRootProps = {
+  const rootProps: NavigationMenuGroupRootProps = keyedProps({
     ...nativeProps,
     'aria-labelledby': nativeProps['aria-labelledby'] ?? labelId,
     children,
     'data-part': 'group',
     role: 'group',
-  };
+  });
   return (
     <GroupContext.Provider value={labelId}>
       {render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps)}
@@ -353,12 +354,12 @@ export function NavigationMenuGroupLabel({
   ...nativeProps
 }: NavigationMenuPartProps) {
   const labelId = useContext(GroupContext);
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'group-label',
     ...(labelId !== undefined && nativeProps.id === undefined ? { id: labelId } : {}),
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -370,7 +371,7 @@ export function NavigationMenuFooter({
   render,
   ...nativeProps
 }: NavigationMenuPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'footer' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'footer' });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -378,7 +379,7 @@ export function NavigationMenuFooter({
 /** A rich link's mark, aligned to the text of its label. */
 export function NavigationMenuIcon({ children, ...nativeProps }: NavigationMenuSpanPartProps) {
   return (
-    <span aria-hidden="true" {...nativeProps} data-part="icon">
+    <span aria-hidden="true" {...withSelectorKey(nativeProps, 'part', 'icon')}>
       {children}
     </span>
   );
@@ -386,11 +387,7 @@ export function NavigationMenuIcon({ children, ...nativeProps }: NavigationMenuS
 
 /** A rich link's title. */
 export function NavigationMenuLabel({ children, ...nativeProps }: NavigationMenuSpanPartProps) {
-  return (
-    <span {...nativeProps} data-part="label">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'label')}>{children}</span>;
 }
 
 /** A rich link's description: two lines to the eye, whole in the DOM. */
@@ -398,9 +395,5 @@ export function NavigationMenuDescription({
   children,
   ...nativeProps
 }: NavigationMenuSpanPartProps) {
-  return (
-    <span {...nativeProps} data-part="description">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'description')}>{children}</span>;
 }

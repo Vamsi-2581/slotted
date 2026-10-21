@@ -21,7 +21,7 @@
    * browser, an iframe without `allow="fullscreen"`, a refused request. The
    * two ways are one component; only `data-mode` tells them apart.
    */
-  [data-ui='fullscreen'][data-part='root'][data-fullscreen] {
+  [data-ui-fullscreen][data-part-root][data-fullscreen] {
     /* The region is the viewport in full screen, so the viewport is what the
        inset answers: the page step on a desktop, down to the small step on a
        phone, where twenty-four pixels a side is an eighth of the width. */
@@ -75,7 +75,7 @@
    * (the automatic minimum of a flex item), so content taller than the screen
    * still scrolls in the region.
    */
-  [data-ui='fullscreen'][data-part='root'][data-fullscreen] {
+  [data-ui-fullscreen][data-part-root][data-fullscreen] {
     display: flex;
     flex-direction: column;
   }
@@ -95,8 +95,7 @@
    * full screen; a descendant selector on the part alone turned an open list
    * into a grid. A flex share only reaches a direct child in any case.
    */
-  [data-ui='fullscreen'][data-part='root'][data-fullscreen]
-    > [data-ui='fullscreen'][data-part='content'] {
+  [data-ui-fullscreen][data-part-root][data-fullscreen] > [data-ui-fullscreen][data-part-content] {
     display: grid;
     flex: 1 0 auto;
     grid-template-columns: minmax(0, 1fr);
@@ -115,9 +114,9 @@
    * menu opened, and the panel would drop to its own height under it. The
    * root is always appended last.
    */
-  [data-ui='fullscreen'][data-part='root'][data-fullscreen]
+  [data-ui-fullscreen][data-part-root][data-fullscreen]
     > :first-child:is(:last-child, :has(+ [data-slotted-portal]:last-child)):not(
-      [data-part='trigger'],
+      [data-part-trigger],
       img,
       video,
       canvas
@@ -131,7 +130,7 @@
    * gives a video in full screen. It may shrink below its natural height,
    * which a photograph taller than the screen has to.
    */
-  [data-ui='fullscreen'][data-part='root'][data-fullscreen]
+  [data-ui-fullscreen][data-part-root][data-fullscreen]
     > :is(img, video, canvas):first-child:is(
       :last-child,
       :has(+ [data-slotted-portal]:last-child)
@@ -142,7 +141,7 @@
     object-fit: contain;
   }
 
-  [data-ui='fullscreen'][data-part='root']::backdrop {
+  [data-ui-fullscreen][data-part-root]::backdrop {
     background-color: var(--slotted-fullscreen-surface, var(--slotted-surface, Canvas));
   }
 
@@ -161,7 +160,7 @@
    * page and never covered it. Nothing else here is `!important` — the ground,
    * the edge and the inset stay the consumer's to change in full screen.
    */
-  [data-ui='fullscreen'][data-part='root'][data-mode='layout'] {
+  [data-ui-fullscreen][data-part-root][data-mode='layout'] {
     animation: slotted-fullscreen-enter var(--slotted-duration-short) var(--slotted-easing-enter);
     block-size: auto !important;
     inline-size: auto !important;
@@ -199,7 +198,7 @@
    * control scale's, the same box `toggle` and `button` stand in, so the
    * control sits in a toolbar beside them without a pixel of difference.
    */
-  [data-ui='fullscreen'][data-part='trigger'] {
+  [data-ui-fullscreen][data-part-trigger] {
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
     --_font-size: var(--slotted-control-font-size-md, 13px);
@@ -247,7 +246,7 @@
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='fullscreen'][data-part='trigger'][data-size='sm'] {
+  [data-ui-fullscreen][data-part-trigger][data-size='sm'] {
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
@@ -255,7 +254,7 @@
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='fullscreen'][data-part='trigger'][data-size='lg'] {
+  [data-ui-fullscreen][data-part-trigger][data-size='lg'] {
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
@@ -271,7 +270,7 @@
    * consumer's icon placed in its stead, each at the control's icon step and
    * in the host's ink.
    */
-  [data-ui='fullscreen'] [data-part='icon'] {
+  [data-ui-fullscreen] [data-part-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     block-size: var(--_icon-size);
@@ -281,7 +280,7 @@
     inline-size: var(--_icon-size);
   }
 
-  [data-ui='fullscreen'] [data-part='icon'] > * {
+  [data-ui-fullscreen] [data-part-icon] > * {
     block-size: 100%;
     display: block;
     inline-size: 100%;
@@ -292,7 +291,7 @@
    * container is shorter than a translated label; the string stays whole in
    * the DOM and in the accessible name.
    */
-  [data-ui='fullscreen'] [data-part='label'] {
+  [data-ui-fullscreen] [data-part-label] {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -304,12 +303,12 @@
    * reader. The label is visually hidden rather than removed, which keeps
    * the accessible name the label the state gives it.
    */
-  [data-ui='fullscreen'][data-part='trigger'][data-icon-only] {
+  [data-ui-fullscreen][data-part-trigger][data-icon-only] {
     inline-size: var(--_height);
     padding-inline: 0;
   }
 
-  [data-ui='fullscreen'][data-part='trigger'][data-icon-only] [data-part='label'] {
+  [data-ui-fullscreen][data-part-trigger][data-icon-only] [data-part-label] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -326,7 +325,7 @@
    * screen needs its own ground, or the edge is all that separates the words
    * from what is behind them.
    */
-  [data-ui='fullscreen'][data-part='trigger'][data-variant='outline'] {
+  [data-ui-fullscreen][data-part-trigger][data-variant='outline'] {
     background-color: var(--slotted-control-surface, ButtonFace);
     border-color: var(
       --slotted-fullscreen-trigger-border-color,
@@ -337,14 +336,14 @@
 
   /* ── Hover and press, held back for disabled ─────────────────────────── */
 
-  [data-ui='fullscreen'][data-part='trigger']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-fullscreen][data-part-trigger]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-fullscreen-trigger-hover-background,
       var(--slotted-tone-secondary-subtle-hover, ButtonFace)
     );
   }
 
-  [data-ui='fullscreen'][data-part='trigger']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-fullscreen][data-part-trigger]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-fullscreen-trigger-active-background,
       var(--slotted-tone-secondary-subtle-active, ButtonFace)
@@ -354,22 +353,22 @@
 
   /* ── Focus ────────────────────────────────────────────────────────────── */
 
-  [data-ui='fullscreen'][data-part='trigger']:focus-visible {
+  [data-ui-fullscreen][data-part-trigger]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   /* ── Disabled ─────────────────────────────────────────────────────────── */
 
-  [data-ui='fullscreen'][data-part='trigger']:disabled,
-  [data-ui='fullscreen'][data-part='trigger'][data-disabled] {
+  [data-ui-fullscreen][data-part-trigger]:disabled,
+  [data-ui-fullscreen][data-part-trigger][data-disabled] {
     background-color: transparent;
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: not-allowed;
   }
 
-  [data-ui='fullscreen'][data-part='trigger'][data-variant='outline']:disabled,
-  [data-ui='fullscreen'][data-part='trigger'][data-variant='outline'][data-disabled] {
+  [data-ui-fullscreen][data-part-trigger][data-variant='outline']:disabled,
+  [data-ui-fullscreen][data-part-trigger][data-variant='outline'][data-disabled] {
     border-color: var(--slotted-disabled-border, GrayText);
     box-shadow: none;
   }

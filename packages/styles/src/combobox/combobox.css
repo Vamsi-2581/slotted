@@ -28,7 +28,7 @@
    * scrolling surface are all `select`'s decisions, taken in the same session
    * and written out in `packages/styles/src/select/select.css`. They are
    * repeated here rather than shared because the two families have two public
-   * identifiers, and a stylesheet that painted `[data-ui='select']` from a
+   * identifiers, and a stylesheet that painted `[data-ui-select]` from a
    * combobox would make one family's selector match the other's DOM. The
    * duplication is the price of that boundary and it is paid on purpose.
    *
@@ -54,7 +54,7 @@
 
   /* ── The control ──────────────────────────────────────────────────────── */
 
-  [data-ui='combobox'][data-part='root'] {
+  [data-ui-combobox][data-part-root] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -102,7 +102,7 @@
       box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='combobox'][data-part='root']:not([data-full-width]) {
+  [data-ui-combobox][data-part-root]:not([data-full-width]) {
     inline-size: auto;
   }
 
@@ -113,7 +113,7 @@
    * `autocomplete="both"` writes as a selected range rather than as text, so
    * the next character typed replaces it.
    */
-  [data-ui='combobox'] > [data-part='input'] {
+  [data-ui-combobox] > [data-part-input] {
     background-color: transparent;
     /* The frame's border box, not its content box: on a coarse pointer the frame
        is the touch target's height and the control it holds is too. Stretched
@@ -135,7 +135,7 @@
     text-overflow: ellipsis;
   }
 
-  [data-ui='combobox'] > [data-part='input']::placeholder {
+  [data-ui-combobox] > [data-part-input]::placeholder {
     color: var(--slotted-combobox-placeholder-color, var(--slotted-text-muted, GrayText));
     text-overflow: ellipsis;
   }
@@ -146,7 +146,7 @@
    * the theme's accent tone is what that paint should be, rather than the
    * browser's blue in a form that is not blue.
    */
-  [data-ui='combobox'] > [data-part='input']::selection {
+  [data-ui-combobox] > [data-part-input]::selection {
     background-color: var(
       --slotted-combobox-completion-background,
       var(--slotted-tone-accent-surface)
@@ -160,7 +160,7 @@
    * rather than erased, in the accent surface the theme owns — the repair
    * `text-field` makes, for the same reason.
    */
-  [data-ui='combobox'] > [data-part='input']:autofill {
+  [data-ui-combobox] > [data-part-input]:autofill {
     box-shadow: inset 0 0 0 100px
       var(--slotted-combobox-autofill-background, var(--slotted-tone-accent-surface));
     -webkit-text-fill-color: var(--slotted-combobox-color, var(--slotted-text, CanvasText));
@@ -168,7 +168,7 @@
 
   /* ── The two buttons inside the frame ─────────────────────────────────── */
 
-  [data-ui='combobox'] > :is([data-part='clear'], [data-part='trigger']) {
+  [data-ui-combobox] > :is([data-part-clear], [data-part-trigger]) {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -199,7 +199,7 @@
    * control is 24 pixels tall — the WCAG 2.2 minimum — so nothing drawn inside
    * it can also be 24.
    */
-  [data-ui='combobox'] > :is([data-part='clear'], [data-part='trigger'])::after {
+  [data-ui-combobox] > :is([data-part-clear], [data-part-trigger])::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -210,22 +210,22 @@
      the hit area above grows to 44 pixels around them. Side by side, neither
      button reaches across the edge the two share. */
   @media (pointer: coarse) {
-    [data-ui='combobox'] > :is([data-part='clear'], [data-part='trigger'])::after {
+    [data-ui-combobox] > :is([data-part-clear], [data-part-trigger])::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='combobox'] > [data-part='clear']:has(+ [data-part='trigger']:not([hidden]))::after {
+    [data-ui-combobox] > [data-part-clear]:has(+ [data-part-trigger]:not([hidden]))::after {
       inset-inline-end: 0;
     }
 
-    [data-ui='combobox'] > [data-part='clear']:not([hidden]) + [data-part='trigger']::after {
+    [data-ui-combobox] > [data-part-clear]:not([hidden]) + [data-part-trigger]::after {
       inset-inline-start: 0;
     }
   }
 
   /* The cross and the chevron are `Glyph` elements the binding draws, sized
      here to the control's icon step. */
-  [data-ui='combobox'] > :is([data-part='clear'], [data-part='trigger']) {
+  [data-ui-combobox] > :is([data-part-clear], [data-part-trigger]) {
     --slotted-icon-size: var(--_icon-size);
   }
 
@@ -234,7 +234,7 @@
    * button is what a reader presses and the arrow is what turns over. The
    * library's own `Glyph` in an `icon` box; a character is never an icon.
    */
-  [data-ui='combobox'] [data-part='arrow'] {
+  [data-ui-combobox] [data-part-arrow] {
     align-items: center;
     block-size: var(--_icon-size);
     display: flex;
@@ -242,12 +242,12 @@
     justify-content: center;
   }
 
-  [data-ui='combobox'] [data-part='arrow'] > [data-ui='icon'] {
+  [data-ui-combobox] [data-part-arrow] > [data-ui-icon] {
     transition: rotate var(--slotted-control-transition-duration)
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='combobox'][data-open] [data-part='arrow'] > [data-ui='icon'] {
+  [data-ui-combobox][data-open] [data-part-arrow] > [data-ui-icon] {
     rotate: 180deg;
   }
 
@@ -258,7 +258,7 @@
    * draws for every family that waits, worn as `data-ui='spinner'` beside this
    * family's own part.
    */
-  [data-ui='combobox'] [data-part='busy'] {
+  [data-ui-combobox] [data-part-busy] {
     --slotted-spinner-size: var(--_icon-size);
 
     color: var(--slotted-combobox-arrow-color, var(--slotted-text-muted, GrayText));
@@ -267,7 +267,7 @@
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='combobox'][data-part='root'][data-size='sm'] {
+  [data-ui-combobox][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
@@ -276,7 +276,7 @@
     --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='combobox'][data-part='root'][data-size='md'] {
+  [data-ui-combobox][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
@@ -285,7 +285,7 @@
     --_inner-size: var(--slotted-control-inner-size-md, 24px);
   }
 
-  [data-ui='combobox'][data-part='root'][data-size='lg'] {
+  [data-ui-combobox][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -296,7 +296,7 @@
 
   /* ── Variant ──────────────────────────────────────────────────────────── */
 
-  [data-ui='combobox'][data-part='root'][data-variant='subtle'] {
+  [data-ui-combobox][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-combobox-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -310,7 +310,7 @@
   /* No edge, no lift, no ground and no corner of its own: the cell it sits in
      is the box, the row is the ground, a cell has no corner, and the resting
      shadow would draw the cell where there is none. */
-  [data-ui='combobox'][data-part='root'][data-variant='plain'] {
+  [data-ui-combobox][data-part-root][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -318,20 +318,20 @@
   }
 
   @media (forced-colors: active) {
-    [data-ui='combobox'][data-part='root'][data-variant='plain'] {
+    [data-ui-combobox][data-part-root][data-variant='plain'] {
       border-color: ButtonBorder;
     }
   }
 
   /* ── States on the control ────────────────────────────────────────────── */
 
-  [data-ui='combobox'][data-part='root']:hover:not([data-disabled]):not([data-readonly]):not(
+  [data-ui-combobox][data-part-root]:hover:not([data-disabled]):not([data-readonly]):not(
       [data-invalid]
     ) {
     border-color: var(--slotted-combobox-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='combobox'][data-part='root'][data-variant='subtle']:hover:not([data-disabled]):not(
+  [data-ui-combobox][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -340,7 +340,7 @@
     );
   }
 
-  [data-ui='combobox'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+  [data-ui-combobox][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       [data-readonly]
     ):not([data-invalid]) {
     background-color: var(
@@ -351,7 +351,7 @@
     border-color: transparent;
   }
 
-  [data-ui='combobox'][data-part='root']:has(> [data-part='input']:focus-visible) {
+  [data-ui-combobox][data-part-root]:has(> [data-part-input]:focus-visible) {
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -365,18 +365,16 @@
    * shadow that appears only under focus is a cell that changes size when it
    * is used.
    */
-  [data-ui='combobox'][data-part='root'][data-variant='plain']:has(
-      > [data-part='input']:focus-visible
-    ) {
+  [data-ui-combobox][data-part-root][data-variant='plain']:has(> [data-part-input]:focus-visible) {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='combobox'][data-part='root'][data-open]:not([data-disabled]) {
+  [data-ui-combobox][data-part-root][data-open]:not([data-disabled]) {
     border-color: var(--slotted-combobox-open-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='combobox'][data-part='root'][data-invalid] {
+  [data-ui-combobox][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-combobox-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -401,15 +399,15 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='combobox'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible) {
+  [data-ui-combobox][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='combobox'][data-part='root'][data-variant='plain'][data-invalid]:has(
-      > [data-part='input']:focus-visible
+  [data-ui-combobox][data-part-root][data-variant='plain'][data-invalid]:has(
+      > [data-part-input]:focus-visible
     ) {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
@@ -427,21 +425,21 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='combobox'][data-part='root'][data-invalid] {
+    [data-ui-combobox][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='combobox'][data-part='root'][data-invalid]:has(> [data-part='input']:focus-visible) {
+    [data-ui-combobox][data-part-root][data-invalid]:has(> [data-part-input]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='combobox'][data-part='root'][data-variant='plain'][data-invalid]:has(
-        > [data-part='input']:focus-visible
+    [data-ui-combobox][data-part-root][data-variant='plain'][data-invalid]:has(
+        > [data-part-input]:focus-visible
       ) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
@@ -456,14 +454,14 @@
    * popup. The native `readonly` gives the first three; the second is the
    * family's, because the pattern has no readonly for a combobox.
    */
-  [data-ui='combobox'][data-part='root'][data-readonly] {
+  [data-ui-combobox][data-part-root][data-readonly] {
     background-color: var(
       --slotted-combobox-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='combobox'][data-part='root'][data-readonly] [data-part='arrow'] {
+  [data-ui-combobox][data-part-root][data-readonly] [data-part-arrow] {
     opacity: 0.5;
   }
 
@@ -472,8 +470,8 @@
    * because a disabled `fieldset` disables every control inside it and the
    * control has no way to say so.
    */
-  [data-ui='combobox'][data-part='root'][data-disabled],
-  [data-ui='combobox'][data-part='root']:has(> [data-part='input']:disabled) {
+  [data-ui-combobox][data-part-root][data-disabled],
+  [data-ui-combobox][data-part-root]:has(> [data-part-input]:disabled) {
     background-color: var(
       --slotted-combobox-disabled-background,
       var(--slotted-disabled-background)
@@ -484,16 +482,16 @@
     cursor: not-allowed;
   }
 
-  [data-ui='combobox']
-    > :is([data-part='clear'], [data-part='trigger']):hover:not(:disabled):not([data-disabled]) {
+  [data-ui-combobox]
+    > :is([data-part-clear], [data-part-trigger]):hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-combobox-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='combobox']
-    > :is([data-part='clear'], [data-part='trigger']):active:not(:disabled):not([data-disabled]) {
+  [data-ui-combobox]
+    > :is([data-part-clear], [data-part-trigger]):active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-combobox-action-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -507,14 +505,14 @@
    * it. The trigger is not in the tab sequence and takes the same rule anyway,
    * because a script may focus it.
    */
-  [data-ui='combobox'] > :is([data-part='clear'], [data-part='trigger']):focus-visible {
+  [data-ui-combobox] > :is([data-part-clear], [data-part-trigger]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
   /* ── The layer ────────────────────────────────────────────────────────── */
 
-  [data-ui='combobox'][data-part='positioner'] {
+  [data-ui-combobox][data-part-positioner] {
     --_surface: var(--slotted-combobox-surface, var(--slotted-surface-raised, #ffffff));
     --_text: var(--slotted-combobox-content-text, var(--slotted-text, #0f172a));
     --_muted: var(--slotted-combobox-content-text-muted, var(--slotted-text-muted, #5b6b7f));
@@ -583,12 +581,12 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-side='top'] {
+  [data-ui-combobox][data-part-positioner][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* A lateral side has no block direction to arrive from, so it only fades. */
-  [data-ui='combobox'][data-part='positioner']:is([data-side='left'], [data-side='right']) {
+  [data-ui-combobox][data-part-positioner]:is([data-side='left'], [data-side='right']) {
     translate: 0 0;
   }
 
@@ -601,7 +599,7 @@
    * A keyframe states where it starts. The exit stays a transition: it
    * leaves from wherever the layer is, on the closed rule's durations.
    */
-  [data-ui='combobox'][data-part='positioner'][data-open] {
+  [data-ui-combobox][data-part-positioner][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -612,16 +610,16 @@
    * with the side, and a layer written open in static markup — the harness,
    * a docs snippet — is simply there, and is photographed where it stands.
    */
-  [data-ui='combobox'][data-part='positioner'][data-open][data-positioned] {
+  [data-ui-combobox][data-part-positioner][data-open][data-positioned] {
     animation: slotted-combobox-enter-down var(--slotted-duration-medium)
       var(--slotted-easing-enter);
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-open][data-positioned][data-side='top'] {
+  [data-ui-combobox][data-part-positioner][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-combobox-enter-up;
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-open][data-positioned]:is(
+  [data-ui-combobox][data-part-positioner][data-open][data-positioned]:is(
       [data-side='left'],
       [data-side='right']
     ) {
@@ -650,37 +648,37 @@
 
   /* Stillness keeps the fade and drops the movement (R7). */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='combobox'][data-part='positioner'],
-    [data-ui='combobox'][data-part='positioner'][data-side='top'],
-    [data-ui='combobox'][data-part='positioner'][data-side='left'],
-    [data-ui='combobox'][data-part='positioner'][data-side='right'] {
+    [data-ui-combobox][data-part-positioner],
+    [data-ui-combobox][data-part-positioner][data-side='top'],
+    [data-ui-combobox][data-part-positioner][data-side='left'],
+    [data-ui-combobox][data-part-positioner][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='combobox'][data-part='positioner'][data-open][data-positioned],
-    [data-ui='combobox'][data-part='positioner'][data-open][data-positioned][data-side='top'],
-    [data-ui='combobox'][data-part='positioner'][data-open][data-positioned][data-side='left'],
-    [data-ui='combobox'][data-part='positioner'][data-open][data-positioned][data-side='right'] {
+    [data-ui-combobox][data-part-positioner][data-open][data-positioned],
+    [data-ui-combobox][data-part-positioner][data-open][data-positioned][data-side='top'],
+    [data-ui-combobox][data-part-positioner][data-open][data-positioned][data-side='left'],
+    [data-ui-combobox][data-part-positioner][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-combobox-fade;
     }
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-detached] {
+  [data-ui-combobox][data-part-positioner][data-detached] {
     visibility: hidden;
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-width='anchor'] {
+  [data-ui-combobox][data-part-positioner][data-width='anchor'] {
     inline-size: var(--slotted-positioner-anchor-width, auto);
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-width='content'] {
+  [data-ui-combobox][data-part-positioner][data-width='content'] {
     inline-size: max-content;
     max-inline-size: min(var(--_measure), var(--slotted-positioner-available-width, 100vw));
     min-inline-size: var(--slotted-positioner-anchor-width, auto);
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-size='sm'] {
+  [data-ui-combobox][data-part-positioner][data-size='sm'] {
     --_item-inset: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_item-height: var(--slotted-control-height-sm, 30px);
     --_content-font-size: var(--slotted-control-font-size-sm, 12px);
@@ -689,7 +687,7 @@
     --_column-gap: var(--slotted-control-gap-sm, 0.375rem);
   }
 
-  [data-ui='combobox'][data-part='positioner'][data-size='lg'] {
+  [data-ui-combobox][data-part-positioner][data-size='lg'] {
     --_item-inset: var(--slotted-control-padding-inline-lg, 1rem);
     --_item-height: var(--slotted-control-height-lg, 38px);
     --_content-font-size: var(--slotted-control-font-size-lg, 14px);
@@ -700,7 +698,7 @@
 
   /* ── The surface ──────────────────────────────────────────────────────── */
 
-  [data-ui='combobox'] > [data-part='content'] {
+  [data-ui-combobox] > [data-part-content] {
     background: var(--_surface);
     border: var(--_border-width) solid var(--_border-color);
     border-radius: var(--_radius);
@@ -722,19 +720,19 @@
     pointer-events: auto;
   }
 
-  [data-ui='combobox'] > [data-part='content']:focus-visible {
+  [data-ui-combobox] > [data-part-content]:focus-visible {
     outline: none;
   }
 
   /* ── Groups ───────────────────────────────────────────────────────────── */
 
-  [data-ui='combobox'] [data-part='group'] {
+  [data-ui-combobox] [data-part-group] {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
   }
 
-  [data-ui='combobox'] [data-part='group-label'] {
+  [data-ui-combobox] [data-part-group-label] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -753,12 +751,12 @@
    * either beats the user agent's own `[hidden] { display: none }`, because an
    * author rule wins over the user agent sheet.
    */
-  [data-ui='combobox'] [data-part='item'][hidden],
-  [data-ui='combobox'] [data-part='group'][hidden] {
+  [data-ui-combobox] [data-part-item][hidden],
+  [data-ui-combobox] [data-part-group][hidden] {
     display: none;
   }
 
-  [data-ui='combobox'] [data-part='item'] {
+  [data-ui-combobox] [data-part-item] {
     align-content: center;
     border-radius: var(--_item-radius);
     box-sizing: border-box;
@@ -784,7 +782,7 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='combobox'] [data-part='item'][data-current] {
+  [data-ui-combobox] [data-part-item][data-current] {
     background-color: var(--_highlight);
     /**
      * A ring as well as a ground. Nothing on this surface holds focus — DOM
@@ -798,11 +796,11 @@
       var(--slotted-combobox-highlight-ring, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='combobox'] [data-part='item']:not([data-disabled]):active {
+  [data-ui-combobox] [data-part-item]:not([data-disabled]):active {
     background-color: var(--_highlight-active);
   }
 
-  [data-ui='combobox'] [data-part='item'][data-selected] {
+  [data-ui-combobox] [data-part-item][data-selected] {
     color: var(--_selected-color);
   }
 
@@ -815,21 +813,21 @@
    * selection begins and ends. `select` and `combobox` draw the same ground
    * and answer the same way; `selection-block.test.mjs` holds the three to it.
    */
-  [data-ui='combobox'] [data-part='item'][data-selected] + [data-part='item'][data-selected] {
+  [data-ui-combobox] [data-part-item][data-selected] + [data-part-item][data-selected] {
     border-start-end-radius: 0;
     border-start-start-radius: 0;
   }
 
-  [data-ui='combobox'] [data-part='item'][data-selected]:has(+ [data-part='item'][data-selected]) {
+  [data-ui-combobox] [data-part-item][data-selected]:has(+ [data-part-item][data-selected]) {
     border-end-end-radius: 0;
     border-end-start-radius: 0;
   }
 
-  [data-ui='combobox'] [data-part='item'][data-selected] > [data-part='label'] {
+  [data-ui-combobox] [data-part-item][data-selected] > [data-part-label] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='combobox'] [data-part='item'][data-disabled] {
+  [data-ui-combobox] [data-part-item][data-disabled] {
     color: var(--slotted-disabled-foreground, #64748b);
     cursor: not-allowed;
   }
@@ -855,7 +853,7 @@
    * would watch it disappear. A cursor lifts, always. What the row cannot do is
    * said by the ink and by the ring, which both step down to the disabled pair.
    */
-  [data-ui='combobox'] [data-part='item'][data-disabled][data-current] {
+  [data-ui-combobox] [data-part-item][data-disabled][data-current] {
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px)
       var(--slotted-disabled-border, #cbd5e1);
     color: var(--slotted-disabled-foreground, #64748b);
@@ -863,13 +861,13 @@
 
   /* ── The cells ────────────────────────────────────────────────────────── */
 
-  [data-ui='combobox'] :is([data-part='indicator'], [data-part='icon']) {
+  [data-ui-combobox] :is([data-part-indicator], [data-part-icon]) {
     block-size: 1lh;
   }
 
   /* Column one holds content and paints none: a `Glyph` in an `Icon` box, or
      artwork of the consumer's own, centred and sized from the column. */
-  [data-ui='combobox'] [data-part='icon'] {
+  [data-ui-combobox] [data-part-icon] {
     --slotted-icon-size: var(--_content-icon-size);
 
     align-items: center;
@@ -882,7 +880,7 @@
     margin-inline-end: var(--_column-gap);
   }
 
-  [data-ui='combobox'] [data-part='label'] {
+  [data-ui-combobox] [data-part-label] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;
@@ -906,7 +904,7 @@
    * run moved on every keystroke as the filter re-marked the label (CB6).
    */
 
-  [data-ui='combobox'] [data-part='description'] {
+  [data-ui-combobox] [data-part-description] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     grid-column: 2;
@@ -916,12 +914,12 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='combobox'] [data-part='item'][data-disabled] > [data-part='description'] {
+  [data-ui-combobox] [data-part-item][data-disabled] > [data-part-description] {
     color: inherit;
   }
 
   /* The tick is a `Glyph` the binding draws, at the content's icon step. */
-  [data-ui='combobox'] [data-part='indicator'] {
+  [data-ui-combobox] [data-part-indicator] {
     --slotted-icon-size: var(--_content-icon-size);
 
     align-items: center;
@@ -936,13 +934,13 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='combobox'] [data-part='item'][data-selected] > [data-part='indicator'] {
+  [data-ui-combobox] [data-part-item][data-selected] > [data-part-indicator] {
     opacity: 1;
   }
 
   /* ── Separator, empty, status ─────────────────────────────────────────── */
 
-  [data-ui='combobox'] [data-part='separator'] {
+  [data-ui-combobox] [data-part-separator] {
     background-color: var(--slotted-combobox-separator-color, var(--_border-color));
     block-size: var(--_border-width);
     border: 0;
@@ -957,7 +955,7 @@
    * when the results land — which is the gap none of the surveyed
    * implementations closes.
    */
-  [data-ui='combobox'] :is([data-part='empty'], [data-part='status']) {
+  [data-ui-combobox] :is([data-part-empty], [data-part-status]) {
     color: var(--_muted);
     /**
      * Its own bidi run, ordered by its own content. "3 results" is a European
@@ -990,7 +988,7 @@
    * often present with nothing to draw. A row with no text takes no space, and
    * a row with text takes the same space as the empty message beside it.
    */
-  [data-ui='combobox'] [data-part='status']:empty {
+  [data-ui-combobox] [data-part-status]:empty {
     display: none;
   }
 
@@ -1003,7 +1001,7 @@
    * about how a placeholder is painted — and they are hidden from assistive
    * technology, because the `status` row beside them is the live region.
    */
-  [data-ui='combobox'] [data-part='placeholder'] {
+  [data-ui-combobox] [data-part-placeholder] {
     display: grid;
     /* The surface is a grid of option columns; the rows span all of them, as
        the status and empty rows do. */
@@ -1012,23 +1010,23 @@
     padding-inline: var(--_item-inset);
   }
 
-  [data-ui='combobox'] [data-part='placeholder'] > * {
+  [data-ui-combobox] [data-part-placeholder] > * {
     align-items: center;
     display: flex;
     min-block-size: var(--_item-height);
   }
 
-  [data-ui='combobox'] [data-part='placeholder'] > [data-ui='skeleton'] {
+  [data-ui-combobox] [data-part-placeholder] > [data-ui-skeleton] {
     align-self: center;
   }
 
   /* Three ragged widths: three identical bars read as a table, and a list of
      labels is ragged. */
-  [data-ui='combobox'] [data-part='placeholder'] > :nth-child(2) [data-ui='skeleton'] {
+  [data-ui-combobox] [data-part-placeholder] > :nth-child(2) [data-ui-skeleton] {
     inline-size: 78%;
   }
 
-  [data-ui='combobox'] [data-part='placeholder'] > :nth-child(3) [data-ui='skeleton'] {
+  [data-ui-combobox] [data-part-placeholder] > :nth-child(3) [data-ui-skeleton] {
     inline-size: 56%;
   }
 
@@ -1039,20 +1037,20 @@
    * many for one wait (SL6/CB5).
    */
 
-  [data-ui='combobox'] > [data-part='content'][data-loading] {
+  [data-ui-combobox] > [data-part-content][data-loading] {
     cursor: progress;
   }
 
   /* ── Forced colours ───────────────────────────────────────────────────── */
 
   @media (forced-colors: active) {
-    [data-ui='combobox'] [data-part='item'][data-current] {
+    [data-ui-combobox] [data-part-item][data-current] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='combobox'] [data-part='item'][data-disabled][data-current] {
+    [data-ui-combobox] [data-part-item][data-disabled][data-current] {
       background-color: Highlight;
       color: GrayText;
     }

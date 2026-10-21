@@ -174,7 +174,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
   ],
   host: {
     'data-ui': 'entity-picker',
+    'data-ui-entity-picker': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-selection-mode]': 'selectionMode()',
@@ -193,7 +195,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
   },
   template: `
     @if (hasScopes()) {
-      <div data-part="scope">
+      <div data-part="scope" data-part-scope="">
         <sl-select
           [value]="scope()"
           [items]="scopeItems()"
@@ -209,9 +211,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         </sl-select>
       </div>
     }
-    <div data-part="control" #control>
+    <div data-part="control" data-part-control="" #control>
       @if (showSelection(); as chosen) {
-        <span data-part="selection" aria-hidden="true">
+        <span data-part="selection" data-part-selection="" aria-hidden="true">
           <span
             slAvatar
             decorative
@@ -225,12 +227,14 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         </span>
       }
       @if (multiple()) {
-        <div data-part="values" role="grid" [attr.aria-label]="chipsLabel()">
-          <div data-part="chips" role="row" #chips>
+        <div data-part="values" data-part-values="" role="grid" [attr.aria-label]="chipsLabel()">
+          <div data-part="chips" data-part-chips="" role="row" #chips>
             @for (id of chosen(); track id) {
               <span
                 data-ui="tag"
+                data-ui-tag=""
                 data-part="root"
+                data-part-root=""
                 data-size="sm"
                 data-tone="secondary"
                 role="gridcell"
@@ -244,9 +248,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                 [attr.aria-label]="chipName(id)"
                 (keydown)="onChipKey(id, $event)"
               >
-                <span data-part="body">
+                <span data-part="body" data-part-body="">
                   @if (resolvedMedia() === 'avatar' && record(id)?.avatar !== null) {
-                    <span data-part="start">
+                    <span data-part="start" data-part-start="">
                       @if (record(id); as entity) {
                         <span
                           slAvatar
@@ -261,7 +265,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                       } @else if (resolution(id) === 'pending') {
                         <span
                           data-ui="skeleton"
+                          data-ui-skeleton=""
                           data-part="root"
+                          data-part-root=""
                           data-shape="circle"
                           data-size="xs"
                           data-loading
@@ -272,11 +278,13 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                       }
                     </span>
                   }
-                  <span data-part="label">
+                  <span data-part="label" data-part-label="">
                     @if (resolution(id) === 'pending' && !record(id)) {
                       <span
                         data-ui="skeleton"
+                        data-ui-skeleton=""
                         data-part="root"
+                        data-part-root=""
                         data-shape="text"
                         data-loading
                         aria-hidden="true"
@@ -295,6 +303,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                   <button
                     type="button"
                     data-part="remove"
+                    data-part-remove=""
                     tabindex="-1"
                     [attr.aria-label]="removeLabel(id)"
                     (click)="onRemoveClick(id, $event)"
@@ -308,7 +317,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               <span
                 #count
                 data-ui="tag"
+                data-ui-tag=""
                 data-part="root"
+                data-part-root=""
                 data-size="sm"
                 data-tone="secondary"
                 data-variant="outline"
@@ -319,12 +330,12 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                 [attr.aria-label]="moreLabel()"
                 (click)="onCountClick($event)"
               >
-                <span data-part="body">
-                  <span data-part="label">{{ moreText() }}</span>
+                <span data-part="body" data-part-body="">
+                  <span data-part="label" data-part-label="">{{ moreText() }}</span>
                 </span>
               </span>
             }
-            <span data-part="field" role="gridcell">
+            <span data-part="field" data-part-field="" role="gridcell">
               <ng-container [ngTemplateOutlet]="field_" />
             </span>
           </div>
@@ -336,6 +347,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         <button
           type="button"
           data-part="clear"
+          data-part-clear=""
           [attr.aria-label]="t('clear')"
           (click)="onClear($event)"
         >
@@ -346,14 +358,21 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         type="button"
         tabindex="-1"
         data-part="trigger"
+        data-part-trigger=""
         [disabled]="resolvedDisabled()"
         [attr.aria-label]="t('trigger')"
         (click)="onToggle($event)"
       >
         @if (busy()) {
-          <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+          <span
+            data-part="busy"
+            data-part-busy=""
+            data-ui="spinner"
+            data-ui-spinner=""
+            aria-hidden="true"
+          ></span>
         } @else {
-          <span data-part="arrow"
+          <span data-part="arrow" data-part-arrow=""
             ><span slIcon><svg slGlyph name="chevron-down"></svg></span
           ></span>
         }
@@ -366,6 +385,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         type="text"
         role="combobox"
         data-part="input"
+        data-part-input=""
         autocomplete="off"
         aria-autocomplete="list"
         [id]="controlId()"
@@ -393,7 +413,9 @@ function sameIds(a: readonly string[], b: readonly string[]) {
     <ng-template #layer>
       <div
         data-ui="entity-picker"
+        data-ui-entity-picker=""
         data-part="positioner"
+        data-part-positioner=""
         data-align="start"
         [attr.data-size]="resolvedSize()"
         [attr.data-width]="resolvedWidth()"
@@ -402,6 +424,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
       >
         <div
           data-part="content"
+          data-part-content=""
           role="listbox"
           [id]="contentId"
           [attr.aria-label]="ariaLabel() ?? null"
@@ -414,10 +437,15 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               @if (sections().headings) {
                 <div
                   data-part="group"
+                  data-part-group=""
                   role="group"
                   [attr.aria-labelledby]="contentId + '-' + section.key"
                 >
-                  <div data-part="group-label" [id]="contentId + '-' + section.key">
+                  <div
+                    data-part="group-label"
+                    data-part-group-label=""
+                    [id]="contentId + '-' + section.key"
+                  >
                     {{ section.label }}
                   </div>
                   @for (entity of section.entities; track entity.id) {
@@ -438,34 +466,66 @@ function sameIds(a: readonly string[], b: readonly string[]) {
             }
           }
           @if (firstPage() && search().indicator) {
-            <div data-part="placeholder" aria-hidden="true">
+            <div data-part="placeholder" data-part-placeholder="" aria-hidden="true">
               @for (row of [0, 1, 2]; track row) {
                 <div>
                   <span
                     data-ui="skeleton"
+                    data-ui-skeleton=""
                     data-part="root"
+                    data-part-root=""
                     data-shape="circle"
                     data-size="xs"
                     data-loading
                   ></span>
-                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
-                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+                  <span
+                    data-ui="skeleton"
+                    data-ui-skeleton=""
+                    data-part="root"
+                    data-part-root=""
+                    data-shape="text"
+                    data-loading
+                  ></span>
+                  <span
+                    data-ui="skeleton"
+                    data-ui-skeleton=""
+                    data-part="root"
+                    data-part-root=""
+                    data-shape="text"
+                    data-loading
+                  ></span>
                 </div>
               }
             </div>
           }
           @if (search().loadingMore && search().indicator) {
-            <div data-part="more" aria-hidden="true">
+            <div data-part="more" data-part-more="" aria-hidden="true">
               <div>
                 <span
                   data-ui="skeleton"
+                  data-ui-skeleton=""
                   data-part="root"
+                  data-part-root=""
                   data-shape="circle"
                   data-size="xs"
                   data-loading
                 ></span>
-                <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
-                <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+                <span
+                  data-ui="skeleton"
+                  data-ui-skeleton=""
+                  data-part="root"
+                  data-part-root=""
+                  data-shape="text"
+                  data-loading
+                ></span>
+                <span
+                  data-ui="skeleton"
+                  data-ui-skeleton=""
+                  data-part="root"
+                  data-part-root=""
+                  data-shape="text"
+                  data-loading
+                ></span>
               </div>
             </div>
           }
@@ -474,6 +534,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
             <div
               role="option"
               data-part="item"
+              data-part-item=""
               data-create
               aria-selected="false"
               [attr.data-value]="CREATE"
@@ -484,19 +545,20 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               (pointerenter)="setHighlighted(CREATE, 'pointer', $event)"
               (click)="activate(CREATE, 'pointer', $event)"
             >
-              <span data-part="media" aria-hidden="true"
+              <span data-part="media" data-part-media="" aria-hidden="true"
                 ><span slIcon><svg slGlyph name="plus"></svg></span
               ></span>
-              <span data-part="label">{{ createText() }}</span>
+              <span data-part="label" data-part-label="">{{ createText() }}</span>
             </div>
           }
           @if (failed()) {
-            <div data-part="error">
+            <div data-part="error" data-part-error="">
               <span slIcon><svg slGlyph name="circle-alert"></svg></span>{{ t('error') }}
             </div>
             <div
               role="option"
               data-part="item"
+              data-part-item=""
               data-retry
               aria-selected="false"
               [attr.data-value]="RETRY"
@@ -506,16 +568,18 @@ function sameIds(a: readonly string[], b: readonly string[]) {
               (pointerenter)="setHighlighted(RETRY, 'pointer', $event)"
               (click)="activate(RETRY, 'pointer', $event)"
             >
-              <span data-part="media" aria-hidden="true"
+              <span data-part="media" data-part-media="" aria-hidden="true"
                 ><span slIcon><svg slGlyph name="rotate-ccw"></svg></span
               ></span>
-              <span data-part="label">{{ t('retry') }}</span>
+              <span data-part="label" data-part-label="">{{ t('retry') }}</span>
             </div>
           }
           @if (showEmpty()) {
-            <div data-part="empty">{{ t('empty') }}</div>
+            <div data-part="empty" data-part-empty="">{{ t('empty') }}</div>
           }
-          <div data-part="status" role="status" aria-live="polite">{{ statusMessage() }}</div>
+          <div data-part="status" data-part-status="" role="status" aria-live="polite">
+            {{ statusMessage() }}
+          </div>
         </div>
       </div>
     </ng-template>
@@ -524,6 +588,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
       <div
         role="option"
         data-part="item"
+        data-part-item=""
         [attr.data-value]="entity.id"
         [id]="optionId(entity.id)"
         [attr.aria-selected]="isChosen(entity.id)"
@@ -536,7 +601,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
         (click)="onRowClick(entity, $event)"
       >
         @if (resolvedMedia() === 'avatar' && entity.avatar !== null) {
-          <span data-part="media">
+          <span data-part="media" data-part-media="">
             <span
               slAvatar
               decorative
@@ -561,7 +626,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
             }"
           />
         } @else {
-          <span data-part="label">
+          <span data-part="label" data-part-label="">
             @if (resolvedHighlightMatch() && query() !== '') {
               <span
                 slHighlight
@@ -574,13 +639,13 @@ function sameIds(a: readonly string[], b: readonly string[]) {
             }
           </span>
           @if (entity.description) {
-            <span data-part="description">{{ entity.description }}</span>
+            <span data-part="description" data-part-description="">{{ entity.description }}</span>
           }
           @if (entity.meta) {
-            <span data-part="meta">{{ entity.meta }}</span>
+            <span data-part="meta" data-part-meta="">{{ entity.meta }}</span>
           }
         }
-        <span data-part="indicator"
+        <span data-part="indicator" data-part-indicator=""
           ><span slIcon><svg slGlyph name="check"></svg></span
         ></span>
       </div>

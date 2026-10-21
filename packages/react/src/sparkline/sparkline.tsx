@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import {
   describeSparkline,
   layoutSparkline,
@@ -119,30 +120,33 @@ export function Sparkline({
 
   const name = description ?? describeSparkline(data, { t, format, label });
 
-  const rootProps: SparklineRootProps = {
+  const rootProps: SparklineRootProps = keyedProps({
     ...nativeProps,
     'aria-label': name,
     children: (
       <svg
         aria-hidden="true"
         data-part="plot"
+        data-part-plot=""
         focusable="false"
         preserveAspectRatio="none"
         viewBox={`0 0 ${width} ${height}`}
       >
-        {layout.area ? <path d={layout.area} data-part="area" /> : null}
-        {layout.line ? <path d={layout.line} data-part="line" /> : null}
+        {layout.area ? <path d={layout.area} data-part="area" data-part-area="" /> : null}
+        {layout.line ? <path d={layout.line} data-part="line" data-part-line="" /> : null}
         {layout.bars.map((bar, index) => (
           <path
             d={bar.path}
             data-current={index === layout.bars.length - 1 ? '' : undefined}
             data-part="bar"
+            data-part-bar=""
             key={bar.index}
           />
         ))}
         {layout.reference === null ? null : (
           <line
             data-part="reference"
+            data-part-reference=""
             x1={0}
             x2={width}
             y1={layout.reference}
@@ -151,8 +155,16 @@ export function Sparkline({
         )}
         {resolved.marker && type === 'line' && layout.marker ? (
           <>
-            <path d={`M${layout.marker.x} ${layout.marker.y}h0.001`} data-part="ring" />
-            <path d={`M${layout.marker.x} ${layout.marker.y}h0.001`} data-part="marker" />
+            <path
+              d={`M${layout.marker.x} ${layout.marker.y}h0.001`}
+              data-part="ring"
+              data-part-ring=""
+            />
+            <path
+              d={`M${layout.marker.x} ${layout.marker.y}h0.001`}
+              data-part="marker"
+              data-part-marker=""
+            />
           </>
         ) : null}
       </svg>
@@ -171,7 +183,7 @@ export function Sparkline({
       else if (ref !== null && ref !== undefined) ref.current = element;
     },
     role: 'img',
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

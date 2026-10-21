@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { tabbables } from '@slotted/core/focus';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -337,8 +338,10 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
 
   const rootProps: SelectTriggerRootProps = {
     'data-part': 'root',
+    ...selectorKeyProps('part', 'root'),
     'data-size': select.size,
     'data-ui': 'select',
+    ...selectorKeyProps('ui', 'select'),
     'data-variant': select.variant,
     ...(select.fullWidth ? { 'data-full-width': '' } : {}),
     ...(select.multiple ? { 'data-multiple': '' } : {}),
@@ -407,6 +410,7 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
         aria-readonly={select.readOnly ? true : undefined}
         aria-required={select.required ? true : undefined}
         data-part="trigger"
+        data-part-trigger=""
         disabled={select.disabled}
         id={select.triggerId}
         onClick={compose(nativeProps.onClick, onClick)}
@@ -419,7 +423,13 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
       </button>
       {chips}
       {showClear ? (
-        <button aria-label={select.t('clear')} data-part="clear" onClick={clear} type="button">
+        <button
+          aria-label={select.t('clear')}
+          data-part="clear"
+          data-part-clear=""
+          onClick={clear}
+          type="button"
+        >
           <Icon>
             <Glyph name="x" />
           </Icon>
@@ -432,9 +442,15 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
         this family's own part.
       */}
       {select.loading ? (
-        <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+        <span
+          aria-hidden="true"
+          data-part="busy"
+          data-part-busy=""
+          data-ui="spinner"
+          data-ui-spinner=""
+        />
       ) : (
-        <span data-part="arrow">
+        <span data-part="arrow" data-part-arrow="">
           <Icon>
             <Glyph name="chevron-down" />
           </Icon>
@@ -548,14 +564,16 @@ export function SelectValue({ children, placeholder, ...nativeProps }: SelectVal
      * the same either way.
      */
     return (
-      <span data-part="summary">{select.t('summary', { count: select.selection.length })}</span>
+      <span data-part="summary" data-part-summary="">
+        {select.t('summary', { count: select.selection.length })}
+      </span>
     );
   })();
 
   return (
     <span
-      {...nativeProps}
-      data-part="value"
+      {...withSelectorKey(nativeProps, 'part', 'value')}
+
       {...(select.selection.length === 0 ? { 'data-placeholder': '' } : {})}
       {...(unmatched ? { 'data-unmatched': '' } : {})}
     >
@@ -653,21 +671,24 @@ export function SelectSearch({ icon, ref, render, ...nativeProps }: SelectSearch
     }
   };
 
-  const rootProps: SelectSearchRootProps = { 'data-part': 'search' };
+  const rootProps: SelectSearchRootProps = {
+    'data-part': 'search',
+    ...selectorKeyProps('part', 'search'),
+  };
 
   const field = (
     <>
       {icon === null
         ? null
         : (icon ?? (
-            <span aria-hidden="true" data-part="search-icon">
+            <span aria-hidden="true" data-part="search-icon" data-part-search-icon="">
               <Icon>
                 <Glyph name="search" />
               </Icon>
             </span>
           ))}
       <input
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'search-input')}
         aria-activedescendant={
           select.highlighted === null ? undefined : select.optionId(select.highlighted)
         }
@@ -676,7 +697,7 @@ export function SelectSearch({ icon, ref, render, ...nativeProps }: SelectSearch
         aria-expanded={true}
         aria-label={nativeProps['aria-label'] ?? select.t('search')}
         autoComplete="off"
-        data-part="search-input"
+
         id={nativeProps.id ?? select.searchId}
         onChange={compose(nativeProps.onChange, (event) =>
           select.setQuery(event.target.value, 'keyboard', event.nativeEvent),
@@ -1039,14 +1060,14 @@ export function SelectContent({
 
   if (!mounted) return collector === null ? null : createPortal(children, collector);
 
-  const rootProps: SelectPositionerProps = {
+  const rootProps: SelectPositionerProps = keyedProps({
     'data-align': align,
     ...(select.open ? {} : { inert: true }),
     'data-part': 'positioner',
     'data-size': select.size,
     'data-ui': 'select',
     'data-width': select.width,
-  };
+  });
 
   /**
    * The sentence the live region carries. While an answer is travelling it is
@@ -1077,17 +1098,21 @@ export function SelectContent({
    */
   const chosen =
     select.multiple && select.selection.length > 0 ? (
-      <div aria-hidden="true" data-part="chosen">
+      <div aria-hidden="true" data-part="chosen" data-part-chosen="">
         {select.selection.map((value) => (
           <span
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-ui="tag"
+            data-ui-tag=""
             data-variant="soft"
             key={String(value)}
           >
-            <span data-part="body">
-              <span data-part="label">{select.labelFor(value) ?? String(value)}</span>
+            <span data-part="body" data-part-body="">
+              <span data-part="label" data-part-label="">
+                {select.labelFor(value) ?? String(value)}
+              </span>
             </span>
           </span>
         ))}
@@ -1113,21 +1138,31 @@ export function SelectContent({
           technology — the status row below is the live region and it already
           says what is happening.
         */
-        <div aria-hidden="true" data-part="placeholder">
+        <div aria-hidden="true" data-part="placeholder" data-part-placeholder="">
           {[0, 1, 2].map((row) => (
             <div key={row}>
-              <span data-part="root" data-shape="text" data-ui="skeleton" data-loading="" />
+              <span
+                data-part="root"
+                data-part-root=""
+                data-shape="text"
+                data-ui="skeleton"
+                data-ui-skeleton=""
+                data-loading=""
+              />
             </div>
           ))}
         </div>
       ) : null}
       {!select.loading && count === 0 ? (
-        <div data-part="empty">{empty ?? select.t('empty')}</div>
+        <div data-part="empty" data-part-empty="">
+          {empty ?? select.t('empty')}
+        </div>
       ) : null}
       {select.search || select.loading ? (
         <div
           aria-live="polite"
           data-part="status"
+          data-part-status=""
           {...(select.loading ? { 'data-loading': '' } : {})}
           role="status"
         >
@@ -1160,10 +1195,10 @@ export function SelectContent({
     >
       <div
         {...nativeProps}
-        {...(select.search ? {} : listWiring)}
+        {...withSelectorKey(select.search ? {} : listWiring, 'part', 'content')}
         aria-labelledby={nativeProps['aria-label'] === undefined ? select.triggerId : undefined}
         data-loading={select.loading ? '' : undefined}
-        data-part="content"
+
         {...(select.search ? { 'data-search': '' } : {})}
         id={select.contentId}
         ref={setSurfaceNode}
@@ -1173,9 +1208,9 @@ export function SelectContent({
           <>
             <SelectSearch {...searchProps} />
             <div
-              {...listWiring}
+              {...withSelectorKey(listWiring, 'part', 'list')}
               aria-labelledby={select.triggerId}
-              data-part="list"
+
               id={select.listId}
               role="listbox"
             >

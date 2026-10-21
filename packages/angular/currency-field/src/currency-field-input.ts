@@ -87,6 +87,7 @@ const SIGN_KEYS = new Set(['-', '−', '+', '(']);
   ],
   host: {
     'data-part': 'input',
+    'data-part-input': '',
     autocorrect: 'off',
     spellcheck: 'false',
     /* Bound rather than static, so a consumer who wrote `type="number"` on a

@@ -40,10 +40,10 @@ const FAMILIES = [
   { family: 'datetime-field' },
   { family: 'tags-input' },
   /* The frame is the `control` part, one element in from the root. */
-  { family: 'date-range-picker', frame: " [data-part='control']" },
-  { family: 'time-range-picker', frame: " [data-part='control']" },
-  { family: 'datetime-range-picker', frame: " [data-part='control']" },
-  { family: 'entity-picker', frame: " > [data-part='control']" },
+  { family: 'date-range-picker', frame: ' [data-part-control]' },
+  { family: 'time-range-picker', frame: ' [data-part-control]' },
+  { family: 'datetime-range-picker', frame: ' [data-part-control]' },
+  { family: 'entity-picker', frame: ' > [data-part-control]' },
 ];
 
 const INWARD = 'calc(var(--slotted-focus-ring-offset, 2px) * -1)';
@@ -130,7 +130,7 @@ function focus(all, variant) {
 for (const { family, frame = '' } of FAMILIES) {
   const css = readFileSync(`${source}${family}/${family}.css`, 'utf8');
   const all = rules(css);
-  const root = `[data-ui='${family}'][data-part='root']`;
+  const root = `[data-ui-${family.toLowerCase()}][data-part-root]`;
   const plain = `${root}[data-variant='plain']`;
 
   test(`${family}: a plain control at rest has no edge, no lift, no ground and no corner`, () => {

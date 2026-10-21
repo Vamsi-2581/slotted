@@ -17,6 +17,6 @@ import { Directive } from '@angular/core';
   selector: '[slCardSelection]',
   standalone: true,
   exportAs: 'slCardSelection',
-  host: { 'data-part': 'selection' },
+  host: { 'data-part': 'selection', 'data-part-selection': '' },
 })
 export class SlCardSelection {}

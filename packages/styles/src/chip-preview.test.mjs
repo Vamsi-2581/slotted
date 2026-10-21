@@ -33,8 +33,8 @@ const source = new URL('.', import.meta.url).pathname;
  * control, beside the caret, because its control holds a real `input`.
  */
 const HOSTS = [
-  { family: 'select', row: "[data-ui='select'][data-part='root'] > [data-part='tags']" },
-  { family: 'multi-select', row: "[data-ui='multi-select'] [data-part='chips']" },
+  { family: 'select', row: '[data-ui-select][data-part-root] > [data-part-tags]' },
+  { family: 'multi-select', row: '[data-ui-multi-select] [data-part-chips]' },
 ];
 
 function sheet(family) {
@@ -84,7 +84,7 @@ test('lays the chips out and paints none of them', () => {
     );
     assert.doesNotMatch(
       css,
-      /\[data-ui='tag'\]/,
+      /\[data-ui-tag\]/,
       `${family} reaches into the tag sheet instead of standing beside it`,
     );
   }
@@ -104,33 +104,33 @@ test('lays the chips out and paints none of them', () => {
  */
 test('gives the chips a lane of the control and the final controls their own', () => {
   const css = sheet('select');
-  const frame = rule(css, "[data-ui='select'][data-part='root']");
+  const frame = rule(css, '[data-ui-select][data-part-root]');
   assert.match(frame, /display:grid/);
   assert.match(frame, /grid-template-columns:minmax\(0,1fr\) auto/);
   assert.match(
-    rule(css, "[data-ui='select'][data-part='root']:has(> [data-part='clear'])"),
+    rule(css, '[data-ui-select][data-part-root]:has(> [data-part-clear])'),
     /grid-template-columns:minmax\(0,1fr\) auto auto/,
     'the clear button has no lane of its own',
   );
 
-  const row = rule(css, "[data-ui='select'][data-part='root'] > [data-part='tags']");
+  const row = rule(css, '[data-ui-select][data-part-root] > [data-part-tags]');
   assert.match(row, /grid-area:1 \/ 1 \/ 2 \/ 2/, 'the chips are not in the content lane');
   assert.doesNotMatch(row, /position:absolute/, 'the row still hangs over the trigger');
   assert.match(row, /pointer-events:none/);
   assert.match(
-    rule(css, "[data-ui='select'] > [data-part='trigger']"),
+    rule(css, '[data-ui-select] > [data-part-trigger]'),
     /grid-area:1 \/ 1 \/ 2 \/ -1/,
     'the trigger is not the ground under every lane',
   );
   for (const part of ['arrow', 'busy']) {
     assert.match(
-      rule(css, `[data-ui='select'] > [data-part='${part}']`),
+      rule(css, `[data-ui-select] > [data-part-${part.toLowerCase()}]`),
       /grid-area:1 \/ -2 \/ 2 \/ -1/,
       `${part} is not in the last lane`,
     );
   }
   assert.match(
-    rule(css, "[data-ui='select'] > [data-part='tags'] > *"),
+    rule(css, '[data-ui-select] > [data-part-tags] > *'),
     /pointer-events:auto/,
     'the chips do not take their own presses back',
   );
@@ -144,7 +144,7 @@ test('gives the chips a lane of the control and the final controls their own', (
  */
 test('keeps the row on one line and no taller than the control', () => {
   const css = sheet('select');
-  const row = rule(css, "[data-ui='select'][data-part='root'] > [data-part='tags']");
+  const row = rule(css, '[data-ui-select][data-part-root] > [data-part-tags]');
   assert.match(row, /display:flex/);
   assert.doesNotMatch(row, /flex-wrap:wrap/, 'the chips wrap onto a second line');
   assert.match(row, /min-inline-size:0/, 'a chip can widen the lane it is in');
@@ -161,7 +161,7 @@ test('keeps the row on one line and no taller than the control', () => {
 test('holds the chosen values in a band that scrolls itself', () => {
   for (const { family } of HOSTS) {
     const css = sheet(family);
-    const band = rule(css, `[data-ui='${family}'] [data-part='chosen']`);
+    const band = rule(css, `[data-ui-${family.toLowerCase()}] [data-part-chosen]`);
     assert.notEqual(band, '', `${family} draws no band of chosen values`);
     assert.match(band, /position:sticky/);
     assert.match(band, /overflow-y:auto/);
@@ -182,8 +182,8 @@ test('holds the chosen values in a band that scrolls itself', () => {
    */
   const scroller = rule(
     css,
-    "[data-ui='select'] > [data-part='content']:not([data-search])," +
-      "[data-ui='select'] [data-part='list']",
+    '[data-ui-select] > [data-part-content]:not([data-search]),' +
+      '[data-ui-select] [data-part-list]',
   );
   assert.match(scroller, /overflow-y:auto/);
   assert.match(scroller, /overscroll-behavior:contain/);
@@ -199,13 +199,13 @@ test('keeps the sentence in the tree while the chips are shown', () => {
   const css = sheet('select');
   const hidden = rule(
     css,
-    "[data-ui='select'][data-part='root']:not([data-narrow]) [data-part='summary']",
+    '[data-ui-select][data-part-root]:not([data-narrow]) [data-part-summary]',
   );
   assert.notEqual(hidden, '', 'the summary is never taken out of sight');
   assert.match(hidden, /clip-path:inset\(50%\)/);
   assert.doesNotMatch(hidden, /display:none/, 'the summary leaves the accessibility tree');
   assert.match(
-    rule(css, "[data-ui='select'][data-part='root'][data-narrow] > [data-part='tags']"),
+    rule(css, '[data-ui-select][data-part-root][data-narrow] > [data-part-tags]'),
     /display:none/,
     'a control too narrow for a chip still draws one',
   );
@@ -221,12 +221,12 @@ test('scopes the option label to the option', () => {
     const css = sheet(family);
     assert.doesNotMatch(
       css.replace(/\s+/g, ' '),
-      new RegExp(`\\[data-ui='${family}'\\] \\[data-part='label'\\] \\{`),
+      new RegExp(`\\[data-ui-${family}\\] \\[data-part-label\\] \\{`),
       `${family} lays out every label in the family, not only an option's`,
     );
     assert.match(
       css.replace(/\s+/g, ' '),
-      new RegExp(`\\[data-ui='${family}'\\] \\[data-part='item'\\] > \\[data-part='label'\\] \\{`),
+      new RegExp(`\\[data-ui-${family}\\] \\[data-part-item\\] > \\[data-part-label\\] \\{`),
       `${family} lays out no option label at all`,
     );
   }

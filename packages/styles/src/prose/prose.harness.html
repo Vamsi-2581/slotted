@@ -1,14 +1,22 @@
 <section data-scene="document">
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="normal"
+  >
     <h1>
       Deploying a service &#8288;<a
         data-part="anchor"
+        data-part-anchor=""
         href="#deploying-a-service"
         aria-label="Link to this section"
         >#</a
       >
     </h1>
-    <p data-part="lead">
+    <p data-part="lead" data-part-lead="">
       Everything a team needs to move a service from a laptop to production, in the order the steps
       have to happen.
     </p>
@@ -21,6 +29,7 @@
     <h2>
       Prerequisites &#8288;<a
         data-part="anchor"
+        data-part-anchor=""
         href="#prerequisites"
         aria-label="Link to this section"
         >#</a
@@ -46,7 +55,11 @@
     </blockquote>
 
     <h3>
-      Running it&#8288;<a data-part="anchor" href="#running-it" aria-label="Link to this section"
+      Running it&#8288;<a
+        data-part="anchor"
+        data-part-anchor=""
+        href="#running-it"
+        aria-label="Link to this section"
         >#</a
       >
     </h3>
@@ -61,7 +74,13 @@
       <li>Roll the instances, one zone at a time.</li>
     </ol>
 
-    <div data-part="scroll" role="region" tabindex="0" aria-label="Scrollable content">
+    <div
+      data-part="scroll"
+      data-part-scroll=""
+      role="region"
+      tabindex="0"
+      aria-label="Scrollable content"
+    >
       <table>
         <caption>
           Environments and their gates
@@ -134,7 +153,7 @@
     <h6>Revision history</h6>
     <p><small>Last reviewed in March, by the platform team.</small></p>
 
-    <section data-part="footnotes">
+    <section data-part="footnotes" data-part-footnotes="">
       <ol>
         <li>Measured over the trailing seven days, not over the deployment window.</li>
       </ol>
@@ -143,21 +162,42 @@
 </section>
 
 <section data-scene="sizes">
-  <div data-ui="prose" data-part="root" data-size="md" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="md"
+    data-flow="normal"
+  >
     <h2>Control size</h2>
     <p>
       Body text at <code>--slotted-font-size-md</code>: the step a button label is set in, for a
       region that sits inside dense product chrome.
     </p>
   </div>
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="normal"
+  >
     <h2>Reading size</h2>
     <p>
       Body text at one rem, the family default, for documentation and for anything a reader stays
       with for more than a sentence.
     </p>
   </div>
-  <div data-ui="prose" data-part="root" data-size="xl" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="xl"
+    data-flow="normal"
+  >
     <h2>Article size</h2>
     <p>
       Body text at <code>--slotted-font-size-xl</code>, where the page is the content rather than a
@@ -167,7 +207,14 @@
 </section>
 
 <section data-scene="flow">
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="tight">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="tight"
+  >
     <h3>Tight</h3>
     <p>A message in a thread, where each block is one turn and the turns are close together.</p>
     <p>The second block, at the same distance.</p>
@@ -176,7 +223,14 @@
       <li>Two rows.</li>
     </ul>
   </div>
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="normal"
+  >
     <h3>Normal</h3>
     <p>A documentation page: the distance a reader scanning for a heading needs.</p>
     <p>The second block, at the same distance.</p>
@@ -185,7 +239,14 @@
       <li>Two rows.</li>
     </ul>
   </div>
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="loose">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="loose"
+  >
     <h3>Loose</h3>
     <p>An article, where the space between blocks is part of how it reads.</p>
     <p>The second block, at the same distance.</p>
@@ -197,14 +258,21 @@
 </section>
 
 <section data-scene="exclude">
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="normal"
+  >
     <h2>A component inside the page</h2>
     <p>
       The paragraph above and this one are set by the family. What follows is not: the subtree is
       returned to control type and left to whatever put it there.
     </p>
-    <div data-part="exclude">
-      <div data-ui="card" data-part="root" data-variant="outline">
+    <div data-part="exclude" data-part-exclude="">
+      <div data-ui="card" data-ui-card="" data-part="root" data-part-root="" data-variant="outline">
         <p>A card keeps its own type, its own rhythm and its own colour.</p>
         <ul>
           <li>No marker gap.</li>
@@ -217,7 +285,14 @@
 </section>
 
 <section data-scene="content">
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="normal"
+  >
     <h3>A body that does not start at the top level</h3>
     <h4>Two headings with nothing between them</h4>
     <p>
@@ -259,10 +334,18 @@
 </section>
 
 <section data-scene="interactive">
-  <div data-ui="prose" data-part="root" data-size="lg" data-flow="normal">
+  <div
+    data-ui="prose"
+    data-ui-prose=""
+    data-part="root"
+    data-part-root=""
+    data-size="lg"
+    data-flow="normal"
+  >
     <h2>
       Focus and hover &#8288;<a
         data-part="anchor"
+        data-part-anchor=""
         href="#focus-and-hover"
         aria-label="Link to this section"
         >#</a
@@ -272,7 +355,13 @@
       The anchor beside the heading appears under the pointer and when it takes focus. The
       <a href="#focus">link in this sentence</a> answers both as well.
     </p>
-    <div data-part="scroll" role="region" tabindex="0" aria-label="Scrollable content">
+    <div
+      data-part="scroll"
+      data-part-scroll=""
+      role="region"
+      tabindex="0"
+      aria-label="Scrollable content"
+    >
       <table>
         <thead>
           <tr>

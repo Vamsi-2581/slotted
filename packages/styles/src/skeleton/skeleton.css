@@ -23,8 +23,8 @@
    * Geometry is left unguarded because a loaded placeholder is
    * `display: contents` and has no box for it to describe.
    */
-  [data-ui='skeleton'][data-part='root'][data-loading],
-  [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line'] {
+  [data-ui-skeleton][data-part-root][data-loading],
+  [data-ui-skeleton][data-part-text][data-loading] [data-part-line] {
     /**
      * The unavailable surface, pushed a little toward the text colour. The
      * token alone is not enough and the first dark capture is why: in the dark
@@ -100,7 +100,7 @@
    * can be.
    */
 
-  [data-ui='skeleton'][data-part='root'] {
+  [data-ui-skeleton][data-part-root] {
     display: inline-block;
     /* Never a negative or zero box, whatever the consumer's value resolves
        to. A placeholder that cannot be seen cannot be corrected. */
@@ -119,7 +119,7 @@
    * own — an axis would have been a coarser second copy of the type scale that
    * a consumer could set to the wrong value.
    */
-  [data-ui='skeleton'][data-part='root'][data-shape='text'] {
+  [data-ui-skeleton][data-part-root][data-shape='text'] {
     --_line: var(--slotted-skeleton-line-size, 1cap);
 
     block-size: var(--slotted-skeleton-block-size, var(--_line));
@@ -140,7 +140,7 @@
    * placeholder that resolved to nothing would be a hole in the page that no
    * capture and no reader could point at.
    */
-  [data-ui='skeleton'][data-part='root'][data-shape='block'] {
+  [data-ui-skeleton][data-part-root][data-shape='block'] {
     block-size: var(--slotted-skeleton-block-size, auto);
     border-radius: var(--slotted-skeleton-radius, var(--slotted-radius-md, 6px));
     display: block;
@@ -155,15 +155,15 @@
    * `--slotted-avatar-size`: setting it on a container must not resize the real
    * avatars standing beside the placeholders.
    */
-  [data-ui='skeleton'][data-part='root'][data-shape='circle'],
-  [data-ui='skeleton'][data-part='root'][data-shape='square'] {
+  [data-ui-skeleton][data-part-root][data-shape='circle'],
+  [data-ui-skeleton][data-part-root][data-shape='square'] {
     --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-md, 36px));
 
     block-size: var(--slotted-skeleton-block-size, var(--_size));
     inline-size: var(--slotted-skeleton-inline-size, var(--_size));
   }
 
-  [data-ui='skeleton'][data-part='root'][data-shape='circle'] {
+  [data-ui-skeleton][data-part-root][data-shape='circle'] {
     border-radius: var(--slotted-radius-full, 9999px);
   }
 
@@ -172,34 +172,34 @@
    * step of the radius scale: six pixels is a gentle round on a 64-pixel square
    * and a quarter-circle on a 20-pixel one.
    */
-  [data-ui='skeleton'][data-part='root'][data-shape='square'] {
+  [data-ui-skeleton][data-part-root][data-shape='square'] {
     border-radius: var(--slotted-skeleton-radius, calc(var(--_size) / 6));
   }
 
   /* ── The size steps, which mean something only for the two round shapes ── */
 
-  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='xs'],
-  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='xs'] {
+  [data-ui-skeleton][data-part-root][data-shape='circle'][data-size='xs'],
+  [data-ui-skeleton][data-part-root][data-shape='square'][data-size='xs'] {
     --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-xs, 24px));
   }
 
-  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='sm'],
-  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='sm'] {
+  [data-ui-skeleton][data-part-root][data-shape='circle'][data-size='sm'],
+  [data-ui-skeleton][data-part-root][data-shape='square'][data-size='sm'] {
     --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-sm, 28px));
   }
 
-  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='md'],
-  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='md'] {
+  [data-ui-skeleton][data-part-root][data-shape='circle'][data-size='md'],
+  [data-ui-skeleton][data-part-root][data-shape='square'][data-size='md'] {
     --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-md, 36px));
   }
 
-  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='lg'],
-  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='lg'] {
+  [data-ui-skeleton][data-part-root][data-shape='circle'][data-size='lg'],
+  [data-ui-skeleton][data-part-root][data-shape='square'][data-size='lg'] {
     --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-lg, 48px));
   }
 
-  [data-ui='skeleton'][data-part='root'][data-shape='circle'][data-size='xl'],
-  [data-ui='skeleton'][data-part='root'][data-shape='square'][data-size='xl'] {
+  [data-ui-skeleton][data-part-root][data-shape='circle'][data-size='xl'],
+  [data-ui-skeleton][data-part-root][data-shape='square'][data-size='xl'] {
     --_size: var(--slotted-skeleton-size, var(--slotted-avatar-size-xl, 64px));
   }
 
@@ -215,7 +215,7 @@
    * available: a consumer covering a paragraph that has not been measured
    * still sets one.
    */
-  [data-ui='skeleton'][data-part='root'][data-loading]:not(:empty) {
+  [data-ui-skeleton][data-part-root][data-loading]:not(:empty) {
     block-size: var(--slotted-skeleton-block-size, auto);
     /* An element child is hidden by `visibility`; a bare text node is not an
        element and can only be hidden by taking the colour away. */
@@ -223,7 +223,7 @@
     inline-size: var(--slotted-skeleton-inline-size, auto);
   }
 
-  [data-ui='skeleton'][data-part='root'][data-loading]:not(:empty) > * {
+  [data-ui-skeleton][data-part-root][data-loading]:not(:empty) > * {
     visibility: hidden;
   }
 
@@ -240,14 +240,14 @@
    * paragraph of them read as a barcode because real prose fills a little over
    * half its leading. A capital's height is where the ink actually is.
    */
-  [data-ui='skeleton'][data-part='text'] {
+  [data-ui-skeleton][data-part-text] {
     align-items: center;
     display: grid;
     grid-auto-rows: var(--slotted-skeleton-row-size, 1lh);
     inline-size: var(--slotted-skeleton-inline-size, 100%);
   }
 
-  [data-ui='skeleton'] [data-part='line'] {
+  [data-ui-skeleton] [data-part-line] {
     block-size: var(--slotted-skeleton-line-size, 1cap);
     border-radius: var(--slotted-radius-full, 9999px);
     inline-size: 100%;
@@ -259,7 +259,7 @@
    * TypeScript and Carbon does not guard at all: one line shortened by itself
    * stands for a sentence that was never there.
    */
-  [data-ui='skeleton'] [data-part='line']:last-child:not(:only-child) {
+  [data-ui-skeleton] [data-part-line]:last-child:not(:only-child) {
     inline-size: var(--slotted-skeleton-last-line-size, 62%);
   }
 
@@ -271,8 +271,8 @@
    * nothing. One declaration answers both, and neither answer remounts the
    * consumer's content on the way through.
    */
-  [data-ui='skeleton'][data-part='root']:not([data-loading]),
-  [data-ui='skeleton'][data-part='text']:not([data-loading]) {
+  [data-ui-skeleton][data-part-root]:not([data-loading]),
+  [data-ui-skeleton][data-part-text]:not([data-loading]) {
     display: contents;
   }
 
@@ -285,7 +285,7 @@
    * pixels inside a 599-pixel column, every placeholder in it two pixels wide.
    * The token is the way out for a region that really is inline.
    */
-  [data-ui='skeleton'][data-part='region'] {
+  [data-ui-skeleton][data-part-region] {
     inline-size: var(--slotted-skeleton-inline-size, 100%);
     min-inline-size: 0;
   }
@@ -308,17 +308,16 @@
    * (0 to 1, a point in the cycle) is where a box starts, so a consumer that
    * needs a late box in step, and a capture that needs one moment, can name it.
    */
-  [data-ui='skeleton'][data-part='root'][data-loading]:not([data-animation='none']),
-  [data-ui='skeleton'][data-part='text'][data-loading]:not([data-animation='none'])
-    [data-part='line'] {
+  [data-ui-skeleton][data-part-root][data-loading]:not([data-animation='none']),
+  [data-ui-skeleton][data-part-text][data-loading]:not([data-animation='none']) [data-part-line] {
     overflow: clip;
     position: relative;
   }
 
-  [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading]::after,
-  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]::after,
-  [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line']::after,
-  [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line']::after {
+  [data-ui-skeleton][data-part-root][data-animation='pulse'][data-loading]::after,
+  [data-ui-skeleton][data-part-root][data-animation='shimmer'][data-loading]::after,
+  [data-ui-skeleton][data-animation='pulse'][data-loading] [data-part-line]::after,
+  [data-ui-skeleton][data-animation='shimmer'][data-loading] [data-part-line]::after {
     animation-delay: calc(
       var(--slotted-skeleton-phase, 0) * var(--slotted-duration-loop-slow) * -1
     );
@@ -337,8 +336,8 @@
    * at full strength and the shape never leaves the page. Zero at both ends of
    * the cycle, so the seam where it wraps carries nothing to see.
    */
-  [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading]::after,
-  [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line']::after {
+  [data-ui-skeleton][data-part-root][data-animation='pulse'][data-loading]::after,
+  [data-ui-skeleton][data-animation='pulse'][data-loading] [data-part-line]::after {
     animation-timing-function: ease-in-out;
     background-color: var(--_trough);
     opacity: 0;
@@ -355,8 +354,8 @@
    * The travel is symmetric about the box, so a right-to-left box runs the same
    * travel backwards; `transform` and the gradient have no logical form.
    */
-  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]::after,
-  [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line']::after {
+  [data-ui-skeleton][data-part-root][data-animation='shimmer'][data-loading]::after,
+  [data-ui-skeleton][data-animation='shimmer'][data-loading] [data-part-line]::after {
     animation-timing-function: linear;
     background-image: linear-gradient(
       90deg,
@@ -366,21 +365,21 @@
     );
   }
 
-  [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]:dir(rtl)::after,
-  [data-ui='skeleton'][data-animation='shimmer'][data-loading]:dir(rtl) [data-part='line']::after {
+  [data-ui-skeleton][data-part-root][data-animation='shimmer'][data-loading]:dir(rtl)::after,
+  [data-ui-skeleton][data-animation='shimmer'][data-loading]:dir(rtl) [data-part-line]::after {
     animation-direction: reverse;
   }
 
   /* Started only here: a reset under `reduce` is one attribute against the
      four that select a layer, and lost, so the loop ran under reduced motion. */
   @media (prefers-reduced-motion: no-preference) {
-    [data-ui='skeleton'][data-part='root'][data-animation='pulse'][data-loading]::after,
-    [data-ui='skeleton'][data-animation='pulse'][data-loading] [data-part='line']::after {
+    [data-ui-skeleton][data-part-root][data-animation='pulse'][data-loading]::after,
+    [data-ui-skeleton][data-animation='pulse'][data-loading] [data-part-line]::after {
       animation-name: slotted-skeleton-pulse;
     }
 
-    [data-ui='skeleton'][data-part='root'][data-animation='shimmer'][data-loading]::after,
-    [data-ui='skeleton'][data-animation='shimmer'][data-loading] [data-part='line']::after {
+    [data-ui-skeleton][data-part-root][data-animation='shimmer'][data-loading]::after,
+    [data-ui-skeleton][data-animation='shimmer'][data-loading] [data-part-line]::after {
       animation-name: slotted-skeleton-sweep;
     }
   }
@@ -410,8 +409,8 @@
    * stands outside the box, so the reader sees the fill alone.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='skeleton']::after,
-    [data-ui='skeleton'] [data-part='line']::after {
+    [data-ui-skeleton]::after,
+    [data-ui-skeleton] [data-part-line]::after {
       animation: none;
     }
   }
@@ -423,8 +422,8 @@
    * would go on painting a mixed colour over a forced one.
    */
   @media (forced-colors: active) {
-    [data-ui='skeleton'][data-part='root'][data-loading]::after,
-    [data-ui='skeleton'][data-part='text'][data-loading] [data-part='line']::after {
+    [data-ui-skeleton][data-part-root][data-loading]::after,
+    [data-ui-skeleton][data-part-text][data-loading] [data-part-line]::after {
       background-image: none;
     }
   }

@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/textarea/contract.json', import.meta.url),
@@ -10,7 +21,9 @@ const contract = JSON.parse(
 );
 const textField = readFileSync(new URL('../text-field/text-field.css', import.meta.url), 'utf8');
 const css = readFileSync(new URL('./textarea.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./textarea.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./textarea.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -18,8 +31,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.textarea;
 
 function rule(selector) {
@@ -36,7 +49,7 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   assert.deepEqual(member.parts, ['root']);
-  assert.ok(normalized.includes(`[data-part='root']`));
+  assert.ok(normalized.includes(`[data-part-root]`));
 });
 
 /**

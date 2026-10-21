@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/list/list.css';
 
 import { createContext, useContext } from 'react';
@@ -50,7 +51,7 @@ export function List({
   const resolvedSize = size ?? defaults.size;
   const resolvedVariant = variant ?? defaults.variant;
 
-  const rootProps: ListRootProps = {
+  const rootProps: ListRootProps = keyedProps({
     role: 'list',
     ...nativeProps,
     ...(loading ? { 'aria-busy': true, 'data-loading': '' } : {}),
@@ -60,7 +61,7 @@ export function List({
     'data-size': resolvedSize,
     'data-ui': 'list',
     'data-variant': resolvedVariant,
-  };
+  });
 
   const context: ListContextValue = {
     inset: resolvedInset,

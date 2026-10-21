@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/segmented-control/contract.json', import.meta.url),
@@ -9,16 +20,16 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./segmented-control.css', import.meta.url), 'utf8');
-const harness = readFileSync(new URL('./segmented-control.harness.html', import.meta.url), 'utf8');
+const harness = withoutSelectorKeys(
+  readFileSync(new URL('./segmented-control.harness.html', import.meta.url), 'utf8'),
+);
 /** The sheet with its prose removed: a comment is not a rule. */
 const rules = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /** The same sheet with every space taken out, so a reflow cannot break a match. */
 const dense = rules.replace(/\s+/g, '');
 
 test('paints every part the contract declares, and no part it does not', () => {
-  const painted = new Set(
-    [...rules.matchAll(/\[data-part=['"]([a-z-]+)['"]\]/g)].map(([, part]) => part),
-  );
+  const painted = new Set([...rules.matchAll(/\[data-part-([a-z-]+)\]/g)].map(([, part]) => part));
   for (const part of contract.members.segmentedControl.parts) {
     assert.ok(painted.has(part), `the stylesheet never selects the ${part} part`);
     assert.match(harness, new RegExp(`data-part="${part}"`), `no scene renders the ${part} part`);
@@ -49,11 +60,11 @@ test('places the thumb by arithmetic and never by measuring', () => {
 test('mirrors the thumb in a right-to-left document', () => {
   assert.match(
     dense,
-    /\[data-part='indicator'\]:dir\(rtl\)\{translate:calc\(var\(--_index\)\*\(-100%-var\(--_spacing\)\)\)/,
+    /\[data-part-indicator\]:dir\(rtl\)\{translate:calc\(var\(--_index\)\*\(-100%-var\(--_spacing\)\)\)/,
   );
   assert.match(
     dense,
-    /\[data-orientation='vertical'\]\[data-part='indicator'\]\{[^}]*translate:0calc\(var\(--_index\)\*\(100%\+var\(--_spacing\)\)\)/,
+    /\[data-orientation='vertical'\]\[data-part-indicator\]\{[^}]*translate:0calc\(var\(--_index\)\*\(100%\+var\(--_spacing\)\)\)/,
   );
 });
 
@@ -86,8 +97,8 @@ test('measures its segments back from the control height', () => {
     dense,
     /--_inner:calc\(var\(--_height\)-\(var\(--_inset\)\+var\(--_border-width\)\)\*2\)/,
   );
-  assert.match(dense, /\[data-part='item'\]\{[^}]*block-size:var\(--_inner\)/);
-  assert.match(dense, /\[data-part='root'\]\{[^}]*padding:var\(--_inset\)/);
+  assert.match(dense, /\[data-part-item\]\{[^}]*block-size:var\(--_inner\)/);
+  assert.match(dense, /\[data-part-root\]\{[^}]*padding:var\(--_inset\)/);
 });
 
 /**
@@ -100,14 +111,14 @@ test('measures its segments back from the control height', () => {
 test('keeps the target at the control’s own height rather than the thumb’s', () => {
   assert.match(
     dense,
-    /\[data-part='control'\]\{[^}]*inset-block:calc\(-1\*\(var\(--_inset\)\+var\(--_border-width\)\)\)/,
+    /\[data-part-control\]\{[^}]*inset-block:calc\(-1\*\(var\(--_inset\)\+var\(--_border-width\)\)\)/,
   );
   /* The floor is the column's, so a segment never runs past its thumb. */
   assert.match(
     dense,
     /grid-auto-columns:minmax\(max\(var\(--_inner\),var\(--slotted-target-min,24px\)\),1fr\)/,
   );
-  assert.match(dense, /\[data-part='item'\]\{[^}]*min-inline-size:0/);
+  assert.match(dense, /\[data-part-item\]\{[^}]*min-inline-size:0/);
 });
 
 /**
@@ -123,7 +134,7 @@ test('spaces the segments apart and moves the thumb by a column and a gap', () =
     dense,
     /inline-size:calc\(\(100%-var\(--_inset\)\*2-var\(--_spacing\)\*\(var\(--_count\)-1\)\)\/var\(--_count\)\)/,
   );
-  assert.match(dense, /\[data-part='control'\]\{[^}]*inset-inline:calc\(var\(--_spacing\)\/-2\)/);
+  assert.match(dense, /\[data-part-control\]\{[^}]*inset-inline:calc\(var\(--_spacing\)\/-2\)/);
 });
 
 /**
@@ -164,7 +175,7 @@ test('hides a condensed label without taking it out of the document', () => {
 test('paints the thumb as a raised neutral surface, and lifts it off the track', () => {
   assert.match(
     dense,
-    /\[data-part='indicator'\]\{[^}]*box-shadow:var\(--slotted-segmented-control-indicator-shadow,var\(--slotted-shadow-xs,none\)\)/,
+    /\[data-part-indicator\]\{[^}]*box-shadow:var\(--slotted-segmented-control-indicator-shadow,var\(--slotted-shadow-xs,none\)\)/,
   );
   assert.match(
     dense,
@@ -185,15 +196,15 @@ test('paints the thumb as a raised neutral surface, and lifts it off the track',
  * of its edge for the length of the slide.
  */
 test('slides the thumb over the dividers and the hover ground', () => {
-  const start = dense.indexOf("[data-ui='segmented-control'][data-part='item']{");
+  const start = dense.indexOf('[data-ui-segmented-control][data-part-item]{');
   assert.notEqual(start, -1);
   const item = dense.slice(start);
   assert.doesNotMatch(item.slice(0, item.indexOf('}')), /z-index/);
-  assert.match(dense, /\[data-part='item'\]::after\{[^}]*z-index:-1/);
-  assert.match(dense, /\[data-part='item'\]\+\[data-part='item'\]::before\{[^}]*z-index:-1/);
+  assert.match(dense, /\[data-part-item\]::after\{[^}]*z-index:-1/);
+  assert.match(dense, /\[data-part-item\]\+\[data-part-item\]::before\{[^}]*z-index:-1/);
   assert.match(
     dense,
-    /:has\(\[data-part='control'\]:enabled\)::after\{[^}]*background:var\(--slotted-segmented-control-hover-background/,
+    /:has\(\[data-part-control\]:enabled\)::after\{[^}]*background:var\(--slotted-segmented-control-hover-background/,
   );
 });
 
@@ -203,14 +214,14 @@ test('slides the thumb over the dividers and the hover ground', () => {
  * out — the rule `checkbox`, `switch` and `radio-group` each record.
  */
 test('moves the ring to the segment and puts out the one the browser draws', () => {
-  assert.match(dense, /\[data-part='control'\]:focus-visible\{outline:none;\}/);
+  assert.match(dense, /\[data-part-control\]:focus-visible\{outline:none;\}/);
   assert.match(
     dense,
-    /\[data-part='item'\]:has\(\[data-part='control'\]:focus-visible\)\{outline:var\(--slotted-focus-ring-width/,
+    /\[data-part-item\]:has\(\[data-part-control\]:focus-visible\)\{outline:var\(--slotted-focus-ring-width/,
   );
   assert.match(
     dense,
-    /:has\(\[data-part='control'\]:focus-visible\)\{[^}]*outline-offset:calc\(-1\*var\(--slotted-focus-ring-width/,
+    /:has\(\[data-part-control\]:focus-visible\)\{[^}]*outline-offset:calc\(-1\*var\(--slotted-focus-ring-width/,
   );
 });
 
@@ -221,7 +232,7 @@ test('moves the ring to the segment and puts out the one the browser draws', () 
  * the three had been chosen.
  */
 test('keeps the track when the whole control is unavailable', () => {
-  const disabled = dense.match(/\[data-part='root'\]\[data-disabled\]\{([^}]*)\}/);
+  const disabled = dense.match(/\[data-part-root\]\[data-disabled\]\{([^}]*)\}/);
   assert.ok(disabled, 'no rule paints an unavailable control');
   assert.ok(
     !/background:/.test(disabled[1]),
@@ -245,7 +256,7 @@ test('inks an unchecked segment darker than an unavailable one', () => {
 
 /** A read-only control keeps its colours; only a disabled one loses them. */
 test('does not paint read-only the way it paints disabled', () => {
-  const readonly = dense.match(/\[data-readonly\]\[data-part='item'\],[^{]*\{([^}]*)\}/);
+  const readonly = dense.match(/\[data-readonly\]\[data-part-item\],[^{]*\{([^}]*)\}/);
   assert.ok(readonly, 'no rule paints a read-only control');
   assert.equal(readonly[1], 'cursor:default;');
 });
@@ -268,7 +279,7 @@ test('answers every density through the control scale', () => {
  * text field painted `--slotted-control-surface` (Nexora's list toolbar).
  */
 test('paints the track as a neutral tint of the ground it stands on', () => {
-  const root = dense.slice(dense.indexOf("[data-ui='segmented-control'][data-part='root']{"));
+  const root = dense.slice(dense.indexOf('[data-ui-segmented-control][data-part-root]{'));
   const body = root.slice(0, root.indexOf('}'));
   assert.match(
     body,
@@ -291,11 +302,11 @@ test('paints the track as a neutral tint of the ground it stands on', () => {
 test('treats an empty label as no label, so an icon-only segment centres its icon', () => {
   assert.match(
     dense,
-    /\[data-ui='segmented-control'\]\[data-part='label'\]:empty\{display:none;\}|\[data-ui='segmented-control'\]\[data-part='label'\]:empty\{[^}]*display:none/,
+    /\[data-ui-segmented-control\]\[data-part-label\]:empty\{display:none;\}|\[data-ui-segmented-control\]\[data-part-label\]:empty\{[^}]*display:none/,
   );
   assert.match(
     dense,
-    /\[data-ui='segmented-control'\]\[data-part='item'\]:not\(:has\(\[data-part='label'\]:not\(:empty\)\)\)\{padding-inline:0;\}/,
+    /\[data-ui-segmented-control\]\[data-part-item\]:not\(:has\(\[data-part-label\]:not\(:empty\)\)\)\{padding-inline:0;\}/,
   );
 });
 
@@ -305,7 +316,7 @@ test('treats an empty label as no label, so an icon-only segment centres its ico
  * column ends its words in an ellipsis rather than in the next segment.
  */
 test('clips a label along the line only, and lets it shrink to its column', () => {
-  const start = dense.indexOf("[data-ui='segmented-control'][data-part='label']{");
+  const start = dense.indexOf('[data-ui-segmented-control][data-part-label]{');
   assert.notEqual(start, -1);
   const label = dense.slice(start, dense.indexOf('}', start));
   assert.match(label, /overflow-x:clip/);
@@ -320,7 +331,7 @@ test('clips a label along the line only, and lets it shrink to its column', () =
  */
 test('rules the middle of each gap and gives way beside the thumb and the pointer', () => {
   const start = dense.indexOf(
-    "[data-ui='segmented-control'][data-part='item']+[data-part='item']::before{",
+    '[data-ui-segmented-control][data-part-item]+[data-part-item]::before{',
   );
   assert.notEqual(start, -1);
   const rule = dense.slice(start, dense.indexOf('}', start));
@@ -333,9 +344,9 @@ test('rules the middle of each gap and gives way beside the thumb and the pointe
     /background:var\(--slotted-segmented-control-divider-color,color-mix\(inoklab,var\(--slotted-text\)14%,transparent\)\)/,
   );
   assert.match(rule, /inset-block:25%/);
-  assert.match(dense, /\[data-part='item'\]\[data-checked\]\+\[data-part='item'\]::before,/);
+  assert.match(dense, /\[data-part-item\]\[data-checked\]\+\[data-part-item\]::before,/);
   assert.match(
     dense,
-    /\[data-part='item'\]:hover:has\(\[data-part='control'\]:enabled\)\+\[data-part='item'\]::before\{opacity:0/,
+    /\[data-part-item\]:hover:has\(\[data-part-control\]:enabled\)\+\[data-part-item\]::before\{opacity:0/,
   );
 });

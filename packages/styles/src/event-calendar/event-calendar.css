@@ -7,7 +7,7 @@
    * scales, so a calendar at `dense` is the same calendar with less air rather
    * than a different drawing.
    */
-  [data-ui='event-calendar'][data-part='root'] {
+  [data-ui-event-calendar][data-part-root] {
     container: slotted-event-calendar / inline-size;
 
     /** Grid rules, drawn once per cell edge. */
@@ -102,9 +102,9 @@
     min-inline-size: 0;
   }
 
-  [data-ui='event-calendar'] *,
-  [data-ui='event-calendar'] *::before,
-  [data-ui='event-calendar'] *::after {
+  [data-ui-event-calendar] *,
+  [data-ui-event-calendar] *::before,
+  [data-ui-event-calendar] *::after {
     box-sizing: border-box;
   }
 
@@ -128,7 +128,7 @@
    * filter with one calendar, no actions — is an empty `auto` track, and a gap
    * beside it would still be drawn. The air is each area's own start margin.
    */
-  [data-ui='event-calendar'] > [data-part='header'] {
+  [data-ui-event-calendar] > [data-part-header] {
     align-items: center;
     display: grid;
     grid-template-areas: 'title navigation views filter actions';
@@ -136,7 +136,7 @@
     row-gap: var(--slotted-space-4, 0.5rem);
   }
 
-  [data-ui='event-calendar'] > [data-part='header'] > [data-part='title'] {
+  [data-ui-event-calendar] > [data-part-header] > [data-part-title] {
     font-family: var(
       --slotted-font-family-heading,
       var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
@@ -150,7 +150,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='event-calendar'] [data-part='navigation'] {
+  [data-ui-event-calendar] [data-part-navigation] {
     align-items: center;
     display: inline-flex;
     gap: var(--slotted-space-2, 0.25rem);
@@ -158,19 +158,19 @@
     margin-inline-start: var(--slotted-space-6, 1rem);
   }
 
-  [data-ui='event-calendar'] [data-part='views'] {
+  [data-ui-event-calendar] [data-part-views] {
     display: flex;
     grid-area: views;
     margin-inline-start: var(--slotted-space-5, 0.75rem);
     min-inline-size: 0;
   }
 
-  [data-ui='event-calendar'] [data-part='filter'] {
+  [data-ui-event-calendar] [data-part-filter] {
     grid-area: filter;
     margin-inline-start: var(--_gap);
   }
 
-  [data-ui='event-calendar'] > [data-part='header'] > [data-part='actions'] {
+  [data-ui-event-calendar] > [data-part-header] > [data-part-actions] {
     align-items: center;
     display: inline-flex;
     gap: var(--_gap);
@@ -184,10 +184,10 @@
    * so it cannot carry this family's part; the look is the outlined secondary
    * control every form already shows, read from the same control tokens.
    */
-  [data-ui='event-calendar'] [data-part='today'],
-  [data-ui='event-calendar'] [data-part='filter'],
-  [data-ui='event-calendar'] [data-part='previous'],
-  [data-ui='event-calendar'] [data-part='next'] {
+  [data-ui-event-calendar] [data-part-today],
+  [data-ui-event-calendar] [data-part-filter],
+  [data-ui-event-calendar] [data-part-previous],
+  [data-ui-event-calendar] [data-part-next] {
     align-items: center;
     appearance: none;
     background-color: var(--slotted-control-surface, #ffffff);
@@ -214,24 +214,24 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='event-calendar'] [data-part='previous'],
-  [data-ui='event-calendar'] [data-part='next'] {
+  [data-ui-event-calendar] [data-part-previous],
+  [data-ui-event-calendar] [data-part-next] {
     inline-size: var(--slotted-control-height-md, 34px);
     padding-inline: 0;
   }
 
-  [data-ui='event-calendar'] [data-part='today']:hover:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='filter']:hover:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='previous']:hover:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='next']:hover:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-today]:hover:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-filter]:hover:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-previous]:hover:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-next]:hover:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
   }
 
-  [data-ui='event-calendar'] [data-part='today']:active:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='filter']:active:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='previous']:active:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='next']:active:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='filter'][aria-expanded='true'] {
+  [data-ui-event-calendar] [data-part-today]:active:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-filter]:active:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-previous]:active:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-next]:active:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-filter][aria-expanded='true'] {
     background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
     transition-duration: var(--slotted-duration-instant);
   }
@@ -243,25 +243,25 @@
    * inside an `icon` box, which the binding draws; the header only sizes and
    * turns the box.
    */
-  [data-ui='event-calendar'] [data-part='previous'] > [data-ui='icon'],
-  [data-ui='event-calendar'] [data-part='next'] > [data-ui='icon'],
-  [data-ui='event-calendar'] [data-part='filter'] > [data-ui='icon'] {
+  [data-ui-event-calendar] [data-part-previous] > [data-ui-icon],
+  [data-ui-event-calendar] [data-part-next] > [data-ui-icon],
+  [data-ui-event-calendar] [data-part-filter] > [data-ui-icon] {
     --slotted-icon-size: var(--slotted-control-icon-size-md, 16px);
   }
 
-  [data-ui='event-calendar'] [data-part='previous'] > [data-ui='icon'] {
+  [data-ui-event-calendar] [data-part-previous] > [data-ui-icon] {
     rotate: 180deg;
   }
 
-  [data-ui='event-calendar']:dir(rtl) [data-part='previous'] > [data-ui='icon'] {
+  [data-ui-event-calendar]:dir(rtl) [data-part-previous] > [data-ui-icon] {
     rotate: 0deg;
   }
 
-  [data-ui='event-calendar']:dir(rtl) [data-part='next'] > [data-ui='icon'] {
+  [data-ui-event-calendar]:dir(rtl) [data-part-next] > [data-ui-icon] {
     rotate: 180deg;
   }
 
-  [data-ui='event-calendar'] [data-part='filter'] > [data-ui='icon'] {
+  [data-ui-event-calendar] [data-part-filter] > [data-ui-icon] {
     color: var(--slotted-text-muted, #5b6b7f);
   }
 
@@ -272,19 +272,19 @@
    * inside its own edge, because the cell beside it shares that edge and a
    * ring hung outside would be half under the neighbour.
    */
-  [data-ui='event-calendar'] [data-part='today']:focus-visible,
-  [data-ui='event-calendar'] [data-part='filter']:focus-visible,
-  [data-ui='event-calendar'] [data-part='previous']:focus-visible,
-  [data-ui='event-calendar'] [data-part='next']:focus-visible,
-  [data-ui='event-calendar'] [data-part='day-number']:focus-visible {
+  [data-ui-event-calendar] [data-part-today]:focus-visible,
+  [data-ui-event-calendar] [data-part-filter]:focus-visible,
+  [data-ui-event-calendar] [data-part-previous]:focus-visible,
+  [data-ui-event-calendar] [data-part-next]:focus-visible,
+  [data-ui-event-calendar] [data-part-day-number]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='event-calendar'] [data-part='day']:focus-visible,
-  [data-ui='event-calendar'] [data-part='column-header']:focus-visible,
-  [data-ui='event-calendar'] [data-part='all-day-cell']:focus-visible,
-  [data-ui='event-calendar'] [data-part='column']:focus-visible {
+  [data-ui-event-calendar] [data-part-day]:focus-visible,
+  [data-ui-event-calendar] [data-part-column-header]:focus-visible,
+  [data-ui-event-calendar] [data-part-all-day-cell]:focus-visible,
+  [data-ui-event-calendar] [data-part-column]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
   }
@@ -293,8 +293,8 @@
    * An event sits in the air the grid leaves around it, and its ring stands
    * in that air: one pixel out, inside the space to the next event or rule.
    */
-  [data-ui='event-calendar'] [data-part='event']:focus-visible,
-  [data-ui='event-calendar'] [data-part='more']:focus-visible {
+  [data-ui-event-calendar] [data-part-event]:focus-visible,
+  [data-ui-event-calendar] [data-part-more]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: 1px;
     z-index: 3;
@@ -307,7 +307,7 @@
    * the month and the list take their content's height and the hours take at
    * most 40rem; a root with a height gives the hours the rest of it.
    */
-  [data-ui='event-calendar'] > [data-part='body'] {
+  [data-ui-event-calendar] > [data-part-body] {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -320,7 +320,7 @@
    * would outline the whole grid; the calendar marks the event or the
    * stretch the commands act on instead.
    */
-  [data-ui='event-calendar'] > [data-part='body'][data-ui='context-menu'] {
+  [data-ui-event-calendar] > [data-part-body][data-ui-context-menu] {
     --slotted-context-menu-mark-width: 0px;
   }
 
@@ -333,12 +333,12 @@
      an application does; with no height the body is the list's height and
      nothing scrolls. The panels are the body's siblings, so nothing it
      clips. */
-  [data-ui='event-calendar'][data-layout='list'] > [data-part='body'] {
+  [data-ui-event-calendar][data-layout='list'] > [data-part-body] {
     overflow-y: auto;
     overscroll-behavior: contain;
   }
 
-  [data-ui='event-calendar'] > [data-part='body'] > [data-part='loader'] {
+  [data-ui-event-calendar] > [data-part-body] > [data-part-loader] {
     inset-block-start: 0;
     inset-inline: 0;
     pointer-events: none;
@@ -346,11 +346,11 @@
     z-index: 4;
   }
 
-  [data-ui='event-calendar'] > [data-part='body'] > [data-part='error'] {
+  [data-ui-event-calendar] > [data-part-body] > [data-part-error] {
     margin-block-end: var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='event-calendar'] > [data-part='body'][aria-busy='true'] [data-part='event'] {
+  [data-ui-event-calendar] > [data-part-body][aria-busy='true'] [data-part-event] {
     opacity: 0.6;
   }
 
@@ -367,7 +367,7 @@
      the rest of it to the weeks: the month grows as a column item and the
      table spreads the height over its rows, instead of ending half way down
      the screen. With no height on the root it is its content's height. */
-  [data-ui='event-calendar'] [data-part='month'] {
+  [data-ui-event-calendar] [data-part-month] {
     flex: 1 0 auto;
     border-block-start: var(--_rule-width) solid var(--_rule);
     border-collapse: separate;
@@ -377,8 +377,8 @@
     table-layout: fixed;
   }
 
-  [data-ui='event-calendar'] [data-part='weekday'],
-  [data-ui='event-calendar'] [data-part='week-number-header'] {
+  [data-ui-event-calendar] [data-part-weekday],
+  [data-ui-event-calendar] [data-part-week-number-header] {
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -391,19 +391,19 @@
     white-space: nowrap;
   }
 
-  [data-ui='event-calendar'] [data-part='month'] [data-part='weekday'],
-  [data-ui='event-calendar'] [data-part='month'] [data-part='week-number-header'] {
+  [data-ui-event-calendar] [data-part-month] [data-part-weekday],
+  [data-ui-event-calendar] [data-part-month] [data-part-week-number-header] {
     border-block-end: var(--_rule-width) solid var(--_rule);
     border-inline-end: var(--_rule-width) solid var(--_rule);
   }
 
   /** The week-number column is a quarter of a day, enough for two digits. */
-  [data-ui='event-calendar'] [data-part='week-number-header'],
-  [data-ui='event-calendar'] [data-part='week-number'] {
+  [data-ui-event-calendar] [data-part-week-number-header],
+  [data-ui-event-calendar] [data-part-week-number] {
     inline-size: calc(var(--slotted-space-9, 2rem) + var(--slotted-space-2, 0.25rem));
   }
 
-  [data-ui='event-calendar'] [data-part='week-number'] {
+  [data-ui-event-calendar] [data-part-week-number] {
     border-block-end: var(--_rule-width) solid var(--_rule);
     border-inline-end: var(--_rule-width) solid var(--_rule);
     color: var(--slotted-text-muted, #5b6b7f);
@@ -420,7 +420,7 @@
    * air between the rules and what the cell holds — and the one number a bar
    * reads to reach across into the cells after it.
    */
-  [data-ui='event-calendar'] [data-part='day'] {
+  [data-ui-event-calendar] [data-part-day] {
     --_pad: var(--_air);
 
     border-block-end: var(--_rule-width) solid var(--_rule);
@@ -430,9 +430,9 @@
     vertical-align: top;
   }
 
-  [data-ui='event-calendar'] [data-part='day'][data-non-working],
-  [data-ui='event-calendar'] [data-part='column'][data-non-working],
-  [data-ui='event-calendar'] [data-part='all-day-cell'][data-non-working] {
+  [data-ui-event-calendar] [data-part-day][data-non-working],
+  [data-ui-event-calendar] [data-part-column][data-non-working],
+  [data-ui-event-calendar] [data-part-all-day-cell][data-non-working] {
     background-color: var(--slotted-event-calendar-off-background, var(--_off));
   }
 
@@ -442,8 +442,8 @@
    * a row draw its start and end. The inline edges are inset shadows, so the
    * offset carries the direction: `--_run-direction` turns it in RTL.
    */
-  [data-ui='event-calendar'] [data-part='day'][data-selected],
-  [data-ui='event-calendar'] [data-part='all-day-cell'][data-selected] {
+  [data-ui-event-calendar] [data-part-day][data-selected],
+  [data-ui-event-calendar] [data-part-all-day-cell][data-selected] {
     --_run-edge: var(--slotted-border-width-thin, 1px);
     --_run-color: var(
       --slotted-event-calendar-selection-border-color,
@@ -464,19 +464,18 @@
       inset calc(var(--_run-end) * var(--_run-direction) * -1) 0 0 0 var(--_run-color);
   }
 
-  [data-ui='event-calendar']:dir(rtl) [data-part='day'][data-selected],
-  [data-ui='event-calendar']:dir(rtl) [data-part='all-day-cell'][data-selected] {
+  [data-ui-event-calendar]:dir(rtl) [data-part-day][data-selected],
+  [data-ui-event-calendar]:dir(rtl) [data-part-all-day-cell][data-selected] {
     --_run-direction: -1;
   }
 
-  [data-ui='event-calendar'] [data-part='day'][data-selected]:not([data-selected] + *),
-  [data-ui='event-calendar'] [data-part='all-day-cell'][data-selected]:not([data-selected] + *) {
+  [data-ui-event-calendar] [data-part-day][data-selected]:not([data-selected] + *),
+  [data-ui-event-calendar] [data-part-all-day-cell][data-selected]:not([data-selected] + *) {
     --_run-start: var(--_run-edge);
   }
 
-  [data-ui='event-calendar'] [data-part='day'][data-selected]:not(:has(+ [data-selected])),
-  [data-ui='event-calendar']
-    [data-part='all-day-cell'][data-selected]:not(:has(+ [data-selected])) {
+  [data-ui-event-calendar] [data-part-day][data-selected]:not(:has(+ [data-selected])),
+  [data-ui-event-calendar] [data-part-all-day-cell][data-selected]:not(:has(+ [data-selected])) {
     --_run-end: var(--_run-edge);
   }
 
@@ -484,7 +483,7 @@
    * The day's number on the start side, the consumer's content for the day
    * on the end side, one line: a price, a count of free slots, a holiday.
    */
-  [data-ui='event-calendar'] [data-part='day-header'] {
+  [data-ui-event-calendar] [data-part-day-header] {
     align-items: center;
     display: flex;
     gap: var(--slotted-space-2, 0.25rem);
@@ -493,7 +492,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='event-calendar'] [data-part='day-content'] {
+  [data-ui-event-calendar] [data-part-day-content] {
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     line-height: var(--_line-xs);
@@ -509,7 +508,7 @@
    * a control, so it lines up with the lanes under it. Today is the accent
    * solid, the one filled mark on the page.
    */
-  [data-ui='event-calendar'] [data-part='day-number'] {
+  [data-ui-event-calendar] [data-part-day-number] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -531,21 +530,21 @@
       var(--slotted-control-transition-easing);
   }
 
-  [data-ui='event-calendar'] [data-part='day-number']:hover:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-day-number]:hover:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
   }
 
-  [data-ui='event-calendar'] [data-part='day-number']:active:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-day-number]:active:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
     transition-duration: var(--slotted-duration-instant);
   }
 
-  [data-ui='event-calendar'] [data-part='day'][data-outside-month] [data-part='day-number'] {
+  [data-ui-event-calendar] [data-part-day][data-outside-month] [data-part-day-number] {
     color: var(--slotted-text-muted, #5b6b7f);
   }
 
-  [data-ui='event-calendar'] [data-today] > [data-part='day-header'] [data-part='day-number'],
-  [data-ui='event-calendar'] [data-part='column-header'][data-today] [data-part='day-number'] {
+  [data-ui-event-calendar] [data-today] > [data-part-day-header] [data-part-day-number],
+  [data-ui-event-calendar] [data-part-column-header][data-today] [data-part-day-number] {
     background-color: var(
       --slotted-event-calendar-today-background,
       var(--slotted-tone-accent-solid, #2563eb)
@@ -560,15 +559,15 @@
    * of every week and a bar crossing from one cell into the next stays on its
    * line.
    */
-  [data-ui='event-calendar'] [data-part='day-events'],
-  [data-ui='event-calendar'] [data-part='all-day-cell'] {
+  [data-ui-event-calendar] [data-part-day-events],
+  [data-ui-event-calendar] [data-part-all-day-cell] {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: repeat(var(--slotted-event-calendar-lanes, 3), var(--_event-size));
     row-gap: var(--_air);
   }
 
-  [data-ui='event-calendar'] [data-part='day-events'] {
+  [data-ui-event-calendar] [data-part-day-events] {
     container: slotted-event-calendar-day / inline-size;
     grid-template-rows:
       repeat(var(--slotted-event-calendar-lanes, 3), var(--_event-size))
@@ -576,14 +575,14 @@
     position: relative;
   }
 
-  [data-ui='event-calendar'] [data-part='day-events'] > [data-part='event'],
-  [data-ui='event-calendar'] [data-part='all-day-cell'] > [data-part='event'] {
+  [data-ui-event-calendar] [data-part-day-events] > [data-part-event],
+  [data-ui-event-calendar] [data-part-all-day-cell] > [data-part-event] {
     grid-column: 1;
     grid-row: var(--slotted-event-lane, 1);
     justify-self: start;
   }
 
-  [data-ui='event-calendar'] [data-part='day-events'] > [data-part='more'] {
+  [data-ui-event-calendar] [data-part-day-events] > [data-part-more] {
     grid-column: 1;
     grid-row: -2 / -1;
     justify-self: start;
@@ -597,7 +596,7 @@
    * scale; the slot is the identity and the text is the meaning, so the ink
    * stays the page's own.
    */
-  [data-ui='event-calendar'] [data-part='event'] {
+  [data-ui-event-calendar] [data-part-event] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -625,35 +624,35 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='1'] {
+  [data-ui-event-calendar] [data-part-event][data-color='1'] {
     --_hue: var(--slotted-data-1, #2563eb);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='2'] {
+  [data-ui-event-calendar] [data-part-event][data-color='2'] {
     --_hue: var(--slotted-data-2, #ea580c);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='3'] {
+  [data-ui-event-calendar] [data-part-event][data-color='3'] {
     --_hue: var(--slotted-data-3, #0891b2);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='4'] {
+  [data-ui-event-calendar] [data-part-event][data-color='4'] {
     --_hue: var(--slotted-data-4, #dc2626);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='5'] {
+  [data-ui-event-calendar] [data-part-event][data-color='5'] {
     --_hue: var(--slotted-data-5, #7c3aed);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='6'] {
+  [data-ui-event-calendar] [data-part-event][data-color='6'] {
     --_hue: var(--slotted-data-6, #a16207);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='7'] {
+  [data-ui-event-calendar] [data-part-event][data-color='7'] {
     --_hue: var(--slotted-data-7, #c026d3);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-color='8'] {
+  [data-ui-event-calendar] [data-part-event][data-color='8'] {
     --_hue: var(--slotted-data-8, #16a34a);
   }
 
@@ -663,25 +662,25 @@
    * "AM 7:30" and lost its start to the ellipsis when it inherited the page's
    * direction instead.
    */
-  [data-ui='event-calendar'] [data-part='event-time'],
-  [data-ui='event-calendar'] [data-part='event-title'],
-  [data-ui='event-calendar'] [data-part='event-location'],
-  [data-ui='event-calendar'] [data-part='more'],
-  [data-ui='event-calendar'] [data-part='hour'],
-  [data-ui='event-calendar'] [data-part='zone'],
-  [data-ui='event-calendar'] [data-part='selection'],
-  [data-ui='event-calendar'] [data-part='offset-change'] {
+  [data-ui-event-calendar] [data-part-event-time],
+  [data-ui-event-calendar] [data-part-event-title],
+  [data-ui-event-calendar] [data-part-event-location],
+  [data-ui-event-calendar] [data-part-more],
+  [data-ui-event-calendar] [data-part-hour],
+  [data-ui-event-calendar] [data-part-zone],
+  [data-ui-event-calendar] [data-part-selection],
+  [data-ui-event-calendar] [data-part-offset-change] {
     unicode-bidi: plaintext;
   }
 
-  [data-ui='event-calendar'] [data-part='event-time'] {
+  [data-ui-event-calendar] [data-part-event-time] {
     color: var(--slotted-text-muted, #5b6b7f);
     flex: 0 0 auto;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
-  [data-ui='event-calendar'] [data-part='event-title'] {
+  [data-ui-event-calendar] [data-part-event-title] {
     flex: 0 1 auto;
     font-weight: var(--slotted-font-weight-medium, 500);
     min-inline-size: 0;
@@ -690,7 +689,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='event-calendar'] [data-part='event-location'] {
+  [data-ui-event-calendar] [data-part-event-location] {
     color: var(--slotted-text-muted, #5b6b7f);
     min-inline-size: 0;
     overflow: hidden;
@@ -699,8 +698,8 @@
   }
 
   /** Text for assistive technology alone, in the shape `visually-hidden` draws. */
-  [data-ui='event-calendar'] [data-part='event-meta'],
-  [data-ui='event-calendar'] [data-part='continuation'] {
+  [data-ui-event-calendar] [data-part-event-meta],
+  [data-ui-event-calendar] [data-part-continuation] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -717,15 +716,15 @@
    * read as a wall of colour, and the all-day events — the ones a month is
    * for — no longer stood out from it.
    */
-  [data-ui='event-calendar'] [data-part='day-events'] > [data-part='event']:not([data-bar]) {
+  [data-ui-event-calendar] [data-part-day-events] > [data-part-event]:not([data-bar]) {
     position: relative;
     block-size: var(--_event-size);
     inline-size: 100%;
     padding-inline: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='event-calendar'] [data-part='day-events'] > [data-part='event']:not([data-bar])::before,
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event']::before {
+  [data-ui-event-calendar] [data-part-day-events] > [data-part-event]:not([data-bar])::before,
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event]::before {
     background-color: var(--_hue);
     block-size: var(--slotted-space-4, 0.5rem);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -734,22 +733,20 @@
     inline-size: var(--slotted-space-4, 0.5rem);
   }
 
-  [data-ui='event-calendar']
-    [data-part='day-events']
-    > [data-part='event']:not([data-bar]):hover:not([data-disabled]) {
+  [data-ui-event-calendar]
+    [data-part-day-events]
+    > [data-part-event]:not([data-bar]):hover:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
   }
 
-  [data-ui='event-calendar']
-    [data-part='day-events']
-    > [data-part='event']:not([data-bar]):active:not([data-disabled], [data-open]) {
+  [data-ui-event-calendar]
+    [data-part-day-events]
+    > [data-part-event]:not([data-bar]):active:not([data-disabled], [data-open]) {
     background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
     transition-duration: var(--slotted-duration-instant);
   }
 
-  [data-ui='event-calendar']
-    [data-part='day-events']
-    > [data-part='event']:not([data-bar])[data-open] {
+  [data-ui-event-calendar] [data-part-day-events] > [data-part-event]:not([data-bar])[data-open] {
     background-color: light-dark(
       color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
       color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
@@ -763,8 +760,8 @@
    * reaches for. `--_ground` is named because the block's fade below paints
    * with it, so the fade follows every state the ground does.
    */
-  [data-ui='event-calendar'] [data-part='event'][data-bar],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
+  [data-ui-event-calendar] [data-part-event][data-bar],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] {
     --_ground: light-dark(
       color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
       color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
@@ -779,26 +776,23 @@
     color: var(--_ink);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar] [data-part='event-time'],
-  [data-ui='event-calendar'] [data-part='event'][data-bar] [data-part='event-location'],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] > [data-part='event-time'],
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event']
-    > [data-part='event-location'] {
+  [data-ui-event-calendar] [data-part-event][data-bar] [data-part-event-time],
+  [data-ui-event-calendar] [data-part-event][data-bar] [data-part-event-location],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-time],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-location] {
     color: color-mix(in oklab, var(--_ink) 72%, var(--_ground));
   }
 
-  [data-ui='event-calendar']
-    [data-part='event'][data-bar]:hover:not(
+  [data-ui-event-calendar]
+    [data-part-event][data-bar]:hover:not(
       [data-disabled],
       [data-open],
       [data-dragging],
       [data-context]
     ),
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event']:hover:not([data-disabled], [data-open], [data-dragging], [data-context]) {
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event]:hover:not([data-disabled], [data-open], [data-dragging], [data-context]) {
     --_ground: light-dark(
       color-mix(in oklab, var(--_hue) var(--_tint-hover), var(--_base)),
       color-mix(in oklab, var(--_hue) var(--_tint-hover-dark), var(--_base))
@@ -810,21 +804,16 @@
     );
   }
 
-  [data-ui='event-calendar']
-    [data-part='event'][data-bar]:active:not(
+  [data-ui-event-calendar]
+    [data-part-event][data-bar]:active:not(
       [data-disabled],
       [data-open],
       [data-dragging],
       [data-context]
     ),
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event']:active:not(
-      [data-disabled],
-      [data-open],
-      [data-dragging],
-      [data-context]
-    ) {
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event]:active:not([data-disabled], [data-open], [data-dragging], [data-context]) {
     --_ground: light-dark(
       color-mix(in oklab, var(--_hue) var(--_tint-active), var(--_base)),
       color-mix(in oklab, var(--_hue) var(--_tint-active-dark), var(--_base))
@@ -840,12 +829,12 @@
    * white type holds 4.5:1 on every slot of the scale. The event a context
    * menu acts on is drawn the same way, for the same reason.
    */
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-open],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-open],
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-context],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-context],
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-dragging],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-dragging] {
+  [data-ui-event-calendar] [data-part-event][data-bar][data-open],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-open],
+  [data-ui-event-calendar] [data-part-event][data-bar][data-context],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-context],
+  [data-ui-event-calendar] [data-part-event][data-bar][data-dragging],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-dragging] {
     --_ground: color-mix(in oklab, var(--_hue) 80%, #000000);
     --_ink: #ffffff;
 
@@ -858,10 +847,10 @@
    * event that will not land there — and the pointer says it cannot drop.
    * Letting go puts it back where it was.
    */
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-dragging][data-drop-invalid],
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event'][data-dragging][data-drop-invalid] {
+  [data-ui-event-calendar] [data-part-event][data-bar][data-dragging][data-drop-invalid],
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event][data-dragging][data-drop-invalid] {
     --_ground: light-dark(
       color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
       color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
@@ -872,24 +861,24 @@
     border-style: dashed;
   }
 
-  [data-ui='event-calendar']:has([data-part='event'][data-drop-invalid]),
-  [data-ui='event-calendar']:has([data-part='event'][data-drop-invalid]) * {
+  [data-ui-event-calendar]:has([data-part-event][data-drop-invalid]),
+  [data-ui-event-calendar]:has([data-part-event][data-drop-invalid]) * {
     cursor: not-allowed;
   }
 
   /* The solid slot answers the pointer by darkening, never by going back to the tint. */
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-open]:hover:not([data-disabled]),
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event'][data-open]:hover:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-event][data-bar][data-open]:hover:not([data-disabled]),
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event][data-open]:hover:not([data-disabled]) {
     --_ground: color-mix(in oklab, var(--_hue) 70%, #000000);
   }
 
   /* And the press one step further down the same line: 80, 70, 60. */
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-open]:active:not([data-disabled]),
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event'][data-open]:active:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-event][data-bar][data-open]:active:not([data-disabled]),
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event][data-open]:active:not([data-disabled]) {
     --_ground: color-mix(in oklab, var(--_hue) 60%, #000000);
 
     transition-duration: var(--slotted-duration-instant);
@@ -901,7 +890,7 @@
    * being cut by its edge; a block whose words end above the fade shows
    * nothing of it, because the fade is the ground it lies on.
    */
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event']:not([data-short])::after {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event]:not([data-short])::after {
     background-image: linear-gradient(to bottom, transparent, var(--_ground));
     block-size: min(var(--slotted-space-6, 1rem), 45%);
     border-end-end-radius: inherit;
@@ -917,7 +906,7 @@
    * An event that has ended steps back: less of its colour, its words in the
    * muted ink. The day's remaining events are the ones a reader acts on.
    */
-  [data-ui='event-calendar'] [data-part='event'][data-past]:not([data-open], [data-dragging]) {
+  [data-ui-event-calendar] [data-part-event][data-past]:not([data-open], [data-dragging]) {
     --_tint: 7%;
     --_tint-hover: 13%;
     --_edge: 20%;
@@ -927,25 +916,23 @@
     --_ink-mix: 30%;
   }
 
-  [data-ui='event-calendar']
-    [data-part='day-events']
-    > [data-part='event'][data-past]:not([data-bar])::before {
+  [data-ui-event-calendar]
+    [data-part-day-events]
+    > [data-part-event][data-past]:not([data-bar])::before {
     opacity: 0.55;
   }
 
-  [data-ui='event-calendar']
-    [data-part='day-events']
-    > [data-part='event'][data-past]:not([data-bar]) {
+  [data-ui-event-calendar] [data-part-day-events] > [data-part-event][data-past]:not([data-bar]) {
     color: var(--slotted-text-muted, #5b6b7f);
   }
 
   /* The list steps a past event back the same way: its mark faded and its
      words in the muted ink, the time and the place quieter still. */
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'][data-past]::before {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event][data-past]::before {
     opacity: 0.55;
   }
 
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'][data-past] {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event][data-past] {
     color: var(--slotted-text-muted, #5b6b7f);
   }
 
@@ -964,7 +951,7 @@
    * it pointing the way it continues. Running it into the table's edge made
    * it read as clipped rather than continued.
    */
-  [data-ui='event-calendar'] [data-part='event'][data-bar] {
+  [data-ui-event-calendar] [data-part-event][data-bar] {
     block-size: var(--_event-size);
     inline-size: calc(
       var(--slotted-event-span, 1) * (100% + 2 * var(--_pad, 0px) + var(--_rule-width)) - 2 *
@@ -976,39 +963,37 @@
     z-index: 1;
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-continues-before] {
+  [data-ui-event-calendar] [data-part-event][data-bar][data-continues-before] {
     border-end-start-radius: 0;
     border-start-start-radius: 0;
     padding-inline-start: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar][data-continues-after] {
+  [data-ui-event-calendar] [data-part-event][data-bar][data-continues-after] {
     border-end-end-radius: 0;
     border-start-end-radius: 0;
     padding-inline-end: var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar] > [data-ui='icon'][data-edge] {
+  [data-ui-event-calendar] [data-part-event][data-bar] > [data-ui-icon][data-edge] {
     color: color-mix(in oklab, var(--_hue) 70%, var(--slotted-text, #0f172a));
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar] > [data-ui='icon'][data-edge='start'] {
+  [data-ui-event-calendar] [data-part-event][data-bar] > [data-ui-icon][data-edge='start'] {
     rotate: 180deg;
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar] > [data-ui='icon'][data-edge='end'] {
+  [data-ui-event-calendar] [data-part-event][data-bar] > [data-ui-icon][data-edge='end'] {
     margin-inline-start: auto;
   }
 
-  [data-ui='event-calendar']:dir(rtl)
-    [data-part='event'][data-bar]
-    > [data-ui='icon'][data-edge='start'] {
+  [data-ui-event-calendar]:dir(rtl)
+    [data-part-event][data-bar]
+    > [data-ui-icon][data-edge='start'] {
     rotate: 0deg;
   }
 
-  [data-ui='event-calendar']:dir(rtl)
-    [data-part='event'][data-bar]
-    > [data-ui='icon'][data-edge='end'] {
+  [data-ui-event-calendar]:dir(rtl) [data-part-event][data-bar] > [data-ui-icon][data-edge='end'] {
     rotate: 180deg;
   }
 
@@ -1017,11 +1002,11 @@
    * is an outline of one. Cancelled keeps its place and strikes its title, so
    * the slot a reader remembers is still where they remember it.
    */
-  [data-ui='event-calendar']
-    [data-part='event'][data-status='tentative'][data-bar]:not([data-open], [data-dragging]),
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event'][data-status='tentative']:not([data-open], [data-dragging]) {
+  [data-ui-event-calendar]
+    [data-part-event][data-status='tentative'][data-bar]:not([data-open], [data-dragging]),
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event][data-status='tentative']:not([data-open], [data-dragging]) {
     --_tint: 0%;
     --_tint-hover: 7%;
     --_tint-active: 12%;
@@ -1033,13 +1018,11 @@
     border-style: dashed;
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-status='cancelled'] {
+  [data-ui-event-calendar] [data-part-event][data-status='cancelled'] {
     color: var(--slotted-text-muted, #5b6b7f);
   }
 
-  [data-ui='event-calendar']
-    [data-part='event'][data-status='cancelled']
-    [data-part='event-title'] {
+  [data-ui-event-calendar] [data-part-event][data-status='cancelled'] [data-part-event-title] {
     text-decoration: line-through;
   }
 
@@ -1053,12 +1036,12 @@
    * floating shadow, and it lets the pointer through to the cell beneath it so
    * the cell under the finger is the one it lands on.
    */
-  [data-ui='event-calendar'] [data-part='event'][data-editable] {
+  [data-ui-event-calendar] [data-part-event][data-editable] {
     cursor: grab;
     touch-action: none;
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-dragging] {
+  [data-ui-event-calendar] [data-part-event][data-dragging] {
     box-shadow: var(--slotted-shadow-md, none);
     cursor: grabbing;
     pointer-events: none;
@@ -1071,7 +1054,7 @@
    * while the event is hovered or focused, so a resting grid carries no marks
    * nobody is using.
    */
-  [data-ui='event-calendar'] [data-part='resize-handle'] {
+  [data-ui-event-calendar] [data-part-resize-handle] {
     display: flex;
     inset-block-end: 0;
     inset-inline: 0;
@@ -1085,7 +1068,7 @@
     z-index: 1;
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar] > [data-part='resize-handle'] {
+  [data-ui-event-calendar] [data-part-event][data-bar] > [data-part-resize-handle] {
     block-size: auto;
     cursor: ew-resize;
     inline-size: var(--slotted-space-4, 0.5rem);
@@ -1093,7 +1076,7 @@
     inset-inline: auto 0;
   }
 
-  [data-ui='event-calendar'] [data-part='resize-handle']::before {
+  [data-ui-event-calendar] [data-part-resize-handle]::before {
     background-color: var(--_ink, var(--_hue));
     block-size: var(--slotted-border-width-thick, 2px);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -1104,26 +1087,22 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='event-calendar'] [data-part='event'][data-bar] > [data-part='resize-handle']::before {
+  [data-ui-event-calendar] [data-part-event][data-bar] > [data-part-resize-handle]::before {
     block-size: var(--slotted-space-4, 0.5rem);
     inline-size: var(--slotted-border-width-thick, 2px);
   }
 
-  [data-ui='event-calendar']
-    [data-part='event']:hover:not([data-disabled])
-    > [data-part='resize-handle']::before,
-  [data-ui='event-calendar']
-    [data-part='event']:focus-visible
-    > [data-part='resize-handle']::before,
-  [data-ui='event-calendar']
-    [data-part='event'][data-dragging]
-    > [data-part='resize-handle']::before {
+  [data-ui-event-calendar]
+    [data-part-event]:hover:not([data-disabled])
+    > [data-part-resize-handle]::before,
+  [data-ui-event-calendar] [data-part-event]:focus-visible > [data-part-resize-handle]::before,
+  [data-ui-event-calendar] [data-part-event][data-dragging] > [data-part-resize-handle]::before {
     opacity: 1;
     transition-timing-function: var(--slotted-easing-enter);
   }
 
   /** "+N": a quiet line under the lanes, or a block in the last column. */
-  [data-ui='event-calendar'] [data-part='more'] {
+  [data-ui-event-calendar] [data-part-more] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -1152,13 +1131,13 @@
     white-space: nowrap;
   }
 
-  [data-ui='event-calendar'] [data-part='more']:hover:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='more'][aria-expanded='true'] {
+  [data-ui-event-calendar] [data-part-more]:hover:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-more][aria-expanded='true'] {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
     color: var(--slotted-text, #0f172a);
   }
 
-  [data-ui='event-calendar'] [data-part='more']:active:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-more]:active:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
     transition-duration: var(--slotted-duration-instant);
   }
@@ -1173,36 +1152,27 @@
    * words were noise that looked like text.
    */
   @container slotted-event-calendar-day (max-width: 7.5rem) {
-    [data-ui='event-calendar']
-      [data-part='day-events']
-      > [data-part='event']:not([data-bar])
-      > [data-part='event-time'] {
+    [data-ui-event-calendar]
+      [data-part-day-events]
+      > [data-part-event]:not([data-bar])
+      > [data-part-event-time] {
       display: none;
     }
   }
 
   @container slotted-event-calendar-event (max-width: 4.5rem) {
-    [data-ui='event-calendar']
-      [data-part='column']
-      > [data-part='event']
-      > [data-part='event-time'],
-    [data-ui='event-calendar']
-      [data-part='column']
-      > [data-part='event']
-      > [data-part='event-location'] {
+    [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-time],
+    [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-location] {
       display: none;
     }
 
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
+    [data-ui-event-calendar] [data-part-column] > [data-part-event] {
       padding-inline: var(--slotted-space-2, 0.25rem);
     }
   }
 
   @container slotted-event-calendar-event (max-width: 2rem) {
-    [data-ui='event-calendar']
-      [data-part='column']
-      > [data-part='event']
-      > [data-part='event-title'] {
+    [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-title] {
       block-size: 1px;
       clip-path: inset(50%);
       inline-size: 1px;
@@ -1213,7 +1183,7 @@
   }
 
   @container slotted-event-calendar-event (max-width: 4.5rem) {
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='more'] > span {
+    [data-ui-event-calendar] [data-part-column] > [data-part-more] > span {
       display: none;
     }
   }
@@ -1227,7 +1197,7 @@
    * the scroller's gutter, which is what keeps a column header over its
    * column when the hours have a scrollbar and the headers do not.
    */
-  [data-ui='event-calendar'] [data-part='time-grid'] {
+  [data-ui-event-calendar] [data-part-time-grid] {
     border-block-start: var(--_rule-width) solid var(--_rule);
     display: flex;
     flex: 1 1 auto;
@@ -1235,15 +1205,15 @@
     min-block-size: 0;
   }
 
-  [data-ui='event-calendar'] [data-part='time-head'] {
+  [data-ui-event-calendar] [data-part-time-head] {
     border-block-end: var(--_rule-width) solid var(--_rule);
     overflow: hidden;
     scrollbar-gutter: stable;
   }
 
-  [data-ui='event-calendar'] [data-part='columns'],
-  [data-ui='event-calendar'] [data-part='all-day-row'],
-  [data-ui='event-calendar'] [data-part='time-row'] {
+  [data-ui-event-calendar] [data-part-columns],
+  [data-ui-event-calendar] [data-part-all-day-row],
+  [data-ui-event-calendar] [data-part-time-row] {
     display: grid;
     grid-template-columns: var(--_gutter) repeat(
         var(--slotted-event-calendar-days, 7),
@@ -1251,11 +1221,11 @@
       );
   }
 
-  [data-ui='event-calendar'] [data-part='columns'] {
+  [data-ui-event-calendar] [data-part-columns] {
     border-block-end: var(--_rule-width) solid var(--_rule);
   }
 
-  [data-ui='event-calendar'] [data-part='zone'] {
+  [data-ui-event-calendar] [data-part-zone] {
     align-self: end;
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
@@ -1275,7 +1245,7 @@
    * start edge sat a padding and a half away from digits it was meant to
    * stand over.
    */
-  [data-ui='event-calendar'] [data-part='column-header'] {
+  [data-ui-event-calendar] [data-part-column-header] {
     align-items: center;
     border-inline-start: var(--_rule-width) solid var(--_rule);
     display: flex;
@@ -1286,24 +1256,24 @@
     padding-inline: var(--_air);
   }
 
-  [data-ui='event-calendar'] [data-part='column-header'] [data-part='weekday'] {
+  [data-ui-event-calendar] [data-part-column-header] [data-part-weekday] {
     max-inline-size: 100%;
     padding: 0;
   }
 
-  [data-ui='event-calendar'] [data-part='column-header'][data-today] [data-part='weekday'] {
+  [data-ui-event-calendar] [data-part-column-header][data-today] [data-part-weekday] {
     color: var(--slotted-tone-accent-text, #1d4ed8);
   }
 
-  [data-ui='event-calendar'] [data-part='column-header'] [data-part='day-number'] {
+  [data-ui-event-calendar] [data-part-column-header] [data-part-day-number] {
     block-size: var(--slotted-control-inner-size-lg, 28px);
     font-size: var(--slotted-font-size-lg, 1rem);
     font-weight: var(--slotted-font-weight-medium, 500);
     min-inline-size: var(--slotted-control-inner-size-lg, 28px);
   }
 
-  [data-ui='event-calendar'] [data-part='column-header'] [data-part='day-content'],
-  [data-ui='event-calendar'] [data-part='offset-change'] {
+  [data-ui-event-calendar] [data-part-column-header] [data-part-day-content],
+  [data-ui-event-calendar] [data-part-offset-change] {
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     line-height: var(--_line-xs);
@@ -1316,7 +1286,7 @@
 
   /* Two short lines rather than an ellipsis: "Dia inteiro" in the gutter of
      "12 PM" read "Dia int…". */
-  [data-ui='event-calendar'] [data-part='all-day-label'] {
+  [data-ui-event-calendar] [data-part-all-day-label] {
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     hyphens: auto;
@@ -1327,7 +1297,7 @@
     text-align: end;
   }
 
-  [data-ui='event-calendar'] [data-part='all-day-cell'] {
+  [data-ui-event-calendar] [data-part-all-day-cell] {
     --_pad: var(--_air);
 
     border-inline-start: var(--_rule-width) solid var(--_rule);
@@ -1336,7 +1306,7 @@
     position: relative;
   }
 
-  [data-ui='event-calendar'] [data-part='scroller'] {
+  [data-ui-event-calendar] [data-part-scroller] {
     flex: 1 1 40rem;
     max-block-size: max-content;
     min-block-size: 0;
@@ -1345,7 +1315,7 @@
     scrollbar-gutter: stable;
   }
 
-  [data-ui='event-calendar'] [data-part='gutter'] {
+  [data-ui-event-calendar] [data-part-gutter] {
     display: flex;
     flex-direction: column;
     min-inline-size: 0;
@@ -1356,7 +1326,7 @@
    * The first hour's line is the grid's own top edge, so its label is not
    * drawn: half of it would hang above the scroller.
    */
-  [data-ui='event-calendar'] [data-part='hour'] {
+  [data-ui-event-calendar] [data-part-hour] {
     block-size: var(--_hour);
     color: var(--slotted-text-muted, #5b6b7f);
     flex: 0 0 auto;
@@ -1371,7 +1341,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='event-calendar'] [data-part='hour']:nth-child(1 of [data-part='hour']) {
+  [data-ui-event-calendar] [data-part-hour]:nth-child(1 of [data-part-hour]) {
     visibility: hidden;
   }
 
@@ -1380,7 +1350,7 @@
    * background, not elements: forty-eight lines a day across seven days would
    * be three hundred nodes that say nothing.
    */
-  [data-ui='event-calendar'] [data-part='column'] {
+  [data-ui-event-calendar] [data-part-column] {
     background-image:
       linear-gradient(to bottom, var(--_rule) var(--_rule-width), transparent var(--_rule-width)),
       linear-gradient(
@@ -1396,7 +1366,7 @@
     position: relative;
   }
 
-  [data-ui='event-calendar'] [data-part='column'][data-today] {
+  [data-ui-event-calendar] [data-part-column][data-today] {
     background-color: color-mix(
       in oklab,
       var(--slotted-tone-accent-surface, #eff6ff) 50%,
@@ -1411,9 +1381,9 @@
    * block that starts where it ends. The last stretch of the column's width is
    * left clear, so there is always an empty slot under the pointer to press.
    */
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='more'],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='selection'] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event],
+  [data-ui-event-calendar] [data-part-column] > [data-part-more],
+  [data-ui-event-calendar] [data-part-column] > [data-part-selection] {
     --_room: calc(100% - var(--slotted-space-5, 0.75rem));
     --_share: calc(var(--_room) / var(--slotted-event-columns, 1));
 
@@ -1427,7 +1397,7 @@
     position: absolute;
   }
 
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] {
     align-content: start;
     align-items: start;
     container: slotted-event-calendar-event / inline-size;
@@ -1442,14 +1412,11 @@
    * fit, the last line first. A flex column that shrank them laid the time
    * over the title in a one-hour block at `dense`.
    */
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] > * {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] > * {
     flex-shrink: 0;
   }
 
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event']
-    > [data-part='event-title'] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-title] {
     max-inline-size: 100%;
     order: -1;
   }
@@ -1460,10 +1427,10 @@
    * "Design …" where "Design critique" fits on two lines. A word wider than
    * the block is hyphenated in the page's language, and cut only without one.
    */
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event']:not([data-short])
-    > [data-part='event-title'] {
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event]:not([data-short])
+    > [data-part-event-title] {
     -webkit-box-orient: vertical;
     display: -webkit-box;
     hyphens: auto;
@@ -1473,11 +1440,8 @@
     white-space: normal;
   }
 
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event']
-    > [data-part='event-location'],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] > [data-part='event-time'] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-location],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event] > [data-part-event-time] {
     max-inline-size: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1488,25 +1452,25 @@
    * takes the room first: a block that can show one word shows the name, not
    * the hour the grid already states by where the block stands.
    */
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-short] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-short] {
     align-items: center;
     flex-direction: row;
     gap: var(--slotted-space-2, 0.25rem);
     padding-block: 0;
   }
 
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event'][data-short]
-    > [data-part='event-title'] {
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event][data-short]
+    > [data-part-event-title] {
     flex: 0 0 auto;
     max-inline-size: 100%;
   }
 
-  [data-ui='event-calendar']
-    [data-part='column']
-    > [data-part='event'][data-short]
-    > [data-part='event-time'] {
+  [data-ui-event-calendar]
+    [data-part-column]
+    > [data-part-event][data-short]
+    > [data-part-event-time] {
     flex: 1 1 0;
     min-inline-size: 0;
   }
@@ -1517,15 +1481,15 @@
    * edge squared and dashed: the same edge, broken where the event is not
    * over.
    */
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-clipped-start],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-continues-before] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-clipped-start],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-continues-before] {
     border-block-start-style: dashed;
     border-start-end-radius: 0;
     border-start-start-radius: 0;
   }
 
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-clipped-end],
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='event'][data-continues-after] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-clipped-end],
+  [data-ui-event-calendar] [data-part-column] > [data-part-event][data-continues-after] {
     border-block-end-style: dashed;
     border-end-end-radius: 0;
     border-end-start-radius: 0;
@@ -1536,7 +1500,7 @@
      Hover and press take six more points of the same ink each, 9, 15 and
      21: the surface's own hover landed within a hundredth of the rest in
      every scheme, lighter than the chip in the light one. */
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='more'] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-more] {
     align-items: start;
     container: slotted-event-calendar-event / inline-size;
     background-color: color-mix(in oklab, var(--slotted-text-muted, #5b6b7f) 9%, var(--_base));
@@ -1545,12 +1509,12 @@
     z-index: 1;
   }
 
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='more']:hover:not([data-disabled]),
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='more'][aria-expanded='true'] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-more]:hover:not([data-disabled]),
+  [data-ui-event-calendar] [data-part-column] > [data-part-more][aria-expanded='true'] {
     background-color: color-mix(in oklab, var(--slotted-text-muted, #5b6b7f) 15%, var(--_base));
   }
 
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='more']:active:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-column] > [data-part-more]:active:not([data-disabled]) {
     background-color: color-mix(in oklab, var(--slotted-text-muted, #5b6b7f) 21%, var(--_base));
   }
 
@@ -1561,7 +1525,7 @@
    * event opens with. It is the day's "+N" by every other measure — the same
    * popover, the same name — and shows the count alone.
    */
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='more'][data-overlay] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-more][data-overlay] {
     align-items: center;
     background-color: var(--_base);
     block-size: auto;
@@ -1583,11 +1547,11 @@
     z-index: 3;
   }
 
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='more'][data-overlay] > span {
+  [data-ui-event-calendar] [data-part-column] > [data-part-more][data-overlay] > span {
     display: none;
   }
 
-  [data-ui='event-calendar'] [data-part='column'] > [data-part='selection'] {
+  [data-ui-event-calendar] [data-part-column] > [data-part-selection] {
     background-color: var(
       --slotted-event-calendar-selection-background,
       var(--slotted-tone-accent-surface, #eff6ff)
@@ -1615,7 +1579,7 @@
   }
 
   /** Time nobody works in: the same step off the page in every scheme. */
-  [data-ui='event-calendar'] [data-part='off-hours'] {
+  [data-ui-event-calendar] [data-part-off-hours] {
     background-color: var(--slotted-event-calendar-off-background, var(--_off));
     block-size: calc(var(--slotted-event-length, 0) * var(--_hour) / 60);
     inset-block-start: calc(var(--slotted-event-start, 0) * var(--_hour) / 60);
@@ -1628,22 +1592,22 @@
    * Now: a thick accent line across today's column, with a dot where it meets
    * the column's edge. Accent and not danger — the present is not a failure.
    */
-  [data-ui='event-calendar'] [data-part='now'],
-  [data-ui='event-calendar'] [data-part='offset-line'] {
+  [data-ui-event-calendar] [data-part-now],
+  [data-ui-event-calendar] [data-part-offset-line] {
     inset-block-start: calc(var(--slotted-event-start, 0) * var(--_hour) / 60);
     inset-inline: 0;
     pointer-events: none;
     position: absolute;
   }
 
-  [data-ui='event-calendar'] [data-part='now'] {
+  [data-ui-event-calendar] [data-part-now] {
     border-block-start: var(--slotted-border-width-thick, 2px) solid
       var(--slotted-event-calendar-now-color, var(--slotted-tone-accent-solid, #2563eb));
     translate: 0 -50%;
     z-index: 2;
   }
 
-  [data-ui='event-calendar'] [data-part='now']::before {
+  [data-ui-event-calendar] [data-part-now]::before {
     background-color: var(
       --slotted-event-calendar-now-color,
       var(--slotted-tone-accent-solid, #2563eb)
@@ -1659,7 +1623,7 @@
     position: absolute;
   }
 
-  [data-ui='event-calendar'] [data-part='offset-line'] {
+  [data-ui-event-calendar] [data-part-offset-line] {
     border-block-start: var(--slotted-border-width-thin, 1px) dashed
       var(--slotted-border-strong, #78899c);
     z-index: 1;
@@ -1673,13 +1637,13 @@
    * description list in a detail — whose own part is also `list` — keeps none
    * of it.
    */
-  [data-ui='event-calendar'] > [data-part='body'] > [data-part='list'] {
+  [data-ui-event-calendar] > [data-part-body] > [data-part-list] {
     border-block-start: var(--_rule-width) solid var(--_rule);
     display: flex;
     flex-direction: column;
   }
 
-  [data-ui='event-calendar'] [data-part='list-day'] {
+  [data-ui-event-calendar] [data-part-list-day] {
     border-block-end: var(--_rule-width) solid var(--_rule);
     column-gap: var(--slotted-space-6, 1rem);
     display: grid;
@@ -1693,32 +1657,32 @@
    * inside itself; beside the events at every width but the narrowest, where
    * the two sit on one line above them.
    */
-  [data-ui='event-calendar'] [data-part='list-day-heading'] {
+  [data-ui-event-calendar] [data-part-list-day-heading] {
     display: flex;
     flex-direction: column;
     margin: 0;
     padding-block: var(--slotted-space-3, 0.375rem);
   }
 
-  [data-ui='event-calendar'] [data-part='list-weekday'] {
+  [data-ui-event-calendar] [data-part-list-weekday] {
     color: var(--slotted-text-muted, #5b6b7f);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-medium, 500);
     line-height: var(--_line-xs);
   }
 
-  [data-ui='event-calendar'] [data-part='list-date'] {
+  [data-ui-event-calendar] [data-part-list-date] {
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--_line-sm);
   }
 
-  [data-ui='event-calendar'] [data-part='list-day'][data-today] [data-part='list-day-heading'],
-  [data-ui='event-calendar'] [data-part='list-day'][data-today] [data-part='list-weekday'] {
+  [data-ui-event-calendar] [data-part-list-day][data-today] [data-part-list-day-heading],
+  [data-ui-event-calendar] [data-part-list-day][data-today] [data-part-list-weekday] {
     color: var(--slotted-tone-accent-text, #1d4ed8);
   }
 
-  [data-ui='event-calendar'] [data-part='list-events'] {
+  [data-ui-event-calendar] [data-part-list-events] {
     display: flex;
     flex-direction: column;
     gap: var(--slotted-space-1, 0.125rem);
@@ -1732,7 +1696,7 @@
    * title and the place under it. The time column is one width for every row,
    * so the titles start on one line down the whole list.
    */
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'] {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event] {
     align-items: start;
     column-gap: var(--slotted-space-4, 0.5rem);
     display: grid;
@@ -1747,27 +1711,27 @@
   }
 
   /** The mark sits on the centre of the title's first line, whatever the row's height. */
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event']::before {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event]::before {
     grid-column: 2;
     grid-row: 1;
     margin-block-start: calc((1lh - var(--slotted-space-4, 0.5rem)) / 2);
   }
 
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-time'] {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event-time] {
     grid-column: 1;
     grid-row: 1;
     white-space: normal;
   }
 
   /* A row grows downward, so a list wraps what a grid cell truncates. */
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-title'] {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event-title] {
     grid-column: 3;
     grid-row: 1;
     overflow-wrap: break-word;
     white-space: normal;
   }
 
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-location'] {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event-location] {
     font-size: var(--slotted-font-size-xs, 0.75rem);
     grid-column: 3;
     line-height: var(--_line-xs);
@@ -1776,37 +1740,35 @@
     white-space: normal;
   }
 
-  [data-ui='event-calendar']
-    [data-part='list-events']
-    [data-part='event']:hover:not([data-disabled]) {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event]:hover:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-hover, #eef1f5);
   }
 
-  [data-ui='event-calendar']
-    [data-part='list-events']
-    [data-part='event']:active:not([data-disabled], [data-open], [data-context]) {
+  [data-ui-event-calendar]
+    [data-part-list-events]
+    [data-part-event]:active:not([data-disabled], [data-open], [data-context]) {
     background-color: var(--slotted-tone-secondary-subtle-active, #e2e8f0);
     transition-duration: var(--slotted-duration-instant);
   }
 
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'][data-open],
-  [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'][data-context] {
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event][data-open],
+  [data-ui-event-calendar] [data-part-list-events] [data-part-event][data-context] {
     background-color: light-dark(
       color-mix(in oklab, var(--_hue) var(--_tint), var(--_base)),
       color-mix(in oklab, var(--_hue) var(--_tint-dark), var(--_base))
     );
   }
 
-  [data-ui='event-calendar']
-    [data-part='list-events']
-    [data-part='event'][data-status='tentative']::before {
+  [data-ui-event-calendar]
+    [data-part-list-events]
+    [data-part-event][data-status='tentative']::before {
     background-color: transparent;
     border: var(--slotted-border-width-medium, 1.5px) solid var(--_hue);
   }
 
   /* The day and the hours of the detail break between them, never inside. */
-  [data-ui='event-calendar'] [data-part='detail-day'],
-  [data-ui='event-calendar'] [data-part='detail-range'] {
+  [data-ui-event-calendar] [data-part-detail-day],
+  [data-ui-event-calendar] [data-part-detail-range] {
     display: inline-block;
   }
 
@@ -1815,8 +1777,8 @@
    * row of actions — and spaces them, so a template needs no wrapper to keep
    * its button off the list above it.
    */
-  [data-ui='event-calendar'] [data-ui='popover'] > [data-part='content'] > [data-part='body'],
-  [data-ui='event-calendar'] [data-ui='drawer'] [data-part='panel'] > [data-part='body'] {
+  [data-ui-event-calendar] [data-ui-popover] > [data-part-content] > [data-part-body],
+  [data-ui-event-calendar] [data-ui-drawer] [data-part-panel] > [data-part-body] {
     display: grid;
     gap: var(--slotted-space-5, 0.75rem);
   }
@@ -1826,40 +1788,36 @@
    * under the title. The panel is a sixth of a page wide, and a column of time
    * beside the titles left each title a word.
    */
-  [data-ui='event-calendar'] [data-part='list-events'][data-layout='stacked'] [data-part='event'] {
+  [data-ui-event-calendar] [data-part-list-events][data-layout='stacked'] [data-part-event] {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  [data-ui='event-calendar']
-    [data-part='list-events'][data-layout='stacked']
-    [data-part='event']::before {
+  [data-ui-event-calendar]
+    [data-part-list-events][data-layout='stacked']
+    [data-part-event]::before {
     grid-column: 1;
   }
 
-  [data-ui='event-calendar']
-    [data-part='list-events'][data-layout='stacked']
-    [data-part='event-title'] {
+  [data-ui-event-calendar] [data-part-list-events][data-layout='stacked'] [data-part-event-title] {
     grid-column: 2;
     grid-row: 1;
   }
 
-  [data-ui='event-calendar']
-    [data-part='list-events'][data-layout='stacked']
-    [data-part='event-time'] {
+  [data-ui-event-calendar] [data-part-list-events][data-layout='stacked'] [data-part-event-time] {
     font-size: var(--slotted-font-size-xs, 0.75rem);
     grid-column: 2;
     grid-row: 2;
     line-height: var(--_line-xs);
   }
 
-  [data-ui='event-calendar']
-    [data-part='list-events'][data-layout='stacked']
-    [data-part='event-location'] {
+  [data-ui-event-calendar]
+    [data-part-list-events][data-layout='stacked']
+    [data-part-event-location] {
     grid-column: 2;
     grid-row: 3;
   }
 
-  [data-ui='event-calendar'] [data-part='empty'] {
+  [data-ui-event-calendar] [data-part-empty] {
     align-items: center;
     color: var(--slotted-text-muted, #5b6b7f);
     display: flex;
@@ -1887,18 +1845,18 @@
     /* The navigation spans the last two columns of the first line: held to
        the fourth alone, it made that column its width, and with no actions
        the filter stopped short of the edge by the width of three buttons. */
-    [data-ui='event-calendar'] > [data-part='header'] {
+    [data-ui-event-calendar] > [data-part-header] {
       grid-template-areas:
         'title title navigation navigation'
         'views . filter actions';
       grid-template-columns: auto minmax(0, 1fr) auto auto;
     }
 
-    [data-ui='event-calendar'] [data-part='navigation'] {
+    [data-ui-event-calendar] [data-part-navigation] {
       justify-self: end;
     }
 
-    [data-ui='event-calendar'] [data-part='views'] {
+    [data-ui-event-calendar] [data-part-views] {
       margin-inline-start: 0;
     }
   }
@@ -1911,64 +1869,64 @@
    * its whole name for assistive technology.
    */
   @container slotted-event-calendar (max-width: 599px) {
-    [data-ui='event-calendar'][data-part='root'] {
+    [data-ui-event-calendar][data-part-root] {
       --_gutter: calc(var(--slotted-space-10, 2.5rem) + var(--slotted-space-2, 0.25rem));
     }
 
-    [data-ui='event-calendar'] [data-part='list-day'] {
+    [data-ui-event-calendar] [data-part-list-day] {
       grid-template-columns: minmax(0, 1fr);
       row-gap: var(--slotted-space-1, 0.125rem);
     }
 
     /* Above the events, the weekday and the date read as one line. */
-    [data-ui='event-calendar'] [data-part='list-day-heading'] {
+    [data-ui-event-calendar] [data-part-list-day-heading] {
       align-items: baseline;
       column-gap: var(--slotted-space-3, 0.375rem);
       flex-direction: row;
       flex-wrap: wrap;
     }
 
-    [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'] {
+    [data-ui-event-calendar] [data-part-list-events] [data-part-event] {
       grid-template-columns: auto minmax(0, 1fr);
     }
 
-    [data-ui='event-calendar'] [data-part='list-events'] [data-part='event']::before {
+    [data-ui-event-calendar] [data-part-list-events] [data-part-event]::before {
       grid-column: 1;
     }
 
-    [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-title'] {
+    [data-ui-event-calendar] [data-part-list-events] [data-part-event-title] {
       grid-column: 2;
       grid-row: 1;
     }
 
-    [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-time'] {
+    [data-ui-event-calendar] [data-part-list-events] [data-part-event-time] {
       font-size: var(--slotted-font-size-xs, 0.75rem);
       grid-column: 2;
       grid-row: 2;
       line-height: var(--_line-xs);
     }
 
-    [data-ui='event-calendar'] [data-part='list-events'] [data-part='event-location'] {
+    [data-ui-event-calendar] [data-part-list-events] [data-part-event-location] {
       grid-column: 2;
       grid-row: 3;
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='day'] {
+    [data-ui-event-calendar] [data-part-month] [data-part-day] {
       --_event-size: var(--slotted-space-3, 0.375rem);
       --_air: var(--slotted-space-1, 0.125rem);
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='day-header'] {
+    [data-ui-event-calendar] [data-part-month] [data-part-day-header] {
       margin-block-end: var(--slotted-space-2, 0.25rem);
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='day-number'] {
+    [data-ui-event-calendar] [data-part-month] [data-part-day-number] {
       block-size: var(--slotted-control-inner-size-sm, 22px);
       min-inline-size: var(--slotted-control-inner-size-sm, 22px);
     }
 
     /** The whole cell is the day's target, through its number. */
-    [data-ui='event-calendar'] [data-part='month'] [data-part='day-number']::after {
+    [data-ui-event-calendar] [data-part-month] [data-part-day-number]::after {
       content: '';
       inset: 0;
       position: absolute;
@@ -1976,7 +1934,7 @@
 
     /* A month's mark is six pixels tall and no target; the day is. A block in
        a column is a column wide and stays one. */
-    [data-ui='event-calendar'] [data-part='month'] [data-part='event'] {
+    [data-ui-event-calendar] [data-part-month] [data-part-event] {
       padding: 0;
       pointer-events: none;
     }
@@ -1986,7 +1944,7 @@
      * pressed tint and the calendar's own edge: at the resting tint a column
      * of pale blocks read as one colour.
      */
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
+    [data-ui-event-calendar] [data-part-column] > [data-part-event] {
       background-color: light-dark(
         color-mix(in oklab, var(--_hue) var(--_tint-active), var(--_base)),
         color-mix(in oklab, var(--_hue) var(--_tint-active-dark), var(--_base))
@@ -1995,37 +1953,37 @@
       padding: 0;
     }
 
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='more'] {
+    [data-ui-event-calendar] [data-part-column] > [data-part-more] {
       justify-content: center;
       padding-inline: 0;
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='event'][data-bar] {
+    [data-ui-event-calendar] [data-part-month] [data-part-event][data-bar] {
       background-color: var(--_hue);
       border-color: var(--_hue);
       border-radius: var(--slotted-radius-full, 9999px);
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='event']:not([data-bar]) {
+    [data-ui-event-calendar] [data-part-month] [data-part-event]:not([data-bar]) {
       inline-size: var(--slotted-space-4, 0.5rem);
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='event']::before {
+    [data-ui-event-calendar] [data-part-month] [data-part-event]::before {
       block-size: var(--slotted-space-3, 0.375rem);
       inline-size: var(--slotted-space-3, 0.375rem);
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='event'][data-bar]::before,
-    [data-ui='event-calendar'] [data-part='month'] [data-part='event'][data-bar]::after {
+    [data-ui-event-calendar] [data-part-month] [data-part-event][data-bar]::before,
+    [data-ui-event-calendar] [data-part-month] [data-part-event][data-bar]::after {
       display: none;
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='event'] > *,
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] > *,
-    [data-ui='event-calendar'] [data-part='month'] [data-part='day-content'],
-    [data-ui='event-calendar'] [data-part='month'] [data-part='more'] > *,
-    [data-ui='event-calendar'] [data-part='column-header'] [data-part='day-content'],
-    [data-ui='event-calendar'] [data-part='offset-change'] {
+    [data-ui-event-calendar] [data-part-month] [data-part-event] > *,
+    [data-ui-event-calendar] [data-part-column] > [data-part-event] > *,
+    [data-ui-event-calendar] [data-part-month] [data-part-day-content],
+    [data-ui-event-calendar] [data-part-month] [data-part-more] > *,
+    [data-ui-event-calendar] [data-part-column-header] [data-part-day-content],
+    [data-ui-event-calendar] [data-part-offset-change] {
       block-size: 1px;
       clip-path: inset(50%);
       inline-size: 1px;
@@ -2036,7 +1994,7 @@
       white-space: nowrap;
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='more'] {
+    [data-ui-event-calendar] [data-part-month] [data-part-more] {
       block-size: auto;
       font-size: var(--slotted-font-size-xs, 0.75rem);
       line-height: var(--_line-xs);
@@ -2044,20 +2002,20 @@
       pointer-events: none;
     }
 
-    [data-ui='event-calendar'] [data-part='month'] [data-part='day-events'] {
+    [data-ui-event-calendar] [data-part-month] [data-part-day-events] {
       grid-template-rows:
         repeat(var(--slotted-event-calendar-lanes, 3), var(--_event-size))
         auto;
     }
 
-    [data-ui='event-calendar'] [data-part='column-header'] [data-part='day-number'] {
+    [data-ui-event-calendar] [data-part-column-header] [data-part-day-number] {
       block-size: var(--slotted-control-inner-size-md, 24px);
       font-size: var(--slotted-font-size-md, 0.875rem);
       min-inline-size: var(--slotted-control-inner-size-md, 24px);
     }
 
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='event'],
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='more'] {
+    [data-ui-event-calendar] [data-part-column] > [data-part-event],
+    [data-ui-event-calendar] [data-part-column] > [data-part-more] {
       --_room: 100%;
     }
   }
@@ -2069,7 +2027,7 @@
    * alone.
    */
   @container slotted-event-calendar (max-width: 479px) {
-    [data-ui='event-calendar'] > [data-part='header'] {
+    [data-ui-event-calendar] > [data-part-header] {
       grid-template-areas:
         'title title title title'
         'navigation . filter actions'
@@ -2077,28 +2035,28 @@
       grid-template-columns: auto minmax(0, 1fr) auto auto;
     }
 
-    [data-ui='event-calendar'] [data-part='navigation'] {
+    [data-ui-event-calendar] [data-part-navigation] {
       justify-self: start;
       margin-inline-start: 0;
     }
 
-    [data-ui='event-calendar'] [data-part='views'] > * {
+    [data-ui-event-calendar] [data-part-views] > * {
       flex: 1 1 auto;
       min-inline-size: 0;
     }
 
-    [data-ui='event-calendar'] [data-part='filter'] {
+    [data-ui-event-calendar] [data-part-filter] {
       inline-size: var(--slotted-control-height-md, 34px);
       padding-inline: 0;
     }
 
     /* The funnel stays: an icon-only control keeps its mark and names itself
        with the words it hides. The chevron goes with the words. */
-    [data-ui='event-calendar'] [data-part='filter'] > [data-ui='icon']:last-child {
+    [data-ui-event-calendar] [data-part-filter] > [data-ui-icon]:last-child {
       display: none;
     }
 
-    [data-ui='event-calendar'] [data-part='filter'] > :not([data-ui='icon']) {
+    [data-ui-event-calendar] [data-part-filter] > :not([data-ui-icon]) {
       block-size: 1px;
       clip-path: inset(50%);
       inline-size: 1px;
@@ -2114,8 +2072,8 @@
        background, which forced colours would replace: the mark would go and
        the box it sat in would stay. The icons are `Glyph` elements stroked
        with the forced ink, and need nothing here. */
-    [data-ui='event-calendar'] [data-part='event']::before,
-    [data-ui='event-calendar'] [data-part='now']::before {
+    [data-ui-event-calendar] [data-part-event]::before,
+    [data-ui-event-calendar] [data-part-now]::before {
       forced-color-adjust: none;
     }
 
@@ -2123,23 +2081,23 @@
      * The tint has nothing to mix in a palette the system replaced, so an
      * event keeps its edge, in the text colour.
      */
-    [data-ui='event-calendar'] [data-part='event'][data-bar],
-    [data-ui='event-calendar'] [data-part='column'] > [data-part='event'] {
+    [data-ui-event-calendar] [data-part-event][data-bar],
+    [data-ui-event-calendar] [data-part-column] > [data-part-event] {
       border-color: currentcolor;
     }
 
     /* A timed line of the month and a row of the list have no edge: the
        transparent one they keep for geometry would be painted in the text
        colour, and the line would read as a bar. */
-    [data-ui='event-calendar'] [data-part='day-events'] > [data-part='event']:not([data-bar]),
-    [data-ui='event-calendar'] [data-part='list-events'] [data-part='event'] {
+    [data-ui-event-calendar] [data-part-day-events] > [data-part-event]:not([data-bar]),
+    [data-ui-event-calendar] [data-part-list-events] [data-part-event] {
       border-color: Canvas;
     }
 
     /* Today is the one filled mark: the system's own highlight pair, kept
        whole, where the replaced palette left a ring round an empty square. */
-    [data-ui='event-calendar'] [data-today] > [data-part='day-header'] [data-part='day-number'],
-    [data-ui='event-calendar'] [data-part='column-header'][data-today] [data-part='day-number'] {
+    [data-ui-event-calendar] [data-today] > [data-part-day-header] [data-part-day-number],
+    [data-ui-event-calendar] [data-part-column-header][data-today] [data-part-day-number] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;

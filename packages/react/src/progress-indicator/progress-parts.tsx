@@ -1,3 +1,4 @@
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import type { CSSProperties, ReactNode } from 'react';
 
 import type { ResolvedProgressIndicator } from './use-progress-indicator';
@@ -15,8 +16,11 @@ export function progressLabel(resolved: ResolvedProgressIndicator): ReactNode {
   return (
     <span
       data-part="label"
+      data-part-label=""
       id={resolved.labelId}
-      {...(resolved.labelHidden ? { 'data-ui': 'visually-hidden' } : {})}
+      {...(resolved.labelHidden
+        ? { 'data-ui': 'visually-hidden', ...selectorKeyProps('ui', 'visually-hidden') }
+        : {})}
     >
       {resolved.labelText}
     </span>
@@ -30,7 +34,11 @@ export function progressLabel(resolved: ResolvedProgressIndicator): ReactNode {
  */
 export function progressValue(resolved: ResolvedProgressIndicator): ReactNode {
   if (!resolved.showValue) return null;
-  return <span data-part="value">{resolved.valueText}</span>;
+  return (
+    <span data-part="value" data-part-value="">
+      {resolved.valueText}
+    </span>
+  );
 }
 
 /**

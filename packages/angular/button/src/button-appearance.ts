@@ -163,7 +163,9 @@ export const BUTTON_WAIT = new InjectionToken<ButtonWait>('slotted button wait')
     @if (drawsRing()) {
       <span
         data-part="indicator"
+        data-part-indicator=""
         data-ui="spinner"
+        data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="wait?.t('loading') ?? null"
       ></span>
@@ -171,7 +173,7 @@ export const BUTTON_WAIT = new InjectionToken<ButtonWait>('slotted button wait')
   styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slButtonStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlButtonStart {
   protected readonly wait = inject(BUTTON_WAIT, { optional: true });
@@ -185,7 +187,9 @@ export class SlButtonStart {
     @if (drawsRing()) {
       <span
         data-part="indicator"
+        data-part-indicator=""
         data-ui="spinner"
+        data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="wait?.t('loading') ?? null"
       ></span>
@@ -193,7 +197,7 @@ export class SlButtonStart {
   styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
   encapsulation: ViewEncapsulation.None,
   exportAs: 'slButtonEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlButtonEnd {
   protected readonly wait = inject(BUTTON_WAIT, { optional: true });

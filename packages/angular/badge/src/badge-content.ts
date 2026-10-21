@@ -9,7 +9,7 @@ import { Directive } from '@angular/core';
   selector: '[slBadgeStart]',
   standalone: true,
   exportAs: 'slBadgeStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlBadgeStart {}
 
@@ -18,6 +18,6 @@ export class SlBadgeStart {}
   selector: '[slBadgeEnd]',
   standalone: true,
   exportAs: 'slBadgeEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlBadgeEnd {}

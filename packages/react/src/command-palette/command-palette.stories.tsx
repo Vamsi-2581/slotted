@@ -735,12 +735,16 @@ export const Composition: Story = {
               messages={{ input: 'Search people', label: 'People', placeholder: 'Search people…' }}
               renderItem={(item, state) => (
                 <>
-                  <span data-part="icon">
+                  <span data-part="icon" data-part-icon="">
                     <Avatar name={item.label} size="xs" />
                   </span>
-                  <span data-part="label">{state.label}</span>
+                  <span data-part="label" data-part-label="">
+                    {state.label}
+                  </span>
                   {item.description === undefined ? null : (
-                    <span data-part="description">{item.description}</span>
+                    <span data-part="description" data-part-description="">
+                      {item.description}
+                    </span>
                   )}
                 </>
               )}

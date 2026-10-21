@@ -17,7 +17,7 @@
    * proportion of that length rather than a scale of its own, which is the
    * reasoning `badge` used for the overhang of an anchored count.
    */
-  [data-ui='avatar'][data-part='root'] {
+  [data-ui-avatar][data-part-root] {
     /**
      * Tone. `secondary` reads the `solid-hover` step rather than `solid` for
      * the reason `badge` records: `secondary.solid` is the surface colour in
@@ -189,7 +189,7 @@
 
   /* ── Tone: which of the five semantic colours the name resolves to ─────── */
 
-  [data-ui='avatar'][data-part='root'][data-tone='accent'] {
+  [data-ui-avatar][data-part-root][data-tone='accent'] {
     --_solid: var(--slotted-tone-accent-solid);
     --_solid-edge: var(--slotted-tone-accent-solid);
     --_on-solid: var(--slotted-tone-accent-on-solid);
@@ -198,7 +198,7 @@
     --_text: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='avatar'][data-part='root'][data-tone='success'] {
+  [data-ui-avatar][data-part-root][data-tone='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_solid-edge: var(--slotted-tone-success-solid);
     --_on-solid: var(--slotted-tone-success-on-solid);
@@ -207,7 +207,7 @@
     --_text: var(--slotted-tone-success-text);
   }
 
-  [data-ui='avatar'][data-part='root'][data-tone='warning'] {
+  [data-ui-avatar][data-part-root][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_solid-edge: var(--slotted-tone-warning-solid);
     --_on-solid: var(--slotted-tone-warning-on-solid);
@@ -216,7 +216,7 @@
     --_text: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='avatar'][data-part='root'][data-tone='danger'] {
+  [data-ui-avatar][data-part-root][data-tone='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_solid-edge: var(--slotted-tone-danger-solid);
     --_on-solid: var(--slotted-tone-danger-on-solid);
@@ -236,14 +236,14 @@
    * There is no `outline`: an avatar drawn as a ring around nothing is not an
    * avatar, and every one of the fourteen surveyed implementations fills.
    */
-  [data-ui='avatar'][data-part='root'][data-variant='soft'] {
+  [data-ui-avatar][data-part-root][data-variant='soft'] {
     --_ground: var(--_surface, ButtonFace);
 
     background-color: var(--_ground);
     color: var(--_text, ButtonText);
   }
 
-  [data-ui='avatar'][data-part='root'][data-variant='solid'] {
+  [data-ui-avatar][data-part-root][data-variant='solid'] {
     --_edge: var(--_solid-edge);
     --_ground: var(--_solid, ButtonFace);
 
@@ -265,29 +265,29 @@
    * Rounded to the pixel: a sixth of 64 is 10.67 and of 28 is 4.67, and a
    * fractional radius spreads the curve over partial pixels at every corner.
    */
-  [data-ui='avatar'][data-part='root'][data-shape='square'] {
+  [data-ui-avatar][data-part-root][data-shape='square'] {
     --_radius: var(--slotted-avatar-radius, round(nearest, calc(var(--_size) / 6), 1px));
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='avatar'][data-part='root'][data-size='xs'] {
+  [data-ui-avatar][data-part-root][data-size='xs'] {
     --slotted-avatar-size: var(--slotted-avatar-size-xs, 24px);
   }
 
-  [data-ui='avatar'][data-part='root'][data-size='sm'] {
+  [data-ui-avatar][data-part-root][data-size='sm'] {
     --slotted-avatar-size: var(--slotted-avatar-size-sm, 28px);
   }
 
-  [data-ui='avatar'][data-part='root'][data-size='md'] {
+  [data-ui-avatar][data-part-root][data-size='md'] {
     --slotted-avatar-size: var(--slotted-avatar-size-md, 36px);
   }
 
-  [data-ui='avatar'][data-part='root'][data-size='lg'] {
+  [data-ui-avatar][data-part-root][data-size='lg'] {
     --slotted-avatar-size: var(--slotted-avatar-size-lg, 48px);
   }
 
-  [data-ui='avatar'][data-part='root'][data-size='xl'] {
+  [data-ui-avatar][data-part-root][data-size='xl'] {
     --slotted-avatar-size: var(--slotted-avatar-size-xl, 64px);
   }
 
@@ -304,7 +304,7 @@
    * `prefers-reduced-motion` collapses the duration in the theme, and nothing
    * here loops.
    */
-  [data-ui='avatar'] [data-part='image'] {
+  [data-ui-avatar] [data-part-image] {
     block-size: 100%;
     border-radius: inherit;
     inline-size: 100%;
@@ -320,14 +320,14 @@
    * enters on the entering curve and, when a later request fails, leaves on the
    * exiting one. The fallback below is the mirror of it.
    */
-  [data-ui='avatar'][data-status='loaded'] [data-part='image'] {
+  [data-ui-avatar][data-status='loaded'] [data-part-image] {
     opacity: 1;
     transition-timing-function: var(--slotted-easing-enter);
   }
 
   /* ── What stands in for it ────────────────────────────────────────────── */
 
-  [data-ui='avatar'] [data-part='fallback'] {
+  [data-ui-avatar] [data-part-fallback] {
     /**
      * The last step of the fallback order, and the only artwork this family
      * owns. It is reached when there is no picture and no name to take
@@ -357,7 +357,7 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-enter);
   }
 
-  [data-ui='avatar'][data-status='loaded'] [data-part='fallback'] {
+  [data-ui-avatar][data-status='loaded'] [data-part-fallback] {
     /**
      * It leaves as the picture arrives rather than the instant the load
      * reports, so the two cross rather than flicker. It is still painted
@@ -394,7 +394,7 @@
    * family's own glyph as well, which is an icon and needs no line at all.
    */
   @supports (text-box: trim-both cap alphabetic) {
-    [data-ui='avatar'] [data-part='fallback']:not(:has(> *)) {
+    [data-ui-avatar] [data-part-fallback]:not(:has(> *)) {
       align-content: center;
       display: block;
       text-align: center;
@@ -413,7 +413,7 @@
    * resolve in the order `STATE_PRECEDENCE` declares with no selector weight
    * standing in for the order.
    */
-  [data-ui='avatar'][data-part='root'][data-status='loaded'] {
+  [data-ui-avatar][data-part-root][data-status='loaded'] {
     --_edge: var(--slotted-border-subtle, ButtonBorder);
   }
 
@@ -425,7 +425,7 @@
    * disabled foreground, which the theme holds against the disabled ground, and
    * the photograph loses its colour rather than its contrast.
    */
-  [data-ui='avatar'][data-part='root'][data-disabled] {
+  [data-ui-avatar][data-part-root][data-disabled] {
     --_solid: var(--slotted-disabled-background, Canvas);
     --_on-solid: var(--slotted-disabled-foreground, GrayText);
     --_surface: var(--slotted-disabled-background, Canvas);
@@ -440,7 +440,7 @@
    * has no photograph at all. Grey alone kept every luminance, which made a
    * deactivated portrait the strongest thing in a row of disabled avatars.
    */
-  [data-ui='avatar'][data-part='root'][data-disabled] [data-part='image'] {
+  [data-ui-avatar][data-part-root][data-disabled] [data-part-image] {
     filter: var(--slotted-avatar-disabled-image-filter, grayscale(1) opacity(0.5));
   }
 
@@ -456,9 +456,9 @@
    * A weak state held back for the stronger one: a disabled avatar answers no
    * hover, which is the rule that test exists to keep.
    */
-  [data-ui='avatar'][data-part='root']:any-link,
-  button[data-ui='avatar'][data-part='root'],
-  [data-ui='avatar'][data-part='root'][tabindex] {
+  [data-ui-avatar][data-part-root]:any-link,
+  button[data-ui-avatar][data-part-root],
+  [data-ui-avatar][data-part-root][tabindex] {
     cursor: pointer;
     /**
      * The target below hangs outside the box on purpose. A box whose content
@@ -492,9 +492,9 @@
    * Press exists because `render` makes the root a link or a button, and a
    * command that does not answer the press reads as one that did not register.
    */
-  [data-ui='avatar'][data-part='root']:any-link:not([data-disabled]):hover,
-  button[data-ui='avatar'][data-part='root']:not([data-disabled]):hover,
-  [data-ui='avatar'][data-part='root'][tabindex]:not([data-disabled]):hover {
+  [data-ui-avatar][data-part-root]:any-link:not([data-disabled]):hover,
+  button[data-ui-avatar][data-part-root]:not([data-disabled]):hover,
+  [data-ui-avatar][data-part-root][tabindex]:not([data-disabled]):hover {
     background-color: color-mix(
       in oklab,
       var(--_ground),
@@ -502,9 +502,9 @@
     );
   }
 
-  [data-ui='avatar'][data-part='root']:any-link:not([data-disabled]):active,
-  button[data-ui='avatar'][data-part='root']:not([data-disabled]):active,
-  [data-ui='avatar'][data-part='root'][tabindex]:not([data-disabled]):active {
+  [data-ui-avatar][data-part-root]:any-link:not([data-disabled]):active,
+  button[data-ui-avatar][data-part-root]:not([data-disabled]):active,
+  [data-ui-avatar][data-part-root][tabindex]:not([data-disabled]):active {
     background-color: color-mix(
       in oklab,
       var(--_ground),
@@ -525,17 +525,17 @@
    * declaration of the same token win without either file knowing the order
    * the other is loaded in.
    */
-  [data-ui='avatar'][data-status='loaded']:any-link:not([data-disabled]):hover,
-  button[data-ui='avatar'][data-status='loaded']:not([data-disabled]):hover,
-  [data-ui='avatar'][data-status='loaded'][tabindex]:not([data-disabled]):hover {
+  [data-ui-avatar][data-status='loaded']:any-link:not([data-disabled]):hover,
+  button[data-ui-avatar][data-status='loaded']:not([data-disabled]):hover,
+  [data-ui-avatar][data-status='loaded'][tabindex]:not([data-disabled]):hover {
     --_edge: var(--slotted-border-strong, CanvasText);
     --slotted-avatar-ring-width: var(--slotted-border-width-thin, 1px);
     --slotted-avatar-ring-color: var(--slotted-border-strong, CanvasText);
   }
 
-  [data-ui='avatar'][data-status='loaded']:any-link:not([data-disabled]):active,
-  button[data-ui='avatar'][data-status='loaded']:not([data-disabled]):active,
-  [data-ui='avatar'][data-status='loaded'][tabindex]:not([data-disabled]):active {
+  [data-ui-avatar][data-status='loaded']:any-link:not([data-disabled]):active,
+  button[data-ui-avatar][data-status='loaded']:not([data-disabled]):active,
+  [data-ui-avatar][data-status='loaded'][tabindex]:not([data-disabled]):active {
     --slotted-avatar-ring-width: var(--slotted-border-width-thick, 2px);
   }
 
@@ -544,7 +544,7 @@
    * on its own, and a ring that appears only where a family expects focus is a
    * ring that goes missing the first time a consumer makes one a link.
    */
-  [data-ui='avatar'][data-part='root']:focus-visible {
+  [data-ui-avatar][data-part-root]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -570,9 +570,9 @@
    * Fluent ships a 16-pixel avatar and Atlassian a 16- and a 20-pixel one, and
    * both accept a click on it as it stands.
    */
-  [data-ui='avatar'][data-part='root']:any-link::after,
-  button[data-ui='avatar'][data-part='root']::after,
-  [data-ui='avatar'][data-part='root'][tabindex]::after {
+  [data-ui-avatar][data-part-root]:any-link::after,
+  button[data-ui-avatar][data-part-root]::after,
+  [data-ui-avatar][data-part-root][tabindex]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -591,7 +591,7 @@
    * photograph.
    */
   @media (forced-colors: active) {
-    [data-ui='avatar'][data-part='root'] {
+    [data-ui-avatar][data-part-root] {
       --_edge: currentColor;
     }
   }

@@ -4,7 +4,7 @@
    * preview of where it goes, or of who it names.
    *
    *   root ─ the trigger ─ <a> ─ data-open
-   *         └─ [data-ui='popover'] ─ unchanged, autoFocus off ─┐
+   *         └─ [data-ui-popover] ─ unchanged, autoFocus off ─┐
    *            │  header / body / footer — the consumer's      │
    *            │  arrow                                        │
    *            └───────────────────────────────────────────────┘
@@ -20,7 +20,7 @@
    * the family renders its own anchor, it owes the reader a link that reads as
    * one and says, while the card shows, which word the card is about.
    */
-  [data-ui='hover-card'] {
+  [data-ui-hover-card] {
     --_text: var(--slotted-hover-card-color, var(--slotted-tone-accent-text, LinkText));
     /* The underline at rest is the text at less than half strength, as
        `link` draws it: present enough to say "link", quiet enough that a
@@ -59,7 +59,7 @@
 
   /* Hover fills the underline. The card itself waits for `openDelay`, so this
      is the only thing that answers the pointer at once. */
-  [data-ui='hover-card']:not([data-disabled]):hover {
+  [data-ui-hover-card]:not([data-disabled]):hover {
     text-decoration-color: currentColor;
   }
 
@@ -69,13 +69,13 @@
    * grows by one step of space without moving the line it sits on. A padding
    * would have reflowed the paragraph on every open.
    */
-  [data-ui='hover-card'][data-open] {
+  [data-ui-hover-card][data-open] {
     background-color: var(--_tint);
     box-shadow: 0 0 0 var(--_halo) var(--_tint);
     text-decoration-color: currentColor;
   }
 
-  [data-ui='hover-card']:focus-visible {
+  [data-ui-hover-card]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -86,7 +86,7 @@
    * colour instead, which is the one thing forced colours keep.
    */
   @media (forced-colors: active) {
-    [data-ui='hover-card'][data-open] {
+    [data-ui-hover-card][data-open] {
       text-decoration-thickness: var(--slotted-border-width-thick, 2px);
     }
   }

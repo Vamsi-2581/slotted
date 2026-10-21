@@ -34,12 +34,16 @@ function activationReason(event: MouseEvent) {
 @Directive({
   selector: '[slPageHeaderTitleArea]',
   standalone: true,
-  host: { 'data-part': 'title-area' },
+  host: { 'data-part': 'title-area', 'data-part-title-area': '' },
 })
 export class SlPageHeaderTitleArea {}
 
 /** The row above the title: the way back, then the breadcrumbs. */
-@Directive({ selector: '[slPageHeaderNav]', standalone: true, host: { 'data-part': 'nav' } })
+@Directive({
+  selector: '[slPageHeaderNav]',
+  standalone: true,
+  host: { 'data-part': 'nav', 'data-part-nav': '' },
+})
 export class SlPageHeaderNav {}
 
 /**
@@ -53,7 +57,7 @@ export class SlPageHeaderNav {}
   imports: [SlGlyph, SlIcon],
   template: `<span slIcon directional><svg slGlyph name="arrow-left"></svg></span><ng-content />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'data-part': 'back' },
+  host: { 'data-part': 'back', 'data-part-back': '' },
 })
 export class SlPageHeaderBack {}
 
@@ -61,7 +65,7 @@ export class SlPageHeaderBack {}
 @Directive({
   selector: '[slPageHeaderBreadcrumbs]',
   standalone: true,
-  host: { 'data-part': 'breadcrumbs' },
+  host: { 'data-part': 'breadcrumbs', 'data-part-breadcrumbs': '' },
 })
 export class SlPageHeaderBreadcrumbs {}
 
@@ -69,27 +73,39 @@ export class SlPageHeaderBreadcrumbs {}
 @Directive({
   selector: '[slPageHeaderTitleRow]',
   standalone: true,
-  host: { 'data-part': 'title-row' },
+  host: { 'data-part': 'title-row', 'data-part-title-row': '' },
 })
 export class SlPageHeaderTitleRow {}
 
 /** The mark before the heading: an avatar, an icon, an image. */
-@Directive({ selector: '[slPageHeaderVisual]', standalone: true, host: { 'data-part': 'visual' } })
+@Directive({
+  selector: '[slPageHeaderVisual]',
+  standalone: true,
+  host: { 'data-part': 'visual', 'data-part-visual': '' },
+})
 export class SlPageHeaderVisual {}
 
 /** The column of heading, marks and subheading. */
-@Directive({ selector: '[slPageHeaderTitle]', standalone: true, host: { 'data-part': 'title' } })
+@Directive({
+  selector: '[slPageHeaderTitle]',
+  standalone: true,
+  host: { 'data-part': 'title', 'data-part-title': '' },
+})
 export class SlPageHeaderTitle {}
 
 /** The status beside the heading: a tag, a badge, a status indicator. */
-@Directive({ selector: '[slPageHeaderMarks]', standalone: true, host: { 'data-part': 'marks' } })
+@Directive({
+  selector: '[slPageHeaderMarks]',
+  standalone: true,
+  host: { 'data-part': 'marks', 'data-part-marks': '' },
+})
 export class SlPageHeaderMarks {}
 
 /** The slot a toolbar sits in, pushed to the end of the title row. */
 @Directive({
   selector: '[slPageHeaderActions]',
   standalone: true,
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlPageHeaderActions {}
 
@@ -97,24 +113,32 @@ export class SlPageHeaderActions {}
 @Directive({
   selector: '[slPageHeaderNavigation]',
   standalone: true,
-  host: { 'data-part': 'navigation' },
+  host: { 'data-part': 'navigation', 'data-part-navigation': '' },
 })
 export class SlPageHeaderNavigation {}
 
 /** The picture of the record, a column before the content of the header area. */
-@Directive({ selector: '[slPageHeaderFigure]', standalone: true, host: { 'data-part': 'figure' } })
+@Directive({
+  selector: '[slPageHeaderFigure]',
+  standalone: true,
+  host: { 'data-part': 'figure', 'data-part-figure': '' },
+})
 export class SlPageHeaderFigure {}
 
 /** A column of whatever only makes sense at rest. */
 @Directive({
   selector: '[slPageHeaderContent]',
   standalone: true,
-  host: { 'data-part': 'content' },
+  host: { 'data-part': 'content', 'data-part-content': '' },
 })
 export class SlPageHeaderContent {}
 
 /** The slot a tabs family sits in, last in the root. */
-@Directive({ selector: '[slPageHeaderTabs]', standalone: true, host: { 'data-part': 'tabs' } })
+@Directive({
+  selector: '[slPageHeaderTabs]',
+  standalone: true,
+  host: { 'data-part': 'tabs', 'data-part-tabs': '' },
+})
 export class SlPageHeaderTabs {}
 
 /**
@@ -137,6 +161,7 @@ export class SlPageHeaderTabs {}
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'heading',
+    'data-part-heading': '',
     '[attr.id]': 'header.ids().headingId',
     '[attr.role]': 'ariaRole()',
     '[attr.aria-level]': 'ariaLevel()',
@@ -165,7 +190,7 @@ export class SlPageHeaderHeading {
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'subheading' },
+  host: { 'data-part': 'subheading', 'data-part-subheading': '' },
 })
 export class SlPageHeaderSubheading {
   protected readonly header = inject(SlPageHeader);
@@ -183,7 +208,7 @@ export class SlPageHeaderSubheading {
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlPageHeaderDescription {
   protected readonly header = inject(SlPageHeader);
@@ -201,6 +226,7 @@ export class SlPageHeaderDescription {
   exportAs: 'slPageHeaderArea',
   host: {
     'data-part': 'header-area',
+    'data-part-header-area': '',
     role: 'region',
     '[attr.id]': 'header.ids().areaId',
     '[attr.aria-label]': 'label()',
@@ -234,7 +260,7 @@ export class SlPageHeaderArea {
   template: `<div><ng-content /></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'controls' },
+  host: { 'data-part': 'controls', 'data-part-controls': '' },
 })
 export class SlPageHeaderControls {}
 
@@ -255,6 +281,7 @@ export class SlPageHeaderControls {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'toggle',
+    'data-part-toggle': '',
     type: 'button',
     '[attr.aria-expanded]': 'header.expanded()',
     '[attr.aria-controls]': 'header.ids().areaId',
@@ -290,6 +317,7 @@ export class SlPageHeaderToggle {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'pin',
+    'data-part-pin': '',
     type: 'button',
     '[attr.aria-pressed]': 'header.pinned()',
     '[attr.data-pressed]': "header.pinned() ? '' : null",
@@ -345,7 +373,7 @@ export class SlPageHeaderPin {
   ></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'progress' },
+  host: { 'data-part': 'progress', 'data-part-progress': '' },
 })
 export class SlPageHeaderProgress {
   protected readonly header = inject(SlPageHeader);

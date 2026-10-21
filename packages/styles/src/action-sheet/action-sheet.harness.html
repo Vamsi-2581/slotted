@@ -25,6 +25,7 @@
     <button
       style="justify-self: start"
       data-part="trigger"
+      data-part-trigger=""
       type="button"
       aria-haspopup="dialog"
       aria-expanded="true"
@@ -36,7 +37,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-mode="overlay"
     data-side="bottom"
     data-size="content"
@@ -45,9 +48,10 @@
     data-open
     data-modal
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       style="--slotted-drawer-sheet-inline-size: var(--slotted-action-sheet-inline-size, 32rem)"
       id="s1-panel"
       role="dialog"
@@ -56,14 +60,22 @@
       aria-describedby="s1-message"
       tabindex="-1"
     >
-      <div data-ui="action-sheet" data-part="root">
-        <header data-part="header">
-          <h2 data-part="title" id="s1-title">Partilhar relatório</h2>
-          <p data-part="message" id="s1-message">Quem recebe a ligação vê a versão de hoje.</p>
+      <div data-ui="action-sheet" data-ui-action-sheet="" data-part="root" data-part-root="">
+        <header data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" id="s1-title">Partilhar relatório</h2>
+          <p data-part="message" data-part-message="" id="s1-message">
+            Quem recebe a ligação vê a versão de hoje.
+          </p>
         </header>
-        <div data-part="list" role="menu" aria-labelledby="s1-title" aria-orientation="vertical">
-          <button data-part="item" role="menuitem" type="button" tabindex="0">
-            <span data-part="icon" aria-hidden="true"
+        <div
+          data-part="list"
+          data-part-list=""
+          role="menu"
+          aria-labelledby="s1-title"
+          aria-orientation="vertical"
+        >
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="0">
+            <span data-part="icon" data-part-icon="" aria-hidden="true"
               ><span
                 style="
                   display: block;
@@ -74,10 +86,10 @@
                 "
               ></span
             ></span>
-            <span data-part="label">Copiar ligação</span>
+            <span data-part="label" data-part-label="">Copiar ligação</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="icon" aria-hidden="true"
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="icon" data-part-icon="" aria-hidden="true"
               ><span
                 style="
                   display: block;
@@ -88,11 +100,11 @@
                 "
               ></span
             ></span>
-            <span data-part="label">Convidar pessoas</span>
-            <span data-part="description">Podem comentar, não editar</span>
+            <span data-part="label" data-part-label="">Convidar pessoas</span>
+            <span data-part="description" data-part-description="">Podem comentar, não editar</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="icon" aria-hidden="true"
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="icon" data-part-icon="" aria-hidden="true"
               ><span
                 style="
                   display: block;
@@ -103,10 +115,10 @@
                 "
               ></span
             ></span>
-            <span data-part="label">Descarregar PDF</span>
+            <span data-part="label" data-part-label="">Descarregar PDF</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="icon" aria-hidden="true"
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="icon" data-part-icon="" aria-hidden="true"
               ><span
                 style="
                   display: block;
@@ -117,11 +129,11 @@
                 "
               ></span
             ></span>
-            <span data-part="label">Abrir no navegador</span>
+            <span data-part="label" data-part-label="">Abrir no navegador</span>
           </button>
         </div>
-        <div data-part="footer">
-          <button data-part="cancel" type="button">Cancelar</button>
+        <div data-part="footer" data-part-footer="">
+          <button data-part="cancel" data-part-cancel="" type="button">Cancelar</button>
         </div>
       </div>
     </div>
@@ -140,7 +152,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-mode="overlay"
     data-side="bottom"
     data-size="content"
@@ -149,29 +163,43 @@
     data-open
     data-modal
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       style="--slotted-drawer-sheet-inline-size: var(--slotted-action-sheet-inline-size, 32rem)"
       role="dialog"
       aria-modal="true"
       aria-labelledby="s2-title"
       tabindex="-1"
     >
-      <div data-ui="action-sheet" data-part="root">
-        <header data-part="header">
-          <h2 data-part="title" id="s2-title">Descartar a mensagem?</h2>
+      <div data-ui="action-sheet" data-ui-action-sheet="" data-part="root" data-part-root="">
+        <header data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" id="s2-title">Descartar a mensagem?</h2>
         </header>
-        <div data-part="list" role="menu" aria-labelledby="s2-title" aria-orientation="vertical">
-          <button data-part="item" role="menuitem" type="button" tabindex="0" data-tone="danger">
-            <span data-part="label">Eliminar rascunho</span>
+        <div
+          data-part="list"
+          data-part-list=""
+          role="menu"
+          aria-labelledby="s2-title"
+          aria-orientation="vertical"
+        >
+          <button
+            data-part="item"
+            data-part-item=""
+            role="menuitem"
+            type="button"
+            tabindex="0"
+            data-tone="danger"
+          >
+            <span data-part="label" data-part-label="">Eliminar rascunho</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="label">Guardar rascunho</span>
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="label" data-part-label="">Guardar rascunho</span>
           </button>
         </div>
-        <div data-part="footer">
-          <button data-part="cancel" type="button">Cancelar</button>
+        <div data-part="footer" data-part-footer="">
+          <button data-part="cancel" data-part-cancel="" type="button">Cancelar</button>
         </div>
       </div>
     </div>
@@ -187,7 +215,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-mode="overlay"
     data-side="bottom"
     data-size="content"
@@ -196,24 +226,31 @@
     data-open
     data-modal
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       style="--slotted-drawer-sheet-inline-size: var(--slotted-action-sheet-inline-size, 32rem)"
       role="dialog"
       aria-modal="true"
       aria-labelledby="s3-title"
       tabindex="-1"
     >
-      <div data-ui="action-sheet" data-part="root">
-        <header data-part="header">
-          <h2 data-part="title" id="s3-title">Fatura 4471</h2>
+      <div data-ui="action-sheet" data-ui-action-sheet="" data-part="root" data-part-root="">
+        <header data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" id="s3-title">Fatura 4471</h2>
         </header>
-        <div data-part="list" role="menu" aria-labelledby="s3-title" aria-orientation="vertical">
-          <div data-part="group" role="group" aria-labelledby="s3-g1">
-            <div data-part="group-label" id="s3-g1">Enviar</div>
-            <button data-part="item" role="menuitem" type="button" tabindex="0">
-              <span data-part="icon" aria-hidden="true"
+        <div
+          data-part="list"
+          data-part-list=""
+          role="menu"
+          aria-labelledby="s3-title"
+          aria-orientation="vertical"
+        >
+          <div data-part="group" data-part-group="" role="group" aria-labelledby="s3-g1">
+            <div data-part="group-label" data-part-group-label="" id="s3-g1">Enviar</div>
+            <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="0">
+              <span data-part="icon" data-part-icon="" aria-hidden="true"
                 ><span
                   style="
                     display: block;
@@ -224,17 +261,18 @@
                   "
                 ></span
               ></span>
-              <span data-part="label">Lembrar o cliente</span>
+              <span data-part="label" data-part-label="">Lembrar o cliente</span>
             </button>
             <button
               data-part="item"
+              data-part-item=""
               role="menuitem"
               type="button"
               tabindex="-1"
               aria-disabled="true"
               data-disabled
             >
-              <span data-part="icon" aria-hidden="true"
+              <span data-part="icon" data-part-icon="" aria-hidden="true"
                 ><span
                   style="
                     display: block;
@@ -245,21 +283,24 @@
                   "
                 ></span
               ></span>
-              <span data-part="label">Enviar para a contabilidade</span>
-              <span data-part="description">Disponível depois de aprovada</span>
+              <span data-part="label" data-part-label="">Enviar para a contabilidade</span>
+              <span data-part="description" data-part-description=""
+                >Disponível depois de aprovada</span
+              >
             </button>
           </div>
-          <hr data-part="separator" role="separator" />
-          <div data-part="group" role="group" aria-labelledby="s3-g2">
-            <div data-part="group-label" id="s3-g2">Estado</div>
+          <hr data-part="separator" data-part-separator="" role="separator" />
+          <div data-part="group" data-part-group="" role="group" aria-labelledby="s3-g2">
+            <div data-part="group-label" data-part-group-label="" id="s3-g2">Estado</div>
             <button
               data-part="item"
+              data-part-item=""
               role="menuitem"
               type="button"
               tabindex="-1"
               data-tone="success"
             >
-              <span data-part="icon" aria-hidden="true"
+              <span data-part="icon" data-part-icon="" aria-hidden="true"
                 ><span
                   style="
                     display: block;
@@ -270,10 +311,17 @@
                   "
                 ></span
               ></span>
-              <span data-part="label">Marcar como paga</span>
+              <span data-part="label" data-part-label="">Marcar como paga</span>
             </button>
-            <button data-part="item" role="menuitem" type="button" tabindex="-1" data-tone="danger">
-              <span data-part="icon" aria-hidden="true"
+            <button
+              data-part="item"
+              data-part-item=""
+              role="menuitem"
+              type="button"
+              tabindex="-1"
+              data-tone="danger"
+            >
+              <span data-part="icon" data-part-icon="" aria-hidden="true"
                 ><span
                   style="
                     display: block;
@@ -284,13 +332,15 @@
                   "
                 ></span
               ></span>
-              <span data-part="label">Anular fatura</span>
-              <span data-part="description">O número não é reutilizado</span>
+              <span data-part="label" data-part-label="">Anular fatura</span>
+              <span data-part="description" data-part-description=""
+                >O número não é reutilizado</span
+              >
             </button>
           </div>
         </div>
-        <div data-part="footer">
-          <button data-part="cancel" type="button">Cancelar</button>
+        <div data-part="footer" data-part-footer="">
+          <button data-part="cancel" data-part-cancel="" type="button">Cancelar</button>
         </div>
       </div>
     </div>
@@ -308,7 +358,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-mode="overlay"
     data-side="bottom"
     data-size="content"
@@ -317,22 +369,30 @@
     data-open
     data-modal
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       style="--slotted-drawer-sheet-inline-size: var(--slotted-action-sheet-inline-size, 32rem)"
       role="dialog"
       aria-modal="true"
       aria-labelledby="s4-title"
       tabindex="-1"
     >
-      <div data-ui="action-sheet" data-part="root">
-        <header data-part="header">
-          <h2 data-part="title" id="s4-title">Exportar</h2>
+      <div data-ui="action-sheet" data-ui-action-sheet="" data-part="root" data-part-root="">
+        <header data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" id="s4-title">Exportar</h2>
         </header>
-        <div data-part="list" role="menu" aria-labelledby="s4-title" aria-orientation="vertical">
+        <div
+          data-part="list"
+          data-part-list=""
+          role="menu"
+          aria-labelledby="s4-title"
+          aria-orientation="vertical"
+        >
           <button
             data-part="item"
+            data-part-item=""
             role="menuitem"
             type="button"
             tabindex="0"
@@ -340,12 +400,14 @@
             aria-disabled="true"
             data-loading
           >
-            <span data-part="icon" aria-hidden="true"><span data-ui="spinner"></span></span>
-            <span data-part="label">Descarregar PDF</span>
-            <span data-part="description">A preparar 14 páginas</span>
+            <span data-part="icon" data-part-icon="" aria-hidden="true"
+              ><span data-ui="spinner" data-ui-spinner=""></span
+            ></span>
+            <span data-part="label" data-part-label="">Descarregar PDF</span>
+            <span data-part="description" data-part-description="">A preparar 14 páginas</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="icon" aria-hidden="true"
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="icon" data-part-icon="" aria-hidden="true"
               ><span
                 style="
                   display: block;
@@ -356,11 +418,11 @@
                 "
               ></span
             ></span>
-            <span data-part="label">Descarregar folha de cálculo</span>
+            <span data-part="label" data-part-label="">Descarregar folha de cálculo</span>
           </button>
         </div>
-        <div data-part="footer">
-          <button data-part="cancel" type="button">Cancelar</button>
+        <div data-part="footer" data-part-footer="">
+          <button data-part="cancel" data-part-cancel="" type="button">Cancelar</button>
         </div>
       </div>
     </div>
@@ -379,7 +441,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-mode="overlay"
     data-side="bottom"
     data-size="content"
@@ -388,9 +452,10 @@
     data-open
     data-modal
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       style="--slotted-drawer-sheet-inline-size: var(--slotted-action-sheet-inline-size, 32rem)"
       role="dialog"
       aria-modal="true"
@@ -398,44 +463,61 @@
       aria-describedby="s5-message"
       tabindex="-1"
     >
-      <div data-ui="action-sheet" data-part="root">
-        <header data-part="header">
-          <h2 data-part="title" id="s5-title">
+      <div data-ui="action-sheet" data-ui-action-sheet="" data-part="root" data-part-root="">
+        <header data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" id="s5-title">
             Ações disponíveis para a encomenda 88213 do cliente Distribuidora Atlântica
           </h2>
-          <p data-part="message" id="s5-message">
+          <p data-part="message" data-part-message="" id="s5-message">
             As alterações ficam registadas no histórico e são enviadas ao armazém na próxima
             sincronização.
           </p>
         </header>
-        <div data-part="list" role="menu" aria-labelledby="s5-title" aria-orientation="vertical">
-          <button data-part="item" role="menuitem" type="button" tabindex="0">
-            <span data-part="label"
+        <div
+          data-part="list"
+          data-part-list=""
+          role="menu"
+          aria-labelledby="s5-title"
+          aria-orientation="vertical"
+        >
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="0">
+            <span data-part="label" data-part-label=""
               >Reenviar a confirmação da encomenda ao endereço de faturação</span
             >
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="label">Alterar a morada de entrega</span>
-            <span data-part="description">Até à saída do armazém, prevista para amanhã às 9h</span>
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="label" data-part-label="">Alterar a morada de entrega</span>
+            <span data-part="description" data-part-description=""
+              >Até à saída do armazém, prevista para amanhã às 9h</span
+            >
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="label">Copiar ENC-2026-0000088213-ATLANTICA-PT-LISBOA-NORTE</span>
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="label" data-part-label=""
+              >Copiar ENC-2026-0000088213-ATLANTICA-PT-LISBOA-NORTE</span
+            >
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="label">Dividir em duas remessas</span>
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="label" data-part-label="">Dividir em duas remessas</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="label">Adicionar nota interna</span>
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="label" data-part-label="">Adicionar nota interna</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="label">Imprimir guia de transporte</span>
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="label" data-part-label="">Imprimir guia de transporte</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1" data-tone="danger">
-            <span data-part="label">Cancelar encomenda</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            role="menuitem"
+            type="button"
+            tabindex="-1"
+            data-tone="danger"
+          >
+            <span data-part="label" data-part-label="">Cancelar encomenda</span>
           </button>
         </div>
-        <div data-part="footer">
-          <button data-part="cancel" type="button">Fechar</button>
+        <div data-part="footer" data-part-footer="">
+          <button data-part="cancel" data-part-cancel="" type="button">Fechar</button>
         </div>
       </div>
     </div>
@@ -458,7 +540,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-mode="overlay"
     data-side="bottom"
     data-size="content"
@@ -467,21 +551,28 @@
     data-open
     data-undimmed
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       style="--slotted-drawer-sheet-inline-size: var(--slotted-action-sheet-inline-size, 32rem)"
       role="dialog"
       aria-label="Rota 12"
       tabindex="-1"
     >
-      <div data-ui="action-sheet" data-part="root">
-        <div data-part="list" role="menu" aria-label="Rota 12" aria-orientation="vertical">
-          <button data-part="item" role="menuitem" type="button" tabindex="0">
-            <span data-part="label">Iniciar navegação</span>
+      <div data-ui="action-sheet" data-ui-action-sheet="" data-part="root" data-part-root="">
+        <div
+          data-part="list"
+          data-part-list=""
+          role="menu"
+          aria-label="Rota 12"
+          aria-orientation="vertical"
+        >
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="0">
+            <span data-part="label" data-part-label="">Iniciar navegação</span>
           </button>
-          <button data-part="item" role="menuitem" type="button" tabindex="-1">
-            <span data-part="label">Ligar ao motorista</span>
+          <button data-part="item" data-part-item="" role="menuitem" type="button" tabindex="-1">
+            <span data-part="label" data-part-label="">Ligar ao motorista</span>
           </button>
         </div>
       </div>

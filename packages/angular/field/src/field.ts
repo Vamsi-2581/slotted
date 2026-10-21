@@ -67,6 +67,7 @@ export type { FieldIds, FieldLabelPlacement, FieldNecessity, FieldSize } from '.
     @if (drawnCount(); as count) {
       <span
         data-part="counter"
+        data-part-counter=""
         [id]="ids().counter"
         [attr.data-invalid]="countOver() ? '' : null"
         >{{ formatCount(count) }}</span
@@ -111,7 +112,9 @@ export type { FieldIds, FieldLabelPlacement, FieldNecessity, FieldSize } from '.
   providers: [{ provide: SlFieldContext, useExisting: forwardRef(() => SlField) }],
   host: {
     'data-ui': 'field',
+    'data-ui-field': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-label-placement]': 'resolvedLabelPlacement()',
     '[attr.data-necessity]': 'resolvedNecessity()',

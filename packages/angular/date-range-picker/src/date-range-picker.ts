@@ -118,6 +118,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
   ],
   template: `<div
       data-part="control"
+      data-part-control=""
       [attr.role]="enclosing === null ? null : 'group'"
       [attr.id]="enclosing?.ids()?.control ?? null"
       [attr.aria-labelledby]="enclosing?.ids()?.label ?? null"
@@ -127,6 +128,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
     >
       <div
         data-part="start"
+        data-part-start=""
         [attr.data-current]="currentPosition() === 'start' ? '' : null"
         (focusin)="onFieldFocus('start', $event)"
       >
@@ -153,9 +155,10 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
           (valueChange)="onFieldValue('start', $event)"
         ></div>
       </div>
-      <span data-part="separator" aria-hidden="true">–</span>
+      <span data-part="separator" data-part-separator="" aria-hidden="true">–</span>
       <div
         data-part="end"
+        data-part-end=""
         [attr.data-current]="currentPosition() === 'end' ? '' : null"
         (focusin)="onFieldFocus('end', $event)"
       >
@@ -186,6 +189,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
       @if (clearable() && held() !== null) {
         <button
           data-part="clear"
+          data-part-clear=""
           type="button"
           [attr.aria-label]="t('clear')"
           [disabled]="!editable()"
@@ -197,6 +201,7 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
       <button
         #trigger
         data-part="trigger"
+        data-part-trigger=""
         type="button"
         aria-haspopup="dialog"
         [attr.aria-label]="triggerLabel()"
@@ -213,20 +218,24 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
       <div
         #layer
         data-ui="date-range-picker"
+        data-ui-date-range-picker=""
         data-part="positioner"
+        data-part-positioner=""
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
       >
         <div
           data-part="content"
+          data-part-content=""
           role="dialog"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
           (keydown)="onContentKeyDown($event)"
         >
-          <div data-part="head">
+          <div data-part="head" data-part-head="">
             <span
               data-part="head-start"
+              data-part-head-start=""
               [attr.data-placeholder]="shownStart() === null ? '' : null"
               [attr.data-pending]="startPending() ? '' : null"
               >{{ shownStart() === null ? t('start') : writeShort(shownStart()!) }}</span
@@ -234,21 +243,23 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
             –
             <span
               data-part="head-end"
+              data-part-head-end=""
               [attr.data-placeholder]="shownEnd() === null ? '' : null"
               [attr.data-pending]="endPending() ? '' : null"
               >{{ shownEnd() === null ? t('end') : writeShort(shownEnd()!) }}</span
             >
             <span
               data-part="length"
+              data-part-length=""
               aria-live="polite"
               [attr.data-pending]="pendingRun() === null ? null : ''"
               >{{ spokenLength() }}</span
             >
             @if (limitText() !== null) {
-              <span data-part="limit">{{ limitText() }}</span>
+              <span data-part="limit" data-part-limit="">{{ limitText() }}</span>
             }
           </div>
-          <div data-part="panels">
+          <div data-part="panels" data-part-panels="">
             <ng-content select="[slDateRangePickerPresets]" />
             <div
               slCalendar
@@ -280,7 +291,9 @@ function normalize(range: DateRange | null | undefined): DateRange | null {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'date-range-picker',
+    'data-ui-date-range-picker': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-calendar]': 'resolvedCalendar()',
@@ -981,6 +994,7 @@ export class SlDateRangePicker implements ControlValueAccessor, Validator, OnIni
   exportAs: 'slDateRangePickerPreset',
   host: {
     'data-part': 'preset',
+    'data-part-preset': '',
     type: 'button',
     '[attr.data-selected]': "selected() ? '' : null",
     '(click)': 'choose($event)',

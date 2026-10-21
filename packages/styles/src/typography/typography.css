@@ -5,7 +5,7 @@
    * so text placed on a tonal surface reads that surface instead of arguing
    * with it; `data-tone` is how a consumer asks for a colour of its own.
    */
-  [data-ui='typography'] {
+  [data-ui-typography] {
     font-family: var(
       --slotted-typography-font-family,
       var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
@@ -30,7 +30,7 @@
    * tells a heading from a line of text here: both carry `data-ui` and
    * `data-part='root'`, and `Heading` always renders `h1` to `h6`.
    */
-  [data-ui='typography']:is(h1, h2, h3, h4, h5, h6) {
+  [data-ui-typography]:is(h1, h2, h3, h4, h5, h6) {
     font-family: var(
       --slotted-font-family-heading,
       var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif)
@@ -38,78 +38,78 @@
   }
 
   /* Each step carries the line height the scale pairs it with. */
-  [data-ui='typography'][data-size='xs'] {
+  [data-ui-typography][data-size='xs'] {
     font-size: var(--slotted-font-size-xs, 0.75rem);
     line-height: var(--slotted-line-height-xs, 1.4);
   }
 
-  [data-ui='typography'][data-size='sm'] {
+  [data-ui-typography][data-size='sm'] {
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     line-height: var(--slotted-line-height-sm, 1.45);
   }
 
-  [data-ui='typography'][data-size='md'] {
+  [data-ui-typography][data-size='md'] {
     font-size: var(--slotted-font-size-md, 0.875rem);
     line-height: var(--slotted-line-height-md, 1.5);
   }
 
-  [data-ui='typography'][data-size='lg'] {
+  [data-ui-typography][data-size='lg'] {
     font-size: var(--slotted-font-size-lg, 1rem);
     line-height: var(--slotted-line-height-lg, 1.5);
   }
 
-  [data-ui='typography'][data-size='xl'] {
+  [data-ui-typography][data-size='xl'] {
     font-size: var(--slotted-font-size-xl, 1.125rem);
     line-height: var(--slotted-line-height-xl, 1.45);
   }
 
-  [data-ui='typography'][data-size='2xl'] {
+  [data-ui-typography][data-size='2xl'] {
     font-size: var(--slotted-font-size-2xl, 1.25rem);
     line-height: var(--slotted-line-height-2xl, 1.4);
   }
 
-  [data-ui='typography'][data-size='3xl'] {
+  [data-ui-typography][data-size='3xl'] {
     font-size: var(--slotted-font-size-3xl, 1.5rem);
     line-height: var(--slotted-line-height-3xl, 1.3);
   }
 
-  [data-ui='typography'][data-weight='regular'] {
+  [data-ui-typography][data-weight='regular'] {
     font-weight: var(--slotted-font-weight-regular, 400);
   }
 
-  [data-ui='typography'][data-weight='medium'] {
+  [data-ui-typography][data-weight='medium'] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='typography'][data-weight='semibold'] {
+  [data-ui-typography][data-weight='semibold'] {
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='typography'][data-tone='default'] {
+  [data-ui-typography][data-tone='default'] {
     color: var(--slotted-text, CanvasText);
   }
 
-  [data-ui='typography'][data-tone='muted'] {
+  [data-ui-typography][data-tone='muted'] {
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='typography'][data-tone='accent'] {
+  [data-ui-typography][data-tone='accent'] {
     color: var(--slotted-tone-accent-text, LinkText);
   }
 
-  [data-ui='typography'][data-tone='success'] {
+  [data-ui-typography][data-tone='success'] {
     color: var(--slotted-tone-success-text, CanvasText);
   }
 
-  [data-ui='typography'][data-tone='warning'] {
+  [data-ui-typography][data-tone='warning'] {
     color: var(--slotted-tone-warning-text, CanvasText);
   }
 
-  [data-ui='typography'][data-tone='danger'] {
+  [data-ui-typography][data-tone='danger'] {
     color: var(--slotted-tone-danger-text, CanvasText);
   }
 
-  [data-ui='typography'][data-tone='inverse'] {
+  [data-ui-typography][data-tone='inverse'] {
     color: var(--slotted-text-inverse, Canvas);
   }
 
@@ -118,54 +118,54 @@
    * asking for alignment is what turns the span into a block; a consumer who
    * wants inline text simply does not ask.
    */
-  [data-ui='typography'][data-align] {
+  [data-ui-typography][data-align] {
     display: block;
   }
 
-  [data-ui='typography'][data-align='start'] {
+  [data-ui-typography][data-align='start'] {
     text-align: start;
   }
 
-  [data-ui='typography'][data-align='center'] {
+  [data-ui-typography][data-align='center'] {
     text-align: center;
   }
 
-  [data-ui='typography'][data-align='end'] {
+  [data-ui-typography][data-align='end'] {
     text-align: end;
   }
 
   /* Every wrapping value is stated, because text-wrap inherits: a heading's
      balance would otherwise reach the running text inside it. */
-  [data-ui='typography'][data-wrap='normal'] {
+  [data-ui-typography][data-wrap='normal'] {
     text-wrap: wrap;
     white-space: normal;
   }
 
-  [data-ui='typography'][data-wrap='nowrap'] {
+  [data-ui-typography][data-wrap='nowrap'] {
     white-space: nowrap;
   }
 
-  [data-ui='typography'][data-wrap='balance'] {
+  [data-ui-typography][data-wrap='balance'] {
     text-wrap: balance;
   }
 
-  [data-ui='typography'][data-wrap='pretty'] {
+  [data-ui-typography][data-wrap='pretty'] {
     text-wrap: pretty;
   }
 
-  [data-ui='typography'][data-numeric='normal'] {
+  [data-ui-typography][data-numeric='normal'] {
     font-variant-numeric: normal;
   }
 
-  [data-ui='typography'][data-numeric='tabular'] {
+  [data-ui-typography][data-numeric='tabular'] {
     font-variant-numeric: tabular-nums;
   }
 
-  [data-ui='typography'][data-transform='none'] {
+  [data-ui-typography][data-transform='none'] {
     text-transform: none;
   }
 
-  [data-ui='typography'][data-transform='capitalize'] {
+  [data-ui-typography][data-transform='capitalize'] {
     text-transform: capitalize;
   }
 
@@ -175,7 +175,7 @@
    * holds no tracking step, and this value corrects an optical effect rather
    * than stating one; a theme retunes it through the token.
    */
-  [data-ui='typography'][data-transform='uppercase'] {
+  [data-ui-typography][data-transform='uppercase'] {
     letter-spacing: var(--slotted-typography-uppercase-tracking, 0.06em);
     text-transform: uppercase;
   }
@@ -186,9 +186,9 @@
    * written in it. The list is the common ones, not every one: a language it
    * misses sets --slotted-typography-uppercase-tracking to normal.
    */
-  [data-ui='typography']:lang(ar),
-  [data-ui='typography']:lang(fa),
-  [data-ui='typography']:lang(ur) {
+  [data-ui-typography]:lang(ar),
+  [data-ui-typography]:lang(fa),
+  [data-ui-typography]:lang(ur) {
     letter-spacing: normal;
   }
 
@@ -199,7 +199,7 @@
    * and the count reaches CSS as a custom property because a line-clamp cannot
    * be read from an attribute.
    */
-  [data-ui='typography'][data-truncate] {
+  [data-ui-typography][data-truncate] {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: var(--slotted-typography-lines, 1);

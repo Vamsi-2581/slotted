@@ -24,7 +24,7 @@
    * hover mixes the first toward the page's own text colour, which is the rule
    * `link` and `breadcrumb` arrived at for a line of text.
    */
-  [data-ui='table-of-contents'] {
+  [data-ui-table-of-contents] {
     --_text: var(--slotted-table-of-contents-color, var(--slotted-text-muted, GrayText));
     --_strong: var(--slotted-text, CanvasText);
     --_hover: var(
@@ -66,7 +66,7 @@
    * fixed height, because a label wraps.
    */
 
-  [data-ui='table-of-contents'][data-size='sm'] {
+  [data-ui-table-of-contents][data-size='sm'] {
     --_row-height: var(--slotted-control-height-sm, 30px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_inset: var(--slotted-control-padding-inline-sm, 10px);
@@ -74,7 +74,7 @@
     --_gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='table-of-contents'][data-size='md'] {
+  [data-ui-table-of-contents][data-size='md'] {
     --_row-height: var(--slotted-control-height-md, 34px);
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_inset: var(--slotted-control-padding-inline-md, 13px);
@@ -82,7 +82,7 @@
     --_gap: var(--slotted-control-gap-md, 8px);
   }
 
-  [data-ui='table-of-contents'][data-size='lg'] {
+  [data-ui-table-of-contents][data-size='lg'] {
     --_row-height: var(--slotted-control-height-lg, 38px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_inset: var(--slotted-control-padding-inline-lg, 16px);
@@ -91,7 +91,7 @@
   }
 
   /** A list with no entries draws nothing: a title over an empty column is a broken column. */
-  [data-ui='table-of-contents'][data-empty]:not([data-loading]) {
+  [data-ui-table-of-contents][data-empty]:not([data-loading]) {
     display: none;
   }
 
@@ -102,7 +102,7 @@
    * link that happens to be bold. It stands on the same inset as the links.
    */
 
-  [data-ui='table-of-contents'] > [data-part='label'] {
+  [data-ui-table-of-contents] > [data-part-label] {
     color: var(--_strong);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -113,11 +113,11 @@
 
   /* ── The list ─────────────────────────────────────────────────────────── */
 
-  [data-ui='table-of-contents'] [data-part='panel'] {
+  [data-ui-table-of-contents] [data-part-panel] {
     position: relative;
   }
 
-  [data-ui='table-of-contents'] :is([data-part='list'], [data-part='group']) {
+  [data-ui-table-of-contents] :is([data-part-list], [data-part-group]) {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -128,15 +128,15 @@
    * text. It is drawn once, on the first level, so the groups inside indent
    * under it rather than each carrying a rule of their own.
    */
-  [data-ui='table-of-contents'][data-layout='vertical'] [data-part='panel'] > [data-part='list'] {
+  [data-ui-table-of-contents][data-layout='vertical'] [data-part-panel] > [data-part-list] {
     border-inline-start: var(--_track-width) solid var(--_track);
   }
 
-  [data-ui='table-of-contents'] [data-part='group'] {
+  [data-ui-table-of-contents] [data-part-group] {
     padding-inline-start: var(--_indent);
   }
 
-  [data-ui='table-of-contents'] [data-part='item'] {
+  [data-ui-table-of-contents] [data-part-item] {
     /* An item is a block in a list; the marker beside the list is the panel's, not the item's. */
     display: block;
     min-inline-size: 0;
@@ -144,7 +144,7 @@
 
   /* ── The link ─────────────────────────────────────────────────────────── */
 
-  [data-ui='table-of-contents'] [data-part='link'] {
+  [data-ui-table-of-contents] [data-part-link] {
     border-radius: var(--slotted-control-radius, 4px);
     color: inherit;
     display: block;
@@ -165,11 +165,11 @@
       font-weight var(--slotted-duration-short) var(--_easing);
   }
 
-  [data-ui='table-of-contents'] [data-part='link']:not([data-disabled]):not([data-current]):hover {
+  [data-ui-table-of-contents] [data-part-link]:not([data-disabled]):not([data-current]):hover {
     color: var(--_hover);
   }
 
-  [data-ui='table-of-contents'] [data-part='link']:not([data-disabled]):not([data-current]):active {
+  [data-ui-table-of-contents] [data-part-link]:not([data-disabled]):not([data-current]):active {
     color: var(--_strong);
   }
 
@@ -178,7 +178,7 @@
    * the list says it a second time; neither says it alone, which is what
    * `state-rail.test.mjs` asks of a band on an edge.
    */
-  [data-ui='table-of-contents'] [data-part='link'][data-current] {
+  [data-ui-table-of-contents] [data-part-link][data-current] {
     color: var(--_current);
     font-weight: var(--slotted-font-weight-medium, 500);
   }
@@ -189,7 +189,7 @@
    * track, and against the column's edge would be clipped by the panel that
    * scrolls.
    */
-  [data-ui='table-of-contents'] :is([data-part='link'], [data-part='trigger']):focus-visible {
+  [data-ui-table-of-contents] :is([data-part-link], [data-part-trigger]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -206,7 +206,7 @@
    * It is pulled over the track by the track's own width, so the two lines
    * are one line — the arithmetic `tabs` uses for the same pair.
    */
-  [data-ui='table-of-contents'] [data-part='marker'] {
+  [data-ui-table-of-contents] [data-part-marker] {
     background-color: var(--_marker);
     border-radius: var(--slotted-radius-full, 9999px);
     pointer-events: none;
@@ -218,7 +218,7 @@
       inline-size var(--_duration) var(--_easing);
   }
 
-  [data-ui='table-of-contents'][data-layout='vertical'] [data-part='marker'] {
+  [data-ui-table-of-contents][data-layout='vertical'] [data-part-marker] {
     block-size: var(--_marker-size, 0px);
     inline-size: var(--_track-width);
     inset-block-start: var(--_marker-start, 0px);
@@ -232,15 +232,15 @@
    * figures, muted like the link it precedes, and it takes the link's ink
    * when the link is current.
    */
-  [data-ui='table-of-contents'][data-numbered] :is([data-part='list'], [data-part='group']) {
+  [data-ui-table-of-contents][data-numbered] :is([data-part-list], [data-part-group]) {
     counter-reset: slotted-table-of-contents;
   }
 
-  [data-ui='table-of-contents'][data-numbered] [data-part='item'] {
+  [data-ui-table-of-contents][data-numbered] [data-part-item] {
     counter-increment: slotted-table-of-contents;
   }
 
-  [data-ui='table-of-contents'][data-numbered] [data-part='link']::before {
+  [data-ui-table-of-contents][data-numbered] [data-part-link]::before {
     content: counters(slotted-table-of-contents, '.') '.';
     display: inline-block;
     font-variant-numeric: tabular-nums;
@@ -254,7 +254,7 @@
    * toolbar comes and goes; the panel's own scrollbar is hidden, because a
    * column of a dozen links with a scrollbar beside it reads as a control.
    */
-  [data-ui='table-of-contents'][data-sticky] {
+  [data-ui-table-of-contents][data-sticky] {
     display: flex;
     flex-direction: column;
     inset-block-start: var(--slotted-page-sticky-top, 0px);
@@ -262,7 +262,7 @@
     position: sticky;
   }
 
-  [data-ui='table-of-contents'][data-sticky] > [data-part='panel'] {
+  [data-ui-table-of-contents][data-sticky] > [data-part-panel] {
     min-block-size: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -277,12 +277,12 @@
    * Ant's horizontal Anchor takes no children, and a bar with two levels is
    * two bars.
    */
-  [data-ui='table-of-contents'][data-layout='horizontal'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] {
     display: flex;
     gap: var(--_gap);
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal'] > [data-part='label'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] > [data-part-label] {
     align-self: center;
     flex: none;
     margin-block-end: 0;
@@ -299,7 +299,7 @@
    * absolutely positioned at the panel's end edge, sits on the track and
    * scrolls with the link it marks.
    */
-  [data-ui='table-of-contents'][data-layout='horizontal'] > [data-part='panel'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] > [data-part-panel] {
     --_fade: var(--slotted-space-9, 2rem);
     --_fade-angle: 90deg;
 
@@ -323,22 +323,19 @@
    * here, mirrored by hand under `:dir(rtl)`, because a gradient angle takes
    * no logical keyword.
    */
-  [data-ui='table-of-contents'][data-layout='horizontal'] > [data-part='panel']:dir(rtl) {
+  [data-ui-table-of-contents][data-layout='horizontal'] > [data-part-panel]:dir(rtl) {
     --_fade-angle: 270deg;
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal']
-    > [data-part='panel'][data-overflow='end'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] > [data-part-panel][data-overflow='end'] {
     mask-image: linear-gradient(var(--_fade-angle), #000 calc(100% - var(--_fade)), transparent);
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal']
-    > [data-part='panel'][data-overflow='start'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] > [data-part-panel][data-overflow='start'] {
     mask-image: linear-gradient(var(--_fade-angle), transparent, #000 var(--_fade));
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal']
-    > [data-part='panel'][data-overflow='both'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] > [data-part-panel][data-overflow='both'] {
     mask-image: linear-gradient(
       var(--_fade-angle),
       transparent,
@@ -348,23 +345,23 @@
     );
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal'] [data-part='list'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] [data-part-list] {
     display: flex;
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal'] [data-part='item'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] [data-part-item] {
     flex: none;
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal'] [data-part='link'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] [data-part-link] {
     white-space: nowrap;
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal'] [data-part='group'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] [data-part-group] {
     display: none;
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal'] [data-part='marker'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] [data-part-marker] {
     block-size: var(--_track-width);
     inline-size: var(--_marker-size, 0px);
     inset-block-end: 0;
@@ -379,11 +376,11 @@
    * no positioner, because it opens exactly one place — and it is a
    * dismissable layer for Escape and a press outside.
    */
-  [data-ui='table-of-contents'][data-layout='collapsed'] {
+  [data-ui-table-of-contents][data-layout='collapsed'] {
     position: relative;
   }
 
-  [data-ui='table-of-contents'] [data-part='trigger'] {
+  [data-ui-table-of-contents] [data-part-trigger] {
     align-items: center;
     appearance: none;
     background: none;
@@ -403,7 +400,7 @@
     text-align: start;
   }
 
-  [data-ui='table-of-contents'] [data-part='trigger'] > [data-part='label'] {
+  [data-ui-table-of-contents] [data-part-trigger] > [data-part-label] {
     color: var(--_strong);
     flex: none;
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -414,7 +411,7 @@
    * room the title leaves and is cut at the end when it is longer. The whole
    * text stays in the DOM and in the list below.
    */
-  [data-ui='table-of-contents'] [data-part='current'] {
+  [data-ui-table-of-contents] [data-part-current] {
     color: var(--_text);
     flex: 1 1 auto;
     min-inline-size: 0;
@@ -423,7 +420,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='table-of-contents'] [data-part='current']:empty {
+  [data-ui-table-of-contents] [data-part-current]:empty {
     display: none;
   }
 
@@ -432,7 +429,7 @@
    * part sizes to the glyph scale and pushes to the end of the trigger. The box
    * turns half a turn while the panel is open.
    */
-  [data-ui='table-of-contents'] [data-part='indicator'] {
+  [data-ui-table-of-contents] [data-part-indicator] {
     --slotted-icon-size: var(--_icon-size);
 
     display: flex;
@@ -440,15 +437,15 @@
     margin-inline-start: auto;
   }
 
-  [data-ui='table-of-contents'] [data-part='indicator'] > [data-ui='icon'] {
+  [data-ui-table-of-contents] [data-part-indicator] > [data-ui-icon] {
     transition: rotate var(--_duration) var(--_easing);
   }
 
-  [data-ui='table-of-contents'][data-open] [data-part='indicator'] > [data-ui='icon'] {
+  [data-ui-table-of-contents][data-open] [data-part-indicator] > [data-ui-icon] {
     rotate: 180deg;
   }
 
-  [data-ui='table-of-contents'][data-layout='collapsed'] > [data-part='panel'] {
+  [data-ui-table-of-contents][data-layout='collapsed'] > [data-part-panel] {
     --_enter-distance: var(--slotted-space-2, 0.25rem);
 
     background-color: var(--slotted-surface-raised, Canvas);
@@ -467,14 +464,14 @@
     z-index: var(--slotted-z-index-popover, 1100);
   }
 
-  [data-ui='table-of-contents'][data-layout='collapsed'][data-open] > [data-part='panel'] {
+  [data-ui-table-of-contents][data-layout='collapsed'][data-open] > [data-part-panel] {
     animation: slotted-table-of-contents-enter var(--slotted-duration-short)
       var(--slotted-easing-enter, ease-out);
     display: block;
   }
 
   /* The layer under the trigger has no track: the layer's own edge frames the list. */
-  [data-ui='table-of-contents'][data-layout='collapsed'] [data-part='marker'] {
+  [data-ui-table-of-contents][data-layout='collapsed'] [data-part-marker] {
     display: none;
   }
 
@@ -499,18 +496,18 @@
    * Rows with an item's geometry whose text is `skeleton`'s bar, so a column
    * whose body is still arriving keeps its width and its rhythm.
    */
-  [data-ui='table-of-contents'] [data-part='skeleton'] {
+  [data-ui-table-of-contents] [data-part-skeleton] {
     display: flex;
     min-block-size: var(--_row-height);
     padding-block: calc((var(--_row-height) - var(--_font-size) * var(--_line-height)) / 2);
     padding-inline: var(--_inset);
   }
 
-  [data-ui='table-of-contents'] [data-part='skeleton'] > [data-ui='skeleton'] {
+  [data-ui-table-of-contents] [data-part-skeleton] > [data-ui-skeleton] {
     --slotted-skeleton-block-size: var(--_font-size);
   }
 
-  [data-ui='table-of-contents'][data-layout='horizontal'] [data-part='skeleton'] {
+  [data-ui-table-of-contents][data-layout='horizontal'] [data-part-skeleton] {
     flex: none;
     inline-size: 6rem;
   }
@@ -519,12 +516,12 @@
 
   @media (forced-colors: active) {
     /* A painted background is the one thing the mode throws away: the marker is redrawn in the system's highlight. */
-    [data-ui='table-of-contents'] [data-part='marker'] {
+    [data-ui-table-of-contents] [data-part-marker] {
       background-color: Highlight;
       forced-color-adjust: none;
     }
 
-    [data-ui='table-of-contents'] [data-part='link'][data-current] {
+    [data-ui-table-of-contents] [data-part-link][data-current] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;

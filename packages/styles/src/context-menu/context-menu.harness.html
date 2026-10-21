@@ -13,7 +13,9 @@
   <div style="position: relative; padding: 16px 16px 240px">
     <div
       data-ui="context-menu"
+      data-ui-context-menu=""
       data-part="root"
+      data-part-root=""
       data-open
       id="context-menu-anatomy-target"
       tabindex="0"
@@ -46,7 +48,9 @@
     </div>
     <div
       data-ui="menu"
+      data-ui-menu=""
       data-part="root"
+      data-part-root=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -60,54 +64,82 @@
     >
       <div
         data-part="content"
+        data-part-content=""
         role="menu"
         aria-labelledby="context-menu-anatomy-target"
         tabindex="-1"
       >
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Open</span>
-          <span data-part="shortcut">↵</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Open</span>
+          <span data-part="shortcut" data-part-shortcut="">↵</span>
         </button>
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Open in new tab</span>
-          <span data-part="shortcut">⌘↵</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Open in new tab</span>
+          <span data-part="shortcut" data-part-shortcut="">⌘↵</span>
         </button>
-        <hr data-part="separator" role="separator" aria-orientation="horizontal" />
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Rename</span>
-          <span data-part="shortcut">F2</span>
+        <hr
+          data-part="separator"
+          data-part-separator=""
+          role="separator"
+          aria-orientation="horizontal"
+        />
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Rename</span>
+          <span data-part="shortcut" data-part-shortcut="">F2</span>
         </button>
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="icon"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="copy"></svg></span
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="icon" data-part-icon=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="copy"></svg></span
           ></span>
-          <span data-part="label">Duplicate</span>
-          <span data-part="shortcut">⌘D</span>
+          <span data-part="label" data-part-label="">Duplicate</span>
+          <span data-part="shortcut" data-part-shortcut="">⌘D</span>
         </button>
         <button
           data-part="item"
+          data-part-item=""
           role="menuitem"
           type="button"
           aria-haspopup="menu"
           aria-expanded="false"
         >
-          <span data-part="label">Move to</span>
-          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+          <span data-part="label" data-part-label="">Move to</span>
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-directional
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg
           ></span>
         </button>
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Download</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Download</span>
         </button>
-        <hr data-part="separator" role="separator" aria-orientation="horizontal" />
-        <button data-part="item" role="menuitem" type="button" data-tone="danger">
-          <span data-part="icon"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg></span
+        <hr
+          data-part="separator"
+          data-part-separator=""
+          role="separator"
+          aria-orientation="horizontal"
+        />
+        <button data-part="item" data-part-item="" role="menuitem" type="button" data-tone="danger">
+          <span data-part="icon" data-part-icon=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg></span
           ></span>
-          <span data-part="label">Move to trash</span>
-          <span data-part="shortcut">⌫</span>
+          <span data-part="label" data-part-label="">Move to trash</span>
+          <span data-part="shortcut" data-part-shortcut="">⌫</span>
         </button>
       </div>
     </div>
@@ -135,7 +167,9 @@
   >
     <div
       data-ui="context-menu"
+      data-ui-context-menu=""
       data-part="root"
+      data-part-root=""
       style="
         padding: 12px;
         border: 1px solid var(--slotted-border-subtle);
@@ -148,7 +182,9 @@
     </div>
     <div
       data-ui="context-menu"
+      data-ui-context-menu=""
       data-part="root"
+      data-part-root=""
       data-pressed
       style="
         padding: 12px;
@@ -162,7 +198,9 @@
     </div>
     <div
       data-ui="context-menu"
+      data-ui-context-menu=""
       data-part="root"
+      data-part-root=""
       data-open
       style="
         padding: 12px;
@@ -176,7 +214,9 @@
     </div>
     <div
       data-ui="context-menu"
+      data-ui-context-menu=""
       data-part="root"
+      data-part-root=""
       data-disabled
       style="
         padding: 12px;
@@ -218,7 +258,9 @@
     >
       <div
         data-ui="context-menu"
+        data-ui-context-menu=""
         data-part="root"
+        data-part-root=""
         style="
           display: grid;
           grid-template-columns: 1fr auto auto;
@@ -233,7 +275,9 @@
       </div>
       <div
         data-ui="context-menu"
+        data-ui-context-menu=""
         data-part="root"
+        data-part-root=""
         data-open
         style="
           display: grid;
@@ -249,7 +293,9 @@
       </div>
       <div
         data-ui="context-menu"
+        data-ui-context-menu=""
         data-part="root"
+        data-part-root=""
         style="display: grid; grid-template-columns: 1fr auto auto; gap: 16px; padding: 10px 12px"
       >
         <span>Onboarding checklist.md</span>
@@ -259,7 +305,9 @@
     </div>
     <div
       data-ui="menu"
+      data-ui-menu=""
       data-part="root"
+      data-part-root=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -273,22 +321,28 @@
     >
       <div
         data-part="content"
+        data-part-content=""
         role="menu"
         aria-label="Supplier contract — Meridian.docx"
         tabindex="-1"
       >
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Open</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Open</span>
         </button>
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Share…</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Share…</span>
         </button>
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Download</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Download</span>
         </button>
-        <hr data-part="separator" role="separator" aria-orientation="horizontal" />
-        <button data-part="item" role="menuitem" type="button" data-tone="danger">
-          <span data-part="label">Move to trash</span>
+        <hr
+          data-part="separator"
+          data-part-separator=""
+          role="separator"
+          aria-orientation="horizontal"
+        />
+        <button data-part="item" data-part-item="" role="menuitem" type="button" data-tone="danger">
+          <span data-part="label" data-part-label="">Move to trash</span>
         </button>
       </div>
     </div>
@@ -305,7 +359,9 @@
   <div style="position: relative; padding: 16px 16px 200px">
     <div
       data-ui="context-menu"
+      data-ui-context-menu=""
       data-part="root"
+      data-part-root=""
       tabindex="0"
       style="
         display: grid;
@@ -327,7 +383,9 @@
     </div>
     <div
       data-ui="menu"
+      data-ui-menu=""
       data-part="root"
+      data-part-root=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -339,16 +397,22 @@
         --slotted-positioner-transform-origin: left top;
       "
     >
-      <div data-part="content" role="menu" aria-label="Release notes 4.2.md" tabindex="-1">
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Open</span>
+      <div
+        data-part="content"
+        data-part-content=""
+        role="menu"
+        aria-label="Release notes 4.2.md"
+        tabindex="-1"
+      >
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Open</span>
         </button>
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Rename</span>
-          <span data-part="shortcut">F2</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Rename</span>
+          <span data-part="shortcut" data-part-shortcut="">F2</span>
         </button>
-        <button data-part="item" role="menuitem" type="button">
-          <span data-part="label">Download</span>
+        <button data-part="item" data-part-item="" role="menuitem" type="button">
+          <span data-part="label" data-part-label="">Download</span>
         </button>
       </div>
     </div>

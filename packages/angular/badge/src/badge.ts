@@ -53,14 +53,16 @@ const ROLE: Record<BadgeLive, string | null> = { off: null, polite: 'status', as
    * siblings of that box rather than joining the line inside it.
    */
   template: `<ng-content select="[slBadgeStart]"></ng-content
-    ><span data-part="label">{{ value() }}<ng-content></ng-content></span
+    ><span data-part="label" data-part-label="">{{ value() }}<ng-content></ng-content></span
     ><ng-content select="[slBadgeEnd]"></ng-content>`,
   styleUrl: '../../../styles/src/badge/badge.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'badge',
+    'data-ui-badge': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-size]': 'resolvedSize()',

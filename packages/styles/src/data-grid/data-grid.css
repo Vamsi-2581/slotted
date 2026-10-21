@@ -16,7 +16,7 @@
    * indicator, the group and the filter row — is declared after the shared
    * set.
    */
-  [data-ui='data-grid'][data-part='root'] {
+  [data-ui-data-grid][data-part-root] {
     /* Geometry. Every value is the control scale's, so one theme decision
        retunes the rows, the buttons and the fields together, and
        `@media (pointer: coarse)` grows all three at once. */
@@ -147,6 +147,13 @@
           var(--slotted-space-1, 0.125rem) * 2
       )
     );
+    /* The control scale as the theme states it, read here once: a body row
+       restates the scale for what its cells hold (below), and a property
+       cannot read its own inherited value. */
+    --_control-height-sm: var(--slotted-control-height-sm, 30px);
+    --_control-height-md: var(--slotted-control-height-md, 34px);
+    --_control-height-lg: var(--slotted-control-height-lg, 38px);
+    --_target-min: var(--slotted-target-min, 24px);
     /* Its glyph keeps two pixels of air inside the control's ground, so at
        dense — a 17-pixel control in a 25-pixel track — the ground reads as a
        button and not as a filled cell. */
@@ -183,7 +190,7 @@
     position: relative;
   }
 
-  [data-ui='data-grid'][data-variant='framed'] {
+  [data-ui-data-grid][data-variant='framed'] {
     border: var(--_rule-width) solid var(--_rule);
     border-radius: var(--_radius);
     /* A box standing on the page takes the surface step, as table's frame does. */
@@ -199,7 +206,7 @@
    * Both axes. It is the window the virtualiser measures, so it takes the room
    * the frame leaves after the footer and scrolls what does not fit.
    */
-  [data-ui='data-grid'] > [data-part='scroll'] {
+  [data-ui-data-grid] > [data-part-scroll] {
     /* The container a detail row, a group row and the empty state measure
        their width against: each spans every column of a template that may
        be wider than the frame, and `100cqi` is what holds it to the frame. */
@@ -223,7 +230,7 @@
     position: relative;
   }
 
-  [data-ui='data-grid'][data-sticky-to='page'] > [data-part='scroll'] {
+  [data-ui-data-grid][data-sticky-to='page'] > [data-part-scroll] {
     overflow: visible;
   }
 
@@ -251,14 +258,14 @@
      other: a widget inside a cell may hold rows of its own — a multi-select's
      chips are a `row` of a grid pattern — and a descendant selector laid its
      chips out on this grid's column template. */
-  [data-ui='data-grid']
-    > [data-part='scroll']
+  [data-ui-data-grid]
+    > [data-part-scroll]
     > :is(
-      [data-part='head'],
-      [data-part='body'],
-      [data-part='pinned-rows'],
-      [data-part='summary'],
-      [data-part='loader']
+      [data-part-head],
+      [data-part-body],
+      [data-part-pinned-rows],
+      [data-part-summary],
+      [data-part-loader]
     )
     > [role='row'] {
     box-sizing: border-box;
@@ -279,7 +286,7 @@
 
   /* The rules between rows are the rows' own: a row is a block box, unlike a
      table row, so its border runs the whole width, filler included. */
-  [data-ui='data-grid'] [data-part='header-row'] {
+  [data-ui-data-grid] [data-part-header-row] {
     background-color: var(--_head-surface);
     border-block-end: var(--_rule-width) solid var(--_rule-strong);
   }
@@ -287,27 +294,27 @@
   /* A row of column groups stands above the row of names, and the rule
      between the two is the lighter one; the strong rule is the last header
      row's, over the values. */
-  [data-ui='data-grid'] [data-part='header-row']:not(:last-of-type) {
+  [data-ui-data-grid] [data-part-header-row]:not(:last-of-type) {
     border-block-end-color: var(--_rule);
   }
 
-  [data-ui='data-grid'][data-variant='plain'] [data-part='header-row'] {
+  [data-ui-data-grid][data-variant='plain'] [data-part-header-row] {
     background-color: transparent;
   }
 
-  [data-ui='data-grid'] [data-part='filter-row'] {
+  [data-ui-data-grid] [data-part-filter-row] {
     background-color: var(--_band-surface);
     border-block-end: var(--_rule-width) solid var(--_rule);
   }
 
-  [data-ui='data-grid']
-    > [data-part='scroll']
+  [data-ui-data-grid]
+    > [data-part-scroll]
     > :is(
-      [data-part='head'],
-      [data-part='body'],
-      [data-part='pinned-rows'],
-      [data-part='summary'],
-      [data-part='loader']
+      [data-part-head],
+      [data-part-body],
+      [data-part-pinned-rows],
+      [data-part-summary],
+      [data-part-loader]
     )
     > [role='row']
     > * {
@@ -318,14 +325,14 @@
      scroller's width with wider rows inside it is a box its own rows overflow,
      which the page audit reads as a defect and a reader never sees. Sized to
      the rows, the only thing that scrolls is the scroller. */
-  [data-ui='data-grid']
-    > [data-part='scroll']
+  [data-ui-data-grid]
+    > [data-part-scroll]
     > :is(
-      [data-part='head'],
-      [data-part='body'],
-      [data-part='pinned-rows'],
-      [data-part='summary'],
-      [data-part='loader']
+      [data-part-head],
+      [data-part-body],
+      [data-part-pinned-rows],
+      [data-part-summary],
+      [data-part-loader]
     ) {
     inline-size: fit-content;
     min-inline-size: 100%;
@@ -342,23 +349,23 @@
    * `button` inside a `columnheader` would be a widget the cursor has to
    * enter.
    */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-head] {
     inset-block-start: var(--slotted-data-grid-sticky-offset, 0);
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
   }
 
-  [data-ui='data-grid']:not([data-sticky-header]) > [data-part='scroll'] > [data-part='head'] {
+  [data-ui-data-grid]:not([data-sticky-header]) > [data-part-scroll] > [data-part-head] {
     position: static;
   }
 
-  [data-ui='data-grid'] [data-part='column-header'],
-  [data-ui='data-grid'] [data-part='column-group'],
-  [data-ui='data-grid']
-    > [data-part='scroll']
-    > [data-part='head']
+  [data-ui-data-grid] [data-part-column-header],
+  [data-ui-data-grid] [data-part-column-group],
+  [data-ui-data-grid]
+    > [data-part-scroll]
+    > [data-part-head]
     > [role='row']
-    > [data-part='selection'] {
+    > [data-part-selection] {
     align-items: center;
     background-color: var(--_head-surface);
     box-sizing: border-box;
@@ -378,21 +385,21 @@
     transition: background-color var(--_transition);
   }
 
-  [data-ui='data-grid'][data-variant='plain']
-    :is([data-part='column-header'], [data-part='column-group']) {
+  [data-ui-data-grid][data-variant='plain']
+    :is([data-part-column-header], [data-part-column-group]) {
     background-color: transparent;
   }
 
   /* A group header is centred over the columns it spans and separated from
      the row of column names by the same rule that separates the names from
      the values, one step lighter. */
-  [data-ui='data-grid'] [data-part='column-group'] {
+  [data-ui-data-grid] [data-part-column-group] {
     justify-content: center;
   }
 
   /* The name takes what is left and truncates: a column name is two or three
      words and its full text is the header's own accessible name. */
-  [data-ui='data-grid'] [data-part='column-header'] > span:first-child {
+  [data-ui-data-grid] [data-part-column-header] > span:first-child {
     flex: 1 1 auto;
     min-inline-size: 0;
     overflow: hidden;
@@ -401,30 +408,30 @@
   }
 
   /* An aligned column keeps its name over its values. */
-  [data-ui='data-grid'] [data-part='column-header'][data-align='center'] {
+  [data-ui-data-grid] [data-part-column-header][data-align='center'] {
     justify-content: center;
   }
 
-  [data-ui='data-grid'] [data-part='column-header'][data-align='center'] > span:first-child {
+  [data-ui-data-grid] [data-part-column-header][data-align='center'] > span:first-child {
     flex: 0 1 auto;
     margin-inline-start: auto;
   }
 
-  [data-ui='data-grid']
-    [data-part='column-header']:is([data-align='end'], [data-numeric]:not([data-align]))
+  [data-ui-data-grid]
+    [data-part-column-header]:is([data-align='end'], [data-numeric]:not([data-align]))
     > span:first-child {
     text-align: end;
   }
 
   /* A sortable header is a control and takes the hand. */
-  [data-ui='data-grid'] [data-part='column-header'][data-sortable] {
+  [data-ui-data-grid] [data-part-column-header][data-sortable] {
     cursor: pointer;
   }
 
   /* A header, a filter cell and a summary cell are controls, not prose: a
      Shift-press that appends a sort key must not also select its name. */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] > [role='row'] > *,
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'] > * {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-head] > [role='row'] > *,
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-summary] > [role='row'] > * {
     user-select: none;
   }
 
@@ -432,12 +439,12 @@
      selection of the grid's own and not of text: the browser's selection is
      put out of the body for the two modes that press across cells. Ctrl+C
      copies the range; a grid with no selection keeps its text selectable. */
-  [data-ui='data-grid']:is([data-selection='multiple'], [data-selection='range'])
-    :is([data-part='body'], [data-part='pinned-rows']) {
+  [data-ui-data-grid]:is([data-selection='multiple'], [data-selection='range'])
+    :is([data-part-body], [data-part-pinned-rows]) {
     user-select: none;
   }
 
-  [data-ui='data-grid'] [data-part='column-header'][data-sortable]:not([data-disabled]):hover {
+  [data-ui-data-grid] [data-part-column-header][data-sortable]:not([data-disabled]):hover {
     background-color: var(--_head-surface-hover);
   }
 
@@ -451,7 +458,7 @@
    * header can be sorted is the hand, the darker band and the menu it
    * reveals — the answer AG Grid gives.
    */
-  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort'] {
+  [data-ui-data-grid] [data-part-column-header] > [data-part-sort] {
     --slotted-icon-size: var(--_icon-size);
     align-items: center;
     color: var(--_text);
@@ -463,29 +470,29 @@
     line-height: 1;
   }
 
-  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort'] > [data-ui='icon'] {
+  [data-ui-data-grid] [data-part-column-header] > [data-part-sort] > [data-ui-icon] {
     transition: rotate var(--_transition);
   }
 
-  [data-ui='data-grid'] [data-part='column-header'][data-sorted] > [data-part='sort'] {
+  [data-ui-data-grid] [data-part-column-header][data-sorted] > [data-part-sort] {
     display: inline-flex;
   }
 
-  [data-ui='data-grid']
-    [data-part='column-header'][data-sorted='ascending']
-    > [data-part='sort']
-    > [data-ui='icon'] {
+  [data-ui-data-grid]
+    [data-part-column-header][data-sorted='ascending']
+    > [data-part-sort]
+    > [data-ui-icon] {
     rotate: 180deg;
   }
 
   /* The index of a key past the first, drawn only then: `aria-sort` cannot say
      which key came first, and the number is what says it. */
-  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']::before {
+  [data-ui-data-grid] [data-part-column-header] > [data-part-sort]::before {
     content: attr(data-index);
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']:not([data-index])::before {
+  [data-ui-data-grid] [data-part-column-header] > [data-part-sort]:not([data-index])::before {
     content: none;
   }
 
@@ -505,7 +512,7 @@
    * filter row. Read on the first capture with both controls reserving room,
    * a 120-pixel column had 34 pixels left for its name.
    */
-  [data-ui='data-grid'] [data-part='column-actions'] {
+  [data-ui-data-grid] [data-part-column-actions] {
     align-items: center;
     display: inline-flex;
     flex: none;
@@ -516,16 +523,16 @@
     margin-inline-start: auto;
   }
 
-  [data-ui='data-grid'] [data-part='column-actions'] *:has([data-part='filter']) {
+  [data-ui-data-grid] [data-part-column-actions] *:has([data-part-filter]) {
     display: contents;
   }
 
-  [data-ui='data-grid'] [data-part='column-help'],
-  [data-ui='data-grid'] [data-part='column-menu'],
-  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],
-  [data-ui='data-grid'] [data-part='expander'],
-  [data-ui='data-grid'] [data-part='group-toggle'],
-  [data-ui='data-grid'] [data-part='tree-toggle'] {
+  [data-ui-data-grid] [data-part-column-help],
+  [data-ui-data-grid] [data-part-column-menu],
+  [data-ui-data-grid] [data-part-column-header] [data-part-filter],
+  [data-ui-data-grid] [data-part-expander],
+  [data-ui-data-grid] [data-part-group-toggle],
+  [data-ui-data-grid] [data-part-tree-toggle] {
     /* The mark inside is the `Glyph` the binding draws, at the controls' own
        icon step rather than the box's. */
     --slotted-icon-size: var(--_control-icon);
@@ -547,44 +554,42 @@
       opacity var(--_transition);
   }
 
-  [data-ui='data-grid'] [data-part='column-menu'] {
+  [data-ui-data-grid] [data-part-column-menu] {
     opacity: 0;
   }
 
-  [data-ui='data-grid']
-    [data-part='column-header']
-    [data-part='filter']:not([data-filtered], [data-open]) {
+  [data-ui-data-grid]
+    [data-part-column-header]
+    [data-part-filter]:not([data-filtered], [data-open]) {
     display: none;
   }
 
-  [data-ui='data-grid']
-    [data-part='column-header']:not([data-disabled]):hover
-    [data-part='column-menu'],
-  [data-ui='data-grid'] [data-part='column-header']:focus-within [data-part='column-menu'],
-  [data-ui='data-grid'] [data-part='column-header'][data-current] [data-part='column-menu'],
-  [data-ui='data-grid'] [data-part='column-menu'][data-open] {
+  [data-ui-data-grid] [data-part-column-header]:not([data-disabled]):hover [data-part-column-menu],
+  [data-ui-data-grid] [data-part-column-header]:focus-within [data-part-column-menu],
+  [data-ui-data-grid] [data-part-column-header][data-current] [data-part-column-menu],
+  [data-ui-data-grid] [data-part-column-menu][data-open] {
     opacity: 1;
   }
 
-  [data-ui='data-grid'] [data-part='column-help']:not(:disabled):hover,
-  [data-ui='data-grid'] [data-part='column-help'][data-open],
-  [data-ui='data-grid'] [data-part='column-menu']:not(:disabled):hover,
-  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']:not(:disabled):hover,
-  [data-ui='data-grid'] [data-part='group-toggle']:not(:disabled):hover {
+  [data-ui-data-grid] [data-part-column-help]:not(:disabled):hover,
+  [data-ui-data-grid] [data-part-column-help][data-open],
+  [data-ui-data-grid] [data-part-column-menu]:not(:disabled):hover,
+  [data-ui-data-grid] [data-part-column-header] [data-part-filter]:not(:disabled):hover,
+  [data-ui-data-grid] [data-part-group-toggle]:not(:disabled):hover {
     background-color: var(--_head-surface-hover);
     color: var(--_text);
   }
 
-  [data-ui='data-grid'] [data-part='expander']:not(:disabled):hover {
+  [data-ui-data-grid] [data-part-expander]:not(:disabled):hover {
     background-color: var(--_hover);
     color: var(--_text);
   }
 
-  [data-ui='data-grid'] [data-part='column-help']:focus-visible,
-  [data-ui='data-grid'] [data-part='column-menu']:focus-visible,
-  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter']:focus-visible,
-  [data-ui='data-grid'] [data-part='expander']:focus-visible,
-  [data-ui='data-grid'] [data-part='group-toggle']:focus-visible {
+  [data-ui-data-grid] [data-part-column-help]:focus-visible,
+  [data-ui-data-grid] [data-part-column-menu]:focus-visible,
+  [data-ui-data-grid] [data-part-column-header] [data-part-filter]:focus-visible,
+  [data-ui-data-grid] [data-part-expander]:focus-visible,
+  [data-ui-data-grid] [data-part-group-toggle]:focus-visible {
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -596,7 +601,7 @@
 
   /* The description is the header's `aria-describedby`: read, never drawn,
      and out of the header's flow so it asks for no room beside the name. */
-  [data-ui='data-grid'] [data-part='column-description'] {
+  [data-ui-data-grid] [data-part-column-description] {
     block-size: 1px;
     border: 0;
     clip-path: inset(50%);
@@ -610,7 +615,7 @@
 
   /* The pop-in's column header names the pop-in for a reader: read, never
      drawn, and out of the row's flow so it takes no track of the template. */
-  [data-ui='data-grid'] [data-part='popin-header'] {
+  [data-ui-data-grid] [data-part-popin-header] {
     block-size: 1px;
     border: 0;
     clip-path: inset(50%);
@@ -627,7 +632,7 @@
      is set as a caption over the items, in the muted ink, on the items' inset.
      The screen reader hears it once, through the menu's `aria-describedby`.
      The menu lays its items on a grid of tracks; the caption spans them all. */
-  [data-ui='menu'] [data-part='column-menu-description'] {
+  [data-ui-menu] [data-part-column-menu-description] {
     grid-column: 1 / -1;
     border-block-end: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-border-subtle, GrayText);
@@ -645,49 +650,47 @@
      glyph scale for this family: `table` takes the artwork from the consumer,
      and a control this family draws itself owes its glyph to the scale. */
 
-  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'][data-filtered],
-  [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'][data-open] {
+  [data-ui-data-grid] [data-part-column-header] [data-part-filter][data-filtered],
+  [data-ui-data-grid] [data-part-column-header] [data-part-filter][data-open] {
     color: var(--slotted-tone-accent-text, CanvasText);
   }
 
-  [data-ui='data-grid']
-    [data-part='column-header']
-    [data-part='filter'][data-filtered]:not(:disabled):hover {
+  [data-ui-data-grid]
+    [data-part-column-header]
+    [data-part-filter][data-filtered]:not(:disabled):hover {
     background-color: var(--slotted-tone-accent-surface, Canvas);
   }
 
   /* The expander and the group toggle are the `chevron-right` `Glyph` the
      binding draws, turned a quarter turn when open and mirrored in a
      right-to-left document. */
-  [data-ui='data-grid'] [data-part='expander'] > [data-ui='icon'],
-  [data-ui='data-grid'] [data-part='group-toggle'] > [data-ui='icon'],
-  [data-ui='data-grid'] button[data-part='tree-toggle'] > [data-ui='icon'] {
+  [data-ui-data-grid] [data-part-expander] > [data-ui-icon],
+  [data-ui-data-grid] [data-part-group-toggle] > [data-ui-icon],
+  [data-ui-data-grid] button[data-part-tree-toggle] > [data-ui-icon] {
     transition: rotate var(--_transition);
   }
 
-  [data-ui='data-grid'] [data-part='expander'][aria-expanded='true'] > [data-ui='icon'],
-  [data-ui='data-grid'] button[data-part='tree-toggle'][aria-expanded='true'] > [data-ui='icon'],
-  [data-ui='data-grid']
-    [data-part='group-row'][aria-expanded='true']
-    [data-part='group-toggle']
-    > [data-ui='icon'] {
+  [data-ui-data-grid] [data-part-expander][aria-expanded='true'] > [data-ui-icon],
+  [data-ui-data-grid] button[data-part-tree-toggle][aria-expanded='true'] > [data-ui-icon],
+  [data-ui-data-grid]
+    [data-part-group-row][aria-expanded='true']
+    [data-part-group-toggle]
+    > [data-ui-icon] {
     rotate: 90deg;
   }
 
-  [data-ui='data-grid']:dir(rtl) [data-part='expander'] > [data-ui='icon'],
-  [data-ui='data-grid']:dir(rtl) [data-part='group-toggle'] > [data-ui='icon'],
-  [data-ui='data-grid']:dir(rtl) button[data-part='tree-toggle'] > [data-ui='icon'] {
+  [data-ui-data-grid]:dir(rtl) [data-part-expander] > [data-ui-icon],
+  [data-ui-data-grid]:dir(rtl) [data-part-group-toggle] > [data-ui-icon],
+  [data-ui-data-grid]:dir(rtl) button[data-part-tree-toggle] > [data-ui-icon] {
     rotate: 180deg;
   }
 
-  [data-ui='data-grid']:dir(rtl) [data-part='expander'][aria-expanded='true'] > [data-ui='icon'],
-  [data-ui='data-grid']:dir(rtl)
-    button[data-part='tree-toggle'][aria-expanded='true']
-    > [data-ui='icon'],
-  [data-ui='data-grid']:dir(rtl)
-    [data-part='group-row'][aria-expanded='true']
-    [data-part='group-toggle']
-    > [data-ui='icon'] {
+  [data-ui-data-grid]:dir(rtl) [data-part-expander][aria-expanded='true'] > [data-ui-icon],
+  [data-ui-data-grid]:dir(rtl) button[data-part-tree-toggle][aria-expanded='true'] > [data-ui-icon],
+  [data-ui-data-grid]:dir(rtl)
+    [data-part-group-row][aria-expanded='true']
+    [data-part-group-toggle]
+    > [data-ui-icon] {
     rotate: 90deg;
   }
 
@@ -700,26 +703,26 @@
    * horizontal arrows there open and close. A row waiting for its children
    * turns the chevron into the loader's ring.
    */
-  [data-ui='data-grid'] [data-part='cell'][data-tree],
-  [data-ui='data-grid'] [data-part='row-header'][data-tree] {
+  [data-ui-data-grid] [data-part-cell][data-tree],
+  [data-ui-data-grid] [data-part-row-header][data-tree] {
     gap: var(--slotted-space-1, 0.125rem);
     padding-inline-start: calc(
       var(--_pad-inline) + var(--_indent) * (var(--slotted-data-grid-level, 1) - 1)
     );
   }
 
-  [data-ui='data-grid'] [data-part='tree-toggle'][data-empty] {
+  [data-ui-data-grid] [data-part-tree-toggle][data-empty] {
     /* The room, and nothing in it. */
     cursor: default;
   }
 
-  [data-ui='data-grid'] button[data-part='tree-toggle']:not(:disabled):hover {
+  [data-ui-data-grid] button[data-part-tree-toggle]:not(:disabled):hover {
     background-color: var(--_hover);
     color: var(--_text);
   }
 
   /* The binding draws the loader's ring in place of the chevron. */
-  [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading] > [data-ui='icon'] {
+  [data-ui-data-grid] button[data-part-tree-toggle][data-loading] > [data-ui-icon] {
     animation: slotted-data-grid-turn var(--slotted-duration-loop) linear infinite;
     rotate: 0deg;
   }
@@ -739,12 +742,12 @@
    * width and the reader hears why nothing moves. A row on its way is
    * dimmed, as a column is.
    */
-  [data-ui='data-grid'] [data-part='cell'][data-kind='drag'] {
+  [data-ui-data-grid] [data-part-cell][data-kind='drag'] {
     justify-content: center;
     padding-inline: 0;
   }
 
-  [data-ui='data-grid'] [data-part='row-handle'] {
+  [data-ui-data-grid] [data-part-row-handle] {
     /* The grip is the `Glyph` the binding draws, at the controls' icon step. */
     --slotted-icon-size: var(--_control-icon);
     align-items: center;
@@ -766,21 +769,21 @@
       opacity var(--_transition);
   }
 
-  [data-ui='data-grid'] [data-part='row-handle']:not([data-disabled]):hover {
+  [data-ui-data-grid] [data-part-row-handle]:not([data-disabled]):hover {
     background-color: var(--_hover);
     color: var(--_text);
   }
 
-  [data-ui='data-grid'] [data-part='row-handle'][data-disabled] {
+  [data-ui-data-grid] [data-part-row-handle][data-disabled] {
     cursor: default;
     opacity: 0.5;
   }
 
-  [data-ui='data-grid'] [data-part='row'][data-dragging] {
+  [data-ui-data-grid] [data-part-row][data-dragging] {
     opacity: 0.5;
   }
 
-  [data-ui='data-grid'] [data-part='row'][data-dragging] [data-part='row-handle'] {
+  [data-ui-data-grid] [data-part-row][data-dragging] [data-part-row-handle] {
     cursor: grabbing;
   }
 
@@ -794,7 +797,7 @@
    * resizes from the header cell itself, and a focusable handle inside a
    * composite widget would be a second tab stop.
    */
-  [data-ui='data-grid'] [data-part='resizer'] {
+  [data-ui-data-grid] [data-part-resizer] {
     cursor: col-resize;
     inline-size: var(--slotted-target-min, 24px);
     inset-block: 0;
@@ -809,15 +812,15 @@
   /* The last column's handle stays inside the row: half a target hanging
      past the last cell was twelve pixels of overflow on a row nothing could
      scroll to. */
-  [data-ui='data-grid']
-    [data-part='header-row']
-    > [data-part='column-header']:last-child
-    > [data-part='resizer'] {
+  [data-ui-data-grid]
+    [data-part-header-row]
+    > [data-part-column-header]:last-child
+    > [data-part-resizer] {
     inline-size: calc(var(--slotted-target-min, 24px) / 2);
     inset-inline-end: 0;
   }
 
-  [data-ui='data-grid'] [data-part='resizer']::after {
+  [data-ui-data-grid] [data-part-resizer]::after {
     background-color: transparent;
     block-size: 100%;
     content: '';
@@ -827,12 +830,12 @@
     transition: background-color var(--_transition);
   }
 
-  [data-ui='data-grid'] [data-part='resizer']:not([data-disabled]):hover::after {
+  [data-ui-data-grid] [data-part-resizer]:not([data-disabled]):hover::after {
     background-color: var(--_rule-strong);
   }
 
-  [data-ui='data-grid'] [data-part='resizer'][data-resizing]::after,
-  [data-ui='data-grid'] [data-part='column-header'][data-resizing] > [data-part='resizer']::after {
+  [data-ui-data-grid] [data-part-resizer][data-resizing]::after,
+  [data-ui-data-grid] [data-part-column-header][data-resizing] > [data-part-resizer]::after {
     background-color: var(--_cursor);
   }
 
@@ -843,15 +846,15 @@
    * colour between two columns, positioned by the binding through
    * `--slotted-data-grid-drop-offset` from the scroller's start edge.
    */
-  [data-ui='data-grid'] [data-part='column-header'][data-dragging] {
+  [data-ui-data-grid] [data-part-column-header][data-dragging] {
     opacity: 0.5;
   }
 
-  [data-ui='data-grid'] [data-part='column-header'][data-drop-target] {
+  [data-ui-data-grid] [data-part-column-header][data-drop-target] {
     background-color: var(--_head-surface-hover);
   }
 
-  [data-ui='data-grid'] [data-part='drop-indicator'] {
+  [data-ui-data-grid] [data-part-drop-indicator] {
     background-color: var(--_cursor);
     /* Absolute in the scroller: its box is the content's, so the line is
        moved down by the scrolled distance to span the viewport. */
@@ -868,7 +871,7 @@
 
   /* The same line for a row on its way: horizontal, in the gap the drop
      lands in, as wide as the viewport and moved by the sideways scroll. */
-  [data-ui='data-grid'] [data-part='drop-indicator'][data-axis='row'] {
+  [data-ui-data-grid] [data-part-drop-indicator][data-axis='row'] {
     block-size: var(--slotted-border-width-thick, 2px);
     inline-size: 100cqi;
     inset-block-start: calc(
@@ -886,7 +889,7 @@
    * head. It is a row of the grid — `role="row"`, one `gridcell` per column —
    * so the cursor walks it.
    */
-  [data-ui='data-grid'] [data-part='filter-row'] > [data-part='filter-cell'] {
+  [data-ui-data-grid] [data-part-filter-row] > [data-part-filter-cell] {
     /* The control inside draws no ring of its own: the cell draws the trace
        around the whole of it while anything inside has the focus, so a field
        in the row and the cell it fills are not two rings. The accent edge a
@@ -906,7 +909,7 @@
     position: relative;
   }
 
-  [data-ui='data-grid'] [data-part='filter-row'] > [data-part='filter-cell']:focus-within {
+  [data-ui-data-grid] [data-part-filter-row] > [data-part-filter-cell]:focus-within {
     box-shadow: none;
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--_ring-width) * -1);
@@ -923,11 +926,8 @@
      named there, and `A > :is(host > B)` asks B to be A's child and the
      host's at once. `data-grid.styles.test.mjs` holds the rule for every
      hosted part. */
-  [data-ui='data-grid'] [data-part='filter-cell'] > [data-part='filter-operand'],
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    > :not([data-part])
-    > [data-part='filter-operand'] {
+  [data-ui-data-grid] [data-part-filter-cell] > [data-part-filter-operand],
+  [data-ui-data-grid] [data-part-filter-cell] > :not([data-part]) > [data-part-filter-operand] {
     align-items: center;
     display: flex;
     flex: 1 1 auto;
@@ -944,15 +944,15 @@
   /* The plain control inside takes what the trace leaves of the row's
      height and a short inset after the operator, the rule every cell
      holding a plain control applies. */
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operand']
-    > [data-part='root'][data-variant='plain'],
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operand']
+  [data-ui-data-grid]
+    [data-part-filter-cell]
+    [data-part-filter-operand]
+    > [data-part-root][data-variant='plain'],
+  [data-ui-data-grid]
+    [data-part-filter-cell]
+    [data-part-filter-operand]
     > :not([data-part])
-    > [data-part='root'][data-variant='plain'] {
+    > [data-part-root][data-variant='plain'] {
     --slotted-control-padding-inline-sm: var(--slotted-space-3, 0.375rem);
     --slotted-control-height-sm: calc(var(--_head-block) - var(--_ring-width) * 2);
 
@@ -963,34 +963,34 @@
   /* Both fields of a numeric `between` share the line, a dash between them;
      a date, a time or a date-time `between` is one range picker and carries
      no `data-range`. */
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operand'][data-range]
-    > [data-part='root'],
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operand'][data-range]
+  [data-ui-data-grid]
+    [data-part-filter-cell]
+    [data-part-filter-operand][data-range]
+    > [data-part-root],
+  [data-ui-data-grid]
+    [data-part-filter-cell]
+    [data-part-filter-operand][data-range]
     > :not([data-part])
-    > [data-part='root'] {
+    > [data-part-root] {
     flex: 1 1 0;
     inline-size: 0;
   }
 
-  [data-ui='data-grid'] [data-part='filter-cell'] [data-part='filter-operand'][data-range]::before {
+  [data-ui-data-grid] [data-part-filter-cell] [data-part-filter-operand][data-range]::before {
     color: var(--_muted);
     content: '–';
     order: 2;
   }
 
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operand'][data-range]
-    > [data-part='root']:last-child,
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operand'][data-range]
+  [data-ui-data-grid]
+    [data-part-filter-cell]
+    [data-part-filter-operand][data-range]
+    > [data-part-root]:last-child,
+  [data-ui-data-grid]
+    [data-part-filter-cell]
+    [data-part-filter-operand][data-range]
     > :not([data-part]):last-child
-    > [data-part='root'] {
+    > [data-part-root] {
     order: 3;
   }
 
@@ -999,7 +999,7 @@
    * square target the height of the inner control; it opens a `menu` naming
    * every operator in full, and its accessible name is the operator in full.
    */
-  [data-ui='data-grid'] [data-part='filter-cell'] [data-part='filter-operator'] {
+  [data-ui-data-grid] [data-part-filter-cell] [data-part-filter-operator] {
     display: inline-flex;
     flex: none;
     /* One space step off the cell's edge: glued to it, the symbol read as
@@ -1007,7 +1007,7 @@
     padding-inline-start: var(--slotted-space-3, 0.375rem);
   }
 
-  [data-ui='data-grid'] [data-part='filter-cell'] [data-part='filter-operator'] > button {
+  [data-ui-data-grid] [data-part-filter-cell] [data-part-filter-operator] > button {
     align-items: center;
     background-color: transparent;
     block-size: var(--slotted-control-inner-size-sm, 22px);
@@ -1028,26 +1028,20 @@
       color var(--_transition);
   }
 
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operator']
+  [data-ui-data-grid]
+    [data-part-filter-cell]
+    [data-part-filter-operator]
     > button:not(:disabled):hover {
     background-color: var(--_head-surface-hover);
     color: var(--_text);
   }
 
-  [data-ui='data-grid']
-    [data-part='filter-cell']
-    [data-part='filter-operator']
-    > button:focus-visible {
+  [data-ui-data-grid] [data-part-filter-cell] [data-part-filter-operator] > button:focus-visible {
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='data-grid']
-    [data-part='filter-cell'][data-filtered]
-    [data-part='filter-operator']
-    > button {
+  [data-ui-data-grid] [data-part-filter-cell][data-filtered] [data-part-filter-operator] > button {
     color: var(--slotted-tone-accent-text, CanvasText);
   }
 
@@ -1069,7 +1063,7 @@
      binding draws it inside a host element of its own (`display: contents`),
      and a child combinator here left that popover at sixteen rem with the
      panel standing out of it. */
-  [data-ui='popover']:has(> [data-part='content'] [data-ui='data-grid'][data-part='filter-panel']) {
+  [data-ui-popover]:has(> [data-part-content] [data-ui-data-grid][data-part-filter-panel]) {
     --slotted-popover-measure-sm: calc(
       var(--slotted-data-grid-filter-panel-size, 24rem) + 2 *
         (var(--slotted-popover-gap, 0.5rem) + var(--slotted-border-width-thin, 1px))
@@ -1079,14 +1073,14 @@
   /* A date's `between` is two dates in one frame and a date-time's two
      date-times: the panel widens for the kinds whose operand is long, so the
      range is read whole rather than clipped. */
-  [data-ui='popover']:has(
-    > [data-part='content'] [data-ui='data-grid'][data-part='filter-panel'][data-kind='date']
+  [data-ui-popover]:has(
+    > [data-part-content] [data-ui-data-grid][data-part-filter-panel][data-kind='date']
   ) {
     --slotted-data-grid-filter-panel-size: var(--slotted-data-grid-filter-panel-size-date, 28rem);
   }
 
-  [data-ui='popover']:has(
-    > [data-part='content'] [data-ui='data-grid'][data-part='filter-panel'][data-kind='datetime']
+  [data-ui-popover]:has(
+    > [data-part-content] [data-ui-data-grid][data-part-filter-panel][data-kind='datetime']
   ) {
     --slotted-data-grid-filter-panel-size: var(
       --slotted-data-grid-filter-panel-size-datetime,
@@ -1094,7 +1088,7 @@
     );
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] {
+  [data-ui-data-grid][data-part-filter-panel] {
     --_operator-size: var(--slotted-data-grid-filter-operator-size, 7rem);
     --_panel-gap: var(--slotted-space-3, 0.375rem);
 
@@ -1119,7 +1113,7 @@
       var(--slotted-popover-padding-inline-sm, var(--slotted-space-5, 0.75rem));
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] > [data-part='filter-condition'] {
+  [data-ui-data-grid][data-part-filter-panel] > [data-part-filter-condition] {
     align-items: center;
     display: grid;
     gap: var(--_panel-gap);
@@ -1129,22 +1123,22 @@
 
   /* The first condition has no join: its operator starts in the second
      column. A set filter has one condition and no join at all. */
-  [data-ui='data-grid'][data-part='filter-panel']
-    > [data-part='filter-condition']:first-child
-    > [data-part='filter-operator'] {
+  [data-ui-data-grid][data-part-filter-panel]
+    > [data-part-filter-condition]:first-child
+    > [data-part-filter-operator] {
     grid-column: 2;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-join'] {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-join] {
     grid-column: 1;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-operator'] {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-operator] {
     grid-column: 2;
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-operand'] {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-operand] {
     align-items: center;
     display: flex;
     gap: var(--_panel-gap);
@@ -1154,46 +1148,44 @@
 
   /* An operator taking no operand leaves the operand column empty rather than
      drawing a disabled field. */
-  [data-ui='data-grid'][data-part='filter-panel']
-    [data-part='filter-condition'][data-operands='0']
-    > [data-part='filter-operand'] {
+  [data-ui-data-grid][data-part-filter-panel]
+    [data-part-filter-condition][data-operands='0']
+    > [data-part-filter-operand] {
     display: none;
   }
 
   /* Both operands of a `between` stand on the line with a dash between them:
      the pair is one thought and one line says so. */
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-operand'][data-range] > * {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-operand][data-range] > * {
     flex: 1 1 0;
     inline-size: 0;
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-operand'][data-range]::before {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-operand][data-range]::before {
     color: var(--slotted-text-muted);
     content: '–';
     order: 1;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel']
-    [data-part='filter-operand'][data-range]
-    > :last-child {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-operand][data-range] > :last-child {
     order: 2;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-operand'] > [data-part='root'],
-  [data-ui='data-grid'][data-part='filter-panel']
-    [data-part='filter-operand']
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-operand] > [data-part-root],
+  [data-ui-data-grid][data-part-filter-panel]
+    [data-part-filter-operand]
     > :not([data-part])
-    > [data-part='root'] {
+    > [data-part-root] {
     flex: 1 1 auto;
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-operand'] [data-part='input'] {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-operand] [data-part-input] {
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-actions'] {
+  [data-ui-data-grid][data-part-filter-panel] [data-part-filter-actions] {
     display: flex;
     gap: var(--_panel-gap);
     grid-column: 1 / -1;
@@ -1204,7 +1196,7 @@
   /**
    * ── Rows and cells ─────────────────────────────────────────────────────
    */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='body'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-body] {
     box-sizing: border-box;
     /* The virtual window: the body is as tall as every row and its padding is
        the offset of the first mounted one, so the mounted rows stand where the
@@ -1214,7 +1206,7 @@
     padding-block-start: var(--slotted-data-grid-window-start, 0);
   }
 
-  [data-ui='data-grid'] [data-part='row'] {
+  [data-ui-data-grid] [data-part-row] {
     background-color: var(--_surface);
     transition: background-color var(--_transition);
   }
@@ -1234,28 +1226,28 @@
    * content grows a `minmax(row, cap)` track to the cap — read on the content
    * scene, every auto row was four rows tall, one line of text in each.
    */
-  [data-ui='data-grid'][data-rows='fixed']
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row'] {
+  [data-ui-data-grid][data-rows='fixed']
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row] {
     block-size: var(--_row-block);
     grid-auto-rows: var(--_track);
   }
 
-  [data-ui='data-grid'][data-rows='auto']
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row'] {
+  [data-ui-data-grid][data-rows='auto']
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row] {
     grid-auto-rows: minmax(var(--_track), auto);
   }
 
   /* A value taller than the cap is clipped at it, on the block axis only: a
      pinned cell's edge shadow is drawn past its inline end. The pop-in is not
      a value of the row and has no cap. */
-  [data-ui='data-grid'][data-rows='auto']
-    :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row']
-    > :is([role='gridcell'], [role='rowheader']):not([data-part='popin']) {
+  [data-ui-data-grid][data-rows='auto']
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row]
+    > :is([role='gridcell'], [role='rowheader']):not([data-part-popin]) {
     max-block-size: var(--_row-max-block);
     overflow-y: clip;
   }
@@ -1263,37 +1255,56 @@
   /* A row that grows to its text aligns its cells to the top: a one-line
      value centred beside a four-line one floats in the middle of nothing,
      and the eye reads a row from its first line. Fixed rows stay centred. */
-  [data-ui='data-grid'][data-rows='auto']
-    :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row']
+  [data-ui-data-grid][data-rows='auto']
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row]
     > [role='gridcell'],
-  [data-ui='data-grid'][data-rows='auto']
-    :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row']
+  [data-ui-data-grid][data-rows='auto']
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row]
     > [role='rowheader'] {
     align-items: start;
   }
 
-  [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows']) {
+  [data-ui-data-grid]:is([data-variant='ruled'], [data-variant='framed'])
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows]) {
     --_track: calc(var(--_row-block) - var(--_rule-width));
   }
 
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] > [role='row'],
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'],
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [role='row'] {
+  /**
+   * A control a cell renderer draws — a `Button`, an `IconButton`, a `Select` —
+   * stands inside the cursor's trace: the row restates the control scale as
+   * the track less the ring and one space step on each side, so a hovered
+   * ground never covers the trace, at every density. The restatement is on
+   * the row and not on each cell, so a row of eight cells computes it once.
+   * A cell in edit states its own, the track less the ring.
+   */
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-body] > [data-part-row],
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-pinned-rows] > [data-part-row] {
+    --_cell-control: calc(
+      var(--_track) - var(--_ring-width) * 2 - var(--slotted-space-1, 0.125rem) * 2
+    );
+    --slotted-control-height-sm: min(var(--_control-height-sm), var(--_cell-control));
+    --slotted-control-height-md: min(var(--_control-height-md), var(--_cell-control));
+    --slotted-control-height-lg: min(var(--_control-height-lg), var(--_cell-control));
+    --slotted-target-min: min(var(--_target-min), var(--_cell-control));
+  }
+
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-head] > [role='row'],
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-summary] > [role='row'],
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-loader] > [role='row'] {
     grid-auto-rows: minmax(var(--_head-block), auto);
   }
 
-  [data-ui='data-grid'] [data-part='cell'],
-  [data-ui='data-grid'] [data-part='row-header'],
-  [data-ui='data-grid'] [data-part='summary-cell'],
-  [data-ui='data-grid']
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
+  [data-ui-data-grid] [data-part-cell],
+  [data-ui-data-grid] [data-part-row-header],
+  [data-ui-data-grid] [data-part-summary-cell],
+  [data-ui-data-grid]
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
     > [role='row']
-    > [data-part='selection'] {
+    > [data-part-selection] {
     align-items: center;
     box-sizing: border-box;
     display: flex;
@@ -1305,7 +1316,7 @@
 
   /* Every cell but a pinned one is a containing block, for the range edges
      and the invalid mark; a pinned cell is already positioned by `sticky`. */
-  [data-ui='data-grid'] [data-part='cell']:not([data-pinned]) {
+  [data-ui-data-grid] [data-part-cell]:not([data-pinned]) {
     position: relative;
   }
 
@@ -1313,9 +1324,9 @@
      keeps its own direction: an identifier, an email or a price in a
      right-to-left document is left-to-right text, and read in `dir="rtl"`
      "Bloom & Co." had its full stop moved to the front. */
-  [data-ui='data-grid'] [data-part='cell'] > span:not([data-ui], [data-part]),
-  [data-ui='data-grid'] [data-part='row-header'] > span:not([data-ui], [data-part]),
-  [data-ui='data-grid'] [data-part='summary-cell'] > span:not([data-ui], [data-part]) {
+  [data-ui-data-grid] [data-part-cell] > span:not([data-ui], [data-part]),
+  [data-ui-data-grid] [data-part-row-header] > span:not([data-ui], [data-part]),
+  [data-ui-data-grid] [data-part-summary-cell] > span:not([data-ui], [data-part]) {
     flex: 1 1 auto;
     min-inline-size: 0;
     unicode-bidi: plaintext;
@@ -1324,35 +1335,35 @@
   /* A family drawn in a cell by a renderer — a badge, a tag — keeps its own
      size: read on the status column, a badge filled the cell's whole width
      because it was a span standing where the value stands. */
-  [data-ui='data-grid'] [data-part='cell'] > [data-ui]:not([data-part]) {
+  [data-ui-data-grid] [data-part-cell] > [data-ui]:not([data-part]) {
     flex: 0 0 auto;
     max-inline-size: 100%;
   }
 
   /* A row header names the record and carries one step of weight. */
-  [data-ui='data-grid'] [data-part='row-header'] {
+  [data-ui-data-grid] [data-part-row-header] {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
   /* The rule between two rows, on the row; the last gives its rule up so a
      ruled grid does not end in a line with nothing under it. */
-  [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
-    :is([data-part='body'], [data-part='pinned-rows'])
+  [data-ui-data-grid]:is([data-variant='ruled'], [data-variant='framed'])
+    :is([data-part-body], [data-part-pinned-rows])
     > [role='row'] {
     border-block-end: var(--_rule-width) solid var(--_rule);
   }
 
-  [data-ui='data-grid']:is([data-variant='ruled'], [data-variant='framed'])
-    :is([data-part='body'], [data-part='pinned-rows'])
+  [data-ui-data-grid]:is([data-variant='ruled'], [data-variant='framed'])
+    :is([data-part-body], [data-part-pinned-rows])
     > [role='row']:last-child {
     border-block-end-color: transparent;
   }
 
   /* The stripe, declared before every state. */
-  [data-ui='data-grid'][data-striped]
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row']:nth-child(even) {
+  [data-ui-data-grid][data-striped]
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row]:nth-child(even) {
     background-color: var(--_stripe);
   }
 
@@ -1361,28 +1372,28 @@
    *
    * In the order `STATE_PRECEDENCE` declares them, weakest last.
    */
-  [data-ui='data-grid']
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row']:not([data-disabled]):hover {
+  [data-ui-data-grid]
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row]:not([data-disabled]):hover {
     background-color: var(--_hover);
   }
 
-  [data-ui='data-grid']
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row'][data-selected] {
+  [data-ui-data-grid]
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row][data-selected] {
     background-color: var(--_selected);
     color: var(--_selected-text);
   }
 
-  [data-ui='data-grid']
-    :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row'][data-selected]:not([data-disabled]):hover {
+  [data-ui-data-grid]
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row][data-selected]:not([data-disabled]):hover {
     background-color: var(--_selected-hover);
   }
 
-  [data-ui='data-grid'] [data-part='row'][data-disabled] {
+  [data-ui-data-grid] [data-part-row][data-disabled] {
     color: var(--slotted-disabled-foreground, GrayText);
   }
 
@@ -1395,9 +1406,9 @@
    * cell has no margin for an outer ring and the row below would cover it.
    * A cell in edit draws nothing: its control draws the inner ring.
    */
-  [data-ui='data-grid'] [role='gridcell'][data-current]:not([data-editing]),
-  [data-ui='data-grid'] [role='rowheader'][data-current]:not([data-editing]),
-  [data-ui='data-grid'] [role='columnheader'][data-current] {
+  [data-ui-data-grid] [role='gridcell'][data-current]:not([data-editing]),
+  [data-ui-data-grid] [role='rowheader'][data-current]:not([data-editing]),
+  [data-ui-data-grid] [role='columnheader'][data-current] {
     /* An inset shadow rather than an outline: an outline is a focus ring by
        the library's rule and is drawn in the ring colour whole; this is the
        place the reader left, at rest. */
@@ -1407,9 +1418,9 @@
   /* The grid's own cells, the children of its rows: a chip in a multi-select
      is a `gridcell` too, of the grid pattern the chips row is, and must keep
      its own ring rather than take this one. */
-  [data-ui='data-grid'] [role='row'] > [role='gridcell']:focus-visible:not([data-editing]),
-  [data-ui='data-grid'] [role='row'] > [role='rowheader']:focus-visible:not([data-editing]),
-  [data-ui='data-grid'] [role='row'] > [role='columnheader']:focus-visible {
+  [data-ui-data-grid] [role='row'] > [role='gridcell']:focus-visible:not([data-editing]),
+  [data-ui-data-grid] [role='row'] > [role='rowheader']:focus-visible:not([data-editing]),
+  [data-ui-data-grid] [role='row'] > [role='columnheader']:focus-visible {
     box-shadow: none;
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--_ring-width) * -1);
@@ -1419,8 +1430,8 @@
      draws none, so there are not two. A cell in edit and a filter cell are
      the other way round — the control inside is silenced and the cell draws
      the trace — so they are left out. */
-  [data-ui='data-grid']
-    [role='gridcell'][data-current]:not([data-editing], [data-part='filter-cell']):focus-within:not(
+  [data-ui-data-grid]
+    [role='gridcell'][data-current]:not([data-editing], [data-part-filter-cell]):focus-within:not(
       :focus
     ) {
     outline: none;
@@ -1435,11 +1446,11 @@
    * pseudo-element rather than a border, because the cell's own bottom border
    * is the rule between rows.
    */
-  [data-ui='data-grid'] [data-part='cell'][data-in-range] {
+  [data-ui-data-grid] [data-part-cell][data-in-range] {
     background-color: var(--_range);
   }
 
-  [data-ui='data-grid'] [data-part='cell'][data-range-edge]::before {
+  [data-ui-data-grid] [data-part-cell][data-range-edge]::before {
     border: 0 solid var(--_cursor);
     content: '';
     /* Past the cell's own bottom border, so a vertical edge runs unbroken
@@ -1449,22 +1460,22 @@
     position: absolute;
   }
 
-  [data-ui='data-grid'] [data-part='cell'][data-range-edge~='top']::before {
+  [data-ui-data-grid] [data-part-cell][data-range-edge~='top']::before {
     border-block-start-width: var(--_ring-width);
   }
 
   /* The bottom edge ends at the cell: run past it, over the row's rule, it
      read one pixel thicker than the other three. */
-  [data-ui='data-grid'] [data-part='cell'][data-range-edge~='bottom']::before {
+  [data-ui-data-grid] [data-part-cell][data-range-edge~='bottom']::before {
     border-block-end-width: var(--_ring-width);
     inset-block-end: 0;
   }
 
-  [data-ui='data-grid'] [data-part='cell'][data-range-edge~='start']::before {
+  [data-ui-data-grid] [data-part-cell][data-range-edge~='start']::before {
     border-inline-start-width: var(--_ring-width);
   }
 
-  [data-ui='data-grid'] [data-part='cell'][data-range-edge~='end']::before {
+  [data-ui-data-grid] [data-part-cell][data-range-edge~='end']::before {
     border-inline-end-width: var(--_ring-width);
   }
 
@@ -1476,7 +1487,7 @@
    * The control is the row's height, so a row in edit is as tall as one that
    * is not.
    */
-  [data-ui='data-grid'] [data-part='cell'][data-editing] {
+  [data-ui-data-grid] [data-part-cell][data-editing] {
     --slotted-control-padding-inline-sm: var(--_pad-inline);
     --slotted-control-padding-inline-md: var(--_pad-inline);
     --slotted-control-padding-inline-lg: var(--_pad-inline);
@@ -1507,7 +1518,7 @@
     padding: 0;
   }
 
-  [data-ui='data-grid'] [data-part='cell'][data-editing][data-current] {
+  [data-ui-data-grid] [data-part-cell][data-editing][data-current] {
     box-shadow: none;
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--_ring-width) * -1);
@@ -1517,7 +1528,7 @@
      does — by pointing the ring at the invalid step: `invalid` does not erase
      focus. The descendants' ring width is already zero, so the token moves
      only this cell's own trace. */
-  [data-ui='data-grid'] [data-part='cell'][data-editing][data-invalid] {
+  [data-ui-data-grid] [data-part-cell][data-editing][data-invalid] {
     --slotted-focus-ring-color: var(--slotted-focus-ring-color-invalid);
     /* Width as well as colour (WCAG 1.4.1): in `high-contrast` the invalid ring
        is the valid ring's black, and the corner mark is withdrawn while the
@@ -1532,11 +1543,11 @@
 
   /* The editor of a numeric column keeps the digits at the end, where the
      read value stood. */
-  [data-ui='data-grid'] [data-numeric][data-editing] [data-part='input'] {
+  [data-ui-data-grid] [data-numeric][data-editing] [data-part-input] {
     text-align: end;
   }
 
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='editor'] {
+  [data-ui-data-grid] [data-part-cell] > [data-part-editor] {
     display: flex;
     flex: 1 1 auto;
     /* Inside the cell's trace, at every density. */
@@ -1544,12 +1555,8 @@
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='editor'] > [data-part='root'],
-  [data-ui='data-grid']
-    [data-part='cell']
-    > [data-part='editor']
-    > :not([data-part])
-    > [data-part='root'] {
+  [data-ui-data-grid] [data-part-cell] > [data-part-editor] > [data-part-root],
+  [data-ui-data-grid] [data-part-cell] > [data-part-editor] > :not([data-part]) > [data-part-root] {
     flex: 1 1 auto;
     min-inline-size: 0;
   }
@@ -1563,13 +1570,13 @@
    * outside the motion scale; under reduced motion the ground stays flat and
    * leaves when the mark does.
    */
-  [data-ui='data-grid'] [data-part='cell'][data-changed='a'] {
+  [data-ui-data-grid] [data-part-cell][data-changed='a'] {
     animation: slotted-data-grid-changed-a
       var(--slotted-data-grid-changed-duration, var(--slotted-duration-long))
       var(--slotted-easing-standard, ease-out) forwards;
   }
 
-  [data-ui='data-grid'] [data-part='cell'][data-changed='b'] {
+  [data-ui-data-grid] [data-part-cell][data-changed='b'] {
     animation: slotted-data-grid-changed-b
       var(--slotted-data-grid-changed-duration, var(--slotted-duration-long))
       var(--slotted-easing-standard, ease-out) forwards;
@@ -1600,12 +1607,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='data-grid'] [data-part='cell'][data-changed] {
+    [data-ui-data-grid] [data-part-cell][data-changed] {
       animation: none;
       background-color: var(--_changed);
     }
 
-    [data-ui='data-grid'] button[data-part='tree-toggle'][data-loading] > [data-ui='icon'] {
+    [data-ui-data-grid] button[data-part-tree-toggle][data-loading] > [data-ui-icon] {
       animation: none;
     }
   }
@@ -1613,7 +1620,7 @@
   /* A cell whose draft failed, or whose value changed under the reader. The
      mark is a corner in the danger ink, and the message is the control's own
      `aria-errormessage`; the cell keeps the draft. */
-  [data-ui='data-grid'] [data-part='cell'][data-invalid]:not([data-editing])::after {
+  [data-ui-data-grid] [data-part-cell][data-invalid]:not([data-editing])::after {
     border-block-start: var(--slotted-space-3, 0.375rem) solid var(--slotted-tone-danger-border);
     border-inline-start: var(--slotted-space-3, 0.375rem) solid transparent;
     content: '';
@@ -1626,39 +1633,39 @@
   }
 
   /* A cell whose commit is pending dims its value; nothing moves. */
-  [data-ui='data-grid'] [data-part='cell'][data-loading] {
+  [data-ui-data-grid] [data-part-cell][data-loading] {
     color: var(--_muted);
   }
 
   /* A cell that does not edit in a grid that does: no mark, no hand. It is a
      fact the reader hears, not one the eye needs. */
-  [data-ui='data-grid'] [data-part='cell'][data-readonly] {
+  [data-ui-data-grid] [data-part-cell][data-readonly] {
     cursor: default;
   }
 
   /**
    * ── Alignment, numerals and the text treatment ─────────────────────────
    */
-  [data-ui='data-grid'] [data-align='start'] {
+  [data-ui-data-grid] [data-align='start'] {
     justify-content: start;
     text-align: start;
   }
 
-  [data-ui='data-grid'] [data-align='center'] {
+  [data-ui-data-grid] [data-align='center'] {
     justify-content: center;
     text-align: center;
   }
 
-  [data-ui='data-grid'] [data-align='end'] {
+  [data-ui-data-grid] [data-align='end'] {
     justify-content: end;
     text-align: end;
   }
 
-  [data-ui='data-grid'] [data-numeric] {
+  [data-ui-data-grid] [data-numeric] {
     font-variant-numeric: tabular-nums;
   }
 
-  [data-ui='data-grid'] [data-numeric]:not([data-align]) {
+  [data-ui-data-grid] [data-numeric]:not([data-align]) {
     justify-content: end;
     text-align: end;
   }
@@ -1668,7 +1675,7 @@
      is the span with no part of its own — in a tree column the toggle comes
      first, and a rule on `:first-child` left "Barcelona" drawn over the next
      column once the column was narrower than the name. */
-  [data-ui='data-grid'] [data-text='truncate'] > span:not([data-ui], [data-part]) {
+  [data-ui-data-grid] [data-text='truncate'] > span:not([data-ui], [data-part]) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1677,12 +1684,12 @@
   /* A value that is never broken is clipped at its cell rather than drawn over
      the next one: a grid's columns are its layout, and a value crossing one is
      a value in the wrong column. */
-  [data-ui='data-grid'] [data-text='nowrap'] > span:not([data-ui], [data-part]) {
+  [data-ui-data-grid] [data-text='nowrap'] > span:not([data-ui], [data-part]) {
     overflow: hidden;
     white-space: nowrap;
   }
 
-  [data-ui='data-grid'] [data-text='wrap'] > span:not([data-ui], [data-part]) {
+  [data-ui-data-grid] [data-text='wrap'] > span:not([data-ui], [data-part]) {
     overflow-wrap: anywhere;
   }
 
@@ -1696,14 +1703,14 @@
    * the rules rather than as a border, for the reason `table` records: two
    * borders of one box are mitred at the corner.
    */
-  [data-ui='data-grid'] [data-pinned='start'] {
+  [data-ui-data-grid] [data-pinned='start'] {
     background-color: inherit;
     inset-inline-start: var(--slotted-data-grid-pin-offset, 0);
     position: sticky;
     z-index: var(--slotted-z-index-sticky, 100);
   }
 
-  [data-ui='data-grid'] [data-pinned='end'] {
+  [data-ui-data-grid] [data-pinned='end'] {
     background-color: inherit;
     inset-inline-end: var(--slotted-data-grid-pin-offset, 0);
     position: sticky;
@@ -1711,7 +1718,7 @@
   }
 
   /* The corner: a header cell that is also pinned takes the step above both. */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] [data-pinned] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-head] [data-pinned] {
     background-color: var(--_head-surface);
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
@@ -1719,33 +1726,30 @@
   /* A plain header has no band: a pinned header cell takes the page's ground,
      opaque over the names sliding under it, and not the band it would be the
      only piece of — read on the pop-in scene, a grey block behind one name. */
-  [data-ui='data-grid'][data-variant='plain']
-    > [data-part='scroll']
-    > [data-part='head']
-    [data-pinned],
-  [data-ui='data-grid'][data-variant='plain']
-    > [data-part='scroll']
-    > [data-part='head']
+  [data-ui-data-grid][data-variant='plain'] > [data-part-scroll] > [data-part-head] [data-pinned],
+  [data-ui-data-grid][data-variant='plain']
+    > [data-part-scroll]
+    > [data-part-head]
     > [role='row']
-    > [data-part='selection'] {
+    > [data-part-selection] {
     background-color: var(--_surface);
   }
 
-  [data-ui='data-grid'] [data-part='filter-row'] > [data-pinned] {
+  [data-ui-data-grid] [data-part-filter-row] > [data-pinned] {
     background-color: var(--_band-surface);
   }
 
-  [data-ui='data-grid']
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row'][data-selected]
+  [data-ui-data-grid]
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row][data-selected]
     > [data-pinned] {
     background-color: var(--_selected);
   }
 
   /* The last pinned cell of each zone draws the edge: the same hairline as
      the rules between rows, and no more. */
-  [data-ui='data-grid'] [data-pinned][data-pin-edge]::after {
+  [data-ui-data-grid] [data-pinned][data-pin-edge]::after {
     background-color: var(--_rule);
     content: '';
     inline-size: var(--_rule-width);
@@ -1756,19 +1760,19 @@
     z-index: 1;
   }
 
-  [data-ui='data-grid']
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
+  [data-ui-data-grid]
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
     > [role='row']:last-child
     > [data-pin-edge]::after {
     inset-block-end: 0;
   }
 
-  [data-ui='data-grid'] [data-pinned='start'][data-pin-edge]::after {
+  [data-ui-data-grid] [data-pinned='start'][data-pin-edge]::after {
     inset-inline-end: 0;
   }
 
-  [data-ui='data-grid'] [data-pinned='end'][data-pin-edge]::after {
+  [data-ui-data-grid] [data-pinned='end'][data-pin-edge]::after {
     inset-inline-start: 0;
   }
 
@@ -1776,7 +1780,7 @@
      run down the body: it stood as a stub beside each values' line. At rest
      a grid with a pop-in draws no edge; the shadow below still marks what
      slides under a zone. */
-  [data-ui='data-grid'][data-popin] [data-pinned][data-pin-edge]::after {
+  [data-ui-data-grid][data-popin] [data-pinned][data-pin-edge]::after {
     background-color: transparent;
   }
 
@@ -1786,11 +1790,11 @@
      mid-word is not always there to be seen. A shadow and not a stronger
      line: read on the pinning scene, a dark rule down the body read as a
      frame inside the frame. */
-  [data-ui='data-grid']
-    [data-part='scroll'][data-overflowing]:not([data-at-start])
+  [data-ui-data-grid]
+    [data-part-scroll][data-overflowing]:not([data-at-start])
     [data-pinned='start'][data-pin-edge]::after,
-  [data-ui='data-grid']
-    [data-part='scroll'][data-overflowing]:not([data-at-end])
+  [data-ui-data-grid]
+    [data-part-scroll][data-overflowing]:not([data-at-end])
     [data-pinned='end'][data-pin-edge]::after {
     /* The colour is the gradient's alone: with the hairline's colour still
        under the widened box, the shadow read as a solid grey band. */
@@ -1798,8 +1802,8 @@
     inline-size: calc(var(--_rule-width) + var(--_edge-shadow-size));
   }
 
-  [data-ui='data-grid']
-    [data-part='scroll'][data-overflowing]:not([data-at-start])
+  [data-ui-data-grid]
+    [data-part-scroll][data-overflowing]:not([data-at-start])
     [data-pinned='start'][data-pin-edge]::after {
     background-image: linear-gradient(
       to right,
@@ -1810,8 +1814,8 @@
     inset-inline-end: calc(var(--_edge-shadow-size) * -1);
   }
 
-  [data-ui='data-grid']
-    [data-part='scroll'][data-overflowing]:not([data-at-end])
+  [data-ui-data-grid]
+    [data-part-scroll][data-overflowing]:not([data-at-end])
     [data-pinned='end'][data-pin-edge]::after {
     background-image: linear-gradient(
       to left,
@@ -1822,8 +1826,8 @@
     inset-inline-start: calc(var(--_edge-shadow-size) * -1);
   }
 
-  [data-ui='data-grid']:dir(rtl)
-    [data-part='scroll'][data-overflowing]:not([data-at-start])
+  [data-ui-data-grid]:dir(rtl)
+    [data-part-scroll][data-overflowing]:not([data-at-start])
     [data-pinned='start'][data-pin-edge]::after {
     background-image: linear-gradient(
       to left,
@@ -1833,8 +1837,8 @@
     );
   }
 
-  [data-ui='data-grid']:dir(rtl)
-    [data-part='scroll'][data-overflowing]:not([data-at-end])
+  [data-ui-data-grid]:dir(rtl)
+    [data-part-scroll][data-overflowing]:not([data-at-end])
     [data-pinned='end'][data-pin-edge]::after {
     background-image: linear-gradient(
       to right,
@@ -1850,7 +1854,7 @@
    * The cell is the family's and the control is `checkbox`'s. The width is
    * stated so a column pinned beside it has a length to state.
    */
-  [data-ui='data-grid'] [role='row'] > [data-part='selection'] {
+  [data-ui-data-grid] [role='row'] > [data-part-selection] {
     --slotted-selection-halo-opacity: 0;
 
     justify-content: center;
@@ -1865,7 +1869,7 @@
    * X both pin it with the first pinned column; here it is pinned always, so a
    * consumer never has to say it.
    */
-  [data-ui='data-grid'] [role='row'] > [data-part='selection'] {
+  [data-ui-data-grid] [role='row'] > [data-part-selection] {
     background-color: inherit;
     inset-inline-start: 0;
     position: sticky;
@@ -1875,25 +1879,25 @@
   /* Restated for the head's chooser, whose header rule above made it
      `relative` at a higher specificity: read scrolled, the select-all left
      with the columns while every row's chooser stayed. */
-  [data-ui='data-grid']
-    > [data-part='scroll']
-    > [data-part='head']
+  [data-ui-data-grid]
+    > [data-part-scroll]
+    > [data-part-head]
     > [role='row']
-    > [data-part='selection'] {
+    > [data-part-selection] {
     background-color: var(--_head-surface);
     inset-inline-start: 0;
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
 
-  [data-ui='data-grid']
-    :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row'][data-selected]
-    > [data-part='selection'] {
+  [data-ui-data-grid]
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row][data-selected]
+    > [data-part-selection] {
     background-color: var(--_selected);
   }
 
-  [data-ui='data-grid'] [role='row'] > [data-part='selection'] > [data-ui='checkbox'] {
+  [data-ui-data-grid] [role='row'] > [data-part-selection] > [data-ui-checkbox] {
     block-size: var(--_line);
   }
 
@@ -1901,7 +1905,7 @@
      it rather than the stylesheet asking every cell what it holds: `:has()`
      on every cell of a windowed body is a question asked a thousand times per
      style pass. */
-  [data-ui='data-grid'] [data-part='cell'][data-kind='expander'] {
+  [data-ui-data-grid] [data-part-cell][data-kind='expander'] {
     justify-content: center;
     padding-inline: 0;
   }
@@ -1912,11 +1916,11 @@
    * One cell spanning every column, on the sunken ground, with the record's
    * own inset so what is inside reads as belonging to the row above.
    */
-  [data-ui='data-grid'] [data-part='detail'] {
+  [data-ui-data-grid] [data-part-detail] {
     background-color: var(--slotted-surface-sunken, Canvas);
   }
 
-  [data-ui='data-grid'] [data-part='detail'] > * {
+  [data-ui-data-grid] [data-part-detail] > * {
     background-color: var(--slotted-surface-sunken, Canvas);
     box-sizing: border-box;
     grid-column: 1 / -1;
@@ -1946,28 +1950,28 @@
    */
   /* The values' line is the density's row, grown to its content; the
      pop-in's line is as tall as its fields. */
-  [data-ui='data-grid'][data-popin]
-    > [data-part='scroll']
-    > :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row'] {
+  [data-ui-data-grid][data-popin]
+    > [data-part-scroll]
+    > :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row] {
     grid-template-rows: minmax(var(--_track), auto) auto;
   }
 
-  [data-ui='data-grid'][data-popin] > [data-part='scroll'] > [data-part='summary'] > [role='row'] {
+  [data-ui-data-grid][data-popin] > [data-part-scroll] > [data-part-summary] > [role='row'] {
     grid-template-rows: minmax(var(--_head-block), auto) auto;
   }
 
   /* The chooser, the expander, the values and the actions stand on the
      values' line centred, as in a fixed row: the line is the row's own
      height, and a wrapped value is the only thing that grows it. */
-  [data-ui='data-grid'][data-popin]
-    :is([data-part='body'], [data-part='pinned-rows'])
-    > [data-part='row']
-    > :is([role='gridcell'], [role='rowheader']):not([data-part='popin']) {
+  [data-ui-data-grid][data-popin]
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row]
+    > :is([role='gridcell'], [role='rowheader']):not([data-part-popin]) {
     align-items: center;
   }
 
-  [data-ui='data-grid'] [data-part='popin'] {
+  [data-ui-data-grid] [data-part-popin] {
     align-content: start;
     box-sizing: border-box;
     column-gap: var(--slotted-space-4, 0.5rem);
@@ -1991,14 +1995,14 @@
      column of fields where the row's whole width holds two. The fields start
      at the row's own padding, under the chooser. */
   @container slotted-data-grid (width < 600px) {
-    [data-ui='data-grid'] [data-part='popin'] {
+    [data-ui-data-grid] [data-part-popin] {
       padding-inline-start: var(--_pad-inline);
     }
   }
 
   /* The label above the value, as a form reads, so a narrow field keeps the
      value's whole width. */
-  [data-ui='data-grid'] [data-part='popin-field'] {
+  [data-ui-data-grid] [data-part-popin-field] {
     display: flex;
     flex-direction: column;
     min-inline-size: 0;
@@ -2007,7 +2011,7 @@
   /* Room for one column of fields only (two need 2 × 9rem and the gap): the
      label goes beside its value, so each field takes one line instead of two. */
   @container slotted-data-grid-popin (width < 19rem) {
-    [data-ui='data-grid'] [data-part='popin-field'] {
+    [data-ui-data-grid] [data-part-popin-field] {
       align-items: baseline;
       column-gap: var(--slotted-space-3, 0.375rem);
       display: grid;
@@ -2015,7 +2019,7 @@
     }
   }
 
-  [data-ui='data-grid'] [data-part='popin-label'] {
+  [data-ui-data-grid] [data-part-popin-label] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-regular, 400);
@@ -2026,7 +2030,7 @@
      field under a label at its start reads as the next field's. One line tall
      when empty, so an empty value keeps its place under its label, as the
      empty cell keeps its row. */
-  [data-ui='data-grid'] [data-part='popin-value'] {
+  [data-ui-data-grid] [data-part-popin-value] {
     align-items: center;
     display: flex;
     gap: var(--_gap);
@@ -2042,8 +2046,8 @@
      aligns its lines to the grid's start, under its label: read in `rtl`, a
      company name set by its own direction ran from the far edge of the field,
      and `match-parent` did not move it. */
-  [data-ui='data-grid'] [data-part='popin-value'][data-text] > span:not([data-ui], [data-part]),
-  [data-ui='data-grid'] [data-part='popin-value'] > span:not([data-ui], [data-part]) {
+  [data-ui-data-grid] [data-part-popin-value][data-text] > span:not([data-ui], [data-part]),
+  [data-ui-data-grid] [data-part-popin-value] > span:not([data-ui], [data-part]) {
     flex: 0 1 auto;
     min-inline-size: 0;
     overflow: visible;
@@ -2055,11 +2059,11 @@
   }
 
   /* Physical, because `start` under `plaintext` is the value's own start. */
-  [data-ui='data-grid']:dir(rtl) [data-part='popin-value'] > span:not([data-ui], [data-part]) {
+  [data-ui-data-grid]:dir(rtl) [data-part-popin-value] > span:not([data-ui], [data-part]) {
     text-align: right;
   }
 
-  [data-ui='data-grid'] [data-part='popin-value'] > [data-ui]:not([data-part]) {
+  [data-ui-data-grid] [data-part-popin-value] > [data-ui]:not([data-part]) {
     flex: 0 0 auto;
     max-inline-size: 100%;
   }
@@ -2071,13 +2075,13 @@
    * indented by its level. The ground is the band at 4%, and the text is
    * semibold, so a reader scanning for a group finds it without reading.
    */
-  [data-ui='data-grid'] [data-part='group-row'] {
+  [data-ui-data-grid] [data-part-group-row] {
     background-color: var(--_band-surface);
     color: var(--_text);
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='data-grid'] [data-part='group-row'] > [role='gridcell'] {
+  [data-ui-data-grid] [data-part-group-row] > [role='gridcell'] {
     align-items: center;
     box-sizing: border-box;
     display: flex;
@@ -2090,7 +2094,7 @@
 
   /* The first cell of a group row spans to the first aggregate, indented by
      its level; the aggregates stand in their own columns. */
-  [data-ui='data-grid'] [data-part='group-row'] > [role='gridcell']:first-child {
+  [data-ui-data-grid] [data-part-group-row] > [role='gridcell']:first-child {
     padding-inline-start: calc(
       var(--_pad-inline) + var(--_indent) * (var(--slotted-data-grid-level, 1) - 1)
     );
@@ -2098,25 +2102,25 @@
     inset-inline-start: 0;
   }
 
-  [data-ui='data-grid'] [data-part='group-row'] > [role='gridcell']:first-child > span {
+  [data-ui-data-grid] [data-part-group-row] > [role='gridcell']:first-child > span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
   /* The count, one step lighter than the value. */
-  [data-ui='data-grid'] [data-part='group-row'] [data-count] {
+  [data-ui-data-grid] [data-part-group-row] [data-count] {
     color: var(--_muted);
     font-weight: var(--slotted-font-weight-regular, 400);
   }
 
-  [data-ui='data-grid'] [data-part='group-row'] [data-aggregate] {
+  [data-ui-data-grid] [data-part-group-row] [data-aggregate] {
     color: var(--_muted);
     font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='data-grid'] [data-part='group-toggle'] {
+  [data-ui-data-grid] [data-part-group-toggle] {
     margin-block: calc((var(--_line) - var(--slotted-target-min, 24px)) / 2);
     margin-inline-start: calc(var(--slotted-space-2, 0.25rem) * -1);
   }
@@ -2127,13 +2131,13 @@
    * The aggregates of the whole query, pinned to the end of the scroller, on
    * the band with a strong rule above — the header of the other end.
    */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-summary] {
     inset-block-end: var(--slotted-data-grid-sticky-offset-end, 0);
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
   }
 
-  [data-ui='data-grid']:not([data-sticky-header]) > [data-part='scroll'] > [data-part='summary'] {
+  [data-ui-data-grid]:not([data-sticky-header]) > [data-part-scroll] > [data-part-summary] {
     position: static;
   }
 
@@ -2145,20 +2149,20 @@
    * surface so the body scrolls under it, with a rule on the side it faces
    * the body. Their rows are the body's rows.
    */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-pinned-rows] {
     background-color: var(--_surface);
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 1);
   }
 
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'][data-edge='top'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-pinned-rows][data-edge='top'] {
     border-block-end: var(--_rule-width) solid var(--_rule-strong);
     inset-block-start: calc(
       var(--slotted-data-grid-sticky-offset, 0px) + var(--slotted-data-grid-pinned-top-offset, 0px)
     );
   }
 
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'][data-edge='bottom'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-pinned-rows][data-edge='bottom'] {
     border-block-start: var(--_rule-width) solid var(--_rule-strong);
     inset-block-end: calc(
       var(--slotted-data-grid-sticky-offset-end, 0px) +
@@ -2166,36 +2170,34 @@
     );
   }
 
-  [data-ui='data-grid']:not([data-sticky-header])
-    > [data-part='scroll']
-    > [data-part='pinned-rows'] {
+  [data-ui-data-grid]:not([data-sticky-header]) > [data-part-scroll] > [data-part-pinned-rows] {
     position: static;
   }
 
   /* A pinned cell inside a held row stands over the row's own ground. */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'] [data-pinned] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-pinned-rows] [data-pinned] {
     background-color: var(--_surface);
   }
 
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] > [role='row'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-summary] > [role='row'] {
     background-color: var(--_head-surface);
     border-block-start: var(--_rule-width) solid var(--_rule-strong);
   }
 
-  [data-ui='data-grid'] [data-part='summary-cell'] {
+  [data-ui-data-grid] [data-part-summary-cell] {
     background-color: var(--_head-surface);
     font-weight: var(--slotted-font-weight-semibold, 600);
     min-block-size: var(--_head-block);
   }
 
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'] [data-pinned] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-summary] [data-pinned] {
     background-color: var(--_head-surface);
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
 
   /* The label of an aggregate — "Total", "Average" — one step lighter than
      the number beside it. */
-  [data-ui='data-grid'] [data-part='summary-cell'] [data-label] {
+  [data-ui-data-grid] [data-part-summary-cell] [data-label] {
     color: var(--_muted);
     font-weight: var(--slotted-font-weight-regular, 400);
     margin-inline-end: var(--slotted-space-2, 0.25rem);
@@ -2211,7 +2213,7 @@
   /* Scoped to the cell's own child: `result-state` in the empty part has an
      `actions` part of the same name, and a rule naming the part alone hid
      its buttons. */
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] {
+  [data-ui-data-grid] [data-part-cell] > [data-part-actions] {
     align-items: center;
     /* One line tall, whatever stands inside: the buttons are taller than the
        line and overflow it evenly, so the row is still measured by its text
@@ -2231,7 +2233,7 @@
    * scene, two of them stood five pixels proud of the row on both sides and
    * grew its track. The consumer keeps the behaviour and the artwork.
    */
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button {
+  [data-ui-data-grid] [data-part-cell] > [data-part-actions] > button {
     align-items: center;
     background-color: transparent;
     block-size: var(--_control);
@@ -2249,42 +2251,42 @@
       color var(--_transition);
   }
 
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button :is(svg, img) {
+  [data-ui-data-grid] [data-part-cell] > [data-part-actions] > button :is(svg, img) {
     block-size: var(--_control-icon);
     inline-size: var(--_control-icon);
   }
 
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button:not(:disabled):hover {
+  [data-ui-data-grid] [data-part-cell] > [data-part-actions] > button:not(:disabled):hover {
     background-color: color-mix(in oklab, var(--slotted-text, CanvasText) 7%, transparent);
     color: var(--_text);
   }
 
-  [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'] > button:focus-visible {
+  [data-ui-data-grid] [data-part-cell] > [data-part-actions] > button:focus-visible {
     outline: var(--_ring-width) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='data-grid']
-    [data-part='row']:not([data-disabled]):hover
-    [data-part='cell']
-    > [data-part='actions'],
-  [data-ui='data-grid'] [data-part='row']:focus-within [data-part='cell'] > [data-part='actions'],
-  [data-ui='data-grid'] [data-part='row'][data-current] [data-part='cell'] > [data-part='actions'],
-  [data-ui='data-grid'] [data-part='row'][data-editing] [data-part='cell'] > [data-part='actions'] {
+  [data-ui-data-grid]
+    [data-part-row]:not([data-disabled]):hover
+    [data-part-cell]
+    > [data-part-actions],
+  [data-ui-data-grid] [data-part-row]:focus-within [data-part-cell] > [data-part-actions],
+  [data-ui-data-grid] [data-part-row][data-current] [data-part-cell] > [data-part-actions],
+  [data-ui-data-grid] [data-part-row][data-editing] [data-part-cell] > [data-part-actions] {
     opacity: 1;
   }
 
   @media (pointer: coarse) {
-    [data-ui='data-grid'] [data-part='cell'] > [data-part='actions'],
-    [data-ui='data-grid'] [data-part='column-menu'],
-    [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'] {
+    [data-ui-data-grid] [data-part-cell] > [data-part-actions],
+    [data-ui-data-grid] [data-part-column-menu],
+    [data-ui-data-grid] [data-part-column-header] [data-part-filter] {
       opacity: 1;
     }
 
     /* The row grew to the comfortable target through the control scale; the
        family's own controls grow with it, to the row less the cursor's ring.
        A 24-pixel button in a 44-pixel row is a target a thumb misses. */
-    [data-ui='data-grid'][data-part='root'] {
+    [data-ui-data-grid][data-part-root] {
       --_control: min(
         var(--slotted-target-comfortable, 44px),
         calc(min(var(--_row-block), var(--_head-block)) - var(--_ring-width) * 2)
@@ -2297,13 +2299,13 @@
        shows round it; the box reaches the full target by a padding the ground
        does not paint, and gives it back as a negative margin, so no row, no
        header and no column name moves. Neighbours overlap by the gap. */
-    [data-ui='data-grid'] [data-part='column-help'],
-    [data-ui='data-grid'] [data-part='column-menu'],
-    [data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],
-    [data-ui='data-grid'] [data-part='expander'],
-    [data-ui='data-grid'] [data-part='group-toggle'],
-    [data-ui='data-grid'] [data-part='tree-toggle'],
-    [data-ui='data-grid'] [data-part='row-handle'] {
+    [data-ui-data-grid] [data-part-column-help],
+    [data-ui-data-grid] [data-part-column-menu],
+    [data-ui-data-grid] [data-part-column-header] [data-part-filter],
+    [data-ui-data-grid] [data-part-expander],
+    [data-ui-data-grid] [data-part-group-toggle],
+    [data-ui-data-grid] [data-part-tree-toggle],
+    [data-ui-data-grid] [data-part-row-handle] {
       background-clip: content-box;
       box-sizing: content-box;
       margin: calc(var(--_reach) * -1);
@@ -2314,7 +2316,7 @@
   /**
    * ── Empty, and loading ─────────────────────────────────────────────────
    */
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty'] {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-empty] {
     align-items: center;
     /* The padding stands inside the viewport's width. Without it the box was
        its own padding wider than the frame, and a grid whose columns all fit
@@ -2333,7 +2335,7 @@
     position: sticky;
   }
 
-  [data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [data-part='row'] > * {
+  [data-ui-data-grid] > [data-part-scroll] > [data-part-loader] > [data-part-row] > * {
     align-items: center;
     box-sizing: border-box;
     display: flex;
@@ -2348,7 +2350,7 @@
     padding-inline: var(--_pad-inline);
   }
 
-  [data-ui='data-grid'][aria-busy='true'] > [data-part='scroll'] > [data-part='body'] {
+  [data-ui-data-grid][aria-busy='true'] > [data-part-scroll] > [data-part-body] {
     opacity: 0.55;
     pointer-events: none;
     transition: opacity var(--_transition);
@@ -2365,7 +2367,7 @@
    * its own content to the end: `pagination` is an inline-size container and
    * contributes no intrinsic width, so it cannot be sized by its content.
    */
-  [data-ui='data-grid'] > [data-part='footer'] {
+  [data-ui-data-grid] > [data-part-footer] {
     align-items: center;
     border-block-start: var(--_rule-width) solid var(--_rule);
     box-sizing: border-box;
@@ -2380,14 +2382,14 @@
     padding-inline: var(--_pad-inline);
   }
 
-  [data-ui='data-grid'] > [data-part='footer'] > :last-child {
+  [data-ui-data-grid] > [data-part-footer] > :last-child {
     display: flex;
     flex: 1 1 auto;
     justify-content: flex-end;
     min-inline-size: 0;
   }
 
-  [data-ui='data-grid'] > [data-part='footer'] [data-range] {
+  [data-ui-data-grid] > [data-part-footer] [data-range] {
     color: var(--_muted);
     flex: none;
     font-variant-numeric: tabular-nums;
@@ -2398,21 +2400,21 @@
    * ── Scheme and platform ────────────────────────────────────────────────
    */
   @media (forced-colors: active) {
-    [data-ui='data-grid'] [role='gridcell'][data-current],
-    [data-ui='data-grid'] [role='columnheader'][data-current] {
+    [data-ui-data-grid] [role='gridcell'][data-current],
+    [data-ui-data-grid] [role='columnheader'][data-current] {
       box-shadow: inset 0 0 0 var(--_ring-width) Highlight;
     }
 
-    [data-ui='data-grid'] [data-part='cell'][data-in-range] {
+    [data-ui-data-grid] [data-part-cell][data-in-range] {
       background-color: Highlight;
       color: HighlightText;
     }
 
-    [data-ui='data-grid'] [data-part='drop-indicator'] {
+    [data-ui-data-grid] [data-part-drop-indicator] {
       background-color: Highlight;
     }
 
-    [data-ui='data-grid'] [data-part='cell'][data-changed] {
+    [data-ui-data-grid] [data-part-cell][data-changed] {
       animation: none;
       background-color: Highlight;
       color: HighlightText;
@@ -2420,7 +2422,7 @@
 
     /* The resizer's line is a painted background, which the adjustment
        would otherwise replace, leaving the target with no line to show. */
-    [data-ui='data-grid'] [data-part='resizer']::after {
+    [data-ui-data-grid] [data-part-resizer]::after {
       forced-color-adjust: none;
     }
   }
@@ -2435,49 +2437,49 @@
    * consumer who prints ten thousand turns the window off first.
    */
   @media print {
-    [data-ui='data-grid'][data-part='root'] {
+    [data-ui-data-grid][data-part-root] {
       block-size: auto;
       break-inside: auto;
     }
 
-    [data-ui='data-grid'] > [data-part='scroll'] {
+    [data-ui-data-grid] > [data-part-scroll] {
       overflow: visible;
     }
 
-    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'],
-    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='summary'],
-    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty'],
-    [data-ui='data-grid'] > [data-part='scroll'] > [data-part='pinned-rows'],
-    [data-ui='data-grid'] [data-pinned] {
+    [data-ui-data-grid] > [data-part-scroll] > [data-part-head],
+    [data-ui-data-grid] > [data-part-scroll] > [data-part-summary],
+    [data-ui-data-grid] > [data-part-scroll] > [data-part-empty],
+    [data-ui-data-grid] > [data-part-scroll] > [data-part-pinned-rows],
+    [data-ui-data-grid] [data-pinned] {
       position: static;
     }
 
-    [data-ui='data-grid'] [data-pinned] {
+    [data-ui-data-grid] [data-pinned] {
       box-shadow: none;
     }
 
-    [data-ui='data-grid'] [data-part='column-actions'],
-    [data-ui='data-grid'] [data-part='row-handle'],
-    [data-ui='data-grid'] [data-part='resizer'],
-    [data-ui='data-grid'] [data-part='drop-indicator'],
-    [data-ui='data-grid'] [data-part='loader'] {
+    [data-ui-data-grid] [data-part-column-actions],
+    [data-ui-data-grid] [data-part-row-handle],
+    [data-ui-data-grid] [data-part-resizer],
+    [data-ui-data-grid] [data-part-drop-indicator],
+    [data-ui-data-grid] [data-part-loader] {
       display: none;
     }
 
-    [data-ui='data-grid'] [role='gridcell'][data-current],
-    [data-ui='data-grid'] [role='rowheader'][data-current],
-    [data-ui='data-grid'] [role='columnheader'][data-current] {
+    [data-ui-data-grid] [role='gridcell'][data-current],
+    [data-ui-data-grid] [role='rowheader'][data-current],
+    [data-ui-data-grid] [role='columnheader'][data-current] {
       box-shadow: none;
     }
 
-    [data-ui='data-grid'] :is([data-part='body'], [data-part='pinned-rows']) > [data-part='row'] {
+    [data-ui-data-grid] :is([data-part-body], [data-part-pinned-rows]) > [data-part-row] {
       break-inside: avoid;
     }
 
-    [data-ui='data-grid']
-      > [data-part='scroll']
-      > :is([data-part='body'], [data-part='pinned-rows'])
-      > [data-part='row'] {
+    [data-ui-data-grid]
+      > [data-part-scroll]
+      > :is([data-part-body], [data-part-pinned-rows])
+      > [data-part-row] {
       --_hover: transparent;
     }
   }

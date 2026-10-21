@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { fieldMessages } from '@slotted/core/i18n';
 import { useEffect } from 'react';
 
@@ -48,13 +49,13 @@ export function FieldGroupLegend({
   const own = useMessages(fieldMessages);
   const mark = necessityMark(group?.necessity ?? 'mark', group?.required === true, group?.t ?? own);
 
-  const rootProps: FieldGroupLegendRootProps = {
+  const rootProps: FieldGroupLegendRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
         {children}
         {mark === null ? null : (
-          <span {...(mark.hidden ? { 'aria-hidden': true } : {})} data-part="mark">
+          <span {...withSelectorKey(mark.hidden ? { 'aria-hidden': true } : {}, 'part', 'mark')}>
             {mark.text}
           </span>
         )}
@@ -62,7 +63,7 @@ export function FieldGroupLegend({
     ),
     'data-part': 'legend',
     id: id ?? group?.ids.legend,
-  };
+  });
 
   return render === undefined ? <legend {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -75,7 +76,10 @@ export function FieldGroupLegend({
  * element `orientation` arranges.
  */
 export function FieldGroupContent({ ref, render, ...nativeProps }: FieldGroupContentProps) {
-  const rootProps: FieldGroupContentRootProps = { ...nativeProps, 'data-part': 'content' };
+  const rootProps: FieldGroupContentRootProps = keyedProps({
+    ...nativeProps,
+    'data-part': 'content',
+  });
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
 

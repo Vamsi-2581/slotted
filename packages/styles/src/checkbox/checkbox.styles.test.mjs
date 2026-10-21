@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/checkbox/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./checkbox.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./checkbox.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./checkbox.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.checkbox;
 
 function rule(selector) {
@@ -26,7 +39,7 @@ function rule(selector) {
 }
 
 /** A part reached from anywhere inside the family's own root. */
-const part = (name) => `${ui} [data-part='${name}']`;
+const part = (name) => `${ui} [data-part-${name.toLowerCase()}]`;
 
 test('lives in the component layer', () => {
   assert.match(css, /@layer slotted\.components/);
@@ -39,7 +52,10 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
     if (part === 'root') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -57,11 +73,11 @@ test('renders every part the contract declares, in at least one scene', () => {
  */
 test('paints the mark from the control it stands on, through the sibling combinator', () => {
   assert.ok(
-    normalized.includes(`${part('control')}:checked + [data-part='indicator']`),
+    normalized.includes(`${part('control')}:checked + [data-part-indicator]`),
     'checked does not reach the mark through the control',
   );
   assert.ok(
-    normalized.includes(`${part('control')}:indeterminate + [data-part='indicator']`),
+    normalized.includes(`${part('control')}:indeterminate + [data-part-indicator]`),
     'mixed does not reach the mark through the control',
   );
 });
@@ -168,10 +184,10 @@ test('draws the glyph in a box the square clears by a whole pixel on every side'
  * the words end and the empty row beside them stops toggling the box.
  */
 test('lights the box and its label as one wash, lit by hover alone', () => {
-  const label = rule(`${root}:not([data-variant='tile']) [data-part='label']`);
+  const label = rule(`${root}:not([data-variant='tile']) [data-part-label]`);
   assert.match(label, /justify-self:start/);
   assert.match(label, /position:relative/);
-  const halo = rule(`${root}:not([data-variant='tile']) [data-part='label']::after`);
+  const halo = rule(`${root}:not([data-variant='tile']) [data-part-label]::after`);
   assert.match(
     halo,
     /background-color:var\(--slotted-checkbox-halo-color,var\(--slotted-tone-accent-text\)\)/,
@@ -196,12 +212,12 @@ test('lights the box and its label as one wash, lit by hover alone', () => {
   assert.match(rule(root), /position:relative/);
   assert.ok(
     normalized.includes(
-      `${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled) ~ [data-part='label']::after,${root}:not([data-readonly]) [data-part='control']:not(:disabled) ~ [data-part='label']:hover::after{opacity:var(--slotted-selection-halo-opacity,0.12);}`,
+      `${root}:not([data-readonly]) [data-part-control]:hover:not(:disabled) ~ [data-part-label]::after,${root}:not([data-readonly]) [data-part-control]:not(:disabled) ~ [data-part-label]:hover::after{opacity:var(--slotted-selection-halo-opacity,0.12);}`,
     ),
     'hover does not light the halo, or lights it from somewhere else',
   );
   /* Hover moves the edge and the halo, and nothing on the ground. */
-  const hover = rule(`${root}:not([data-readonly]) [data-part='control']:hover:not(:disabled)`);
+  const hover = rule(`${root}:not([data-readonly]) [data-part-control]:hover:not(:disabled)`);
   assert.match(
     hover,
     /border-color:var\(--slotted-checkbox-hover-border-color,var\(--slotted-tone-accent-border\)\)/,
@@ -210,11 +226,11 @@ test('lights the box and its label as one wash, lit by hover alone', () => {
   /* The other placement stretches the label to the box at the row's end, and
      the wash runs from the text to past the box. */
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='label']`),
+    rule(`${root}[data-label-placement='start'] [data-part-label]`),
     /justify-self:stretch/,
   );
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='label']::after`),
+    rule(`${root}[data-label-placement='start'] [data-part-label]::after`),
     /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\) \+ var\(--_halo-spread\)\)\);inset-inline-start:calc\(-1\.5 \* var\(--_halo-spread\)\)/,
   );
 });
@@ -247,7 +263,7 @@ test('keeps the row at its line and hits the target around the box', () => {
   assert.match(label, /cursor:pointer/);
   assert.doesNotMatch(declarations, /--_label-slack/);
   assert.match(rule(root), /--_target:var\(--slotted-target-min,24px\)/);
-  const target = rule(`${root}:not([data-variant='tile']) [data-part='label']::before`);
+  const target = rule(`${root}:not([data-variant='tile']) [data-part-label]::before`);
   assert.match(target, /block-size:var\(--_target\)/);
   assert.match(target, /inline-size:var\(--_target\)/);
   assert.match(
@@ -260,7 +276,7 @@ test('keeps the row at its line and hits the target around the box', () => {
     /inset-inline-start:calc\(\(var\(--_size\) - var\(--_target\)\) \/ 2 - var\(--_size\) - var\(--_gap\)\)/,
   );
   assert.match(
-    rule(`${root}[data-label-placement='start'] [data-part='label']::before`),
+    rule(`${root}[data-label-placement='start'] [data-part-label]::before`),
     /inset-inline-end:calc\(-1 \* \(var\(--_size\) \+ var\(--_gap\)\)\);inset-inline-start:auto/,
   );
   assert.doesNotMatch(target, /box-shadow|opacity/);
@@ -308,7 +324,7 @@ test('holds hover and press back for disabled and for read-only', () => {
 /** A read-only value is real, so it keeps its ink, its ring and its tab stop. */
 test('does not paint read-only as if it were disabled', () => {
   const readonly = rule(
-    `${root}[data-readonly] [data-part='control']:not(:checked):not(:indeterminate)`,
+    `${root}[data-readonly] [data-part-control]:not(:checked):not(:indeterminate)`,
   );
   assert.match(readonly, /background-color:var\(--slotted-checkbox-readonly-background/);
   assert.doesNotMatch(readonly, /--slotted-disabled/);
@@ -321,9 +337,7 @@ test('does not paint read-only as if it were disabled', () => {
  */
 test('answers the disabled element as well as the mirrored attribute', () => {
   assert.ok(
-    normalized.includes(
-      `${root}[data-disabled] [data-part='control'],${part('control')}:disabled{`,
-    ),
+    normalized.includes(`${root}[data-disabled] [data-part-control],${part('control')}:disabled{`),
     'the disabled rule does not answer :disabled',
   );
 });
@@ -342,7 +356,7 @@ test('restates the pair forced colors would collapse', () => {
   );
   assert.ok(
     normalized.includes(
-      `${part('control')}:checked + [data-part='indicator'],${part('control')}:indeterminate + [data-part='indicator']{color:HighlightText;}`,
+      `${part('control')}:checked + [data-part-indicator],${part('control')}:indeterminate + [data-part-indicator]{color:HighlightText;}`,
     ),
   );
 });
@@ -367,7 +381,7 @@ test('draws the mark in along its own stroke, at the medium step of the scale', 
     /transition:clip-path var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\),opacity var\(--slotted-duration-medium\) var\(--slotted-control-transition-easing\)/,
   );
   const shown = rule(
-    `${part('control')}:checked + [data-part='indicator'],${part('control')}:indeterminate + [data-part='indicator']`,
+    `${part('control')}:checked + [data-part-indicator],${part('control')}:indeterminate + [data-part-indicator]`,
   );
   assert.match(shown, /clip-path:inset\(0% 0% 0% 0%\)/);
   assert.match(shown, /opacity:1/);
@@ -414,7 +428,7 @@ test('parts the border from the fill of a checked invalid box, in forced colours
   const edge =
     'var(--slotted-checkbox-invalid-edge-width,var(--slotted-control-invalid-edge-width,1px))';
   const checked = rule(
-    `${root}[data-invalid] [data-part='control']:checked,${root}[data-invalid] [data-part='control']:indeterminate`,
+    `${root}[data-invalid] [data-part-control]:checked,${root}[data-invalid] [data-part-control]:indeterminate`,
   );
   assert.ok(
     checked.includes(`box-shadow:inset 0 0 0 ${edge} var(--slotted-surface,Canvas)`),
@@ -423,13 +437,13 @@ test('parts the border from the fill of a checked invalid box, in forced colours
   const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
   assert.ok(
     forced.includes(
-      `${root}[data-invalid] [data-part='control']:checked,${root}[data-invalid] [data-part='control']:indeterminate{background-color:Highlight;border-color:CanvasText;outline:${edge} solid Canvas;`,
+      `${root}[data-invalid] [data-part-control]:checked,${root}[data-invalid] [data-part-control]:indeterminate{background-color:Highlight;border-color:CanvasText;outline:${edge} solid Canvas;`,
     ),
     forced,
   );
   assert.match(
     forced,
-    /\[data-invalid\] \[data-part='control'\]:checked:focus-visible,[^{]*\{outline:calc\([^;]*\) double/,
+    /\[data-invalid\] \[data-part-control\]:checked:focus-visible,[^{]*\{outline:calc\([^;]*\) double/,
   );
 });
 
@@ -442,7 +456,7 @@ test('parts the border from the fill of a checked invalid box, in forced colours
  */
 test('keeps a checked invalid box checked under forced colours', () => {
   const forced = normalized.slice(normalized.lastIndexOf('@media (forced-colors:active)'));
-  const box = `${root}[data-invalid] [data-part='control']`;
+  const box = `${root}[data-invalid] [data-part-control]`;
   assert.ok(
     forced.includes(
       `${box}:checked,${box}:indeterminate{background-color:Highlight;border-color:CanvasText;`,
@@ -451,7 +465,7 @@ test('keeps a checked invalid box checked under forced colours', () => {
   );
   assert.ok(
     forced.includes(
-      `${box}:checked + [data-part='indicator'],${box}:indeterminate + [data-part='indicator']{color:HighlightText;}`,
+      `${box}:checked + [data-part-indicator],${box}:indeterminate + [data-part-indicator]{color:HighlightText;}`,
     ),
     forced,
   );
@@ -465,7 +479,7 @@ test('keeps a checked invalid box checked under forced colours', () => {
  * tile is still wider than a chosen valid one.
  */
 test('says invalid with weight as well as with colour', () => {
-  const invalid = rule(`${root}[data-invalid] [data-part='control']`);
+  const invalid = rule(`${root}[data-invalid] [data-part-control]`);
   assert.match(
     invalid,
     /border-width:calc\(var\(--slotted-checkbox-border-width,var\(--slotted-border-width-medium,1\.5px\)\) \+ var\(--slotted-checkbox-invalid-edge-width,var\(--slotted-control-invalid-edge-width,1px\)\)\)/,
@@ -492,7 +506,7 @@ test('says invalid with weight as well as with colour', () => {
  * disabling — a disabled `fieldset` disables the control and tells nothing.
  */
 test('dims the label of a control the browser disabled, not only of a mirrored one', () => {
-  assert.ok(normalized.includes(`${part('control')}:disabled ~ [data-part='label']`));
+  assert.ok(normalized.includes(`${part('control')}:disabled ~ [data-part-label]`));
 });
 
 /**
@@ -536,10 +550,10 @@ test('keeps the air of its line under the box as well as over it', () => {
  * start. The gap goes, and the target and the wash are measured from the box.
  */
 test('closes the wash around a box whose label shows nothing, and gives it no gap', () => {
-  const textless = `${root}:is([data-label-hidden],:has(>[data-part='label']:empty))`;
+  const textless = `${root}:is([data-label-hidden],:has(>[data-part-label]:empty))`;
   assert.match(rule(`${textless}:not([data-label-placement='start'])`), /column-gap:0/);
   const halo = rule(
-    `${textless}:not([data-label-placement='start'],[data-variant='tile']) [data-part='label']::after`,
+    `${textless}:not([data-label-placement='start'],[data-variant='tile']) [data-part-label]::after`,
   );
   assert.match(halo, /inset-inline-end:calc\(-1 \* var\(--_halo-spread\)\)/);
   assert.match(
@@ -548,7 +562,7 @@ test('closes the wash around a box whose label shows nothing, and gives it no ga
   );
   assert.match(
     rule(
-      `${textless}:not([data-label-placement='start'],[data-variant='tile']) [data-part='label']::before`,
+      `${textless}:not([data-label-placement='start'],[data-variant='tile']) [data-part-label]::before`,
     ),
     /inset-inline-start:calc\(-1 \* var\(--_target\)\)/,
   );

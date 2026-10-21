@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceStatus } from '@slotted/core/presence';
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -148,8 +149,8 @@ export function Toast({ children, index = 0, message, ref, ...nativeProps }: Toa
 
   return (
     <li
-      {...nativeProps}
-      data-part="item"
+      {...withSelectorKey(nativeProps, 'part', 'item')}
+
       data-tone={tone}
       data-variant={variant}
       {...(open ? { 'data-open': '' } : {})}
@@ -258,19 +259,23 @@ export function ToastIcon({ children, render, ...nativeProps }: ToastIconProps) 
     ));
   if (mark === null) return null;
 
-  const partProps = {
+  const partProps = keyedProps({
     ...nativeProps,
     'aria-hidden': true,
     children: mark,
     'data-part': 'icon',
-  } as const;
+  } as const);
 
   return render === undefined ? <span {...partProps} /> : render(partProps);
 }
 
 /** The words, and the one column that is allowed to shrink. */
 export function ToastContent({ children, render, ...nativeProps }: ToastPartRenderProps) {
-  const partProps: ToastPartProps = { ...nativeProps, children, 'data-part': 'content' };
+  const partProps: ToastPartProps = keyedProps({
+    ...nativeProps,
+    children,
+    'data-part': 'content',
+  });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
@@ -281,14 +286,14 @@ export function ToastContent({ children, render, ...nativeProps }: ToastPartRend
  * its outline has told a reader it can be navigated back to.
  */
 export function ToastTitle({ children, render, ...nativeProps }: ToastPartRenderProps) {
-  const partProps: ToastPartProps = { ...nativeProps, children, 'data-part': 'title' };
+  const partProps: ToastPartProps = keyedProps({ ...nativeProps, children, 'data-part': 'title' });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
 
 /** The message. A `p`, because that is what a sentence of prose is. */
 export function ToastDescription({ children, render, ...nativeProps }: ToastDescriptionProps) {
-  const partProps = { ...nativeProps, children, 'data-part': 'description' } as const;
+  const partProps = keyedProps({ ...nativeProps, children, 'data-part': 'description' } as const);
 
   return render === undefined ? <p {...partProps} /> : render(partProps);
 }
@@ -299,14 +304,18 @@ export function ToastDescription({ children, render, ...nativeProps }: ToastDesc
  * controls `cancel` would privilege one arrangement over every other.
  */
 export function ToastActions({ children, render, ...nativeProps }: ToastPartRenderProps) {
-  const partProps: ToastPartProps = { ...nativeProps, children, 'data-part': 'actions' };
+  const partProps: ToastPartProps = keyedProps({
+    ...nativeProps,
+    children,
+    'data-part': 'actions',
+  });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
 
 /** The control that puts the message away. A real button with a real name. */
 export function ToastClose({ children, render, ...nativeProps }: ToastCloseProps) {
-  const partProps = {
+  const partProps = keyedProps({
     type: 'button' as const,
     ...nativeProps,
     /* The cross is drawn unless the consumer wrote content of their own. */
@@ -316,7 +325,7 @@ export function ToastClose({ children, render, ...nativeProps }: ToastCloseProps
       </Icon>
     ),
     'data-part': 'close',
-  };
+  });
 
   return render === undefined ? <button {...partProps} /> : render(partProps);
 }
@@ -326,11 +335,11 @@ export function ToastClose({ children, render, ...nativeProps }: ToastCloseProps
  * and the same play state, so the picture and the clock cannot disagree.
  */
 export function ToastProgress({ render, ...nativeProps }: ToastPartRenderProps) {
-  const partProps: ToastPartProps = {
+  const partProps: ToastPartProps = keyedProps({
     ...nativeProps,
     'aria-hidden': true,
     'data-part': 'progress',
-  };
+  });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/page-header/page-header.css';
 
 import { pageHeaderMessages } from '@slotted/core/i18n';
@@ -287,7 +288,7 @@ export function PageHeader({
     setPinned,
   };
 
-  const rootProps: PageHeaderRootProps = {
+  const rootProps: PageHeaderRootProps = keyedProps({
     ...nativeProps,
     ...(loading === true ? { 'aria-busy': true } : {}),
     children: (
@@ -310,7 +311,7 @@ export function PageHeader({
     'data-ui': 'page-header',
     'data-variant': resolvedVariant,
     style,
-  };
+  });
 
   return (
     <PageHeaderContext.Provider value={context}>

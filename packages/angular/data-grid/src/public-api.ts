@@ -58,4 +58,5 @@ export type {
   DataGridStickyTo,
   DataGridVariant,
   DataGridVirtualize,
+  DataGridLoadMoreTrigger,
 } from './data-grid-defaults';

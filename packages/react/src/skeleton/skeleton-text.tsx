@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/skeleton/skeleton.css';
 
 import type { CSSProperties } from 'react';
@@ -40,7 +41,7 @@ export function SkeletonText({
   const resolvedAnimation = animation ?? region?.animation ?? defaults.animation ?? 'shimmer';
   const resolvedLastLine = lastLineSize ?? defaults.lastLineSize;
 
-  const rootProps: SkeletonTextRootProps = {
+  const rootProps: SkeletonTextRootProps = keyedProps({
     ...nativeProps,
     'aria-hidden': painted ? (ariaHidden ?? 'true') : ariaHidden,
     /**
@@ -50,7 +51,7 @@ export function SkeletonText({
      */
     children: painted
       ? Array.from({ length: Math.max(1, Math.trunc(lines)) }, (_, row) => (
-          <span data-part="line" key={row} />
+          <span data-part="line" data-part-line="" key={row} />
         ))
       : null,
     'data-animation': resolvedAnimation,
@@ -59,7 +60,7 @@ export function SkeletonText({
     'data-ui': 'skeleton',
     inert: painted || undefined,
     style: lastLine(resolvedLastLine, geometryStyle({ inlineSize }, style)),
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

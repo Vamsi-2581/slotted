@@ -55,6 +55,7 @@ let nextId = 0;
       <button
         type="button"
         data-part="more"
+        data-part-more=""
         [attr.aria-controls]="contentId"
         [attr.aria-expanded]="revealed()"
         (click)="toggle($event)"
@@ -68,7 +69,9 @@ let nextId = 0;
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'message',
+    'data-ui-message': '',
     'data-part': 'bubble',
+    'data-part-bubble': '',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-clamped]': "clamped() ? '' : null",
@@ -130,7 +133,7 @@ export class SlBubble {
 @Directive({
   selector: '[slBubbleContent]',
   standalone: true,
-  host: { 'data-part': 'content', '[attr.id]': 'id' },
+  host: { 'data-part': 'content', 'data-part-content': '', '[attr.id]': 'id' },
 })
 export class SlBubbleContent {
   private readonly bubble = inject(SlBubble, { optional: true });
@@ -165,12 +168,12 @@ export class SlBubbleContent {
   selector: '[slBubbleQuote]',
   standalone: true,
   template: `@if (author(); as name) {
-      <span data-part="quote-author">{{ name }}</span>
+      <span data-part="quote-author" data-part-quote-author="">{{ name }}</span>
     }
     <ng-content></ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'quote' },
+  host: { 'data-part': 'quote', 'data-part-quote': '' },
 })
 export class SlBubbleQuote {
   readonly author = input<string | undefined>(undefined);
@@ -196,10 +199,10 @@ export class SlBubbleQuote {
   standalone: true,
   /* One line: a space or a line break between the text and the chunks would be painted. */
   // prettier-ignore
-  template: `{{ stream().settled }}@for (chunk of stream().chunks; track chunk.key) {<span data-part="stream-chunk" [style.animation-delay.ms]="chunk.delay" (animationend)="settle(chunk.key)">{{ chunk.text }}</span>}`,
+  template: `{{ stream().settled }}@for (chunk of stream().chunks; track chunk.key) {<span data-part="stream-chunk" data-part-stream-chunk="" [style.animation-delay.ms]="chunk.delay" (animationend)="settle(chunk.key)">{{ chunk.text }}</span>}`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'stream' },
+  host: { 'data-part': 'stream', 'data-part-stream': '' },
 })
 export class SlBubbleStream {
   private readonly row = inject(SlMessage, { optional: true });
@@ -245,7 +248,7 @@ export class SlBubbleStream {
 @Directive({
   selector: '[slBubbleCaret]',
   standalone: true,
-  host: { 'data-part': 'caret', 'aria-hidden': 'true' },
+  host: { 'data-part': 'caret', 'data-part-caret': '', 'aria-hidden': 'true' },
 })
 export class SlBubbleCaret {}
 
@@ -256,7 +259,12 @@ export class SlBubbleCaret {}
   template: '<span></span><span></span><span></span>',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'typing', role: 'img', '[attr.aria-label]': 'label()' },
+  host: {
+    'data-part': 'typing',
+    'data-part-typing': '',
+    role: 'img',
+    '[attr.aria-label]': 'label()',
+  },
 })
 export class SlBubbleTyping {
   private readonly t = injectMessageWords();
@@ -279,6 +287,7 @@ export class SlBubbleTyping {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'retry',
+    'data-part-retry': '',
     type: 'button',
     '[attr.aria-label]': 'label()',
     '(click)': 'onClick($event)',
@@ -300,7 +309,12 @@ export class SlBubbleRetry {
 @Directive({
   selector: '[slBubbleReactions]',
   standalone: true,
-  host: { 'data-part': 'reactions', role: 'group', '[attr.aria-label]': 'label()' },
+  host: {
+    'data-part': 'reactions',
+    'data-part-reactions': '',
+    role: 'group',
+    '[attr.aria-label]': 'label()',
+  },
 })
 export class SlBubbleReactions {
   private readonly t = injectMessageWords();
@@ -318,12 +332,13 @@ export class SlBubbleReactions {
   standalone: true,
   template: `<ng-content></ng-content>
     @if (count() !== undefined) {
-      <span data-part="reaction-count">{{ count() }}</span>
+      <span data-part="reaction-count" data-part-reaction-count="">{{ count() }}</span>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'reaction',
+    'data-part-reaction': '',
     type: 'button',
     '[attr.aria-pressed]': 'pressed()',
     '[attr.data-pressed]': "pressed() ? '' : null",

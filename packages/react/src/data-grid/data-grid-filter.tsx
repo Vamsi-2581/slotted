@@ -419,9 +419,14 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
     const operands = operandCount(condition.operator as FilterOperator);
     const custom = grid.renderFilterOperand;
     return (
-      <div data-operands={operands} data-part="filter-condition" key={index}>
+      <div
+        data-operands={operands}
+        data-part="filter-condition"
+        data-part-filter-condition=""
+        key={index}
+      >
         {index === 1 ? (
-          <div data-part="filter-join">
+          <div data-part="filter-join" data-part-filter-join="">
             <SegmentedControl
               aria-label={t('filterJoin')}
               onValueChange={(join) => setDraft(withJoin(current, join as FilterJoin))}
@@ -433,7 +438,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
             </SegmentedControl>
           </div>
         ) : null}
-        <div data-part="filter-operator">
+        <div data-part="filter-operator" data-part-filter-operator="">
           <Select
             fullWidth
             width="content"
@@ -463,6 +468,7 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
         <div
           data-kind={panelKind}
           data-part="filter-operand"
+          data-part-filter-operand=""
           {...(operands === 2 && !isRangeOperand(panelKind, condition.operator)
             ? { 'data-range': '' }
             : {})}
@@ -548,10 +554,16 @@ export function DataGridFilterPanel<Row>({ column, children }: PanelProps<Row>) 
       {open ? (
         <PopoverLayer>
           <PopoverContent aria-label={t('filterColumn', { column: name })}>
-            <div data-kind={panelKind} data-part="filter-panel" data-ui="data-grid">
+            <div
+              data-kind={panelKind}
+              data-part="filter-panel"
+              data-part-filter-panel=""
+              data-ui="data-grid"
+              data-ui-data-grid=""
+            >
               {renderCondition(0)}
               {showsSecond ? renderCondition(1) : null}
-              <div data-part="filter-actions">
+              <div data-part="filter-actions" data-part-filter-actions="">
                 <Button
                   disabled={!isFilterActive(current) && committed === null}
                   onClick={(event) => clear(event)}
@@ -617,6 +629,7 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
         {...columnAttributes(column)}
         aria-colindex={index}
         data-part="filter-cell"
+        data-part-filter-cell=""
         role="gridcell"
         style={cellStyle(column, index)}
         tabIndex={current ? 0 : -1}
@@ -675,6 +688,7 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
       {...columnAttributes(column)}
       aria-colindex={index}
       data-part="filter-cell"
+      data-part-filter-cell=""
       role="gridcell"
       style={cellStyle(column, index)}
       tabIndex={current ? 0 : -1}
@@ -689,9 +703,10 @@ export function DataGridFilterCell<Row>({ column }: { column: ResolvedGridColumn
       <div
         data-kind={kind}
         data-part="filter-operand"
+        data-part-filter-operand=""
         {...(operands === 2 && !isRangeOperand(kind, operator) ? { 'data-range': '' } : {})}
       >
-        <div data-part="filter-operator">
+        <div data-part="filter-operator" data-part-filter-operator="">
           <Menu size="sm">
             <MenuTrigger
               render={(props) => (

@@ -1,3 +1,4 @@
+import { hostSelectorKey } from '@slotted/core/selector-key';
 import { tabbables } from '@slotted/core/focus';
 import {
   afterNextRender,
@@ -61,8 +62,8 @@ export class SlHoverCardTrigger {
      it, as `menu-trigger.ts` records for two directives on one element. */
   private readonly writtenUi = inject(new HostAttributeToken('data-ui'), { optional: true });
   private readonly writtenPart = inject(new HostAttributeToken('data-part'), { optional: true });
-  protected readonly ui = this.writtenUi ?? 'hover-card';
-  protected readonly part = this.writtenPart ?? 'root';
+  protected readonly ui = hostSelectorKey(this.element, 'ui', this.writtenUi ?? 'hover-card');
+  protected readonly part = hostSelectorKey(this.element, 'part', this.writtenPart ?? 'root');
 
   /** Whether this trigger is the one the open card hangs from. */
   protected readonly anchors = computed(() => this.card.triggerNode() === this.element);

@@ -68,6 +68,7 @@ const optionalNumber = (value: unknown) =>
   ],
   host: {
     'data-part': 'input',
+    'data-part-input': '',
     autocomplete: 'off',
     autocorrect: 'off',
     spellcheck: 'false',

@@ -1,9 +1,22 @@
 import '@testing-library/jest-dom/vitest';
 
+import { selectorKeyMismatches } from '@slotted/core/selector-key';
 import { cleanup } from '@testing-library/react';
 import { afterEach, beforeEach } from 'vitest';
 
-afterEach(cleanup);
+/**
+ * The stylesheet matches the selector key (`data-part-cell`), not the public
+ * `data-part="cell"`: an element that carries one without the other is drawn
+ * unstyled, or with the rules of a part it no longer is. Every test's final
+ * document is checked before it is cleaned up.
+ */
+afterEach(() => {
+  const mismatches = selectorKeyMismatches(document);
+  cleanup();
+  if (mismatches.length > 0) {
+    throw new Error(`Selector keys out of line:\n${[...new Set(mismatches)].join('\n')}`);
+  }
+});
 
 /**
  * Each test starts at the end of the session history, as a page just loaded

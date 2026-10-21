@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/card/card.css';
 
 import { useCardDefaults } from './card-defaults';
@@ -23,7 +24,7 @@ export function Card({
 }: CardProps) {
   const defaults = useCardDefaults();
 
-  const rootProps: CardRootProps = {
+  const rootProps: CardRootProps = keyedProps({
     ...nativeProps,
     ...(disabled ? { 'data-disabled': '' } : {}),
     ...(selected ? { 'data-selected': '' } : {}),
@@ -32,7 +33,7 @@ export function Card({
     'data-part': 'root',
     'data-size': size ?? defaults.size,
     'data-ui': 'card',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

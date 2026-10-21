@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type {
   ProseAnchorProps,
   ProseExcludeProps,
@@ -13,7 +14,7 @@ import type {
  * produce it.
  */
 export function ProseLead({ render, ...nativeProps }: ProseLeadProps) {
-  const rootProps: ProsePartProps = { ...nativeProps, 'data-part': 'lead' };
+  const rootProps: ProsePartProps = keyedProps({ ...nativeProps, 'data-part': 'lead' });
 
   return render === undefined ? <p {...rootProps} /> : render(rootProps);
 }
@@ -31,7 +32,7 @@ export function ProseLead({ render, ...nativeProps }: ProseLeadProps) {
  * space with it.
  */
 export function ProseAnchor({ children, render, ...nativeProps }: ProseAnchorProps) {
-  const rootProps: ProsePartProps = { ...nativeProps, children, 'data-part': 'anchor' };
+  const rootProps: ProsePartProps = keyedProps({ ...nativeProps, children, 'data-part': 'anchor' });
 
   return (
     <>
@@ -51,14 +52,14 @@ export function ProseAnchor({ children, render, ...nativeProps }: ProseAnchorPro
  * type in place, so a card inside a large region is set in the region's text.
  */
 export function ProseExclude({ render, ...nativeProps }: ProseExcludeProps) {
-  const rootProps: ProsePartProps = { ...nativeProps, 'data-part': 'exclude' };
+  const rootProps: ProsePartProps = keyedProps({ ...nativeProps, 'data-part': 'exclude' });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
 
 /** What GitHub Flavored Markdown emits at the end of a document. */
 export function ProseFootnotes({ render, ...nativeProps }: ProseFootnotesProps) {
-  const rootProps: ProsePartProps = { ...nativeProps, 'data-part': 'footnotes' };
+  const rootProps: ProsePartProps = keyedProps({ ...nativeProps, 'data-part': 'footnotes' });
 
   return render === undefined ? <section {...rootProps} /> : render(rootProps);
 }

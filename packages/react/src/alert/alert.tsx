@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/alert/alert.css';
 
 import { alertMessages } from '@slotted/core/i18n';
@@ -129,14 +130,14 @@ export function Alert({
 
   const glyph = TONE_GLYPH[tone ?? defaults.tone];
 
-  const rootProps: AlertRootProps = {
+  const rootProps: AlertRootProps = keyedProps({
     ...(hasTitle ? { 'aria-labelledby': titleId } : {}),
     ...nativeProps,
     ...(isOpen ? { 'data-open': '' } : {}),
     children: (
       <AlertProvider value={context}>
         {hideIcon || (icon == null && glyph === null) ? null : (
-          <span aria-hidden="true" data-part="icon">
+          <span aria-hidden="true" data-part="icon" data-part-icon="">
             {icon ??
               (glyph === null ? null : (
                 <Icon>
@@ -150,6 +151,7 @@ export function Alert({
           <button
             aria-label={t('dismiss')}
             data-part="dismiss"
+            data-part-dismiss=""
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
               /* A consumer that called preventDefault has refused the
                  dismissal, and a refused dismissal moves nothing. */
@@ -187,7 +189,7 @@ export function Alert({
     },
     ref,
     tabIndex: nativeProps.tabIndex ?? -1,
-  };
+  });
 
   return render === undefined ? <section {...rootProps} /> : render(rootProps);
 }

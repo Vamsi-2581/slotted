@@ -5,6 +5,6 @@ import { Directive } from '@angular/core';
   selector: '[slCardBody]',
   standalone: true,
   exportAs: 'slCardBody',
-  host: { 'data-part': 'body' },
+  host: { 'data-part': 'body', 'data-part-body': '' },
 })
 export class SlCardBody {}

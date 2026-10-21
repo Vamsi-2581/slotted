@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { useId } from 'react';
 import type { MouseEvent } from 'react';
 
@@ -49,11 +50,11 @@ export function Radio({
   const checked = group.value === value;
   const resolvedDisabled = disabled ?? group.disabled;
 
-  const rootProps: RadioRootProps = {
+  const rootProps: RadioRootProps = keyedProps({
     children: (
       <>
         <input
-          {...nativeProps}
+          {...withSelectorKey(nativeProps, 'part', 'control')}
           aria-describedby={
             /* What the field says is said once, on the group, which is the
                control as far as the field is concerned. */
@@ -62,7 +63,7 @@ export function Radio({
               .join(' ') || undefined
           }
           checked={checked}
-          data-part="control"
+
           disabled={resolvedDisabled}
           id={controlId}
           name={group.name}
@@ -78,18 +79,18 @@ export function Radio({
           type="radio"
           value={value}
         />
-        <span data-part="indicator">
+        <span data-part="indicator" data-part-indicator="">
           <Icon>
             <Glyph name="dot" />
           </Icon>
         </span>
         {children === undefined ? null : (
-          <label data-part="label" htmlFor={controlId}>
+          <label data-part="label" data-part-label="" htmlFor={controlId}>
             {children}
           </label>
         )}
         {description === undefined ? null : (
-          <p data-part="description" id={descriptionId}>
+          <p data-part="description" data-part-description="" id={descriptionId}>
             {description}
           </p>
         )}
@@ -100,7 +101,7 @@ export function Radio({
     ...(resolvedDisabled === true ? { 'data-disabled': '' } : {}),
     'data-part': 'item',
     style,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

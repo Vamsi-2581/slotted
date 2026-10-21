@@ -786,7 +786,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'load-more',
     title: 'Load more',
-    note: 'With an unknown total the footer states the range without one and offers Load more; when the grid windows its rows, onLoadMore is called on its own as the window nears the end.',
+    note: 'With an unknown total the footer states the range without one. onLoadMore is called on its own as the reader nears the end, and the footer says a page is loading; it offers a control only to retry a page that failed (loadMoreFailed). loadMoreTrigger="button" asks only from a Load more control, "both" does the two.',
     snippet: defineSnippet({
       id: 'data-grid-react-load-more',
       language: 'tsx',
@@ -1020,7 +1020,7 @@ const api = apiRows([
     'GridColumn<Row>[]',
     '—',
     'DataGrid',
-    'The column model: id, label, description, kind, accessor, format, compare, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse — and help, a node for the column’s help popover.',
+    'The column model: id, label, description, kind, accessor, format, compare, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, pinned (end by default for kind actions), options, aggregate, validate, parse — and help, a node for the column’s help popover.',
   ],
   [
     'description',
@@ -1076,7 +1076,7 @@ const api = apiRows([
     'boolean',
     '—',
     'DataGrid',
-    'Whether a page past this one exists when the total is unknown; the footer offers Load more.',
+    'Whether a page past this one exists when the total is unknown; loadMoreTrigger decides what asks for it.',
   ],
   [
     'loading',
@@ -1386,6 +1386,20 @@ const api = apiRows([
     'Rows left below the window before onLoadMore is called.',
   ],
   ['onLoadMore', '() => void', '—', 'DataGrid', 'Asked for the next page when hasMore is true.'],
+  [
+    'loadMoreTrigger',
+    "'scroll' | 'button' | 'both'",
+    'scroll',
+    'DataGrid',
+    'What asks for the next page: nearing the end, with a loading status in the footer; a Load more control; or both.',
+  ],
+  [
+    'loadMoreFailed',
+    'boolean',
+    'false',
+    'DataGrid',
+    'The last page asked for failed: the automatic request stops and the footer offers Try again.',
+  ],
   ['onRetry', '() => void', '—', 'DataGrid', 'The error state’s Try again.'],
   ['skeletonRows', 'number', '8', 'DataGrid', 'Rows the first load draws.'],
   [
@@ -1591,7 +1605,7 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold and skeletonRows once for a subtree. A grid that states one itself still wins. Its words and its locale come from the language in force (SlottedProvider).',
+    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, loadMoreTrigger and skeletonRows once for a subtree. A grid that states one itself still wins. Its words and its locale come from the language in force (SlottedProvider).',
   ],
   [
     '@slotted/core/grid',

@@ -36,7 +36,7 @@
    * overflow. The margin pulls it past the start edge, where overflow is not
    * scrollable, and the overflow measures zero.
    */
-  [data-ui='visually-hidden']:not([data-focusable]:focus-within) {
+  [data-ui-visually-hidden]:not([data-focusable]:focus-within) {
     block-size: 1px;
     border: 0;
     clip-path: inset(50%);

@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/alert/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./alert.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./alert.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./alert.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /**
  * Whitespace is collapsed rather than removed: a descendant selector and a
@@ -23,8 +36,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
 function rule(selector) {
@@ -41,7 +54,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.alert.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -54,14 +70,14 @@ test('styles every part the contract declares', () => {
 test('places the actions and the dismiss control outside the region that announces', () => {
   for (const part of ['icon', 'content', 'actions', 'dismiss']) {
     assert.ok(
-      normalized.includes(`${ui}>[data-part='${part}']`),
+      normalized.includes(`${ui}>[data-part-${part.toLowerCase()}]`),
       `${part} is not placed as a child of the root`,
     );
   }
-  assert.match(rule(`${ui}>[data-part='content']`), /grid-column:2/);
-  assert.match(rule(`${ui}>[data-part='actions']`), /grid-column:2/);
-  assert.match(rule(`${ui}>[data-part='actions']`), /grid-row:2/);
-  assert.match(rule(`${ui}>[data-part='dismiss']`), /grid-column:3/);
+  assert.match(rule(`${ui}>[data-part-content]`), /grid-column:2/);
+  assert.match(rule(`${ui}>[data-part-actions]`), /grid-column:2/);
+  assert.match(rule(`${ui}>[data-part-actions]`), /grid-row:2/);
+  assert.match(rule(`${ui}>[data-part-dismiss]`), /grid-column:3/);
 });
 
 /**
@@ -101,7 +117,7 @@ test('gives every tone its own colour and leaves the glyph to the binding', () =
  */
 test('draws the mark as a disc with the symbol cut out, on the title’s first line', () => {
   assert.match(rule(root), /--_mark-size:round\(nearest,\s*1\.2em,\s*2px\)/);
-  const icon = rule(`${ui}>[data-part='icon']`);
+  const icon = rule(`${ui}>[data-part-icon]`);
   assert.match(icon, /align-self:baseline/);
   assert.match(icon, /position:relative/);
   assert.match(icon, /block-size:var\(--_mark-size\)/);
@@ -113,7 +129,7 @@ test('draws the mark as a disc with the symbol cut out, on the title’s first l
   assert.match(icon, /margin-block-start:calc\(-1 \* var\(--_mark-size\)\)/);
   assert.match(icon, /--slotted-icon-size:calc\(var\(--_mark-size\) \* 12 \/ 11\)/);
   assert.ok(!/content:'[^']/.test(icon), 'the mark is drawn with a character');
-  assert.match(rule(`${ui}>[data-part='content']`), /align-self:baseline/);
+  assert.match(rule(`${ui}>[data-part-content]`), /align-self:baseline/);
   assert.match(icon, /contain:layout/);
   for (const glyph of Object.values(contract.toneGlyphs)) {
     if (glyph === null) continue;
@@ -176,7 +192,7 @@ test('sizes the dismiss control from its glyph, floored at the target minimum', 
     rule(root),
     /--_dismiss-size:var\(--slotted-alert-dismiss-size,max\(var\(--slotted-target-min,24px\),min\(calc\(var\(--_glyph-size\) \+ 2 \* var\(--slotted-space-2,0\.25rem\)\),var\(--_inner-size\)\)\)\)/,
   );
-  const dismiss = rule(`${ui}>[data-part='dismiss']`);
+  const dismiss = rule(`${ui}>[data-part-dismiss]`);
   assert.match(dismiss, /block-size:var\(--_dismiss-size\)/);
   assert.match(dismiss, /inline-size:var\(--_dismiss-size\)/);
 });
@@ -204,7 +220,7 @@ test('holds hover and press back for a control the browser has refused', () => {
  */
 test('draws a focus ring on the control and on the box, and insets only one', () => {
   assert.match(
-    rule(`${ui}>[data-part='dismiss']:focus-visible`),
+    rule(`${ui}>[data-part-dismiss]:focus-visible`),
     /outline-offset:calc\(-1 ?\* ?var\(--slotted-focus-ring-width/,
   );
   assert.match(rule(`${root}:focus-visible`), /outline-offset:var\(--slotted-focus-ring-offset/);
@@ -247,7 +263,7 @@ test('gives a starting style to a live alert and to no other', () => {
 test('rounds every line box it sets to an even pixel', () => {
   const even = /line-height:round\(nearest,calc\(var\(--_line-height\) \* 1em\),2px\)/;
   assert.match(rule(root), even);
-  assert.match(rule(`${ui} [data-part='description']`), even);
+  assert.match(rule(`${ui} [data-part-description]`), even);
 });
 
 /**
@@ -258,7 +274,7 @@ test('rounds every line box it sets to an even pixel', () => {
 test('centres the page banner’s dismiss control on its whole box', () => {
   const wide = normalized.slice(normalized.indexOf('@container slotted-alert (min-width:40rem)'));
   const dismiss =
-    wide.split(`${ui}[data-reach='page']>[data-part='dismiss']{`)[1]?.split('}')[0] ?? '';
+    wide.split(`${ui}[data-reach='page']>[data-part-dismiss]{`)[1]?.split('}')[0] ?? '';
   assert.match(dismiss, /margin-block:0/);
 });
 
@@ -299,7 +315,7 @@ test('answers its own inline size, in a container it owns', () => {
 test('keeps an edge and a silhouette when the system takes the palette', () => {
   const block = css.slice(css.indexOf('forced-colors: active'));
   assert.match(block, /border-color:\s*CanvasText/);
-  assert.doesNotMatch(block, /\[data-part='icon'\]/);
+  assert.doesNotMatch(block, /\[data-part-icon\]/);
 });
 
 /**
@@ -389,9 +405,9 @@ test('makes the box a programmatic focus destination and never a tab stop', () =
  * min-content size the grid reads, and the clamped track is the other half.
  */
 test('breaks an unbreakable title inside the box rather than growing the box', () => {
-  assert.match(rule(`${ui}>[data-part='content']`), /grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(rule(`${ui}>[data-part-content]`), /grid-template-columns:minmax\(0,1fr\)/);
   for (const part of ['title', 'description']) {
-    const words = rule(`${ui} [data-part='${part}']`);
+    const words = rule(`${ui} [data-part-${part.toLowerCase()}]`);
     assert.match(words, /overflow-wrap:anywhere/, `${part} keeps break-word`);
     assert.match(words, /min-inline-size:0/, `${part} does not shrink`);
   }

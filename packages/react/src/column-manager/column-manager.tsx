@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/column-manager/column-manager.css';
 
 import { createDragController, type DragController, type DragState } from '@slotted/core/drag';
@@ -578,6 +579,7 @@ export function ColumnManager<Row = unknown>({
       <div
         data-column={id}
         data-part="item"
+        data-part-item=""
         {...(isHidden ? { 'data-hidden': '' } : {})}
         {...(locked ? { 'data-locked': '' } : {})}
         {...(bySpace ? { 'data-space-hidden': '' } : {})}
@@ -588,6 +590,7 @@ export function ColumnManager<Row = unknown>({
           aria-disabled={handleDisabled || undefined}
           aria-label={t('reorder', { column: column.label })}
           data-part="handle"
+          data-part-handle=""
           onKeyDown={(event) => onHandleKeyDown(event, id, key)}
           type="button"
           {...(handleDisabled ? { 'data-disabled': '' } : {})}
@@ -596,7 +599,7 @@ export function ColumnManager<Row = unknown>({
             <Glyph name="grip-vertical" />
           </Icon>
         </button>
-        <div data-part="visibility">
+        <div data-part="visibility" data-part-visibility="">
           <Checkbox
             checked={!isHidden}
             description={column.description}
@@ -613,7 +616,9 @@ export function ColumnManager<Row = unknown>({
             {status === null ? null : (
               <>
                 {' '}
-                <span data-part="status">{status}</span>
+                <span data-part="status" data-part-status="">
+                  {status}
+                </span>
               </>
             )}
           </Checkbox>
@@ -622,9 +627,9 @@ export function ColumnManager<Row = unknown>({
           <MenuTrigger
             render={(props) => (
               <button
-                {...props}
+                {...withSelectorKey(props, 'part', 'pin')}
                 aria-label={t('pin', { column: column.label })}
-                data-part="pin"
+
                 type="button"
                 {...(zone ? { 'data-pinned': '' } : {})}
               >
@@ -674,23 +679,26 @@ export function ColumnManager<Row = unknown>({
 
   const panelNode = (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'root')}
       aria-labelledby={nativeProps['aria-labelledby'] ?? titleId}
       data-apply={applyMode}
-      data-part="root"
+
       data-presentation={presentation}
       data-ui="column-manager"
+      data-ui-column-manager=""
       id={nativeProps.id ?? rootId}
       ref={setRoot}
       role="group"
     >
-      <div data-part="header">
-        <h2 data-part="title" id={titleId}>
+      <div data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id={titleId}>
           {t('title')}
         </h2>
-        <span data-part="summary">{t('visibleCount', { visible, total })}</span>
+        <span data-part="summary" data-part-summary="">
+          {t('visibleCount', { visible, total })}
+        </span>
       </div>
-      <div data-part="search">
+      <div data-part="search" data-part-search="">
         <TextField
           aria-label={t('search')}
           clearable
@@ -706,9 +714,9 @@ export function ColumnManager<Row = unknown>({
           value={query}
         />
       </div>
-      <div data-part="list">
+      <div data-part="list" data-part-list="">
         {sections.length === 0 && searching ? (
-          <div data-part="empty" role="status">
+          <div data-part="empty" data-part-empty="" role="status">
             {t('noResults')}
           </div>
         ) : (
@@ -716,23 +724,32 @@ export function ColumnManager<Row = unknown>({
             <div
               aria-labelledby={`${base}-${key}`}
               data-part="section"
+              data-part-section=""
               data-zone={key}
               key={key}
               role="group"
               {...(sections.length === 1 ? { 'data-sole': '' } : {})}
               {...(drag.container === key && drag.index !== null ? { 'data-drop-target': '' } : {})}
             >
-              <div data-part="section-label" id={`${base}-${key}`}>
+              <div data-part="section-label" data-part-section-label="" id={`${base}-${key}`}>
                 {sectionLabel[key]}
               </div>
               {ids.map((id, index) => (
                 <Fragment key={id}>
                   {dropAt(key, zones[key].indexOf(id)) ? (
-                    <div aria-hidden="true" data-part="drop-indicator" />
+                    <div
+                      aria-hidden="true"
+                      data-part="drop-indicator"
+                      data-part-drop-indicator=""
+                    />
                   ) : null}
                   {renderItem(id, key)}
                   {index === ids.length - 1 && dropAt(key, zones[key].length) ? (
-                    <div aria-hidden="true" data-part="drop-indicator" />
+                    <div
+                      aria-hidden="true"
+                      data-part="drop-indicator"
+                      data-part-drop-indicator=""
+                    />
                   ) : null}
                 </Fragment>
               ))}
@@ -740,11 +757,11 @@ export function ColumnManager<Row = unknown>({
           ))
         )}
       </div>
-      <div data-part="footer">
+      <div data-part="footer" data-part-footer="">
         <Button
           disabled={working.hidden.length === 0}
           onClick={(event) => edit({ ...working, hidden: [] }, pressReason(event), event)}
-          render={(props) => <button {...props} data-part="show-all" />}
+          render={(props) => <button {...withSelectorKey(props, 'part', 'show-all')} />}
           size="sm"
           tone="secondary"
           variant="ghost"
@@ -754,7 +771,7 @@ export function ColumnManager<Row = unknown>({
         <Button
           disabled={sameState(working, normalizedDefault)}
           onClick={(event) => edit(normalizedDefault, 'clear', event)}
-          render={(props) => <button {...props} data-part="reset" />}
+          render={(props) => <button {...withSelectorKey(props, 'part', 'reset')} />}
           size="sm"
           tone="secondary"
           variant="ghost"
@@ -765,7 +782,7 @@ export function ColumnManager<Row = unknown>({
           <>
             <Button
               onClick={onCancel}
-              render={(props) => <button {...props} data-part="cancel" />}
+              render={(props) => <button {...withSelectorKey(props, 'part', 'cancel')} />}
               size="sm"
               tone="secondary"
               variant="outline"
@@ -775,7 +792,7 @@ export function ColumnManager<Row = unknown>({
             <Button
               disabled={draft === null || sameState(draft, state)}
               onClick={onApply}
-              render={(props) => <button {...props} data-part="apply" />}
+              render={(props) => <button {...withSelectorKey(props, 'part', 'apply')} />}
               size="sm"
             >
               {t('apply')}
@@ -882,7 +899,7 @@ export function ColumnManagerTrigger({
   const count = snapshot.hidden;
   const sentence = snapshot.t('hiddenCount', { count });
 
-  const rootProps: ColumnManagerTriggerRootProps = {
+  const rootProps: ColumnManagerTriggerRootProps = keyedProps({
     ...nativeProps,
     'aria-controls': snapshot.open ? snapshot.rootId : undefined,
     'aria-expanded': snapshot.open,
@@ -895,7 +912,7 @@ export function ColumnManagerTrigger({
         {children}
         {count > 0 ? (
           <>
-            <span aria-hidden="true" data-part="count">
+            <span aria-hidden="true" data-part="count" data-part-count="">
               {count}
             </span>{' '}
             <VisuallyHidden>{sentence}</VisuallyHidden>
@@ -910,7 +927,7 @@ export function ColumnManagerTrigger({
     },
     ref: setNode,
     type: nativeProps.type ?? 'button',
-  };
+  });
 
   if (render) return render(rootProps);
   const { children: content, ref: buttonRef, ...buttonProps } = rootProps;
@@ -918,7 +935,7 @@ export function ColumnManagerTrigger({
     <Button
       {...(buttonProps as object)}
       ref={buttonRef as Ref<HTMLButtonElement>}
-      render={(props) => <button {...props} data-part="trigger" />}
+      render={(props) => <button {...withSelectorKey(props, 'part', 'trigger')} />}
       tone="secondary"
       variant="outline"
     >

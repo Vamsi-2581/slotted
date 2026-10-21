@@ -191,8 +191,8 @@ function lastCompound(selector) {
  */
 function box(family, selector) {
   const compound = lastCompound(selector);
-  const ui = /\[data-ui=['"]([^'"]+)['"]\]/.exec(compound);
-  const part = /\[data-part=['"]([^'"]+)['"]\]/.exec(compound);
+  const ui = /\[data-ui-([a-z0-9-]+)\]/.exec(compound);
+  const part = /\[data-part-([a-z0-9-]+)\]/.exec(compound);
   const pseudo = /::[a-z-]+/.exec(compound);
   return `${ui ? ui[1] : family}/${part ? part[1] : '(root)'}${pseudo ? pseudo[0] : ''}`;
 }

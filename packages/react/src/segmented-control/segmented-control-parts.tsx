@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { useId } from 'react';
 import type { MouseEvent } from 'react';
 
@@ -54,14 +55,14 @@ export function Segment({
   const checked = control.value === value;
   const resolvedDisabled = disabled ?? control.disabled;
 
-  const rootProps: SegmentRootProps = {
+  const rootProps: SegmentRootProps = keyedProps({
     children: (
       <>
         <input
-          {...nativeProps}
+          {...withSelectorKey(nativeProps, 'part', 'control')}
           aria-describedby={describedBy}
           checked={checked}
-          data-part="control"
+
           disabled={resolvedDisabled}
           id={controlId}
           name={control.name}
@@ -78,11 +79,15 @@ export function Segment({
           value={value}
         />
         {icon === undefined ? null : (
-          <span aria-hidden="true" data-part="icon">
+          <span aria-hidden="true" data-part="icon" data-part-icon="">
             {icon}
           </span>
         )}
-        {children === undefined ? null : <span data-part="label">{children}</span>}
+        {children === undefined ? null : (
+          <span data-part="label" data-part-label="">
+            {children}
+          </span>
+        )}
       </>
     ),
     className,
@@ -90,7 +95,7 @@ export function Segment({
     ...(resolvedDisabled === true ? { 'data-disabled': '' } : {}),
     'data-part': 'item',
     style,
-  };
+  });
 
   return render === undefined ? <label {...rootProps} /> : render(rootProps);
 }

@@ -2,8 +2,21 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const css = readFileSync(new URL('./data-grid.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./data-grid.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./data-grid.harness.html', import.meta.url), 'utf8'),
+);
 const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/data-grid/contract.json', import.meta.url)),
 );
@@ -47,16 +60,16 @@ test('lays every row out as a grid over the template the binding writes', () => 
      cell may hold rows of its own (a multi-select's chips are a `row`), and a
      descendant selector laid those out on this grid's template. */
   const groups =
-    "> [data-part='scroll'] > :is([data-part='head'],[data-part='body'],[data-part='pinned-rows'],[data-part='summary'],[data-part='loader'])";
-  const row = rule(`[data-ui='data-grid'] ${groups} > [role='row']`);
+    '> [data-part-scroll] > :is([data-part-head],[data-part-body],[data-part-pinned-rows],[data-part-summary],[data-part-loader])';
+  const row = rule(`[data-ui-data-grid] ${groups} > [role='row']`);
   assert.match(row, /display:grid;/);
   /* The filler after the template is `auto`, not `1fr`: an `fr` filler shared
      the free space with a flexible column, which then stopped at half the
      frame; `auto` stretches only where no flexible track exists. */
   assert.match(row, /grid-template-columns:var\(--slotted-data-grid-template,none\) auto;/);
-  const cell = rule(`[data-ui='data-grid'] ${groups} > [role='row'] > *`);
+  const cell = rule(`[data-ui-data-grid] ${groups} > [role='row'] > *`);
   assert.match(cell, /grid-column:var\(--slotted-data-grid-column,auto\);/);
-  assert.doesNotMatch(normalized, /\[data-ui='data-grid'\] \[role='row'\]\{/);
+  assert.doesNotMatch(normalized, /\[data-ui-data-grid\] \[role='row'\]\{/);
 });
 
 /**
@@ -68,10 +81,10 @@ test('lays every row out as a grid over the template the binding writes', () => 
  */
 test('sizes rows and row groups to fit the frame, not to their longest value', () => {
   const groups =
-    "> [data-part='scroll'] > :is([data-part='head'],[data-part='body'],[data-part='pinned-rows'],[data-part='summary'],[data-part='loader'])";
+    '> [data-part-scroll] > :is([data-part-head],[data-part-body],[data-part-pinned-rows],[data-part-summary],[data-part-loader])';
   for (const selector of [
-    `[data-ui='data-grid'] ${groups} > [role='row']`,
-    `[data-ui='data-grid'] ${groups}`,
+    `[data-ui-data-grid] ${groups} > [role='row']`,
+    `[data-ui-data-grid] ${groups}`,
   ]) {
     const block = rule(selector);
     assert.match(block, /inline-size:fit-content;/);
@@ -86,7 +99,7 @@ test('sizes rows and row groups to fit the frame, not to their longest value', (
  * scroller it must resolve against.
  */
 test('windows rows with padding and height, and never with a transform', () => {
-  const body = rule("[data-ui='data-grid'] > [data-part='scroll'] > [data-part='body']");
+  const body = rule('[data-ui-data-grid] > [data-part-scroll] > [data-part-body]');
   assert.match(body, /block-size:var\(--slotted-data-grid-window-total,auto\);/);
   assert.match(body, /padding-block-start:var\(--slotted-data-grid-window-start,0\);/);
   assert.doesNotMatch(declarations, /transform\s*:/);
@@ -99,11 +112,11 @@ test('windows rows with padding and height, and never with a transform', () => {
  */
 test('draws the cursor inward, at rest as a shadow and under focus as the ring', () => {
   const rest = rule(
-    "[data-ui='data-grid'] [role='gridcell'][data-current]:not([data-editing]),[data-ui='data-grid'] [role='rowheader'][data-current]:not([data-editing]),[data-ui='data-grid'] [role='columnheader'][data-current]",
+    "[data-ui-data-grid] [role='gridcell'][data-current]:not([data-editing]),[data-ui-data-grid] [role='rowheader'][data-current]:not([data-editing]),[data-ui-data-grid] [role='columnheader'][data-current]",
   );
   assert.match(rest, /box-shadow:inset 0 0 0 var\(--_ring-width\) var\(--_cursor-rest\);/);
   const focus = rule(
-    "[data-ui='data-grid'] [role='row'] > [role='gridcell']:focus-visible:not([data-editing]),[data-ui='data-grid'] [role='row'] > [role='rowheader']:focus-visible:not([data-editing]),[data-ui='data-grid'] [role='row'] > [role='columnheader']:focus-visible",
+    "[data-ui-data-grid] [role='row'] > [role='gridcell']:focus-visible:not([data-editing]),[data-ui-data-grid] [role='row'] > [role='rowheader']:focus-visible:not([data-editing]),[data-ui-data-grid] [role='row'] > [role='columnheader']:focus-visible",
   );
   assert.match(
     focus,
@@ -119,7 +132,7 @@ test('draws the cursor inward, at rest as a shadow and under focus as the ring',
 /** A pinned cell covers what slides under it with the row's own ground. */
 test('pins a column with sticky at the offset the binding writes, on the row’s own ground', () => {
   for (const edge of ['start', 'end']) {
-    const pinned = rule(`[data-ui='data-grid'] [data-pinned='${edge}']`);
+    const pinned = rule(`[data-ui-data-grid] [data-pinned='${edge}']`);
     assert.match(pinned, /position:sticky;/);
     assert.match(pinned, /background-color:inherit;/);
     assert.match(
@@ -127,18 +140,16 @@ test('pins a column with sticky at the offset the binding writes, on the row’s
       new RegExp(`inset-inline-${edge}:var\\(--slotted-data-grid-pin-offset,0\\);`),
     );
   }
-  const corner = rule(
-    "[data-ui='data-grid'] > [data-part='scroll'] > [data-part='head'] [data-pinned]",
-  );
+  const corner = rule('[data-ui-data-grid] > [data-part-scroll] > [data-part-head] [data-pinned]');
   assert.match(corner, /z-index:calc\(var\(--slotted-z-index-sticky,100\) \+ 2\);/);
   /* The zone's edge is the hairline the rows are ruled with; while something
      slides under it the line casts a short shadow, never a stronger line: a
      dark rule down the body read as a frame inside the frame. */
-  const edge = rule("[data-ui='data-grid'] [data-pinned][data-pin-edge]::after");
+  const edge = rule('[data-ui-data-grid] [data-pinned][data-pin-edge]::after');
   assert.match(edge, /background-color:var\(--_rule\);/);
   assert.match(edge, /inline-size:var\(--_rule-width\);/);
   const hidden = rule(
-    "[data-ui='data-grid'] [data-part='scroll'][data-overflowing]:not([data-at-start]) [data-pinned='start'][data-pin-edge]::after",
+    "[data-ui-data-grid] [data-part-scroll][data-overflowing]:not([data-at-start]) [data-pinned='start'][data-pin-edge]::after",
   );
   assert.match(
     hidden,
@@ -148,11 +159,11 @@ test('pins a column with sticky at the offset the binding writes, on the row’s
   /* The cells end where the rule under the row begins: the track is the row
      less the rule, or a pinned cell painted above its row covered the rule. */
   const body = rule(
-    "[data-ui='data-grid']:is([data-variant='ruled'],[data-variant='framed']) > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows'])",
+    "[data-ui-data-grid]:is([data-variant='ruled'],[data-variant='framed']) > [data-part-scroll] > :is([data-part-body],[data-part-pinned-rows])",
   );
   assert.match(body, /--_track:calc\(var\(--_row-block\) - var\(--_rule-width\)\);/);
   const fixed = rule(
-    "[data-ui='data-grid'][data-rows='fixed'] > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row']",
+    "[data-ui-data-grid][data-rows='fixed'] > [data-part-scroll] > :is([data-part-body],[data-part-pinned-rows]) > [data-part-row]",
   );
   assert.match(fixed, /block-size:var\(--_row-block\);grid-auto-rows:var\(--_track\);/);
 });
@@ -166,7 +177,7 @@ test('pins a column with sticky at the offset the binding writes, on the row’s
  * resting trace; the cursor's own carries it whole.
  */
 test('hands the editing cell’s inset, height and type to the plain control', () => {
-  const editing = rule("[data-ui='data-grid'] [data-part='cell'][data-editing]");
+  const editing = rule('[data-ui-data-grid] [data-part-cell][data-editing]');
   assert.match(editing, /(^|;)padding:0;/);
   for (const step of ['sm', 'md', 'lg']) {
     assert.match(
@@ -183,13 +194,13 @@ test('hands the editing cell’s inset, height and type to the plain control', (
   assert.match(editing, /--slotted-control-font-size-sm:var\(--_font-size\);/);
   assert.match(editing, /--slotted-focus-ring-width:0px;/);
   assert.match(editing, /box-shadow:inset 0 0 0 var\(--_ring-width\) var\(--_cursor-rest\);/);
-  const editor = rule("[data-ui='data-grid'] [data-part='cell'] > [data-part='editor']");
+  const editor = rule('[data-ui-data-grid] [data-part-cell] > [data-part-editor]');
   assert.match(editor, /margin:var\(--_ring-width\);/);
-  const invalid = rule("[data-ui='data-grid'] [data-part='cell'][data-editing][data-invalid]");
+  const invalid = rule('[data-ui-data-grid] [data-part-cell][data-editing][data-invalid]');
   assert.match(invalid, /--slotted-focus-ring-color:var\(--slotted-focus-ring-color-invalid\);/);
   /* The filter row's control stands inside its cell's trace the same way. */
   const operand = rule(
-    "[data-ui='data-grid'] [data-part='filter-cell'] > [data-part='filter-operand'],[data-ui='data-grid'] [data-part='filter-cell'] > :not([data-part]) > [data-part='filter-operand']",
+    '[data-ui-data-grid] [data-part-filter-cell] > [data-part-filter-operand],[data-ui-data-grid] [data-part-filter-cell] > :not([data-part]) > [data-part-filter-operand]',
   );
   assert.match(operand, /margin:var\(--_ring-width\);/);
 });
@@ -201,12 +212,12 @@ test('hands the editing cell’s inset, height and type to the plain control', (
  * empty scene, where every action button was missing.
  */
 test('scopes the row-actions reveal to the cell’s own child', () => {
-  assert.doesNotMatch(normalized, /\[data-ui='data-grid'\] \[data-part='actions'\]\{/);
-  const actions = rule("[data-ui='data-grid'] [data-part='cell'] > [data-part='actions']");
+  assert.doesNotMatch(normalized, /\[data-ui-data-grid\] \[data-part-actions\]\{/);
+  const actions = rule('[data-ui-data-grid] [data-part-cell] > [data-part-actions]');
   assert.match(actions, /opacity:0;/);
   assert.match(
     normalized,
-    /\[data-part='row'\]\[data-current\] \[data-part='cell'\] > \[data-part='actions'\]/,
+    /\[data-part-row\]\[data-current\] \[data-part-cell\] > \[data-part-actions\]/,
   );
 });
 
@@ -216,7 +227,7 @@ test('scopes the row-actions reveal to the cell’s own child', () => {
  * stating its own width rather than taking the operands' natural one.
  */
 test('lays the filter panel out as one line per condition', () => {
-  const panel = rule("[data-ui='data-grid'][data-part='filter-panel']");
+  const panel = rule('[data-ui-data-grid][data-part-filter-panel]');
   assert.match(panel, /grid-template-columns:max-content var\(--_operator-size\) minmax\(0,1fr\);/);
   assert.match(panel, /inline-size:var\(--slotted-data-grid-filter-panel-size,24rem\);/);
   /* The popover pads its header and its body, not its surface; the panel
@@ -231,11 +242,11 @@ test('lays the filter panel out as one line per condition', () => {
      Angular binding draws it inside a host element of its own, and a child
      combinator left that popover at sixteen rem with the panel out of it. */
   const layer = rule(
-    "[data-ui='popover']:has(> [data-part='content'] [data-ui='data-grid'][data-part='filter-panel'])",
+    '[data-ui-popover]:has(> [data-part-content] [data-ui-data-grid][data-part-filter-panel])',
   );
   assert.doesNotMatch(
     normalized,
-    /\[data-part='content'\] > \[data-ui='data-grid'\]\[data-part='filter-panel'\]/,
+    /\[data-part-content\] > \[data-ui-data-grid\]\[data-part-filter-panel\]/,
   );
   assert.match(
     layer,
@@ -245,7 +256,7 @@ test('lays the filter panel out as one line per condition', () => {
     normalized,
     /--_operator-size:var\(--slotted-data-grid-filter-operator-size,7rem\);/,
   );
-  const join = rule("[data-ui='data-grid'][data-part='filter-panel'] [data-part='filter-join']");
+  const join = rule('[data-ui-data-grid][data-part-filter-panel] [data-part-filter-join]');
   assert.match(join, /grid-column:1;/);
 });
 
@@ -261,10 +272,10 @@ test('lays the filter panel out as one line per condition', () => {
  */
 test('reaches every part a binding may host through its host element', () => {
   const through = (part) =>
-    new RegExp(`>:not\\(\\[data-part\\]\\)(:last-child)?>\\[data-part='${part}'\\]`);
+    new RegExp(`>:not\\(\\[data-part\\]\\)(:last-child)?>\\[data-part-${part}\\]`);
   for (const selector of normalized.match(/[^{}]+(?=\{)/g) ?? []) {
     for (const part of ['filter-panel', 'filter-operand']) {
-      const asChild = new RegExp(`(^|[^)])>\\[data-part='${part}'\\]`);
+      const asChild = new RegExp(`(^|[^)])>\\[data-part-${part}\\]`);
       if (!asChild.test(selector)) continue;
       assert.match(
         selector,
@@ -274,12 +285,10 @@ test('reaches every part a binding may host through its host element', () => {
     }
     /* The control inside the editor and the operand is a family of its own,
        hosted the same way. */
-    if (
-      /\[data-part='(editor|filter-operand)'\](\[[^\]]*\])*>\[data-part='root'\]/.test(selector)
-    ) {
+    if (/\[data-part-(editor|filter-operand)\](\[[^\]]*\])*>\[data-part-root\]/.test(selector)) {
       assert.match(
         selector,
-        /\[data-part='(editor|filter-operand)'\](\[[^\]]*\])*>:not\(\[data-part\]\)(:last-child)?>\[data-part='root'\]/,
+        /\[data-part-(editor|filter-operand)\](\[[^\]]*\])*>:not\(\[data-part\]\)(:last-child)?>\[data-part-root\]/,
         `${selector} reaches a hosted control as a child but not through its host`,
       );
     }
@@ -287,10 +296,10 @@ test('reaches every part a binding may host through its host element', () => {
 });
 
 test('draws the filter row on the band and its operator on a square inner target', () => {
-  const cell = rule("[data-ui='data-grid'] [data-part='filter-row'] > [data-part='filter-cell']");
+  const cell = rule('[data-ui-data-grid] [data-part-filter-row] > [data-part-filter-cell]');
   assert.match(cell, /background-color:var\(--_band-surface\);/);
   const button = rule(
-    "[data-ui='data-grid'] [data-part='filter-cell'] [data-part='filter-operator'] > button",
+    '[data-ui-data-grid] [data-part-filter-cell] [data-part-filter-operator] > button',
   );
   assert.match(button, /inline-size:var\(--slotted-control-inner-size-sm,22px\);/);
   assert.match(button, /block-size:var\(--slotted-control-inner-size-sm,22px\);/);
@@ -298,16 +307,16 @@ test('draws the filter row on the band and its operator on a square inner target
 
 /** The sort mark takes no room on an unsorted column; the menu keeps its room and reveals. */
 test('reserves room for the column menu and none for an unsorted mark', () => {
-  const sort = rule("[data-ui='data-grid'] [data-part='column-header'] > [data-part='sort']");
+  const sort = rule('[data-ui-data-grid] [data-part-column-header] > [data-part-sort]');
   assert.match(sort, /display:none;/);
   const sorted = rule(
-    "[data-ui='data-grid'] [data-part='column-header'][data-sorted] > [data-part='sort']",
+    '[data-ui-data-grid] [data-part-column-header][data-sorted] > [data-part-sort]',
   );
   assert.match(sorted, /display:inline-flex;/);
-  const menu = rule("[data-ui='data-grid'] [data-part='column-menu']");
+  const menu = rule('[data-ui-data-grid] [data-part-column-menu]');
   assert.match(menu, /opacity:0;/);
   const filter = rule(
-    "[data-ui='data-grid'] [data-part='column-header'] [data-part='filter']:not([data-filtered],[data-open])",
+    '[data-ui-data-grid] [data-part-column-header] [data-part-filter]:not([data-filtered],[data-open])',
   );
   assert.match(filter, /display:none;/);
 });
@@ -315,7 +324,7 @@ test('reserves room for the column menu and none for an unsorted mark', () => {
 /** A value keeps its own direction inside a right-to-left grid. */
 test('keeps a cell value’s own writing direction', () => {
   const value = rule(
-    "[data-ui='data-grid'] [data-part='cell'] > span:not([data-ui], [data-part]),[data-ui='data-grid'] [data-part='row-header'] > span:not([data-ui], [data-part]),[data-ui='data-grid'] [data-part='summary-cell'] > span:not([data-ui], [data-part])",
+    '[data-ui-data-grid] [data-part-cell] > span:not([data-ui], [data-part]),[data-ui-data-grid] [data-part-row-header] > span:not([data-ui], [data-part]),[data-ui-data-grid] [data-part-summary-cell] > span:not([data-ui], [data-part])',
   );
   assert.match(value, /unicode-bidi:plaintext;/);
 });
@@ -328,7 +337,7 @@ test('keeps a cell value’s own writing direction', () => {
  */
 test('grows its own controls to the row on a coarse pointer', () => {
   const coarse = declarations.slice(declarations.indexOf('@media (pointer: coarse)'));
-  const root = coarse.slice(coarse.indexOf("[data-ui='data-grid'][data-part='root']"));
+  const root = coarse.slice(coarse.indexOf('[data-ui-data-grid][data-part-root]'));
   const block = root.slice(root.indexOf('{') + 1, root.indexOf('}'));
   assert.match(
     normalize(block),
@@ -350,10 +359,10 @@ test('makes its own controls a full touch target on a coarse pointer, with the g
     const rest = coarse.slice(at);
     return normalize(rest.slice(rest.indexOf('{') + 1, rest.indexOf('}')));
   };
-  const root = block("[data-ui='data-grid'][data-part='root']");
+  const root = block('[data-ui-data-grid][data-part-root]');
   assert.match(root, /--_target:var\(--slotted-target-comfortable,44px\);/);
   assert.match(root, /--_reach:max\(0px,calc\(\(var\(--_target\) - var\(--_control\)\) \/ 2\)\);/);
-  const controls = block("[data-ui='data-grid'] [data-part='column-help'],");
+  const controls = block('[data-ui-data-grid] [data-part-column-help],');
   assert.match(controls, /background-clip:content-box;/);
   assert.match(controls, /box-sizing:content-box;/);
   assert.match(controls, /padding:var\(--_reach\);/);
@@ -367,7 +376,7 @@ test('makes its own controls a full touch target on a coarse pointer, with the g
  * moment a filter emptied it.
  */
 test('keeps the empty scene’s padding inside the frame’s viewport', () => {
-  const body = rule("[data-ui='data-grid'] > [data-part='scroll'] > [data-part='empty']");
+  const body = rule('[data-ui-data-grid] > [data-part-scroll] > [data-part-empty]');
   assert.match(body, /inline-size:100cqi/);
   assert.match(body, /padding:/);
   assert.match(body, /box-sizing:border-box/);
@@ -380,7 +389,7 @@ test('keeps the empty scene’s padding inside the frame’s viewport', () => {
  */
 test('reserves the body row’s height in the loader, not the header’s', () => {
   const cell = rule(
-    "[data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [data-part='row'] > *",
+    '[data-ui-data-grid] > [data-part-scroll] > [data-part-loader] > [data-part-row] > *',
   );
   assert.match(cell, /min-block-size:max\(var\(--_row-block\),/);
 });
@@ -392,7 +401,7 @@ test('reserves the body row’s height in the loader, not the header’s', () =>
  */
 test('draws the column help as a header control that is always shown', () => {
   const shared = rule(
-    "[data-ui='data-grid'] [data-part='column-help'],[data-ui='data-grid'] [data-part='column-menu'],[data-ui='data-grid'] [data-part='column-header'] [data-part='filter'],[data-ui='data-grid'] [data-part='expander'],[data-ui='data-grid'] [data-part='group-toggle'],[data-ui='data-grid'] [data-part='tree-toggle']",
+    '[data-ui-data-grid] [data-part-column-help],[data-ui-data-grid] [data-part-column-menu],[data-ui-data-grid] [data-part-column-header] [data-part-filter],[data-ui-data-grid] [data-part-expander],[data-ui-data-grid] [data-part-group-toggle],[data-ui-data-grid] [data-part-tree-toggle]',
   );
   assert.match(shared, /inline-size:var\(--_control\);/);
   assert.match(shared, /block-size:var\(--_control\);/);
@@ -402,15 +411,15 @@ test('draws the column help as a header control that is always shown', () => {
   );
   assert.doesNotMatch(
     normalized,
-    /\[data-part='column-help'\]\{[^}]*opacity:0/,
+    /\[data-part-column-help\]\{[^}]*opacity:0/,
     'the help is never hidden at rest',
   );
-  assert.match(normalized, /\[data-ui='data-grid'\] \[data-part='column-help'\]:focus-visible,/);
+  assert.match(normalized, /\[data-ui-data-grid\] \[data-part-column-help\]:focus-visible,/);
 });
 
 /** The description is read through `aria-describedby` and takes no room in the header. */
 test('keeps the column description for the reader only', () => {
-  const hidden = rule("[data-ui='data-grid'] [data-part='column-description']");
+  const hidden = rule('[data-ui-data-grid] [data-part-column-description]');
   assert.match(hidden, /position:absolute;/);
   assert.match(hidden, /clip-path:inset\(50%\);/);
   assert.match(hidden, /inline-size:1px;/);
@@ -418,7 +427,7 @@ test('keeps the column description for the reader only', () => {
 
 /** The menu's layer is a portal: the description atop it is scoped to the menu, muted and inset like its items. */
 test('sets the column menu description as a muted caption over the items', () => {
-  const caption = rule("[data-ui='menu'] [data-part='column-menu-description']");
+  const caption = rule('[data-ui-menu] [data-part-column-menu-description]');
   assert.match(caption, /color:var\(--slotted-text-muted,GrayText\);/);
   assert.match(caption, /padding-inline:var\(--slotted-control-padding-inline-sm,0\.625rem\);/);
   assert.match(caption, /font-size:var\(--slotted-font-size-xs,0\.75rem\);/);
@@ -433,7 +442,7 @@ test('sets the column menu description as a muted caption over the items', () =>
  * column's text does and filling as many columns as the frame has room for.
  */
 test('draws the pop-in on the row’s second line, across the frame, after the gutters', () => {
-  const popin = rule("[data-ui='data-grid'] [data-part='popin']");
+  const popin = rule('[data-ui-data-grid] [data-part-popin]');
   assert.match(popin, /grid-column:1 \/ -1;/);
   assert.match(popin, /grid-row:2;/);
   assert.match(popin, /display:grid;/);
@@ -452,17 +461,17 @@ test('draws the pop-in on the row’s second line, across the frame, after the g
      further than the cap; the pop-in's line has no cap. A fixed length as a
      track's maximum is where an auto-height grid grows every track to. */
   const row = rule(
-    "[data-ui='data-grid'][data-popin] > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row']",
+    '[data-ui-data-grid][data-popin] > [data-part-scroll] > :is([data-part-body],[data-part-pinned-rows]) > [data-part-row]',
   );
   assert.match(row, /grid-template-rows:minmax\(var\(--_track\),auto\) auto;/);
   const summary = rule(
-    "[data-ui='data-grid'][data-popin] > [data-part='scroll'] > [data-part='summary'] > [role='row']",
+    "[data-ui-data-grid][data-popin] > [data-part-scroll] > [data-part-summary] > [role='row']",
   );
   assert.match(summary, /grid-template-rows:minmax\(var\(--_head-block\),auto\) auto;/);
   /* The chooser, the expander, the values and the actions are centred on the
      values' line, as in a fixed row. */
   const first = rule(
-    "[data-ui='data-grid'][data-popin] :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row'] > :is([role='gridcell'],[role='rowheader']):not([data-part='popin'])",
+    "[data-ui-data-grid][data-popin] :is([data-part-body],[data-part-pinned-rows]) > [data-part-row] > :is([role='gridcell'],[role='rowheader']):not([data-part-popin])",
   );
   assert.match(first, /align-items:center;/);
 });
@@ -474,12 +483,12 @@ test('draws the pop-in on the row’s second line, across the frame, after the g
  */
 test('grows an auto row to its content, capped by its cells and not its track', () => {
   const row = rule(
-    "[data-ui='data-grid'][data-rows='auto'] > [data-part='scroll'] > :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row']",
+    "[data-ui-data-grid][data-rows='auto'] > [data-part-scroll] > :is([data-part-body],[data-part-pinned-rows]) > [data-part-row]",
   );
   assert.match(row, /grid-auto-rows:minmax\(var\(--_track\),auto\);/);
   assert.doesNotMatch(normalized, /minmax\(var\(--_track\),var\(--_row-max-block\)\)/);
   const cell = rule(
-    "[data-ui='data-grid'][data-rows='auto'] :is([data-part='body'],[data-part='pinned-rows']) > [data-part='row'] > :is([role='gridcell'],[role='rowheader']):not([data-part='popin'])",
+    "[data-ui-data-grid][data-rows='auto'] :is([data-part-body],[data-part-pinned-rows]) > [data-part-row] > :is([role='gridcell'],[role='rowheader']):not([data-part-popin])",
   );
   assert.match(cell, /max-block-size:var\(--_row-max-block\);/);
   assert.match(cell, /overflow-y:clip;/);
@@ -487,13 +496,13 @@ test('grows an auto row to its content, capped by its cells and not its track', 
 
 test('grounds a plain header’s pinned cells on the surface, not on a band the row lacks', () => {
   const pinned = rule(
-    "[data-ui='data-grid'][data-variant='plain'] > [data-part='scroll'] > [data-part='head'] [data-pinned],[data-ui='data-grid'][data-variant='plain'] > [data-part='scroll'] > [data-part='head'] > [role='row'] > [data-part='selection']",
+    "[data-ui-data-grid][data-variant='plain'] > [data-part-scroll] > [data-part-head] [data-pinned],[data-ui-data-grid][data-variant='plain'] > [data-part-scroll] > [data-part-head] > [role='row'] > [data-part-selection]",
   );
   assert.match(pinned, /background-color:var\(--_surface\);/);
 });
 
 test('draws no resting pin edge beside a pop-in, which the edge could not run past', () => {
-  const edge = rule("[data-ui='data-grid'][data-popin] [data-pinned][data-pin-edge]::after");
+  const edge = rule('[data-ui-data-grid][data-popin] [data-pinned][data-pin-edge]::after');
   assert.match(edge, /background-color:transparent;/);
 });
 
@@ -508,28 +517,28 @@ test('starts a compact frame’s pop-in at the row’s padding and sets one colu
       new RegExp(`@container ${escape(normalize(condition))}\\{([\\s\\S]*?\\})\\}`),
     )?.[1] ?? '';
   assert.match(
-    normalize(rule("[data-ui='data-grid'] [data-part='popin']")),
+    normalize(rule('[data-ui-data-grid] [data-part-popin]')),
     /container:slotted-data-grid-popin \/ inline-size;/,
   );
   const compact = at('slotted-data-grid (width < 600px)');
   assert.match(
     compact,
-    /\[data-ui='data-grid'\] \[data-part='popin'\]\{padding-inline-start:var\(--_pad-inline\);\}/,
+    /\[data-ui-data-grid\] \[data-part-popin\]\{padding-inline-start:var\(--_pad-inline\);\}/,
   );
   const single = at('slotted-data-grid-popin (width < 19rem)');
-  assert.match(single, /\[data-part='popin-field'\]\{[^}]*display:grid;/);
+  assert.match(single, /\[data-part-popin-field\]\{[^}]*display:grid;/);
   assert.match(single, /grid-template-columns:minmax\(0,7\.5rem\) minmax\(0,1fr\);/);
 });
 
 test('sets a pop-in field as its label above its value, whole and at the start', () => {
-  const field = rule("[data-ui='data-grid'] [data-part='popin-field']");
+  const field = rule('[data-ui-data-grid] [data-part-popin-field]');
   assert.match(field, /flex-direction:column;/);
   assert.match(field, /min-inline-size:0;/);
-  const label = rule("[data-ui='data-grid'] [data-part='popin-label']");
+  const label = rule('[data-ui-data-grid] [data-part-popin-label]');
   assert.match(label, /color:var\(--_muted\);/);
   assert.match(label, /font-size:var\(--slotted-font-size-xs,0\.75rem\);/);
   assert.match(label, /overflow-wrap:anywhere;/);
-  const value = rule("[data-ui='data-grid'] [data-part='popin-value']");
+  const value = rule('[data-ui-data-grid] [data-part-popin-value]');
   assert.match(value, /min-inline-size:0;/);
   /* An empty value keeps its line, so the fields beside it stay aligned. */
   assert.match(value, /min-block-size:var\(--_line\);/);
@@ -537,23 +546,21 @@ test('sets a pop-in field as its label above its value, whole and at the start',
   assert.match(value, /text-align:start;/);
   /* Whole, whatever the column's own text treatment: the field has the room. */
   const text = rule(
-    "[data-ui='data-grid'] [data-part='popin-value'][data-text] > span:not([data-ui],[data-part]),[data-ui='data-grid'] [data-part='popin-value'] > span:not([data-ui],[data-part])",
+    '[data-ui-data-grid] [data-part-popin-value][data-text] > span:not([data-ui],[data-part]),[data-ui-data-grid] [data-part-popin-value] > span:not([data-ui],[data-part])',
   );
   assert.match(text, /overflow:visible;/);
   assert.match(text, /overflow-wrap:anywhere;/);
   assert.match(text, /white-space:normal;/);
   assert.match(text, /text-align:left;/);
   assert.match(
-    rule(
-      "[data-ui='data-grid']:dir(rtl) [data-part='popin-value'] > span:not([data-ui],[data-part])",
-    ),
+    rule('[data-ui-data-grid]:dir(rtl) [data-part-popin-value] > span:not([data-ui],[data-part])'),
     /text-align:right;/,
   );
 });
 
 /** The pop-in's column header is a name for a reader and takes no track of the template. */
 test('keeps the pop-in’s column header for the reader only', () => {
-  const hidden = rule("[data-ui='data-grid'] [data-part='popin-header']");
+  const hidden = rule('[data-ui-data-grid] [data-part-popin-header]');
   assert.match(hidden, /position:absolute;/);
   assert.match(hidden, /clip-path:inset\(50%\);/);
   assert.match(hidden, /inline-size:1px;/);
@@ -570,7 +577,7 @@ test('keeps the pop-in’s column header for the reader only', () => {
  */
 test('draws a skeleton row as tall as the rows it stands in for', () => {
   const cells = rule(
-    "[data-ui='data-grid'] > [data-part='scroll'] > [data-part='loader'] > [data-part='row'] > *",
+    '[data-ui-data-grid] > [data-part-scroll] > [data-part-loader] > [data-part-row] > *',
   );
   assert.match(
     cells,
@@ -586,7 +593,7 @@ test('draws a skeleton row as tall as the rows it stands in for', () => {
  * drag over the columns is not the browser's back gesture.
  */
 test('chains a vertical drag to the page and contains a horizontal one', () => {
-  const scroll = rule("[data-ui='data-grid'] > [data-part='scroll']");
+  const scroll = rule('[data-ui-data-grid] > [data-part-scroll]');
   assert.match(scroll, /overscroll-behavior-block:auto;/);
   assert.match(scroll, /overscroll-behavior-inline:contain;/);
   assert.ok(!/overscroll-behavior:contain/.test(normalized));

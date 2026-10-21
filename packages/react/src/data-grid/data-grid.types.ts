@@ -26,6 +26,14 @@ export type DataGridSelectionMode = 'none' | 'single' | 'multiple' | 'range';
 export type DataGridEditMode = 'cell' | 'row';
 export type DataGridMode = 'client' | 'server';
 export type DataGridVirtualize = 'auto' | boolean;
+
+/**
+ * What asks for the next page of a grid that has more. `scroll` asks when the
+ * window nears the end and draws a quiet status while the page loads, and a
+ * retry only after `loadMoreFailed`; `button` asks only from a Load more
+ * control; `both` does the two. Default `scroll`.
+ */
+export type DataGridLoadMoreTrigger = 'scroll' | 'button' | 'both';
 export type DataGridRowHeight = number | 'auto';
 /**
  * What a frame too narrow for the template does: moves columns into the row's
@@ -79,6 +87,7 @@ export interface DataGridDefaults {
   pageSizes?: readonly number[] | undefined;
   filterDebounce?: number | undefined;
   loadMoreThreshold?: number | undefined;
+  loadMoreTrigger?: DataGridLoadMoreTrigger | undefined;
   skeletonRows?: number | undefined;
 }
 
@@ -249,6 +258,8 @@ export interface DataGridProps<Row>
   error?: string | null | undefined;
   onRetry?: (() => void) | undefined;
   onLoadMore?: (() => void) | undefined;
+  /** The last page asked for failed: the automatic request stops and the footer offers a retry. */
+  loadMoreFailed?: boolean | undefined;
   /** Rows a consumer has disabled: not selectable, not editable. */
   disabledKeys?: readonly string[] | undefined;
   /**

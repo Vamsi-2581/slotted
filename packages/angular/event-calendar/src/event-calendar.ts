@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
@@ -268,9 +269,10 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
   ],
   template: `
     @if (header()) {
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         <div
           data-part="title"
+          data-part-title=""
           role="heading"
           aria-live="polite"
           [attr.aria-level]="level()"
@@ -278,20 +280,27 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
         >
           {{ title() }}
         </div>
-        <div data-part="navigation" role="group" [attr.aria-label]="t('navigation')">
+        <div
+          data-part="navigation"
+          data-part-navigation=""
+          role="group"
+          [attr.aria-label]="t('navigation')"
+        >
           <button
             data-part="previous"
+            data-part-previous=""
             type="button"
             [attr.aria-label]="previousLabel()"
             (click)="step(-1, $event)"
           >
             <span slIcon><svg slGlyph name="chevron-right"></svg></span>
           </button>
-          <button data-part="today" type="button" (click)="goToday($event)">
+          <button data-part="today" data-part-today="" type="button" (click)="goToday($event)">
             {{ t('today') }}
           </button>
           <button
             data-part="next"
+            data-part-next=""
             type="button"
             [attr.aria-label]="nextLabel()"
             (click)="step(1, $event)"
@@ -300,7 +309,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
           </button>
         </div>
         @if (views().length > 1) {
-          <div data-part="views">
+          <div data-part="views" data-part-views="">
             <div
               slSegmentedControl
               fullWidth
@@ -315,7 +324,13 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
           </div>
         }
         @if (calendars().length > 1) {
-          <button #filterButton data-part="filter" type="button" [slMenuTriggerFor]="filterMenu">
+          <button
+            #filterButton
+            data-part="filter"
+            data-part-filter=""
+            type="button"
+            [slMenuTriggerFor]="filterMenu"
+          >
             <span slIcon><svg slGlyph name="funnel"></svg></span>
             <span>{{ t('calendars') }}</span>
             <span slIcon><svg slGlyph name="chevron-down"></svg></span>
@@ -338,7 +353,9 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
           </sl-menu>
         }
         @if (actions()) {
-          <div data-part="actions"><ng-content select="[slEventCalendarActions]" /></div>
+          <div data-part="actions" data-part-actions="">
+            <ng-content select="[slEventCalendarActions]" />
+          </div>
         }
       </div>
     }
@@ -349,6 +366,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
       <div
         #body
         data-part="body"
+        data-part-body=""
         [slContextMenuTriggerFor]="contextMenuRef"
         [attr.aria-busy]="loading() ? true : null"
         (keydown)="onKeyDown($event)"
@@ -375,6 +393,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
       <div
         #body
         data-part="body"
+        data-part-body=""
         [attr.aria-busy]="loading() ? true : null"
         (keydown)="onKeyDown($event)"
         (pointerdown)="onPointerDown($event)"
@@ -384,7 +403,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
     }
 
     <ng-template #bodyContent>
-      <div data-part="loader">
+      <div data-part="loader" data-part-loader="">
         @if (loaderMounted()) {
           <div
             slProgressBar
@@ -398,29 +417,35 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
         }
       </div>
       @if (errorContent()) {
-        <div data-part="error"><ng-content select="[slEventCalendarError]" /></div>
+        <div data-part="error" data-part-error="">
+          <ng-content select="[slEventCalendarError]" />
+        </div>
       }
 
       @if (layout() === 'list') {
-        <div data-part="list">
+        <div data-part="list" data-part-list="">
           @for (day of listDrawing(); track day.iso) {
             <section
               data-part="list-day"
+              data-part-list-day=""
               [attr.aria-labelledby]="day.headingId"
               [attr.data-date]="day.iso"
               [attr.data-today]="day.today ? '' : null"
             >
               <div
                 data-part="list-day-heading"
+                data-part-list-day-heading=""
                 role="heading"
                 [attr.aria-level]="level() + 1"
                 [attr.id]="day.headingId"
                 [attr.aria-label]="day.heading.label"
               >
-                <span data-part="list-weekday">{{ day.heading.weekday }}</span>
-                <span data-part="list-date">{{ day.heading.date }}</span>
+                <span data-part="list-weekday" data-part-list-weekday="">{{
+                  day.heading.weekday
+                }}</span>
+                <span data-part="list-date" data-part-list-date="">{{ day.heading.date }}</span>
               </div>
-              <ul data-part="list-events" role="list">
+              <ul data-part="list-events" data-part-list-events="" role="list">
                 @for (view of day.events; track view.key) {
                   <li>
                     <ng-container
@@ -431,35 +456,46 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
               </ul>
             </section>
           } @empty {
-            <div data-part="empty">
+            <div data-part="empty" data-part-empty="">
               <p>{{ emptyText() }}</p>
               <ng-content select="[slEventCalendarEmpty]" />
             </div>
           }
         </div>
       } @else if (currentView() === 'month') {
-        <table data-part="month" role="grid" [attr.aria-labelledby]="titleId">
+        <table data-part="month" data-part-month="" role="grid" [attr.aria-labelledby]="titleId">
           <thead>
-            <tr data-part="weekdays">
+            <tr data-part="weekdays" data-part-weekdays="">
               @if (weekNumbersValue()) {
-                <th data-part="week-number-header" scope="col">
-                  <span data-ui="visually-hidden">{{ t('weekNumber') }}</span>
+                <th data-part="week-number-header" data-part-week-number-header="" scope="col">
+                  <span data-ui="visually-hidden" data-ui-visually-hidden="">{{
+                    t('weekNumber')
+                  }}</span>
                 </th>
               }
               @for (name of monthDrawing().weekdays; track name.key) {
-                <th data-part="weekday" scope="col" [attr.abbr]="name.long">{{ name.short }}</th>
+                <th data-part="weekday" data-part-weekday="" scope="col" [attr.abbr]="name.long">
+                  {{ name.short }}
+                </th>
               }
             </tr>
           </thead>
           <tbody>
             @for (row of monthDrawing().rows; track row.key) {
-              <tr data-part="week" [style.--slotted-event-calendar-lanes]="maxEventsValue()">
+              <tr
+                data-part="week"
+                data-part-week=""
+                [style.--slotted-event-calendar-lanes]="maxEventsValue()"
+              >
                 @if (weekNumbersValue()) {
-                  <th data-part="week-number" scope="row">{{ row.weekNumber }}</th>
+                  <th data-part="week-number" data-part-week-number="" scope="row">
+                    {{ row.weekNumber }}
+                  </th>
                 }
                 @for (cell of row.cells; track cell.iso) {
                   <td
                     data-part="day"
+                    data-part-day=""
                     data-row="day"
                     role="gridcell"
                     [attr.data-date]="cell.iso"
@@ -473,9 +509,10 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                     [attr.data-non-working]="cell.nonWorking ? '' : null"
                     [attr.data-selected]="cell.selected ? '' : null"
                   >
-                    <div data-part="day-header">
+                    <div data-part="day-header" data-part-day-header="">
                       <button
                         data-part="day-number"
+                        data-part-day-number=""
                         type="button"
                         tabindex="-1"
                         [attr.id]="id + '-day-' + cell.iso"
@@ -486,7 +523,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                         {{ cell.date.day }}
                       </button>
                       @if (dayContent(); as content) {
-                        <div data-part="day-content">
+                        <div data-part="day-content" data-part-day-content="">
                           <ng-container
                             *ngTemplateOutlet="
                               content.template;
@@ -497,11 +534,12 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                       }
                       <span
                         data-ui="visually-hidden"
+                        data-ui-visually-hidden=""
                         [attr.id]="id + '-day-' + cell.iso + '-count'"
                         >{{ cell.count }}</span
                       >
                     </div>
-                    <div data-part="day-events">
+                    <div data-part="day-events" data-part-day-events="">
                       @for (view of cell.events; track view.key) {
                         <ng-container
                           *ngTemplateOutlet="
@@ -511,11 +549,12 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                         />
                       }
                       @for (text of cell.continuations; track $index) {
-                        <span data-part="continuation">{{ text }}</span>
+                        <span data-part="continuation" data-part-continuation="">{{ text }}</span>
                       }
                       @if (cell.more > 0) {
                         <button
                           data-part="more"
+                          data-part-more=""
                           type="button"
                           tabindex="-1"
                           aria-haspopup="dialog"
@@ -536,17 +575,21 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
       } @else {
         <div
           data-part="time-grid"
+          data-part-time-grid=""
           role="grid"
           [attr.aria-labelledby]="titleId"
           [style.--slotted-event-calendar-days]="timeDrawing().days"
           [style.--slotted-event-calendar-slot]="slotDurationValue()"
         >
-          <div data-part="time-head" role="rowgroup">
-            <div data-part="columns" role="row">
-              <div data-part="zone" role="columnheader">{{ timeDrawing().zone }}</div>
+          <div data-part="time-head" data-part-time-head="" role="rowgroup">
+            <div data-part="columns" data-part-columns="" role="row">
+              <div data-part="zone" data-part-zone="" role="columnheader">
+                {{ timeDrawing().zone }}
+              </div>
               @for (column of timeDrawing().headers; track column.iso) {
                 <div
                   data-part="column-header"
+                  data-part-column-header=""
                   data-row="header"
                   role="columnheader"
                   [attr.data-date]="column.iso"
@@ -554,9 +597,12 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                   [attr.data-today]="column.today ? '' : null"
                   [attr.data-offset-change]="column.offsetShort === null ? null : ''"
                 >
-                  <span data-part="weekday" aria-hidden="true">{{ column.weekday }}</span>
+                  <span data-part="weekday" data-part-weekday="" aria-hidden="true">{{
+                    column.weekday
+                  }}</span>
                   <button
                     data-part="day-number"
+                    data-part-day-number=""
                     type="button"
                     tabindex="-1"
                     [attr.aria-label]="column.label"
@@ -565,7 +611,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                     {{ column.date.day }}
                   </button>
                   @if (dayContent(); as content) {
-                    <div data-part="day-content">
+                    <div data-part="day-content" data-part-day-content="">
                       <ng-container
                         *ngTemplateOutlet="
                           content.template;
@@ -577,6 +623,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                   @if (column.offsetShort !== null) {
                     <span
                       data-part="offset-change"
+                      data-part-offset-change=""
                       role="note"
                       [attr.aria-label]="column.offsetLong"
                       >{{ column.offsetShort }}</span
@@ -587,13 +634,17 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
             </div>
             <div
               data-part="all-day-row"
+              data-part-all-day-row=""
               role="row"
               [style.--slotted-event-calendar-lanes]="timeDrawing().lanes"
             >
-              <div data-part="all-day-label" role="rowheader">{{ t('allDay') }}</div>
+              <div data-part="all-day-label" data-part-all-day-label="" role="rowheader">
+                {{ t('allDay') }}
+              </div>
               @for (cell of timeDrawing().allDay; track cell.iso) {
                 <div
                   data-part="all-day-cell"
+                  data-part-all-day-cell=""
                   data-row="all-day"
                   role="gridcell"
                   [attr.data-date]="cell.iso"
@@ -609,23 +660,26 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                     />
                   }
                   @for (text of cell.continuations; track $index) {
-                    <span data-part="continuation">{{ text }}</span>
+                    <span data-part="continuation" data-part-continuation="">{{ text }}</span>
                   }
                 </div>
               }
             </div>
           </div>
-          <div #scroller data-part="scroller" role="rowgroup">
-            <div data-part="time-row" role="row">
-              <div data-part="gutter" role="rowheader">
-                <span data-ui="visually-hidden">{{ t('timed') }}</span>
+          <div #scroller data-part="scroller" data-part-scroller="" role="rowgroup">
+            <div data-part="time-row" data-part-time-row="" role="row">
+              <div data-part="gutter" data-part-gutter="" role="rowheader">
+                <span data-ui="visually-hidden" data-ui-visually-hidden="">{{ t('timed') }}</span>
                 @for (hour of timeDrawing().hours; track hour.hour) {
-                  <span data-part="hour" aria-hidden="true">{{ hour.label }}</span>
+                  <span data-part="hour" data-part-hour="" aria-hidden="true">{{
+                    hour.label
+                  }}</span>
                 }
               </div>
               @for (column of timeDrawing().columns; track column.iso) {
                 <div
                   data-part="column"
+                  data-part-column=""
                   data-row="timed"
                   role="gridcell"
                   [attr.data-date]="column.iso"
@@ -634,13 +688,28 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                   [attr.data-non-working]="column.nonWorking ? '' : null"
                 >
                   @for (off of column.offHours; track $index) {
-                    <div data-part="off-hours" aria-hidden="true" [style]="off"></div>
+                    <div
+                      data-part="off-hours"
+                      data-part-off-hours=""
+                      aria-hidden="true"
+                      [style]="off"
+                    ></div>
                   }
                   @if (column.offsetLine; as line) {
-                    <div data-part="offset-line" aria-hidden="true" [style]="line"></div>
+                    <div
+                      data-part="offset-line"
+                      data-part-offset-line=""
+                      aria-hidden="true"
+                      [style]="line"
+                    ></div>
                   }
                   @if (column.selection; as chosen) {
-                    <div data-part="selection" aria-hidden="true" [style]="chosen.style">
+                    <div
+                      data-part="selection"
+                      data-part-selection=""
+                      aria-hidden="true"
+                      [style]="chosen.style"
+                    >
                       {{ chosen.text }}
                     </div>
                   }
@@ -652,6 +721,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                   @for (entry of column.more; track $index) {
                     <button
                       data-part="more"
+                      data-part-more=""
                       type="button"
                       tabindex="-1"
                       aria-haspopup="dialog"
@@ -665,7 +735,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                     </button>
                   }
                   @if (column.now; as now) {
-                    <div data-part="now" aria-hidden="true" [style]="now"></div>
+                    <div data-part="now" data-part-now="" aria-hidden="true" [style]="now"></div>
                   }
                 </div>
               }
@@ -695,6 +765,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
           <div slDrawerBody>
             <ul
               data-part="list-events"
+              data-part-list-events=""
               data-layout="stacked"
               role="list"
               [attr.aria-label]="t('dayEvents', { day: dateLabel(date) })"
@@ -725,9 +796,10 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
               <p slDrawerDescription>
                 @if (whenOf(occurrence); as when) {
                   @if (when.day !== null) {
-                    <span data-part="detail-day">{{ when.day }},</span>{{ ' ' }}
+                    <span data-part="detail-day" data-part-detail-day="">{{ when.day }},</span
+                    >{{ ' ' }}
                   }
-                  <span data-part="detail-range">{{ when.range }}</span>
+                  <span data-part="detail-range" data-part-detail-range="">{{ when.range }}</span>
                 }
               </p>
               <button slDrawerClose></button>
@@ -761,6 +833,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
               <div slPopoverBody>
                 <ul
                   data-part="list-events"
+                  data-part-list-events=""
                   data-layout="stacked"
                   role="list"
                   [attr.aria-label]="t('dayEvents', { day: dateLabel(date) })"
@@ -799,9 +872,12 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
                   <div slPopoverDescription>
                     @if (whenOf(occurrence); as when) {
                       @if (when.day !== null) {
-                        <span data-part="detail-day">{{ when.day }},</span>{{ ' ' }}
+                        <span data-part="detail-day" data-part-detail-day="">{{ when.day }},</span
+                        >{{ ' ' }}
                       }
-                      <span data-part="detail-range">{{ when.range }}</span>
+                      <span data-part="detail-range" data-part-detail-range="">{{
+                        when.range
+                      }}</span>
                     }
                   </div>
                   <button slPopoverClose></button>
@@ -825,6 +901,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
       @if (view.href !== null) {
         <a
           data-part="event"
+          data-part-event=""
           [attr.href]="view.href"
           [attr.tabindex]="inGrid ? -1 : null"
           [attr.data-key]="view.key"
@@ -849,6 +926,7 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
       } @else {
         <button
           data-part="event"
+          data-part-event=""
           type="button"
           [attr.tabindex]="inGrid ? -1 : null"
           [attr.data-key]="view.key"
@@ -895,19 +973,19 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
         />
       } @else {
         @if (view.time !== null) {
-          <span data-part="event-time">{{ view.time }}</span>
+          <span data-part="event-time" data-part-event-time="">{{ view.time }}</span>
         }
-        <span data-part="event-title">{{ view.title }}</span>
+        <span data-part="event-title" data-part-event-title="">{{ view.title }}</span>
         @if (view.location) {
-          <span data-part="event-location">{{ view.location }}</span>
+          <span data-part="event-location" data-part-event-location="">{{ view.location }}</span>
         }
       }
-      <span data-part="event-meta">{{ view.meta }}</span>
+      <span data-part="event-meta" data-part-event-meta="">{{ view.meta }}</span>
       @if (view.bar && view.continuesAfter) {
         <span slIcon size="sm" data-edge="end"><svg slGlyph name="chevron-right"></svg></span>
       }
       @if (view.resizable) {
-        <span aria-hidden="true" data-part="resize-handle"></span>
+        <span aria-hidden="true" data-part="resize-handle" data-part-resize-handle=""></span>
       }
     </ng-template>
   `,
@@ -919,7 +997,9 @@ const pressReason = (event: MouseEvent) => (event.detail === 0 ? 'keyboard' : 'p
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'event-calendar',
+    'data-ui-event-calendar': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-view]': 'currentView()',
     '[attr.data-layout]': 'layout()',
     '[attr.data-loading]': "loading() ? '' : null",
@@ -1380,7 +1460,7 @@ export class SlEventCalendar implements OnInit {
     afterRenderEffect(() => {
       const button = this.filterButton()?.nativeElement;
       if (button !== undefined && button.getAttribute('data-part') !== 'filter') {
-        button.setAttribute('data-part', 'filter');
+        writeSelectorKey(button, 'part', 'filter');
       }
     });
 

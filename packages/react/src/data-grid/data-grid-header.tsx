@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import {
   FILTER_ROW,
   HEADER_ROW,
@@ -41,15 +42,16 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
   const hasGroups = columnGroups !== undefined && columnGroups.length > 0;
 
   return (
-    <div data-part="head" role="rowgroup">
+    <div data-part="head" data-part-head="" role="rowgroup">
       {hasGroups ? (
-        <div aria-rowindex={1} data-part="header-row" role="row">
+        <div aria-rowindex={1} data-part="header-row" data-part-header-row="" role="row">
           {groupCells(grid.mountedColumns, columnGroups, gutterCount)}
         </div>
       ) : null}
       <div
         aria-rowindex={hasGroups ? 2 : 1}
         data-part="header-row"
+        data-part-header-row=""
         data-row={HEADER_ROW}
         role="row"
       >
@@ -59,6 +61,7 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
             aria-colindex={grid.columnIds.indexOf(DRAG_COLUMN) + 1}
             data-column={DRAG_COLUMN}
             data-part="column-header"
+            data-part-column-header=""
             role="columnheader"
             style={
               {
@@ -75,6 +78,7 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
             aria-colindex={grid.columnIds.indexOf(EXPANDER_COLUMN) + 1}
             data-column={EXPANDER_COLUMN}
             data-part="column-header"
+            data-part-column-header=""
             role="columnheader"
             style={
               {
@@ -95,6 +99,7 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
             aria-colindex={grid.popinIndex}
             data-column={POPIN_COLUMN_ID}
             data-part="popin-header"
+            data-part-popin-header=""
             role="columnheader"
           >
             {grid.t('popinHeader')}
@@ -102,12 +107,19 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
         ) : null}
       </div>
       {grid.filterRow ? (
-        <div aria-rowindex={headerRowCount} data-part="filter-row" data-row={FILTER_ROW} role="row">
+        <div
+          aria-rowindex={headerRowCount}
+          data-part="filter-row"
+          data-part-filter-row=""
+          data-row={FILTER_ROW}
+          role="row"
+        >
           {grid.columnIds.includes(SELECTION_COLUMN) ? (
             <div
               aria-colindex={1}
               data-column={SELECTION_COLUMN}
               data-part="filter-cell"
+              data-part-filter-cell=""
               role="gridcell"
               tabIndex={-1}
             />
@@ -117,6 +129,7 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
               aria-colindex={grid.columnIds.indexOf(DRAG_COLUMN) + 1}
               data-column={DRAG_COLUMN}
               data-part="filter-cell"
+              data-part-filter-cell=""
               role="gridcell"
               tabIndex={-1}
             />
@@ -126,6 +139,7 @@ export function DataGridHead<Row>({ columnGroups, headerRowCount }: HeadProps) {
               aria-colindex={grid.columnIds.indexOf(EXPANDER_COLUMN) + 1}
               data-column={EXPANDER_COLUMN}
               data-part="filter-cell"
+              data-part-filter-cell=""
               role="gridcell"
               tabIndex={-1}
             />
@@ -170,6 +184,7 @@ function groupCells<Row>(
         aria-colindex={first}
         aria-colspan={span}
         data-part="column-group"
+        data-part-column-group=""
         key={group ? `${group.id}:${column.id}` : column.id}
         role="columnheader"
         style={style as CSSProperties}
@@ -202,6 +217,7 @@ function SelectAllCell() {
       aria-colindex={1}
       data-column={SELECTION_COLUMN}
       data-part="selection"
+      data-part-selection=""
       role="gridcell"
       style={{ '--slotted-data-grid-column': '1' } as CSSProperties}
       tabIndex={current || sameCell(cell, grid.tabStop) ? 0 : -1}
@@ -278,6 +294,7 @@ function ColumnHeader<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
             aria-describedby={description ? descriptionId : undefined}
             aria-sort={sort && sort.index === 1 ? sort.direction : undefined}
             data-part="column-header"
+            data-part-column-header=""
             role="columnheader"
             style={cellStyle(column, index)}
             tabIndex={current || sameCell(cell, grid.tabStop) ? 0 : -1}
@@ -302,6 +319,7 @@ function ColumnHeader<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
               <span
                 aria-hidden
                 data-part="sort"
+                data-part-sort=""
                 {...(multiSort ? { 'data-index': String(sort.index) } : {})}
               >
                 {/* The stylesheet turns the chevron over for ascending; the
@@ -312,11 +330,16 @@ function ColumnHeader<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
               </span>
             ) : null}
             {description ? (
-              <span aria-hidden="true" data-part="column-description" id={descriptionId}>
+              <span
+                aria-hidden="true"
+                data-part="column-description"
+                data-part-column-description=""
+                id={descriptionId}
+              >
                 {description}
               </span>
             ) : null}
-            <span data-part="column-actions">
+            <span data-part="column-actions" data-part-column-actions="">
               {description || help !== undefined ? (
                 <ColumnHelp<Row> column={column} description={description} help={help} />
               ) : null}
@@ -382,9 +405,9 @@ function ColumnHelp<Row>({
       <PopoverTrigger
         render={(props) => (
           <button
-            {...props}
+            {...withSelectorKey(props, 'part', 'column-help')}
             aria-label={name}
-            data-part="column-help"
+
             onClick={(event) => {
               event.stopPropagation();
               props.onClick?.(event as never);
@@ -427,6 +450,7 @@ function FilterTrigger<Row>({
       aria-haspopup="dialog"
       aria-label={grid.t('filterColumn', { column: column.column.label })}
       data-part="filter"
+      data-part-filter=""
       onClick={(event) => {
         event.stopPropagation();
         grid.setFilterOpen(open ? null : column.id);
@@ -478,9 +502,9 @@ function ColumnMenu<Row>({
       <MenuTrigger
         render={(props) => (
           <button
-            {...props}
+            {...withSelectorKey(props, 'part', 'column-menu')}
             aria-label={t('columnMenu', { column: name })}
-            data-part="column-menu"
+
             onPointerDown={(event) => {
               event.stopPropagation();
               props.onPointerDown?.(event as never);
@@ -502,7 +526,7 @@ function ColumnMenu<Row>({
       />
       <MenuContent aria-describedby={descriptionId}>
         {column.column.description ? (
-          <div aria-hidden data-part="column-menu-description">
+          <div aria-hidden data-part="column-menu-description" data-part-column-menu-description="">
             {column.column.description}
           </div>
         ) : null}
@@ -640,6 +664,7 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
     <div
       aria-hidden
       data-part="resizer"
+      data-part-resizer=""
       /* A press on the handle is a resize, never the header's sort: the
          click the browser fires after the pointer is released stops here. */
       onClick={(event) => event.stopPropagation()}

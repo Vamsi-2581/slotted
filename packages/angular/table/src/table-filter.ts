@@ -422,6 +422,7 @@ export abstract class SlTableFilterBase {
       slPopoverTrigger
       type="button"
       data-part="filter"
+      data-part-filter=""
       [attr.data-filtered]="owner().filtered() ? '' : null"
       [attr.aria-label]="owner().name()"
     >
@@ -444,10 +445,16 @@ export abstract class SlTableFilterBase {
              popover's: slPopoverContent names its own identity, and a second
              data-ui on the same element is one of them lost — the surface, the
              radius and the shadow all came off the panel. -->
-        <div data-ui="table" data-part="filter-panel" [attr.data-kind]="owner().kind">
+        <div
+          data-ui="table"
+          data-ui-table=""
+          data-part="filter-panel"
+          data-part-filter-panel=""
+          [attr.data-kind]="owner().kind"
+        >
           @for (row of owner().rows(); track $index) {
             @if ($index === 1) {
-              <div data-part="filter-join">
+              <div data-part="filter-join" data-part-filter-join="">
                 <span data-label>{{ owner().t('filterJoin') }}</span>
                 <div
                   slRadioGroup
@@ -463,8 +470,12 @@ export abstract class SlTableFilterBase {
               </div>
             }
 
-            <div data-part="filter-condition" [attr.data-operands]="owner().slotsOf(row).length">
-              <div data-part="filter-operator">
+            <div
+              data-part="filter-condition"
+              data-part-filter-condition=""
+              [attr.data-operands]="owner().slotsOf(row).length"
+            >
+              <div data-part="filter-operator" data-part-filter-operator="">
                 <!-- items names every operator for the closed control: without
                      it the trigger falls back to the value itself and a reader
                      sees the raw between the engine speaks. -->
@@ -487,6 +498,7 @@ export abstract class SlTableFilterBase {
               @if (owner().slotsOf(row).length > 0) {
                 <div
                   data-part="filter-operand"
+                  data-part-filter-operand=""
                   [attr.data-kind]="owner().kind"
                   [attr.data-operand]="owner().operandName()"
                   [attr.data-range]="owner().rangeMark(row)"
@@ -500,7 +512,7 @@ export abstract class SlTableFilterBase {
             </div>
           }
 
-          <div data-part="filter-actions">
+          <div data-part="filter-actions" data-part-filter-actions="">
             <button
               slButton
               type="button"
@@ -1051,7 +1063,7 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
         }
       } @else {
         @if (searching()) {
-          <div data-part="filter-search">
+          <div data-part="filter-search" data-part-filter-search="">
             <div slTextField size="sm" clearable>
               <input
                 slTextFieldInput
@@ -1065,10 +1077,10 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
         }
 
         @if (shown().length === 0) {
-          <p data-part="filter-empty">{{ t('filterEmpty') }}</p>
+          <p data-part="filter-empty" data-part-filter-empty="">{{ t('filterEmpty') }}</p>
         } @else {
-          <div data-part="filter-list">
-            <div data-part="filter-option" data-covering>
+          <div data-part="filter-list" data-part-filter-list="">
+            <div data-part="filter-option" data-part-filter-option="" data-covering>
               <span
                 slCheckbox
                 [checked]="allCovered(context)"
@@ -1081,7 +1093,7 @@ export class SlTableBooleanFilter extends SlTableFilterBase {
             </div>
 
             @for (option of shown(); track option.value) {
-              <div data-part="filter-option">
+              <div data-part="filter-option" data-part-filter-option="">
                 <span
                   slCheckbox
                   [checked]="chosen(context).includes(option.value)"

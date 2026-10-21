@@ -76,7 +76,9 @@
       <span data-demo-label>single · one of three is on</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -84,14 +86,21 @@
         role="group"
         aria-label="Chart range"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Day</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Day</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Week</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Week</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Month</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Month</span>
         </button>
       </div>
     </div>
@@ -100,7 +109,9 @@
       <span data-demo-label>multiple · two of three are on</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -110,13 +121,14 @@
       >
         <button
           data-part="item"
+          data-part-item=""
           type="button"
           aria-pressed="true"
           data-pressed
           aria-label="Bold"
           tabindex="0"
         >
-          <span data-part="icon" aria-hidden="true">
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -132,13 +144,14 @@
         </button>
         <button
           data-part="item"
+          data-part-item=""
           type="button"
           aria-pressed="true"
           data-pressed
           aria-label="Italic"
           tabindex="-1"
         >
-          <span data-part="icon" aria-hidden="true">
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -152,12 +165,13 @@
         </button>
         <button
           data-part="item"
+          data-part-item=""
           type="button"
           aria-pressed="false"
           aria-label="Underline"
           tabindex="-1"
         >
-          <span data-part="icon" aria-hidden="true">
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -176,7 +190,9 @@
       <span data-demo-label>none on · the group has an empty value</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -184,14 +200,14 @@
         role="group"
         aria-label="Map layers"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="0">
-          <span data-part="label">Roads</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="0">
+          <span data-part="label" data-part-label="">Roads</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Terrain</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Terrain</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Traffic</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Traffic</span>
         </button>
       </div>
     </div>
@@ -204,7 +220,9 @@
       <span data-demo-label>outline · joined</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -212,14 +230,21 @@
         role="group"
         aria-label="Density, joined outline"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Comfortable</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Comfortable</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Compact</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Compact</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Dense</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Dense</span>
         </button>
       </div>
     </div>
@@ -228,21 +253,30 @@
       <span data-demo-label>outline · separated</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
         role="group"
         aria-label="Density, separated outline"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Comfortable</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Comfortable</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Compact</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Compact</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Dense</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Dense</span>
         </button>
       </div>
     </div>
@@ -251,7 +285,9 @@
       <span data-demo-label>ghost · joined, for a bar inside something already framed</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="ghost"
         data-orientation="horizontal"
@@ -259,14 +295,21 @@
         role="group"
         aria-label="Density, joined ghost"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Comfortable</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Comfortable</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Compact</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Compact</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Dense</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Dense</span>
         </button>
       </div>
     </div>
@@ -275,21 +318,30 @@
       <span data-demo-label>ghost · separated</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="ghost"
         data-orientation="horizontal"
         role="group"
         aria-label="Density, separated ghost"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Comfortable</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Comfortable</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Compact</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Compact</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Dense</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Dense</span>
         </button>
       </div>
     </div>
@@ -302,7 +354,9 @@
       <span data-demo-label>sm</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="sm"
         data-variant="outline"
         data-orientation="horizontal"
@@ -310,11 +364,18 @@
         role="group"
         aria-label="Sort order, small"
       >
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Newest</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Newest</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Oldest</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Oldest</span>
         </button>
       </div>
     </div>
@@ -323,7 +384,9 @@
       <span data-demo-label>md</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -331,11 +394,18 @@
         role="group"
         aria-label="Sort order, medium"
       >
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Newest</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Newest</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Oldest</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Oldest</span>
         </button>
       </div>
     </div>
@@ -344,7 +414,9 @@
       <span data-demo-label>lg</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="lg"
         data-variant="outline"
         data-orientation="horizontal"
@@ -352,11 +424,18 @@
         role="group"
         aria-label="Sort order, large"
       >
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Newest</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Newest</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Oldest</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Oldest</span>
         </button>
       </div>
     </div>
@@ -365,7 +444,9 @@
       <span data-demo-label>icon and label together, md</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -373,8 +454,15 @@
         role="group"
         aria-label="Result view"
       >
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="icon" aria-hidden="true">
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -389,10 +477,10 @@
               <rect x="14" y="14" width="7" height="7" rx="1" />
             </svg>
           </span>
-          <span data-part="label">Grid</span>
+          <span data-part="label" data-part-label="">Grid</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="icon" aria-hidden="true">
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="icon" data-part-icon="" aria-hidden="true">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -404,7 +492,7 @@
               <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
             </svg>
           </span>
-          <span data-part="label">List</span>
+          <span data-part="label" data-part-label="">List</span>
         </button>
       </div>
     </div>
@@ -417,7 +505,9 @@
       <span data-demo-label>vertical · joined</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="vertical"
@@ -426,14 +516,21 @@
         aria-label="Alignment"
         aria-orientation="vertical"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Start</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Start</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Center</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Center</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">End</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">End</span>
         </button>
       </div>
     </div>
@@ -442,7 +539,9 @@
       <span data-demo-label>vertical · separated</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="vertical"
@@ -450,14 +549,21 @@
         aria-label="Alignment, separated"
         aria-orientation="vertical"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">Start</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">Start</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">Center</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">Center</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">End</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">End</span>
         </button>
       </div>
     </div>
@@ -470,7 +576,9 @@
       <span data-demo-label>one item unavailable, one unavailable and on</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -478,21 +586,29 @@
         role="group"
         aria-label="Export format"
       >
-        <button data-part="item" type="button" aria-pressed="false" tabindex="0">
-          <span data-part="label">CSV</span>
-        </button>
-        <button data-part="item" type="button" aria-pressed="false" disabled data-disabled>
-          <span data-part="label">XLSX</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="0">
+          <span data-part="label" data-part-label="">CSV</span>
         </button>
         <button
           data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="false"
+          disabled
+          data-disabled
+        >
+          <span data-part="label" data-part-label="">XLSX</span>
+        </button>
+        <button
+          data-part="item"
+          data-part-item=""
           type="button"
           aria-pressed="true"
           data-pressed
           disabled
           data-disabled
         >
-          <span data-part="label">PDF</span>
+          <span data-part="label" data-part-label="">PDF</span>
         </button>
       </div>
     </div>
@@ -501,7 +617,9 @@
       <span data-demo-label>the whole group unavailable</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -509,21 +627,36 @@
         role="group"
         aria-label="Export format, unavailable"
       >
-        <button data-part="item" type="button" aria-pressed="false" disabled data-disabled>
-          <span data-part="label">CSV</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="false"
+          disabled
+          data-disabled
+        >
+          <span data-part="label" data-part-label="">CSV</span>
         </button>
         <button
           data-part="item"
+          data-part-item=""
           type="button"
           aria-pressed="true"
           data-pressed
           disabled
           data-disabled
         >
-          <span data-part="label">XLSX</span>
+          <span data-part="label" data-part-label="">XLSX</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" disabled data-disabled>
-          <span data-part="label">PDF</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="false"
+          disabled
+          data-disabled
+        >
+          <span data-part="label" data-part-label="">PDF</span>
         </button>
       </div>
     </div>
@@ -532,7 +665,9 @@
       <span data-demo-label>ghost, one item unavailable</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="ghost"
         data-orientation="horizontal"
@@ -540,11 +675,25 @@
         role="group"
         aria-label="Export format, ghost"
       >
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label">CSV</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="">CSV</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" disabled data-disabled>
-          <span data-part="label">XLSX</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="false"
+          disabled
+          data-disabled
+        >
+          <span data-part="label" data-part-label="">XLSX</span>
         </button>
       </div>
     </div>
@@ -558,7 +707,9 @@
       <div data-demo-frame>
         <div
           data-ui="toggle-group"
+          data-ui-toggle-group=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-orientation="horizontal"
@@ -567,11 +718,24 @@
           role="group"
           aria-label="Billing period"
         >
-          <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-            <span data-part="label">Monthly</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="true"
+            data-pressed
+            tabindex="0"
+          >
+            <span data-part="label" data-part-label="">Monthly</span>
           </button>
-          <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-            <span data-part="label">Yearly</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="false"
+            tabindex="-1"
+          >
+            <span data-part="label" data-part-label="">Yearly</span>
           </button>
         </div>
       </div>
@@ -582,7 +746,9 @@
       <div data-demo-frame>
         <div
           data-ui="toggle-group"
+          data-ui-toggle-group=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-orientation="horizontal"
@@ -590,11 +756,24 @@
           role="group"
           aria-label="Billing period, content width"
         >
-          <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-            <span data-part="label">Monthly</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="true"
+            data-pressed
+            tabindex="0"
+          >
+            <span data-part="label" data-part-label="">Monthly</span>
           </button>
-          <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-            <span data-part="label">Yearly</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="false"
+            tabindex="-1"
+          >
+            <span data-part="label" data-part-label="">Yearly</span>
           </button>
         </div>
       </div>
@@ -609,7 +788,9 @@
       <div data-demo-narrow>
         <div
           data-ui="toggle-group"
+          data-ui-toggle-group=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-orientation="horizontal"
@@ -618,11 +799,24 @@
           role="group"
           aria-label="Notification frequency"
         >
-          <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-            <span data-part="label">Immediately</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="true"
+            data-pressed
+            tabindex="0"
+          >
+            <span data-part="label" data-part-label="">Immediately</span>
           </button>
-          <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-            <span data-part="label">Once a day, in the evening digest</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="false"
+            tabindex="-1"
+          >
+            <span data-part="label" data-part-label="">Once a day, in the evening digest</span>
           </button>
         </div>
       </div>
@@ -633,7 +827,9 @@
       <div data-demo-narrow>
         <div
           data-ui="toggle-group"
+          data-ui-toggle-group=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-orientation="horizontal"
@@ -642,11 +838,24 @@
           role="group"
           aria-label="Environment"
         >
-          <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-            <span data-part="label">staging-eu-west-1a</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="true"
+            data-pressed
+            tabindex="0"
+          >
+            <span data-part="label" data-part-label="">staging-eu-west-1a</span>
           </button>
-          <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-            <span data-part="label">prod</span>
+          <button
+            data-part="item"
+            data-part-item=""
+            type="button"
+            aria-pressed="false"
+            tabindex="-1"
+          >
+            <span data-part="label" data-part-label="">prod</span>
           </button>
         </div>
       </div>
@@ -656,7 +865,9 @@
       <span data-demo-label>a right-to-left label inside a left-to-right page</span>
       <div
         data-ui="toggle-group"
+        data-ui-toggle-group=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="outline"
         data-orientation="horizontal"
@@ -664,11 +875,18 @@
         role="group"
         aria-label="Language"
       >
-        <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-          <span data-part="label" dir="rtl">العربية</span>
+        <button
+          data-part="item"
+          data-part-item=""
+          type="button"
+          aria-pressed="true"
+          data-pressed
+          tabindex="0"
+        >
+          <span data-part="label" data-part-label="" dir="rtl">العربية</span>
         </button>
-        <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-          <span data-part="label">English</span>
+        <button data-part="item" data-part-item="" type="button" aria-pressed="false" tabindex="-1">
+          <span data-part="label" data-part-label="">English</span>
         </button>
       </div>
     </div>
@@ -680,12 +898,21 @@
     <div data-demo-row>
       <span data-demo-label>in a form row · the bar is the control height, to the pixel</span>
       <div data-demo-form-row>
-        <div data-ui="text-field" data-part="root" data-size="md" data-variant="outline">
-          <input data-part="input" value="Quarterly report" />
+        <div
+          data-ui="text-field"
+          data-ui-text-field=""
+          data-part="root"
+          data-part-root=""
+          data-size="md"
+          data-variant="outline"
+        >
+          <input data-part="input" data-part-input="" value="Quarterly report" />
         </div>
         <div
           data-ui="toggle-group"
+          data-ui-toggle-group=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-orientation="horizontal"
@@ -695,13 +922,14 @@
         >
           <button
             data-part="item"
+            data-part-item=""
             type="button"
             aria-pressed="true"
             data-pressed
             aria-label="Bold"
             tabindex="0"
           >
-            <span data-part="icon" aria-hidden="true">
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -717,12 +945,13 @@
           </button>
           <button
             data-part="item"
+            data-part-item=""
             type="button"
             aria-pressed="false"
             aria-label="Italic"
             tabindex="-1"
           >
-            <span data-part="icon" aria-hidden="true">
+            <span data-part="icon" data-part-icon="" aria-hidden="true">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -737,27 +966,38 @@
         </div>
         <button
           data-ui="button"
+          data-ui-button=""
           data-part="root"
+          data-part-root=""
           data-tone="secondary"
           data-variant="outline"
           data-size="md"
           type="button"
         >
-          <span data-part="label">Save</span>
+          <span data-part="label" data-part-label="">Save</span>
         </button>
       </div>
     </div>
 
     <div data-demo-row>
       <span data-demo-label>sm and lg beside the same two controls</span>
-      <div data-ui="stack" data-part="root" data-gap="5">
+      <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="5">
         <div data-demo-form-row>
-          <div data-ui="text-field" data-part="root" data-size="sm" data-variant="outline">
-            <input data-part="input" value="Quarterly report" />
+          <div
+            data-ui="text-field"
+            data-ui-text-field=""
+            data-part="root"
+            data-part-root=""
+            data-size="sm"
+            data-variant="outline"
+          >
+            <input data-part="input" data-part-input="" value="Quarterly report" />
           </div>
           <div
             data-ui="toggle-group"
+            data-ui-toggle-group=""
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-variant="outline"
             data-orientation="horizontal"
@@ -765,32 +1005,56 @@
             role="group"
             aria-label="Chart range, small"
           >
-            <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-              <span data-part="label">Day</span>
+            <button
+              data-part="item"
+              data-part-item=""
+              type="button"
+              aria-pressed="true"
+              data-pressed
+              tabindex="0"
+            >
+              <span data-part="label" data-part-label="">Day</span>
             </button>
-            <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-              <span data-part="label">Week</span>
+            <button
+              data-part="item"
+              data-part-item=""
+              type="button"
+              aria-pressed="false"
+              tabindex="-1"
+            >
+              <span data-part="label" data-part-label="">Week</span>
             </button>
           </div>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Save</span>
+            <span data-part="label" data-part-label="">Save</span>
           </button>
         </div>
 
         <div data-demo-form-row>
-          <div data-ui="text-field" data-part="root" data-size="lg" data-variant="outline">
-            <input data-part="input" value="Quarterly report" />
+          <div
+            data-ui="text-field"
+            data-ui-text-field=""
+            data-part="root"
+            data-part-root=""
+            data-size="lg"
+            data-variant="outline"
+          >
+            <input data-part="input" data-part-input="" value="Quarterly report" />
           </div>
           <div
             data-ui="toggle-group"
+            data-ui-toggle-group=""
             data-part="root"
+            data-part-root=""
             data-size="lg"
             data-variant="outline"
             data-orientation="horizontal"
@@ -798,22 +1062,37 @@
             role="group"
             aria-label="Chart range, large"
           >
-            <button data-part="item" type="button" aria-pressed="true" data-pressed tabindex="0">
-              <span data-part="label">Day</span>
+            <button
+              data-part="item"
+              data-part-item=""
+              type="button"
+              aria-pressed="true"
+              data-pressed
+              tabindex="0"
+            >
+              <span data-part="label" data-part-label="">Day</span>
             </button>
-            <button data-part="item" type="button" aria-pressed="false" tabindex="-1">
-              <span data-part="label">Week</span>
+            <button
+              data-part="item"
+              data-part-item=""
+              type="button"
+              aria-pressed="false"
+              tabindex="-1"
+            >
+              <span data-part="label" data-part-label="">Week</span>
             </button>
           </div>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-tone="secondary"
             data-variant="outline"
             data-size="lg"
             type="button"
           >
-            <span data-part="label">Save</span>
+            <span data-part="label" data-part-label="">Save</span>
           </button>
         </div>
       </div>

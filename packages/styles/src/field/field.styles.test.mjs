@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/field/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./field.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./field.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./field.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.field;
 
 /** A selector list split at its top-level commas, leaving `:is(a, b)` whole. */
@@ -63,7 +76,10 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
     if (part === 'root') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -111,11 +127,11 @@ test('owns the container the side label is measured against', () => {
  */
 test('places its children without selecting the messages', () => {
   assert.match(rule(`${root}>*`), /grid-column:1 \/ -1/);
-  assert.match(rule(`${ui}>[data-part='label']`), /grid-column:1 \/ -1/);
-  assert.match(rule(`${ui}>[data-part='header']`), /grid-column:1 \/ -1/);
-  assert.match(rule(`${ui}>[data-part='counter']`), /grid-column:3/);
+  assert.match(rule(`${ui}>[data-part-label]`), /grid-column:1 \/ -1/);
+  assert.match(rule(`${ui}>[data-part-header]`), /grid-column:1 \/ -1/);
+  assert.match(rule(`${ui}>[data-part-counter]`), /grid-column:3/);
   assert.ok(
-    !normalized.includes(`${ui}>[data-ui='inline-message']{`),
+    !normalized.includes(`${ui}>[data-ui-inline-message]{`),
     'the field paints the message family it composes with',
   );
 });
@@ -126,10 +142,7 @@ test('places its children without selecting the messages', () => {
  * than losing a track's width to a part that is not there.
  */
 test('stops the label at the counter only when there is a counter', () => {
-  assert.match(
-    rule(`${root}:has(>[data-part='counter'])>[data-part='label']`),
-    /grid-column:1 \/ 3/,
-  );
+  assert.match(rule(`${root}:has(>[data-part-counter])>[data-part-label]`), /grid-column:1 \/ 3/);
 });
 
 /**
@@ -144,12 +157,12 @@ test('keeps the side label and its control on one row, and the count in the labe
   );
   assert.ok(
     query.includes(
-      `[data-label-placement='side']>[data-part='counter']{grid-column:1;grid-row:2;justify-self:end`,
+      `[data-label-placement='side']>[data-part-counter]{grid-column:1;grid-row:2;justify-self:end`,
     ),
     'the counter a field draws beside its control is not where a header puts it',
   );
   assert.ok(
-    query.includes(`${root}[data-label-placement='side']>[data-part='header']{grid-column:1`),
+    query.includes(`${root}[data-label-placement='side']>[data-part-header]{grid-column:1`),
     'the header does not take the label track',
   );
 });
@@ -174,8 +187,8 @@ test('centres the side label on the control’s first line', () => {
  * is always a word, and it never breaks.
  */
 test('breaks a label that cannot fit, and never breaks the necessity word', () => {
-  assert.match(rule(`${ui}>[data-part='label']`), /overflow-wrap:anywhere/);
-  assert.match(rule(`${ui}>[data-part='label']>[data-part='mark']`), /overflow-wrap:normal/);
+  assert.match(rule(`${ui}>[data-part-label]`), /overflow-wrap:anywhere/);
+  assert.match(rule(`${ui}>[data-part-label]>[data-part-mark]`), /overflow-wrap:normal/);
 });
 
 /**
@@ -184,8 +197,8 @@ test('breaks a label that cannot fit, and never breaks the necessity word', () =
  * landed outside the run and `CNPJ` and `(required)` touched.
  */
 test('keeps the necessity marker in a bidi run of its own', () => {
-  assert.match(rule(`${ui}>[data-part='label']>[data-part='mark']`), /unicode-bidi:isolate/);
-  assert.match(rule(`${ui}>[data-part='label']>[data-part='mark']`), /margin-inline-start:/);
+  assert.match(rule(`${ui}>[data-part-label]>[data-part-mark]`), /unicode-bidi:isolate/);
+  assert.match(rule(`${ui}>[data-part-label]>[data-part-mark]`), /margin-inline-start:/);
 });
 
 /**
@@ -195,12 +208,12 @@ test('keeps the necessity marker in a bidi run of its own', () => {
  */
 test('paints the mark as a severity and the words as a qualifier', () => {
   assert.match(
-    rule(`${ui}>[data-part='label']>[data-part='mark']`),
+    rule(`${ui}>[data-part-label]>[data-part-mark]`),
     /color:var\(--slotted-field-mark-color,var\(--slotted-tone-danger-text\)\)/,
   );
   assert.match(
     rule(
-      `${ui}:is([data-necessity='optional'],[data-necessity='words'])>[data-part='label']>[data-part='mark']`,
+      `${ui}:is([data-necessity='optional'],[data-necessity='words'])>[data-part-label]>[data-part-mark]`,
     ),
     /color:var\(--slotted-field-mark-text-color,var\(--slotted-text-muted\)\)/,
   );
@@ -212,7 +225,7 @@ test('paints the mark as a severity and the words as a qualifier', () => {
  * the same thing in words, in colour and in a glyph.
  */
 test('never repaints the label for the state the error already carries', () => {
-  assert.ok(!normalized.includes(`${root}[data-invalid]>[data-part='label']{`));
+  assert.ok(!normalized.includes(`${root}[data-invalid]>[data-part-label]{`));
 });
 
 /**
@@ -221,7 +234,7 @@ test('never repaints the label for the state the error already carries', () => {
  */
 test('holds the counter’s limit back for the stronger state', () => {
   assert.match(
-    rule(`${root}[data-disabled]>[data-part='counter'][data-invalid]`),
+    rule(`${root}[data-disabled]>[data-part-counter][data-invalid]`),
     /color:var\(--slotted-disabled-foreground\)/,
   );
 });
@@ -232,9 +245,9 @@ test('holds the counter’s limit back for the stronger state', () => {
  * which is the one thing in this family worth animating.
  */
 test('counts in tabular figures and moves only the colour', () => {
-  assert.match(rule(`${ui}>[data-part='counter']`), /font-variant-numeric:tabular-nums/);
+  assert.match(rule(`${ui}>[data-part-counter]`), /font-variant-numeric:tabular-nums/);
   assert.match(
-    rule(`${ui}>[data-part='counter']`),
+    rule(`${ui}>[data-part-counter]`),
     /transition:color var\(--slotted-control-transition-duration\)/,
   );
 });
@@ -248,14 +261,14 @@ test('withdraws an empty message unless the form asked for its line', () => {
   assert.match(
     normalized,
     new RegExp(
-      `\\[data-ui='inline-message'\\]:not\\(\\[data-reserve\\]\\):has\\(\\[data-part='text'\\]:empty\\)\\{display:none`,
+      `\\[data-ui-inline-message\\]:not\\(\\[data-reserve\\]\\):has\\(\\[data-part-text\\]:empty\\)\\{display:none`,
     ),
   );
 });
 
 /** The whole of what the field does to a control it does not own. */
 test('lets the control shrink and touches nothing else about it', () => {
-  assert.equal(rule(`${ui}>[data-part='control']`).trim(), 'min-inline-size:0;');
+  assert.equal(rule(`${ui}>[data-part-control]`).trim(), 'min-inline-size:0;');
 });
 
 /**
@@ -266,15 +279,15 @@ test('lets the control shrink and touches nothing else about it', () => {
  * carries the root's part so it outweighs the message family's own root rule.
  */
 test('sets the type of what the field says: xs, and a weight up for an outcome', () => {
-  const message = rule(`${root}>[data-ui='inline-message']`);
+  const message = rule(`${root}>[data-ui-inline-message]`);
   assert.match(message, /font-size:var\(--slotted-font-size-xs,0\.75rem\)/);
   for (const tone of ['danger', 'success']) {
     assert.ok(
-      normalized.includes(`${root}>[data-ui='inline-message'][data-tone='${tone}']`),
+      normalized.includes(`${root}>[data-ui-inline-message][data-tone='${tone}']`),
       `${tone} is not set a weight up`,
     );
   }
-  const outcome = normalized.split(`${root}>[data-ui='inline-message'][data-tone='danger']`)[1];
+  const outcome = normalized.split(`${root}>[data-ui-inline-message][data-tone='danger']`)[1];
   assert.match(outcome ?? '', /^,[^{]*\{font-weight:var\(--slotted-font-weight-medium,500\);\}/);
   assert.equal(contract.messageMark, 'none', 'the field asks for a mark again (F2)');
   assert.ok(!/data-mark="(?:dot|glyph)"/.test(fragment), 'the fragment still draws a mark');
@@ -286,7 +299,7 @@ test('sets the type of what the field says: xs, and a weight up for an outcome',
  * control it names. A field is as tall as its rows.
  */
 test('never distributes surplus height between its rows', () => {
-  assert.match(declarations, /\[data-ui='field'\]\[data-part='root'\][^}]*align-content:\s*start/);
+  assert.match(declarations, /\[data-ui-field\]\[data-part-root\][^}]*align-content:\s*start/);
 });
 
 /**
@@ -296,15 +309,12 @@ test('never distributes surplus height between its rows', () => {
  * label and a 12-pixel count on one centre instead of one line of text.
  */
 test('sets the header on the label’s baseline and ends it with the action and the count', () => {
-  const header = rule(`${ui}>[data-part='header']`);
+  const header = rule(`${ui}>[data-part-header]`);
   assert.match(header, /align-items:baseline/);
   assert.match(header, /display:flex/);
   assert.match(header, /flex-wrap:wrap/);
-  assert.match(rule(`${ui}>[data-part='header']>[data-part='action']`), /margin-inline-start:auto/);
-  assert.match(
-    rule(`${ui}>[data-part='header']>[data-part='counter']`),
-    /margin-inline-start:auto/,
-  );
+  assert.match(rule(`${ui}>[data-part-header]>[data-part-action]`), /margin-inline-start:auto/);
+  assert.match(rule(`${ui}>[data-part-header]>[data-part-counter]`), /margin-inline-start:auto/);
 });
 
 /**
@@ -316,11 +326,11 @@ test('sets the header on the label’s baseline and ends it with the action and 
  * baseline, where their inset stood them 1.77 pixels above it.
  */
 test('keeps the label row as tall as the label', () => {
-  const help = rule(`${ui}>[data-part='header']>[data-part='help']`);
+  const help = rule(`${ui}>[data-part-header]>[data-part-help]`);
   assert.match(help, /--_box:max\(min\(/);
   assert.match(help, /,1lh\);/);
   assert.match(help, /margin-block:calc\(/);
-  assert.match(rule(`${ui}>[data-part='header']>[data-part='indicator']`), /align-self:center/);
+  assert.match(rule(`${ui}>[data-part-header]>[data-part-indicator]`), /align-self:center/);
 });
 
 /**
@@ -331,10 +341,10 @@ test('keeps the label row as tall as the label', () => {
  */
 test('answers the pointer on the action the way a link does', () => {
   const hover = normalized.match(
-    /\[data-part='action'\]:not\(:disabled,\[aria-disabled='true'\]\):hover\{([^}]*)\}/,
+    /\[data-part-action\]:not\(:disabled,\[aria-disabled='true'\]\):hover\{([^}]*)\}/,
   )?.[1];
   const active = normalized.match(
-    /\[data-part='action'\]:not\(:disabled,\[aria-disabled='true'\]\):active\{([^}]*)\}/,
+    /\[data-part-action\]:not\(:disabled,\[aria-disabled='true'\]\):active\{([^}]*)\}/,
   )?.[1];
   assert.match(hover ?? '', /65%/);
   assert.match(active ?? '', /35%/);
@@ -344,7 +354,7 @@ test('answers the pointer on the action the way a link does', () => {
 /** The glyph sits on the band between the capitals and the lowercase. */
 test('centres the help glyph on the label’s text rather than on its line box', () => {
   assert.match(
-    rule(`${ui}>[data-part='header']>[data-part='help']>[data-ui='icon']`),
+    rule(`${ui}>[data-part-header]>[data-part-help]>[data-ui-icon]`),
     /vertical-align:calc\(\(\(1cap \+ 1ex\) \/ 2 - var\(--_help-glyph\)\) \/ 2\)/,
   );
 });
@@ -353,7 +363,9 @@ test('centres the help glyph on the label’s text rather than on its line box',
 test('leaves the help and the action alone on a disabled field', () => {
   for (const part of contract.disabledLeaves) {
     assert.ok(
-      !normalized.includes(`${root}[data-disabled]>[data-part='header']>[data-part='${part}']`),
+      !normalized.includes(
+        `${root}[data-disabled]>[data-part-header]>[data-part-${part.toLowerCase()}]`,
+      ),
       `a disabled field repaints its ${part}`,
     );
   }

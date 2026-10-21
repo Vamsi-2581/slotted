@@ -164,21 +164,20 @@ describe('createArrowNavigation', () => {
   });
 
   /**
-   * Reading the collection filters every item through `getComputedStyle`. An
-   * accordion of fifty disclosures read it as the engine was created and again
-   * on the mutation its own mount caused, forcing a style recalculation inside
-   * the task that mounted them, for a list no key had asked for.
+   * The collection is read on render paths — a roving tab stop, a refresh —
+   * and one `getComputedStyle` there forces a style recalculation of whatever
+   * the render has just dirtied. A data-grid of fifty rows paid it per row on
+   * every scroll step.
    */
-  it('reads no computed style until a key or a caller asks for the items', () => {
+  it('reads no computed style to collect the items', () => {
     const { container, items } = mount(three);
     const styles = vi.spyOn(window, 'getComputedStyle');
     const handle = createArrowNavigation(container, { itemSelector: 'button' });
     handle.refresh();
 
-    expect(styles).not.toHaveBeenCalled();
-
     expect(handle.items()).toEqual(items);
-    expect(styles).toHaveBeenCalledTimes(3);
+    expect(handle.firstEnabled()).toBe(0);
+    expect(styles).not.toHaveBeenCalled();
     styles.mockRestore();
     handle.destroy();
   });
@@ -219,6 +218,29 @@ describe('createArrowNavigation and an item that cannot be focused', () => {
 
     expect(handle.items()).toEqual([items[0], items[2]]);
     expect(document.activeElement).toBe(items[2]);
+    handle.destroy();
+  });
+
+  /**
+   * `visibility: hidden` is read at navigation time, for the candidate a key
+   * moves to, rather than for the whole list on every read of it.
+   */
+  it('skips an item whose computed visibility is hidden when a key moves', () => {
+    const { container, items } = mount(
+      '<button>1</button><button style="visibility: hidden">2</button><button>3</button>',
+    );
+    const handle = createArrowNavigation(container, {
+      itemSelector: 'button',
+      orientation: () => 'vertical',
+    });
+
+    items[0]!.focus();
+    const styles = vi.spyOn(window, 'getComputedStyle');
+    press(items[0]!, 'ArrowDown');
+
+    expect(document.activeElement).toBe(items[2]);
+    expect(styles).toHaveBeenCalledTimes(2);
+    styles.mockRestore();
     handle.destroy();
   });
 

@@ -1,3 +1,4 @@
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/button/button.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -38,7 +39,9 @@ interface RootDataOptions {
 export function rootData(options: RootDataOptions) {
   return {
     'data-ui': 'button',
+    ...selectorKeyProps('ui', 'button'),
     'data-part': 'root',
+    ...selectorKeyProps('part', 'root'),
     'data-tone': options.tone,
     'data-variant': options.variant,
     'data-size': options.size,

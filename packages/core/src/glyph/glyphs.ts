@@ -56,6 +56,8 @@ export const GLYPHS = {
   },
   'chevron-right': { paint: 'stroke', strokeWidth: 2, offset: [0, 0], paths: ['m9 18 6-6-6-6'] },
   'chevron-down': { paint: 'stroke', strokeWidth: 2, offset: [0, 0], paths: ['m6 9 6 6 6-6'] },
+  'chevron-left': { paint: 'stroke', strokeWidth: 2, offset: [0, 0], paths: ['m15 18-6-6 6-6'] },
+  'chevron-up': { paint: 'stroke', strokeWidth: 2, offset: [0, 0], paths: ['m18 15-6-6-6 6'] },
   'chevrons-right': {
     paint: 'stroke',
     strokeWidth: 2,
@@ -87,6 +89,18 @@ export const GLYPHS = {
     strokeWidth: 2,
     offset: [0, 0],
     paths: ['m12 19-7-7 7-7', 'M19 12H5'],
+  },
+  'arrow-right': {
+    paint: 'stroke',
+    strokeWidth: 2,
+    offset: [0, 0],
+    paths: ['M5 12h14', 'm12 5 7 7-7 7'],
+  },
+  'arrow-down': {
+    paint: 'stroke',
+    strokeWidth: 2,
+    offset: [0, 0],
+    paths: ['M12 5v14', 'm19 12-7 7-7-7'],
   },
   pin: {
     paint: 'stroke',

@@ -7,12 +7,18 @@ export {
   compareValues,
   createComparator,
   formatValue,
+  groupInOrder,
   groupKey,
   groupKeysOf,
   isEmptyValue,
   isGroupCursorRow,
 } from './apply';
-export type { ApplyQueryOptions, ApplyQueryResult, FormatOptions } from './apply';
+export type {
+  ApplyQueryOptions,
+  ApplyQueryResult,
+  FormatOptions,
+  GroupInOrderOptions,
+} from './apply';
 export {
   clampWidth,
   columnStateChanges,

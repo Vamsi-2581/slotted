@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/color-picker/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./color-picker.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./color-picker.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./color-picker.harness.html', import.meta.url), 'utf8'),
+);
 const normalized = css
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\s+/g, ' ')
@@ -24,14 +37,14 @@ const parts = [
 
 test('lives in the component layer and is keyed on the identifier', () => {
   assert.match(css, /@layer slotted\.components/);
-  assert.ok(normalized.includes("[data-ui='color-picker'][data-part='root']{"));
+  assert.ok(normalized.includes('[data-ui-color-picker][data-part-root]{'));
 });
 
 test('styles every drawn part and renders each in a scene', () => {
   for (const part of parts) {
     /* The text of the value is `text-field`'s input, drawn by that family. */
     if (part === 'root' || part === 'input') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches ${part}`);
+    assert.ok(normalized.includes(`[data-part-${part.toLowerCase()}]`), `no rule reaches ${part}`);
     assert.match(fragment, new RegExp(`data-part="${part}"`), `${part} is in no scene`);
   }
 });

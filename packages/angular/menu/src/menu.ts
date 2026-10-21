@@ -103,7 +103,9 @@ const reveal = (item: HTMLElement) => {
     <ng-template #layer>
       <div
         data-ui="menu"
+        data-ui-menu=""
         data-part="root"
+        data-part-root=""
         [attr.data-align]="resolvedAlign()"
         [attr.data-size]="resolvedSize()"
         [attr.data-width]="resolvedWidth()"
@@ -113,6 +115,7 @@ const reveal = (item: HTMLElement) => {
         <div
           #surface
           data-part="content"
+          data-part-content=""
           role="menu"
           tabindex="-1"
           [id]="contentId"

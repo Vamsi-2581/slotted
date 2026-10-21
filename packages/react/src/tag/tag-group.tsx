@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
 import { useCallback, useEffect, useRef } from 'react';
 
@@ -76,7 +77,7 @@ export function TagGroup({
     };
   }, [loop, orientation, roving]);
 
-  const rootProps: TagGroupRootProps = {
+  const rootProps: TagGroupRootProps = keyedProps({
     tabIndex: -1,
     ...nativeProps,
     children: (
@@ -92,7 +93,7 @@ export function TagGroup({
     /* `horizontal` is the toolbar role's own default, so only the other one is
        written; a list has no orientation to state. */
     ...(roving && orientation === 'vertical' ? { 'aria-orientation': orientation } : {}),
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

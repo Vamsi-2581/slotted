@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
@@ -65,6 +66,7 @@ import type { ActionBarOverflowLabel } from './action-bar';
     <button
       #trigger
       data-part="overflow"
+      data-part-overflow=""
       type="button"
       [slMenuTriggerFor]="surface"
       [attr.aria-label]="name()"
@@ -139,7 +141,7 @@ export class SlActionBarOverflow {
        * it once. `docs/build-briefing.md` records the rule; `toolbar` is where
        * it was learnt.
        */
-      element.setAttribute('data-part', 'overflow');
+      writeSelectorKey(element, 'part', 'overflow');
 
       /* The bar measures the control, so it has to hold it. */
       this.bar.registerTrigger(element);

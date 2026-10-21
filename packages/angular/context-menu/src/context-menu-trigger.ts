@@ -1,3 +1,4 @@
+import { hostSelectorKey } from '@slotted/core/selector-key';
 import type { PositionerAnchor } from '@slotted/core/positioner';
 import {
   afterNextRender,
@@ -97,8 +98,8 @@ export class SlContextMenuTrigger {
   private readonly writtenPart = inject(new HostAttributeToken('data-part'), { optional: true });
   private readonly writtenId = inject(new HostAttributeToken('id'), { optional: true });
 
-  protected readonly ui = this.writtenUi ?? 'context-menu';
-  protected readonly part = this.writtenPart ?? 'root';
+  protected readonly ui = hostSelectorKey(this.element, 'ui', this.writtenUi ?? 'context-menu');
+  protected readonly part = hostSelectorKey(this.element, 'part', this.writtenPart ?? 'root');
   /** The menu names its surface after this element unless given `aria-label`. */
   protected get id(): string {
     return this.writtenId ?? this.menu().triggerId;

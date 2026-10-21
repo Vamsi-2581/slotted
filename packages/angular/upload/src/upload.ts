@@ -86,7 +86,9 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
   ],
   host: {
     'data-ui': 'upload',
+    'data-ui-upload': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-size]': 'resolvedSize()',
@@ -100,10 +102,12 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
   },
   template: `
     @if (label() && !insideField()) {
-      <span data-part="label">{{ label() }}</span>
+      <span data-part="label" data-part-label="">{{ label() }}</span>
     }
     @if (description() && !insideField()) {
-      <p [id]="descriptionId" data-part="description">{{ description() }}</p>
+      <p [id]="descriptionId" data-part="description" data-part-description="">
+        {{ description() }}
+      </p>
     }
 
     @if (resolvedVariant() === 'button') {
@@ -120,6 +124,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
         [attr.data-drop-invalid]="verdict() === 'invalid' ? '' : null"
         [attr.data-browsable]="browsable() ? '' : null"
         data-part="dropzone"
+        data-part-dropzone=""
       >
         <!-- The region carries the mark, so the trigger inside it does not. -->
         @if (resolvedVariant() === 'dropzone') {
@@ -128,16 +133,16 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
         }
         <ng-container [ngTemplateOutlet]="triggerTemplate" />
         @if (resolvedVariant() === 'field') {
-          <span data-part="meta">{{ fieldSummary() }}</span>
+          <span data-part="meta" data-part-meta="">{{ fieldSummary() }}</span>
         }
       </div>
     }
 
     @if (files().length > 1) {
-      <div data-part="summary">
+      <div data-part="summary" data-part-summary="">
         <span>{{ summaryText() }}</span>
         @if (!readOnly()) {
-          <button (click)="clear($event)" data-part="clear" type="button">
+          <button (click)="clear($event)" data-part="clear" data-part-clear="" type="button">
             {{ t('clear') }}
           </button>
         }
@@ -145,14 +150,15 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
     }
 
     @if (showList()) {
-      <ul [style.--slotted-upload-visible-rows]="visibleRows()" data-part="list">
+      <ul [style.--slotted-upload-visible-rows]="visibleRows()" data-part="list" data-part-list="">
         @for (file of files(); track file.key) {
-          <li [attr.data-status]="file.status" data-part="item">
+          <li [attr.data-status]="file.status" data-part="item" data-part-item="">
             @if (resolvedPreview() !== 'none' || resolvedLayout() === 'grid') {
               <span
                 [attr.data-extension]="extensionLabel(file)"
                 [attr.data-kind]="file.kind"
                 data-part="preview"
+                data-part-preview=""
               >
                 @if (url(file) && file.type.startsWith('image/')) {
                   <img [src]="url(file)" alt="" />
@@ -162,34 +168,45 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
               </span>
             }
 
-            <div data-part="body">
+            <div data-part="body" data-part-body="">
               @if (openable(file)) {
-                <button (click)="open(file, $event)" data-part="filename" dir="auto" type="button">
-                  <span data-part="name">{{ stem(file) }}</span>
+                <button
+                  (click)="open(file, $event)"
+                  data-part="filename"
+                  data-part-filename=""
+                  dir="auto"
+                  type="button"
+                >
+                  <span data-part="name" data-part-name="">{{ stem(file) }}</span>
                   @if (extension(file)) {
-                    <span data-part="extension">{{ extension(file) }}</span>
+                    <span data-part="extension" data-part-extension="">{{ extension(file) }}</span>
                   }
                 </button>
               } @else {
-                <span data-part="filename" dir="auto">
-                  <span data-part="name">{{ stem(file) }}</span>
+                <span data-part="filename" data-part-filename="" dir="auto">
+                  <span data-part="name" data-part-name="">{{ stem(file) }}</span>
                   @if (extension(file)) {
-                    <span data-part="extension">{{ extension(file) }}</span>
+                    <span data-part="extension" data-part-extension="">{{ extension(file) }}</span>
                   }
                 </span>
               }
-              <div data-part="detail">
-                <span data-part="meta">{{ formatters().bytes(file.size) }}</span>
-                <span data-part="status">{{ statusText(file) }}</span>
+              <div data-part="detail" data-part-detail="">
+                <span data-part="meta" data-part-meta="">{{ formatters().bytes(file.size) }}</span>
+                <span data-part="status" data-part-status="">{{ statusText(file) }}</span>
               </div>
             </div>
 
-            <span data-part="actions">
+            <span data-part="actions" data-part-actions="">
               @for (action of actions(file); track action.part) {
                 <button
                   (click)="act(file, action.action, $event)"
                   [attr.aria-label]="action.label"
                   [attr.data-part]="action.part"
+                  [attr.data-part-start]="action.part === 'start' ? '' : null"
+                  [attr.data-part-pause]="action.part === 'pause' ? '' : null"
+                  [attr.data-part-retry]="action.part === 'retry' ? '' : null"
+                  [attr.data-part-cancel]="action.part === 'cancel' ? '' : null"
+                  [attr.data-part-remove]="action.part === 'remove' ? '' : null"
                   type="button"
                 >
                   <span slIcon><svg slGlyph [name]="action.glyph"></svg></span>
@@ -198,7 +215,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
             </span>
 
             @if (showBar(file)) {
-              <div data-part="progress">
+              <div data-part="progress" data-part-progress="">
                 <div
                   [tone]="file.status === 'uploading' ? 'accent' : 'warning'"
                   [value]="percent(file)"
@@ -210,7 +227,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
             }
 
             @if (file.status === 'rejected' || file.status === 'error') {
-              <p data-part="message">{{ messageText(file) }}</p>
+              <p data-part="message" data-part-message="">{{ messageText(file) }}</p>
             }
           </li>
         }
@@ -231,7 +248,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
     ></div>
 
     <ng-template #triggerTemplate>
-      <label #trigger data-part="trigger">
+      <label #trigger data-part="trigger" data-part-trigger="">
         @if (resolvedVariant() !== 'dropzone') {
           <span slIcon><svg slGlyph name="upload"></svg></span>
         }
@@ -248,6 +265,7 @@ import { KIND_GLYPH, SlUploadViewer } from './upload-viewer';
           [attr.required]="required() ? '' : null"
           [attr.webkitdirectory]="directory() ? '' : null"
           data-part="input"
+          data-part-input=""
           type="file"
         />
         {{ t('trigger') }}

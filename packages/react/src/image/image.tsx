@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/image/image.css';
 
 import { useCallback, useState } from 'react';
@@ -146,7 +147,7 @@ export function Image({
     : 'custom';
   const resolvedPlaceholder = placeholder ?? defaults.placeholder;
 
-  const mediaProps: ImageMediaProps = {
+  const mediaProps: ImageMediaProps = keyedProps({
     ...nativeProps,
     alt,
     'data-part': 'image',
@@ -163,7 +164,7 @@ export function Image({
     onLoad: handleLoad,
     ref: measure,
     ...(shownSrc === undefined ? {} : { src: shownSrc }),
-  };
+  });
 
   const media = renderImage === undefined ? <img {...mediaProps} /> : renderImage(mediaProps);
 
@@ -171,7 +172,7 @@ export function Image({
     sources === undefined || sources.length === 0 ? (
       media
     ) : (
-      <picture data-part="picture">
+      <picture data-part="picture" data-part-picture="">
         {sources.map((source, index) => (
           <source
             key={index}
@@ -188,13 +189,13 @@ export function Image({
   const layers: ReactNode = (
     <>
       {picture}
-      <span aria-hidden="true" data-part="placeholder">
+      <span aria-hidden="true" data-part="placeholder" data-part-placeholder="">
         {resolvedPlaceholder === 'blur' && placeholderSrc !== undefined ? (
           <img alt="" src={placeholderSrc} />
         ) : null}
         {placeholderContent}
       </span>
-      <span data-part="fallback">
+      <span data-part="fallback" data-part-fallback="">
         {/* The mark a picture leaves behind, unless the consumer wrote their own. */}
         {fallback ?? (
           <Icon>
@@ -205,7 +206,7 @@ export function Image({
     </>
   );
 
-  const rootProps: ImageRootProps = {
+  const rootProps: ImageRootProps = keyedProps({
     children: ratio === undefined ? layers : <AspectRatio ratio={ratio}>{layers}</AspectRatio>,
     ...(className === undefined ? {} : { className }),
     'data-fit': fit ?? defaults.fit,
@@ -222,7 +223,7 @@ export function Image({
       positionAttribute === 'custom'
         ? ({ ...style, '--slotted-image-position': resolvedPosition } as CSSProperties)
         : style,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

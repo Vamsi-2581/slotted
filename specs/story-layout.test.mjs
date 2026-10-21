@@ -50,7 +50,7 @@ function targetsRoot(selectorList, family) {
         .split(/\s*[\s>+~]\s*/)
         .filter(Boolean);
       const last = compounds.at(-1);
-      return last !== undefined && last.includes(`[data-ui='${family}']`);
+      return last !== undefined && last.includes(`[data-ui-${family}]`);
     });
 }
 

@@ -5,7 +5,7 @@
    * the family draws every interaction over. The table is a view of the plot,
    * shown in the plot's own box.
    *
-   *   ┌ figure [data-ui=chart] ─────────────────────────────────────────┐
+   *   ┌ figure [data-ui-chart] ─────────────────────────────────────────┐
    *   │ header   title (help) · description         actions  toolbar   │
    *   │ legend   ▬ Revenue  ■ Cost  ● Visits  +3                        │
    *   │ plot     ┌ canvas (engine) · table-region (the table view) ───┐ │
@@ -24,7 +24,7 @@
    * resolves them at the plot, so a scheme, a density, a palette or a token a
    * consumer overrides on a wrapper reaches the marks through the cascade.
    */
-  [data-ui='chart'] {
+  [data-ui-chart] {
     --_gap: var(--slotted-chart-gap, var(--slotted-space-5, 0.75rem));
     --_plot-size: var(--slotted-chart-plot-block-size, calc(var(--slotted-space-12, 4rem) * 4));
     --_radius: var(--slotted-chart-radius, var(--slotted-radius-md, 6px));
@@ -98,11 +98,11 @@
   /* Three heights on the space scale's top step: 12, 16 and 24 rem. A plot
      is content, not a control, so the height does not follow density; what
      density moves is the inset around the marks and the type on the axes. */
-  [data-ui='chart'][data-size='sm'] {
+  [data-ui-chart][data-size='sm'] {
     --_plot-size: var(--slotted-chart-plot-block-size-sm, calc(var(--slotted-space-12, 4rem) * 3));
   }
 
-  [data-ui='chart'][data-size='lg'] {
+  [data-ui-chart][data-size='lg'] {
     --_plot-size: var(--slotted-chart-plot-block-size-lg, calc(var(--slotted-space-12, 4rem) * 6));
   }
 
@@ -117,7 +117,7 @@
    * are mixed in CSS from tokens the theme already owns, so they follow every
    * scheme and brand with no scale of their own.
    */
-  [data-ui='chart'][data-palette='sequential'] {
+  [data-ui-chart][data-palette='sequential'] {
     --_hue: var(--slotted-chart-sequential-color, var(--slotted-tone-accent-text, CanvasText));
     --_chart-slot-1: var(--_hue);
     --_chart-slot-2: color-mix(in oklab, var(--_hue) 76%, var(--_chart-surface));
@@ -129,7 +129,7 @@
     --_chart-slot-8: color-mix(in oklab, var(--_hue) 10%, var(--_chart-surface));
   }
 
-  [data-ui='chart'][data-palette='focus'] {
+  [data-ui-chart][data-palette='focus'] {
     --_muted: var(--slotted-text-muted, GrayText);
     --_chart-slot-1: var(--slotted-chart-focus-color, var(--slotted-tone-accent-text, CanvasText));
     --_chart-slot-2: color-mix(in oklab, var(--_muted) 70%, var(--_chart-surface));
@@ -151,7 +151,7 @@
    * never less than its size step — so tiles in one row end on one line
    * whatever their titles and legends hold.
    */
-  [data-ui='chart'][data-variant='card'] {
+  [data-ui-chart][data-variant='card'] {
     --_chart-surface: var(--slotted-chart-surface, var(--slotted-surface-raised, Canvas));
 
     background-color: var(--_chart-surface);
@@ -167,7 +167,7 @@
      `description` and `actions` are also parts of the families a plot
      composes — `result-state` in an empty or failed plot — and a bare
      descendant selector restyled theirs. */
-  [data-ui='chart'] > [data-part='header'] {
+  [data-ui-chart] > [data-part-header] {
     align-items: start;
     display: flex;
     gap: var(--slotted-space-4, 0.5rem);
@@ -175,7 +175,7 @@
   }
 
   /* The heading block: title and help on one line, the description under. */
-  [data-ui='chart'] > [data-part='header'] > :first-child {
+  [data-ui-chart] > [data-part-header] > :first-child {
     align-content: start;
     display: grid;
     flex: 1 1 auto;
@@ -183,14 +183,14 @@
     min-inline-size: 0;
   }
 
-  [data-ui='chart'] > [data-part='header'] > :first-child > :first-child {
+  [data-ui-chart] > [data-part-header] > :first-child > :first-child {
     align-items: center;
     display: flex;
     gap: var(--slotted-space-2, 0.25rem);
     min-inline-size: 0;
   }
 
-  [data-ui='chart'] > [data-part='header'] [data-part='title'] {
+  [data-ui-chart] > [data-part-header] [data-part-title] {
     color: var(--slotted-text, CanvasText);
     font-family: var(
       --slotted-font-family-heading,
@@ -203,7 +203,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='chart'] > [data-part='header'] [data-part='description'] {
+  [data-ui-chart] > [data-part-header] [data-part-description] {
     color: var(--slotted-text-muted, GrayText);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     line-height: var(--slotted-line-height-sm, 1.45);
@@ -213,22 +213,22 @@
   /* A tile's heading is one line of title and one of description, cut with
      an ellipsis and whole in the DOM, so tiles in a row keep one header
      height. The full text stays the figure's name and description. */
-  [data-ui='chart'][data-variant='card']
-    > [data-part='header']
-    :is([data-part='title'], [data-part='description']) {
+  [data-ui-chart][data-variant='card']
+    > [data-part-header]
+    :is([data-part-title], [data-part-description]) {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  [data-ui='chart'][data-variant='card'] > [data-part='header'] [data-part='title'] {
+  [data-ui-chart][data-variant='card'] > [data-part-header] [data-part-title] {
     font-size: var(--slotted-font-size-md, 0.875rem);
     line-height: var(--slotted-line-height-md, 1.5);
   }
 
   /* A tile keeps the description's line whether it has one or not, so the
      legends and the plots of a row start on one line too. */
-  [data-ui='chart'][data-variant='card'] > [data-part='header'] > :first-child {
+  [data-ui-chart][data-variant='card'] > [data-part-header] > :first-child {
     min-block-size: calc(
       var(--slotted-font-size-md, 0.875rem) * var(--slotted-line-height-md, 1.5) +
         var(--slotted-space-1, 0.125rem) + var(--slotted-font-size-sm, 0.8125rem) *
@@ -236,7 +236,7 @@
     );
   }
 
-  [data-ui='chart'] > [data-part='header'] > [data-part='actions'] {
+  [data-ui-chart] > [data-part-header] > [data-part-actions] {
     align-items: center;
     display: flex;
     flex: none;
@@ -252,7 +252,7 @@
    * hovered or holds focus (`toolbar="hover"`), and never where the device
    * cannot hover.
    */
-  [data-ui='chart'] > [data-part='header'] > [data-part='toolbar'] {
+  [data-ui-chart] > [data-part-header] > [data-part-toolbar] {
     align-items: center;
     display: flex;
     flex: none;
@@ -269,38 +269,38 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='chart'][data-toolbar='hover'] > [data-part='header'] > [data-part='toolbar'] {
+  [data-ui-chart][data-toolbar='hover'] > [data-part-header] > [data-part-toolbar] {
     opacity: 0;
   }
 
   /* While the plot waits, fails or has no data the toolbar keeps its width —
      the title and the description wrap where they will wrap once it is ready —
      and draws nothing: an action nobody can press yet is absent. */
-  [data-ui='chart'] > [data-part='header'] > [data-part='toolbar'][data-waiting] {
+  [data-ui-chart] > [data-part-header] > [data-part-toolbar][data-waiting] {
     visibility: hidden;
   }
 
   /* A chart has no disabled state; the guard is the precedence rule every
      hover in the library states (`packages/styles/src/states.test.mjs`). */
-  [data-ui='chart'][data-toolbar='hover']:is(:hover, :focus-within):not([data-disabled])
-    > [data-part='header']
-    > [data-part='toolbar'] {
+  [data-ui-chart][data-toolbar='hover']:is(:hover, :focus-within):not([data-disabled])
+    > [data-part-header]
+    > [data-part-toolbar] {
     opacity: 1;
   }
 
   @media (hover: none) {
-    [data-ui='chart'][data-toolbar='hover'] > [data-part='header'] > [data-part='toolbar'] {
+    [data-ui-chart][data-toolbar='hover'] > [data-part-header] > [data-part-toolbar] {
       opacity: 1;
     }
   }
 
-  [data-ui='chart']
+  [data-ui-chart]
     :is(
-      [data-part='zoom-reset'],
-      [data-part='view-toggle'],
-      [data-part='fullscreen-toggle'],
-      [data-part='menu-trigger'],
-      [data-part='help']
+      [data-part-zoom-reset],
+      [data-part-view-toggle],
+      [data-part-fullscreen-toggle],
+      [data-part-menu-trigger],
+      [data-part-help]
     ) {
     --_box: var(--slotted-control-height-sm, 1.75rem);
 
@@ -322,7 +322,7 @@
   }
 
   /* Help sits beside the words it explains, a step smaller than the toolbar. */
-  [data-ui='chart'] [data-part='help'] {
+  [data-ui-chart] [data-part-help] {
     --_box: var(--slotted-control-inner-size-sm, 1.25rem);
 
     /* It hangs past the title's line by the difference rather than growing
@@ -332,35 +332,35 @@
     );
   }
 
-  [data-ui='chart']
+  [data-ui-chart]
     :is(
-      [data-part='zoom-reset'],
-      [data-part='view-toggle'],
-      [data-part='fullscreen-toggle'],
-      [data-part='menu-trigger'],
-      [data-part='help']
+      [data-part-zoom-reset],
+      [data-part-view-toggle],
+      [data-part-fullscreen-toggle],
+      [data-part-menu-trigger],
+      [data-part-help]
     ):hover:not(:disabled) {
     background-color: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
     color: var(--slotted-text, CanvasText);
   }
 
   /* On: the table standing in the plot, the menu or the help open. */
-  [data-ui='chart']
-    :is([data-part='view-toggle'], [data-part='menu-trigger'], [data-part='help'])[data-pressed],
-  [data-ui='chart'] :is([data-part='menu-trigger'], [data-part='help'])[data-open] {
+  [data-ui-chart]
+    :is([data-part-view-toggle], [data-part-menu-trigger], [data-part-help])[data-pressed],
+  [data-ui-chart] :is([data-part-menu-trigger], [data-part-help])[data-open] {
     background-color: var(--slotted-tone-secondary-surface, ButtonFace);
     color: var(--slotted-text, CanvasText);
   }
 
-  [data-ui='chart']
+  [data-ui-chart]
     :is(
-      [data-part='zoom-reset'],
-      [data-part='view-toggle'],
-      [data-part='fullscreen-toggle'],
-      [data-part='menu-trigger'],
-      [data-part='help'],
-      [data-part='legend-more'],
-      [data-part='menu-item']
+      [data-part-zoom-reset],
+      [data-part-view-toggle],
+      [data-part-fullscreen-toggle],
+      [data-part-menu-trigger],
+      [data-part-help],
+      [data-part-legend-more],
+      [data-part-menu-item]
     ):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: 0;
@@ -371,7 +371,7 @@
    * every floating layer in the library. They are placed in the viewport's
    * coordinates by the binding, through the chart's two runtime properties.
    */
-  [data-ui='chart'] :is([data-part='menu'], [data-part='help-content']) {
+  [data-ui-chart] :is([data-part-menu], [data-part-help-content]) {
     background-color: var(--slotted-surface-raised, Canvas);
     border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle, CanvasText);
     border-radius: var(--slotted-radius-md, 6px);
@@ -389,26 +389,26 @@
     z-index: var(--slotted-z-index-popover, 1100);
   }
 
-  [data-ui='chart'] [data-part='menu'] {
+  [data-ui-chart] [data-part-menu] {
     display: grid;
     min-inline-size: 11rem;
     padding: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='chart'] [data-part='menu']:not(:popover-open, [data-open]) {
+  [data-ui-chart] [data-part-menu]:not(:popover-open, [data-open]) {
     display: none;
   }
 
-  [data-ui='chart'] [data-part='help-content'] {
+  [data-ui-chart] [data-part-help-content] {
     padding-block: var(--slotted-space-4, 0.5rem);
     padding-inline: var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='chart'] [data-part='help-content']:not(:popover-open, [data-open]) {
+  [data-ui-chart] [data-part-help-content]:not(:popover-open, [data-open]) {
     display: none;
   }
 
-  [data-ui='chart'] [data-part='menu-item'] {
+  [data-ui-chart] [data-part-menu-item] {
     align-items: center;
     background: transparent;
     border: 0;
@@ -425,11 +425,11 @@
 
   /* The table and full-screen controls are in the toolbar; the menu holds
      them only where the toolbar gives them up (see Narrow). */
-  [data-ui='chart'] [data-part='menu-item']:is([data-action='view'], [data-action='fullscreen']) {
+  [data-ui-chart] [data-part-menu-item]:is([data-action='view'], [data-action='fullscreen']) {
     display: none;
   }
 
-  [data-ui='chart'] [data-part='menu-item']:hover:not(:disabled) {
+  [data-ui-chart] [data-part-menu-item]:hover:not(:disabled) {
     background-color: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
   }
 
@@ -438,7 +438,7 @@
   /* One line: what does not fit waits behind `legend-more`, so a legend of
      three and a legend of twelve are the same height. `legendOverflow="wrap"`
      lets a chart that owns its own page wrap instead. */
-  [data-ui='chart'] [data-part='legend'] {
+  [data-ui-chart] [data-part-legend] {
     align-items: center;
     display: flex;
     flex: none;
@@ -455,7 +455,7 @@
     padding: 0;
   }
 
-  [data-ui='chart'][data-legend-overflow='wrap'] [data-part='legend'] {
+  [data-ui-chart][data-legend-overflow='wrap'] [data-part-legend] {
     flex-wrap: wrap;
     overflow: visible;
   }
@@ -467,53 +467,53 @@
    * muted step with a dash of its own. The legend, the markers and the
    * tooltip read the palette the root declares, as the engine does.
    */
-  [data-ui='chart'] [data-slot='1'] {
+  [data-ui-chart] [data-slot='1'] {
     --_series: var(--_chart-slot-1);
   }
-  [data-ui='chart'] [data-slot='2'] {
+  [data-ui-chart] [data-slot='2'] {
     --_series: var(--_chart-slot-2);
   }
-  [data-ui='chart'] [data-slot='3'] {
+  [data-ui-chart] [data-slot='3'] {
     --_series: var(--_chart-slot-3);
   }
-  [data-ui='chart'] [data-slot='4'] {
+  [data-ui-chart] [data-slot='4'] {
     --_series: var(--_chart-slot-4);
   }
-  [data-ui='chart'] [data-slot='5'] {
+  [data-ui-chart] [data-slot='5'] {
     --_series: var(--_chart-slot-5);
   }
-  [data-ui='chart'] [data-slot='6'] {
+  [data-ui-chart] [data-slot='6'] {
     --_series: var(--_chart-slot-6);
   }
-  [data-ui='chart'] [data-slot='7'] {
+  [data-ui-chart] [data-slot='7'] {
     --_series: var(--_chart-slot-7);
   }
-  [data-ui='chart'] [data-slot='8'] {
+  [data-ui-chart] [data-slot='8'] {
     --_series: var(--_chart-slot-8);
   }
-  [data-ui='chart'] [data-tone='neutral'] {
+  [data-ui-chart] [data-tone='neutral'] {
     --_series: var(--_chart-tone-neutral);
   }
-  [data-ui='chart'] [data-tone='accent'] {
+  [data-ui-chart] [data-tone='accent'] {
     --_series: var(--_chart-tone-accent);
   }
-  [data-ui='chart'] [data-tone='secondary'] {
+  [data-ui-chart] [data-tone='secondary'] {
     --_series: var(--_chart-tone-secondary);
   }
-  [data-ui='chart'] [data-tone='success'] {
+  [data-ui-chart] [data-tone='success'] {
     --_series: var(--_chart-tone-success);
   }
-  [data-ui='chart'] [data-tone='warning'] {
+  [data-ui-chart] [data-tone='warning'] {
     --_series: var(--_chart-tone-warning);
   }
-  [data-ui='chart'] [data-tone='danger'] {
+  [data-ui-chart] [data-tone='danger'] {
     --_series: var(--_chart-tone-danger);
   }
-  [data-ui='chart'] [data-overflow] {
+  [data-ui-chart] [data-overflow] {
     --_series: var(--_chart-overflow);
   }
 
-  [data-ui='chart'] :is([data-part='legend-item'], [data-part='legend-more']) {
+  [data-ui-chart] :is([data-part-legend-item], [data-part-legend-more]) {
     align-items: center;
     background: transparent;
     border: 0;
@@ -535,11 +535,11 @@
       color var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='chart'] :is([data-part='legend-item'], [data-part='legend-more'])[hidden] {
+  [data-ui-chart] :is([data-part-legend-item], [data-part-legend-more])[hidden] {
     display: none;
   }
 
-  [data-ui='chart'] [data-part='legend-more'] {
+  [data-ui-chart] [data-part-legend-more] {
     color: var(--slotted-text-muted, GrayText);
     cursor: pointer;
     font-variant-numeric: tabular-nums;
@@ -547,20 +547,19 @@
   }
 
   /* An entry moved into the `+N` layer stands in a column there. */
-  [data-ui='chart'] [data-part='menu'] [data-part='legend-item'] {
+  [data-ui-chart] [data-part-menu] [data-part-legend-item] {
     inline-size: 100%;
   }
 
-  [data-ui='chart'] :is(button[data-part='legend-item'], [data-part='legend-more']) {
+  [data-ui-chart] :is(button[data-part-legend-item], [data-part-legend-more]) {
     cursor: pointer;
   }
 
-  [data-ui='chart']
-    :is(button[data-part='legend-item'], [data-part='legend-more']):hover:not(:disabled) {
+  [data-ui-chart] :is(button[data-part-legend-item], [data-part-legend-more]):hover:not(:disabled) {
     background-color: var(--slotted-tone-secondary-subtle-hover, ButtonFace);
   }
 
-  [data-ui='chart'] [data-part='legend-item']:focus-visible {
+  [data-ui-chart] [data-part-legend-item]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: 0;
   }
@@ -570,7 +569,7 @@
    * legend reads without colour: a stroke for a line, a square for a bar, an
    * area or a slice, a disc for a scatter.
    */
-  [data-ui='chart'] :is([data-part='legend-marker'], [data-part='tooltip-marker']) {
+  [data-ui-chart] :is([data-part-legend-marker], [data-part-tooltip-marker]) {
     background-color: var(--_series);
     block-size: 0.625rem;
     border-radius: var(--slotted-radius-xs, 2px);
@@ -578,32 +577,28 @@
     inline-size: 0.625rem;
   }
 
-  [data-ui='chart']
-    :is([data-part='legend-marker'], [data-part='tooltip-marker'])[data-kind='line'] {
+  [data-ui-chart] :is([data-part-legend-marker], [data-part-tooltip-marker])[data-kind='line'] {
     block-size: var(--slotted-border-width-thick, 2px);
     border-radius: var(--slotted-radius-full, 9999px);
     inline-size: 0.875rem;
   }
 
-  [data-ui='chart']
-    :is([data-part='legend-marker'], [data-part='tooltip-marker'])[data-kind='scatter'] {
+  [data-ui-chart] :is([data-part-legend-marker], [data-part-tooltip-marker])[data-kind='scatter'] {
     border-radius: var(--slotted-radius-full, 9999px);
   }
 
   /* The line's own dash, drawn at the marker's scale, so three series that
      share the muted colour past the eighth slot still read apart. */
-  [data-ui='chart']
-    :is([data-part='legend-marker'], [data-part='tooltip-marker'])[data-stroke='dashed'] {
+  [data-ui-chart] :is([data-part-legend-marker], [data-part-tooltip-marker])[data-stroke='dashed'] {
     background: repeating-linear-gradient(to right, var(--_series) 0 3px, transparent 3px 5px);
   }
 
-  [data-ui='chart']
-    :is([data-part='legend-marker'], [data-part='tooltip-marker'])[data-stroke='dotted'] {
+  [data-ui-chart] :is([data-part-legend-marker], [data-part-tooltip-marker])[data-stroke='dotted'] {
     background: repeating-linear-gradient(to right, var(--_series) 0 2px, transparent 2px 4px);
   }
 
-  [data-ui='chart']
-    :is([data-part='legend-marker'], [data-part='tooltip-marker'])[data-stroke='dash-dot'] {
+  [data-ui-chart]
+    :is([data-part-legend-marker], [data-part-tooltip-marker])[data-stroke='dash-dot'] {
     background: repeating-linear-gradient(
       to right,
       var(--_series) 0 5px,
@@ -613,20 +608,20 @@
     );
   }
 
-  [data-ui='chart'] [data-part='legend-label'] {
+  [data-ui-chart] [data-part-legend-label] {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  [data-ui='chart'] [data-part='legend-value'] {
+  [data-ui-chart] [data-part-legend-value] {
     color: var(--slotted-text-muted, GrayText);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
-  [data-ui='chart'] [data-part='legend-item'][data-current] [data-part='legend-value'] {
+  [data-ui-chart] [data-part-legend-item][data-current] [data-part-legend-value] {
     color: var(--slotted-text, CanvasText);
   }
 
@@ -637,33 +632,31 @@
    * outline is the series colour, so the item still says which series it
    * would bring back.
    */
-  [data-ui='chart'] button[data-part='legend-item']:not([data-pressed]) {
+  [data-ui-chart] button[data-part-legend-item]:not([data-pressed]) {
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='chart']
-    button[data-part='legend-item']:not([data-pressed])
-    [data-part='legend-marker'] {
+  [data-ui-chart] button[data-part-legend-item]:not([data-pressed]) [data-part-legend-marker] {
     background: transparent;
     box-shadow: inset 0 0 0 var(--slotted-border-width-medium, 1.5px) var(--_series);
   }
 
-  [data-ui='chart']
-    button[data-part='legend-item']:not([data-pressed])
-    [data-part='legend-marker'][data-kind='line'] {
+  [data-ui-chart]
+    button[data-part-legend-item]:not([data-pressed])
+    [data-part-legend-marker][data-kind='line'] {
     background: var(--_series);
     box-shadow: none;
     opacity: 0.4;
   }
 
-  [data-ui='chart'] button[data-part='legend-item']:not([data-pressed]) [data-part='legend-label'] {
+  [data-ui-chart] button[data-part-legend-item]:not([data-pressed]) [data-part-legend-label] {
     text-decoration: line-through;
     text-decoration-color: color-mix(in oklab, currentColor 55%, transparent);
   }
 
   /* ── Plot ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='chart'] [data-part='plot'] {
+  [data-ui-chart] [data-part-plot] {
     border-radius: var(--_radius);
     /* Its size step, and whatever more a tile or the full screen gives it. */
     flex: 1 0 var(--_plot-size);
@@ -678,12 +671,12 @@
     position: relative;
   }
 
-  [data-ui='chart'] [data-part='plot']:focus-visible {
+  [data-ui-chart] [data-part-plot]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='chart'] [data-part='canvas'] {
+  [data-ui-chart] [data-part-canvas] {
     inset: 0;
     position: absolute;
     z-index: 1;
@@ -691,14 +684,14 @@
 
   /* The engine keeps its size and its state behind the table, so the chart
      comes back where the reader left it. */
-  [data-ui='chart']
-    [data-part='plot']:has(> [data-part='table-region']:not([hidden]))
+  [data-ui-chart]
+    [data-part-plot]:has(> [data-part-table-region]:not([hidden]))
     > :is(
-      [data-part='canvas'],
-      [data-part='crosshair'],
-      [data-part='marker'],
-      [data-part='tooltip'],
-      [data-part='center']
+      [data-part-canvas],
+      [data-part-crosshair],
+      [data-part-marker],
+      [data-part-tooltip],
+      [data-part-center]
     ) {
     visibility: hidden;
   }
@@ -714,7 +707,7 @@
    * `--slotted-chart-frame-size` for the grid across it. None of them is a
    * design token.
    */
-  [data-ui='chart'] :is([data-part='crosshair'], [data-part='marker'], [data-part='tooltip']) {
+  [data-ui-chart] :is([data-part-crosshair], [data-part-marker], [data-part-tooltip]) {
     inset-block-start: 0;
     inset-inline-start: 0;
     pointer-events: none;
@@ -723,7 +716,7 @@
 
   /* A line under the marks for a line or an area, where the eye needs the
      exact x; a band for bars, where the category is the whole slot. */
-  [data-ui='chart'] [data-part='crosshair'] {
+  [data-ui-chart] [data-part-crosshair] {
     background-color: var(--slotted-chart-crosshair-color, var(--slotted-border-strong, GrayText));
     block-size: var(--slotted-chart-frame-size, 100%);
     inline-size: 1px;
@@ -734,7 +727,7 @@
     z-index: 0;
   }
 
-  [data-ui='chart'] [data-part='crosshair'][data-band] {
+  [data-ui-chart] [data-part-crosshair][data-band] {
     background-color: var(
       --slotted-chart-band-color,
       color-mix(in oklab, var(--slotted-text, CanvasText) 6%, transparent)
@@ -747,7 +740,7 @@
     );
   }
 
-  [data-ui='chart'] [data-part='crosshair'][data-orientation='horizontal'] {
+  [data-ui-chart] [data-part-crosshair][data-orientation='horizontal'] {
     block-size: 1px;
     inline-size: var(--slotted-chart-frame-size, 100%);
     transform: translate(
@@ -756,7 +749,7 @@
     );
   }
 
-  [data-ui='chart'] [data-part='crosshair'][data-band][data-orientation='horizontal'] {
+  [data-ui-chart] [data-part-crosshair][data-band][data-orientation='horizontal'] {
     block-size: var(--slotted-chart-band-size, 0px);
     transform: translate(
       var(--slotted-chart-frame-start, 0px),
@@ -769,7 +762,7 @@
    * of the ground around it, so it separates from the line it sits on and
    * from a neighbouring series crossing at the same place.
    */
-  [data-ui='chart'] [data-part='marker'] {
+  [data-ui-chart] [data-part-marker] {
     --_size: calc(var(--_chart-marker-size) + var(--slotted-space-2, 0.25rem));
 
     background-color: var(--_series, var(--_chart-slot-1));
@@ -787,7 +780,7 @@
   /* The point the reader chose stays marked after the pointer leaves: a ring
      in the series colour around the ground, larger than the hover marker so
      the two read as two states when they meet. */
-  [data-ui='chart'] [data-part='marker'][data-selected] {
+  [data-ui-chart] [data-part-marker][data-selected] {
     --_size: calc(var(--_chart-marker-size) * 2 + var(--slotted-space-2, 0.25rem));
 
     background-color: transparent;
@@ -805,7 +798,7 @@
    * subgrid of one three-column grid, so the values line up whatever the
    * labels' lengths.
    */
-  [data-ui='chart'] [data-part='tooltip'] {
+  [data-ui-chart] [data-part-tooltip] {
     background-color: var(--slotted-chart-tooltip-surface, var(--slotted-surface-raised, Canvas));
     border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle, CanvasText);
     border-radius: var(--slotted-radius-md, 6px);
@@ -837,7 +830,7 @@
    * point never hides under, and the crosshair shows which point it is about.
    * The binding docks it; `placeTooltip` says when.
    */
-  [data-ui='chart'] [data-part='tooltip'][data-docked] {
+  [data-ui-chart] [data-part-tooltip][data-docked] {
     inline-size: 100%;
     max-inline-size: 100%;
     min-inline-size: 0;
@@ -847,16 +840,16 @@
      plot's coordinates: an inset resolves against the element's own
      direction, so the right-to-left box anchors at its inline end, which is
      the same left edge the translation is measured from. */
-  [data-ui='chart']:dir(rtl) :is([data-part='tooltip'], [data-part='center']) {
+  [data-ui-chart]:dir(rtl) :is([data-part-tooltip], [data-part-center]) {
     direction: rtl;
   }
 
-  [data-ui='chart']:dir(rtl) [data-part='tooltip'] {
+  [data-ui-chart]:dir(rtl) [data-part-tooltip] {
     inset-inline-end: 0;
     inset-inline-start: auto;
   }
 
-  [data-ui='chart'] [data-part='tooltip'][data-open] {
+  [data-ui-chart] [data-part-tooltip][data-open] {
     opacity: 1;
     visibility: visible;
   }
@@ -864,13 +857,13 @@
   /* A tooltip that appears slides into place from where it opened; one that
      follows the pointer from point to point moves with it. Opening snaps the
      position so the first frame is not a flight from the corner. */
-  [data-ui='chart'] [data-part='tooltip']:not([data-open]) {
+  [data-ui-chart] [data-part-tooltip]:not([data-open]) {
     transition:
       opacity var(--slotted-duration-short) var(--slotted-easing-standard),
       visibility var(--slotted-duration-instant) linear var(--slotted-duration-short);
   }
 
-  [data-ui='chart'] [data-part='tooltip-title'] {
+  [data-ui-chart] [data-part-tooltip-title] {
     color: var(--slotted-text, CanvasText);
     font-weight: var(--slotted-font-weight-semibold, 600);
     grid-column: 1 / -1;
@@ -878,35 +871,35 @@
   }
 
   /* The label of a line on this category, the plot's own words for it. */
-  [data-ui='chart'] [data-part='tooltip-note'] {
+  [data-ui-chart] [data-part-tooltip-note] {
     color: var(--slotted-text-muted, GrayText);
     grid-column: 1 / -1;
     overflow-wrap: anywhere;
   }
 
-  [data-ui='chart'] :is([data-part='tooltip-item'], [data-part='tooltip-total']) {
+  [data-ui-chart] :is([data-part-tooltip-item], [data-part-tooltip-total]) {
     align-items: center;
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
   }
 
-  [data-ui='chart'] [data-part='tooltip-item'] {
+  [data-ui-chart] [data-part-tooltip-item] {
     color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='chart'] [data-part='tooltip-item'][data-current] {
+  [data-ui-chart] [data-part-tooltip-item][data-current] {
     color: var(--slotted-text, CanvasText);
   }
 
-  [data-ui='chart'] [data-part='tooltip-label'] {
+  [data-ui-chart] [data-part-tooltip-label] {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  [data-ui='chart'] [data-part='tooltip-value'] {
+  [data-ui-chart] [data-part-tooltip-value] {
     color: var(--slotted-text, CanvasText);
     font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -914,7 +907,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='chart'] [data-part='tooltip-total'] {
+  [data-ui-chart] [data-part-tooltip-total] {
     border-block-start: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-border-subtle, CanvasText);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -922,13 +915,13 @@
     padding-block-start: var(--slotted-space-3, 0.375rem);
   }
 
-  [data-ui='chart'] [data-part='tooltip-total'] > :first-child {
+  [data-ui-chart] [data-part-tooltip-total] > :first-child {
     grid-column: 1 / 3;
   }
 
   /* ── The centre of a donut ────────────────────────────────────────────── */
 
-  [data-ui='chart'] [data-part='center'] {
+  [data-ui-chart] [data-part-center] {
     align-content: center;
     display: grid;
     inset: 0;
@@ -939,14 +932,14 @@
     z-index: 2;
   }
 
-  [data-ui='chart'] [data-part='center-value'] {
+  [data-ui-chart] [data-part-center-value] {
     font-size: var(--slotted-font-size-2xl, 1.25rem);
     font-variant-numeric: tabular-nums;
     font-weight: var(--slotted-font-weight-semibold, 600);
     line-height: var(--slotted-line-height-2xl, 1.4);
   }
 
-  [data-ui='chart'] [data-part='center-label'] {
+  [data-ui-chart] [data-part-center-label] {
     color: var(--slotted-text-muted, GrayText);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     line-height: var(--slotted-line-height-xs, 1.4);
@@ -962,12 +955,12 @@
    * have, a line and its wash, a pie's ring — under one shimmer. It fills the
    * plot's box exactly, so nothing moves when the data lands.
    */
-  [data-ui='chart'] [data-part='skeleton'] {
+  [data-ui-chart] [data-part-skeleton] {
     inset: var(--_chart-inset);
     position: absolute;
   }
 
-  [data-ui='chart'] [data-part='skeleton'] > [data-ui='skeleton'] {
+  [data-ui-chart] [data-part-skeleton] > [data-ui-skeleton] {
     /* A tenth of the text over the ground: a step lighter than the ground
        in a dark scheme and a step darker in a light one, where the skeleton
        family's own fill, made for a sunken field, sank into a dark tile. */
@@ -990,7 +983,7 @@
     row-gap: var(--_chart-inset);
   }
 
-  [data-ui='chart'] [data-part='skeleton'] [data-skeleton='y'] {
+  [data-ui-chart] [data-part-skeleton] [data-skeleton='y'] {
     align-items: end;
     display: flex;
     flex-direction: column;
@@ -998,17 +991,17 @@
     justify-content: space-between;
   }
 
-  [data-ui='chart'] [data-part='skeleton'] [data-skeleton='x'] {
+  [data-ui-chart] [data-part-skeleton] [data-skeleton='x'] {
     display: flex;
     grid-area: x;
     justify-content: space-around;
   }
 
   /* An axis label is a short line at the axis type's height. */
-  [data-ui='chart']
-    [data-part='skeleton']
+  [data-ui-chart]
+    [data-part-skeleton]
     :is([data-skeleton='y'], [data-skeleton='x'])
-    > [data-ui='skeleton'] {
+    > [data-ui-skeleton] {
     block-size: 0.5rem;
     border-radius: var(--slotted-radius-full, 9999px);
     flex: none;
@@ -1016,22 +1009,19 @@
     min-block-size: 0;
   }
 
-  [data-ui='chart']
-    [data-part='skeleton']
-    [data-skeleton='y']
-    > [data-ui='skeleton']:nth-child(odd) {
+  [data-ui-chart] [data-part-skeleton] [data-skeleton='y'] > [data-ui-skeleton]:nth-child(odd) {
     inline-size: 2rem;
   }
 
   /* Six category labels at their full width are 144 pixels, more than the
      marks column of a quarter-width tile holds; they shrink together with it,
      as the engine's labels thin out, rather than run past the plot. */
-  [data-ui='chart'] [data-part='skeleton'] [data-skeleton='x'] > [data-ui='skeleton'] {
+  [data-ui-chart] [data-part-skeleton] [data-skeleton='x'] > [data-ui-skeleton] {
     flex: 0 1 auto;
     min-inline-size: 0;
   }
 
-  [data-ui='chart'] [data-part='skeleton'] [data-skeleton='marks'] {
+  [data-ui-chart] [data-part-skeleton] [data-skeleton='marks'] {
     align-items: end;
     background-image: repeating-linear-gradient(
       to bottom,
@@ -1047,73 +1037,73 @@
 
   /* The skeleton family sizes a block on its own; inside the plot a bar takes
      its share of the row and nothing more. */
-  [data-ui='chart'] [data-part='skeleton'] [data-skeleton='marks'] > [data-ui='skeleton'] {
+  [data-ui-chart] [data-part-skeleton] [data-skeleton='marks'] > [data-ui-skeleton] {
     border-radius: var(--_chart-bar-radius) var(--_chart-bar-radius) 0 0;
     flex: 0 1 9%;
     inline-size: auto;
     min-inline-size: 0;
   }
 
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='bar']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='bar']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:nth-child(7n + 1) {
+    > [data-ui-skeleton]:nth-child(7n + 1) {
     block-size: 38%;
   }
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='bar']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='bar']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:nth-child(7n + 2) {
+    > [data-ui-skeleton]:nth-child(7n + 2) {
     block-size: 62%;
   }
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='bar']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='bar']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:nth-child(7n + 3) {
+    > [data-ui-skeleton]:nth-child(7n + 3) {
     block-size: 50%;
   }
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='bar']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='bar']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:nth-child(7n + 4) {
+    > [data-ui-skeleton]:nth-child(7n + 4) {
     block-size: 74%;
   }
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='bar']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='bar']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:nth-child(7n + 5) {
+    > [data-ui-skeleton]:nth-child(7n + 5) {
     block-size: 56%;
   }
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='bar']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='bar']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:nth-child(7n + 6) {
+    > [data-ui-skeleton]:nth-child(7n + 6) {
     block-size: 44%;
   }
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='bar']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='bar']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:nth-child(7n + 7) {
+    > [data-ui-skeleton]:nth-child(7n + 7) {
     block-size: 68%;
   }
 
   /* A line is its stroke and the wash under it: two blocks over the whole
      marks area, one cut to a band as thick as a line, one to the silhouette
      under it at a third of the fill. */
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='line']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='line']
     [data-skeleton='marks']
-    > [data-ui='skeleton'] {
+    > [data-ui-skeleton] {
     block-size: 100%;
     border-radius: 0;
     inset: 0;
     position: absolute;
   }
 
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='line']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='line']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:first-child {
+    > [data-ui-skeleton]:first-child {
     clip-path: polygon(
       0% 60.5%,
       14% 46.5%,
@@ -1134,10 +1124,10 @@
     );
   }
 
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='line']
+  [data-ui-chart]
+    [data-part-skeleton][data-kind='line']
     [data-skeleton='marks']
-    > [data-ui='skeleton']:last-child {
+    > [data-ui-skeleton]:last-child {
     clip-path: polygon(
       0% 62%,
       14% 48%,
@@ -1154,15 +1144,13 @@
   }
 
   /* A pie has no axes: its ring, centred, at the size the engine draws it. */
-  [data-ui='chart'] [data-part='skeleton'][data-kind='pie'] > [data-ui='skeleton'] {
+  [data-ui-chart] [data-part-skeleton][data-kind='pie'] > [data-ui-skeleton] {
     align-items: center;
     display: flex;
     justify-content: center;
   }
 
-  [data-ui='chart']
-    [data-part='skeleton'][data-kind='pie']
-    [data-ui='skeleton'][data-shape='circle'] {
+  [data-ui-chart] [data-part-skeleton][data-kind='pie'] [data-ui-skeleton][data-shape='circle'] {
     aspect-ratio: 1;
     block-size: 76%;
     flex: none;
@@ -1176,7 +1164,7 @@
 
   /* A legend whose entries come with the data stands in as three short
      lines of the entries' type height. */
-  [data-ui='chart'] [data-part='legend'] > [data-ui='skeleton'] {
+  [data-ui-chart] [data-part-legend] > [data-ui-skeleton] {
     /* A tenth of the text over the ground: a step lighter than the ground
        in a dark scheme and a step darker in a light one, where the skeleton
        family's own fill, made for a sunken field, sank into a dark tile. */
@@ -1198,13 +1186,13 @@
     min-block-size: 0;
   }
 
-  [data-ui='chart'] [data-part='legend'] > [data-ui='skeleton']:nth-child(2) {
+  [data-ui-chart] [data-part-legend] > [data-ui-skeleton]:nth-child(2) {
     inline-size: 3.25rem;
   }
 
   /* ── Empty and failed ─────────────────────────────────────────────────── */
 
-  [data-ui='chart'] :is([data-part='empty'], [data-part='error']) {
+  [data-ui-chart] :is([data-part-empty], [data-part-error]) {
     /* A message about one chart, at the size of the chart's own words. */
     --slotted-result-state-title-font-size: var(--slotted-font-size-md, 0.875rem);
     --slotted-result-state-padding-block: var(--slotted-space-4, 0.5rem);
@@ -1223,7 +1211,7 @@
      the message stands on no surface of its own, and the bands the grid drew
      every quarter of the height crossed the empty title and ran between the
      failed title and its retry. */
-  [data-ui='chart'] [data-part='plot']:has(> :is([data-part='empty'], [data-part='error'])) {
+  [data-ui-chart] [data-part-plot]:has(> :is([data-part-empty], [data-part-error])) {
     background: linear-gradient(var(--_chart-grid), var(--_chart-grid)) 0 100% / 100% 1px no-repeat
       content-box;
     box-sizing: border-box;
@@ -1232,7 +1220,7 @@
 
   /* ── Text alternatives ────────────────────────────────────────────────── */
 
-  [data-ui='chart'] [data-part='summary'] {
+  [data-ui-chart] [data-part-summary] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -1244,7 +1232,7 @@
 
   /* The table view: in the plot's box, scrolling inside it, in the document's
      direction, on the plot's ground. */
-  [data-ui='chart'] [data-part='table-region'] {
+  [data-ui-chart] [data-part-table-region] {
     background-color: var(--_chart-surface);
     border-radius: var(--_radius);
     inset: 0;
@@ -1254,7 +1242,7 @@
     z-index: 4;
   }
 
-  [data-ui='chart']:dir(rtl) [data-part='table-region'] {
+  [data-ui-chart]:dir(rtl) [data-part-table-region] {
     direction: rtl;
   }
 
@@ -1262,26 +1250,26 @@
      is drawn for a focus from the keyboard: a click on a cell focuses the region
      too, and the next Shift would make it match `:focus-visible`
      (`createFocusOrigin`). The browser's own ring is suppressed for the same focus. */
-  [data-ui='chart'] [data-part='table-region']:focus {
+  [data-ui-chart] [data-part-table-region]:focus {
     outline: none;
   }
-  [data-ui='chart'] [data-part='table-region']:focus-visible[data-focus-origin='keyboard'] {
+  [data-ui-chart] [data-part-table-region]:focus-visible[data-focus-origin='keyboard'] {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
   }
 
-  [data-ui='chart'] [data-part='table-region'][hidden] {
+  [data-ui-chart] [data-part-table-region][hidden] {
     display: none;
   }
 
-  [data-ui='chart'] [data-part='table'] {
+  [data-ui-chart] [data-part-table] {
     border-collapse: collapse;
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     inline-size: 100%;
     line-height: var(--slotted-line-height-sm, 1.45);
   }
 
-  [data-ui='chart'] [data-part='table'] caption {
+  [data-ui-chart] [data-part-table] caption {
     caption-side: bottom;
     color: var(--slotted-text-muted, GrayText);
     font-size: var(--slotted-font-size-xs, 0.75rem);
@@ -1289,7 +1277,7 @@
     text-align: start;
   }
 
-  [data-ui='chart'] [data-part='table'] :is(th, td) {
+  [data-ui-chart] [data-part-table] :is(th, td) {
     border-block-end: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-border-subtle, CanvasText);
     padding-block: var(--slotted-control-gap-sm, 0.375rem);
@@ -1298,11 +1286,11 @@
     white-space: nowrap;
   }
 
-  [data-ui='chart'] [data-part='table'] tbody th {
+  [data-ui-chart] [data-part-table] tbody th {
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='chart'] [data-part='table'] thead th {
+  [data-ui-chart] [data-part-table] thead th {
     background-color: var(--_chart-surface);
     color: var(--slotted-text-muted, GrayText);
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -1310,12 +1298,12 @@
     position: sticky;
   }
 
-  [data-ui='chart'] [data-part='table'] [data-numeric] {
+  [data-ui-chart] [data-part-table] [data-numeric] {
     font-variant-numeric: tabular-nums;
     text-align: end;
   }
 
-  [data-ui='chart'] [data-part='table'] tbody tr[data-current] {
+  [data-ui-chart] [data-part-table] tbody tr[data-current] {
     background-color: var(--slotted-tone-secondary-subtle-hover, Highlight);
   }
 
@@ -1328,7 +1316,7 @@
    * `data-fullscreen`; the plot takes the height the header and the legend
    * leave, and the engine redraws at the new size on its own.
    */
-  [data-ui='chart'][data-fullscreen] {
+  [data-ui-chart][data-fullscreen] {
     --_chart-surface: var(--slotted-chart-surface, var(--slotted-surface, Canvas));
 
     background-color: var(--_chart-surface);
@@ -1342,7 +1330,7 @@
     z-index: var(--slotted-z-index-overlay, 1000);
   }
 
-  [data-ui='chart'][data-fullscreen] [data-part='title'] {
+  [data-ui-chart][data-fullscreen] [data-part-title] {
     font-size: var(--slotted-font-size-xl, 1.125rem);
   }
 
@@ -1359,24 +1347,24 @@
    * (`docs/token-foundation.md`, rule 4).
    */
   @container slotted-chart (max-width: 480px) {
-    [data-ui='chart']
-      > [data-part='header']
-      > [data-part='toolbar']
-      > :is([data-part='view-toggle'], [data-part='fullscreen-toggle']) {
+    [data-ui-chart]
+      > [data-part-header]
+      > [data-part-toolbar]
+      > :is([data-part-view-toggle], [data-part-fullscreen-toggle]) {
       display: none;
     }
 
-    [data-ui='chart'] [data-part='menu-item']:is([data-action='view'], [data-action='fullscreen']) {
+    [data-ui-chart] [data-part-menu-item]:is([data-action='view'], [data-action='fullscreen']) {
       display: flex;
     }
 
-    [data-ui='chart'] :is([data-part='legend-item'], [data-part='legend-more']) {
+    [data-ui-chart] :is([data-part-legend-item], [data-part-legend-more]) {
       padding-inline: var(--slotted-space-2, 0.25rem);
     }
   }
 
   @container slotted-chart (max-width: 360px) {
-    [data-ui='chart'][data-variant='card'] {
+    [data-ui-chart][data-variant='card'] {
       padding-block: var(--slotted-space-5, 0.75rem);
       padding-inline: var(--slotted-space-5, 0.75rem);
     }
@@ -1394,44 +1382,42 @@
    * the last entry two pixels away and does not reach back across it.
    */
   @media (pointer: coarse) {
-    [data-ui='chart'] [data-part='menu-item'] {
+    [data-ui-chart] [data-part-menu-item] {
       min-block-size: var(--slotted-target-comfortable, 2.75rem);
     }
 
-    [data-ui='chart'] [data-part='menu'] [data-part='legend-item'] {
+    [data-ui-chart] [data-part-menu] [data-part-legend-item] {
       min-block-size: var(--slotted-target-comfortable, 2.75rem);
       min-inline-size: var(--slotted-target-comfortable, 2.75rem);
     }
 
-    [data-ui='chart'] [data-part='legend'] {
+    [data-ui-chart] [data-part-legend] {
       min-block-size: var(--slotted-target-comfortable, 2.75rem);
       row-gap: calc(var(--slotted-target-comfortable, 2.75rem) - var(--slotted-target-min, 1.5rem));
     }
 
-    [data-ui='chart']
-      [data-part='legend']
-      > :is([data-part='legend-item'], [data-part='legend-more']) {
+    [data-ui-chart] [data-part-legend] > :is([data-part-legend-item], [data-part-legend-more]) {
       position: relative;
     }
 
-    [data-ui='chart']
-      [data-part='legend']
-      > :is([data-part='legend-item'], [data-part='legend-more'])::after {
+    [data-ui-chart]
+      [data-part-legend]
+      > :is([data-part-legend-item], [data-part-legend-more])::after {
       content: '';
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 2.75rem)) / 2));
       position: absolute;
     }
 
-    [data-ui='chart'] [data-part='legend'] > [data-part='legend-more']::after {
+    [data-ui-chart] [data-part-legend] > [data-part-legend-more]::after {
       inset-inline-start: 0;
     }
 
-    [data-ui='chart']
+    [data-ui-chart]
       :is(
-        [data-part='zoom-reset'],
-        [data-part='view-toggle'],
-        [data-part='fullscreen-toggle'],
-        [data-part='menu-trigger']
+        [data-part-zoom-reset],
+        [data-part-view-toggle],
+        [data-part-fullscreen-toggle],
+        [data-part-menu-trigger]
       ) {
       --_box: var(--slotted-target-comfortable, 2.75rem);
     }
@@ -1441,24 +1427,24 @@
 
   /* Paper holds the marks and the words: no controls, no hover, no layer. */
   @media print {
-    [data-ui='chart']
+    [data-ui-chart]
       :is(
-        [data-part='toolbar'],
-        [data-part='help'],
-        [data-part='legend-more'],
-        [data-part='tooltip'],
-        [data-part='crosshair'],
-        [data-part='marker']:not([data-selected])
+        [data-part-toolbar],
+        [data-part-help],
+        [data-part-legend-more],
+        [data-part-tooltip],
+        [data-part-crosshair],
+        [data-part-marker]:not([data-selected])
       ) {
       display: none;
     }
 
-    [data-ui='chart'] [data-part='legend'] {
+    [data-ui-chart] [data-part-legend] {
       flex-wrap: wrap;
       overflow: visible;
     }
 
-    [data-ui='chart'] {
+    [data-ui-chart] {
       break-inside: avoid;
     }
   }
@@ -1472,13 +1458,12 @@
    * not have carried anyway.
    */
   @media (forced-colors: active) {
-    [data-ui='chart']
-      :is([data-part='legend-marker'], [data-part='tooltip-marker'], [data-part='marker']) {
+    [data-ui-chart] :is([data-part-legend-marker], [data-part-tooltip-marker], [data-part-marker]) {
       forced-color-adjust: none;
       background-color: CanvasText;
     }
 
-    [data-ui='chart'] [data-part='crosshair'] {
+    [data-ui-chart] [data-part-crosshair] {
       background-color: GrayText;
       forced-color-adjust: none;
     }

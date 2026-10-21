@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/scroll-area/scroll-area.css';
 import { createFocusOrigin } from '@slotted/core/focus';
 import { scrollAreaMessages } from '@slotted/core/i18n';
@@ -178,8 +179,8 @@ export function ScrollArea({
   delete viewportRest.ref;
   const viewportElement = (
     <div
-      {...viewportRest}
-      data-part="viewport"
+      {...withSelectorKey(viewportRest, 'part', 'viewport')}
+
       onScroll={handleScroll}
       ref={attachViewport}
       {...(wired
@@ -196,7 +197,7 @@ export function ScrollArea({
     </div>
   );
 
-  const props = {
+  const props = keyedProps({
     ...rest,
     className,
     'data-axis': resolvedAxis,
@@ -218,7 +219,7 @@ export function ScrollArea({
             ...style,
           },
     children: viewportElement,
-  };
+  });
 
   if (render !== undefined) return render(props);
   return <div {...props} />;
@@ -234,7 +235,7 @@ export function ScrollArea({
  * content already carries its own inset renders no `Content` at all.
  */
 function ScrollAreaContent({ render, ...rest }: ScrollAreaContentProps) {
-  const props = { ...rest, 'data-part': 'content' as const };
+  const props = keyedProps({ ...rest, 'data-part': 'content' as const });
   if (render !== undefined) return render(props);
   return <div {...props} />;
 }

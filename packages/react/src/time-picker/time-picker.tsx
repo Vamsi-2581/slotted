@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/time-picker/time-picker.css';
 
 import {
@@ -544,22 +545,30 @@ export function TimePicker({
   const surface: ReactNode = mounted ? (
     <div
       data-part="positioner"
+      data-part-positioner=""
       data-presentation={sheet ? 'sheet' : 'popover'}
       data-ui="time-picker"
+      data-ui-time-picker=""
       ref={setLayerNode}
       {...(isOpen ? { 'data-open': '' } : {})}
     >
       <div
         aria-label={spoken}
         data-part="content"
+        data-part-content=""
         id={contentId}
         role="listbox"
         {...(truncated ? { 'aria-description': t('truncated') } : {})}
       >
-        {presets === undefined ? null : <div data-part="presets">{presets}</div>}
-        <div data-part="head">
+        {presets === undefined ? null : (
+          <div data-part="presets" data-part-presets="">
+            {presets}
+          </div>
+        )}
+        <div data-part="head" data-part-head="">
           <button
             data-part="now"
+            data-part-now=""
             onClick={(event) => requestValue(anchor, { reason: 'select', source: event })}
             type="button"
           >
@@ -567,10 +576,13 @@ export function TimePicker({
           </button>
         </div>
         {list.length === 0 ? (
-          <div data-part="empty">{t('empty')}</div>
+          <div data-part="empty" data-part-empty="">
+            {t('empty')}
+          </div>
         ) : (
           <div
             data-part="list"
+            data-part-list=""
             onKeyDown={onListKeyDown}
             ref={listRef}
             {...(truncated ? { 'data-truncated': '' } : {})}
@@ -584,6 +596,7 @@ export function TimePicker({
                   aria-disabled={option.unavailable ? true : undefined}
                   aria-selected={selected}
                   data-part="option"
+                  data-part-option=""
                   key={toISOTime(option.time)}
                   onClick={(event) => select(option, event)}
                   role="option"
@@ -606,14 +619,18 @@ export function TimePicker({
             })}
           </div>
         )}
-        {footer === undefined ? null : <div data-part="footer">{footer}</div>}
+        {footer === undefined ? null : (
+          <div data-part="footer" data-part-footer="">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   ) : null;
 
   const children: ReactNode = (
     <>
-      <div data-part="control" onKeyDown={onControlKeyDown}>
+      <div data-part="control" data-part-control="" onKeyDown={onControlKeyDown}>
         <TimeField
           clearable={clearable}
           disabled={resolvedDisabled}
@@ -624,6 +641,7 @@ export function TimePicker({
               aria-haspopup="listbox"
               aria-label={spoken}
               data-part="trigger"
+              data-part-trigger=""
               disabled={!editable}
               onClick={(event) => {
                 setOpen(!isOpen, 'pointer', event);
@@ -662,7 +680,7 @@ export function TimePicker({
     </>
   );
 
-  const rootProps: TimePickerRootProps = {
+  const rootProps: TimePickerRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -678,7 +696,7 @@ export function TimePicker({
     'data-ui': 'time-picker',
     'data-variant': resolvedVariant,
     ref: rootRef,
-  };
+  });
 
   return (
     <>

@@ -100,14 +100,16 @@ export interface FieldGroupIds {
         <ng-content select="[slFieldGroupError]" />
       </p>
     }
-    <div data-part="content"><ng-content /></div>`,
+    <div data-part="content" data-part-content=""><ng-content /></div>`,
   styleUrl: '../../../styles/src/field-group/field-group.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [{ provide: SlFieldDefaultsSource, useExisting: forwardRef(() => SlFieldGroup) }],
   host: {
     'data-ui': 'field-group',
+    'data-ui-field-group': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'orientation()',
     '[attr.data-necessity]': 'resolvedNecessity()',

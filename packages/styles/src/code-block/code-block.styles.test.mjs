@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/code-block/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./code-block.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./code-block.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./code-block.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations.replace(/\s+/g, '');
 
@@ -24,11 +37,12 @@ test('lives in the component layer', () => {
  */
 test('styles every part the contract declares', () => {
   for (const part of contract.members.codeBlock.parts) {
-    const selector = part === 'root' ? "[data-ui='code-block']{" : `[data-part='${part}']`;
+    const selector =
+      part === 'root' ? '[data-ui-code-block]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
   assert.ok(
-    normalized.includes("[data-part='body']>[data-part='viewport']"),
+    normalized.includes('[data-part-body]>[data-part-viewport]'),
     'reaches scroll-area’s viewport, never a scroll measure of its own',
   );
   assert.doesNotMatch(declarations, /overflow(-x|-inline)?:\s*auto/);
@@ -63,7 +77,7 @@ test('draws the fence prose draws', () => {
     ),
   );
   assert.ok(
-    normalized.includes("[data-part='pre']{direction:ltr;"),
+    normalized.includes('[data-part-pre]{direction:ltr;'),
     'code reads left to right whatever the page does',
   );
 });
@@ -93,20 +107,20 @@ test('paints every scope from the code scale', () => {
 test('lays a line out as a grid whose gutters cannot be selected', () => {
   assert.ok(
     normalized.includes(
-      "[data-part='line']{--_indent:calc(var(--slotted-code-block-indent,0)*1ch);box-sizing:border-box;display:grid;grid-template-columns:var(--_number,0px)var(--_marker,0px)minmax(0,1fr);",
+      '[data-part-line]{--_indent:calc(var(--slotted-code-block-indent,0)*1ch);box-sizing:border-box;display:grid;grid-template-columns:var(--_number,0px)var(--_marker,0px)minmax(0,1fr);',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-part='number']{color:var(--_muted);font-variant-numeric:tabular-nums;grid-column:1;padding-inline-end:var(--slotted-space-4,0.5rem);text-align:end;user-select:none;}",
+      '[data-part-number]{color:var(--_muted);font-variant-numeric:tabular-nums;grid-column:1;padding-inline-end:var(--slotted-space-4,0.5rem);text-align:end;user-select:none;}',
     ),
   );
   assert.ok(
-    normalized.includes("[data-part='marker']{grid-column:2;text-align:center;user-select:none;}"),
+    normalized.includes('[data-part-marker]{grid-column:2;text-align:center;user-select:none;}'),
   );
   assert.ok(
     normalized.includes(
-      "[data-ui='code-block']:not([data-line-numbers])[data-part='number']{display:none;}",
+      '[data-ui-code-block]:not([data-line-numbers])[data-part-number]{display:none;}',
     ),
   );
   assert.ok(
@@ -118,12 +132,12 @@ test('lays a line out as a grid whose gutters cannot be selected', () => {
 test('wraps at the box and indents the continuation to the line’s own indent', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='code-block'][data-wrap][data-part='pre']{min-inline-size:0;overflow-wrap:anywhere;white-space:pre-wrap;}",
+      '[data-ui-code-block][data-wrap][data-part-pre]{min-inline-size:0;overflow-wrap:anywhere;white-space:pre-wrap;}',
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-ui='code-block'][data-wrap][data-part='line']>[data-part='text']{padding-inline-start:var(--_indent);text-indent:calc(var(--_indent)*-1);}",
+      '[data-ui-code-block][data-wrap][data-part-line]>[data-part-text]{padding-inline-start:var(--_indent);text-indent:calc(var(--_indent)*-1);}',
     ),
   );
 });
@@ -138,12 +152,12 @@ test('marks a line with a tint of the tone’s text, a bar, or a sign', () => {
   assert.ok(normalized.includes('--_tint:var(--slotted-highlight-tint-opacity,0.075)'));
   assert.ok(
     normalized.includes(
-      "[data-part='line'][data-mark]{--_tone:var(--slotted-tone-accent-text,CanvasText);background-color:color-mix(insrgb,var(--_tone)calc(var(--_tint)*100%),transparent);}",
+      '[data-part-line][data-mark]{--_tone:var(--slotted-tone-accent-text,CanvasText);background-color:color-mix(insrgb,var(--_tone)calc(var(--_tint)*100%),transparent);}',
     ),
   );
   const marks = normalized.slice(
-    normalized.indexOf("[data-part='line'][data-mark]{"),
-    normalized.indexOf("[data-part='line'][data-dim]{"),
+    normalized.indexOf('[data-part-line][data-mark]{'),
+    normalized.indexOf('[data-part-line][data-dim]{'),
   );
   assert.doesNotMatch(marks, /-surface/, 'a mark never fills from a tone surface');
   for (const [mark, tone] of [
@@ -161,16 +175,16 @@ test('marks a line with a tint of the tone’s text, a bar, or a sign', () => {
   }
   assert.ok(
     normalized.includes(
-      "[data-mark='add']>[data-part='marker']::before{color:var(--_tone);content:'+';}",
+      "[data-mark='add']>[data-part-marker]::before{color:var(--_tone);content:'+';}",
     ),
   );
   assert.ok(
     normalized.includes(
-      "[data-mark='remove']>[data-part='marker']::before{color:var(--_tone);content:'−';}",
+      "[data-mark='remove']>[data-part-marker]::before{color:var(--_tone);content:'−';}",
     ),
   );
   assert.ok(
-    normalized.includes("[data-part='line'][data-dim]{color:var(--_muted);filter:blur(1px);"),
+    normalized.includes('[data-part-line][data-dim]{color:var(--_muted);filter:blur(1px);'),
   );
 });
 
@@ -182,13 +196,13 @@ test('marks a line with a tint of the tone’s text, a bar, or a sign', () => {
 test('sizes the glyphs of the copy and wrap controls and borrows the ring', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='code-block']:is([data-part='copy'],[data-part='wrap']){--slotted-icon-size:var(--_icon);",
+      '[data-ui-code-block]:is([data-part-copy],[data-part-wrap]){--slotted-icon-size:var(--_icon);',
     ),
   );
   assert.ok(!/mask-image:var\(--slotted-(icon|code-block)-/.test(normalized), 'no glyph is a mask');
   assert.ok(
     normalized.includes(
-      "[data-part='copy'][data-complete]{color:var(--slotted-tone-success-text,CanvasText);}",
+      '[data-part-copy][data-complete]{color:var(--slotted-tone-success-text,CanvasText);}',
     ),
   );
   assert.ok(
@@ -203,7 +217,7 @@ test('sizes the glyphs of the copy and wrap controls and borrows the ring', () =
 test('collapses behind the reveal control and prints the whole block', () => {
   assert.ok(
     normalized.includes(
-      "[data-ui='code-block'][data-collapse]:not([data-revealed])>[data-part='body']>[data-part='viewport']{",
+      '[data-ui-code-block][data-collapse]:not([data-revealed])>[data-part-body]>[data-part-viewport]{',
     ),
   );
   assert.match(

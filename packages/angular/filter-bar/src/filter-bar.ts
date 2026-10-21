@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
@@ -330,7 +331,7 @@ export class SlFilterBarPart {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   constructor() {
-    afterNextRender(() => this.host.nativeElement.setAttribute('data-part', this.part()));
+    afterNextRender(() => writeSelectorKey(this.host.nativeElement, 'part', this.part()));
   }
 }
 
@@ -370,7 +371,7 @@ export interface FilterBarEnvironment {
   ],
   template: `
     @if (withOperator()) {
-      <div data-part="operator" [attr.id]="ids()?.operator ?? null">
+      <div data-part="operator" data-part-operator="" [attr.id]="ids()?.operator ?? null">
         <sl-select
           [size]="size()"
           [fullWidth]="true"
@@ -386,7 +387,7 @@ export interface FilterBarEnvironment {
         </sl-select>
       </div>
     }
-    <div data-part="operand" [attr.id]="ids()?.operand ?? null">
+    <div data-part="operand" data-part-operand="" [attr.id]="ids()?.operand ?? null">
       @for (slot of slots(); track slot) {
         @if (customTemplate(); as custom) {
           <ng-container
@@ -607,6 +608,7 @@ export class SlFilterBarCondition {
   template: `
     <button
       data-part="rule-summary"
+      data-part-rule-summary=""
       type="button"
       [attr.aria-expanded]="isExpanded()"
       [attr.aria-controls]="id + '-field ' + id + '-operator ' + id + '-operand'"
@@ -621,7 +623,7 @@ export class SlFilterBarCondition {
       </span>
       <span slIcon><svg slGlyph name="chevron-down"></svg></span>
     </button>
-    <div data-part="field" [id]="id + '-field'">
+    <div data-part="field" data-part-field="" [id]="id + '-field'">
       <sl-select
         [size]="size()"
         [fullWidth]="true"
@@ -650,12 +652,13 @@ export class SlFilterBarCondition {
         (applyRequest)="applyRequest.emit()"
       ></div>
     } @else {
-      <div data-part="operator" [id]="id + '-operator'"></div>
-      <div data-part="operand" [id]="id + '-operand'"></div>
+      <div data-part="operator" data-part-operator="" [id]="id + '-operator'"></div>
+      <div data-part="operand" data-part-operand="" [id]="id + '-operand'"></div>
     }
     @if (removable()) {
       <button
         data-part="remove"
+        data-part-remove=""
         type="button"
         [attr.aria-label]="t('removeRule')"
         (click)="removeRequest.emit()"
@@ -670,6 +673,7 @@ export class SlFilterBarCondition {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'rule',
+    'data-part-rule': '',
     '[attr.data-kind]': 'field()?.kind ?? null',
     '[attr.data-operands]': 'operands()',
     '[attr.data-invalid]': 'invalid() || !field() ? "" : null',
@@ -755,7 +759,7 @@ export class SlFilterBarRule {
   ],
   template: `
     <legend>{{ t('matches', { join: joinWord() }) }}</legend>
-    <div data-part="join">
+    <div data-part="join" data-part-join="">
       @if (aroundJoin()[0]) {
         <span>{{ aroundJoin()[0] }}</span>
       }
@@ -788,9 +792,9 @@ export class SlFilterBarRule {
         </button>
       }
     </div>
-    <div data-part="rules">
+    <div data-part="rules" data-part-rules="">
       @for (node of group().rules; track $index) {
-        <span data-part="conjunction">{{
+        <span data-part="conjunction" data-part-conjunction="">{{
           $index === 0 ? t('where') : t(group().join === 'and' ? 'joins.and' : 'joins.or')
         }}</span>
         @if (isGroup(node)) {
@@ -827,7 +831,7 @@ export class SlFilterBarRule {
         }
       }
     </div>
-    <div data-part="actions">
+    <div data-part="actions" data-part-actions="">
       <button
         slButton
         slFilterBarPart="add-rule"
@@ -867,6 +871,7 @@ export class SlFilterBarRule {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     '[attr.data-depth]': 'path().length',
   },
 })
@@ -960,7 +965,7 @@ export class SlFilterBarGroup {
       (conditionChange)="change($event)"
       (applyRequest)="done()"
     ></div>
-    <div data-part="actions">
+    <div data-part="actions" data-part-actions="">
       <button
         slButton
         type="button"
@@ -979,7 +984,9 @@ export class SlFilterBarGroup {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'filter-bar',
+    'data-ui-filter-bar': '',
     'data-part': 'rule',
+    'data-part-rule': '',
     '[attr.data-kind]': 'field().kind',
     '[attr.data-invalid]': 'invalid() ? "" : null',
   },
@@ -1176,8 +1183,8 @@ interface PendingRule {
       }
     </ng-template>
 
-    <div data-part="frame">
-      <div data-part="search">
+    <div data-part="frame" data-part-frame="">
+      <div data-part="search" data-part-search="">
         <div slTextField [size]="sizeValue()" [clearable]="true">
           <span slTextFieldStart
             ><span slIcon><svg slGlyph name="search"></svg></span
@@ -1204,6 +1211,7 @@ interface PendingRule {
       <div
         #barRow
         data-part="bar"
+        data-part-bar=""
         role="toolbar"
         [attr.aria-label]="t('filters')"
         [attr.aria-description]="readOnly() ? t('readOnly') : null"
@@ -1230,6 +1238,7 @@ interface PendingRule {
           @if (pillOf(member); as pill) {
             <button
               data-part="pill"
+              data-part-pill=""
               type="button"
               aria-haspopup="dialog"
               [attr.data-field]="pill.field.key"
@@ -1244,6 +1253,7 @@ interface PendingRule {
           @if (chipOf(member); as chip) {
             <div
               data-part="chip"
+              data-part-chip=""
               role="group"
               [attr.aria-label]="chip.name"
               [attr.data-field]="chip.key"
@@ -1254,7 +1264,7 @@ interface PendingRule {
               [attr.data-invalid]="chip.unknown || invalid() === chip.key ? '' : null"
               (keydown)="onChipKeyDown($event, chip.key)"
             >
-              <span data-part="chip-field"
+              <span data-part="chip-field" data-part-chip-field=""
                 ><ng-container
                   [ngTemplateOutlet]="fieldIcon"
                   [ngTemplateOutletContext]="{ $implicit: chip.field?.icon }"
@@ -1263,6 +1273,7 @@ interface PendingRule {
               @if (readOnly() || chip.unknown) {
                 <button
                   data-part="chip-operator"
+                  data-part-chip-operator=""
                   type="button"
                   aria-disabled="true"
                   [disabled]="disabled()"
@@ -1272,6 +1283,7 @@ interface PendingRule {
               } @else {
                 <button
                   data-part="chip-operator"
+                  data-part-chip-operator=""
                   slFilterBarPart="chip-operator"
                   type="button"
                   [disabled]="disabled()"
@@ -1296,6 +1308,7 @@ interface PendingRule {
                 @if (readOnly() || chip.unknown || narrow()) {
                   <button
                     data-part="chip-value"
+                    data-part-chip-value=""
                     type="button"
                     [attr.aria-haspopup]="readOnly() || chip.unknown ? null : 'dialog'"
                     [attr.aria-disabled]="readOnly() || chip.unknown ? 'true' : null"
@@ -1316,6 +1329,7 @@ interface PendingRule {
                     <button
                       slPopoverTrigger
                       data-part="chip-value"
+                      data-part-chip-value=""
                       type="button"
                       aria-haspopup="dialog"
                       [attr.aria-label]="chip.valueName"
@@ -1350,6 +1364,7 @@ interface PendingRule {
               @if (chip.removable) {
                 <button
                   data-part="chip-remove"
+                  data-part-chip-remove=""
                   type="button"
                   [attr.aria-label]="t('remove', { name: chip.label })"
                   [disabled]="disabled()"
@@ -1363,6 +1378,7 @@ interface PendingRule {
           @if (groupOf(member); as group) {
             <div
               data-part="chip"
+              data-part-chip=""
               role="group"
               data-operands="1"
               [attr.aria-label]="group.words"
@@ -1371,6 +1387,7 @@ interface PendingRule {
             >
               <button
                 data-part="chip-value"
+                data-part-chip-value=""
                 type="button"
                 aria-haspopup="dialog"
                 [attr.aria-disabled]="readOnly() ? 'true' : null"
@@ -1383,6 +1400,7 @@ interface PendingRule {
               @if (!readOnly()) {
                 <button
                   data-part="chip-remove"
+                  data-part-chip-remove=""
                   type="button"
                   [attr.aria-label]="t('remove', { name: group.words })"
                   [disabled]="disabled()"
@@ -1398,6 +1416,7 @@ interface PendingRule {
         @if (folded() > 0) {
           <button
             data-part="more"
+            data-part-more=""
             type="button"
             [attr.aria-expanded]="isRevealed()"
             [disabled]="disabled()"
@@ -1495,7 +1514,7 @@ interface PendingRule {
         }
 
         @if (applyValue() === 'manual' && !readOnly()) {
-          <div data-part="actions">
+          <div data-part="actions" data-part-actions="">
             <button
               slButton
               slFilterBarPart="reset"
@@ -1522,12 +1541,12 @@ interface PendingRule {
         }
       </div>
 
-      <div data-part="end">
+      <div data-part="end" data-part-end="">
         @if (presets(); as views) {
           @if (views.length > 0) {
             <!-- Clearable: leaving a preset is the control's own clear, and
                  without it the one way out of a saved view is deleting it. -->
-            <div data-part="preset">
+            <div data-part="preset" data-part-preset="">
               <sl-select
                 clearable
                 [size]="sizeValue()"
@@ -1549,11 +1568,18 @@ interface PendingRule {
       </div>
 
       @if (countText() !== null || loading()) {
-        <p data-part="count" aria-live="polite" [attr.aria-busy]="loading() ? 'true' : null">
+        <p
+          data-part="count"
+          data-part-count=""
+          aria-live="polite"
+          [attr.aria-busy]="loading() ? 'true' : null"
+        >
           @if (loading()) {
             <span
               data-ui="spinner"
+              data-ui-spinner=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               role="progressbar"
               [attr.aria-label]="t('filters')"
@@ -1576,7 +1602,13 @@ interface PendingRule {
         <button slDrawerClose></button>
       </header>
       <div slDrawerBody>
-        <div data-part="builder" data-ui="filter-bar" [id]="id + '-builder'">
+        <div
+          data-part="builder"
+          data-part-builder=""
+          data-ui="filter-bar"
+          data-ui-filter-bar=""
+          [id]="id + '-builder'"
+        >
           <fieldset
             slFilterBarGroup
             [group]="drawerDraft() ?? empty"
@@ -1642,7 +1674,9 @@ interface PendingRule {
   exportAs: 'slFilterBar',
   host: {
     'data-ui': 'filter-bar',
+    'data-ui-filter-bar': '',
     'data-part': 'root',
+    'data-part-root': '',
     role: 'search',
     '[attr.aria-label]': "ariaLabel ?? t('bar')",
     '[attr.data-apply]': 'applyValue()',

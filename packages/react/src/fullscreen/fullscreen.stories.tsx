@@ -417,7 +417,9 @@ function OutsideControl() {
         data-fullscreen={handle.fullscreen ? '' : undefined}
         data-mode={handle.mode ?? undefined}
         data-part="root"
+        data-part-root=""
         data-ui="fullscreen"
+        data-ui-fullscreen=""
         ref={setChart}
       >
         <RevenuePanel control={<FullscreenTrigger iconOnly target={handle} />} />

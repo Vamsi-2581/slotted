@@ -21,6 +21,23 @@ describe('createRovingTabindex', () => {
     document.body.innerHTML = '';
   });
 
+  /**
+   * The tab stop is placed on render paths: at creation, on a refresh after a
+   * render, and on `setActive`. None of them reads computed style.
+   */
+  it('reads no computed style to place the tab stop', () => {
+    const { container, items } = mount(three);
+    const styles = vi.spyOn(window, 'getComputedStyle');
+    const handle = createRovingTabindex(container, { itemSelector: 'button' });
+    handle.refresh();
+    handle.setActive(2);
+
+    expect(tabindexes(items)).toEqual(['-1', '-1', '0']);
+    expect(styles).not.toHaveBeenCalled();
+    styles.mockRestore();
+    handle.destroy();
+  });
+
   it('gives the group one tab stop', () => {
     const { container, items } = mount(three);
     const handle = createRovingTabindex(container, { itemSelector: 'button' });

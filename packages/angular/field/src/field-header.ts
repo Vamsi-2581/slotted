@@ -49,6 +49,7 @@ import {
     @if (drawnCount(); as count) {
       <span
         data-part="counter"
+        data-part-counter=""
         [id]="field.ids().counter"
         [attr.data-invalid]="countOver() ? '' : null"
         >{{ formatCount(count) }}</span
@@ -57,7 +58,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   providers: [{ provide: SlFieldHeaderSlot, useExisting: forwardRef(() => SlFieldHeader) }],
-  host: { 'data-part': 'header' },
+  host: { 'data-part': 'header', 'data-part-header': '' },
 })
 export class SlFieldHeader {
   protected readonly field = inject(SlField);
@@ -85,6 +86,7 @@ export class SlFieldHeader {
   providers: [{ provide: SlFieldIndicatorSlot, useExisting: forwardRef(() => SlFieldIndicator) }],
   host: {
     'data-part': 'indicator',
+    'data-part-indicator': '',
     '[attr.id]': 'indicatorId()',
   },
 })
@@ -130,7 +132,9 @@ export class SlFieldIndicator {
     SlTooltipTrigger,
   ],
   template: `<span slIcon aria-hidden="true"><svg slGlyph name="circle-question"></svg></span>
-    <span data-part="help-text" hidden [id]="textId()">{{ slFieldHelp() }}</span>
+    <span data-part="help-text" data-part-help-text="" hidden [id]="textId()">{{
+      slFieldHelp()
+    }}</span>
     <ng-template slTooltipLayer>
       <div slTooltipContent>{{ slFieldHelp() }}</div>
       <div slTooltipArrow></div>
@@ -143,6 +147,7 @@ export class SlFieldIndicator {
   ],
   host: {
     'data-part': 'help',
+    'data-part-help': '',
     type: 'button',
     '[attr.aria-label]': 'label()',
     '[attr.aria-describedby]': 'describedBy()',

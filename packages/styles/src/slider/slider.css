@@ -18,7 +18,7 @@
    * `--_position` on a thumb or a mark, `--_start` and `--_end` on the fill.
    * A percentage of a track is geometry and geometry is not a token.
    */
-  [data-ui='slider'][data-part='root'] {
+  [data-ui-slider][data-part-root] {
     /**
      * Type, glyph and gap come from the control scales — the only ones the
      * theme restates per density — so a slider in a dense row shrinks whole
@@ -113,23 +113,23 @@
    * them and no rail at all. A vertical slider is left alone: its cross
    * measurement is the band, and its length is its own.
    */
-  [data-ui='slider'][data-part='root'][data-orientation='horizontal'] {
+  [data-ui-slider][data-part-root][data-orientation='horizontal'] {
     inline-size: 100%;
   }
 
-  [data-ui='slider'][data-part='root'][data-size='sm'] {
+  [data-ui-slider][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_gap: var(--slotted-control-gap-sm, 6px);
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
   }
 
-  [data-ui='slider'][data-part='root'][data-size='md'] {
+  [data-ui-slider][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_gap: var(--slotted-control-gap-md, 8px);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
   }
 
-  [data-ui='slider'][data-part='root'][data-size='lg'] {
+  [data-ui-slider][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_gap: var(--slotted-control-gap-lg, 8px);
     --_icon-size: var(--slotted-control-icon-size-lg, 18px);
@@ -142,7 +142,7 @@
    * tabular figures because a number that changes under a drag must not change
    * width while it does.
    */
-  [data-ui='slider'] > [data-part='output'] {
+  [data-ui-slider] > [data-part-output] {
     align-self: flex-end;
     color: var(--slotted-slider-output-color, var(--slotted-text, CanvasText));
     font-variant-numeric: tabular-nums;
@@ -159,7 +159,7 @@
    * and a scroll of the page are the same gesture, and the one the pointer
    * started on the control is the drag.
    */
-  [data-ui='slider'] [data-part='control'] {
+  [data-ui-slider] [data-part-control] {
     align-items: center;
     /**
      * The reserve for the two half thumbs comes out of the band rather than
@@ -178,7 +178,7 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  [data-ui='slider'][data-orientation='horizontal'] [data-part='control'] {
+  [data-ui-slider][data-orientation='horizontal'] [data-part-control] {
     block-size: var(--_control-size);
     inline-size: 100%;
     padding-inline: calc(var(--_thumb-size) / 2);
@@ -190,8 +190,8 @@
    * finger's width above its own rail, reading as a separate line rather than
    * as this control's value.
    */
-  [data-ui='slider'][data-orientation='horizontal']:not([data-value-label='none'])
-    [data-part='control'] {
+  [data-ui-slider][data-orientation='horizontal']:not([data-value-label='none'])
+    [data-part-control] {
     margin-block-start: max(0px, calc(var(--_bubble-size) - var(--_gap)));
   }
 
@@ -202,7 +202,7 @@
    * cost more than the overlap it prevented.
    */
 
-  [data-ui='slider'][data-orientation='vertical'] [data-part='control'] {
+  [data-ui-slider][data-orientation='vertical'] [data-part-control] {
     /**
      * A vertical slider has no intrinsic length, so it takes one: ten thumbs
      * is a scale a reader can point at, and a consumer who wants another one
@@ -226,21 +226,21 @@
    * than discovered, so a family below the slider does not move when a label
    * appears.
    */
-  [data-ui='slider'][data-orientation='horizontal'][data-marks='ticks'] [data-part='control'] {
+  [data-ui-slider][data-orientation='horizontal'][data-marks='ticks'] [data-part-control] {
     margin-block-end: var(--_mark-length);
   }
 
-  [data-ui='slider'][data-orientation='horizontal'][data-marks='labelled'] [data-part='control'] {
+  [data-ui-slider][data-orientation='horizontal'][data-marks='labelled'] [data-part-control] {
     margin-block-end: calc(
       var(--_mark-length) + var(--slotted-space-1, 0.125rem) + var(--_mark-label-line)
     );
   }
 
-  [data-ui='slider'][data-orientation='vertical'][data-marks='ticks'] [data-part='control'] {
+  [data-ui-slider][data-orientation='vertical'][data-marks='ticks'] [data-part-control] {
     margin-inline-end: var(--_mark-length);
   }
 
-  [data-ui='slider'][data-orientation='vertical'][data-marks='labelled'] [data-part='control'] {
+  [data-ui-slider][data-orientation='vertical'][data-marks='labelled'] [data-part-control] {
     margin-inline-end: calc(
       var(--_mark-length) + var(--slotted-space-1, 0.125rem) + var(--_mark-label-size)
     );
@@ -258,7 +258,7 @@
    * bounds are the two places a thumb's centre can reach and the thumb itself
    * stays inside the band.
    */
-  [data-ui='slider'] [data-part='track'] {
+  [data-ui-slider] [data-part-track] {
     background-color: var(--slotted-slider-track-color, var(--slotted-surface-sunken, Canvas));
     border: var(--slotted-control-border-width, 1px) solid
       var(--slotted-slider-track-border-color, var(--slotted-control-border-color, ButtonBorder));
@@ -267,12 +267,12 @@
     position: relative;
   }
 
-  [data-ui='slider'][data-orientation='horizontal'] [data-part='track'] {
+  [data-ui-slider][data-orientation='horizontal'] [data-part-track] {
     block-size: var(--_track-size);
     inline-size: 100%;
   }
 
-  [data-ui='slider'][data-orientation='vertical'] [data-part='track'] {
+  [data-ui-slider][data-orientation='vertical'] [data-part-track] {
     block-size: 100%;
     inline-size: var(--_track-size);
   }
@@ -297,7 +297,7 @@
    * overhung there would leave a pixel of accent past the value at one end and
    * cover the cap at the other.
    */
-  [data-ui='slider'] [data-part='indicator'] {
+  [data-ui-slider] [data-part-indicator] {
     --_edge-overlap: calc(var(--slotted-control-border-width, 1px) * -1);
 
     background-color: var(--slotted-slider-indicator-color, var(--slotted-tone-accent-solid));
@@ -305,13 +305,13 @@
     position: absolute;
   }
 
-  [data-ui='slider'][data-orientation='horizontal'] [data-part='indicator'] {
+  [data-ui-slider][data-orientation='horizontal'] [data-part-indicator] {
     inset-block: var(--_edge-overlap);
     inset-inline-start: calc(var(--_start, 0) * 1%);
     inline-size: calc((var(--_end, 0) - var(--_start, 0)) * 1%);
   }
 
-  [data-ui='slider'][data-orientation='vertical'] [data-part='indicator'] {
+  [data-ui-slider][data-orientation='vertical'] [data-part-indicator] {
     inset-inline: var(--_edge-overlap);
     inset-block-end: calc(var(--_start, 0) * 1%);
     block-size: calc((var(--_end, 0) - var(--_start, 0)) * 1%);
@@ -323,12 +323,12 @@
    * the rail would have to read against the fill and against the empty channel
    * at once; beside it, it reads against the page in every scheme.
    */
-  [data-ui='slider'] [data-part='mark'] {
+  [data-ui-slider] [data-part-mark] {
     background-color: var(--slotted-slider-mark-color, var(--slotted-border-strong, CanvasText));
     position: absolute;
   }
 
-  [data-ui='slider'][data-orientation='horizontal'] [data-part='mark'] {
+  [data-ui-slider][data-orientation='horizontal'] [data-part-mark] {
     block-size: var(--_mark-length);
     inline-size: var(--slotted-border-width-thin, 1px);
     inset-block-start: calc(100% + var(--_mark-gap));
@@ -336,7 +336,7 @@
     margin-inline-start: calc(var(--slotted-border-width-thin, 1px) / -2);
   }
 
-  [data-ui='slider'][data-orientation='vertical'] [data-part='mark'] {
+  [data-ui-slider][data-orientation='vertical'] [data-part-mark] {
     block-size: var(--slotted-border-width-thin, 1px);
     inline-size: var(--_mark-length);
     inset-inline-start: calc(100% + var(--_mark-gap));
@@ -344,7 +344,7 @@
     margin-block-end: calc(var(--slotted-border-width-thin, 1px) / -2);
   }
 
-  [data-ui='slider'] [data-part='mark-label'] {
+  [data-ui-slider] [data-part-mark-label] {
     color: var(--slotted-slider-mark-label-color, var(--slotted-text-muted, GrayText));
     display: block;
     font-size: var(--slotted-font-size-xs, 0.75rem);
@@ -364,7 +364,7 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='slider'][data-orientation='horizontal'] [data-part='mark-label'] {
+  [data-ui-slider][data-orientation='horizontal'] [data-part-mark-label] {
     inset-block-start: calc(100% + var(--slotted-space-1, 0.125rem));
     inset-inline-start: 50%;
     translate: -50% 0;
@@ -376,9 +376,9 @@
    * of the `marks` scene showed "Máximo" clipped by the edge of the cell, and
    * a scale whose last label cannot be read is a scale with four labels.
    */
-  [data-ui='slider'][data-orientation='horizontal']
-    [data-part='mark'][data-edge='start']
-    [data-part='mark-label'] {
+  [data-ui-slider][data-orientation='horizontal']
+    [data-part-mark][data-edge='start']
+    [data-part-mark-label] {
     inset-inline-start: 0;
     text-align: start;
     translate: 0 0;
@@ -390,15 +390,15 @@
    * label at the end of the scale is off the control: the 240-pixel capture
    * printed "Máximo" over the edge of its own cell.
    */
-  [data-ui='slider'][data-orientation='horizontal']
-    [data-part='mark'][data-edge]
-    [data-part='mark-label'] {
+  [data-ui-slider][data-orientation='horizontal']
+    [data-part-mark][data-edge]
+    [data-part-mark-label] {
     max-inline-size: none;
   }
 
-  [data-ui='slider'][data-orientation='horizontal']
-    [data-part='mark'][data-edge='end']
-    [data-part='mark-label'] {
+  [data-ui-slider][data-orientation='horizontal']
+    [data-part-mark][data-edge='end']
+    [data-part-mark-label] {
     inset-inline-end: 0;
     inset-inline-start: auto;
     text-align: end;
@@ -411,13 +411,13 @@
    * moves the box left in both directions, so a right-to-left page would hang
    * every centred label half a box off its own tick.
    */
-  [data-ui='slider'][data-orientation='horizontal']:dir(rtl)
-    [data-part='mark']:not([data-edge])
-    [data-part='mark-label'] {
+  [data-ui-slider][data-orientation='horizontal']:dir(rtl)
+    [data-part-mark]:not([data-edge])
+    [data-part-mark-label] {
     translate: 50% 0;
   }
 
-  [data-ui='slider'][data-orientation='vertical'] [data-part='mark-label'] {
+  [data-ui-slider][data-orientation='vertical'] [data-part-mark-label] {
     inset-block-start: 50%;
     inset-inline-start: calc(100% + var(--slotted-space-1, 0.125rem));
     text-align: start;
@@ -430,7 +430,7 @@
    * the mirrored document needs no rule of its own: `margin-inline-start`
    * measures from whichever edge `inset-inline-start` measured from.
    */
-  [data-ui='slider'] [data-part='thumb'] {
+  [data-ui-slider] [data-part-thumb] {
     background-color: var(--slotted-slider-thumb-color, var(--slotted-surface, Canvas));
     block-size: var(--_thumb-size);
     border: var(--slotted-border-width-thick, 2px) solid
@@ -451,14 +451,14 @@
       scale var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='slider'][data-orientation='horizontal'] [data-part='thumb'] {
+  [data-ui-slider][data-orientation='horizontal'] [data-part-thumb] {
     inset-block-start: 50%;
     inset-inline-start: calc(var(--_position, 0) * 1%);
     margin-block-start: calc(var(--_thumb-size) / -2);
     margin-inline-start: calc(var(--_thumb-size) / -2);
   }
 
-  [data-ui='slider'][data-orientation='vertical'] [data-part='thumb'] {
+  [data-ui-slider][data-orientation='vertical'] [data-part-thumb] {
     inset-block-end: calc(var(--_position, 0) * 1%);
     inset-inline-start: 50%;
     margin-block-end: calc(var(--_thumb-size) / -2);
@@ -470,7 +470,7 @@
    * the value set and its place in the form; the box around it is what a
    * reader sees, and the family's own pointer handling is what moves it.
    */
-  [data-ui='slider'] [data-part='input'] {
+  [data-ui-slider] [data-part-input] {
     appearance: none;
     block-size: 100%;
     inline-size: 100%;
@@ -492,13 +492,13 @@
    * content that ran out of its box on every dense stage. The native parts are
    * withdrawn to nothing, as `text-field` withdraws the search decorations.
    */
-  [data-ui='slider'] [data-part='input']::-webkit-slider-thumb {
+  [data-ui-slider] [data-part-input]::-webkit-slider-thumb {
     appearance: none;
     block-size: 0;
     inline-size: 0;
   }
 
-  [data-ui='slider'] [data-part='input']::-webkit-slider-runnable-track {
+  [data-ui-slider] [data-part-input]::-webkit-slider-runnable-track {
     block-size: 0;
   }
 
@@ -509,7 +509,7 @@
    * beneath it already announces the value, and a second copy would announce
    * it twice.
    */
-  [data-ui='slider'] [data-part='bubble'] {
+  [data-ui-slider] [data-part-bubble] {
     background-color: var(--slotted-slider-bubble-background, var(--slotted-surface-inverse));
     border-radius: var(--slotted-radius-sm, 4px);
     color: var(--slotted-slider-bubble-color, var(--slotted-text-inverse));
@@ -535,13 +535,13 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='slider'][data-orientation='horizontal'] [data-part='bubble'] {
+  [data-ui-slider][data-orientation='horizontal'] [data-part-bubble] {
     inset-block-end: calc(100% + var(--slotted-space-2, 0.25rem));
     inset-inline-start: 50%;
     translate: -50% 0;
   }
 
-  [data-ui='slider'][data-orientation='horizontal']:dir(rtl) [data-part='bubble'] {
+  [data-ui-slider][data-orientation='horizontal']:dir(rtl) [data-part-bubble] {
     translate: 50% 0;
   }
 
@@ -550,7 +550,7 @@
    * on the other one. Two overlays on one edge is a scale whose labels sit
    * under its own values.
    */
-  [data-ui='slider'][data-orientation='vertical'] [data-part='bubble'] {
+  [data-ui-slider][data-orientation='vertical'] [data-part-bubble] {
     inset-block-start: 50%;
     inset-inline-end: calc(100% + var(--slotted-space-2, 0.25rem));
     translate: 0 -50%;
@@ -562,15 +562,13 @@
    * alone, so nothing moves under a reader who asked for stillness — the
    * duration token collapses and the bubble simply appears.
    */
-  [data-ui='slider'][data-value-label='always'] [data-part='bubble'],
-  [data-ui='slider'][data-dragging] [data-part='thumb'][data-active] [data-part='bubble'],
-  [data-ui='slider']
-    [data-part='thumb']:has(> [data-part='input']:focus-visible)
-    [data-part='bubble'] {
+  [data-ui-slider][data-value-label='always'] [data-part-bubble],
+  [data-ui-slider][data-dragging] [data-part-thumb][data-active] [data-part-bubble],
+  [data-ui-slider] [data-part-thumb]:has(> [data-part-input]:focus-visible) [data-part-bubble] {
     opacity: 1;
   }
 
-  [data-ui='slider'][data-value-label='none'] [data-part='bubble'] {
+  [data-ui-slider][data-value-label='none'] [data-part-bubble] {
     display: none;
   }
 
@@ -580,8 +578,8 @@
    * ones it can meet, which is the order `STATE_PRECEDENCE` sets.
    */
 
-  [data-ui='slider']:not([data-disabled]):not([data-readonly])
-    [data-part='thumb']:hover:not(:disabled) {
+  [data-ui-slider]:not([data-disabled]):not([data-readonly])
+    [data-part-thumb]:hover:not(:disabled) {
     background-color: var(
       --slotted-slider-thumb-hover-background,
       var(--slotted-tone-accent-surface)
@@ -594,10 +592,10 @@
    * taken the gesture — and it collapses with the duration token under reduced
    * motion.
    */
-  [data-ui='slider']:not([data-disabled]):not([data-readonly])
-    [data-part='thumb']:active:not(:disabled),
-  [data-ui='slider'][data-dragging]:not([data-disabled]):not([data-readonly])
-    [data-part='thumb'][data-active] {
+  [data-ui-slider]:not([data-disabled]):not([data-readonly])
+    [data-part-thumb]:active:not(:disabled),
+  [data-ui-slider][data-dragging]:not([data-disabled]):not([data-readonly])
+    [data-part-thumb][data-active] {
     cursor: grabbing;
     scale: 1.15;
   }
@@ -606,7 +604,7 @@
    * The ring belongs to the thumb and answers the input's focus. The input is
    * `opacity: 0`, so nothing else in the family could draw it.
    */
-  [data-ui='slider'] [data-part='thumb']:has(> [data-part='input']:focus-visible) {
+  [data-ui-slider] [data-part-thumb]:has(> [data-part-input]:focus-visible) {
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -619,21 +617,21 @@
    * `--slotted-focus-ring-color`, so pointing that one name at the invalid
    * colour moves the outline and the shadow together.
    */
-  [data-ui='slider'][data-part='root'][data-invalid] {
+  [data-ui-slider][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-slider-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
   }
 
-  [data-ui='slider'][data-invalid] [data-part='indicator'] {
+  [data-ui-slider][data-invalid] [data-part-indicator] {
     background-color: var(
       --slotted-slider-invalid-indicator-color,
       var(--slotted-tone-danger-solid)
     );
   }
 
-  [data-ui='slider'][data-invalid] [data-part='thumb'] {
+  [data-ui-slider][data-invalid] [data-part-thumb] {
     --_invalid-edge-width: var(
       --slotted-slider-invalid-edge-width,
       var(--slotted-control-invalid-edge-width, 1px)
@@ -657,7 +655,7 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='slider'][data-invalid] [data-part='thumb']:has(> [data-part='input']:focus-visible) {
+  [data-ui-slider][data-invalid] [data-part-thumb]:has(> [data-part-input]:focus-visible) {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
@@ -673,12 +671,12 @@
    * the first capture's defect, and it is the one `number-field` found in the
    * same state.
    */
-  [data-ui='slider'][data-part='root'][data-readonly] [data-part='control'],
-  [data-ui='slider'][data-part='root'][data-readonly] [data-part='thumb'] {
+  [data-ui-slider][data-part-root][data-readonly] [data-part-control],
+  [data-ui-slider][data-part-root][data-readonly] [data-part-thumb] {
     cursor: default;
   }
 
-  [data-ui='slider'][data-part='root'][data-readonly] [data-part='indicator'] {
+  [data-ui-slider][data-part-root][data-readonly] [data-part-indicator] {
     background-color: var(--slotted-slider-readonly-indicator-color, var(--slotted-text-muted));
   }
 
@@ -689,7 +687,7 @@
    * two tokens the theme keeps apart in every scheme, which is what makes the
    * two states tell themselves apart.
    */
-  [data-ui='slider'][data-part='root'][data-readonly] [data-part='thumb'] {
+  [data-ui-slider][data-part-root][data-readonly] [data-part-thumb] {
     border-color: var(
       --slotted-slider-readonly-thumb-border-color,
       var(--slotted-control-border-color, ButtonBorder)
@@ -701,8 +699,8 @@
    * because a control can be disabled by something that never told it so: a
    * disabled `fieldset` disables every control inside it.
    */
-  [data-ui='slider'][data-part='root'][data-disabled] [data-part='track'],
-  [data-ui='slider'][data-part='root']:has([data-part='input']:disabled) [data-part='track'] {
+  [data-ui-slider][data-part-root][data-disabled] [data-part-track],
+  [data-ui-slider][data-part-root]:has([data-part-input]:disabled) [data-part-track] {
     background-color: var(
       --slotted-slider-disabled-track-color,
       var(--slotted-disabled-background)
@@ -710,16 +708,16 @@
     border-color: var(--slotted-slider-disabled-border-color, var(--slotted-disabled-border));
   }
 
-  [data-ui='slider'][data-part='root'][data-disabled] [data-part='indicator'],
-  [data-ui='slider'][data-part='root']:has([data-part='input']:disabled) [data-part='indicator'] {
+  [data-ui-slider][data-part-root][data-disabled] [data-part-indicator],
+  [data-ui-slider][data-part-root]:has([data-part-input]:disabled) [data-part-indicator] {
     background-color: var(
       --slotted-slider-disabled-indicator-color,
       var(--slotted-disabled-foreground)
     );
   }
 
-  [data-ui='slider'][data-part='root'][data-disabled] [data-part='thumb'],
-  [data-ui='slider'][data-part='root']:has([data-part='input']:disabled) [data-part='thumb'] {
+  [data-ui-slider][data-part-root][data-disabled] [data-part-thumb],
+  [data-ui-slider][data-part-root]:has([data-part-input]:disabled) [data-part-thumb] {
     background-color: var(
       --slotted-slider-disabled-thumb-color,
       var(--slotted-disabled-background)
@@ -730,14 +728,14 @@
     cursor: not-allowed;
   }
 
-  [data-ui='slider'][data-part='root'][data-disabled] [data-part='control'],
-  [data-ui='slider'][data-part='root'][data-disabled] > [data-part='output'],
-  [data-ui='slider'][data-part='root'][data-disabled] [data-part='mark-label'] {
+  [data-ui-slider][data-part-root][data-disabled] [data-part-control],
+  [data-ui-slider][data-part-root][data-disabled] > [data-part-output],
+  [data-ui-slider][data-part-root][data-disabled] [data-part-mark-label] {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
 
-  [data-ui='slider'][data-part='root'][data-disabled] [data-part='mark'] {
+  [data-ui-slider][data-part-root][data-disabled] [data-part-mark] {
     background-color: var(--slotted-disabled-foreground);
   }
 
@@ -749,26 +747,26 @@
    * with no value on it at all.
    */
   @media (forced-colors: active) {
-    [data-ui='slider'] [data-part='track'] {
+    [data-ui-slider] [data-part-track] {
       background-color: ButtonFace;
       border-color: ButtonBorder;
     }
 
-    [data-ui='slider'] [data-part='indicator'] {
+    [data-ui-slider] [data-part-indicator] {
       background-color: Highlight;
     }
 
-    [data-ui='slider'] [data-part='thumb'] {
+    [data-ui-slider] [data-part-thumb] {
       background-color: ButtonFace;
       border-color: ButtonBorder;
     }
 
-    [data-ui='slider'] [data-part='mark'] {
+    [data-ui-slider] [data-part-mark] {
       background-color: CanvasText;
     }
 
-    [data-ui='slider'][data-part='root'][data-disabled] [data-part='indicator'],
-    [data-ui='slider'][data-part='root'][data-disabled] [data-part='thumb'] {
+    [data-ui-slider][data-part-root][data-disabled] [data-part-indicator],
+    [data-ui-slider][data-part-root][data-disabled] [data-part-thumb] {
       background-color: Canvas;
       border-color: GrayText;
     }
@@ -776,14 +774,14 @@
     /* The invalid edge is a shadow, which forced colours remove: it comes back
        as an outline inside the thumb's border, and a focused invalid thumb
        draws its ring double. */
-    [data-ui='slider'][data-invalid] [data-part='thumb'] {
+    [data-ui-slider][data-invalid] [data-part-thumb] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-border-width-thick, 2px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='slider'][data-invalid] [data-part='thumb']:has(> [data-part='input']:focus-visible) {
+    [data-ui-slider][data-invalid] [data-part-thumb]:has(> [data-part-input]:focus-visible) {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);

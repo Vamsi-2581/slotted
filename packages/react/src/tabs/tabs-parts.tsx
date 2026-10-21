@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import { useCallback } from 'react';
 import type { HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
@@ -49,14 +50,14 @@ export function TabList({ children, ref, render, ...nativeProps }: TabListProps)
     [ref, tabs.attachList],
   );
 
-  const rootProps: TabListRootProps = {
+  const rootProps: TabListRootProps = keyedProps({
     tabIndex: -1,
     ...nativeProps,
     ...(tabs.orientation === 'vertical' ? { 'aria-orientation': 'vertical' as const } : {}),
     children,
     'data-part': 'list',
     role: 'tablist',
-  };
+  });
 
   return render === undefined ? (
     <div {...rootProps} ref={attach} />
@@ -140,20 +141,30 @@ export function Tab({
      fit="equal". */
   const content = (
     <>
-      {start === undefined ? null : <span data-part="start">{start}</span>}
-      <span data-part="label">{children}</span>
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
+      <span data-part="label" data-part-label="">
+        {children}
+      </span>
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
     </>
   );
 
   const control =
     href === undefined ? (
       <button
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'tab')}
         aria-controls={panelId}
         aria-keyshortcuts={dismissible ? 'Delete' : undefined}
         aria-selected={selected}
-        data-part="tab"
+
         data-value={value}
         disabled={resolvedDisabled}
         id={tabId}
@@ -168,12 +179,12 @@ export function Tab({
       </button>
     ) : (
       <a
-        {...(nativeProps as HTMLAttributes<HTMLAnchorElement>)}
+        {...withSelectorKey(nativeProps as HTMLAttributes<HTMLAnchorElement>, 'part', 'tab')}
         aria-controls={panelId}
         aria-disabled={resolvedDisabled === true ? true : undefined}
         aria-keyshortcuts={dismissible ? 'Delete' : undefined}
         aria-selected={selected}
-        data-part="tab"
+
         data-value={value}
         href={href}
         id={tabId}
@@ -195,6 +206,7 @@ export function Tab({
           <button
             aria-label={dismissLabel}
             data-part="dismiss"
+            data-part-dismiss=""
             disabled={resolvedDisabled}
             onClick={(event) => {
               /* The dismiss control sits inside the item, and the item's click
@@ -220,6 +232,7 @@ export function Tab({
     ),
     className,
     'data-part': 'item',
+    ...selectorKeyProps('part', 'item'),
     ...(selected ? { 'data-selected': '' } : {}),
     role: 'presentation',
     style,
@@ -250,7 +263,7 @@ export function TabPanel({ children, ref, render, value, ...nativeProps }: TabPa
   const pending = shown && tabs.value !== tabs.shownValue;
   const present = shown || tabs.mount === 'eager' || (tabs.mount === 'lazy' && tabs.seen(value));
 
-  const rootProps: TabPanelRootProps = {
+  const rootProps: TabPanelRootProps = keyedProps({
     ...nativeProps,
     'aria-labelledby': tabId,
     ...(pending ? { 'aria-busy': true, 'data-pending': '' } : {}),
@@ -260,7 +273,7 @@ export function TabPanel({ children, ref, render, value, ...nativeProps }: TabPa
     id: panelId,
     role: 'tabpanel',
     tabIndex: 0,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -275,11 +288,11 @@ export function TabPanel({ children, ref, render, value, ...nativeProps }: TabPa
 export function TabActions({ children, ref, render, ...nativeProps }: TabActionsProps) {
   useTabs();
 
-  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = {
+  const rootProps: HTMLAttributes<HTMLElement> & { 'data-part': string } = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'actions',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : (render(rootProps) as ReactNode);
 }

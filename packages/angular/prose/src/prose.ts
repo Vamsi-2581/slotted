@@ -44,7 +44,9 @@ export type { ProseFlow, ProseSize } from './prose-defaults';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'prose',
+    'data-ui-prose': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-flow]': 'resolvedFlow()',
   },

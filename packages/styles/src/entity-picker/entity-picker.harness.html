@@ -23,7 +23,9 @@
   <div style="position: relative; padding: 12px; min-block-size: 330px">
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="single"
@@ -31,21 +33,24 @@
       data-open
       style="max-inline-size: min(320px, calc(100% - 24px))"
     >
-      <div data-part="control">
-        <span data-part="selection" aria-hidden="true"
+      <div data-part="control" data-part-control="">
+        <span data-part="selection" data-part-selection="" aria-hidden="true"
           ><span
             data-ui="avatar"
+            data-ui-avatar=""
             data-part="root"
+            data-part-root=""
             data-size="xs"
             data-shape="circle"
             data-tone="accent"
             data-variant="soft"
             data-status="idle"
-            ><span data-part="fallback">AS</span></span
+            ><span data-part="fallback" data-part-fallback="">AS</span></span
           ></span
         >
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="true"
@@ -55,22 +60,35 @@
           aria-label="Owner"
           value="Ana Silva"
         />
-        <button data-part="clear" type="button" aria-label="Clear">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+        <button data-part="clear" data-part-clear="" type="button" aria-label="Clear">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -83,113 +101,149 @@
         --slotted-positioner-available-height: 280px;
       "
     >
-      <div data-part="content" id="ep-anatomy-list" role="listbox" aria-label="Owner">
-        <div data-part="group" role="group" aria-labelledby="ep-anatomy-fav">
-          <div data-part="group-label" id="ep-anatomy-fav">Favorites</div>
+      <div
+        data-part="content"
+        data-part-content=""
+        id="ep-anatomy-list"
+        role="listbox"
+        aria-label="Owner"
+      >
+        <div data-part="group" data-part-group="" role="group" aria-labelledby="ep-anatomy-fav">
+          <div data-part="group-label" data-part-group-label="" id="ep-anatomy-fav">Favorites</div>
           <div
             data-part="item"
+            data-part-item=""
             role="option"
             aria-selected="true"
             data-selected
             id="ep-anatomy-ana"
           >
-            <span data-part="media"
+            <span data-part="media" data-part-media=""
               ><span
                 data-ui="avatar"
+                data-ui-avatar=""
                 data-part="root"
+                data-part-root=""
                 data-size="xs"
                 data-shape="circle"
                 data-tone="accent"
                 data-variant="soft"
                 data-status="idle"
                 aria-hidden="true"
-                ><span data-part="fallback">AS</span></span
+                ><span data-part="fallback" data-part-fallback="">AS</span></span
               ></span
             >
-            <span data-part="label">Ana Silva</span>
-            <span data-part="description">ana.silva@acme.com</span>
-            <span data-part="meta">Admin</span>
-            <span data-part="indicator"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg></span
+            <span data-part="label" data-part-label="">Ana Silva</span>
+            <span data-part="description" data-part-description="">ana.silva@acme.com</span>
+            <span data-part="meta" data-part-meta="">Admin</span>
+            <span data-part="indicator" data-part-indicator=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
             ></span>
           </div>
         </div>
-        <div data-part="group" role="group" aria-labelledby="ep-anatomy-recent">
-          <div data-part="group-label" id="ep-anatomy-recent">Recent</div>
+        <div data-part="group" data-part-group="" role="group" aria-labelledby="ep-anatomy-recent">
+          <div data-part="group-label" data-part-group-label="" id="ep-anatomy-recent">Recent</div>
           <div
             data-part="item"
+            data-part-item=""
             role="option"
             aria-selected="false"
             data-current
             id="ep-anatomy-bruno"
           >
-            <span data-part="media"
+            <span data-part="media" data-part-media=""
               ><span
                 data-ui="avatar"
+                data-ui-avatar=""
                 data-part="root"
+                data-part-root=""
                 data-size="xs"
                 data-shape="circle"
                 data-tone="success"
                 data-variant="soft"
                 data-status="idle"
                 aria-hidden="true"
-                ><span data-part="fallback">BC</span></span
+                ><span data-part="fallback" data-part-fallback="">BC</span></span
               ></span
             >
-            <span data-part="label">Bruno Costa</span>
-            <span data-part="description">bruno.costa@acme.com</span>
-            <span data-part="indicator"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg></span
+            <span data-part="label" data-part-label="">Bruno Costa</span>
+            <span data-part="description" data-part-description="">bruno.costa@acme.com</span>
+            <span data-part="indicator" data-part-indicator=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
             ></span>
           </div>
-          <div data-part="item" role="option" aria-selected="false">
-            <span data-part="media"
+          <div data-part="item" data-part-item="" role="option" aria-selected="false">
+            <span data-part="media" data-part-media=""
               ><span
                 data-ui="avatar"
+                data-ui-avatar=""
                 data-part="root"
+                data-part-root=""
                 data-size="xs"
                 data-shape="circle"
                 data-tone="warning"
                 data-variant="soft"
                 data-status="idle"
                 aria-hidden="true"
-                ><span data-part="fallback">AS</span></span
+                ><span data-part="fallback" data-part-fallback="">AS</span></span
               ></span
             >
-            <span data-part="label">Ana Souza</span>
-            <span data-part="description">ana.souza@acme.com</span>
-            <span data-part="meta">Guest</span>
-            <span data-part="indicator"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg></span
+            <span data-part="label" data-part-label="">Ana Souza</span>
+            <span data-part="description" data-part-description="">ana.souza@acme.com</span>
+            <span data-part="meta" data-part-meta="">Guest</span>
+            <span data-part="indicator" data-part-indicator=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
             ></span>
           </div>
-          <div data-part="item" role="option" aria-selected="false">
-            <span data-part="media"
+          <div data-part="item" data-part-item="" role="option" aria-selected="false">
+            <span data-part="media" data-part-media=""
               ><span
                 data-ui="avatar"
+                data-ui-avatar=""
                 data-part="root"
+                data-part-root=""
                 data-size="xs"
                 data-shape="square"
                 data-tone="secondary"
                 data-variant="soft"
                 data-status="idle"
                 aria-hidden="true"
-                ><span data-part="fallback">DT</span></span
+                ><span data-part="fallback" data-part-fallback="">DT</span></span
               ></span
             >
-            <span data-part="label">Design team</span>
-            <span data-part="description">12 members</span>
-            <span data-part="meta">Team</span>
-            <span data-part="indicator"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="check"></svg></span
+            <span data-part="label" data-part-label="">Design team</span>
+            <span data-part="description" data-part-description="">12 members</span>
+            <span data-part="meta" data-part-meta="">Team</span>
+            <span data-part="indicator" data-part-indicator=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
             ></span>
           </div>
         </div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -200,7 +254,9 @@
   <div style="position: relative; padding: 12px; min-block-size: 320px">
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="multiple"
@@ -209,12 +265,14 @@
       data-open
       style="max-inline-size: min(360px, calc(100% - 24px))"
     >
-      <div data-part="control">
-        <div data-part="values" role="grid" aria-label="Reviewers, 4 chosen">
-          <div data-part="chips" role="row">
+      <div data-part="control" data-part-control="">
+        <div data-part="values" data-part-values="" role="grid" aria-label="Reviewers, 4 chosen">
+          <div data-part="chips" data-part-chips="" role="row">
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               data-tone="secondary"
@@ -222,30 +280,45 @@
               tabindex="-1"
               aria-label="Ana Silva, ana.silva@acme.com"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="avatar"
+                    data-ui-avatar=""
                     data-part="root"
+                    data-part-root=""
                     data-size="xs"
                     data-shape="circle"
                     data-tone="accent"
                     data-variant="soft"
                     data-status="idle"
                     aria-hidden="true"
-                    ><span data-part="fallback">AS</span></span
+                    ><span data-part="fallback" data-part-fallback="">AS</span></span
                   ></span
-                ><span data-part="label">Ana Silva</span></span
+                ><span data-part="label" data-part-label="">Ana Silva</span></span
               >
-              <button data-part="remove" type="button" tabindex="-1" aria-label="Remove Ana Silva">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+              <button
+                data-part="remove"
+                data-part-remove=""
+                type="button"
+                tabindex="-1"
+                aria-label="Remove Ana Silva"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               data-tone="secondary"
@@ -254,35 +327,45 @@
               tabindex="-1"
               aria-label="Bruno Costa, bruno.costa@acme.com"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="avatar"
+                    data-ui-avatar=""
                     data-part="root"
+                    data-part-root=""
                     data-size="xs"
                     data-shape="circle"
                     data-tone="success"
                     data-variant="soft"
                     data-status="idle"
                     aria-hidden="true"
-                    ><span data-part="fallback">BC</span></span
+                    ><span data-part="fallback" data-part-fallback="">BC</span></span
                   ></span
-                ><span data-part="label">Bruno Costa</span></span
+                ><span data-part="label" data-part-label="">Bruno Costa</span></span
               >
               <button
                 data-part="remove"
+                data-part-remove=""
                 type="button"
                 tabindex="-1"
                 aria-label="Remove Bruno Costa"
               >
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="outline"
               data-tone="secondary"
@@ -293,34 +376,51 @@
               aria-busy="true"
               aria-label="Loading…, usr_41ad"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="skeleton"
+                    data-ui-skeleton=""
                     data-part="root"
+                    data-part-root=""
                     data-shape="circle"
                     data-size="xs"
                     data-loading
                     aria-hidden="true"
                   ></span></span
-                ><span data-part="label"
+                ><span data-part="label" data-part-label=""
                   ><span
                     data-ui="skeleton"
+                    data-ui-skeleton=""
                     data-part="root"
+                    data-part-root=""
                     data-shape="text"
                     data-loading
                     aria-hidden="true"
                   ></span></span
               ></span>
-              <button data-part="remove" type="button" tabindex="-1" aria-label="Remove usr_41ad">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+              <button
+                data-part="remove"
+                data-part-remove=""
+                type="button"
+                tabindex="-1"
+                aria-label="Remove usr_41ad"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="outline"
               data-tone="secondary"
@@ -330,26 +430,43 @@
               tabindex="-1"
               aria-label="Unavailable, usr_9f2c"
             >
-              <span data-part="body"
-                ><span data-part="start"
-                  ><span data-ui="icon" data-part="root" aria-hidden="true"
-                    ><svg data-part="glyph" data-glyph="circle-alert"></svg></span></span
-                ><span data-part="label">Unavailable</span></span
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
+                  ><span
+                    data-ui="icon"
+                    data-ui-icon=""
+                    data-part="root"
+                    data-part-root=""
+                    aria-hidden="true"
+                    ><svg
+                      data-part="glyph"
+                      data-part-glyph=""
+                      data-glyph="circle-alert"
+                    ></svg></span></span
+                ><span data-part="label" data-part-label="">Unavailable</span></span
               >
               <button
                 data-part="remove"
+                data-part-remove=""
                 type="button"
                 tabindex="-1"
                 aria-label="Remove Unavailable"
               >
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="outline"
               data-tone="secondary"
@@ -358,11 +475,14 @@
               tabindex="-1"
               aria-label="3 more chosen"
             >
-              <span data-part="body"><span data-part="label">+3</span></span>
+              <span data-part="body" data-part-body=""
+                ><span data-part="label" data-part-label="">+3</span></span
+              >
             </span>
-            <span data-part="field" role="gridcell">
+            <span data-part="field" data-part-field="" role="gridcell">
               <input
                 data-part="input"
+                data-part-input=""
                 type="text"
                 role="combobox"
                 aria-expanded="true"
@@ -375,22 +495,35 @@
             </span>
           </div>
         </div>
-        <button data-part="clear" type="button" aria-label="Clear">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+        <button data-part="clear" data-part-clear="" type="button" aria-label="Clear">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -405,6 +538,7 @@
     >
       <div
         data-part="content"
+        data-part-content=""
         id="ep-multiple-list"
         role="listbox"
         aria-multiselectable="true"
@@ -412,108 +546,151 @@
       >
         <div
           data-part="item"
+          data-part-item=""
           role="option"
           aria-selected="false"
           data-current
           id="ep-multiple-carla"
         >
-          <span data-part="media"
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="danger"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">CM</span></span
+              ><span data-part="fallback" data-part-fallback="">CM</span></span
             ></span
           >
-          <span data-part="label"
-            ><span data-ui="highlight" data-part="root"
-              ><mark data-part="match">Car</mark>la Mendes</span
+          <span data-part="label" data-part-label=""
+            ><span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+              ><mark data-part="match" data-part-match="">Car</mark>la Mendes</span
             ></span
           >
-          <span data-part="description">carla.mendes@acme.com</span>
-          <span data-part="meta">Finance</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="description" data-part-description="">carla.mendes@acme.com</span>
+          <span data-part="meta" data-part-meta="">Finance</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="secondary"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">CM</span></span
+              ><span data-part="fallback" data-part-fallback="">CM</span></span
             ></span
           >
-          <span data-part="label"
-            ><span data-ui="highlight" data-part="root"
-              ><mark data-part="match">Car</mark>la Mendes</span
+          <span data-part="label" data-part-label=""
+            ><span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+              ><mark data-part="match" data-part-match="">Car</mark>la Mendes</span
             ></span
           >
-          <span data-part="description">c.mendes@partner.io</span>
-          <span data-part="meta">Guest</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="description" data-part-description="">c.mendes@partner.io</span>
+          <span data-part="meta" data-part-meta="">Guest</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="warning"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">RC</span></span
+              ><span data-part="fallback" data-part-fallback="">RC</span></span
             ></span
           >
-          <span data-part="label"
-            ><span data-ui="highlight" data-part="root"
-              >Ri<mark data-part="match">car</mark>do Campos</span
+          <span data-part="label" data-part-label=""
+            ><span data-ui="highlight" data-ui-highlight="" data-part="root" data-part-root=""
+              >Ri<mark data-part="match" data-part-match="">car</mark>do Campos</span
             ></span
           >
-          <span data-part="description">ricardo.campos@acme.com</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="description" data-part-description="">ricardo.campos@acme.com</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="false" data-create>
-          <span data-part="media"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="plus"></svg></span
+        <div data-part="item" data-part-item="" role="option" aria-selected="false" data-create>
+          <span data-part="media" data-part-media=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="plus"></svg></span
           ></span>
-          <span data-part="label">Invite “car”</span>
+          <span data-part="label" data-part-label="">Invite “car”</span>
         </div>
-        <div data-part="more" aria-hidden="true">
+        <div data-part="more" data-part-more="" aria-hidden="true">
           <div>
             <span
               data-ui="skeleton"
+              data-ui-skeleton=""
               data-part="root"
+              data-part-root=""
               data-shape="circle"
               data-size="xs"
               data-loading
             ></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
           </div>
         </div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -523,19 +700,23 @@
 <section data-scene="chips">
   <div
     data-ui="entity-picker"
+    data-ui-entity-picker=""
     data-part="root"
+    data-part-root=""
     data-size="md"
     data-variant="outline"
     data-selection-mode="multiple"
     data-overflow="wrap"
     data-full-width
   >
-    <div data-part="control">
-      <div data-part="values" role="grid" aria-label="Reviewers, 4 chosen">
-        <div data-part="chips" role="row">
+    <div data-part="control" data-part-control="">
+      <div data-part="values" data-part-values="" role="grid" aria-label="Reviewers, 4 chosen">
+        <div data-part="chips" data-part-chips="" role="row">
           <span
             data-ui="tag"
+            data-ui-tag=""
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-variant="soft"
             data-tone="secondary"
@@ -543,30 +724,45 @@
             tabindex="-1"
             aria-label="Ana Silva, ana.silva@acme.com"
           >
-            <span data-part="body"
-              ><span data-part="start"
+            <span data-part="body" data-part-body=""
+              ><span data-part="start" data-part-start=""
                 ><span
                   data-ui="avatar"
+                  data-ui-avatar=""
                   data-part="root"
+                  data-part-root=""
                   data-size="xs"
                   data-shape="circle"
                   data-tone="accent"
                   data-variant="soft"
                   data-status="idle"
                   aria-hidden="true"
-                  ><span data-part="fallback">AS</span></span
+                  ><span data-part="fallback" data-part-fallback="">AS</span></span
                 ></span
-              ><span data-part="label">Ana Silva</span></span
+              ><span data-part="label" data-part-label="">Ana Silva</span></span
             >
-            <button data-part="remove" type="button" tabindex="-1" aria-label="Remove Ana Silva">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button
+              data-part="remove"
+              data-part-remove=""
+              type="button"
+              tabindex="-1"
+              aria-label="Remove Ana Silva"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </span>
           <span
             data-ui="tag"
+            data-ui-tag=""
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-variant="outline"
             data-tone="secondary"
@@ -576,34 +772,51 @@
             aria-busy="true"
             aria-label="Loading…, usr_41ad"
           >
-            <span data-part="body"
-              ><span data-part="start"
+            <span data-part="body" data-part-body=""
+              ><span data-part="start" data-part-start=""
                 ><span
                   data-ui="skeleton"
+                  data-ui-skeleton=""
                   data-part="root"
+                  data-part-root=""
                   data-shape="circle"
                   data-size="xs"
                   data-loading
                   aria-hidden="true"
                 ></span></span
-              ><span data-part="label"
+              ><span data-part="label" data-part-label=""
                 ><span
                   data-ui="skeleton"
+                  data-ui-skeleton=""
                   data-part="root"
+                  data-part-root=""
                   data-shape="text"
                   data-loading
                   aria-hidden="true"
                 ></span></span
             ></span>
-            <button data-part="remove" type="button" tabindex="-1" aria-label="Remove usr_41ad">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button
+              data-part="remove"
+              data-part-remove=""
+              type="button"
+              tabindex="-1"
+              aria-label="Remove usr_41ad"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </span>
           <span
             data-ui="tag"
+            data-ui-tag=""
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-variant="outline"
             data-tone="secondary"
@@ -612,21 +825,42 @@
             tabindex="-1"
             aria-label="Unavailable, usr_9f2c"
           >
-            <span data-part="body"
-              ><span data-part="start"
-                ><span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="circle-alert"></svg></span></span
-              ><span data-part="label">Unavailable</span></span
+            <span data-part="body" data-part-body=""
+              ><span data-part="start" data-part-start=""
+                ><span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg
+                    data-part="glyph"
+                    data-part-glyph=""
+                    data-glyph="circle-alert"
+                  ></svg></span></span
+              ><span data-part="label" data-part-label="">Unavailable</span></span
             >
-            <button data-part="remove" type="button" tabindex="-1" aria-label="Remove Unavailable">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="x"></svg
+            <button
+              data-part="remove"
+              data-part-remove=""
+              type="button"
+              tabindex="-1"
+              aria-label="Remove Unavailable"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
               ></span>
             </button>
           </span>
-          <span data-part="field" role="gridcell"
+          <span data-part="field" data-part-field="" role="gridcell"
             ><input
               data-part="input"
+              data-part-input=""
               type="text"
               role="combobox"
               aria-expanded="false"
@@ -634,15 +868,26 @@
           /></span>
         </div>
       </div>
-      <button data-part="clear" type="button" aria-label="Clear">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="x"></svg
+      <button data-part="clear" data-part-clear="" type="button" aria-label="Clear">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
         ></span>
       </button>
-      <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-        <span data-part="arrow"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+      <button
+        data-part="trigger"
+        data-part-trigger=""
+        type="button"
+        tabindex="-1"
+        aria-label="Show results"
+      >
+        <span data-part="arrow" data-part-arrow=""
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
         ></span>
       </button>
     </div>
@@ -653,7 +898,9 @@
 <section data-scene="rows">
   <div
     data-ui="entity-picker"
+    data-ui-entity-picker=""
     data-part="positioner"
+    data-part-positioner=""
     data-side="bottom"
     data-align="start"
     data-size="md"
@@ -665,63 +912,80 @@
       --slotted-positioner-available-height: 520px;
     "
   >
-    <div data-part="content" role="listbox" aria-label="Assignee">
-      <div data-part="group" role="group" aria-labelledby="ep-rows-people">
-        <div data-part="group-label" id="ep-rows-people">People</div>
-        <div data-part="item" role="option" aria-selected="true" data-selected>
-          <span data-part="media"
+    <div data-part="content" data-part-content="" role="listbox" aria-label="Assignee">
+      <div data-part="group" data-part-group="" role="group" aria-labelledby="ep-rows-people">
+        <div data-part="group-label" data-part-group-label="" id="ep-rows-people">People</div>
+        <div data-part="item" data-part-item="" role="option" aria-selected="true" data-selected>
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="accent"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">MR</span></span
+              ><span data-part="fallback" data-part-fallback="">MR</span></span
             ></span
           >
-          <span data-part="label">Marta Ribeiro</span>
-          <span data-part="description">marta@acme.com</span>
-          <span data-part="meta">Owner</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">Marta Ribeiro</span>
+          <span data-part="description" data-part-description="">marta@acme.com</span>
+          <span data-part="meta" data-part-meta="">Owner</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="true" data-selected>
-          <span data-part="media"
+        <div data-part="item" data-part-item="" role="option" aria-selected="true" data-selected>
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="success"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">JP</span></span
+              ><span data-part="fallback" data-part-fallback="">JP</span></span
             ></span
           >
-          <span data-part="label">João Pereira</span>
-          <span data-part="description">joao@acme.com</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">João Pereira</span>
+          <span data-part="description" data-part-description="">joao@acme.com</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
         <div
           data-part="item"
+          data-part-item=""
           role="option"
           aria-selected="false"
           aria-disabled="true"
           data-disabled
         >
-          <span data-part="media"
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="secondary"
@@ -729,63 +993,82 @@
               data-status="idle"
               data-disabled
               aria-hidden="true"
-              ><span data-part="fallback">LF</span></span
+              ><span data-part="fallback" data-part-fallback="">LF</span></span
             ></span
           >
-          <span data-part="label">Luís Ferreira</span>
-          <span data-part="description">Deactivated</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">Luís Ferreira</span>
+          <span data-part="description" data-part-description="">Deactivated</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="false" data-current>
-          <span data-part="media"
+        <div data-part="item" data-part-item="" role="option" aria-selected="false" data-current>
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="warning"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">S</span></span
+              ><span data-part="fallback" data-part-fallback="">S</span></span
             ></span
           >
-          <span data-part="label">Sofia</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">Sofia</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
       </div>
-      <div data-part="group" role="group" aria-labelledby="ep-rows-teams">
-        <div data-part="group-label" id="ep-rows-teams">Teams</div>
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+      <div data-part="group" data-part-group="" role="group" aria-labelledby="ep-rows-teams">
+        <div data-part="group-label" data-part-group-label="" id="ep-rows-teams">Teams</div>
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="square"
               data-tone="accent"
               data-variant="solid"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">P</span></span
+              ><span data-part="fallback" data-part-fallback="">P</span></span
             ></span
           >
-          <span data-part="label">Platform</span>
-          <span data-part="description">#platform · 18 members</span>
-          <span data-part="meta">Team</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">Platform</span>
+          <span data-part="description" data-part-description="">#platform · 18 members</span>
+          <span data-part="meta" data-part-meta="">Team</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
       </div>
-      <div data-part="status" role="status" aria-live="polite"></div>
+      <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
     </div>
   </div>
 </section>
@@ -794,7 +1077,9 @@
 <section data-scene="media-none">
   <div
     data-ui="entity-picker"
+    data-ui-entity-picker=""
     data-part="positioner"
+    data-part-positioner=""
     data-side="bottom"
     data-align="start"
     data-size="md"
@@ -806,34 +1091,49 @@
       --slotted-positioner-available-height: 520px;
     "
   >
-    <div data-part="content" role="listbox" aria-label="Account">
-      <div data-part="item" role="option" aria-selected="false" data-current>
-        <span data-part="label">Acme Corporation</span>
-        <span data-part="description">ACC-00412 · Lisbon</span>
-        <span data-part="meta">Customer</span>
-        <span data-part="indicator"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="check"></svg></span
+    <div data-part="content" data-part-content="" role="listbox" aria-label="Account">
+      <div data-part="item" data-part-item="" role="option" aria-selected="false" data-current>
+        <span data-part="label" data-part-label="">Acme Corporation</span>
+        <span data-part="description" data-part-description="">ACC-00412 · Lisbon</span>
+        <span data-part="meta" data-part-meta="">Customer</span>
+        <span data-part="indicator" data-part-indicator=""
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
         ></span>
       </div>
-      <div data-part="item" role="option" aria-selected="true" data-selected>
-        <span data-part="label">Acme Holdings</span>
-        <span data-part="description">ACC-01877 · Porto</span>
-        <span data-part="meta">Partner</span>
-        <span data-part="indicator"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="check"></svg></span
+      <div data-part="item" data-part-item="" role="option" aria-selected="true" data-selected>
+        <span data-part="label" data-part-label="">Acme Holdings</span>
+        <span data-part="description" data-part-description="">ACC-01877 · Porto</span>
+        <span data-part="meta" data-part-meta="">Partner</span>
+        <span data-part="indicator" data-part-indicator=""
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
         ></span>
       </div>
-      <div data-part="item" role="option" aria-selected="false">
-        <span data-part="label">Acme Labs</span>
-        <span data-part="description">ACC-02203 · Braga</span>
-        <span data-part="indicator"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="check"></svg></span
+      <div data-part="item" data-part-item="" role="option" aria-selected="false">
+        <span data-part="label" data-part-label="">Acme Labs</span>
+        <span data-part="description" data-part-description="">ACC-02203 · Braga</span>
+        <span data-part="indicator" data-part-indicator=""
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
         ></span>
       </div>
-      <div data-part="status" role="status" aria-live="polite">3 results</div>
+      <div data-part="status" data-part-status="" role="status" aria-live="polite">3 results</div>
     </div>
   </div>
 </section>
@@ -843,7 +1143,9 @@
   <div style="display: grid; gap: 16px">
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -855,48 +1157,105 @@
         --slotted-positioner-available-height: 520px;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Owner" aria-busy="true" data-loading>
-        <div data-part="placeholder" aria-hidden="true">
+      <div
+        data-part="content"
+        data-part-content=""
+        role="listbox"
+        aria-label="Owner"
+        aria-busy="true"
+        data-loading
+      >
+        <div data-part="placeholder" data-part-placeholder="" aria-hidden="true">
           <div>
             <span
               data-ui="skeleton"
+              data-ui-skeleton=""
               data-part="root"
+              data-part-root=""
               data-shape="circle"
               data-size="xs"
               data-loading
             ></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
           </div>
           <div>
             <span
               data-ui="skeleton"
+              data-ui-skeleton=""
               data-part="root"
+              data-part-root=""
               data-shape="circle"
               data-size="xs"
               data-loading
             ></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
           </div>
           <div>
             <span
               data-ui="skeleton"
+              data-ui-skeleton=""
               data-part="root"
+              data-part-root=""
               data-shape="circle"
               data-size="xs"
               data-loading
             ></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
-            <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
+            <span
+              data-ui="skeleton"
+              data-ui-skeleton=""
+              data-part="root"
+              data-part-root=""
+              data-shape="text"
+              data-loading
+            ></span>
           </div>
         </div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -908,50 +1267,71 @@
         --slotted-positioner-available-height: 520px;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Owner" aria-busy="true" data-loading>
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+      <div
+        data-part="content"
+        data-part-content=""
+        role="listbox"
+        aria-label="Owner"
+        aria-busy="true"
+        data-loading
+      >
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="accent"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">AS</span></span
+              ><span data-part="fallback" data-part-fallback="">AS</span></span
             ></span
           >
-          <span data-part="label">Ana Silva</span>
-          <span data-part="description">ana.silva@acme.com</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">Ana Silva</span>
+          <span data-part="description" data-part-description="">ana.silva@acme.com</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="success"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">BC</span></span
+              ><span data-part="fallback" data-part-fallback="">BC</span></span
             ></span
           >
-          <span data-part="label">Bruno Costa</span>
-          <span data-part="description">bruno.costa@acme.com</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">Bruno Costa</span>
+          <span data-part="description" data-part-description="">bruno.costa@acme.com</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
   </div>
@@ -962,7 +1342,9 @@
   <div style="display: grid; gap: 16px">
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -974,25 +1356,39 @@
         --slotted-positioner-available-height: 520px;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Owner">
-        <div data-part="error">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="circle-alert"></svg></span
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Owner">
+        <div data-part="error" data-part-error="">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="circle-alert"></svg></span
           >Couldn’t load results
         </div>
-        <div data-part="item" role="option" aria-selected="false" data-retry data-current>
-          <span data-part="media"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="rotate-ccw"></svg></span
+        <div
+          data-part="item"
+          data-part-item=""
+          role="option"
+          aria-selected="false"
+          data-retry
+          data-current
+        >
+          <span data-part="media" data-part-media=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg></span
           ></span>
-          <span data-part="label">Try again</span>
+          <span data-part="label" data-part-label="">Try again</span>
         </div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -1004,20 +1400,27 @@
         --slotted-positioner-available-height: 520px;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Customer">
-        <div data-part="item" role="option" aria-selected="false" data-create>
-          <span data-part="media"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="plus"></svg></span
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Customer">
+        <div data-part="item" data-part-item="" role="option" aria-selected="false" data-create>
+          <span data-part="media" data-part-media=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="plus"></svg></span
           ></span>
-          <span data-part="label">Create “Zeta Industries”</span>
+          <span data-part="label" data-part-label="">Create “Zeta Industries”</span>
         </div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -1029,14 +1432,16 @@
         --slotted-positioner-available-height: 520px;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Customer">
-        <div data-part="empty">No results</div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Customer">
+        <div data-part="empty" data-part-empty="">No results</div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -1048,8 +1453,10 @@
         --slotted-positioner-available-height: 520px;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Customer">
-        <div data-part="status" role="status" aria-live="polite">Type 2 or more characters</div>
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Customer">
+        <div data-part="status" data-part-status="" role="status" aria-live="polite">
+          Type 2 or more characters
+        </div>
       </div>
     </div>
   </div>
@@ -1060,7 +1467,9 @@
   <div style="display: grid; gap: 16px">
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="single"
@@ -1068,27 +1477,41 @@
       role="group"
       aria-label="Related record"
     >
-      <div data-part="scope">
-        <div data-ui="select" data-part="root" data-size="md" data-variant="outline">
+      <div data-part="scope" data-part-scope="">
+        <div
+          data-ui="select"
+          data-ui-select=""
+          data-part="root"
+          data-part-root=""
+          data-size="md"
+          data-variant="outline"
+        >
           <button
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             role="combobox"
             aria-haspopup="listbox"
             aria-expanded="false"
             aria-label="Search in"
           >
-            <span data-part="value">Accounts</span>
+            <span data-part="value" data-part-value="">Accounts</span>
           </button>
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </div>
       </div>
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
@@ -1096,37 +1519,53 @@
           aria-label="Related record"
           placeholder="Search accounts"
         />
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="single"
       data-full-width
     >
-      <div data-part="control">
-        <span data-part="selection" aria-hidden="true"
+      <div data-part="control" data-part-control="">
+        <span data-part="selection" data-part-selection="" aria-hidden="true"
           ><span
             data-ui="avatar"
+            data-ui-avatar=""
             data-part="root"
+            data-part-root=""
             data-size="xs"
             data-shape="circle"
             data-tone="success"
             data-variant="soft"
             data-status="idle"
-            ><span data-part="fallback">BC</span></span
+            ><span data-part="fallback" data-part-fallback="">BC</span></span
           ></span
         >
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
@@ -1134,31 +1573,45 @@
           aria-label="Owner"
           value="Bruno Costa"
         />
-        <button data-part="clear" type="button" aria-label="Clear">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+        <button data-part="clear" data-part-clear="" type="button" aria-label="Clear">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="single"
       data-full-width
       data-loading
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
@@ -1166,8 +1619,20 @@
           aria-busy="true"
           aria-label="Owner"
         />
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span
+            data-part="busy"
+            data-part-busy=""
+            data-ui="spinner"
+            data-ui-spinner=""
+            aria-hidden="true"
+          ></span>
         </button>
       </div>
     </div>
@@ -1179,115 +1644,164 @@
   <div style="display: grid; gap: 12px">
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-variant="outline"
       data-selection-mode="single"
       data-full-width
     >
-      <div data-part="control">
-        <span data-part="selection" aria-hidden="true"
+      <div data-part="control" data-part-control="">
+        <span data-part="selection" data-part-selection="" aria-hidden="true"
           ><span
             data-ui="avatar"
+            data-ui-avatar=""
             data-part="root"
+            data-part-root=""
             data-size="xs"
             data-shape="circle"
             data-tone="accent"
             data-variant="soft"
             data-status="idle"
-            ><span data-part="fallback">AS</span></span
+            ><span data-part="fallback" data-part-fallback="">AS</span></span
           ></span
         >
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
           aria-label="sm"
           value="Ana Silva"
         />
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="lg"
       data-variant="outline"
       data-selection-mode="single"
       data-full-width
     >
-      <div data-part="control">
-        <span data-part="selection" aria-hidden="true"
+      <div data-part="control" data-part-control="">
+        <span data-part="selection" data-part-selection="" aria-hidden="true"
           ><span
             data-ui="avatar"
+            data-ui-avatar=""
             data-part="root"
+            data-part-root=""
             data-size="xs"
             data-shape="circle"
             data-tone="accent"
             data-variant="soft"
             data-status="idle"
-            ><span data-part="fallback">AS</span></span
+            ><span data-part="fallback" data-part-fallback="">AS</span></span
           ></span
         >
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
           aria-label="lg"
           value="Ana Silva"
         />
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="subtle"
       data-selection-mode="single"
       data-full-width
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
           aria-label="subtle"
           placeholder="Subtle"
         />
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="single"
       data-full-width
       data-invalid
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
@@ -1295,38 +1809,54 @@
           aria-label="invalid"
           placeholder="Required"
         />
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="single"
       data-full-width
       data-readonly
     >
-      <div data-part="control">
-        <span data-part="selection" aria-hidden="true"
+      <div data-part="control" data-part-control="">
+        <span data-part="selection" data-part-selection="" aria-hidden="true"
           ><span
             data-ui="avatar"
+            data-ui-avatar=""
             data-part="root"
+            data-part-root=""
             data-size="xs"
             data-shape="circle"
             data-tone="success"
             data-variant="soft"
             data-status="idle"
-            ><span data-part="fallback">BC</span></span
+            ><span data-part="fallback" data-part-fallback="">BC</span></span
           ></span
         >
         <input
           data-part="input"
+          data-part-input=""
           type="text"
           role="combobox"
           aria-expanded="false"
@@ -1335,29 +1865,44 @@
           aria-label="readonly"
           value="Bruno Costa"
         />
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="multiple"
       data-full-width
       data-disabled
     >
-      <div data-part="control">
-        <div data-part="values" role="grid" aria-label="disabled, 1 chosen">
-          <div data-part="chips" role="row">
+      <div data-part="control" data-part-control="">
+        <div data-part="values" data-part-values="" role="grid" aria-label="disabled, 1 chosen">
+          <div data-part="chips" data-part-chips="" role="row">
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               data-tone="secondary"
@@ -1366,25 +1911,28 @@
               tabindex="-1"
               aria-label="Ana Silva"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="avatar"
+                    data-ui-avatar=""
                     data-part="root"
+                    data-part-root=""
                     data-size="xs"
                     data-shape="circle"
                     data-tone="accent"
                     data-variant="soft"
                     data-status="idle"
                     aria-hidden="true"
-                    ><span data-part="fallback">AS</span></span
+                    ><span data-part="fallback" data-part-fallback="">AS</span></span
                   ></span
-                ><span data-part="label">Ana Silva</span></span
+                ><span data-part="label" data-part-label="">Ana Silva</span></span
               >
             </span>
-            <span data-part="field" role="gridcell"
+            <span data-part="field" data-part-field="" role="gridcell"
               ><input
                 data-part="input"
+                data-part-input=""
                 type="text"
                 role="combobox"
                 aria-expanded="false"
@@ -1393,10 +1941,22 @@
             /></span>
           </div>
         </div>
-        <button data-part="trigger" type="button" tabindex="-1" disabled aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          disabled
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
@@ -1404,25 +1964,39 @@
     <div style="padding: 4px; background: var(--slotted-surface-sunken)">
       <div
         data-ui="entity-picker"
+        data-ui-entity-picker=""
         data-part="root"
+        data-part-root=""
         data-size="md"
         data-variant="plain"
         data-selection-mode="single"
         data-full-width
       >
-        <div data-part="control">
+        <div data-part="control" data-part-control="">
           <input
             data-part="input"
+            data-part-input=""
             type="text"
             role="combobox"
             aria-expanded="false"
             aria-label="plain"
             placeholder="Plain, in a cell"
           />
-          <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-            <span data-part="arrow"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+          <button
+            data-part="trigger"
+            data-part-trigger=""
+            type="button"
+            tabindex="-1"
+            aria-label="Show results"
+          >
+            <span data-part="arrow" data-part-arrow=""
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
           </button>
         </div>
@@ -1436,19 +2010,23 @@
   <div style="display: grid; gap: 16px">
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-selection-mode="multiple"
       data-overflow="collapse"
       data-full-width
     >
-      <div data-part="control">
-        <div data-part="values" role="grid" aria-label="Watchers, 6 chosen">
-          <div data-part="chips" role="row">
+      <div data-part="control" data-part-control="">
+        <div data-part="values" data-part-values="" role="grid" aria-label="Watchers, 6 chosen">
+          <div data-part="chips" data-part-chips="" role="row">
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               data-tone="secondary"
@@ -1456,30 +2034,47 @@
               tabindex="-1"
               aria-label="Maria Eduarda Albuquerque de Vasconcelos"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="avatar"
+                    data-ui-avatar=""
                     data-part="root"
+                    data-part-root=""
                     data-size="xs"
                     data-shape="circle"
                     data-tone="accent"
                     data-variant="soft"
                     data-status="idle"
                     aria-hidden="true"
-                    ><span data-part="fallback">MV</span></span
+                    ><span data-part="fallback" data-part-fallback="">MV</span></span
                   ></span
-                ><span data-part="label">Maria Eduarda Albuquerque de Vasconcelos</span></span
+                ><span data-part="label" data-part-label=""
+                  >Maria Eduarda Albuquerque de Vasconcelos</span
+                ></span
               >
-              <button data-part="remove" type="button" tabindex="-1" aria-label="Remove">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+              <button
+                data-part="remove"
+                data-part-remove=""
+                type="button"
+                tabindex="-1"
+                aria-label="Remove"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               data-tone="secondary"
@@ -1488,30 +2083,45 @@
               tabindex="-1"
               aria-label="Li Wei"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="avatar"
+                    data-ui-avatar=""
                     data-part="root"
+                    data-part-root=""
                     data-size="xs"
                     data-shape="circle"
                     data-tone="success"
                     data-variant="soft"
                     data-status="idle"
                     aria-hidden="true"
-                    ><span data-part="fallback">LW</span></span
+                    ><span data-part="fallback" data-part-fallback="">LW</span></span
                   ></span
-                ><span data-part="label">Li Wei</span></span
+                ><span data-part="label" data-part-label="">Li Wei</span></span
               >
-              <button data-part="remove" type="button" tabindex="-1" aria-label="Remove">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+              <button
+                data-part="remove"
+                data-part-remove=""
+                type="button"
+                tabindex="-1"
+                aria-label="Remove"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               data-tone="secondary"
@@ -1520,30 +2130,45 @@
               tabindex="-1"
               aria-label="نور الهدى"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="avatar"
+                    data-ui-avatar=""
                     data-part="root"
+                    data-part-root=""
                     data-size="xs"
                     data-shape="circle"
                     data-tone="warning"
                     data-variant="soft"
                     data-status="idle"
                     aria-hidden="true"
-                    ><span data-part="fallback">ن</span></span
+                    ><span data-part="fallback" data-part-fallback="">ن</span></span
                   ></span
-                ><span data-part="label">نور الهدى</span></span
+                ><span data-part="label" data-part-label="">نور الهدى</span></span
               >
-              <button data-part="remove" type="button" tabindex="-1" aria-label="Remove">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+              <button
+                data-part="remove"
+                data-part-remove=""
+                type="button"
+                tabindex="-1"
+                aria-label="Remove"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="soft"
               data-tone="secondary"
@@ -1552,30 +2177,45 @@
               tabindex="-1"
               aria-label="Ola Nordmann"
             >
-              <span data-part="body"
-                ><span data-part="start"
+              <span data-part="body" data-part-body=""
+                ><span data-part="start" data-part-start=""
                   ><span
                     data-ui="avatar"
+                    data-ui-avatar=""
                     data-part="root"
+                    data-part-root=""
                     data-size="xs"
                     data-shape="circle"
                     data-tone="danger"
                     data-variant="soft"
                     data-status="idle"
                     aria-hidden="true"
-                    ><span data-part="fallback">ON</span></span
+                    ><span data-part="fallback" data-part-fallback="">ON</span></span
                   ></span
-                ><span data-part="label">Ola Nordmann</span></span
+                ><span data-part="label" data-part-label="">Ola Nordmann</span></span
               >
-              <button data-part="remove" type="button" tabindex="-1" aria-label="Remove">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+              <button
+                data-part="remove"
+                data-part-remove=""
+                type="button"
+                tabindex="-1"
+                aria-label="Remove"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
             <span
               data-ui="tag"
+              data-ui-tag=""
               data-part="root"
+              data-part-root=""
               data-size="sm"
               data-variant="outline"
               data-tone="secondary"
@@ -1583,11 +2223,14 @@
               role="gridcell"
               tabindex="-1"
               aria-label="3 more chosen"
-              ><span data-part="body"><span data-part="label">+3</span></span></span
+              ><span data-part="body" data-part-body=""
+                ><span data-part="label" data-part-label="">+3</span></span
+              ></span
             >
-            <span data-part="field" role="gridcell"
+            <span data-part="field" data-part-field="" role="gridcell"
               ><input
                 data-part="input"
+                data-part-input=""
                 type="text"
                 role="combobox"
                 aria-expanded="false"
@@ -1595,22 +2238,35 @@
             /></span>
           </div>
         </div>
-        <button data-part="clear" type="button" aria-label="Clear">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+        <button data-part="clear" data-part-clear="" type="button" aria-label="Clear">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
-        <button data-part="trigger" type="button" tabindex="-1" aria-label="Show results">
-          <span data-part="arrow"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="chevron-down"></svg></span
+        <button
+          data-part="trigger"
+          data-part-trigger=""
+          type="button"
+          tabindex="-1"
+          aria-label="Show results"
+        >
+          <span data-part="arrow" data-part-arrow=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
           ></span>
         </button>
       </div>
     </div>
     <div
       data-ui="entity-picker"
+      data-ui-entity-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-size="md"
@@ -1622,76 +2278,107 @@
         --slotted-positioner-available-height: 520px;
       "
     >
-      <div data-part="content" role="listbox" aria-multiselectable="true" aria-label="Watchers">
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+      <div
+        data-part="content"
+        data-part-content=""
+        role="listbox"
+        aria-multiselectable="true"
+        aria-label="Watchers"
+      >
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="accent"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">MV</span></span
+              ><span data-part="fallback" data-part-fallback="">MV</span></span
             ></span
           >
-          <span data-part="label"
+          <span data-part="label" data-part-label=""
             >Maria Eduarda Albuquerque de Vasconcelos Cavalcanti Sobrinho</span
           >
-          <span data-part="description"
+          <span data-part="description" data-part-description=""
             >maria.eduarda.albuquerque.vasconcelos@departamento-juridico.example.com</span
           >
-          <span data-part="meta">Legal</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="meta" data-part-meta="">Legal</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="warning"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">ن</span></span
+              ><span data-part="fallback" data-part-fallback="">ن</span></span
             ></span
           >
-          <span data-part="label">نور الهدى العبدالله</span>
-          <span data-part="description">nour@acme.com</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label="">نور الهدى العبدالله</span>
+          <span data-part="description" data-part-description="">nour@acme.com</span>
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="item" role="option" aria-selected="false">
-          <span data-part="media"
+        <div data-part="item" data-part-item="" role="option" aria-selected="false">
+          <span data-part="media" data-part-media=""
             ><span
               data-ui="avatar"
+              data-ui-avatar=""
               data-part="root"
+              data-part-root=""
               data-size="xs"
               data-shape="circle"
               data-tone="secondary"
               data-variant="soft"
               data-status="idle"
               aria-hidden="true"
-              ><span data-part="fallback">X</span></span
+              ><span data-part="fallback" data-part-fallback="">X</span></span
             ></span
           >
-          <span data-part="label">xXx_unbrokentokenwithoutanyspacesatallthatkeepsgoing_xXx</span>
-          <span data-part="description">usr_7f3a9c21e4b04d8f9e1a2b3c4d5e6f70</span>
-          <span data-part="indicator"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="check"></svg></span
+          <span data-part="label" data-part-label=""
+            >xXx_unbrokentokenwithoutanyspacesatallthatkeepsgoing_xXx</span
+          >
+          <span data-part="description" data-part-description=""
+            >usr_7f3a9c21e4b04d8f9e1a2b3c4d5e6f70</span
+          >
+          <span data-part="indicator" data-part-indicator=""
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="check"></svg></span
           ></span>
         </div>
-        <div data-part="status" role="status" aria-live="polite"></div>
+        <div data-part="status" data-part-status="" role="status" aria-live="polite"></div>
       </div>
     </div>
   </div>

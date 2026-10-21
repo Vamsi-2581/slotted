@@ -509,10 +509,12 @@ export const Donut: Story = {
           data={TICKETS}
           renderCenter={(model) => (
             <>
-              <span data-part="center-value">
+              <span data-part="center-value" data-part-center-value="">
                 {Math.round((312 / model.total) * 100).toLocaleString('pt-BR')}%
               </span>
-              <span data-part="center-label">resolvidos</span>
+              <span data-part="center-label" data-part-center-label="">
+                resolvidos
+              </span>
             </>
           )}
           series={[{ kind: 'pie', field: 'n', label: 'Tickets', innerRadius: 0.64 }]}
@@ -669,17 +671,20 @@ function MonthOverMonth({ context, model }: { context: ChartTooltipContext; mode
   const change = previous ? (value - previous) / previous : null;
   return (
     <>
-      <div data-part="tooltip-title">
+      <div data-part="tooltip-title" data-part-tooltip-title="">
         {context.title} · {brlThousands(value, 'pt-BR')}
       </div>
       <div
         data-current=""
         data-part="tooltip-item"
+        data-part-tooltip-item=""
         data-tone={change === null ? 'neutral' : change >= 0 ? 'success' : 'danger'}
       >
-        <span data-kind="line" data-part="tooltip-marker" />
-        <span data-part="tooltip-label">contra o mês anterior</span>
-        <span data-part="tooltip-value">
+        <span data-kind="line" data-part="tooltip-marker" data-part-tooltip-marker="" />
+        <span data-part="tooltip-label" data-part-tooltip-label="">
+          contra o mês anterior
+        </span>
+        <span data-part="tooltip-value" data-part-tooltip-value="">
           {change === null
             ? '—'
             : new Intl.NumberFormat('pt-BR', {

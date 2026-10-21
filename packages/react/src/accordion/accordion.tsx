@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/accordion/accordion.css';
 
 import { isHeldOpen, nextOpenValues, sameOpenValues } from '@slotted/core/disclosure';
@@ -215,7 +216,7 @@ export function Accordion({
     [current, resolvedMultiple, resolvedRequireOpen],
   );
 
-  const rootProps: AccordionRootProps = {
+  const rootProps: AccordionRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -225,7 +226,7 @@ export function Accordion({
     'data-ui': 'accordion',
     'data-variant': resolvedVariant,
     style,
-  };
+  });
 
   return (
     <AccordionContext.Provider value={context}>

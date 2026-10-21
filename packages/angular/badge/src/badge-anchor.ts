@@ -19,7 +19,9 @@ import type { BadgeOffset, BadgeOverlap, BadgePlacement } from './badge-defaults
   exportAs: 'slBadgeAnchor',
   host: {
     'data-ui': 'badge',
+    'data-ui-badge': '',
     'data-part': 'anchor',
+    'data-part-anchor': '',
     '[attr.data-placement]': 'resolvedPlacement()',
     '[attr.data-overlap]': 'resolvedOverlap()',
     '[style.--slotted-badge-anchor-offset-x]': 'offsetX()',

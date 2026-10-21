@@ -210,7 +210,7 @@ describe('slContextMenuTriggerFor', () => {
   template: `
     <table>
       <tbody>
-        <tr [slContextMenuTriggerFor]="actions" data-part="row">
+        <tr [slContextMenuTriggerFor]="actions" data-part="row" data-part-row="">
           <td>Invoice</td>
         </tr>
       </tbody>

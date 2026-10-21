@@ -425,11 +425,21 @@ export class SlDataGridRangeOperand {
     SlSelectItem,
   ],
   template: `
-    <div data-ui="data-grid" data-part="filter-panel" [attr.data-kind]="kind()">
+    <div
+      data-ui="data-grid"
+      data-ui-data-grid=""
+      data-part="filter-panel"
+      data-part-filter-panel=""
+      [attr.data-kind]="kind()"
+    >
       @for (index of lines(); track index) {
-        <div data-part="filter-condition" [attr.data-operands]="operandsOf(index)">
+        <div
+          data-part="filter-condition"
+          data-part-filter-condition=""
+          [attr.data-operands]="operandsOf(index)"
+        >
           @if (index === 1) {
-            <div data-part="filter-join">
+            <div data-part="filter-join" data-part-filter-join="">
               <div
                 slSegmentedControl
                 size="sm"
@@ -442,7 +452,7 @@ export class SlDataGridRangeOperand {
               </div>
             </div>
           }
-          <div data-part="filter-operator">
+          <div data-part="filter-operator" data-part-filter-operator="">
             <sl-select
               size="sm"
               width="content"
@@ -459,6 +469,7 @@ export class SlDataGridRangeOperand {
           </div>
           <div
             data-part="filter-operand"
+            data-part-filter-operand=""
             [attr.data-kind]="kind()"
             [attr.data-range]="operandsOf(index) === 2 && !rangeAt(index) ? '' : null"
           >
@@ -500,7 +511,7 @@ export class SlDataGridRangeOperand {
           </div>
         </div>
       }
-      <div data-part="filter-actions">
+      <div data-part="filter-actions" data-part-filter-actions="">
         <button
           slButton
           type="button"
@@ -679,10 +690,11 @@ export class SlDataGridFilterPanel {
   template: `
     <div
       data-part="filter-operand"
+      data-part-filter-operand=""
       [attr.data-kind]="kind()"
       [attr.data-range]="operands() === 2 && !range() ? '' : null"
     >
-      <div data-part="filter-operator">
+      <div data-part="filter-operator" data-part-filter-operator="">
         <button
           type="button"
           tabindex="-1"
@@ -896,7 +908,13 @@ export class SlDataGridFilterRowOperand {
           [checked]="draft() === true"
           (checkedChange)="draftChange.emit($event.value)"
         >
-          <span data-ui="visually-hidden" data-part="root">{{ column().label }}</span>
+          <span
+            data-ui="visually-hidden"
+            data-ui-visually-hidden=""
+            data-part="root"
+            data-part-root=""
+            >{{ column().label }}</span
+          >
         </span>
       }
       @case ('date') {

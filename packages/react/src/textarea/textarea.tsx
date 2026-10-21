@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/textarea/textarea.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -114,7 +115,7 @@ export function Textarea({
     '--slotted-textarea-max-rows': String(maxRows),
   } as CSSProperties;
 
-  const rootProps: TextareaRootProps = {
+  const rootProps: TextareaRootProps = keyedProps({
     ...nativeProps,
     'aria-describedby': [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined,
     'aria-invalid': ariaInvalid ?? (resolvedInvalid === true ? true : undefined),
@@ -131,7 +132,7 @@ export function Textarea({
     'data-variant': resolvedVariant,
     id: id ?? field?.ids.control,
     style: { ...rowVariables, ...style },
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
 

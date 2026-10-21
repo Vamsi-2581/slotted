@@ -55,13 +55,19 @@ import {
   standalone: true,
   imports: [SlGlyph, SlIcon],
   /* The icon mark's glyph follows the status; the sheet sizes and colours it. */
-  template: `<span aria-hidden="true" data-part="mark">
+  template: `<span aria-hidden="true" data-part="mark" data-part-mark="">
       @if (markValue() === 'icon') {
         <span slIcon><svg slGlyph [name]="glyph()"></svg></span>
       }</span
-    ><span data-part="label"
+    ><span data-part="label" data-part-label=""
       ><ng-content
-        ><span data-part="announcement" data-ui="visually-hidden">{{ name() }}</span></ng-content
+        ><span
+          data-part="announcement"
+          data-part-announcement=""
+          data-ui="visually-hidden"
+          data-ui-visually-hidden=""
+          >{{ name() }}</span
+        ></ng-content
       ></span
     >`,
   styleUrls: [
@@ -73,7 +79,9 @@ import {
   exportAs: 'slStatusIndicator',
   host: {
     'data-ui': 'status-indicator',
+    'data-ui-status-indicator': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-status]': 'status()',
     '[attr.data-mark]': 'markValue()',
     '[attr.data-size]': 'sizeValue()',

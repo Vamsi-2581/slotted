@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/rating/rating.css';
 
 import { ratingMessages } from '@slotted/core/i18n';
@@ -238,7 +239,7 @@ export function Rating({
 
   const fills = ratingFills(current, resolvedMax);
 
-  const rootProps: RatingRootProps = {
+  const rootProps: RatingRootProps = keyedProps({
     ...nativeProps,
     'aria-describedby': [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined,
     'aria-invalid': ariaInvalid ?? (resolvedInvalid === true ? true : undefined),
@@ -252,6 +253,7 @@ export function Rating({
       <>
         <div
           data-part="symbols"
+          data-part-symbols=""
           onPointerCancel={release}
           onPointerMove={handlePointerMove}
           onPointerUp={release}
@@ -262,7 +264,12 @@ export function Rating({
             const values = resolvedStep === 0.5 ? [index + 0.5, whole] : [whole];
             const checked = current !== null && current > index && current <= whole;
             return (
-              <span data-part="item" key={whole} {...(checked ? { 'data-checked': '' } : {})}>
+              <span
+                data-part="item"
+                data-part-item=""
+                key={whole}
+                {...(checked ? { 'data-checked': '' } : {})}
+              >
                 {values.map((itemValue) => (
                   <input
                     aria-label={t('itemLabel', {
@@ -271,6 +278,7 @@ export function Rating({
                     })}
                     checked={itemValue === current}
                     data-part="input"
+                    data-part-input=""
                     disabled={resolvedDisabled}
                     form={form}
                     key={itemValue}
@@ -294,7 +302,7 @@ export function Rating({
           })}
         </div>
         {caption === undefined ? null : (
-          <span data-part="value" aria-hidden="true">
+          <span data-part="value" data-part-value="" aria-hidden="true">
             {typeof caption === 'function' ? caption({ value: current, preview }) : caption}
           </span>
         )}
@@ -326,7 +334,7 @@ export function Rating({
     },
     role: role ?? 'radiogroup',
     style,
-  };
+  });
 
   return render === undefined ? (
     <div

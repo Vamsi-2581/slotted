@@ -32,7 +32,7 @@
    * answered in logical properties without mirroring in the wrong direction.
    * Symmetric padding answers every side at once.
    */
-  [data-ui='tooltip'] {
+  [data-ui-tooltip] {
     /**
      * The distance between the trigger and the painted surface, and the band
      * the arrow stands in. A consumer who raises `sideOffset` past it leaves
@@ -139,12 +139,12 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='tooltip'][data-side='top'] {
+  [data-ui-tooltip][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* A lateral side has no block direction to arrive from, so it only fades. */
-  [data-ui='tooltip']:is([data-side='left'], [data-side='right']) {
+  [data-ui-tooltip]:is([data-side='left'], [data-side='right']) {
     translate: 0 0;
   }
 
@@ -162,7 +162,7 @@
    * A keyframe states where it starts. The exit stays a transition: it
    * leaves from wherever the layer is, on the closed rule's durations.
    */
-  [data-ui='tooltip'][data-open] {
+  [data-ui-tooltip][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -173,15 +173,15 @@
    * with the side, and a layer written open in static markup — the harness,
    * a docs snippet — is simply there, and is photographed where it stands.
    */
-  [data-ui='tooltip'][data-open][data-positioned] {
+  [data-ui-tooltip][data-open][data-positioned] {
     animation: slotted-tooltip-enter-down var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
-  [data-ui='tooltip'][data-open][data-positioned][data-side='top'] {
+  [data-ui-tooltip][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-tooltip-enter-up;
   }
 
-  [data-ui='tooltip'][data-open][data-positioned]:is([data-side='left'], [data-side='right']) {
+  [data-ui-tooltip][data-open][data-positioned]:is([data-side='left'], [data-side='right']) {
     animation-name: slotted-tooltip-fade;
   }
 
@@ -207,23 +207,23 @@
 
   /* Stillness keeps the fade and drops the movement (R7). */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='tooltip'],
-    [data-ui='tooltip'][data-side='top'],
-    [data-ui='tooltip'][data-side='left'],
-    [data-ui='tooltip'][data-side='right'] {
+    [data-ui-tooltip],
+    [data-ui-tooltip][data-side='top'],
+    [data-ui-tooltip][data-side='left'],
+    [data-ui-tooltip][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='tooltip'][data-open][data-positioned],
-    [data-ui='tooltip'][data-open][data-positioned][data-side='top'],
-    [data-ui='tooltip'][data-open][data-positioned][data-side='left'],
-    [data-ui='tooltip'][data-open][data-positioned][data-side='right'] {
+    [data-ui-tooltip][data-open][data-positioned],
+    [data-ui-tooltip][data-open][data-positioned][data-side='top'],
+    [data-ui-tooltip][data-open][data-positioned][data-side='left'],
+    [data-ui-tooltip][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-tooltip-fade;
     }
   }
 
-  [data-ui='tooltip'][data-open][data-hoverable] {
+  [data-ui-tooltip][data-open][data-hoverable] {
     pointer-events: auto;
   }
 
@@ -232,11 +232,11 @@
    * `hideWhenDetached`: the layer comes back when the anchor does, and nothing
    * has moved the consumer's own `open` because a rectangle changed size.
    */
-  [data-ui='tooltip'][data-detached] {
+  [data-ui-tooltip][data-detached] {
     visibility: hidden;
   }
 
-  [data-ui='tooltip'][data-size='sm'] {
+  [data-ui-tooltip][data-size='sm'] {
     --_padding-inline: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_padding-block: var(--slotted-control-gap-sm, 0.375rem);
     --_font-size: var(--slotted-control-font-size-sm, 0.75rem);
@@ -248,14 +248,14 @@
    * want to read as a small panel rather than as a label. It takes the raised
    * surface and the edge that surface needs to separate from the page.
    */
-  [data-ui='tooltip'][data-variant='surface'] {
+  [data-ui-tooltip][data-variant='surface'] {
     --_surface: var(--slotted-tooltip-surface-raised, var(--slotted-surface-raised, #ffffff));
     --_text: var(--slotted-tooltip-text-raised, var(--slotted-text, #0f172a));
     --_border-color: var(--slotted-tooltip-border-color, var(--slotted-border-subtle, #e2e8f0));
     --_border-width: var(--slotted-border-width-thin, 1px);
   }
 
-  [data-ui='tooltip'] > [data-part='content'] {
+  [data-ui-tooltip] > [data-part-content] {
     box-sizing: border-box;
     display: block;
     max-inline-size: 100%;
@@ -304,7 +304,7 @@
    * the reader's writing direction. Mirroring either would move an already
    * correct arrow to the wrong edge in a right-to-left document, so
    * `packages/styles/src/logical.test.mjs` exempts exactly the rules that
-   * select `[data-part='arrow']`, and nothing else.
+   * select `[data-part-arrow]`, and nothing else.
    *
    * ── Why it is painted over the surface and not behind it ─────────────
    *
@@ -320,7 +320,7 @@
    * `arrowPadding` keeps it clear of the corners, where the content's radius
    * would leave the base uncovered.
    */
-  [data-ui='tooltip'] > [data-part='arrow'] {
+  [data-ui-tooltip] > [data-part-arrow] {
     position: absolute;
     z-index: 1;
     inline-size: var(--_arrow-size);
@@ -330,7 +330,7 @@
     border: 0 solid var(--_border-color);
   }
 
-  [data-ui='tooltip'][data-side='top'] > [data-part='arrow'] {
+  [data-ui-tooltip][data-side='top'] > [data-part-arrow] {
     left: var(--slotted-positioner-arrow-x, 0);
     top: auto;
     bottom: calc(var(--_gap) - var(--_arrow-size) / 2);
@@ -339,7 +339,7 @@
     border-bottom-right-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='tooltip'][data-side='bottom'] > [data-part='arrow'] {
+  [data-ui-tooltip][data-side='bottom'] > [data-part-arrow] {
     left: var(--slotted-positioner-arrow-x, 0);
     top: calc(var(--_gap) - var(--_arrow-size) / 2);
     bottom: auto;
@@ -348,7 +348,7 @@
     border-top-left-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='tooltip'][data-side='left'] > [data-part='arrow'] {
+  [data-ui-tooltip][data-side='left'] > [data-part-arrow] {
     top: var(--slotted-positioner-arrow-y, 0);
     left: auto;
     right: calc(var(--_gap) - var(--_arrow-size) / 2);
@@ -357,7 +357,7 @@
     border-top-right-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='tooltip'][data-side='right'] > [data-part='arrow'] {
+  [data-ui-tooltip][data-side='right'] > [data-part-arrow] {
     top: var(--slotted-positioner-arrow-y, 0);
     left: calc(var(--_gap) - var(--_arrow-size) / 2);
     right: auto;

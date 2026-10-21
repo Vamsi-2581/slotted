@@ -19,7 +19,7 @@ const css = readFileSync(new URL('./tags-input.css', import.meta.url), 'utf8').r
  * duplicate — and never by naming the tag's identifier or its private hooks.
  */
 test('lays the chips out and paints none of them', () => {
-  assert.doesNotMatch(css, /\[data-ui='tag'\]/, 'reaches into the tag sheet');
+  assert.doesNotMatch(css, /\[data-ui-tag\]/, 'reaches into the tag sheet');
   assert.doesNotMatch(css, /--_inset-block|--_border\b|--_surface|--_text\b/, 'writes a tag hook');
   assert.match(css, /--slotted-control-inner-size:\s*var\(--_inner-size\)/);
   assert.match(css, /--slotted-tag-border-color:/);

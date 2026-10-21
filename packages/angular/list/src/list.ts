@@ -45,7 +45,9 @@ export type { ListMarker, ListSize, ListVariant } from './list-defaults';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'list',
+    'data-ui-list': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'role()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-size]': 'resolvedSize()',

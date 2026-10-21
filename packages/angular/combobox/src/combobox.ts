@@ -112,7 +112,9 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
   ],
   host: {
     'data-ui': 'combobox',
+    'data-ui-combobox': '',
     'data-part': 'root',
+    'data-part-root': '',
     /* The name a page writes on the element is forwarded to the control, and
        the root keeps none: ARIA 1.2 does not name a generic element. */
     '[attr.aria-label]': 'null',
@@ -132,6 +134,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       type="text"
       role="combobox"
       data-part="input"
+      data-part-input=""
       [id]="controlId()"
       [value]="display()"
       [disabled]="resolvedDisabled()"
@@ -157,6 +160,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       <button
         type="button"
         data-part="clear"
+        data-part-clear=""
         [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
@@ -167,14 +171,21 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       type="button"
       tabindex="-1"
       data-part="trigger"
+      data-part-trigger=""
       [disabled]="resolvedDisabled()"
       [attr.aria-label]="t('trigger')"
       (click)="onToggle($event)"
     >
       @if (loading()) {
-        <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+        <span
+          data-part="busy"
+          data-part-busy=""
+          data-ui="spinner"
+          data-ui-spinner=""
+          aria-hidden="true"
+        ></span>
       } @else {
-        <span data-part="arrow"
+        <span data-part="arrow" data-part-arrow=""
           ><span slIcon><svg slGlyph name="chevron-down"></svg></span
         ></span>
       }
@@ -206,7 +217,9 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
     <ng-template #layer>
       <div
         data-ui="combobox"
+        data-ui-combobox=""
         data-part="positioner"
+        data-part-positioner=""
         [attr.data-align]="resolvedAlign()"
         [attr.data-size]="resolvedSize()"
         [attr.data-width]="resolvedWidth()"
@@ -215,6 +228,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
       >
         <div
           data-part="content"
+          data-part-content=""
           role="listbox"
           [id]="contentId"
           [attr.aria-label]="ariaLabel() ?? null"
@@ -232,6 +246,7 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
             <div
               role="option"
               data-part="item"
+              data-part-item=""
               data-create
               [attr.data-value]="query"
               [id]="optionId(query)"
@@ -240,10 +255,10 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
               (pointerdown)="onOptionPointerDown($event)"
               (pointerenter)="setHighlighted(query, 'pointer', $event)"
             >
-              <span data-part="label">{{ t('create', { query: query }) }}</span>
+              <span data-part="label" data-part-label="">{{ t('create', { query: query }) }}</span>
             </div>
           } @else if (!loading() && optionCount() === 0) {
-            <div data-part="empty">{{ t('empty') }}</div>
+            <div data-part="empty" data-part-empty="">{{ t('empty') }}</div>
           }
           @if (loading()) {
             <!--
@@ -251,16 +266,24 @@ const flatten = (items: ComboboxItems | undefined): readonly ComboboxOption[] =>
               height of an option, drawn by the skeleton sheet (SL6/CB5). Hidden
               assistive technology — the status row is the live region.
             -->
-            <div data-part="placeholder" aria-hidden="true">
+            <div data-part="placeholder" data-part-placeholder="" aria-hidden="true">
               @for (row of [0, 1, 2]; track row) {
                 <div>
-                  <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+                  <span
+                    data-ui="skeleton"
+                    data-ui-skeleton=""
+                    data-part="root"
+                    data-part-root=""
+                    data-shape="text"
+                    data-loading
+                  ></span>
                 </div>
               }
             </div>
           }
           <div
             data-part="status"
+            data-part-status=""
             role="status"
             aria-live="polite"
             [attr.data-loading]="loading() ? '' : null"

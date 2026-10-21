@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -48,7 +49,7 @@ function activationReason(event: MouseEvent) {
 @Directive({
   selector: '[slSideNavigationSection]',
   standalone: true,
-  host: { 'data-part': 'section' },
+  host: { 'data-part': 'section', 'data-part-section': '' },
 })
 export class SlSideNavigationSection {}
 
@@ -56,7 +57,7 @@ export class SlSideNavigationSection {}
 @Directive({
   selector: '[slSideNavigationSectionLabel]',
   standalone: true,
-  host: { 'data-part': 'section-label' },
+  host: { 'data-part': 'section-label', 'data-part-section-label': '' },
 })
 export class SlSideNavigationSectionLabel {}
 
@@ -64,7 +65,7 @@ export class SlSideNavigationSectionLabel {}
 @Directive({
   selector: 'ul[slSideNavigationList]',
   standalone: true,
-  host: { 'data-part': 'list' },
+  host: { 'data-part': 'list', 'data-part-list': '' },
 })
 export class SlSideNavigationList {}
 
@@ -84,6 +85,7 @@ export class SlSideNavigationList {}
   exportAs: 'slSideNavigationItem',
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     '[attr.data-value]': 'value()',
     '[attr.data-current]': "marked() ? '' : null",
     '[attr.data-expanded]': "expanded() ? '' : null",
@@ -266,6 +268,7 @@ const HINT_HOST = {
   host: {
     ...HINT_HOST,
     'data-part': 'link',
+    'data-part-link': '',
     '[attr.aria-current]': "resolvedCurrent() ? 'page' : null",
     '[attr.aria-disabled]': "item.resolvedDisabled() ? 'true' : null",
     '[attr.aria-label]': 'ariaLabel()',
@@ -337,7 +340,7 @@ export class SlSideNavigationLink extends SideNavigationRow {
   exportAs: 'slSideNavigationTrigger',
   imports: [SlGlyph, SlIcon, SlTooltipLayer, SlTooltipContent],
   template: `<ng-content />
-    <span data-part="indicator" aria-hidden="true"
+    <span data-part="indicator" data-part-indicator="" aria-hidden="true"
       ><span slIcon directional><svg slGlyph name="chevron-right"></svg></span
     ></span>
     @if (hint()) {
@@ -354,6 +357,7 @@ export class SlSideNavigationLink extends SideNavigationRow {
   host: {
     ...HINT_HOST,
     'data-part': 'trigger',
+    'data-part-trigger': '',
     type: 'button',
     '[attr.id]': 'item.ids.triggerId',
     '[attr.aria-controls]': 'item.ids.groupId',
@@ -391,7 +395,7 @@ export class SlSideNavigationTrigger extends SideNavigationRow {
 @Directive({
   selector: '[slSideNavigationIcon]',
   standalone: true,
-  host: { 'data-part': 'icon', 'aria-hidden': 'true' },
+  host: { 'data-part': 'icon', 'data-part-icon': '', 'aria-hidden': 'true' },
 })
 export class SlSideNavigationIcon {}
 
@@ -404,7 +408,7 @@ export class SlSideNavigationIcon {}
 @Directive({
   selector: '[slSideNavigationLabel]',
   standalone: true,
-  host: { 'data-part': 'label', '[attr.id]': 'item.ids.labelId' },
+  host: { 'data-part': 'label', 'data-part-label': '', '[attr.id]': 'item.ids.labelId' },
 })
 export class SlSideNavigationLabel {
   protected readonly item = inject(SlSideNavigationItem);
@@ -456,7 +460,7 @@ export class SlSideNavigationLabel {
 @Directive({
   selector: '[slSideNavigationDescription]',
   standalone: true,
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlSideNavigationDescription {
   private readonly item = inject(SlSideNavigationItem);
@@ -471,7 +475,7 @@ export class SlSideNavigationDescription {
 @Directive({
   selector: '[slSideNavigationCount]',
   standalone: true,
-  host: { 'data-part': 'count' },
+  host: { 'data-part': 'count', 'data-part-count': '' },
 })
 export class SlSideNavigationCount {}
 
@@ -479,7 +483,7 @@ export class SlSideNavigationCount {}
 @Directive({
   selector: '[slSideNavigationEnd]',
   standalone: true,
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlSideNavigationEnd {}
 
@@ -487,7 +491,7 @@ export class SlSideNavigationEnd {}
 @Directive({
   selector: '[slSideNavigationActions]',
   standalone: true,
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlSideNavigationActions {}
 
@@ -495,7 +499,7 @@ export class SlSideNavigationActions {}
 @Directive({
   selector: 'li[slSideNavigationDivider]',
   standalone: true,
-  host: { 'data-part': 'divider', role: 'separator' },
+  host: { 'data-part': 'divider', 'data-part-divider': '', role: 'separator' },
 })
 export class SlSideNavigationDivider {}
 
@@ -504,13 +508,15 @@ export class SlSideNavigationDivider {}
   selector: 'li[slSideNavigationSkeleton]',
   standalone: true,
   imports: [SlSkeleton],
-  template: `<span data-part="icon"><span slSkeleton shape="square" size="xs"></span></span>
-    <span data-part="label"
+  template: `<span data-part="icon" data-part-icon=""
+      ><span slSkeleton shape="square" size="xs"></span
+    ></span>
+    <span data-part="label" data-part-label=""
       ><span slSkeleton shape="text" [inlineSize]="labelSize()"></span
     ></span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'skeleton', 'aria-hidden': 'true' },
+  host: { 'data-part': 'skeleton', 'data-part-skeleton': '', 'aria-hidden': 'true' },
 })
 export class SlSideNavigationSkeleton {
   /** How wide the label's bar is drawn, as any CSS length. */
@@ -533,6 +539,7 @@ export class SlSideNavigationSkeleton {
   exportAs: 'slSideNavigationGroup',
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     '[attr.id]': 'item.ids.groupId',
     '[attr.aria-labelledby]': 'item.ids.labelId',
   },
@@ -570,8 +577,8 @@ export class SlSideNavigationGroup {
     const anchor = this.item.triggerNode();
     const document = this.native.ownerDocument;
     const layer = document.createElement('div');
-    layer.setAttribute('data-ui', 'side-navigation');
-    layer.setAttribute('data-part', 'flyout');
+    writeSelectorKey(layer, 'ui', 'side-navigation');
+    writeSelectorKey(layer, 'part', 'flyout');
     layer.setAttribute('data-size', this.navigation.resolvedSize());
     layer.setAttribute('data-truncate', this.navigation.resolvedTruncate());
     if (this.navigation.resolvedGuides()) layer.setAttribute('data-guides', '');

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/toggle-group/toggle-group.css';
 
 import { createRovingTabindex } from '@slotted/core/focus';
@@ -139,7 +140,7 @@ export function ToggleGroup({
     variant: resolvedVariant,
   };
 
-  const rootProps: ToggleGroupRootProps = {
+  const rootProps: ToggleGroupRootProps = keyedProps({
     ...nativeProps,
     /**
      * Written only when the group flows the other way: `group` carries no
@@ -164,7 +165,7 @@ export function ToggleGroup({
     'data-ui': 'toggle-group',
     'data-variant': resolvedVariant,
     role: role ?? 'group',
-  };
+  });
 
   /**
    * The group keeps the element for its own ring and still hands it to the

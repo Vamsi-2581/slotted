@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createCollapse } from '@slotted/core/overflow';
 import {
   Children,
@@ -160,12 +161,12 @@ export function BreadcrumbList({ children, ref, render, ...nativeProps }: Breadc
     );
   }
 
-  const rootProps: BreadcrumbListRootProps = {
+  const rootProps: BreadcrumbListRootProps = keyedProps({
     ...nativeProps,
     children: laidOut,
     'data-part': 'list',
     ref: setList,
-  };
+  });
 
   return render === undefined ? <ol {...rootProps} /> : render(rootProps);
 }
@@ -177,7 +178,7 @@ export function BreadcrumbList({ children, ref, render, ...nativeProps }: Breadc
  */
 function Separator({ children }: { children: ReactNode }) {
   return (
-    <span aria-hidden="true" data-part="separator">
+    <span aria-hidden="true" data-part="separator" data-part-separator="">
       {children}
     </span>
   );
@@ -202,11 +203,12 @@ function BreadcrumbEllipsis({
   const trail = useBreadcrumb();
 
   return (
-    <li data-part="item" hidden={idle} ref={itemRef}>
+    <li data-part="item" data-part-item="" hidden={idle} ref={itemRef}>
       <button
         aria-expanded={false}
         aria-label={trail.t('showHidden', { count: hidden })}
         data-part="ellipsis"
+        data-part-ellipsis=""
         onClick={(event) => trail.expand('pointer', event)}
         onKeyDown={(event) => {
           /* `Enter` and `Space` both activate a button, and the browser turns
@@ -233,7 +235,7 @@ export function BreadcrumbItem({ children, ref, render, ...nativeProps }: Breadc
   const trail = useBreadcrumb();
   const item = useBreadcrumbItem();
 
-  const rootProps: BreadcrumbItemRootProps = {
+  const rootProps: BreadcrumbItemRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -243,7 +245,7 @@ export function BreadcrumbItem({ children, ref, render, ...nativeProps }: Breadc
     ),
     'data-part': 'item',
     hidden: item?.hidden === true ? true : nativeProps.hidden,
-  };
+  });
 
   return render === undefined ? <li {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -256,13 +258,13 @@ export function BreadcrumbItem({ children, ref, render, ...nativeProps }: Breadc
 export function BreadcrumbLink({ children, ref, render, ...nativeProps }: BreadcrumbLinkProps) {
   const item = useBreadcrumbItem();
 
-  const rootProps: BreadcrumbLinkRootProps = {
+  const rootProps: BreadcrumbLinkRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'link',
     /* Focus lands here when the ellipsis that hid this crumb stops existing. */
     id: nativeProps.id ?? item?.revealedId,
-  };
+  });
 
   return render === undefined ? <a {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -292,7 +294,7 @@ export function BreadcrumbTrigger({
 }: BreadcrumbTriggerProps) {
   const item = useBreadcrumbItem();
 
-  const rootProps: BreadcrumbTriggerRootProps = {
+  const rootProps: BreadcrumbTriggerRootProps = keyedProps({
     type: 'button',
     ...nativeProps,
     'aria-current': current === true ? 'page' : nativeProps['aria-current'],
@@ -306,7 +308,7 @@ export function BreadcrumbTrigger({
     ),
     'data-part': 'trigger',
     id: nativeProps.id ?? item?.revealedId,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -317,12 +319,12 @@ export function BreadcrumbTrigger({
  * — the value the ARIA specification names for a link within a set of pages.
  */
 export function BreadcrumbPage({ children, ref, render, ...nativeProps }: BreadcrumbPageProps) {
-  const rootProps: BreadcrumbPageRootProps = {
+  const rootProps: BreadcrumbPageRootProps = keyedProps({
     ...nativeProps,
     'aria-current': 'page',
     children,
     'data-part': 'page',
-  };
+  });
 
   return render === undefined ? <span {...rootProps} ref={ref} /> : render(rootProps);
 }

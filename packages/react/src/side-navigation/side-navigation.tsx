@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/side-navigation/side-navigation.css';
 
 import { nextOpenValues, sameOpenValues } from '@slotted/core/disclosure';
@@ -360,7 +361,7 @@ export function SideNavigation({
   /* The name belongs to the landmark: the div inside the shell carries none,
      written or not, because the shell's nav region already says it. */
   const { 'aria-label': writtenLabel, ...unnamedProps } = nativeProps;
-  const rootProps: SideNavigationRootProps = {
+  const rootProps: SideNavigationRootProps = keyedProps({
     ...unnamedProps,
     ...(resolvedLandmark ? { 'aria-label': writtenLabel ?? t('navigation') } : {}),
     children,
@@ -374,7 +375,7 @@ export function SideNavigation({
     'data-ui': 'side-navigation',
     onKeyDown: handleKeyDown,
     style,
-  };
+  });
 
   const Element = resolvedLandmark ? 'nav' : 'div';
 

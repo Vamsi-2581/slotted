@@ -59,6 +59,7 @@ export function isFieldCountOver(count: FieldCount): boolean {
   exportAs: 'slFieldCounter',
   host: {
     'data-part': 'counter',
+    'data-part-counter': '',
     '[attr.id]': 'counterId()',
     '[attr.data-invalid]': "invalid() ? '' : null",
   },

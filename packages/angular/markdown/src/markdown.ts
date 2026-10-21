@@ -178,7 +178,7 @@ const KINDS = new Set<string>([
   ],
   template: `
     @if (status() === 'error') {
-      <div data-part="error">
+      <div data-part="error" data-part-error="">
         <p slInlineMessage tone="danger">{{ t('error') }}</p>
         @if (retryable()) {
           <button
@@ -201,7 +201,7 @@ const KINDS = new Set<string>([
       </div>
     } @else if (document().empty) {
       @if (!loading()) {
-        <p data-part="empty">
+        <p data-part="empty" data-part-empty="">
           <ng-content select="[slMarkdownEmpty]">{{ t('empty') }}</ng-content>
         </p>
       }
@@ -242,6 +242,7 @@ const KINDS = new Set<string>([
       @for (reference of footnote.references; track reference; let index = $index) {
         <a
           data-part="backref"
+          data-part-backref=""
           [href]="'#' + reference"
           [attr.aria-label]="t('backReference', { number: footnote.number, occurrence: index + 1 })"
           ><span slIcon><svg slGlyph name="arrow-left"></svg></span
@@ -327,12 +328,12 @@ const KINDS = new Set<string>([
               }
             }
             @case ('alert') {
-              <div data-part="embed">
+              <div data-part="embed" data-part-embed="">
                 <section slAlert reach="section" live="off" [tone]="element.tone">
                   <div slAlertContent>
                     <div slAlertTitle>{{ alertTitle(element) }}</div>
                     <div slAlertDescription>
-                      <div data-part="alert-body">
+                      <div data-part="alert-body" data-part-alert-body="">
                         <ng-container
                           *ngTemplateOutlet="nodes; context: { $implicit: element.children }"
                         />
@@ -346,6 +347,7 @@ const KINDS = new Set<string>([
               @if (element.ordered) {
                 <ol
                   [attr.data-part]="element.task ? 'task-list' : null"
+                  [attr.data-part-task-list]="element.task ? '' : null"
                   [attr.start]="element.start"
                 >
                   <ng-container
@@ -353,7 +355,10 @@ const KINDS = new Set<string>([
                   />
                 </ol>
               } @else {
-                <ul [attr.data-part]="element.task ? 'task-list' : null">
+                <ul
+                  [attr.data-part]="element.task ? 'task-list' : null"
+                  [attr.data-part-task-list]="element.task ? '' : null"
+                >
                   <ng-container
                     *ngTemplateOutlet="nodes; context: { $implicit: element.children }"
                   />
@@ -368,7 +373,7 @@ const KINDS = new Set<string>([
                   />
                 </li>
               } @else {
-                <li data-part="task">
+                <li data-part="task" data-part-task="">
                   <div
                     slCheckbox
                     [checked]="element.checked"
@@ -377,7 +382,7 @@ const KINDS = new Set<string>([
                   >
                     <span slVisuallyHidden>{{ element.label }}</span>
                   </div>
-                  <div data-part="task-body">
+                  <div data-part="task-body" data-part-task-body="">
                     <ng-container
                       *ngTemplateOutlet="nodes; context: { $implicit: element.children }"
                     />
@@ -386,7 +391,7 @@ const KINDS = new Set<string>([
               }
             }
             @case ('code') {
-              <div data-part="embed">
+              <div data-part="embed" data-part-embed="">
                 <div
                   slCodeBlock
                   [code]="element.code"
@@ -489,7 +494,9 @@ const KINDS = new Set<string>([
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'markdown',
+    'data-ui-markdown': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-status]': 'status()',
     '[attr.data-flow]': 'resolvedFlow()',
     '[attr.data-loading]': "painted() ? '' : null",

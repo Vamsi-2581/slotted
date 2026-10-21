@@ -88,7 +88,9 @@ export const TABLE_ROW_SELECTOR = '[data-part="body"] > [data-part="row"][data-v
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SlTable), multi: true }],
   host: {
     'data-ui': 'table',
+    'data-ui-table': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-edges]': 'resolvedEdges()',
     '[attr.data-layout]': 'resolvedLayout()',

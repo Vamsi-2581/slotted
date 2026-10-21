@@ -26,7 +26,9 @@ export function FormSummary({ ref, ...nativeProps }: FormSummaryProps) {
     <div
       aria-labelledby={form.summaryId}
       data-ui="form"
+      data-ui-form=""
       data-part="summary"
+      data-part-summary=""
       role="alert"
       tabIndex={-1}
       {...nativeProps}
@@ -36,19 +38,22 @@ export function FormSummary({ ref, ...nativeProps }: FormSummaryProps) {
         else if (ref !== null && ref !== undefined) ref.current = element;
       }}
     >
-      <h2 data-part="summary-title" id={form.summaryId}>
+      <h2 data-part="summary-title" data-part-summary-title="" id={form.summaryId}>
         {form.summaryTitle}
       </h2>
       {form.summaryDescription === undefined ? null : <p>{form.summaryDescription}</p>}
-      <ul data-part="summary-list">
+      <ul data-part="summary-list" data-part-summary-list="">
         {form.entries.flatMap((entry) =>
           entry.messages.map((message, index) => (
             <li key={`${entry.name}-${index}`}>
               {entry.id === undefined ? (
-                <span data-part="summary-item">{message}</span>
+                <span data-part="summary-item" data-part-summary-item="">
+                  {message}
+                </span>
               ) : (
                 <a
                   data-part="summary-item"
+                  data-part-summary-item=""
                   href={`#${entry.id}`}
                   onClick={(event) => {
                     /**
@@ -94,7 +99,9 @@ export function FormActions({ align, ref, ...nativeProps }: FormActionsProps) {
     <div
       data-align={align ?? form?.align ?? defaults.align}
       data-ui="form"
+      data-ui-form=""
       data-part="actions"
+      data-part-actions=""
       {...nativeProps}
       ref={ref}
     />

@@ -160,7 +160,9 @@ function privateProperties(css) {
 function audit({ family, part, rest = /./, size, sizeValue, gap, solid, anchor = 'start' }) {
   const css = withoutForcedColors(stylesheet(family));
   const privates = privateProperties(css);
-  const own = rules(css).filter(({ selector }) => selector.includes(`[data-part='${part}']`));
+  const own = rules(css).filter(({ selector }) =>
+    selector.includes(`[data-part-${part.toLowerCase()}]`),
+  );
   const atRest = own.filter(({ selector }) => !STATE.test(selector) && rest.test(selector));
   const findings = [];
 
@@ -243,12 +245,12 @@ function audit({ family, part, rest = /./, size, sizeValue, gap, solid, anchor =
 }
 
 for (const mark of MARKS) {
-  test(`${mark.family}: [data-part='${mark.part}'] sits on the title's first line at the title's size (R5)`, () => {
+  test(`${mark.family}: [data-part-${mark.part.toLowerCase()}] sits on the title's first line at the title's size (R5)`, () => {
     const findings = audit(mark);
     assert.deepEqual(
       findings,
       [],
-      `${mark.family} [data-part='${mark.part}']:\n  ${findings.join('\n  ')}`,
+      `${mark.family} [data-part-${mark.part.toLowerCase()}]:\n  ${findings.join('\n  ')}`,
     );
   });
 }
@@ -256,7 +258,7 @@ for (const mark of MARKS) {
 test('reads the rules it guards', () => {
   const guarded = MARKS.flatMap(({ family, part }) =>
     rules(withoutForcedColors(stylesheet(family))).filter(({ selector }) =>
-      selector.includes(`[data-part='${part}']`),
+      selector.includes(`[data-part-${part.toLowerCase()}]`),
     ),
   );
   /* 13 since the marks became `Glyph` elements: the mask, its per-tone image

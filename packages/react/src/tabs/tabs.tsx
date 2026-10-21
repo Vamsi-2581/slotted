@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/tabs/tabs.css';
 
 import { createRemovalFocus, createRovingTabindex } from '@slotted/core/focus';
@@ -355,7 +356,7 @@ export function Tabs({
     value: current,
   };
 
-  const rootProps: TabsRootProps = {
+  const rootProps: TabsRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -366,6 +367,7 @@ export function Tabs({
               aria-hidden="true"
               data-direction="start"
               data-part="scroll"
+              data-part-scroll=""
               disabled={overflow.atStart}
               onClick={() => affordance.current?.page(-1)}
               tabIndex={-1}
@@ -379,6 +381,7 @@ export function Tabs({
               aria-hidden="true"
               data-direction="end"
               data-part="scroll"
+              data-part-scroll=""
               disabled={overflow.atEnd}
               onClick={() => affordance.current?.page(1)}
               tabIndex={-1}
@@ -404,7 +407,7 @@ export function Tabs({
     'data-ui': 'tabs',
     'data-variant': resolvedVariant,
     style,
-  };
+  });
 
   return (
     <TabsContext.Provider value={context}>

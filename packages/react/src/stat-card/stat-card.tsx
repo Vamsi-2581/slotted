@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/stat-card/stat-card.css';
 
 import { statCardMessages } from '@slotted/core/i18n';
@@ -82,13 +83,15 @@ export function StatCard({
     ],
   );
 
-  const rootProps: StatCardRootProps = {
+  const rootProps: StatCardRootProps = keyedProps({
     'aria-labelledby': labelId,
     ...nativeProps,
     'aria-busy': loading || undefined,
     children: (
       <StatCardProvider value={context}>
-        <div data-part="body">{children}</div>
+        <div data-part="body" data-part-body="">
+          {children}
+        </div>
       </StatCardProvider>
     ),
     'data-fill': resolved.fill,
@@ -101,7 +104,7 @@ export function StatCard({
     'data-tone': resolvedTone,
     'data-ui': 'stat-card',
     role: 'group',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

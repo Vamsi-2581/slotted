@@ -28,7 +28,7 @@ const dense = declarations.replace(/\s+/g, '');
  * writes over a control's own border has to outrank `button`'s, and the part
  * the root always carries is the fifth attribute that does it.
  */
-const group = `[data-ui='${contract.ui}'][data-part='root']`;
+const group = `[data-ui-${contract.ui.toLowerCase()}][data-part-root]`;
 
 /** Attributes, ids and classes in one selector — the middle of the triple. */
 function specificity(selector) {
@@ -57,7 +57,7 @@ function selectorsOf(source) {
 test('takes the bar edge back from a control whose state would repaint it', () => {
   for (const variant of ['outline', 'ghost']) {
     for (const state of ['[data-pressed]', '[data-disabled]', ':disabled']) {
-      const selector = `${group}>[data-ui='button'][data-variant='${variant}']${state}`;
+      const selector = `${group}>[data-ui-button][data-variant='${variant}']${state}`;
       assert.ok(
         dense.includes(selector.replace(/\s+/g, '')),
         `the group leaves the bar edge to a ${state} ${variant} control`,
@@ -115,7 +115,7 @@ test('paints one border in each shared column, not two stacked ones', () => {
     [":not([data-orientation='vertical'])", 'border-inline-end-color'],
     ["[data-orientation='vertical']", 'border-block-end-color'],
   ]) {
-    const selector = `${group}${axis}>[data-ui='button']:not(:last-child)`;
+    const selector = `${group}${axis}>[data-ui-button]:not(:last-child)`;
     const block = blocks.find(({ selectors }) => selectors.includes(selector));
     assert.ok(block, `no rule takes the trailing edge of a joined control out of the paint`);
     assert.equal(
@@ -137,7 +137,7 @@ test('has one mode, and states no distance between its controls', () => {
   }
   assert.ok(!dense.includes('@container'), 'the bar still reflows at a container width');
   assert.ok(!/--slotted-space-\d/.test(dense), 'the bar still spaces its controls by the scale');
-  const base = dense.split(`[data-ui='${contract.ui}']{`)[1]?.split('}')[0] ?? '';
+  const base = dense.split(`[data-ui-${contract.ui.toLowerCase()}]{`)[1]?.split('}')[0] ?? '';
   for (const declaration of ['gap:0;', 'flex-wrap:nowrap;', 'align-items:stretch;']) {
     assert.ok(base.includes(declaration), `the base rule is missing ${declaration}`);
   }
@@ -150,7 +150,9 @@ test('has one mode, and states no distance between its controls', () => {
  */
 test('rounds all four corners of a control that is the whole bar', () => {
   assert.ok(
-    dense.includes(`[data-ui='${contract.ui}']>:only-child{border-radius:var(--_radius);}`),
+    dense.includes(
+      `[data-ui-${contract.ui.toLowerCase()}]>:only-child{border-radius:var(--_radius);}`,
+    ),
     'a lone control keeps the square corner one of the end rules gave it',
   );
 });
@@ -164,13 +166,15 @@ test('rounds all four corners of a control that is the whole bar', () => {
 test('squares the corners of a run inside the bar and keeps the two on its ends', () => {
   assert.ok(
     dense.includes(
-      `[data-ui='${contract.ui}'][data-ui='${contract.ui}']>:not([data-part='separator']){border-radius:0;}`,
+      `[data-ui-${contract.ui.toLowerCase()}][data-ui-${contract.ui.toLowerCase()}]>:not([data-part-separator]){border-radius:0;}`,
     ),
     'a run keeps its own corners inside the bar',
   );
   for (const end of [':first-child>:first-child', ':last-child>:last-child']) {
     assert.ok(
-      dense.includes(`[data-ui='${contract.ui}']>[data-ui='${contract.ui}']${end}{`),
+      dense.includes(
+        `[data-ui-${contract.ui.toLowerCase()}]>[data-ui-${contract.ui.toLowerCase()}]${end}{`,
+      ),
       `the ${end.split('>')[0]} run loses the corner on the end of the bar`,
     );
   }
@@ -256,7 +260,9 @@ test('draws the rule at one border width and no more', () => {
  */
 test('gives the rule no column of its own inside the bar', () => {
   const body =
-    dense.split(`[data-ui='${contract.ui}']>[data-part='separator']{`)[1]?.split('}')[0] ?? '';
+    dense
+      .split(`[data-ui-${contract.ui.toLowerCase()}]>[data-part-separator]{`)[1]
+      ?.split('}')[0] ?? '';
   for (const declaration of ['inline-size:0', 'block-size:0', 'margin:0']) {
     assert.ok(
       body.includes(declaration),

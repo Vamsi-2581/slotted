@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/checkbox-group/checkbox-group.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -147,7 +148,7 @@ export function CheckboxGroup({
     value: current,
   };
 
-  const rootProps: CheckboxGroupRootProps = {
+  const rootProps: CheckboxGroupRootProps = keyedProps({
     ...nativeProps,
     'aria-label': ariaLabel,
     /* A group has no element a label's for can reach, so inside a field the
@@ -168,7 +169,7 @@ export function CheckboxGroup({
     'data-variant': resolvedVariant,
     role: role ?? (fieldGroup === undefined ? 'group' : undefined),
     style,
-  };
+  });
 
   return (
     <CheckboxGroupContext.Provider value={context}>

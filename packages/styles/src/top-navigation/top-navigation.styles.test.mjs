@@ -80,17 +80,17 @@ test('each step hides the items of its own priority', () => {
  * folded items have all moved into the panel is left with.
  */
 test('shows more from the stylesheet when something folds, and from the count the script writes', () => {
-  assert.match(stripped, /\[data-part='item'\]:has\(> \[data-part='more'\]\) \{\s*display: none;/);
+  assert.match(stripped, /\[data-part-item\]:has\(> \[data-part-more\]\) \{\s*display: none;/);
   assert.match(
     stripped,
-    /\[data-part='item'\]:has\(> \[data-part='more'\]\[data-overflow\]\) \{\s*display: flex;/,
+    /\[data-part-item\]:has\(> \[data-part-more\]\[data-overflow\]\) \{\s*display: flex;/,
   );
   for (const step of ['low', 'medium', 'high']) {
     const rules = rulesUnder(`inline-size < ${contract.collapseAt[step]}px`);
     assert.ok(
       rules.some(
         ({ selector, body }) =>
-          selector.includes(":has(> [data-part='more'])") && /display: flex/.test(body),
+          selector.includes(':has(> [data-part-more])') && /display: flex/.test(body),
       ),
       `${step} folds something and shows no more`,
     );
@@ -105,16 +105,16 @@ test('shows more from the stylesheet when something folds, and from the count th
 test('gives the search its toggle below the medium step, and the bar while open', () => {
   const rules = rulesUnder(`inline-size < ${contract.collapseAt.medium}px`);
   const find = (fragment) => rules.find(({ selector }) => selector.includes(fragment));
-  assert.match(find(":not([data-search-open]) [data-part='search']").body, /display: none/);
+  assert.match(find(':not([data-search-open]) [data-part-search]').body, /display: none/);
   assert.match(
-    find(":not([data-search-open]) [data-part='search-toggle']").body,
+    find(':not([data-search-open]) [data-part-search-toggle]').body,
     /display: inline-flex/,
   );
-  assert.match(find("[data-search-open] [data-part='search-close']").body, /display: inline-flex/);
-  assert.match(find("[data-search-open] > :is([data-part='brand']").body, /display: none/);
+  assert.match(find('[data-search-open] [data-part-search-close]').body, /display: inline-flex/);
+  assert.match(find('[data-search-open] > :is([data-part-brand]').body, /display: none/);
   assert.match(
     stripped,
-    /\[data-part='search-toggle'\],\s*\[data-ui='top-navigation'\] \[data-part='search-close'\] \{\s*display: none;/,
+    /\[data-part-search-toggle\],\s*\[data-ui-top-navigation\] \[data-part-search-close\] \{\s*display: none;/,
   );
 });
 
@@ -124,7 +124,7 @@ test('gives the search its toggle below the medium step, and the bar while open'
  * and a field centred between them is centred on nothing.
  */
 test('stands the search at the start of the middle and grows it to its measure', () => {
-  const at = css.indexOf("[data-ui='top-navigation'] [data-part='search'] {");
+  const at = css.indexOf('[data-ui-top-navigation] [data-part-search] {');
   assert.notEqual(at, -1);
   const body = css.slice(css.indexOf('{', at), css.indexOf('\n  }', at));
   assert.match(body, /margin-inline:\s*0 auto/);
@@ -140,18 +140,18 @@ test('stands the search at the start of the middle and grows it to its measure',
  */
 test('clips the name below the high step rather than removing it', () => {
   const high = rulesUnder(`inline-size < ${contract.collapseAt.high}px`);
-  const name = high.find(({ selector }) => selector.includes("[data-part='name']"));
+  const name = high.find(({ selector }) => selector.includes('[data-part-name]'));
   assert.ok(name, 'no rule for the name at the high step');
   assert.match(name.body, /clip-path: inset\(50%\)/);
   assert.doesNotMatch(name.body, /display: none/);
   const help = high.find(({ selector }) =>
-    selector.includes("[data-part='actions'] > [data-part='help']"),
+    selector.includes('[data-part-actions] > [data-part-help]'),
   );
   assert.ok(help, 'help does not leave the bar at the high step');
   assert.match(help.body, /display: none/);
 
   const medium = rulesUnder(`inline-size < ${contract.collapseAt.medium}px`);
-  const context = medium.find(({ selector }) => selector.endsWith("> [data-part='context']"));
+  const context = medium.find(({ selector }) => selector.endsWith('> [data-part-context]'));
   assert.ok(context, 'context does not leave the bar at the medium step');
   assert.match(context.body, /display: none/);
 });
@@ -163,16 +163,16 @@ test('clips the name below the high step rather than removing it', () => {
  * pixel.
  */
 test('keeps the root free of inline padding, so the query and the script measure one box', () => {
-  const root = /\[data-ui='top-navigation'\]\[data-frame\] \{([^}]*)\}/.exec(stripped)?.[1] ?? '';
+  const root = /\[data-ui-top-navigation\]\[data-frame\] \{([^}]*)\}/.exec(stripped)?.[1] ?? '';
   assert.doesNotMatch(root, /padding-inline/);
   assert.match(root, /--_edge: var\(--_inset\)/);
   assert.match(
     stripped,
-    /\[data-part='brand'\] \{[^}]*padding-inline-start: calc\(var\(--_edge\) \+ var\(--_row-inset\)\)/,
+    /\[data-part-brand\] \{[^}]*padding-inline-start: calc\(var\(--_edge\) \+ var\(--_row-inset\)\)/,
   );
   assert.match(
     stripped,
-    /\[data-part='actions'\] \{[^}]*padding-inline-end: calc\(var\(--_edge\) \+ var\(--_row-inset\)\)/,
+    /\[data-part-actions\] \{[^}]*padding-inline-end: calc\(var\(--_edge\) \+ var\(--_row-inset\)\)/,
   );
 });
 
@@ -183,13 +183,13 @@ test('keeps the root free of inline padding, so the query and the script measure
  * computed style. Below the high step it takes the root's width.
  */
 test('places the panel under the bar, inside the root, and hides it from Tab while closed', () => {
-  assert.match(stripped, /\[data-part='panel'\] \{[^}]*position: absolute;/);
-  assert.match(stripped, /\[data-part='panel'\] \{[^}]*visibility: hidden;/);
-  assert.match(stripped, /\[data-part='panel'\]\[data-open\] \{[^}]*visibility: visible;/);
-  assert.match(stripped, /\[data-ui='top-navigation'\] \{[^}]*position: relative;/);
+  assert.match(stripped, /\[data-part-panel\] \{[^}]*position: absolute;/);
+  assert.match(stripped, /\[data-part-panel\] \{[^}]*visibility: hidden;/);
+  assert.match(stripped, /\[data-part-panel\]\[data-open\] \{[^}]*visibility: visible;/);
+  assert.match(stripped, /\[data-ui-top-navigation\] \{[^}]*position: relative;/);
   assert.doesNotMatch(css, /--slotted-positioner-/);
   const rules = rulesUnder(`inline-size < ${contract.collapseAt.high}px`);
-  const panel = rules.find(({ selector }) => selector.endsWith("[data-part='panel']"));
+  const panel = rules.find(({ selector }) => selector.endsWith('[data-part-panel]'));
   assert.match(panel.body, /inset-inline: var\(--_edge\)/);
 });
 
@@ -197,7 +197,7 @@ test('places the panel under the bar, inside the root, and hides it from Tab whi
 test('says current with the ground and paints no bar', () => {
   assert.match(
     css,
-    /\[data-part='link'\]:is\(\[data-current\], \[aria-current='page'\]\) \{[^}]*--_current-background/,
+    /\[data-part-link\]:is\(\[data-current\], \[aria-current='page'\]\) \{[^}]*--_current-background/,
   );
   assert.doesNotMatch(css, /data-marker/);
   /* The edge is the foundation's `--slotted-current-edge`, as side-navigation reads it. */
@@ -238,7 +238,7 @@ test('paints no mark of its own', () => {
  * outranks it; the shell's own reopening narrows the leak at its source.
  */
 test('outranks the shell selector that reaches its brand', () => {
-  assert.match(css, /\[data-ui='top-navigation'\]\[data-part='root'\] > \[data-part='brand'\] \{/);
+  assert.match(css, /\[data-ui-top-navigation\]\[data-part-root\] > \[data-part-brand\] \{/);
 });
 
 /**
@@ -255,12 +255,12 @@ test('gives every icon-only control, the consumer action included, the same shap
   }));
   const shape = rules.find(
     ({ selector, body }) =>
-      selector.includes("[data-part='notifications']") &&
+      selector.includes('[data-part-notifications]') &&
       /min-inline-size: var\(--_control-height\)/.test(body),
   );
   assert.ok(shape, 'no shared square for the icon-only controls');
   assert.match(shape.body, /position: relative/);
-  const parts = [...shape.selector.matchAll(/\[data-part='([a-z-]+)'\]/g)].map(([, part]) => part);
+  const parts = [...shape.selector.matchAll(/\[data-part-([a-z-]+)\]/g)].map(([, part]) => part);
   assert.ok(parts.includes('action'), 'action does not share the square of the marked controls');
   /* A part that joins the shape joins every state, or it is a control that looks right at rest only. */
   for (const part of parts) {
@@ -275,7 +275,7 @@ test('gives every icon-only control, the consumer action included, the same shap
       const attached = new RegExp(`[)\\]](:[a-z-]+(\\([^)]*\\))?)*:${pseudo}`);
       const rule = rules.find(
         ({ selector, body }) =>
-          selector.includes(`[data-part='${part}']`) &&
+          selector.includes(`[data-part-${part.toLowerCase()}]`) &&
           attached.test(selector) &&
           !new RegExp(`\\s:${pseudo}`).test(selector) &&
           expectation.test(body),
@@ -285,15 +285,12 @@ test('gives every icon-only control, the consumer action included, the same shap
   }
   const glyph = rules.find(
     ({ selector, body }) =>
-      /\[data-part='action'\] > :not\(\[data-part='count'\]\)/.test(selector) &&
+      /\[data-part-action\] > :not\(\[data-part-count\]\)/.test(selector) &&
       /font-size: var\(--_icon-size\)/.test(body),
   );
   assert.ok(glyph, 'the glyph inside action is not sized at the control glyph size');
   assert.match(glyph.body, /inline-size: var\(--_icon-size\)/);
-  assert.match(
-    stripped,
-    /\[data-part='action'\]\s*\{[^}]*--slotted-icon-size: var\(--_icon-size\)/,
-  );
+  assert.match(stripped, /\[data-part-action\]\s*\{[^}]*--slotted-icon-size: var\(--_icon-size\)/);
 });
 
 /**
@@ -306,9 +303,7 @@ test('gives every icon-only control, the consumer action included, the same shap
  * the line to the cap and the baseline; a flex container cannot.
  */
 test('sizes the count from the small type step and centres its figures on the ink', () => {
-  const rule = stripped.match(
-    /\[data-ui='top-navigation'\] \[data-part='count'\]\s*\{([^}]*)\}/,
-  )?.[1];
+  const rule = stripped.match(/\[data-ui-top-navigation\] \[data-part-count\]\s*\{([^}]*)\}/)?.[1];
   assert.ok(rule, 'no count rule');
   assert.match(rule, /--_count-font: var\(--slotted-control-font-size-sm/);
   assert.match(rule, /--_count-size: calc\(var\(--_count-font\) \* var\(--slotted-line-height-xs/);
@@ -318,7 +313,7 @@ test('sizes the count from the small type step and centres its figures on the in
   assert.match(rule, /align-content: center/);
   assert.doesNotMatch(rule, /display: inline-flex/);
   const trimmed = stripped.match(
-    /@supports \(text-box: trim-both cap alphabetic\)\s*\{\s*\[data-ui='top-navigation'\] \[data-part='count'\]\s*\{([^}]*)\}/,
+    /@supports \(text-box: trim-both cap alphabetic\)\s*\{\s*\[data-ui-top-navigation\] \[data-part-count\]\s*\{([^}]*)\}/,
   )?.[1];
   assert.ok(trimmed, 'the count is not trimmed to its ink');
   assert.match(trimmed, /text-box: trim-both cap alphabetic/);
@@ -336,17 +331,17 @@ test('sizes the count from the small type step and centres its figures on the in
  */
 test('never shrinks the brand under its marks', () => {
   const brand = stripped.match(
-    /\[data-ui='top-navigation'\]\[data-part='root'\] > \[data-part='brand'\] \{([^}]*)\}/,
+    /\[data-ui-top-navigation\]\[data-part-root\] > \[data-part-brand\] \{([^}]*)\}/,
   )?.[1];
   assert.ok(brand);
   assert.doesNotMatch(brand, /min-inline-size:\s*0/);
-  const home = stripped.match(/\[data-ui='top-navigation'\] \[data-part='home'\] \{([^}]*)\}/)?.[1];
+  const home = stripped.match(/\[data-ui-top-navigation\] \[data-part-home\] \{([^}]*)\}/)?.[1];
   assert.ok(home);
   assert.match(home, /display:\s*inline-grid/);
   assert.match(home, /grid-template-columns:\s*auto minmax\(0, 1fr\)/);
   /* Below the high step the name is out of flow; the empty track would keep its gap. */
   const high = rulesUnder(`inline-size < ${contract.collapseAt.high}px`);
-  const narrowHome = high.find(({ selector }) => selector.endsWith("[data-part='home']"));
+  const narrowHome = high.find(({ selector }) => selector.endsWith('[data-part-home]'));
   assert.ok(narrowHome, 'no rule for home at the high step');
   assert.match(narrowHome.body, /grid-template-columns:\s*auto/);
 });

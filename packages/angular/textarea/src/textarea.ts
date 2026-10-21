@@ -60,7 +60,9 @@ export type { TextareaResize, TextareaSize, TextareaVariant } from './textarea-d
   ],
   host: {
     'data-ui': 'textarea',
+    'data-ui-textarea': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.id]': 'controlId()',
     '[attr.rows]': 'rows()',
     '[attr.data-size]': 'resolvedSize()',

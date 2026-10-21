@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/section/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./section.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./section.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./section.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,7 +30,7 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.section;
 
 function rule(selector) {
@@ -36,7 +49,7 @@ test('styles every part the contract declares', () => {
   for (const declared of member.parts) {
     if (declared === 'root') continue;
     assert.ok(
-      normalized.includes(`[data-part='${declared}']`),
+      normalized.includes(`[data-part-${declared.toLowerCase()}]`),
       `no rule reaches the ${declared} part`,
     );
   }
@@ -65,7 +78,7 @@ test('renders every part the contract declares, in at least one scene', () => {
 test('reaches its own parts with a child combinator, never a descendant one', () => {
   for (const part of member.parts) {
     if (part === 'root') continue;
-    const descendant = new RegExp(`\\[data-ui='section'\\][^{]*? \\[data-part='${part}'\\]`);
+    const descendant = new RegExp(`\\[data-ui-section\\][^{]*? \\[data-part-${part}\\]`);
     assert.ok(!descendant.test(normalized), `a descendant rule reaches ${part}`);
   }
 });
@@ -76,7 +89,7 @@ test('lands a hash link under the page chrome', () => {
 });
 
 test('sticks its header under the page chrome and paints it', () => {
-  const header = rule(`${ui}[data-sticky]>[data-part='header']`);
+  const header = rule(`${ui}[data-sticky]>[data-part-header]`);
   assert.match(header, /position:sticky/);
   assert.match(header, /inset-block-start:var\(--slotted-page-sticky-top,0px\)/);
   assert.match(header, /background-color:var\(--_ground\)/);
@@ -93,7 +106,7 @@ test('paints a surface with no shadow and no interaction', () => {
 });
 
 test('rules under the header when asked', () => {
-  const divided = rule(`${ui}[data-divider]>[data-part='header']`);
+  const divided = rule(`${ui}[data-divider]>[data-part-header]`);
   assert.match(
     divided,
     /border-block-end:var\(--slotted-border-width-thin,1px\) solid var\(--_rule\)/,
@@ -121,7 +134,7 @@ test('sizes the heading on the type scale, independent of its rank', () => {
  */
 test('republishes the sticky top for what is under a sticky header', () => {
   assert.match(rule(`${ui}[data-sticky]`), /--_above:var\(--slotted-page-sticky-top,0px\)/);
-  const body = rule(`${ui}[data-sticky]>[data-part='body']`);
+  const body = rule(`${ui}[data-sticky]>[data-part-body]`);
   assert.match(
     body,
     /--slotted-page-sticky-top:calc\(var\(--_above\) \+ var\(--slotted-section-header-size,0px\)\)/,
@@ -131,7 +144,7 @@ test('republishes the sticky top for what is under a sticky header', () => {
 
 /** Stuck, the header keeps air under the chrome; at rest the margin takes it back. */
 test('gives a stuck header air under the chrome without moving it at rest', () => {
-  const header = rule(`${ui}[data-sticky]>[data-part='header']`);
+  const header = rule(`${ui}[data-sticky]>[data-part-header]`);
   assert.match(header, /padding-block-start:var\(--slotted-space-4,0\.5rem\)/);
   assert.match(header, /margin-block-start:calc\(-1 \* var\(--slotted-space-4,0\.5rem\)\)/);
 });

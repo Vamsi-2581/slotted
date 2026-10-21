@@ -1,3 +1,4 @@
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import { compareDateTime } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import {
@@ -112,11 +113,17 @@ export function EventItem({
   const defaultContent: ReactNode = (
     <>
       {showTime && !(bar && occurrence.allDay) ? (
-        <span data-part="event-time">{timeText}</span>
+        <span data-part="event-time" data-part-event-time="">
+          {timeText}
+        </span>
       ) : null}
-      <span data-part="event-title">{event.title}</span>
+      <span data-part="event-title" data-part-event-title="">
+        {event.title}
+      </span>
       {withLocation && event.location ? (
-        <span data-part="event-location">{event.location}</span>
+        <span data-part="event-location" data-part-event-location="">
+          {event.location}
+        </span>
       ) : null}
     </>
   );
@@ -129,6 +136,7 @@ export function EventItem({
   const editable = model.canEdit(occurrence);
   const attributes = {
     'data-part': 'event',
+    ...selectorKeyProps('part', 'event'),
     'data-key': key,
     'data-editable': editable && inGrid ? '' : undefined,
     'data-dragging': model.draggingKey === key ? '' : undefined,
@@ -171,9 +179,13 @@ export function EventItem({
     <>
       {layout === 'bar' && continuesBefore === true ? edge('start') : null}
       {content}
-      <span data-part="event-meta">{metaText(model, occurrence, continuesBefore === true)}</span>
+      <span data-part="event-meta" data-part-event-meta="">
+        {metaText(model, occurrence, continuesBefore === true)}
+      </span>
       {layout === 'bar' && continuesAfter === true ? edge('end') : null}
-      {resizable ? <span aria-hidden="true" data-part="resize-handle" /> : null}
+      {resizable ? (
+        <span aria-hidden="true" data-part="resize-handle" data-part-resize-handle="" />
+      ) : null}
     </>
   );
 

@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/data-list/data-list.css';
 
 import {
@@ -473,7 +474,7 @@ export function DataList<Row>({
     if (custom !== undefined) return custom;
     if (text === null) {
       return (
-        <span data-part="field-empty">
+        <span data-part="field-empty" data-part-field-empty="">
           <span aria-hidden="true">—</span>
           <VisuallyHidden>{t('empty')}</VisuallyHidden>
         </span>
@@ -506,6 +507,7 @@ export function DataList<Row>({
         <a
           aria-disabled={blocked || undefined}
           data-part="title"
+          data-part-title=""
           href={destination}
           onClick={(event) => {
             if (blocked) {
@@ -522,6 +524,7 @@ export function DataList<Row>({
       titleElement = (
         <button
           data-part="title"
+          data-part-title=""
           disabled={blocked}
           onClick={(event) => onActivate?.({ key, row, reason: pressReason(event), event })}
           type="button"
@@ -530,7 +533,11 @@ export function DataList<Row>({
         </button>
       );
     } else {
-      titleElement = <span data-part="title">{titleContent}</span>;
+      titleElement = (
+        <span data-part="title" data-part-title="">
+          {titleContent}
+        </span>
+      );
     }
 
     const media = renderMedia?.(row);
@@ -554,7 +561,7 @@ export function DataList<Row>({
           {hasStart ? (
             <ListItemStart>
               {selectionMode === 'none' ? null : (
-                <span data-part="selection">
+                <span data-part="selection" data-part-selection="">
                   <Checkbox
                     aria-label={t('selectRow', { title: titleText })}
                     checked={isSelected}
@@ -569,7 +576,11 @@ export function DataList<Row>({
                   />
                 </span>
               )}
-              {media === undefined ? null : <span data-part="media">{media}</span>}
+              {media === undefined ? null : (
+                <span data-part="media" data-part-media="">
+                  {media}
+                </span>
+              )}
             </ListItemStart>
           ) : null}
           <ListItemBody>
@@ -582,19 +593,24 @@ export function DataList<Row>({
           </ListItemBody>
           {layout.trailing ? (
             <ListItemEnd>
-              <span data-part="trailing">{draw(layout.trailing, row, key, 'trailing')}</span>
+              <span data-part="trailing" data-part-trailing="">
+                {draw(layout.trailing, row, key, 'trailing')}
+              </span>
             </ListItemEnd>
           ) : null}
           {visibleFields.length > 0 ? (
-            <dl data-part="fields" id={fieldsId}>
+            <dl data-part="fields" data-part-fields="" id={fieldsId}>
               {visibleFields.map((column) => (
-                <div data-part="field" key={column.id}>
-                  <dt data-part="field-label">{column.label}</dt>
+                <div data-part="field" data-part-field="" key={column.id}>
+                  <dt data-part="field-label" data-part-field-label="">
+                    {column.label}
+                  </dt>
                   <dd
                     data-numeric={
                       column.kind === 'number' || column.numeric === true ? '' : undefined
                     }
                     data-part="field-value"
+                    data-part-field-value=""
                   >
                     {draw(column, row, key, 'field')}
                   </dd>
@@ -607,6 +623,7 @@ export function DataList<Row>({
               aria-controls={fieldsId}
               aria-expanded={isExpanded}
               data-part="more"
+              data-part-more=""
               onClick={(event) => requestExpanded(key, pressReason(event), event)}
               type="button"
             >
@@ -687,9 +704,9 @@ export function DataList<Row>({
   );
 
   const header = (
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       {selectionMode === 'multiple' && !showLoader ? (
-        <span data-part="select-all">
+        <span data-part="select-all" data-part-select-all="">
           <Checkbox
             aria-label={t('selectAll', { count: allKeys.length })}
             checked={allSelected}
@@ -700,11 +717,11 @@ export function DataList<Row>({
           />
         </span>
       ) : null}
-      <output aria-live="polite" data-part="count">
+      <output aria-live="polite" data-part="count" data-part-count="">
         {showLoader ? '' : countText}
       </output>
       {layout.sortable.length > 0 ? (
-        <span data-direction={firstKey?.direction} data-part="sort">
+        <span data-direction={firstKey?.direction} data-part="sort" data-part-sort="">
           <Menu align="end">
             {sortTrigger}
             <MenuContent aria-label={t('sort')}>
@@ -758,7 +775,7 @@ export function DataList<Row>({
 
   const skeletonCount = skeletonRows ?? defaults.skeletonRows;
   const loader = showLoader ? (
-    <div data-part="loader">
+    <div data-part="loader" data-part-loader="">
       <SkeletonRegion
         delay={loadingDelay ?? defaults.loadingDelay}
         messages={{ label: t('loading') }}
@@ -786,11 +803,13 @@ export function DataList<Row>({
                   </ListItemEnd>
                 ) : null}
                 {layout.shown > 0 ? (
-                  <dl data-part="fields">
+                  <dl data-part="fields" data-part-fields="">
                     {layout.fields.slice(0, layout.shown).map((column, field) => (
-                      <div data-part="field" key={column.id}>
-                        <dt data-part="field-label">{column.label}</dt>
-                        <dd data-part="field-value">
+                      <div data-part="field" data-part-field="" key={column.id}>
+                        <dt data-part="field-label" data-part-field-label="">
+                          {column.label}
+                        </dt>
+                        <dd data-part="field-value" data-part-field-value="">
                           <Skeleton
                             inlineSize={FIELD_WIDTHS[(index + field) % FIELD_WIDTHS.length]}
                           />
@@ -811,7 +830,12 @@ export function DataList<Row>({
 
   function renderEmptyState(status: DataListEmptyStatus) {
     const custom = renderEmpty?.(status);
-    if (custom !== undefined) return <div data-part="empty">{custom}</div>;
+    if (custom !== undefined)
+      return (
+        <div data-part="empty" data-part-empty="">
+          {custom}
+        </div>
+      );
     const titleText =
       status === 'error'
         ? typeof error === 'string'
@@ -821,7 +845,7 @@ export function DataList<Row>({
           ? t('noResultsTitle')
           : t('emptyTitle');
     return (
-      <div data-part="empty">
+      <div data-part="empty" data-part-empty="">
         <ResultState reach="section" status={status} tabIndex={-1}>
           <ResultStateContent>
             <ResultStateTitle>{titleText}</ResultStateTitle>
@@ -870,13 +894,14 @@ export function DataList<Row>({
 
   return (
     <div
-      {...rest}
+      {...withSelectorKey(rest, 'part', 'root')}
       aria-busy={refreshing || undefined}
       className={className}
       data-loading={refreshing ? '' : undefined}
-      data-part="root"
+
       data-size={size}
       data-ui="data-list"
+      data-ui-data-list=""
       data-variant={variant}
       onBlur={onRootBlur}
       ref={rootRef}
@@ -896,9 +921,9 @@ export function DataList<Row>({
       )}
       {emptyStatus === null ? null : renderEmptyState(emptyStatus)}
       {hasMore || footer !== undefined ? (
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           {hasMore && !showLoader ? (
-            <span data-part="load-more">
+            <span data-part="load-more" data-part-load-more="">
               <Button
                 loading={loading && loadingMore.current}
                 onClick={() => {

@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
@@ -167,7 +168,7 @@ export class SlDataListPart {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   constructor() {
-    afterNextRender(() => this.host.nativeElement.setAttribute('data-part', this.part()));
+    afterNextRender(() => writeSelectorKey(this.host.nativeElement, 'part', this.part()));
   }
 }
 
@@ -256,7 +257,9 @@ interface RecordView<Row> {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'data-list',
+    'data-ui-data-list': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-variant]': 'variantValue()',
     '[attr.data-size]': 'sizeValue()',
     '[attr.aria-busy]': "refreshing() ? 'true' : null",
@@ -264,9 +267,9 @@ interface RecordView<Row> {
     '(focusin)': 'onFocusIn($event)',
   },
   template: `
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       @if (selectionModeValue() === 'multiple' && !showLoader()) {
-        <span data-part="select-all">
+        <span data-part="select-all" data-part-select-all="">
           <span
             slCheckbox
             [checked]="allSelected()"
@@ -278,9 +281,15 @@ interface RecordView<Row> {
           >
         </span>
       }
-      <output data-part="count" aria-live="polite">{{ showLoader() ? '' : countText() }}</output>
+      <output data-part="count" data-part-count="" aria-live="polite">{{
+        showLoader() ? '' : countText()
+      }}</output>
       @if (layout().sortable.length > 0) {
-        <span data-part="sort" [attr.data-direction]="firstKey()?.direction ?? null">
+        <span
+          data-part="sort"
+          data-part-sort=""
+          [attr.data-direction]="firstKey()?.direction ?? null"
+        >
           <button
             slButton
             slDataListPart="root"
@@ -304,7 +313,7 @@ interface RecordView<Row> {
               [value]="firstKey()?.column ?? noSort"
               (valueChangeRequest)="chooseColumn($event)"
             >
-              <div data-part="group-label" [id]="id + '-sort-column'">
+              <div data-part="group-label" data-part-group-label="" [id]="id + '-sort-column'">
                 {{ t('sortColumn') }}
               </div>
               <button slMenuRadioItem [value]="noSort">{{ t('sortNone') }}</button>
@@ -318,7 +327,7 @@ interface RecordView<Row> {
               [value]="firstKey()?.direction ?? ''"
               (valueChangeRequest)="chooseDirection($event)"
             >
-              <div data-part="group-label" [id]="id + '-sort-direction'">
+              <div data-part="group-label" data-part-group-label="" [id]="id + '-sort-direction'">
                 {{ t('sortDirection') }}
               </div>
               <button slMenuRadioItem value="ascending" [disabled]="!firstKey()">
@@ -341,7 +350,7 @@ interface RecordView<Row> {
     }
 
     @if (showLoader()) {
-      <div data-part="loader">
+      <div data-part="loader" data-part-loader="">
         <div
           slSkeletonRegion
           [loading]="firstLoad()"
@@ -368,11 +377,13 @@ interface RecordView<Row> {
                     </div>
                   }
                   @if (layout().shown > 0) {
-                    <dl data-part="fields">
+                    <dl data-part="fields" data-part-fields="">
                       @for (column of shownColumns(); track column.id; let field = $index) {
-                        <div data-part="field">
-                          <dt data-part="field-label">{{ column.label }}</dt>
-                          <dd data-part="field-value">
+                        <div data-part="field" data-part-field="">
+                          <dt data-part="field-label" data-part-field-label="">
+                            {{ column.label }}
+                          </dt>
+                          <dd data-part="field-value" data-part-field-value="">
                             <span slSkeleton [inlineSize]="fieldBar(index + field)"></span>
                           </dd>
                         </div>
@@ -406,9 +417,9 @@ interface RecordView<Row> {
     }
 
     @if (hasMore() || footers().length > 0) {
-      <div data-part="footer">
+      <div data-part="footer" data-part-footer="">
         @if (hasMore() && !showLoader()) {
-          <span data-part="load-more">
+          <span data-part="load-more" data-part-load-more="">
             <button
               slButton
               size="sm"
@@ -465,7 +476,7 @@ interface RecordView<Row> {
           @if (selectionModeValue() !== 'none' || mediaTemplate()) {
             <div slListItemStart>
               @if (selectionModeValue() !== 'none') {
-                <span data-part="selection">
+                <span data-part="selection" data-part-selection="">
                   <span
                     slCheckbox
                     [checked]="view.selected"
@@ -479,7 +490,7 @@ interface RecordView<Row> {
                 </span>
               }
               @if (mediaTemplate(); as media) {
-                <span data-part="media">
+                <span data-part="media" data-part-media="">
                   <ng-container
                     [ngTemplateOutlet]="media.template"
                     [ngTemplateOutletContext]="{ $implicit: view.row }"
@@ -493,6 +504,7 @@ interface RecordView<Row> {
               @if (view.href !== undefined) {
                 <a
                   data-part="title"
+                  data-part-title=""
                   [attr.href]="view.href"
                   [attr.aria-disabled]="view.disabled || view.busy ? 'true' : null"
                   (click)="activateLink(view, $event)"
@@ -503,6 +515,7 @@ interface RecordView<Row> {
               } @else if (activatable()) {
                 <button
                   data-part="title"
+                  data-part-title=""
                   type="button"
                   [disabled]="view.disabled || view.busy"
                   (click)="activate(view, $event)"
@@ -513,7 +526,7 @@ interface RecordView<Row> {
                   />
                 </button>
               } @else {
-                <span data-part="title"
+                <span data-part="title" data-part-title=""
                   ><ng-container
                     [ngTemplateOutlet]="value"
                     [ngTemplateOutletContext]="{ $implicit: view.title }"
@@ -531,7 +544,7 @@ interface RecordView<Row> {
           </div>
           @if (view.trailing) {
             <div slListItemEnd>
-              <span data-part="trailing"
+              <span data-part="trailing" data-part-trailing=""
                 ><ng-container
                   [ngTemplateOutlet]="value"
                   [ngTemplateOutletContext]="{ $implicit: view.trailing }"
@@ -539,11 +552,15 @@ interface RecordView<Row> {
             </div>
           }
           @if (view.fields.length > 0) {
-            <dl data-part="fields" [id]="view.fieldsId">
+            <dl data-part="fields" data-part-fields="" [id]="view.fieldsId">
               @for (field of view.fields; track field.column.id) {
-                <div data-part="field">
-                  <dt data-part="field-label">{{ field.column.label }}</dt>
-                  <dd data-part="field-value" [attr.data-numeric]="field.numeric ? '' : null">
+                <div data-part="field" data-part-field="">
+                  <dt data-part="field-label" data-part-field-label="">{{ field.column.label }}</dt>
+                  <dd
+                    data-part="field-value"
+                    data-part-field-value=""
+                    [attr.data-numeric]="field.numeric ? '' : null"
+                  >
                     <ng-container
                       [ngTemplateOutlet]="value"
                       [ngTemplateOutletContext]="{ $implicit: field }"
@@ -556,6 +573,7 @@ interface RecordView<Row> {
           @if (view.hidden > 0) {
             <button
               data-part="more"
+              data-part-more=""
               type="button"
               [attr.aria-controls]="view.fieldsId"
               [attr.aria-expanded]="view.expanded"
@@ -587,7 +605,7 @@ interface RecordView<Row> {
             [ngTemplateOutletContext]="field.context"
           />
         } @else if (field.context.text === '' && field.context.place !== 'actions') {
-          <span data-part="field-empty"
+          <span data-part="field-empty" data-part-field-empty=""
             ><span aria-hidden="true">—</span><span slVisuallyHidden>{{ t('empty') }}</span></span
           >
         } @else {
@@ -597,7 +615,7 @@ interface RecordView<Row> {
     </ng-template>
 
     <ng-template #emptyState let-status>
-      <div data-part="empty">
+      <div data-part="empty" data-part-empty="">
         @if (emptyTemplate(); as custom) {
           <ng-container
             [ngTemplateOutlet]="custom.template"

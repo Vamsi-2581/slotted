@@ -14,7 +14,7 @@
    * the arrows reach the buttons through it because the items are found by
    * being focusable rather than by being children.
    */
-  [data-ui='toolbar'] {
+  [data-ui-toolbar] {
     /**
      * The bar's own rhythm, from the control scales, so the three densities
      * move it without a rule of their own.
@@ -44,7 +44,7 @@
     padding: var(--slotted-toolbar-inset, var(--_pad));
   }
 
-  [data-ui='toolbar'][data-size='sm'] {
+  [data-ui-toolbar][data-size='sm'] {
     --_gap: var(--slotted-control-gap-sm, 0.25rem);
     --_inset: var(--slotted-space-1, 0.125rem);
     --_height: var(--slotted-control-height-sm, 30px);
@@ -54,7 +54,7 @@
     --_inner-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='toolbar'][data-size='lg'] {
+  [data-ui-toolbar][data-size='lg'] {
     --_gap: var(--slotted-control-gap-lg, 0.5rem);
     --_inset: var(--slotted-space-3, 0.375rem);
     --_height: var(--slotted-control-height-lg, 40px);
@@ -70,7 +70,7 @@
    * renders an empty container often, and an empty box still consumes the gap
    * of the row that holds it.
    */
-  [data-ui='toolbar']:empty {
+  [data-ui-toolbar]:empty {
     display: none;
   }
 
@@ -81,7 +81,7 @@
    * natural widths is a ragged edge rather than a bar. A row centres them,
    * because two controls of different heights in one line share a middle.
    */
-  [data-ui='toolbar'][data-orientation='vertical'] {
+  [data-ui-toolbar][data-orientation='vertical'] {
     align-items: stretch;
     flex-direction: column;
     inline-size: fit-content;
@@ -94,7 +94,7 @@
    * above a table is already standing on a surface, and a second one there
    * reads as a box nobody asked for.
    */
-  [data-ui='toolbar'][data-variant='outline'] {
+  [data-ui-toolbar][data-variant='outline'] {
     --_pad: max(
       var(--_inset),
       calc(var(--slotted-focus-ring-offset, 2px) + var(--slotted-focus-ring-width, 2px))
@@ -121,7 +121,7 @@
    * design — its spacer exists so the first item "can wrap to the next line
    * and get clipped".
    */
-  [data-ui='toolbar']:is([data-overflow='scroll'], [data-overflow='menu']) {
+  [data-ui-toolbar]:is([data-overflow='scroll'], [data-overflow='menu']) {
     /**
      * A scroll container clips at its padding edge whether or not a scrollbar
      * is drawn, and a control's focus ring is drawn outward. The bar therefore
@@ -139,7 +139,7 @@
     scrollbar-width: thin;
   }
 
-  [data-ui='toolbar']:is(
+  [data-ui-toolbar]:is(
       [data-overflow='scroll'],
       [data-overflow='menu']
     )[data-orientation='vertical'] {
@@ -155,7 +155,7 @@
    * gets instead — and the collapse would then measure a control at a width it
    * only has while it is being squeezed.
    */
-  [data-ui='toolbar']:is([data-overflow='scroll'], [data-overflow='menu']) > * {
+  [data-ui-toolbar]:is([data-overflow='scroll'], [data-overflow='menu']) > * {
     flex: none;
   }
 
@@ -171,13 +171,13 @@
    * It paints nothing. Everything a reader sees inside it belongs to the
    * control the consumer placed.
    */
-  [data-ui='toolbar'] [data-part='item'] {
+  [data-ui-toolbar] [data-part-item] {
     align-items: center;
     display: inline-flex;
     min-inline-size: 0;
   }
 
-  [data-ui='toolbar'][data-orientation='vertical'] [data-part='item'] {
+  [data-ui-toolbar][data-orientation='vertical'] [data-part-item] {
     align-items: stretch;
     flex-direction: column;
   }
@@ -189,13 +189,8 @@
    * without this rule every collapsed unit stayed on the bar and the collapse
    * did nothing at all.
    */
-  [data-ui='toolbar']
-    :is(
-      [data-part='item'],
-      [data-part='group'],
-      [data-part='separator'],
-      [data-part='overflow']
-    )[hidden] {
+  [data-ui-toolbar]
+    :is([data-part-item], [data-part-group], [data-part-separator], [data-part-overflow])[hidden] {
     display: none;
   }
 
@@ -216,7 +211,7 @@
    * Its accessible name carries the count, so what a reader hears is a number
    * rather than three dots.
    */
-  [data-ui='toolbar'] [data-part='overflow'] {
+  [data-ui-toolbar] [data-part-overflow] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -249,14 +244,14 @@
   }
 
   /* The ground moves under the pointer and nothing else does (R2). */
-  [data-ui='toolbar'] [data-part='overflow']:not(:disabled):hover {
+  [data-ui-toolbar] [data-part-overflow]:not(:disabled):hover {
     background-color: var(
       --slotted-toolbar-overflow-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='toolbar'] [data-part='overflow']:not(:disabled):active {
+  [data-ui-toolbar] [data-part-overflow]:not(:disabled):active {
     background-color: var(
       --slotted-toolbar-overflow-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -268,7 +263,7 @@
    * reader who moved the pointer off the trigger loses every sign of which
    * control the layer belongs to.
    */
-  [data-ui='toolbar'] [data-part='overflow'][data-open] {
+  [data-ui-toolbar] [data-part-overflow][data-open] {
     background-color: var(
       --slotted-toolbar-overflow-open-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -286,13 +281,13 @@
      it are, and square: one value for both axes, so a bar taller than the
      comfortable target does not stand it on end. */
   @media (pointer: coarse) {
-    [data-ui='toolbar'] [data-part='overflow'] {
+    [data-ui-toolbar] [data-part-overflow] {
       min-block-size: max(var(--slotted-target-comfortable, 44px), var(--_height));
       min-inline-size: max(var(--slotted-target-comfortable, 44px), var(--_height));
     }
   }
 
-  [data-ui='toolbar'] [data-part='overflow']:disabled {
+  [data-ui-toolbar] [data-part-overflow]:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: default;
   }
@@ -302,7 +297,7 @@
    * edge, and the trigger is the control closest to it, so an outward ring here
    * is the one this family cannot afford.
    */
-  [data-ui='toolbar'] [data-part='overflow']:focus-visible {
+  [data-ui-toolbar] [data-part-overflow]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
@@ -321,7 +316,7 @@
    * puts the clusters of a loosely spaced bar closer together than the
    * controls inside them.
    */
-  [data-ui='toolbar'] [data-part='group'] {
+  [data-ui-toolbar] [data-part-group] {
     align-items: center;
     display: flex;
     flex-wrap: inherit;
@@ -329,25 +324,25 @@
     min-inline-size: 0;
   }
 
-  [data-ui='toolbar'][data-orientation='vertical'] [data-part='group'] {
+  [data-ui-toolbar][data-orientation='vertical'] [data-part-group] {
     align-items: stretch;
     flex-direction: column;
   }
 
-  [data-ui='toolbar'] [data-part='group']:not(:first-child) {
+  [data-ui-toolbar] [data-part-group]:not(:first-child) {
     margin-inline-start: calc(var(--_gap) / 2);
   }
 
-  [data-ui='toolbar'] [data-part='group']:not(:last-child) {
+  [data-ui-toolbar] [data-part-group]:not(:last-child) {
     margin-inline-end: calc(var(--_gap) / 2);
   }
 
-  [data-ui='toolbar'][data-orientation='vertical'] [data-part='group']:not(:first-child) {
+  [data-ui-toolbar][data-orientation='vertical'] [data-part-group]:not(:first-child) {
     margin-block-start: calc(var(--_gap) / 2);
     margin-inline-start: 0;
   }
 
-  [data-ui='toolbar'][data-orientation='vertical'] [data-part='group']:not(:last-child) {
+  [data-ui-toolbar][data-orientation='vertical'] [data-part-group]:not(:last-child) {
     margin-block-end: calc(var(--_gap) / 2);
     margin-inline-end: 0;
   }
@@ -365,7 +360,7 @@
    * It is one border width. A thick rule in a bar of hairlines is not a
    * stronger boundary, it is a slab.
    */
-  [data-ui='toolbar'] [data-part='separator'] {
+  [data-ui-toolbar] [data-part-separator] {
     align-self: stretch;
     /**
      * The control edge rather than the subtle rule `divider` reaches for: this
@@ -391,7 +386,7 @@
     min-block-size: calc(var(--_height) - 2 * var(--_separator-inset));
   }
 
-  [data-ui='toolbar'][data-orientation='vertical'] [data-part='separator'] {
+  [data-ui-toolbar][data-orientation='vertical'] [data-part-separator] {
     block-size: var(--slotted-border-width-thin, 1px);
     inline-size: auto;
     margin-block: calc(var(--_gap) / 2);
@@ -405,7 +400,7 @@
    * so keeping the paint is the only way the boundary is still there to read.
    */
   @media (forced-colors: active) {
-    [data-ui='toolbar'] [data-part='separator'] {
+    [data-ui-toolbar] [data-part-separator] {
       background-color: CanvasText;
       forced-color-adjust: none;
     }
@@ -426,7 +421,7 @@
    * afterwards, so a zero-width spacer moves what follows to the end of its own
    * line and pushes nothing onto the next one.
    */
-  [data-ui='toolbar'] [data-part='spacer'] {
+  [data-ui-toolbar] [data-part-spacer] {
     flex: 1 1 0;
     min-block-size: 0;
     min-inline-size: 0;

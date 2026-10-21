@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import {
   defaultOperator as kindDefaultOperator,
   emptyFilter,
@@ -343,7 +344,7 @@ export function ConditionEditor({
   return (
     <>
       {withOperator ? (
-        <div data-part="operator" id={ids?.operator}>
+        <div data-part="operator" data-part-operator="" id={ids?.operator}>
           <Select
             fullWidth
             {...(invalid ? { invalid: true } : {})}
@@ -368,7 +369,7 @@ export function ConditionEditor({
           </Select>
         </div>
       ) : null}
-      <div data-part="operand" id={ids?.operand}>
+      <div data-part="operand" data-part-operand="" id={ids?.operand}>
         {Array.from({ length: operands }, (_, slot) => (
           <Operand key={slot} render={renderOperand} {...operandProps(slot as 0 | 1)} />
         ))}
@@ -424,6 +425,7 @@ export function RuleEditor({
       data-kind={field?.kind}
       data-operands={operands}
       data-part="rule"
+      data-part-rule=""
       {...(invalid || !field ? { 'data-invalid': '' } : {})}
       {...(expanded ? { 'data-expanded': '' } : {})}
     >
@@ -432,6 +434,7 @@ export function RuleEditor({
         aria-controls={`${id}field ${id}operator ${id}operand`}
         aria-expanded={expanded}
         data-part="rule-summary"
+        data-part-rule-summary=""
         onClick={() => environment.onExpandedChange?.(expanded ? null : key)}
         type="button"
       >
@@ -448,7 +451,7 @@ export function RuleEditor({
           <Glyph name="chevron-down" />
         </Icon>
       </button>
-      <div data-part="field" id={`${id}field`}>
+      <div data-part="field" data-part-field="" id={`${id}field`}>
         <Select
           fullWidth
           {...(invalid || !field ? { invalid: true } : {})}
@@ -487,12 +490,18 @@ export function RuleEditor({
         />
       ) : (
         <>
-          <div data-part="operator" id={`${id}operator`} />
-          <div data-part="operand" id={`${id}operand`} />
+          <div data-part="operator" data-part-operator="" id={`${id}operator`} />
+          <div data-part="operand" data-part-operand="" id={`${id}operand`} />
         </>
       )}
       {onRemove ? (
-        <button aria-label={t('removeRule')} data-part="remove" onClick={onRemove} type="button">
+        <button
+          aria-label={t('removeRule')}
+          data-part="remove"
+          data-part-remove=""
+          onClick={onRemove}
+          type="button"
+        >
           <Icon>
             <Glyph name="x" />
           </Icon>
@@ -551,7 +560,7 @@ export function GroupEditor({
       <IconButton
         aria-label={t('removeGroup')}
         onClick={() => onRootChange(removeNodeAt(root, path))}
-        render={(props) => <button {...props} data-part="remove-group" />}
+        render={(props) => <button {...withSelectorKey(props, 'part', 'remove-group')} />}
         size={size === 'lg' ? 'md' : 'sm'}
         title={t('removeGroup')}
         tone="secondary"
@@ -583,20 +592,20 @@ export function GroupEditor({
   }
 
   return (
-    <fieldset data-depth={depth} data-part="group">
+    <fieldset data-depth={depth} data-part="group" data-part-group="">
       <legend>{t('matches', { join: joinWord })}</legend>
-      <div data-part="join">
+      <div data-part="join" data-part-join="">
         {before ? <span>{before}</span> : null}
         {joinControl}
         {after ? <span>{after}</span> : null}
         {removeGroup}
       </div>
-      <div data-part="rules">
+      <div data-part="rules" data-part-rules="">
         {group.rules.map((node: FilterNode, index) => {
           const childPath = [...path, index];
           /* The word that joins this row to the one above: "Where" on the first. */
           const conjunction = (
-            <span data-part="conjunction">
+            <span data-part="conjunction" data-part-conjunction="">
               {index === 0 ? t('where') : t(`joins.${group.join}`)}
             </span>
           );
@@ -632,11 +641,11 @@ export function GroupEditor({
           );
         })}
       </div>
-      <div data-part="actions">
+      <div data-part="actions" data-part-actions="">
         <Button
           disabled={!firstField}
           onClick={addRule}
-          render={(props) => <button {...props} data-part="add-rule" />}
+          render={(props) => <button {...withSelectorKey(props, 'part', 'add-rule')} />}
           size={size === 'lg' ? 'md' : 'sm'}
           start={
             <Icon>
@@ -651,7 +660,7 @@ export function GroupEditor({
         <Button
           disabled={!firstField}
           onClick={addGroup}
-          render={(props) => <button {...props} data-part="add-group" />}
+          render={(props) => <button {...withSelectorKey(props, 'part', 'add-group')} />}
           size={size === 'lg' ? 'md' : 'sm'}
           start={
             <Icon>

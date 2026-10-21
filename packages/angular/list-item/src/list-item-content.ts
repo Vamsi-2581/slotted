@@ -32,6 +32,7 @@ import { SlListItem } from './list-item';
   exportAs: 'slListItemContent',
   host: {
     'data-part': 'content',
+    'data-part-content': '',
     '[attr.disabled]': 'nativeDisabled()',
     '[attr.aria-disabled]': 'ariaDisabled()',
     '[attr.aria-busy]': "loading() ? 'true' : null",

@@ -97,7 +97,9 @@ function focusVisible(target: EventTarget | null): boolean {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'carousel',
+    'data-ui-carousel': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-roledescription]': "t('roleDescription')",
     '[attr.data-orientation]': 'resolvedOrientation()',
     '[attr.data-transition]': 'resolvedTransition()',

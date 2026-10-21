@@ -110,6 +110,12 @@ export interface GridColumn<Row = unknown> {
   readonly hideable?: boolean;
   /** The column that names the record, drawn as a `rowheader`. */
   readonly rowHeader?: boolean;
+  /**
+   * The edge the column is pinned to while no column state states one.
+   * Default `end` for a column of kind `actions`, so the row's actions stay
+   * in the frame when the columns scroll sideways; `null` otherwise.
+   */
+  readonly pinned?: GridPinZone;
   /** The values a `set` column can hold, with their names. */
   readonly options?: readonly GridColumnOption[];
   readonly aggregate?: GridAggregate | ((values: readonly unknown[]) => unknown);

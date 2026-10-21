@@ -15,7 +15,7 @@ function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
 }
 
-const body = "[data-ui='dashboard-grid'] [data-part='widget']>[data-ui='card']>[data-part='body']";
+const body = '[data-ui-dashboard-grid] [data-part-widget]>[data-ui-card]>[data-part-body]';
 
 /**
  * A body taller than its cell scrolls inside it, down to its own end padding.
@@ -26,7 +26,7 @@ const body = "[data-ui='dashboard-grid'] [data-part='widget']>[data-ui='card']>[
  */
 test('lets the body scroll its content whole: the content grows and never shrinks', () => {
   assert.match(rule(body), /overflow:auto/);
-  const content = rule(`${body}>:not([data-part='busy-indicator'])`);
+  const content = rule(`${body}>:not([data-part-busy-indicator])`);
   assert.match(content, /flex:1 0 auto/, 'the body content may still shrink under its own height');
   assert.doesNotMatch(content, /min-block-size:0/);
 });
@@ -54,7 +54,7 @@ test('registers the cell of a widget as a property its content does not inherit'
 
 /**
  * A browser invalidates by attribute name: `[data-gesture]` on the root ahead
- * of `> [data-part='grid']` restyled every element under the root that has a
+ * of `> [data-part-grid]` restyled every element under the root that has a
  * `data-part` — 722 of them, 114 ms, as a widget was picked up and again as it
  * was dropped. On the grid, in the compound that the rule styles, it
  * restyles the grid alone.
@@ -62,7 +62,7 @@ test('registers the cell of a widget as a property its content does not inherit'
 test('brings the lattice forward from the grid itself, never from an ancestor', () => {
   assert.match(
     normalized,
-    /\[data-ui='dashboard-grid'\]>\[data-part='grid'\]\[data-gesture\]::before\{/,
+    /\[data-ui-dashboard-grid\]>\[data-part-grid\]\[data-gesture\]::before\{/,
   );
   for (const selector of normalized.match(/[^{}]*\[data-gesture\][^{}]*\{/g) ?? []) {
     assert.match(

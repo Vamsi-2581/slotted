@@ -84,7 +84,7 @@ interface ItemRecord {
   standalone: true,
   exportAs: 'slTopNavigation',
   template: `@if (skipTo()) {
-      <a data-part="skip" [attr.href]="'#' + skipTo()">{{ t('skip') }}</a>
+      <a data-part="skip" data-part-skip="" [attr.href]="'#' + skipTo()">{{ t('skip') }}</a>
     }
     <ng-content />`,
   styleUrl: '../../../styles/src/top-navigation/top-navigation.css',
@@ -92,7 +92,9 @@ interface ItemRecord {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'top-navigation',
+    'data-ui-top-navigation': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-frame]': "resolvedFrame() ? '' : null",
     '[attr.data-search-open]': "searchTakesBar() ? '' : null",

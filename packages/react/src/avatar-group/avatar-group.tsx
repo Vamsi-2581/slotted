@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/avatar-group/avatar-group.css';
 
 import { Children, isValidElement } from 'react';
@@ -72,17 +73,17 @@ export function AvatarGroup({
 
   const summary = formatCount({ count: surplus, max: false, locale: resolvedLocale });
 
-  const rootProps: AvatarGroupRootProps = {
+  const rootProps: AvatarGroupRootProps = keyedProps({
     ...nativeProps,
     children: (
       <AvatarDefaultsProvider shape={resolvedShape} size={resolvedSize} variant={resolvedVariant}>
         {members.slice(0, shownCount).map((member, index) => (
-          <li data-part="item" key={member.key ?? index}>
+          <li data-part="item" data-part-item="" key={member.key ?? index}>
             {member}
           </li>
         ))}
         {surplus > 0 && summary !== undefined ? (
-          <li data-part="overflow">
+          <li data-part="overflow" data-part-overflow="">
             <Avatar
               initials={`+${summary}`}
               locale={resolvedLocale}
@@ -98,7 +99,7 @@ export function AvatarGroup({
     'data-shape': resolvedShape,
     'data-size': resolvedSize,
     'data-ui': 'avatar-group',
-  };
+  });
 
   return render === undefined ? <ul {...rootProps} /> : render(rootProps);
 }

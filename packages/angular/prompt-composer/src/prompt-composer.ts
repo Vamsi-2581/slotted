@@ -62,7 +62,9 @@ function carriesFiles(event: DragEvent): boolean {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'prompt-composer',
+    'data-ui-prompt-composer': '',
     'data-part': 'root',
+    'data-part-root': '',
     novalidate: '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',

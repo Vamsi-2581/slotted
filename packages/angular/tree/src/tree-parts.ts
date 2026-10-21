@@ -41,16 +41,27 @@ export const NODE_SELECTOR = "[data-part='node']";
   imports: [SlGlyph, SlIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  template: `<div data-part="row" (click)="onRowClick($event)">
+  template: `<div data-part="row" data-part-row="" (click)="onRowClick($event)">
       @if (tree.showGuides() && depth() > 0) {
-        <span data-part="guide" aria-hidden="true"></span>
+        <span data-part="guide" data-part-guide="" aria-hidden="true"></span>
       }
       @if (branch() && loading()) {
         <!-- The wait stands in the chevron's own cell, so a branch that starts
              fetching moves neither its own name nor the rows below it. -->
-        <span data-part="loader" data-ui="spinner" aria-hidden="true"></span>
+        <span
+          data-part="loader"
+          data-part-loader=""
+          data-ui="spinner"
+          data-ui-spinner=""
+          aria-hidden="true"
+        ></span>
       } @else {
-        <span data-part="expander" aria-hidden="true" (click)="onExpanderClick($event)">
+        <span
+          data-part="expander"
+          data-part-expander=""
+          aria-hidden="true"
+          (click)="onExpanderClick($event)"
+        >
           <!-- A leaf keeps the box and draws nothing in it. -->
           @if (branch()) {
             <span slIcon><svg slGlyph name="chevron-right"></svg></span>
@@ -60,12 +71,16 @@ export const NODE_SELECTOR = "[data-part='node']";
       @if (tree.indicatorMode() === 'checkbox') {
         <!-- The dash outranks the check: a branch partly chosen shows the state
              its children are in. -->
-        <span data-part="indicator" aria-hidden="true" (click)="onIndicatorClick($event)"
+        <span
+          data-part="indicator"
+          data-part-indicator=""
+          aria-hidden="true"
+          (click)="onIndicatorClick($event)"
           ><span slIcon><svg slGlyph [name]="indeterminate() ? 'minus' : 'check'"></svg></span
         ></span>
       }
       <ng-content select="[slTreeIcon]" />
-      <span data-part="label" [attr.id]="labelId()"
+      <span data-part="label" data-part-label="" [attr.id]="labelId()"
         >{{ label() }}<ng-content select="[slTreeLabel]"
       /></span>
       <ng-content select="[slTreeDescription]" />
@@ -88,6 +103,7 @@ export const NODE_SELECTOR = "[data-part='node']";
     <ng-content />`,
   host: {
     'data-part': 'node',
+    'data-part-node': '',
     role: 'treeitem',
     '[attr.id]': 'id()',
     '[attr.data-key]': 'value()',
@@ -286,6 +302,7 @@ export class SlTreeNode {
   standalone: true,
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     role: 'group',
     '[attr.aria-busy]': "busy() ? 'true' : null",
   },
@@ -299,7 +316,7 @@ export class SlTreeGroup {
 @Directive({
   selector: '[slTreeIcon]',
   standalone: true,
-  host: { 'data-part': 'icon', 'aria-hidden': 'true' },
+  host: { 'data-part': 'icon', 'data-part-icon': '', 'aria-hidden': 'true' },
 })
 export class SlTreeIcon {}
 
@@ -311,18 +328,30 @@ export class SlTreeLabel {}
 @Directive({
   selector: '[slTreeDescription]',
   standalone: true,
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlTreeDescription {}
 
 /** The trailing count, size or badge. */
-@Directive({ selector: '[slTreeMeta]', standalone: true, host: { 'data-part': 'meta' } })
+@Directive({
+  selector: '[slTreeMeta]',
+  standalone: true,
+  host: { 'data-part': 'meta', 'data-part-meta': '' },
+})
 export class SlTreeMeta {}
 
 /** The trailing controls. They stay in the DOM and stay reachable. */
-@Directive({ selector: '[slTreeActions]', standalone: true, host: { 'data-part': 'actions' } })
+@Directive({
+  selector: '[slTreeActions]',
+  standalone: true,
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
+})
 export class SlTreeActions {}
 
 /** What the tree shows when it holds nothing. */
-@Directive({ selector: '[slTreeEmpty]', standalone: true, host: { 'data-part': 'empty' } })
+@Directive({
+  selector: '[slTreeEmpty]',
+  standalone: true,
+  host: { 'data-part': 'empty', 'data-part-empty': '' },
+})
 export class SlTreeEmpty {}

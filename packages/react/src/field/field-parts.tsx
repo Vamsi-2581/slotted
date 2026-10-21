@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { fieldMessages } from '@slotted/core/i18n';
 import { useEffect, useId, useRef } from 'react';
 import type { FocusEvent, MouseEvent, PointerEvent } from 'react';
@@ -87,13 +88,13 @@ export function FieldLabel({
   const own = useMessages(fieldMessages);
   const mark = necessityMark(field?.necessity ?? 'mark', field?.required === true, field?.t ?? own);
 
-  const rootProps: FieldLabelRootProps = {
+  const rootProps: FieldLabelRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
         {children}
         {mark === null ? null : (
-          <span {...(mark.hidden ? { 'aria-hidden': true } : {})} data-part="mark">
+          <span {...withSelectorKey(mark.hidden ? { 'aria-hidden': true } : {}, 'part', 'mark')}>
             {mark.text}
           </span>
         )}
@@ -102,7 +103,7 @@ export function FieldLabel({
     'data-part': 'label',
     htmlFor: htmlFor ?? field?.ids.control,
     id: id ?? field?.ids.label,
-  };
+  });
 
   return render === undefined ? <label {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -136,7 +137,7 @@ export function FieldControl({
 
   const merged = [describedBy, field?.describedBy].filter(Boolean).join(' ') || undefined;
 
-  const rootProps: FieldControlRootProps = {
+  const rootProps: FieldControlRootProps = keyedProps({
     ...nativeProps,
     'aria-describedby': merged,
     'aria-invalid': ariaInvalid ?? (field?.invalid === true ? true : undefined),
@@ -145,7 +146,7 @@ export function FieldControl({
     disabled: disabled ?? field?.disabled,
     id: id ?? field?.ids.control,
     readOnly: readOnly ?? field?.readOnly,
-  };
+  });
 
   return render === undefined ? <input {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -241,13 +242,13 @@ export function FieldCounter({
   const own = children === undefined && count !== undefined;
   const over = invalid ?? (own && count !== undefined ? isFieldCountOver(count) : false);
 
-  const rootProps: FieldCounterRootProps = {
+  const rootProps: FieldCounterRootProps = keyedProps({
     ...nativeProps,
     children: own && count !== undefined ? formatFieldCount(count) : children,
     ...(over ? { 'data-invalid': '' } : {}),
     'data-part': 'counter',
     id: nativeProps.id ?? field?.ids.counter,
-  };
+  });
 
   return render === undefined ? <span {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -277,13 +278,14 @@ export function FieldHeader({ children, ref, render, ...nativeProps }: FieldHead
       <span
         {...(isFieldCountOver(count) ? { 'data-invalid': '' } : {})}
         data-part="counter"
+        data-part-counter=""
         id={field?.ids.counter}
       >
         {formatFieldCount(count)}
       </span>
     );
 
-  const rootProps: FieldHeaderRootProps = {
+  const rootProps: FieldHeaderRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -292,7 +294,7 @@ export function FieldHeader({ children, ref, render, ...nativeProps }: FieldHead
       </>
     ),
     'data-part': 'header',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -307,12 +309,12 @@ export function FieldIndicator({ children, id, ref, render, ...nativeProps }: Fi
   const field = useField();
   useRegisterMessage('indicator', hasFieldContent(children));
 
-  const rootProps: FieldIndicatorRootProps = {
+  const rootProps: FieldIndicatorRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'indicator',
     id: id ?? field?.ids.indicator,
-  };
+  });
 
   return render === undefined ? <span {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -324,7 +326,7 @@ export function FieldIndicator({ children, id, ref, render, ...nativeProps }: Fi
  * The field does not disable it with the control: what it does is the page's.
  */
 export function FieldAction({ ref, render, type, ...nativeProps }: FieldActionProps) {
-  const rootProps: FieldActionRootProps = { ...nativeProps, 'data-part': 'action' };
+  const rootProps: FieldActionRootProps = keyedProps({ ...nativeProps, 'data-part': 'action' });
 
   return render === undefined ? (
     <button {...rootProps} ref={ref} type={type ?? 'button'} />
@@ -383,7 +385,7 @@ export function FieldHelp({
           aria-describedby={buttonProps['aria-describedby'] ?? textId}
           aria-label={buttonProps['aria-label'] ?? (field?.t ?? own)('help')}
         >
-          <span data-part="help-text" hidden id={textId}>
+          <span data-part="help-text" data-part-help-text="" hidden id={textId}>
             {children}
           </span>
         </FieldHelpTrigger>
@@ -454,8 +456,8 @@ function FieldHelpTrigger({
 
   return (
     <TooltipTrigger
-      {...nativeProps}
-      data-part="help"
+      {...withSelectorKey(nativeProps, 'part', 'help')}
+
       onBlur={compose(onBlur, blur)}
       onClick={compose(onClick, press)}
       onFocus={compose(onFocus, focus)}

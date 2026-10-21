@@ -57,6 +57,7 @@ function describes(part: 'detail' | 'message') {
   host: {
     'aria-hidden': 'true',
     'data-part': 'preview',
+    'data-part-preview': '',
     '[attr.data-kind]': 'owner.kind()',
     '[attr.data-extension]': 'extension()',
   },
@@ -83,7 +84,7 @@ export class SlAttachmentPreview {
   selector: '[slAttachmentBody]',
   standalone: true,
   exportAs: 'slAttachmentBody',
-  host: { 'data-part': 'body' },
+  host: { 'data-part': 'body', 'data-part-body': '' },
 })
 export class SlAttachmentBody {}
 
@@ -97,15 +98,16 @@ export class SlAttachmentBody {}
   standalone: true,
   exportAs: 'slAttachmentFilename',
   template: `<ng-content
-    ><span data-part="name">{{ owner.split().stem }}</span>
+    ><span data-part="name" data-part-name="">{{ owner.split().stem }}</span>
     @if (owner.split().extension) {
-      <span data-part="extension">{{ owner.split().extension }}</span>
+      <span data-part="extension" data-part-extension="">{{ owner.split().extension }}</span>
     }
   </ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'filename',
+    'data-part-filename': '',
     '[attr.dir]': 'dir',
   },
 })
@@ -133,6 +135,7 @@ export class SlAttachmentFilename {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'trigger',
+    'data-part-trigger': '',
     '[attr.title]': 'title ?? owner.file().name',
     '[attr.aria-describedby]': 'describedBy()',
     '[attr.disabled]': "isButton && owner.blocked() ? '' : null",
@@ -175,6 +178,7 @@ export class SlAttachmentTrigger {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'detail',
+    'data-part-detail': '',
     '[attr.id]': 'wiring.id',
   },
 })
@@ -194,6 +198,7 @@ export class SlAttachmentDetail {
   exportAs: 'slAttachmentMessage',
   host: {
     'data-part': 'message',
+    'data-part-message': '',
     '[attr.id]': 'wiring.id',
   },
 })
@@ -221,7 +226,7 @@ export class SlAttachmentMessage {
   ></div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  host: { 'data-part': 'progress' },
+  host: { 'data-part': 'progress', 'data-part-progress': '' },
 })
 export class SlAttachmentProgress {
   /** Per cent, 0 to 100. Absent, the bar is indeterminate. */
@@ -239,7 +244,7 @@ export class SlAttachmentProgress {
   selector: '[slAttachmentActions]',
   standalone: true,
   exportAs: 'slAttachmentActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlAttachmentActions {}
 
@@ -256,6 +261,7 @@ export class SlAttachmentActions {}
   exportAs: 'slAttachmentAction',
   host: {
     'data-part': 'action',
+    'data-part-action': '',
     '[attr.disabled]': "isButton && owner.disabled() ? '' : null",
     '[attr.aria-disabled]': "!isButton && owner.disabled() ? 'true' : null",
     '[attr.type]': "isButton ? (type ?? 'button') : null",
@@ -286,6 +292,7 @@ export class SlAttachmentAction {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'remove',
+    'data-part-remove': '',
     type: 'button',
     '[attr.hidden]': "owner.removable() ? null : ''",
     '[attr.aria-label]': 'label()',

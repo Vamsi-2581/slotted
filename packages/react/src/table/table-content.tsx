@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createFocusOrigin } from '@slotted/core/focus';
 import { createScrollAffordance } from '@slotted/core/overflow';
 import type { ScrollAffordanceHandle } from '@slotted/core/overflow';
@@ -88,11 +89,11 @@ export function TableContent({
     [element],
   );
 
-  const scroll: Record<string, unknown> = {
+  const scroll: Record<string, unknown> = keyedProps({
     ...restScrollProps,
     'data-part': 'scroll',
     ref: attach,
-  };
+  });
 
   if (state.overflowing) {
     scroll['data-overflowing'] = '';
@@ -116,8 +117,8 @@ export function TableContent({
          * twice. The row states its own index under the same condition.
          */
         {...(totalRowCount === undefined ? {} : { 'aria-rowcount': totalRowCount })}
-        {...(table.loading ? { 'aria-busy': true } : {})}
-        data-part="table"
+        {...withSelectorKey(table.loading ? { 'aria-busy': true } : {}, 'part', 'table')}
+
         ref={ref}
       >
         {children}

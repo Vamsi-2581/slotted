@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/kbd/kbd.css';
 
 import { Fragment } from 'react';
@@ -69,7 +70,7 @@ export function Shortcut({
           <Fragment key={`step-${String(stepIndex)}`}>
             {stepIndex === 0 ? null : (
               /* Read aloud: it is the only thing that tells a sequence from a combination. */
-              <span data-part="separator" data-separator="then">
+              <span data-part="separator" data-part-separator="" data-separator="then">
                 {resolved.thenLabel}
               </span>
             )}
@@ -77,7 +78,12 @@ export function Shortcut({
               <Fragment key={`key-${String(keyIndex)}-${key.legend}`}>
                 {keyIndex === 0 || resolved.separator === '' ? null : (
                   /* Punctuation joining two caps. “Command Shift K” is what the platforms announce. */
-                  <span aria-hidden="true" data-part="separator" data-separator="plus">
+                  <span
+                    aria-hidden="true"
+                    data-part="separator"
+                    data-part-separator=""
+                    data-separator="plus"
+                  >
                     {resolved.separator}
                   </span>
                 )}
@@ -96,7 +102,7 @@ export function Shortcut({
           </Fragment>
         ));
 
-  const rootProps: KbdShortcutRootProps = {
+  const rootProps: KbdShortcutRootProps = keyedProps({
     ...nativeProps,
     children: content,
     'data-part': 'shortcut',
@@ -105,7 +111,7 @@ export function Shortcut({
     'data-ui': 'kbd',
     'data-variant': resolvedVariant,
     ...(disabled === true ? { 'data-disabled': '' as const } : {}),
-  };
+  });
 
   /**
    * The axes reach a key a consumer authored by hand inside this group, so a

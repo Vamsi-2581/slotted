@@ -85,7 +85,9 @@ const ITEM_VARIANT: Record<AccordionVariant, 'plain' | 'ruled' | 'framed'> = {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'accordion',
+    'data-ui-accordion': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-disabled]': "disabled() ? '' : null",

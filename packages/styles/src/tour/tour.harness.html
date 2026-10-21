@@ -16,14 +16,16 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-variant="outline"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">Share</span>
+        <span data-part="label" data-part-label="">Share</span>
       </button>
     </div>
     <p style="margin: 24px 0 0; color: var(--slotted-text-muted)">
@@ -32,7 +34,9 @@
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -45,9 +49,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="center"
@@ -60,57 +67,70 @@
         --slotted-positioner-arrow-x: calc(50% - 0.3125rem);
       "
     >
-      <div data-part="arrow"></div>
+      <div data-part="arrow" data-part-arrow=""></div>
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-anchored-title"
         aria-describedby="tour-anchored-description"
       >
-        <div data-part="header">
-          <p data-part="progress">2 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">2 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-anchored-title">Share with your team</h2>
-        <p data-part="description" id="tour-anchored-description">
+        <h2 data-part="title" data-part-title="" id="tour-anchored-title">Share with your team</h2>
+        <p data-part="description" data-part-description="" id="tour-anchored-description">
           Invite people by name or email. They see the report as it stands, and every edit after.
         </p>
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Skip tour</span>
+            <span data-part="label" data-part-label="">Skip tour</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Next</span>
+            <span data-part="label" data-part-label="">Next</span>
           </button>
         </div>
       </div>
@@ -142,20 +162,24 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="accent"
         data-variant="solid"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">Export</span>
+        <span data-part="label" data-part-label="">Export</span>
       </button>
     </div>
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -168,9 +192,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="top"
       data-align="center"
@@ -184,54 +211,69 @@
         --slotted-positioner-arrow-x: calc(50% - 0.3125rem);
       "
     >
-      <div data-part="arrow"></div>
+      <div data-part="arrow" data-part-arrow=""></div>
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-top-title"
       >
-        <div data-part="header">
-          <p data-part="progress">4 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">4 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-top-title">Export what you see</h2>
-        <p data-part="description">The file keeps your filters and your column order.</p>
-        <div data-part="footer">
+        <h2 data-part="title" data-part-title="" id="tour-top-title">Export what you see</h2>
+        <p data-part="description" data-part-description="">
+          The file keeps your filters and your column order.
+        </p>
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Skip tour</span>
+            <span data-part="label" data-part-label="">Skip tour</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Next</span>
+            <span data-part="label" data-part-label="">Next</span>
           </button>
         </div>
       </div>
@@ -251,22 +293,25 @@
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-size="md"
     data-placement="centered"
   >
-    <div data-part="backdrop" aria-hidden="true"></div>
-    <div data-part="surface" data-ready data-placement="centered">
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true"></div>
+    <div data-part="surface" data-part-surface="" data-ready data-placement="centered">
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-centered-title"
       >
-        <div data-part="media" aria-hidden="true">
+        <div data-part="media" data-part-media="" aria-hidden="true">
           <svg viewBox="0 0 320 120" preserveAspectRatio="xMidYMid slice">
             <rect width="320" height="120" style="fill: var(--slotted-tone-accent-surface)" />
             <rect
@@ -303,38 +348,48 @@
             />
           </svg>
         </div>
-        <div data-part="header">
-          <p data-part="progress">1 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">1 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-centered-title">Welcome to Reports</h2>
-        <p data-part="description">
+        <h2 data-part="title" data-part-title="" id="tour-centered-title">Welcome to Reports</h2>
+        <p data-part="description" data-part-description="">
           Five stops, about a minute. You can leave the tour at any point and pick it up from Help.
         </p>
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Not now</span>
+            <span data-part="label" data-part-label="">Not now</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Start tour</span>
+            <span data-part="label" data-part-label="">Start tour</span>
           </button>
         </div>
       </div>
@@ -352,23 +407,34 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-variant="outline"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">Saved views</span>
+        <span data-part="label" data-part-label="">Saved views</span>
       </button>
     </div>
     <p style="margin: 24px 0 0; color: var(--slotted-text-muted)">
       Twelve reports match the current filters.
     </p>
   </div>
-  <div data-ui="tour" data-part="root" data-open data-size="sm" data-placement="anchored">
+  <div
+    data-ui="tour"
+    data-ui-tour=""
+    data-part="root"
+    data-part-root=""
+    data-open
+    data-size="sm"
+    data-placement="anchored"
+  >
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="center"
@@ -381,34 +447,50 @@
         --slotted-positioner-arrow-x: calc(50% - 0.3125rem);
       "
     >
-      <span data-part="focus-guard" tabindex="0" aria-hidden="true"></span>
-      <div data-part="arrow"></div>
-      <div data-part="content" role="dialog" tabindex="-1" aria-labelledby="tour-coach-title">
-        <div data-part="header">
-          <p data-part="progress">New</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="focus-guard" data-part-focus-guard="" tabindex="0" aria-hidden="true"></span>
+      <div data-part="arrow" data-part-arrow=""></div>
+      <div
+        data-part="content"
+        data-part-content=""
+        role="dialog"
+        tabindex="-1"
+        aria-labelledby="tour-coach-title"
+      >
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">New</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-coach-title">Keep this view</h2>
-        <p data-part="description">Save the filters and columns you use every week.</p>
-        <div data-part="footer">
+        <h2 data-part="title" data-part-title="" id="tour-coach-title">Keep this view</h2>
+        <p data-part="description" data-part-description="">
+          Save the filters and columns you use every week.
+        </p>
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             data-last
             type="button"
           >
-            <span data-part="label">Got it</span>
+            <span data-part="label" data-part-label="">Got it</span>
           </button>
         </div>
       </div>
-      <span data-part="focus-guard" tabindex="0" aria-hidden="true"></span>
+      <span data-part="focus-guard" data-part-focus-guard="" tabindex="0" aria-hidden="true"></span>
     </div>
   </div>
 </section>
@@ -424,14 +506,16 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="accent"
         data-variant="solid"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">New report</span>
+        <span data-part="label" data-part-label="">New report</span>
       </button>
     </div>
     <p style="margin: 24px 0 0; color: var(--slotted-text-muted)">
@@ -440,7 +524,9 @@
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-spotlight
     data-size="md"
@@ -452,9 +538,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="center"
@@ -467,43 +556,63 @@
         --slotted-positioner-arrow-x: calc(50% - 0.3125rem);
       "
     >
-      <span data-part="focus-guard" tabindex="0" aria-hidden="true"></span>
-      <div data-part="arrow"></div>
-      <div data-part="content" role="dialog" tabindex="-1" aria-labelledby="tour-interactive-title">
-        <div data-part="header">
-          <p data-part="progress">3 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+      <span data-part="focus-guard" data-part-focus-guard="" tabindex="0" aria-hidden="true"></span>
+      <div data-part="arrow" data-part-arrow=""></div>
+      <div
+        data-part="content"
+        data-part-content=""
+        role="dialog"
+        tabindex="-1"
+        aria-labelledby="tour-interactive-title"
+      >
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">3 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-interactive-title">Create your first report</h2>
-        <p data-part="description">Press New report. The tour continues once it opens.</p>
-        <div data-part="footer">
+        <h2 data-part="title" data-part-title="" id="tour-interactive-title">
+          Create your first report
+        </h2>
+        <p data-part="description" data-part-description="">
+          Press New report. The tour continues once it opens.
+        </p>
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Skip tour</span>
+            <span data-part="label" data-part-label="">Skip tour</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
         </div>
       </div>
-      <span data-part="focus-guard" tabindex="0" aria-hidden="true"></span>
+      <span data-part="focus-guard" data-part-focus-guard="" tabindex="0" aria-hidden="true"></span>
     </div>
   </div>
 </section>
@@ -518,20 +627,24 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-variant="outline"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">Columns</span>
+        <span data-part="label" data-part-label="">Columns</span>
       </button>
     </div>
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -544,9 +657,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="center"
@@ -559,48 +675,63 @@
         --slotted-positioner-arrow-x: calc(50% - 0.3125rem);
       "
     >
-      <div data-part="arrow"></div>
+      <div data-part="arrow" data-part-arrow=""></div>
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-prepare-title"
       >
-        <div data-part="header">
-          <p data-part="progress">3 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">3 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-prepare-title">Choose your columns</h2>
-        <p data-part="description">Show, hide and reorder what the table lists.</p>
-        <div data-part="footer">
+        <h2 data-part="title" data-part-title="" id="tour-prepare-title">Choose your columns</h2>
+        <p data-part="description" data-part-description="">
+          Show, hide and reorder what the table lists.
+        </p>
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Skip tour</span>
+            <span data-part="label" data-part-label="">Skip tour</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
@@ -608,10 +739,12 @@
             aria-disabled="true"
             type="button"
           >
-            <span data-part="label">Next</span>
+            <span data-part="label" data-part-label="">Next</span>
             <span
               data-part="indicator"
+              data-part-indicator=""
               data-ui="spinner"
+              data-ui-spinner=""
               role="progressbar"
               aria-label="Preparing the next step"
             ></span>
@@ -635,55 +768,70 @@
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-missing
     data-size="md"
     data-placement="centered"
   >
-    <div data-part="backdrop" aria-hidden="true"></div>
-    <div data-part="surface" data-ready data-placement="centered">
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true"></div>
+    <div data-part="surface" data-part-surface="" data-ready data-placement="centered">
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-missing-title"
       >
-        <div data-part="header">
-          <p data-part="progress">5 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">5 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-missing-title">Find it all in the sidebar</h2>
-        <p data-part="description">
+        <h2 data-part="title" data-part-title="" id="tour-missing-title">
+          Find it all in the sidebar
+        </h2>
+        <p data-part="description" data-part-description="">
           Every report, dashboard and saved view is one click away from the menu on the left.
         </p>
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             data-last
             type="button"
           >
-            <span data-part="label">Done</span>
+            <span data-part="label" data-part-label="">Done</span>
           </button>
         </div>
       </div>
@@ -701,20 +849,24 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-variant="outline"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">Automations</span>
+        <span data-part="label" data-part-label="">Automations</span>
       </button>
     </div>
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -727,9 +879,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="center"
@@ -743,24 +898,33 @@
         --slotted-positioner-arrow-x: calc(50% - 0.3125rem);
       "
     >
-      <div data-part="arrow"></div>
+      <div data-part="arrow" data-part-arrow=""></div>
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-long-title"
       >
-        <div data-part="header">
-          <p data-part="progress">Schritt 3 von 12 in der Einführung</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">Schritt 3 von 12 in der Einführung</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-long-title">Automatisierungsregelverwaltungsoberfläche</h2>
-        <div data-part="body">
+        <h2 data-part="title" data-part-title="" id="tour-long-title">
+          Automatisierungsregelverwaltungsoberfläche
+        </h2>
+        <div data-part="body" data-part-body="">
           <p style="margin: 0 0 0.5em">
             Rules run when a report changes. Each rule has a trigger, a condition and one or more
             actions, and runs in the order it appears in the list.
@@ -774,36 +938,42 @@
             change either.
           </p>
         </div>
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Tour überspringen</span>
+            <span data-part="label" data-part-label="">Tour überspringen</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Zurück</span>
+            <span data-part="label" data-part-label="">Zurück</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Weiter</span>
+            <span data-part="label" data-part-label="">Weiter</span>
           </button>
         </div>
       </div>
@@ -817,20 +987,24 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-variant="outline"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">Share</span>
+        <span data-part="label" data-part-label="">Share</span>
       </button>
     </div>
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -843,9 +1017,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="center"
@@ -858,56 +1035,69 @@
         --slotted-positioner-arrow-x: calc(50% - 0.3125rem);
       "
     >
-      <div data-part="arrow"></div>
+      <div data-part="arrow" data-part-arrow=""></div>
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-large-title"
       >
-        <div data-part="header">
-          <p data-part="progress">2 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">2 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-large-title">Share with your team</h2>
-        <p data-part="description">
+        <h2 data-part="title" data-part-title="" id="tour-large-title">Share with your team</h2>
+        <p data-part="description" data-part-description="">
           Invite people by name or email. They see the report as it stands, and every edit after.
         </p>
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Skip tour</span>
+            <span data-part="label" data-part-label="">Skip tour</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Next</span>
+            <span data-part="label" data-part-label="">Next</span>
           </button>
         </div>
       </div>
@@ -925,20 +1115,24 @@
     <div style="display: flex; justify-content: center">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-variant="outline"
         data-size="md"
         type="button"
         style="inline-size: 9rem; block-size: 2.25rem"
       >
-        <span data-part="label">Saved views</span>
+        <span data-part="label" data-part-label="">Saved views</span>
       </button>
     </div>
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -952,9 +1146,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="center"
@@ -966,54 +1163,69 @@
         --slotted-positioner-arrow-x: calc(50% - 8px - 0.3125rem);
       "
     >
-      <div data-part="arrow"></div>
+      <div data-part="arrow" data-part-arrow=""></div>
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-compact-title"
       >
-        <div data-part="header">
-          <p data-part="progress">3 of 5</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">3 of 5</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-compact-title">Keep this view</h2>
-        <p data-part="description">Save the filters and columns you use every week.</p>
-        <div data-part="footer">
+        <h2 data-part="title" data-part-title="" id="tour-compact-title">Keep this view</h2>
+        <p data-part="description" data-part-description="">
+          Save the filters and columns you use every week.
+        </p>
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Skip tour</span>
+            <span data-part="label" data-part-label="">Skip tour</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Next</span>
+            <span data-part="label" data-part-label="">Next</span>
           </button>
         </div>
       </div>
@@ -1037,7 +1249,9 @@
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -1050,55 +1264,72 @@
       --slotted-tour-target-height: calc(100% - 72px);
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
-    <div data-part="surface" data-ready data-placement="centered">
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
+    <div data-part="surface" data-part-surface="" data-ready data-placement="centered">
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-crowded-title"
       >
-        <div data-part="header">
-          <p data-part="progress">3 of 4</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">3 of 4</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-crowded-title">Revenue by region</h2>
-        <p data-part="description">Taller than the room around it: the card is centred over it.</p>
-        <div data-part="footer">
+        <h2 data-part="title" data-part-title="" id="tour-crowded-title">Revenue by region</h2>
+        <p data-part="description" data-part-description="">
+          Taller than the room around it: the card is centred over it.
+        </p>
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="skip"
+            data-part-skip=""
             data-tone="secondary"
             data-variant="ghost"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Skip tour</span>
+            <span data-part="label" data-part-label="">Skip tour</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Next</span>
+            <span data-part="label" data-part-label="">Next</span>
           </button>
         </div>
       </div>
@@ -1117,20 +1348,24 @@
     <div style="display: flex; justify-content: flex-end">
       <button
         data-ui="button"
+        data-ui-button=""
         data-part="root"
+        data-part-root=""
         data-tone="secondary"
         data-variant="outline"
         data-size="md"
         type="button"
         style="inline-size: 6rem; block-size: 2.25rem"
       >
-        <span data-part="label">Account</span>
+        <span data-part="label" data-part-label="">Account</span>
       </button>
     </div>
   </div>
   <div
     data-ui="tour"
+    data-ui-tour=""
     data-part="root"
+    data-part-root=""
     data-open
     data-modal
     data-spotlight
@@ -1143,9 +1378,12 @@
       --slotted-tour-target-height: 2.25rem;
     "
   >
-    <div data-part="backdrop" aria-hidden="true"><div data-part="spotlight"></div></div>
+    <div data-part="backdrop" data-part-backdrop="" aria-hidden="true">
+      <div data-part="spotlight" data-part-spotlight=""></div>
+    </div>
     <div
       data-part="surface"
+      data-part-surface=""
       data-ready
       data-side="bottom"
       data-align="end"
@@ -1157,44 +1395,57 @@
         --slotted-positioner-arrow-x: calc(100% - 12px - 0.625rem);
       "
     >
-      <div data-part="arrow"></div>
+      <div data-part="arrow" data-part-arrow=""></div>
       <div
         data-part="content"
+        data-part-content=""
         role="dialog"
         aria-modal="true"
         tabindex="-1"
         aria-labelledby="tour-corner-title"
       >
-        <div data-part="header">
-          <p data-part="progress">2 of 4</p>
-          <button data-part="close" type="button" aria-label="Close tour">
-            <span data-ui="icon" data-part="root" data-size="sm" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <div data-part="header" data-part-header="">
+          <p data-part="progress" data-part-progress="">2 of 4</p>
+          <button data-part="close" data-part-close="" type="button" aria-label="Close tour">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </div>
-        <h2 data-part="title" id="tour-corner-title">Account</h2>
-        <p data-part="description">Your profile, your plan and who can see what.</p>
-        <div data-part="footer">
+        <h2 data-part="title" data-part-title="" id="tour-corner-title">Account</h2>
+        <p data-part="description" data-part-description="">
+          Your profile, your plan and who can see what.
+        </p>
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="prev"
+            data-part-prev=""
             data-tone="secondary"
             data-variant="outline"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Back</span>
+            <span data-part="label" data-part-label="">Back</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="next"
+            data-part-next=""
             data-tone="accent"
             data-variant="solid"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Next</span>
+            <span data-part="label" data-part-label="">Next</span>
           </button>
         </div>
       </div>

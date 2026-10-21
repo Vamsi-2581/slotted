@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/checkbox/checkbox.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -181,7 +182,7 @@ export function Checkbox({
     if (next !== labelHidden) setLabelHidden(next);
   });
 
-  const rootProps: CheckboxRootProps = {
+  const rootProps: CheckboxRootProps = keyedProps({
     children: (
       <>
         <input
@@ -203,6 +204,7 @@ export function Checkbox({
           aria-required={ariaRequired ?? (resolvedRequired === true ? true : undefined)}
           checked={isParent || isMember ? resolvedChecked : checked}
           data-part="control"
+          data-part-control=""
           defaultChecked={
             isParent || isMember || checked !== undefined ? undefined : defaultChecked
           }
@@ -248,18 +250,18 @@ export function Checkbox({
         {/* Mixed is the dash, and it outranks the check: a control that is both
             indeterminate and checked draws the state its children are in. The
             stylesheet only reveals the mark, on `:checked` or `:indeterminate`. */}
-        <span data-part="indicator">
+        <span data-part="indicator" data-part-indicator="">
           <Icon>
             <Glyph name={resolvedIndeterminate ? 'minus' : 'check'} />
           </Icon>
         </span>
         {/* Rendered without children as well: the target and the wash are the
             label's pseudo-elements, and a box named by aria-label keeps both. */}
-        <label data-part="label" htmlFor={controlId} ref={labelRef}>
+        <label data-part="label" data-part-label="" htmlFor={controlId} ref={labelRef}>
           {children}
         </label>
         {description === undefined ? null : (
-          <p data-part="description" id={descriptionId}>
+          <p data-part="description" data-part-description="" id={descriptionId}>
             {description}
           </p>
         )}
@@ -278,7 +280,7 @@ export function Checkbox({
     'data-ui': 'checkbox',
     'data-variant': resolvedVariant,
     style,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

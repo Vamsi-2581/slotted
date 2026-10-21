@@ -20,6 +20,14 @@ export type DataGridSelectionMode = 'none' | 'single' | 'multiple' | 'range';
 export type DataGridEditMode = 'cell' | 'row';
 export type DataGridMode = 'client' | 'server';
 export type DataGridVirtualize = 'auto' | boolean;
+
+/**
+ * What asks for the next page of a grid that has more. `scroll` asks when the
+ * window nears the end and draws a quiet status while the page loads, and a
+ * retry only after `loadMoreFailed`; `button` asks only from a Load more
+ * control; `both` does the two. Default `scroll`.
+ */
+export type DataGridLoadMoreTrigger = 'scroll' | 'button' | 'both';
 export type DataGridRowHeight = number | 'auto';
 /**
  * What a frame too narrow for the template does: moves columns into the row's
@@ -165,6 +173,7 @@ export interface DataGridDefaults {
   pageSizes: readonly number[];
   filterDebounce: number;
   loadMoreThreshold: number;
+  loadMoreTrigger: DataGridLoadMoreTrigger;
   skeletonRows: number;
 }
 
@@ -183,6 +192,7 @@ const FALLBACK: DataGridDefaults = {
   pageSizes: [25, 50, 100],
   filterDebounce: 300,
   loadMoreThreshold: 20,
+  loadMoreTrigger: 'scroll',
   skeletonRows: 8,
 };
 

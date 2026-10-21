@@ -97,7 +97,7 @@ export function isNavigationDisabled(item: HTMLElement, includeAriaDisabled: boo
 }
 
 /**
- * An element the platform will not focus is not an item.
+ * An element the platform will not focus is not a place to move to.
  *
  * The `hidden` attribute and a computed `visibility` of `hidden` or `collapse`
  * both take an element out of the focus order while leaving it in the DOM, so a
@@ -116,6 +116,22 @@ function isNavigationHidden(item: HTMLElement): boolean {
 
   const visibility = item.ownerDocument?.defaultView?.getComputedStyle?.(item)?.visibility;
   return visibility === 'hidden' || visibility === 'collapse';
+}
+
+/**
+ * The collection reads attributes only. The computed `visibility` is read by
+ * `isNavigationHidden` for the candidate a key moves to, never for the whole
+ * list: the list is read on render paths (a roving tab stop, a refresh), and
+ * one `getComputedStyle` there forces a style recalculation of whatever the
+ * render has just dirtied.
+ */
+function isCollectionHidden(item: HTMLElement): boolean {
+  return typeof item.closest === 'function' && item.closest('[hidden]') !== null;
+}
+
+/** An item a key may land on: enabled and drawn. */
+function isNavigable(item: HTMLElement, includeAriaDisabled: boolean): boolean {
+  return !isNavigationDisabled(item, includeAriaDisabled) && !isNavigationHidden(item);
 }
 
 /**
@@ -161,23 +177,23 @@ export function createArrowNavigation(
   let items: HTMLElement[] = [];
   /**
    * The collection is read when something asks for it, not when it may have
-   * changed. Reading filters every item through `getComputedStyle`, which
-   * forces a style recalculation of whatever the page has just mounted — and an
-   * accordion of fifty disclosures paid it at creation and again on the
-   * mutation that mounting itself caused, for a list no key had asked for.
+   * changed: an accordion of fifty disclosures otherwise queried its list at
+   * creation and again on the mutation that mounting itself caused, for a list
+   * no key had asked for.
    */
   let stale = true;
 
   function currentItems() {
     if (stale) {
       items = [...container.querySelectorAll<HTMLElement>(options.itemSelector)].filter(
-        (item) => !isNavigationHidden(item),
+        (item) => !isCollectionHidden(item),
       );
       stale = false;
     }
     return items;
   }
 
+  /** Attributes only: it places the tab stop, which runs on render paths. */
   function firstEnabled() {
     return currentItems().findIndex((item) => !isNavigationDisabled(item, includeAriaDisabled));
   }
@@ -193,7 +209,7 @@ export function createArrowNavigation(
         if (!loop()) return -1;
         index = (index + count) % count;
       }
-      if (!isNavigationDisabled(items[index]!, includeAriaDisabled)) return index;
+      if (isNavigable(items[index]!, includeAriaDisabled)) return index;
     }
     return -1;
   }
@@ -204,7 +220,7 @@ export function createArrowNavigation(
     for (let taken = 0; taken < items.length; taken += 1) {
       index += delta;
       if (index < 0 || index >= items.length) return -1;
-      if (!isNavigationDisabled(items[index]!, includeAriaDisabled)) return index;
+      if (isNavigable(items[index]!, includeAriaDisabled)) return index;
     }
     return -1;
   }

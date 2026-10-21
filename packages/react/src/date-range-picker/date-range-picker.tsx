@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/date-range-picker/date-range-picker.css';
 
 import {
@@ -614,21 +615,25 @@ export function DateRangePicker({
   const surface: ReactNode = mounted ? (
     <div
       data-part="positioner"
+      data-part-positioner=""
       data-presentation={sheet ? 'sheet' : 'popover'}
       data-ui="date-range-picker"
+      data-ui-date-range-picker=""
       ref={setLayerNode}
       {...(isOpen ? { 'data-open': '' } : {})}
     >
       <div
         aria-label={spoken}
         data-part="content"
+        data-part-content=""
         id={contentId}
         onKeyDown={onContentKeyDown}
         role="dialog"
       >
-        <div data-part="head">
+        <div data-part="head" data-part-head="">
           <span
             data-part="head-start"
+            data-part-head-start=""
             {...(shownStart === null ? { 'data-placeholder': '' } : {})}
             {...(startPending ? { 'data-pending': '' } : {})}
           >
@@ -637,6 +642,7 @@ export function DateRangePicker({
           {' – '}
           <span
             data-part="head-end"
+            data-part-head-end=""
             {...(shownEnd === null ? { 'data-placeholder': '' } : {})}
             {...(endPending ? { 'data-pending': '' } : {})}
           >
@@ -645,16 +651,23 @@ export function DateRangePicker({
           <span
             aria-live="polite"
             data-part="length"
+            data-part-length=""
             {...(pendingRun === null ? {} : { 'data-pending': '' })}
           >
             {spokenLength}
           </span>
-          {limitText === null ? null : <span data-part="limit">{limitText}</span>}
+          {limitText === null ? null : (
+            <span data-part="limit" data-part-limit="">
+              {limitText}
+            </span>
+          )}
         </div>
-        <div data-part="panels">
+        <div data-part="panels" data-part-panels="">
           {presets === undefined ? null : (
             <PresetContext.Provider value={presetContext}>
-              <div data-part="presets">{presets}</div>
+              <div data-part="presets" data-part-presets="">
+                {presets}
+              </div>
             </PresetContext.Provider>
           )}
           <Calendar
@@ -687,7 +700,11 @@ export function DateRangePicker({
             {...(firstDayOfWeek === undefined ? {} : { firstDayOfWeek })}
           />
         </div>
-        {footer === undefined ? null : <div data-part="footer">{footer}</div>}
+        {footer === undefined ? null : (
+          <div data-part="footer" data-part-footer="">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   ) : null;
@@ -716,6 +733,7 @@ export function DateRangePicker({
     <>
       <div
         data-part="control"
+        data-part-control=""
         /* Inside a field, the frame takes the field's control identifier and
            its label, and the two ends inside it keep their own names; two
            fields each taking the field's identifier wrote it twice and left
@@ -730,6 +748,7 @@ export function DateRangePicker({
       >
         <div
           data-part="start"
+          data-part-start=""
           onFocus={onFieldFocus('start')}
           {...(currentPosition === 'start' ? { 'data-current': '' } : {})}
         >
@@ -751,11 +770,12 @@ export function DateRangePicker({
             value={start}
           />
         </div>
-        <span aria-hidden="true" data-part="separator">
+        <span aria-hidden="true" data-part="separator" data-part-separator="">
           –
         </span>
         <div
           data-part="end"
+          data-part-end=""
           onFocus={onFieldFocus('end')}
           {...(currentPosition === 'end' ? { 'data-current': '' } : {})}
         >
@@ -782,6 +802,7 @@ export function DateRangePicker({
           <button
             aria-label={t('clear')}
             data-part="clear"
+            data-part-clear=""
             disabled={!editable}
             onClick={(event) => {
               requestValue(null, 'clear', event);
@@ -801,6 +822,7 @@ export function DateRangePicker({
           aria-haspopup="dialog"
           aria-label={spoken}
           data-part="trigger"
+          data-part-trigger=""
           disabled={!editable}
           onClick={(event) => setOpen(!isOpen, 'pointer', event, true)}
           ref={triggerRef}
@@ -815,7 +837,7 @@ export function DateRangePicker({
     </>
   );
 
-  const rootProps: DateRangePickerRootProps = {
+  const rootProps: DateRangePickerRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -832,7 +854,7 @@ export function DateRangePicker({
     'data-ui': 'date-range-picker',
     'data-variant': resolvedVariant,
     ref: rootRef,
-  };
+  });
 
   return (
     <>
@@ -864,7 +886,7 @@ export function DateRangePickerPreset({
   const range = typeof value === 'function' ? value() : value;
   const selected = context !== null && isSameValue(context.held, range);
 
-  const rootProps: DateRangePickerPresetRootProps = {
+  const rootProps: DateRangePickerPresetRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'preset',
@@ -876,7 +898,7 @@ export function DateRangePickerPreset({
     },
     ref: ref as React.Ref<HTMLElement>,
     type: 'button',
-  };
+  });
 
   return render === undefined ? (
     <button

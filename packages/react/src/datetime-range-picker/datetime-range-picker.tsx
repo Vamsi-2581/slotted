@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/datetime-range-picker/datetime-range-picker.css';
 
 import {
@@ -1265,6 +1266,7 @@ export function DateTimeRangePicker({
         aria-controls={`${contentId}-panel`}
         aria-selected={current}
         data-part="tab"
+        data-part-tab=""
         data-position={position}
         disabled={!editable}
         id={tabId(position)}
@@ -1283,8 +1285,12 @@ export function DateTimeRangePicker({
           ? { 'data-placeholder': '' }
           : {})}
       >
-        <span data-part="tab-label">{labelOf(position)}</span>
-        <span data-part="tab-value">{text}</span>
+        <span data-part="tab-label" data-part-tab-label="">
+          {labelOf(position)}
+        </span>
+        <span data-part="tab-value" data-part-tab-value="">
+          {text}
+        </span>
       </button>
     );
   };
@@ -1296,8 +1302,8 @@ export function DateTimeRangePicker({
     const chosen = work[position].time;
     const day = dayFor(position);
     return (
-      <div data-part="panel" data-position={position} id={`${contentId}-panel`}>
-        <div data-part="date-panel">
+      <div data-part="panel" data-part-panel="" data-position={position} id={`${contentId}-panel`}>
+        <div data-part="date-panel" data-part-date-panel="">
           <Calendar
             fixedWeeks={fixedWeeks}
             focusedDate={focusedDate}
@@ -1321,12 +1327,15 @@ export function DateTimeRangePicker({
           />
         </div>
         {list.length === 0 ? (
-          <div data-part="empty">{t('empty')}</div>
+          <div data-part="empty" data-part-empty="">
+            {t('empty')}
+          </div>
         ) : (
           <div
             aria-describedby={hint === '' ? undefined : hintId}
             aria-labelledby={tabId(position)}
             data-part="list"
+            data-part-list=""
             onBlur={(event) => {
               if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
                 setListFocused(false);
@@ -1354,6 +1363,7 @@ export function DateTimeRangePicker({
                   aria-disabled={option.unavailable ? true : undefined}
                   aria-selected={selected}
                   data-part="option"
+                  data-part-option=""
                   key={`${day.year}-${day.month}-${day.day}-${option.time.hour}-${option.time.minute}-${option.time.second}`}
                   onClick={(event) => select(position, option, event)}
                   onPointerEnter={() =>
@@ -1369,7 +1379,9 @@ export function DateTimeRangePicker({
                     <>
                       {rowLabel}
                       {duration === null ? null : (
-                        <span data-part="option-duration">{duration}</span>
+                        <span data-part="option-duration" data-part-option-duration="">
+                          {duration}
+                        </span>
                       )}
                     </>
                   ) : (
@@ -1398,18 +1410,26 @@ export function DateTimeRangePicker({
   const surface: ReactNode = mounted ? (
     <div
       data-part="positioner"
+      data-part-positioner=""
       data-presentation={sheet ? 'sheet' : 'popover'}
       data-ui="datetime-range-picker"
+      data-ui-datetime-range-picker=""
       ref={setLayerNode}
       {...(isOpen ? { 'data-open': '' } : {})}
     >
-      <div aria-label={spoken} data-part="content" id={contentId} role="dialog">
-        <div data-part="head">
-          <div data-part="tabs" role="tablist">
+      <div
+        aria-label={spoken}
+        data-part="content"
+        data-part-content=""
+        id={contentId}
+        role="dialog"
+      >
+        <div data-part="head" data-part-head="">
+          <div data-part="tabs" data-part-tabs="" role="tablist">
             {tab('start')}
             {tab('end')}
           </div>
-          <div data-part="field" data-position={currentPosition} ref={fieldBox}>
+          <div data-part="field" data-part-field="" data-position={currentPosition} ref={fieldBox}>
             <DateTimeField
               {...fieldProps}
               aria-describedby={hint === '' ? undefined : hintId}
@@ -1426,6 +1446,7 @@ export function DateTimeRangePicker({
           </div>
           <button
             data-part="now"
+            data-part-now=""
             disabled={!editable}
             onClick={(event) => chooseNow(currentPosition, event)}
             type="button"
@@ -1434,6 +1455,7 @@ export function DateTimeRangePicker({
           </button>
           <span
             data-part="hint"
+            data-part-hint=""
             id={hintId}
             {...(hintProblem === undefined ? {} : { 'data-invalid': '' })}
           >
@@ -1442,21 +1464,28 @@ export function DateTimeRangePicker({
           <span
             aria-live="polite"
             data-part="length"
+            data-part-length=""
             {...(pendingRun === null ? {} : { 'data-pending': '' })}
           >
             {spokenLength}
           </span>
-          {limitText === null ? null : <span data-part="limit">{limitText}</span>}
+          {limitText === null ? null : (
+            <span data-part="limit" data-part-limit="">
+              {limitText}
+            </span>
+          )}
         </div>
         {presets === undefined ? null : (
           <PresetContext.Provider value={presetContext}>
-            <div data-part="presets">{presets}</div>
+            <div data-part="presets" data-part-presets="">
+              {presets}
+            </div>
           </PresetContext.Provider>
         )}
         {panel()}
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           {footer}
-          <button data-part="done" onClick={done} type="button">
+          <button data-part="done" data-part-done="" onClick={done} type="button">
             {t('done')}
           </button>
         </div>
@@ -1466,13 +1495,14 @@ export function DateTimeRangePicker({
 
   const children: ReactNode = (
     <>
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <button
           aria-controls={isOpen ? contentId : undefined}
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           aria-label={spoken}
           data-part="trigger"
+          data-part-trigger=""
           disabled={!editable}
           onClick={(event) => {
             focusOnOpen.current = 'field';
@@ -1482,7 +1512,11 @@ export function DateTimeRangePicker({
           ref={triggerRef}
           type="button"
         >
-          <span data-part="summary" {...(summary === null ? { 'data-placeholder': '' } : {})}>
+          <span
+            data-part="summary"
+            data-part-summary=""
+            {...(summary === null ? { 'data-placeholder': '' } : {})}
+          >
             {summary ?? t('choose')}
           </span>
           <Icon>
@@ -1493,6 +1527,7 @@ export function DateTimeRangePicker({
           <button
             aria-label={t('clear')}
             data-part="clear"
+            data-part-clear=""
             disabled={!editable}
             onClick={(event) => {
               setWork(EMPTY);
@@ -1509,12 +1544,14 @@ export function DateTimeRangePicker({
         ) : null}
         <input
           data-part="hidden-input"
+          data-part-hidden-input=""
           name={startName}
           type="hidden"
           value={start === null ? '' : toISODateTime(start)}
         />
         <input
           data-part="hidden-input"
+          data-part-hidden-input=""
           name={endName}
           type="hidden"
           value={end === null ? '' : toISODateTime(end)}
@@ -1524,7 +1561,7 @@ export function DateTimeRangePicker({
     </>
   );
 
-  const rootProps: DateTimeRangePickerRootProps = {
+  const rootProps: DateTimeRangePickerRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -1541,7 +1578,7 @@ export function DateTimeRangePicker({
     'data-ui': 'datetime-range-picker',
     'data-variant': resolvedVariant,
     ref: rootRef,
-  };
+  });
 
   return (
     <>
@@ -1575,7 +1612,7 @@ export function DateTimeRangePickerPreset({
   const range = typeof value === 'function' ? value() : value;
   const selected = context !== null && isSameDateTimeRange(context.held, range);
 
-  const rootProps: DateTimeRangePickerPresetRootProps = {
+  const rootProps: DateTimeRangePickerPresetRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'preset',
@@ -1587,7 +1624,7 @@ export function DateTimeRangePickerPreset({
     },
     ref: ref as React.Ref<HTMLElement>,
     type: 'button',
-  };
+  });
 
   return render === undefined ? (
     <button

@@ -108,6 +108,7 @@ export function escapeTabValue(value: string): string {
       <button
         aria-hidden="true"
         data-part="scroll"
+        data-part-scroll=""
         data-direction="start"
         type="button"
         tabindex="-1"
@@ -119,6 +120,7 @@ export function escapeTabValue(value: string): string {
       <button
         aria-hidden="true"
         data-part="scroll"
+        data-part-scroll=""
         data-direction="end"
         type="button"
         tabindex="-1"
@@ -133,7 +135,9 @@ export function escapeTabValue(value: string): string {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'tabs',
+    'data-ui-tabs': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-track]': 'resolvedTrack()',

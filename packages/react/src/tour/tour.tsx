@@ -802,7 +802,13 @@ export function Tour<Step extends TourStep = TourStep>(props: TourProps<Step>) {
     (destination ?? contentNode)?.focus();
   };
   const guard = !settings.modal && (
-    <span aria-hidden="true" data-part="focus-guard" onFocus={onGuardFocus} tabIndex={0} />
+    <span
+      aria-hidden="true"
+      data-part="focus-guard"
+      data-part-focus-guard=""
+      onFocus={onGuardFocus}
+      tabIndex={0}
+    />
   );
 
   const frame = (
@@ -813,27 +819,32 @@ export function Tour<Step extends TourStep = TourStep>(props: TourProps<Step>) {
       data-modal={settings.modal ? '' : undefined}
       data-open={visible && arrived ? '' : undefined}
       data-part="root"
+      data-part-root=""
       data-placement={anchored ? 'anchored' : 'centered'}
       data-size={settings.size}
       data-spot={spot.move}
       data-spotlight={spotlightOn ? '' : undefined}
       data-ui="tour"
+      data-ui-tour=""
       ref={setRootNode}
     >
       {(settings.modal || spotlightOn) && (
-        <div aria-hidden="true" data-part="backdrop">
-          {spotlightOn && <div data-part="spotlight" />}
+        <div aria-hidden="true" data-part="backdrop" data-part-backdrop="">
+          {spotlightOn && <div data-part="spotlight" data-part-spotlight="" />}
         </div>
       )}
       <div
         data-leaving={leaving ? '' : undefined}
         data-part="surface"
+        data-part-surface=""
         data-placement={anchored ? 'anchored' : 'centered'}
         data-ready={ready ? '' : undefined}
         ref={setSurfaceNode}
       >
         {guard}
-        {anchored && settings.arrow && <div data-part="arrow" ref={setArrowNode} />}
+        {anchored && settings.arrow && (
+          <div data-part="arrow" data-part-arrow="" ref={setArrowNode} />
+        )}
         {children ?? <TourAnatomy />}
         {guard}
       </div>

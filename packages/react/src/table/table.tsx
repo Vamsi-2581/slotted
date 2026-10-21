@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/table/table.css';
 
 import { nextSelection } from '@slotted/core/collection';
@@ -249,7 +250,7 @@ export function Table({
     value: currentValue,
   };
 
-  const rootProps: TableRootProps = {
+  const rootProps: TableRootProps = keyedProps({
     ...nativeProps,
     children,
     'data-cell-align': resolvedCellAlign,
@@ -264,7 +265,7 @@ export function Table({
     'data-ui': 'table',
     'data-variant': resolvedVariant,
     ref: attach,
-  };
+  });
 
   return (
     <TableContext.Provider value={context}>

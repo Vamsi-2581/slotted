@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/toggle/toggle.css';
 
 import { createControllable } from '@slotted/core/state';
@@ -55,17 +56,21 @@ export function Toggle({
     onRequest: (request) => onPressedChange?.(request.value, request as never),
   });
 
-  const rootProps: ToggleRootProps = {
+  const rootProps: ToggleRootProps = keyedProps({
     ...nativeProps,
     'aria-pressed': state.value,
     children: (
       <>
         {icon === undefined ? null : (
-          <span aria-hidden="true" data-part="icon">
+          <span aria-hidden="true" data-part="icon" data-part-icon="">
             {icon}
           </span>
         )}
-        {children === undefined ? null : <span data-part="label">{children}</span>}
+        {children === undefined ? null : (
+          <span data-part="label" data-part-label="">
+            {children}
+          </span>
+        )}
       </>
     ),
     className,
@@ -84,7 +89,7 @@ export function Toggle({
       if (state.request(next, activationReason(event), event)) setOwn(next);
     },
     style,
-  };
+  });
 
   return render === undefined ? (
     <button {...rootProps} disabled={disabled} ref={ref} type={type} />

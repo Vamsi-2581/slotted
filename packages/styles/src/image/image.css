@@ -20,7 +20,7 @@
    * `height` on the element, or `ratio` on the root, are the two ways to
    * decide, and both reserve the box before the first byte arrives.
    */
-  [data-ui='image'][data-part='root'] {
+  [data-ui-image][data-part-root] {
     --_fit: cover;
     --_position: var(--slotted-image-position, center);
     --_radius: var(--slotted-image-radius, var(--slotted-radius-none, 0px));
@@ -106,7 +106,7 @@
    * stood 0.016 pixels tall above the picture instead of over it (measured
    * with hover forced on the `interactive` scene).
    */
-  [data-ui='image'][data-part='root'] > * {
+  [data-ui-image][data-part-root] > * {
     grid-area: 1 / 1;
     min-inline-size: 0;
   }
@@ -121,7 +121,7 @@
    * picture keeps its intrinsic height; the family does not measure the
    * parent to do otherwise.
    */
-  [data-ui='image'][data-part='root'][data-layout='fill'] {
+  [data-ui-image][data-part-root][data-layout='fill'] {
     block-size: 100%;
     inline-size: 100%;
   }
@@ -134,7 +134,7 @@
    * pushed the caption under the picture out of the item (measured in the
    * first capture of the `in-context` scene).
    */
-  [data-ui='image'][data-part='root'][data-layout='framed'] {
+  [data-ui-image][data-part-root][data-layout='framed'] {
     inline-size: 100%;
   }
 
@@ -145,19 +145,19 @@
    * the blurred preview both read, so the preview is cropped exactly where
    * the picture will be. `cover` is stated in the base rule.
    */
-  [data-ui='image'][data-part='root'][data-fit='contain'] {
+  [data-ui-image][data-part-root][data-fit='contain'] {
     --_fit: contain;
   }
 
-  [data-ui='image'][data-part='root'][data-fit='fill'] {
+  [data-ui-image][data-part-root][data-fit='fill'] {
     --_fit: fill;
   }
 
-  [data-ui='image'][data-part='root'][data-fit='none'] {
+  [data-ui-image][data-part-root][data-fit='none'] {
     --_fit: none;
   }
 
-  [data-ui='image'][data-part='root'][data-fit='scale-down'] {
+  [data-ui-image][data-part-root][data-fit='scale-down'] {
     --_fit: scale-down;
   }
 
@@ -170,41 +170,41 @@
    * page is mirrored. `center` is stated in the base rule; `custom` is the
    * token written on the instance, read there.
    */
-  [data-ui='image'][data-part='root'][data-position='top'] {
+  [data-ui-image][data-part-root][data-position='top'] {
     --_position: top;
   }
 
-  [data-ui='image'][data-part='root'][data-position='bottom'] {
+  [data-ui-image][data-part-root][data-position='bottom'] {
     --_position: bottom;
   }
 
-  [data-ui='image'][data-part='root'][data-position='start'] {
+  [data-ui-image][data-part-root][data-position='start'] {
     --_position: left;
   }
 
-  [data-ui='image'][data-part='root'][data-position='end'] {
+  [data-ui-image][data-part-root][data-position='end'] {
     --_position: right;
   }
 
-  [data-ui='image'][data-part='root'][data-position='start']:dir(rtl) {
+  [data-ui-image][data-part-root][data-position='start']:dir(rtl) {
     --_position: right;
   }
 
-  [data-ui='image'][data-part='root'][data-position='end']:dir(rtl) {
+  [data-ui-image][data-part-root][data-position='end']:dir(rtl) {
     --_position: left;
   }
 
   /* ── Radius ───────────────────────────────────────────────────────────── */
 
-  [data-ui='image'][data-part='root'][data-radius='sm'] {
+  [data-ui-image][data-part-root][data-radius='sm'] {
     --_radius: var(--slotted-image-radius, var(--slotted-radius-sm, 4px));
   }
 
-  [data-ui='image'][data-part='root'][data-radius='md'] {
+  [data-ui-image][data-part-root][data-radius='md'] {
     --_radius: var(--slotted-image-radius, var(--slotted-radius-md, 6px));
   }
 
-  [data-ui='image'][data-part='root'][data-radius='lg'] {
+  [data-ui-image][data-part-root][data-radius='lg'] {
     --_radius: var(--slotted-image-radius, var(--slotted-radius-lg, 8px));
   }
 
@@ -216,7 +216,7 @@
    * everywhere else. Drawn as the inset ring the base rule already holds, so
    * the picture is the same size with the edge as without it.
    */
-  [data-ui='image'][data-part='root'][data-bordered] {
+  [data-ui-image][data-part-root][data-bordered] {
     --_edge: var(--slotted-border-subtle, ButtonBorder);
   }
 
@@ -228,7 +228,7 @@
    * last and so painted last, and takes no pointer, so a press on the edge
    * is a press on the link the root may be.
    */
-  [data-ui='image'][data-part='root']::after {
+  [data-ui-image][data-part-root]::after {
     border-radius: inherit;
     box-shadow: inset 0 0 0 var(--_edge-width) var(--_edge);
     content: '';
@@ -244,7 +244,7 @@
    * takes its box away, so the `<img>` inside it is the grid item and every
    * rule below reaches it the same way with sources and without.
    */
-  [data-ui='image'] [data-part='picture'] {
+  [data-ui-image] [data-part-picture] {
     display: contents;
   }
 
@@ -262,7 +262,7 @@
    * own `contain` — `aspect-ratio` reserves without cropping, and this
    * family is the one that decides to.
    */
-  [data-ui='image'][data-part='root'] [data-part='image'] {
+  [data-ui-image][data-part-root] [data-part-image] {
     block-size: auto;
     display: block;
     grid-area: 1 / 1;
@@ -274,13 +274,13 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='image'][data-part='root'][data-layout='fill'] [data-part='image'],
-  [data-ui='image'][data-part='root'][data-layout='framed'] [data-part='image'] {
+  [data-ui-image][data-part-root][data-layout='fill'] [data-part-image],
+  [data-ui-image][data-part-root][data-layout='framed'] [data-part-image] {
     block-size: 100%;
     inline-size: 100%;
   }
 
-  [data-ui='image'][data-part='root'][data-status='loaded'] [data-part='image'] {
+  [data-ui-image][data-part-root][data-status='loaded'] [data-part-image] {
     opacity: 1;
   }
 
@@ -290,7 +290,7 @@
    * width of the sentence (measured in the `error` scene). The element stays
    * in the tree with its name and takes no box; the fallback is the box.
    */
-  [data-ui='image'][data-part='root'][data-status='error'] [data-part='image'] {
+  [data-ui-image][data-part-root][data-status='error'] [data-part-image] {
     block-size: 0;
     inline-size: 0;
     min-block-size: 0;
@@ -306,7 +306,7 @@
    * flicker. It never takes a pointer: a press on a loading thumbnail is a
    * press on the link the root may be.
    */
-  [data-ui='image'][data-part='root'] [data-part='placeholder'] {
+  [data-ui-image][data-part-root] [data-part-placeholder] {
     background-color: var(--_ground);
     block-size: 100%;
     box-shadow: var(--_ground-edge);
@@ -327,7 +327,7 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='image'][data-part='root'][data-placeholder='none'] [data-part='placeholder'] {
+  [data-ui-image][data-part-root][data-placeholder='none'] [data-part-placeholder] {
     background-color: transparent;
     box-shadow: none;
   }
@@ -342,7 +342,7 @@
    * blur's, in a length rather than a scale step, because a scale step is a
    * distance between things and this is how far a pixel bleeds.
    */
-  [data-ui='image'][data-part='root'][data-placeholder='blur'] [data-part='placeholder'] > img {
+  [data-ui-image][data-part-root][data-placeholder='blur'] [data-part-placeholder] > img {
     block-size: 100%;
     display: block;
     filter: blur(var(--slotted-image-placeholder-blur, 1.25rem));
@@ -352,11 +352,11 @@
     transform: scale(1.08);
   }
 
-  [data-ui='image'][data-part='root'][data-status='loaded'] [data-part='placeholder'] {
+  [data-ui-image][data-part-root][data-status='loaded'] [data-part-placeholder] {
     opacity: 0;
   }
 
-  [data-ui='image'][data-part='root'][data-status='error'] [data-part='placeholder'] {
+  [data-ui-image][data-part-root][data-status='error'] [data-part-placeholder] {
     visibility: hidden;
   }
 
@@ -368,7 +368,7 @@
    * while the picture is fine. Given a minimum of its own because a picture
    * that reserved nothing and then failed has no box, and a glyph needs one.
    */
-  [data-ui='image'][data-part='root'] [data-part='fallback'] {
+  [data-ui-image][data-part-root] [data-part-fallback] {
     /**
      * The mark a picture leaves behind: the binding draws `image-off` in an
      * `Icon` unless the consumer projected content of their own, which
@@ -383,7 +383,7 @@
     display: none;
   }
 
-  [data-ui='image'][data-part='root'][data-status='error'] [data-part='fallback'] {
+  [data-ui-image][data-part-root][data-status='error'] [data-part-fallback] {
     background-color: var(--_ground);
     block-size: 100%;
     box-shadow: var(--_ground-edge);
@@ -412,15 +412,15 @@
    * that belongs to the control that holds the picture — but a `<button
    * disabled>` is the platform's, and a weak state holds itself back for it.
    */
-  [data-ui='image'][data-part='root']:any-link,
-  button[data-ui='image'][data-part='root'],
-  [data-ui='image'][data-part='root'][tabindex] {
+  [data-ui-image][data-part-root]:any-link,
+  button[data-ui-image][data-part-root],
+  [data-ui-image][data-part-root][tabindex] {
     cursor: pointer;
   }
 
-  [data-ui='image'][data-part='root']:any-link:not([data-disabled]):hover,
-  button[data-ui='image'][data-part='root']:not(:disabled):hover,
-  [data-ui='image'][data-part='root'][tabindex]:not([data-disabled]):hover {
+  [data-ui-image][data-part-root]:any-link:not([data-disabled]):hover,
+  button[data-ui-image][data-part-root]:not(:disabled):hover,
+  [data-ui-image][data-part-root][tabindex]:not([data-disabled]):hover {
     --_edge: var(--slotted-border-strong, CanvasText);
     /* Two pixels rather than one: a hairline over a photograph's own bright
        edge is not a hover anyone sees, and the ring is inset, so the width
@@ -433,7 +433,7 @@
    * missing the first time a consumer makes a picture a link. Drawn outside
    * the box at the theme's offset, over whatever the picture is on.
    */
-  [data-ui='image'][data-part='root']:focus-visible {
+  [data-ui-image][data-part-root]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }

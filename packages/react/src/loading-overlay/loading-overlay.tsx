@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/loading-overlay/loading-overlay.css';
 import '@slotted/styles/progress-indicator/progress-indicator.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
@@ -210,24 +211,29 @@ export function LoadingOverlay({
   const cancelProps: LoadingOverlayCancelProps = {
     children: resolved.cancelLabel,
     'data-part': 'cancel',
+    ...selectorKeyProps('part', 'cancel'),
     onClick: (event) => emitCancel(PRESS, event),
     ref: cancel,
     type: 'button',
   };
 
   const panelContent = (
-    <div data-part="panel" ref={setPanel} tabIndex={-1}>
-      <span data-part="indicator" {...(indicator === undefined ? { 'data-default': '' } : {})}>
+    <div data-part="panel" data-part-panel="" ref={setPanel} tabIndex={-1}>
+      <span
+        data-part="indicator"
+        data-part-indicator=""
+        {...(indicator === undefined ? { 'data-default': '' } : {})}
+      >
         {indicator ?? <Loader contained decorative size={resolved.size} />}
       </span>
       {/* The two lines are painted and not announced: the live region above
           already holds the same sentence, and a screen reader should hear a
           wait once. */}
-      <span aria-hidden="true" data-part="label">
+      <span aria-hidden="true" data-part="label" data-part-label="">
         {resolved.label}
       </span>
       {description === undefined ? null : (
-        <span aria-hidden="true" data-part="description">
+        <span aria-hidden="true" data-part="description" data-part-description="">
           {description}
         </span>
       )}
@@ -242,17 +248,29 @@ export function LoadingOverlay({
   const body: ReactNode = (
     <>
       {resolved.live === 'off' ? null : (
-        <span data-part="announcement" data-ui="visually-hidden" role="status">
+        <span
+          data-part="announcement"
+          data-part-announcement=""
+          data-ui="visually-hidden"
+          data-ui-visually-hidden=""
+          role="status"
+        >
           {announcement}
         </span>
       )}
       {scope === 'page' ? null : (
-        <div data-part="content" ref={content} {...(painted ? { inert: true } : {})}>
+        <div
+          data-part="content"
+          data-part-content=""
+          ref={content}
+          {...(painted ? { inert: true } : {})}
+        >
           {children}
         </div>
       )}
       <div
         data-part="scrim"
+        data-part-scrim=""
         onKeyDown={onKeyDown}
         ref={setScrim}
         {...(painted ? { 'data-loading': '' } : {})}
@@ -262,7 +280,7 @@ export function LoadingOverlay({
     </>
   );
 
-  const rootProps: LoadingOverlayRootProps = {
+  const rootProps: LoadingOverlayRootProps = keyedProps({
     ...nativeProps,
     /* ARIA 1.2 asks for it on the region until it is finished loading. Page
        scope writes it nowhere: the busy region would be the document root, and
@@ -275,7 +293,7 @@ export function LoadingOverlay({
     'data-ui': 'loading-overlay',
     'data-veil': resolved.veil,
     ...(painted ? { 'data-loading': '' } : {}),
-  };
+  });
 
   const element =
     render === undefined ? (

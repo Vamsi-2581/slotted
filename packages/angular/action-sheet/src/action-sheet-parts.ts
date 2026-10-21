@@ -50,6 +50,7 @@ const uniqueId = (prefix: string) => `${prefix}-${(nextId += 1)}`;
   exportAs: 'slActionSheetTrigger',
   host: {
     'data-part': 'trigger',
+    'data-part-trigger': '',
     type: 'button',
     'aria-haspopup': 'dialog',
     '[attr.aria-expanded]': 'sheet().open()',
@@ -92,7 +93,7 @@ export class SlActionSheetTrigger implements OnInit, OnDestroy {
 @Directive({
   selector: '[slActionSheetHeader]',
   standalone: true,
-  host: { 'data-part': 'header' },
+  host: { 'data-part': 'header', 'data-part-header': '' },
 })
 export class SlActionSheetHeader {}
 
@@ -100,7 +101,7 @@ export class SlActionSheetHeader {}
 @Directive({
   selector: '[slActionSheetTitle]',
   standalone: true,
-  host: { 'data-part': 'title', '[attr.id]': 'sheet.titleId()' },
+  host: { 'data-part': 'title', 'data-part-title': '', '[attr.id]': 'sheet.titleId()' },
 })
 export class SlActionSheetTitle implements OnInit, OnDestroy {
   protected readonly sheet = inject(SlActionSheet);
@@ -118,7 +119,7 @@ export class SlActionSheetTitle implements OnInit, OnDestroy {
 @Directive({
   selector: '[slActionSheetMessage]',
   standalone: true,
-  host: { 'data-part': 'message', '[attr.id]': 'sheet.messageId()' },
+  host: { 'data-part': 'message', 'data-part-message': '', '[attr.id]': 'sheet.messageId()' },
 })
 export class SlActionSheetMessage implements OnInit, OnDestroy {
   protected readonly sheet = inject(SlActionSheet);
@@ -142,6 +143,7 @@ export class SlActionSheetMessage implements OnInit, OnDestroy {
   exportAs: 'slActionSheetList',
   host: {
     'data-part': 'list',
+    'data-part-list': '',
     role: 'menu',
     'aria-orientation': 'vertical',
     '[attr.aria-labelledby]': 'labelledBy()',
@@ -208,7 +210,7 @@ export class SlActionSheetList implements OnInit, AfterContentChecked {
 @Directive({
   selector: '[slActionSheetGroupLabel]',
   standalone: true,
-  host: { 'data-part': 'group-label', '[id]': 'id' },
+  host: { 'data-part': 'group-label', 'data-part-group-label': '', '[id]': 'id' },
 })
 export class SlActionSheetGroupLabel {
   readonly id = uniqueId('slotted-action-sheet-group-label');
@@ -220,6 +222,7 @@ export class SlActionSheetGroupLabel {
   standalone: true,
   host: {
     'data-part': 'group',
+    'data-part-group': '',
     role: 'group',
     '[attr.aria-labelledby]': 'label()?.id ?? null',
   },
@@ -231,7 +234,7 @@ export class SlActionSheetGroup {
 @Directive({
   selector: 'hr[slActionSheetSeparator]',
   standalone: true,
-  host: { 'data-part': 'separator', role: 'separator' },
+  host: { 'data-part': 'separator', 'data-part-separator': '', role: 'separator' },
 })
 export class SlActionSheetSeparator {}
 
@@ -239,7 +242,7 @@ export class SlActionSheetSeparator {}
 @Directive({
   selector: '[slActionSheetItemIcon]',
   standalone: true,
-  host: { 'data-part': 'icon', 'aria-hidden': 'true' },
+  host: { 'data-part': 'icon', 'data-part-icon': '', 'aria-hidden': 'true' },
 })
 export class SlActionSheetItemIcon {}
 
@@ -247,7 +250,7 @@ export class SlActionSheetItemIcon {}
 @Directive({
   selector: '[slActionSheetItemDescription]',
   standalone: true,
-  host: { 'data-part': 'description', '[id]': 'id' },
+  host: { 'data-part': 'description', 'data-part-description': '', '[id]': 'id' },
 })
 export class SlActionSheetItemDescription {
   readonly id = uniqueId('slotted-action-sheet-description');
@@ -269,6 +272,7 @@ export class SlActionSheetItemDescription {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'item',
+    'data-part-item': '',
     role: 'menuitem',
     tabindex: '-1',
     '[attr.type]': 'isLink ? null : "button"',
@@ -289,11 +293,13 @@ export class SlActionSheetItemDescription {
   },
   template: `
     @if (loading()) {
-      <span data-part="icon" aria-hidden="true"><span data-ui="spinner"></span></span>
+      <span data-part="icon" data-part-icon="" aria-hidden="true"
+        ><span data-ui="spinner" data-ui-spinner=""></span
+      ></span>
     } @else {
       <ng-content select="[slActionSheetItemIcon]" />
     }
-    <span data-part="label"><ng-content /></span>
+    <span data-part="label" data-part-label=""><ng-content /></span>
     <ng-content select="[slActionSheetItemDescription]" />
   `,
 })
@@ -364,7 +370,7 @@ export class SlActionSheetItem {
 @Directive({
   selector: '[slActionSheetFooter]',
   standalone: true,
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlActionSheetFooter {}
 
@@ -379,6 +385,7 @@ export class SlActionSheetFooter {}
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'cancel',
+    'data-part-cancel': '',
     type: 'button',
     '[disabled]': 'false',
     '(click)': 'onClick($event)',

@@ -42,13 +42,15 @@ import { SlShortcutAxes } from './kbd-axes';
    * space inside the key's word.
    */
   // prettier-ignore
-  template: `<span data-part="legend" [attr.aria-hidden]="key() ? true : null" [attr.data-legend]="key()?.symbolic ? 'symbol' : null">@if (key(); as resolved) {{{ resolved.legend }}} @else {<ng-content></ng-content>}</span>@if (key()?.name; as name) {<span data-part="name">{{ name }}</span>}`,
+  template: `<span data-part="legend" data-part-legend="" [attr.aria-hidden]="key() ? true : null" [attr.data-legend]="key()?.symbolic ? 'symbol' : null">@if (key(); as resolved) {{{ resolved.legend }}} @else {<ng-content></ng-content>}</span>@if (key()?.name; as name) {<span data-part="name" data-part-name="">{{ name }}</span>}`,
   styleUrl: '../../../styles/src/kbd/kbd.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'kbd',
+    'data-ui-kbd': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-key]': 'key()?.token ?? null',

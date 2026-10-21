@@ -97,23 +97,28 @@ export function ChipRow({
   }, [frame, onNarrow]);
 
   return (
-    <span data-part="tags" ref={row}>
+    <span data-part="tags" data-part-tags="" ref={row}>
       {values.map((value) => {
         const label = labelFor(value) ?? String(value);
         return (
           <span
             data-part="root"
+            data-part-root=""
             data-size="sm"
             data-ui="tag"
+            data-ui-tag=""
             data-variant="soft"
             key={String(value)}
           >
-            <span data-part="body">
-              <span data-part="label">{label}</span>
+            <span data-part="body" data-part-body="">
+              <span data-part="label" data-part-label="">
+                {label}
+              </span>
             </span>
             <button
               aria-label={removeLabel(label)}
               data-part="remove"
+              data-part-remove=""
               disabled={disabled}
               onClick={(event) => onRemove(value, event)}
               type="button"
@@ -133,14 +138,16 @@ export function ChipRow({
       <span
         data-overflow=""
         data-part="root"
+        data-part-root=""
         data-size="sm"
         data-ui="tag"
+        data-ui-tag=""
         data-variant="soft"
         hidden
         ref={overflow}
       >
-        <span data-part="body">
-          <span data-part="label">{`+${Math.max(hidden, 1)}`}</span>
+        <span data-part="body" data-part-body="">
+          <span data-part="label" data-part-label="">{`+${Math.max(hidden, 1)}`}</span>
         </span>
       </span>
     </span>

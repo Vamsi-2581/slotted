@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/status-indicator/status-indicator.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -58,7 +59,7 @@ export function StatusIndicator({
 
   const name = label ?? t(status);
 
-  const rootProps: StatusIndicatorRootProps = {
+  const rootProps: StatusIndicatorRootProps = keyedProps({
     ...nativeProps,
     /**
      * The mark is hidden rather than left to be ignored. It is a painted dot
@@ -73,16 +74,21 @@ export function StatusIndicator({
      */
     children: (
       <>
-        <span aria-hidden="true" data-part="mark">
+        <span aria-hidden="true" data-part="mark" data-part-mark="">
           {resolved.mark === 'icon' ? (
             <Icon>
               <Glyph name={STATUS_INDICATOR_GLYPHS[status]} />
             </Icon>
           ) : null}
         </span>
-        <span data-part="label">
+        <span data-part="label" data-part-label="">
           {children ?? (
-            <span data-part="announcement" data-ui="visually-hidden">
+            <span
+              data-part="announcement"
+              data-part-announcement=""
+              data-ui="visually-hidden"
+              data-ui-visually-hidden=""
+            >
               {name}
             </span>
           )}
@@ -100,7 +106,7 @@ export function StatusIndicator({
     ...(role === undefined && ROLE[resolved.live] !== undefined
       ? { role: ROLE[resolved.live] }
       : {}),
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

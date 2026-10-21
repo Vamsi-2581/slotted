@@ -381,7 +381,7 @@ export const Composition: Story = {
       <p slText>
         Approved by
         <ng-container slHoverCard [open]="true" [portal]="false">
-          <a slHoverCardTrigger href="/people/ana.souza" data-part="mention">Ana Souza</a>
+          <a slHoverCardTrigger href="/people/ana.souza" data-part="mention" data-part-mention="">Ana Souza</a>
           <ng-template slPopoverLayer>
             <div slPopoverContent>
               <div slPopoverHeader>

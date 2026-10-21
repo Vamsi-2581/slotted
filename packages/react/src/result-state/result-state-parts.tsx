@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createContext, useContext, useEffect } from 'react';
 
 import type {
@@ -70,11 +71,11 @@ export function ResultStateContent({ render, ...nativeProps }: ResultStateConten
   const { live } = useResultStateContext('Content');
   const role = LIVE_ROLE[live];
 
-  const partProps: ResultStatePartProps = {
+  const partProps: ResultStatePartProps = keyedProps({
     ...nativeProps,
     ...(role === undefined ? {} : { role }),
     'data-part': 'content',
-  };
+  });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
@@ -97,18 +98,18 @@ export function ResultStateTitle({ render, ...nativeProps }: ResultStateTitlePro
     return () => registerTitle(null);
   }, [id, registerTitle]);
 
-  const partProps: ResultStatePartProps = {
+  const partProps: ResultStatePartProps = keyedProps({
     ...nativeProps,
     'data-part': 'title',
     id,
-  };
+  });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
 
 /** The message. A `p`, because that is what a paragraph of prose is. */
 export function ResultStateDescription({ render, ...nativeProps }: ResultStateDescriptionProps) {
-  const partProps = { ...nativeProps, 'data-part': 'description' } as const;
+  const partProps = keyedProps({ ...nativeProps, 'data-part': 'description' } as const);
 
   return render === undefined ? <p {...partProps} /> : render(partProps);
 }
@@ -120,7 +121,7 @@ export function ResultStateDescription({ render, ...nativeProps }: ResultStateDe
  * retry in flight is.
  */
 export function ResultStateActions({ render, ...nativeProps }: ResultStateActionsProps) {
-  const partProps: ResultStatePartProps = { ...nativeProps, 'data-part': 'actions' };
+  const partProps: ResultStatePartProps = keyedProps({ ...nativeProps, 'data-part': 'actions' });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }
@@ -131,7 +132,7 @@ export function ResultStateActions({ render, ...nativeProps }: ResultStateAction
  * and both are right that it is neither of the buttons above it.
  */
 export function ResultStateFooter({ render, ...nativeProps }: ResultStateFooterProps) {
-  const partProps: ResultStatePartProps = { ...nativeProps, 'data-part': 'footer' };
+  const partProps: ResultStatePartProps = keyedProps({ ...nativeProps, 'data-part': 'footer' });
 
   return render === undefined ? <div {...partProps} /> : render(partProps);
 }

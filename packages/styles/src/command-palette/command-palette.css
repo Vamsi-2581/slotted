@@ -23,7 +23,7 @@
    * The layer, the scrim, the motion of arriving and leaving, the focus
    * containment and the Escape that closes are `dialog`'s: the panel stands
    * inside a dialog whose surface is `plain`, and `identity.test.mjs` keeps
-   * this sheet off `[data-ui='dialog']`. The keys in an item's shortcut and in
+   * this sheet off `[data-ui-dialog]`. The keys in an item's shortcut and in
    * the footer's hints are `kbd`'s, worn as `data-ui='kbd'` under this family's
    * own `shortcut` and `hint` parts, so every selector on those two parts is a
    * child selector and never reaches the caps inside them. The mark on the
@@ -57,7 +57,7 @@
    * down. Only the panel's own radius and the list's inset come off the space
    * and radius scales.
    */
-  [data-ui='command-palette'] {
+  [data-ui-command-palette] {
     --_surface: var(--slotted-command-palette-surface, var(--slotted-surface-raised, #ffffff));
     --_text: var(--slotted-command-palette-text, var(--slotted-text, #0f172a));
     --_muted: var(--slotted-command-palette-text-muted, var(--slotted-text-muted, #5b6b7f));
@@ -137,7 +137,7 @@
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='command-palette'][data-size='sm'] {
+  [data-ui-command-palette][data-size='sm'] {
     --_item-height: var(--slotted-control-height-sm, 30px);
     --_item-inset: var(--slotted-control-padding-inline-sm, 10px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
@@ -150,7 +150,7 @@
     --_chip-size: var(--slotted-control-inner-size-sm, 22px);
   }
 
-  [data-ui='command-palette'][data-size='lg'] {
+  [data-ui-command-palette][data-size='lg'] {
     --_item-height: var(--slotted-control-height-lg, 38px);
     --_item-inset: var(--slotted-control-padding-inline-lg, 16px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
@@ -172,7 +172,7 @@
    * something else — so it draws no edge and no ground of its own, and the
    * rule under the header is the one line between the field and the list.
    */
-  [data-ui='command-palette'] > [data-part='header'] {
+  [data-ui-command-palette] > [data-part-header] {
     align-items: center;
     border-block-end: var(--_border-width) solid var(--_border-color);
     box-sizing: border-box;
@@ -194,8 +194,7 @@
    * a bottom edge: `state-rail.test.mjs` (R1) refuses a state rail on the
    * start or the top edge, and this is neither.
    */
-  [data-ui='command-palette']
-    > [data-part='header']:has(> [data-part='input']:focus-visible)::after {
+  [data-ui-command-palette] > [data-part-header]:has(> [data-part-input]:focus-visible)::after {
     background-color: var(--slotted-focus-ring-color, currentColor);
     block-size: var(--slotted-focus-ring-width, 2px);
     content: '';
@@ -205,7 +204,7 @@
     position: absolute;
   }
 
-  [data-ui='command-palette'] :is([data-part='search'], [data-part='busy']) {
+  [data-ui-command-palette] :is([data-part-search], [data-part-busy]) {
     color: var(--_muted);
     flex: none;
   }
@@ -215,7 +214,7 @@
    * icon box at the header's icon size so it sits on the field's line; a
    * character is never an icon.
    */
-  [data-ui='command-palette'] [data-part='search'] {
+  [data-ui-command-palette] [data-part-search] {
     --slotted-icon-size: var(--_header-icon-size);
 
     display: flex;
@@ -226,7 +225,7 @@
    * `spinner/spinner.css`'s, worn as `data-ui='spinner'` beside this family's
    * part, and this family only says where it stands and how big it is.
    */
-  [data-ui='command-palette'] [data-part='busy'] {
+  [data-ui-command-palette] [data-part-busy] {
     --slotted-spinner-size: var(--_header-icon-size);
   }
 
@@ -237,7 +236,7 @@
    * Each is a control that returns to its page; the last one is where the
    * reader is and reads as the field's own prefix.
    */
-  [data-ui='command-palette'] [data-part='pages'] {
+  [data-ui-command-palette] [data-part-pages] {
     align-items: center;
     display: flex;
     flex: none;
@@ -249,11 +248,11 @@
     padding: 0;
   }
 
-  [data-ui='command-palette'] [data-part='pages'] > li {
+  [data-ui-command-palette] [data-part-pages] > li {
     display: contents;
   }
 
-  [data-ui='command-palette'] [data-part='page'] {
+  [data-ui-command-palette] [data-part-page] {
     align-items: center;
     appearance: none;
     background-color: var(--slotted-command-palette-page-surface, var(--_hover));
@@ -284,32 +283,32 @@
     white-space: nowrap;
   }
 
-  [data-ui='command-palette'] [data-part='page'] > span {
+  [data-ui-command-palette] [data-part-page] > span {
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   /* A chip inside the header is shorter than the target minimum at every
      density; the hit area is recovered outside its paint. */
-  [data-ui='command-palette'] [data-part='page']::after {
+  [data-ui-command-palette] [data-part-page]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
   }
 
-  [data-ui='command-palette'] [data-part='page']:not(:disabled):hover {
+  [data-ui-command-palette] [data-part-page]:not(:disabled):hover {
     background-color: var(--_active);
     color: var(--_text);
   }
 
-  [data-ui='command-palette'] [data-part='page']:not(:disabled):active {
+  [data-ui-command-palette] [data-part-page]:not(:disabled):active {
     background-color: var(--_active);
   }
 
   /* Drawn one width inside the chip, as a chip in a scrolling row draws it:
      the header clips at its padding edge and a ring at the theme's offset
      would lose its outer half. */
-  [data-ui='command-palette'] [data-part='page']:focus-visible {
+  [data-ui-command-palette] [data-part-page]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
@@ -321,7 +320,7 @@
    * right-to-left document so the trail reads in the direction the reader
    * reads.
    */
-  [data-ui='command-palette'] [data-part='pages'] > li > [data-ui='icon'] {
+  [data-ui-command-palette] [data-part-pages] > li > [data-ui-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     color: var(--_muted);
@@ -330,7 +329,7 @@
 
   /* ── The field ────────────────────────────────────────────────────────── */
 
-  [data-ui='command-palette'] [data-part='input'] {
+  [data-ui-command-palette] [data-part-input] {
     appearance: none;
     background: transparent;
     block-size: 100%;
@@ -349,7 +348,7 @@
     padding: 0;
   }
 
-  [data-ui='command-palette'] [data-part='input']::placeholder {
+  [data-ui-command-palette] [data-part-input]::placeholder {
     color: var(--_muted);
     opacity: 1;
   }
@@ -362,7 +361,7 @@
    * or not — measured on the Nexora palette at 390 pixels. Only while the
    * placeholder shows: what the reader types is never faded under the caret.
    */
-  [data-ui='command-palette'] [data-part='input']:placeholder-shown {
+  [data-ui-command-palette] [data-part-input]:placeholder-shown {
     mask-image: linear-gradient(
       to right,
       #000 calc(100% - var(--slotted-command-palette-placeholder-fade, 2em)),
@@ -372,8 +371,8 @@
 
   /* The browser's own clear and its search decoration, which the family
      draws itself so the two schemes and the three densities agree. */
-  [data-ui='command-palette'] [data-part='input']::-webkit-search-cancel-button,
-  [data-ui='command-palette'] [data-part='input']::-webkit-search-decoration {
+  [data-ui-command-palette] [data-part-input]::-webkit-search-cancel-button,
+  [data-ui-command-palette] [data-part-input]::-webkit-search-decoration {
     appearance: none;
   }
 
@@ -384,7 +383,7 @@
    * because Escape already clears and a second stop before the list is a
    * stop nobody asked for.
    */
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='clear'] {
+  [data-ui-command-palette] > [data-part-header] > [data-part-clear] {
     --_clear-size: min(
       calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)),
       var(--slotted-control-inner-size-md, 24px)
@@ -412,7 +411,7 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']::after {
+  [data-ui-command-palette] > [data-part-header] > [data-part-clear]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -423,27 +422,27 @@
      the hit area above grows to 44 pixels around them. It does not reach
      across the close control after it. */
   @media (pointer: coarse) {
-    [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']::after {
+    [data-ui-command-palette] > [data-part-header] > [data-part-clear]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='command-palette']
-      > [data-part='header']
-      > [data-part='clear']:has(+ [data-part='close'])::after {
+    [data-ui-command-palette]
+      > [data-part-header]
+      > [data-part-clear]:has(+ [data-part-close])::after {
       inset-inline-end: 0;
     }
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']:not(:disabled):hover {
+  [data-ui-command-palette] > [data-part-header] > [data-part-clear]:not(:disabled):hover {
     background-color: var(--_hover);
     color: var(--_text);
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']:not(:disabled):active {
+  [data-ui-command-palette] > [data-part-header] > [data-part-clear]:not(:disabled):active {
     background-color: var(--_active);
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='clear']:focus-visible {
+  [data-ui-command-palette] > [data-part-header] > [data-part-clear]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
@@ -451,7 +450,7 @@
 
   /* Present in the DOM whenever the family renders it, drawn only with a
      query: a clear beside an empty field is a control with nothing to do. */
-  [data-ui='command-palette']:not([data-query]) > [data-part='header'] > [data-part='clear'] {
+  [data-ui-command-palette]:not([data-query]) > [data-part-header] > [data-part-clear] {
     display: none;
   }
 
@@ -463,7 +462,7 @@
    * beside a search field reads as clear, which is what `clear` already is.
    * Drawn only under the dialog's own full-screen query, below.
    */
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='close'] {
+  [data-ui-command-palette] > [data-part-header] > [data-part-close] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -483,15 +482,15 @@
     white-space: nowrap;
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='close']:not(:disabled):hover {
+  [data-ui-command-palette] > [data-part-header] > [data-part-close]:not(:disabled):hover {
     background-color: var(--_hover);
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='close']:not(:disabled):active {
+  [data-ui-command-palette] > [data-part-header] > [data-part-close]:not(:disabled):active {
     background-color: var(--_active);
   }
 
-  [data-ui='command-palette'] > [data-part='header'] > [data-part='close']:focus-visible {
+  [data-ui-command-palette] > [data-part-header] > [data-part-close]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
@@ -503,7 +502,7 @@
    * Five columns, bounded, scrolling. `overscroll-behavior` keeps the page —
    * or the popover — still once the list has scrolled to its end.
    */
-  [data-ui='command-palette'] > [data-part='list'] {
+  [data-ui-command-palette] > [data-part-list] {
     box-sizing: border-box;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto auto auto;
@@ -517,19 +516,19 @@
     scroll-padding-block: var(--_list-inset);
   }
 
-  [data-ui='command-palette'] > [data-part='list'][data-loading] {
+  [data-ui-command-palette] > [data-part-list][data-loading] {
     cursor: progress;
   }
 
   /* ── Groups ───────────────────────────────────────────────────────────── */
 
-  [data-ui='command-palette'] [data-part='group'] {
+  [data-ui-command-palette] [data-part-group] {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
   }
 
-  [data-ui='command-palette'] [data-part='group-label'] {
+  [data-ui-command-palette] [data-part-group-label] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -548,7 +547,7 @@
    * `min-block-size` rather than a height, because an item with a description
    * is two lines tall and still has to clear the target minimum.
    */
-  [data-ui='command-palette'] [data-part='item'] {
+  [data-ui-command-palette] [data-part-item] {
     align-content: center;
     border-radius: var(--_item-radius);
     box-sizing: border-box;
@@ -582,11 +581,11 @@
    * moves; the two are told apart so a reader who arrowed to one row while the
    * pointer rests on another reads exactly one cursor.
    */
-  [data-ui='command-palette'] [data-part='item']:not([data-disabled]):not([data-current]):hover {
+  [data-ui-command-palette] [data-part-item]:not([data-disabled]):not([data-current]):hover {
     background-color: var(--_hover);
   }
 
-  [data-ui='command-palette'] [data-part='item']:not([data-disabled]):not([data-current]):active {
+  [data-ui-command-palette] [data-part-item]:not([data-disabled]):not([data-current]):active {
     background-color: var(--_active);
   }
 
@@ -597,13 +596,13 @@
    * of row is a reading, not a movement, and a transition lags behind a reader
    * holding ArrowDown.
    */
-  [data-ui='command-palette'] [data-part='item'][data-current] {
+  [data-ui-command-palette] [data-part-item][data-current] {
     background-color: var(--_highlight);
     box-shadow: inset 0 0 0 var(--slotted-border-width-thin, 1px) var(--_highlight-ring);
     transition: none;
   }
 
-  [data-ui='command-palette'] [data-part='item'][data-current]:not([data-disabled]):active {
+  [data-ui-command-palette] [data-part-item][data-current]:not([data-disabled]):active {
     background-color: var(--_active);
   }
 
@@ -612,7 +611,7 @@
    * current — `moveIndex` skips it and the pointer does not highlight it. The
    * hand goes, because there is nothing to press.
    */
-  [data-ui='command-palette'] [data-part='item'][data-disabled] {
+  [data-ui-command-palette] [data-part-item][data-disabled] {
     color: var(--slotted-disabled-foreground, #64748b);
     cursor: not-allowed;
   }
@@ -620,11 +619,11 @@
   /* A handler that has not answered yet: the cursor says so, and the ring
      `spinner` draws stands in the last column, where the arrow of a page
      item stands, sized to the row's own glyph. */
-  [data-ui='command-palette'] [data-part='item'][data-loading] {
+  [data-ui-command-palette] [data-part-item][data-loading] {
     cursor: progress;
   }
 
-  [data-ui='command-palette'] [data-part='item'] > [data-part='busy'] {
+  [data-ui-command-palette] [data-part-item] > [data-part-busy] {
     --slotted-spinner-size: var(--_icon-size);
 
     color: var(--_muted);
@@ -648,7 +647,7 @@
    * the child and not on the box, because the box's `1lh` reads the item's
    * line box.
    */
-  [data-ui='command-palette'] [data-part='icon'] {
+  [data-ui-command-palette] [data-part-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -665,7 +664,7 @@
     margin-inline-end: calc(var(--_column-gap) + var(--slotted-space-2, 0.25rem));
   }
 
-  [data-ui='command-palette'] [data-part='icon']:not(:empty) > * {
+  [data-ui-command-palette] [data-part-icon]:not(:empty) > * {
     block-size: var(--_icon-size);
     font-size: var(--_icon-size);
     inline-size: var(--_icon-size);
@@ -677,7 +676,7 @@
    * is three rows pretending to be one. The whole text is on the item's
    * `title` and reachable by the reader, so nothing leaves the DOM.
    */
-  [data-ui='command-palette'] [data-part='label'] {
+  [data-ui-command-palette] [data-part-label] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;
@@ -686,7 +685,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='command-palette'] [data-part='description'] {
+  [data-ui-command-palette] [data-part-description] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     grid-column: 2;
@@ -698,7 +697,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='command-palette'] [data-part='item'][data-disabled] > [data-part='description'] {
+  [data-ui-command-palette] [data-part-item][data-disabled] > [data-part-description] {
     color: inherit;
   }
 
@@ -709,14 +708,14 @@
    * label's line box stretched that row, and the description under it dropped
    * by the difference — a gap that opened only on rows with a binding.
    */
-  [data-ui='command-palette']
-    [data-part='item']
-    > :is([data-part='meta'], [data-part='shortcut'], [data-part='arrow'], [data-part='busy']) {
+  [data-ui-command-palette]
+    [data-part-item]
+    > :is([data-part-meta], [data-part-shortcut], [data-part-arrow], [data-part-busy]) {
     align-self: center;
     grid-row: 1 / -1;
   }
 
-  [data-ui='command-palette'] [data-part='meta'] {
+  [data-ui-command-palette] [data-part-meta] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     grid-column: 3;
@@ -728,9 +727,7 @@
   /* A word on a row with no binding takes the binding's column too, so it
      ends where the bindings on the rows around it end rather than a column
      short of them. */
-  [data-ui='command-palette']
-    [data-part='item']:not(:has(> [data-part='shortcut']))
-    > [data-part='meta'] {
+  [data-ui-command-palette] [data-part-item]:not(:has(> [data-part-shortcut])) > [data-part-meta] {
     grid-column: 3 / 5;
   }
 
@@ -739,7 +736,7 @@
    * rule places the column and states its ink; every selector stops at the
    * part and never reaches the caps.
    */
-  [data-ui='command-palette'] [data-part='item'] > [data-part='shortcut'] {
+  [data-ui-command-palette] [data-part-item] > [data-part-shortcut] {
     align-items: center;
     color: var(--_muted);
     display: inline-flex;
@@ -757,9 +754,9 @@
     white-space: nowrap;
   }
 
-  [data-ui='command-palette']
-    [data-part='item'][data-disabled]
-    > :is([data-part='meta'], [data-part='shortcut']) {
+  [data-ui-command-palette]
+    [data-part-item][data-disabled]
+    > :is([data-part-meta], [data-part-shortcut]) {
     color: inherit;
   }
 
@@ -769,7 +766,7 @@
    * glyph in a `directional` icon box, which mirrors in a right-to-left
    * document; the column is one line box tall and centres it.
    */
-  [data-ui='command-palette'] [data-part='arrow'] {
+  [data-ui-command-palette] [data-part-arrow] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -790,7 +787,7 @@
    * painted them as one-pixel rules — the bar over the word, and the word
    * itself pushed out of a box one pixel tall.
    */
-  [data-ui='command-palette'] > [data-part='list'] [data-part='separator']:not([data-separator]) {
+  [data-ui-command-palette] > [data-part-list] [data-part-separator]:not([data-separator]) {
     background-color: var(--slotted-command-palette-separator-color, var(--_border-color));
     block-size: var(--_border-width);
     border: 0;
@@ -799,7 +796,7 @@
     margin-inline: 0;
   }
 
-  [data-ui='command-palette'] [data-part='empty'] {
+  [data-ui-command-palette] [data-part-empty] {
     color: var(--_muted);
     grid-column: 1 / -1;
     padding-block: var(--slotted-space-8, 1.5rem);
@@ -814,7 +811,7 @@
    * what the reader is looking at. The clip is the visually-hidden idiom, kept
    * in the DOM so `role="status"` has something to announce from.
    */
-  [data-ui='command-palette'] > [data-part='status'] {
+  [data-ui-command-palette] > [data-part-status] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -829,24 +826,24 @@
    * of an item, `combobox`'s decision for `combobox`'s reasons. The bars are
    * `skeleton/skeleton.css`'s; this family places them.
    */
-  [data-ui='command-palette'] [data-part='placeholder'] {
+  [data-ui-command-palette] [data-part-placeholder] {
     display: grid;
     grid-column: 1 / -1;
     padding-block: var(--slotted-space-2, 0.25rem);
     padding-inline: var(--_item-inset);
   }
 
-  [data-ui='command-palette'] [data-part='placeholder'] > * {
+  [data-ui-command-palette] [data-part-placeholder] > * {
     align-items: center;
     display: flex;
     min-block-size: var(--_item-height);
   }
 
-  [data-ui='command-palette'] [data-part='placeholder'] > :nth-child(2) [data-ui='skeleton'] {
+  [data-ui-command-palette] [data-part-placeholder] > :nth-child(2) [data-ui-skeleton] {
     inline-size: 78%;
   }
 
-  [data-ui='command-palette'] [data-part='placeholder'] > :nth-child(3) [data-ui='skeleton'] {
+  [data-ui-command-palette] [data-part-placeholder] > :nth-child(3) [data-ui-skeleton] {
     inline-size: 56%;
   }
 
@@ -857,7 +854,7 @@
    * `kbd`'s in its `plain` variant at the small step; the words beside them
    * are this family's, one step quieter than the list.
    */
-  [data-ui='command-palette'] > [data-part='footer'] {
+  [data-ui-command-palette] > [data-part-footer] {
     align-items: center;
     background: var(
       --slotted-command-palette-footer-surface,
@@ -876,7 +873,7 @@
     padding-inline: var(--_header-inset);
   }
 
-  [data-ui='command-palette'] > [data-part='footer'] > [data-part='hint'] {
+  [data-ui-command-palette] > [data-part-footer] > [data-part-hint] {
     align-items: center;
     display: inline-flex;
     /* The caps read the footer's own size through `kbd` at `inherit`, a tenth
@@ -892,7 +889,7 @@
    * because a line box of 1.4 is centred on its leading and not on its
    * letters. `line-height: 1` centres the em box, which is where the word is.
    */
-  [data-ui='command-palette'] > [data-part='footer'] > [data-part='hint'] > span:not([data-ui]) {
+  [data-ui-command-palette] > [data-part-footer] > [data-part-hint] > span:not([data-ui]) {
     font-size: var(--slotted-font-size-xs, 0.75rem);
     line-height: 1;
   }
@@ -905,15 +902,15 @@
    * third of the header so the field is never squeezed to nothing.
    */
   @container command-palette (max-width: 360px) {
-    [data-ui='command-palette'] :is([data-part='description'], [data-part='meta']) {
+    [data-ui-command-palette] :is([data-part-description], [data-part-meta]) {
       display: none;
     }
 
-    [data-ui='command-palette'] [data-part='pages'] {
+    [data-ui-command-palette] [data-part-pages] {
       max-inline-size: 33%;
     }
 
-    [data-ui='command-palette'] > [data-part='footer'] {
+    [data-ui-command-palette] > [data-part-footer] {
       gap: var(--slotted-space-4, 0.5rem);
     }
   }
@@ -925,13 +922,13 @@
    * edge is this panel's. The panel is asked the same question the dialog
    * asked, of the dialog's own named container, so the two answer together:
    * the corner, the side edges and the lift go, and the list takes the rest
-   * of the screen. Written here rather than on `[data-ui='dialog']` because
+   * of the screen. Written here rather than on `[data-ui-dialog]` because
    * `identity.test.mjs` keeps this sheet off another family's identifier;
    * the container name and the breakpoint are the dialog's, recorded in
    * `dialog.css` beside its own query.
    */
   @container slotted-dialog (max-inline-size: 30rem) {
-    [data-ui='command-palette'][data-presentation='dialog'] {
+    [data-ui-command-palette][data-presentation='dialog'] {
       --_list-max: none;
 
       border-inline: 0;
@@ -948,9 +945,7 @@
     }
 
     /* No scrim to press: the word that closes stands at the end of the field. */
-    [data-ui='command-palette'][data-presentation='dialog']
-      > [data-part='header']
-      > [data-part='close'] {
+    [data-ui-command-palette][data-presentation='dialog'] > [data-part-header] > [data-part-close] {
       display: inline-flex;
     }
   }
@@ -961,7 +956,7 @@
    * the reader can press; the list is scrolled and the rows are tapped.
    */
   @media (hover: none) and (pointer: coarse) {
-    [data-ui='command-palette'] > [data-part='footer'] {
+    [data-ui-command-palette] > [data-part-footer] {
       display: none;
     }
   }
@@ -974,13 +969,13 @@
    * not decoration — would disappear.
    */
   @media (forced-colors: active) {
-    [data-ui='command-palette'] [data-part='item'][data-current] {
+    [data-ui-command-palette] [data-part-item][data-current] {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='command-palette'] [data-part='item'][data-disabled][data-current] {
+    [data-ui-command-palette] [data-part-item][data-disabled][data-current] {
       background-color: Highlight;
       color: GrayText;
     }
@@ -992,8 +987,7 @@
      * the host's ink the system has already forced. The glyphs are `Glyph`
      * elements drawn in `currentColor` and need nothing here.
      */
-    [data-ui='command-palette']
-      > [data-part='header']:has(> [data-part='input']:focus-visible)::after {
+    [data-ui-command-palette] > [data-part-header]:has(> [data-part-input]:focus-visible)::after {
       forced-color-adjust: none;
     }
   }

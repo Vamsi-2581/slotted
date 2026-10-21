@@ -34,13 +34,13 @@ function stylesheet(family) {
   return readFileSync(join(source, family, `${family}.css`), 'utf8');
 }
 
-/** The declaration a `[data-part='backdrop']` rule makes, closed and open. */
+/** The declaration a `[data-part-backdrop]` rule makes, closed and open. */
 function scrimMotion(css, ui) {
   const closed = new RegExp(
-    `\\[data-ui='${ui}'\\]\\s*>\\s*\\[data-part='backdrop'\\]\\s*\\{([\\s\\S]*?)\\}`,
+    `\\[data-ui-${ui}\\]\\s*>\\s*\\[data-part-backdrop\\]\\s*\\{([\\s\\S]*?)\\}`,
   ).exec(css)?.[1];
   const open = new RegExp(
-    `\\[data-ui='${ui}'\\]\\[data-open\\]\\s*>\\s*\\[data-part='backdrop'\\]\\s*\\{([\\s\\S]*?)\\}`,
+    `\\[data-ui-${ui}\\]\\[data-open\\]\\s*>\\s*\\[data-part-backdrop\\]\\s*\\{([\\s\\S]*?)\\}`,
   ).exec(css)?.[1];
 
   const transition = (block) =>
@@ -55,7 +55,7 @@ function families() {
     .map((entry) => entry.name)
     .filter((name) => {
       try {
-        return stylesheet(name).includes("[data-part='backdrop']");
+        return stylesheet(name).includes('[data-part-backdrop]');
       } catch {
         return false;
       }

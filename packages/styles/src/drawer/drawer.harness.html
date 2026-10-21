@@ -21,6 +21,7 @@
     <button
       style="justify-self: start"
       data-part="trigger"
+      data-part-trigger=""
       type="button"
       aria-haspopup="dialog"
       aria-expanded="true"
@@ -31,39 +32,42 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="end"
     data-size="md"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       role="dialog"
       aria-modal="true"
       aria-labelledby="d1-title"
       aria-describedby="d1-description"
     >
-      <header data-part="header">
-        <h2 data-part="title" id="d1-title">Fatura 4471</h2>
-        <p data-part="description" id="d1-description">
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d1-title">Fatura 4471</h2>
+        <p data-part="description" data-part-description="" id="d1-description">
           Emitida em 12 de agosto, vence em 11 dias.
         </p>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <p style="margin: 0">
           Um drawer guarda uma tarefa secundária. A linha do meio é a única que rola, que é o que
           mantém as ações na tela por mais longo que o corpo fique.
         </p>
       </div>
-      <footer data-part="footer">
+      <footer data-part="footer" data-part-footer="">
         <button type="button">Cancelar</button>
         <button type="button">Baixar PDF</button>
       </footer>
@@ -82,30 +86,39 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="start"
     data-size="sm"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d2-title">
-      <header data-part="header">
-        <h2 data-part="title" id="d2-title">Menu</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d2-title"
+    >
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d2-title">Menu</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <p style="margin: 0">Projetos</p>
         <p style="margin: 0">Faturas</p>
         <p style="margin: 0">Equipe</p>
       </div>
       <div
         data-part="resizer"
+        data-part-resizer=""
         role="separator"
         tabindex="0"
         aria-orientation="vertical"
@@ -115,9 +128,9 @@
         aria-labelledby="d2-title"
         aria-controls="d2-panel"
       >
-        <span data-part="line" aria-hidden="true"></span
-        ><span data-part="grip" aria-hidden="true"></span
-        ><span data-part="line" aria-hidden="true"></span>
+        <span data-part="line" data-part-line="" aria-hidden="true"></span
+        ><span data-part="grip" data-part-grip="" aria-hidden="true"></span
+        ><span data-part="line" data-part-line="" aria-hidden="true"></span>
       </div>
     </div>
   </div>
@@ -134,7 +147,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="bottom"
@@ -142,10 +157,18 @@
     data-drag="panel"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d3-title" id="d3-panel">
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d3-title"
+      id="d3-panel"
+    >
       <div
         data-part="resizer"
+        data-part-resizer=""
         role="separator"
         tabindex="0"
         aria-orientation="horizontal"
@@ -155,26 +178,26 @@
         aria-labelledby="d3-title"
         aria-controls="d3-panel"
       >
-        <span data-part="line" aria-hidden="true"></span
-        ><span data-part="grip" aria-hidden="true"></span
-        ><span data-part="line" aria-hidden="true"></span>
+        <span data-part="line" data-part-line="" aria-hidden="true"></span
+        ><span data-part="grip" data-part-grip="" aria-hidden="true"></span
+        ><span data-part="line" data-part-line="" aria-hidden="true"></span>
       </div>
-      <header data-part="header">
-        <h2 data-part="title" id="d3-title">Filtrar faturas</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d3-title">Filtrar faturas</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <div style="display: grid; gap: var(--slotted-space-3)">
           <p style="margin: 0">Período: últimos 30 dias</p>
           <p style="margin: 0">Status: em aberto, vencidas</p>
           <p style="margin: 0">Responsável: Marina Duarte</p>
         </div>
       </div>
-      <footer data-part="footer">
+      <footer data-part="footer" data-part-footer="">
         <button type="button">Limpar</button>
         <button type="button">Aplicar</button>
       </footer>
@@ -193,7 +216,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="bottom"
@@ -201,9 +226,10 @@
     data-drag="panel"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       role="dialog"
       aria-modal="true"
       aria-labelledby="d3l-title"
@@ -211,6 +237,7 @@
     >
       <div
         data-part="resizer"
+        data-part-resizer=""
         role="separator"
         tabindex="0"
         aria-orientation="horizontal"
@@ -220,19 +247,19 @@
         aria-labelledby="d3l-title"
         aria-controls="d3l-panel"
       >
-        <span data-part="line" aria-hidden="true"></span
-        ><span data-part="grip" aria-hidden="true"></span
-        ><span data-part="line" aria-hidden="true"></span>
+        <span data-part="line" data-part-line="" aria-hidden="true"></span
+        ><span data-part="grip" data-part-grip="" aria-hidden="true"></span
+        ><span data-part="line" data-part-line="" aria-hidden="true"></span>
       </div>
-      <header data-part="header">
-        <h2 data-part="title" id="d3l-title">Clientes com faturas em aberto</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d3l-title">Clientes com faturas em aberto</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <div style="display: grid; gap: var(--slotted-space-4)">
           <p style="margin: 0">Acme Logística — R$ 12.480,00</p>
           <p style="margin: 0">Banco Horizonte — R$ 3.920,50</p>
@@ -248,7 +275,7 @@
           <p style="margin: 0">Laboratório Vitta — R$ 4.380,00</p>
         </div>
       </div>
-      <footer data-part="footer">
+      <footer data-part="footer" data-part-footer="">
         <button type="button">Limpar</button>
         <button type="button">Aplicar</button>
       </footer>
@@ -267,7 +294,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="bottom"
@@ -276,10 +305,17 @@
     data-mount="active"
     data-undimmed
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-labelledby="d3u-title" id="d3u-panel">
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-labelledby="d3u-title"
+      id="d3u-panel"
+    >
       <div
         data-part="resizer"
+        data-part-resizer=""
         role="separator"
         tabindex="0"
         aria-orientation="horizontal"
@@ -289,26 +325,26 @@
         aria-labelledby="d3u-title"
         aria-controls="d3u-panel"
       >
-        <span data-part="line" aria-hidden="true"></span
-        ><span data-part="grip" aria-hidden="true"></span
-        ><span data-part="line" aria-hidden="true"></span>
+        <span data-part="line" data-part-line="" aria-hidden="true"></span
+        ><span data-part="grip" data-part-grip="" aria-hidden="true"></span
+        ><span data-part="line" data-part-line="" aria-hidden="true"></span>
       </div>
-      <header data-part="header">
-        <h2 data-part="title" id="d3u-title">Filtrar faturas</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d3u-title">Filtrar faturas</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <div style="display: grid; gap: var(--slotted-space-3)">
           <p style="margin: 0">Período: últimos 30 dias</p>
           <p style="margin: 0">Status: em aberto, vencidas</p>
           <p style="margin: 0">Responsável: Marina Duarte</p>
         </div>
       </div>
-      <footer data-part="footer">
+      <footer data-part="footer" data-part-footer="">
         <button type="button">Limpar</button>
         <button type="button">Aplicar</button>
       </footer>
@@ -342,7 +378,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="bottom"
@@ -351,9 +389,10 @@
     data-mount="active"
     style="--slotted-keyboard-inset: 180px"
   >
-    <div data-part="backdrop"></div>
+    <div data-part="backdrop" data-part-backdrop=""></div>
     <div
       data-part="panel"
+      data-part-panel=""
       role="dialog"
       aria-modal="true"
       aria-labelledby="d3k-title"
@@ -361,6 +400,7 @@
     >
       <div
         data-part="resizer"
+        data-part-resizer=""
         role="separator"
         tabindex="0"
         aria-orientation="horizontal"
@@ -370,25 +410,25 @@
         aria-labelledby="d3k-title"
         aria-controls="d3k-panel"
       >
-        <span data-part="line" aria-hidden="true"></span
-        ><span data-part="grip" aria-hidden="true"></span
-        ><span data-part="line" aria-hidden="true"></span>
+        <span data-part="line" data-part-line="" aria-hidden="true"></span
+        ><span data-part="grip" data-part-grip="" aria-hidden="true"></span
+        ><span data-part="line" data-part-line="" aria-hidden="true"></span>
       </div>
-      <header data-part="header">
-        <h2 data-part="title" id="d3k-title">Enviar lembrete</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d3k-title">Enviar lembrete</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <label style="display: grid; gap: var(--slotted-space-2)">
           <span>Nota para o cliente</span>
           <input type="text" value="Pagamento previsto para sexta" />
         </label>
       </div>
-      <footer data-part="footer">
+      <footer data-part="footer" data-part-footer="">
         <button type="button">Limpar</button>
         <button type="button">Aplicar</button>
       </footer>
@@ -406,21 +446,29 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="top"
     data-size="content"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d4-title">
-      <header data-part="header">
-        <h2 data-part="title" id="d4-title">Manutenção programada</h2>
-        <p data-part="description">Sábado, das 02h às 04h.</p>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d4-title"
+    >
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d4-title">Manutenção programada</h2>
+        <p data-part="description" data-part-description="">Sábado, das 02h às 04h.</p>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
@@ -444,24 +492,27 @@
   >
     <div
       data-ui="drawer"
+      data-ui-drawer=""
       data-part="root"
+      data-part-root=""
       data-open
       data-mode="inline"
       data-side="start"
       data-size="sm"
       data-mount="eager"
     >
-      <div data-part="panel" aria-labelledby="d5-title" id="d5-panel">
-        <header data-part="header">
-          <h2 data-part="title" id="d5-title">Coleções</h2>
+      <div data-part="panel" data-part-panel="" aria-labelledby="d5-title" id="d5-panel">
+        <header data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" id="d5-title">Coleções</h2>
         </header>
-        <div data-part="body">
+        <div data-part="body" data-part-body="">
           <p style="margin: 0">Todas</p>
           <p style="margin: 0">Recentes</p>
           <p style="margin: 0">Arquivadas</p>
         </div>
         <div
           data-part="resizer"
+          data-part-resizer=""
           role="separator"
           tabindex="0"
           aria-orientation="vertical"
@@ -471,9 +522,9 @@
           aria-labelledby="d5-title"
           aria-controls="d5-panel"
         >
-          <span data-part="line" aria-hidden="true"></span
-          ><span data-part="grip" aria-hidden="true"></span
-          ><span data-part="line" aria-hidden="true"></span>
+          <span data-part="line" data-part-line="" aria-hidden="true"></span
+          ><span data-part="grip" data-part-grip="" aria-hidden="true"></span
+          ><span data-part="line" data-part-line="" aria-hidden="true"></span>
         </div>
       </div>
     </div>
@@ -502,18 +553,20 @@
   >
     <div
       data-ui="drawer"
+      data-ui-drawer=""
       data-part="root"
+      data-part-root=""
       data-mode="inline"
       data-side="start"
       data-size="sm"
       data-mount="eager"
       inert
     >
-      <div data-part="panel" aria-labelledby="d6-title">
-        <header data-part="header">
-          <h2 data-part="title" id="d6-title">Coleções</h2>
+      <div data-part="panel" data-part-panel="" aria-labelledby="d6-title">
+        <header data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" id="d6-title">Coleções</h2>
         </header>
-        <div data-part="body">
+        <div data-part="body" data-part-body="">
           <p style="margin: 0">Todas</p>
         </div>
       </div>
@@ -534,30 +587,38 @@
 <section data-scene="content" data-fixed>
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="end"
     data-size="sm"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d7-title">
-      <header data-part="header">
-        <h2 data-part="title" id="d7-title">
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d7-title"
+    >
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d7-title">
           relatorio-de-conciliacao-bancaria-consolidado-2026-08.csv
         </h2>
-        <p data-part="description">
+        <p data-part="description" data-part-description="">
           Uma string sem espaços não pode alargar o painel: a medida mínima é zero e a quebra é
           permitida em qualquer ponto.
         </p>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <p style="margin: 0 0 var(--slotted-space-4)">
           A linha do meio é o único trilho que rola. Limitada, ela rola; ilimitada, empurraria o
           rodapé para fora da tela e o leitor não alcançaria o botão.
@@ -571,7 +632,7 @@
         </p>
         <p style="margin: 0">E um quarto, que já está abaixo da dobra.</p>
       </div>
-      <footer data-part="footer">
+      <footer data-part="footer" data-part-footer="">
         <button type="button">Cancelar</button>
         <button type="button">Salvar</button>
       </footer>
@@ -582,7 +643,9 @@
 <section data-scene="loading" data-fixed>
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-loading
     data-mode="overlay"
@@ -590,17 +653,23 @@
     data-size="sm"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d8-title">
-      <header data-part="header">
-        <h2 data-part="title" id="d8-title">Fatura 4471</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d8-title"
+    >
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d8-title">Fatura 4471</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body" aria-busy="true">
+      <div data-part="body" data-part-body="" aria-busy="true">
         <div
           style="
             block-size: var(--slotted-space-6);
@@ -617,24 +686,32 @@
 <section data-scene="nested" data-fixed>
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="end"
     data-size="md"
     data-mount="active"
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d9-title">
-      <header data-part="header">
-        <h2 data-part="title" id="d9-title">Pedido 118</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d9-title"
+    >
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d9-title">Pedido 118</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <p style="margin: 0">Escape alcança apenas a camada mais alta.</p>
       </div>
     </div>
@@ -642,7 +719,9 @@
 
   <div
     data-ui="drawer"
+    data-ui-drawer=""
     data-part="root"
+    data-part-root=""
     data-open
     data-mode="overlay"
     data-side="end"
@@ -650,17 +729,23 @@
     data-mount="active"
     style="--slotted-layer-depth: 1"
   >
-    <div data-part="backdrop"></div>
-    <div data-part="panel" role="dialog" aria-modal="true" aria-labelledby="d10-title">
-      <header data-part="header">
-        <h2 data-part="title" id="d10-title">Item 3</h2>
-        <button data-part="close" type="button" aria-label="Fechar">
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="x"></svg
+    <div data-part="backdrop" data-part-backdrop=""></div>
+    <div
+      data-part="panel"
+      data-part-panel=""
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="d10-title"
+    >
+      <header data-part="header" data-part-header="">
+        <h2 data-part="title" data-part-title="" id="d10-title">Item 3</h2>
+        <button data-part="close" data-part-close="" type="button" aria-label="Fechar">
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
           ></span>
         </button>
       </header>
-      <div data-part="body">
+      <div data-part="body" data-part-body="">
         <p style="margin: 0">A profundidade vem da pilha única, não de um número escrito aqui.</p>
       </div>
     </div>

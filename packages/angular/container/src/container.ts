@@ -34,7 +34,9 @@ export type { ContainerAlign, ContainerInset, ContainerSize } from './container-
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'container',
+    'data-ui-container': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-inset]': 'resolvedInset()',
     '[attr.data-align]': 'resolvedAlign()',

@@ -23,7 +23,7 @@
    * disagrees with the type it contains and no density can leave one of its
    * controls unhittable.
    */
-  [data-ui='tag'][data-part='root'] {
+  [data-ui-tag][data-part-root] {
     /**
      * Tone. The neutral fill is the tone's `solid-hover` step rather than its
      * `solid` one, for the reason `badge` recorded: `solid` is the colour of
@@ -65,7 +65,7 @@
      * `tags-input` set it from the room their frame has left); and the edge,
      * so a host can mark one chip — the one that answered a duplicate —
      * without reaching into this sheet. Both are read here, once, and a host
-     * writes `[data-ui='tag']` nowhere.
+     * writes `[data-ui-tag]` nowhere.
      */
     --_inset-block: var(--slotted-tag-inset-block, var(--slotted-space-2, 0.25rem));
     --_inset-inline: var(--slotted-space-4, 0.5rem);
@@ -147,7 +147,7 @@
    * the sheet that was missing it, and the two hosts that collapse a row of
    * chips both write the attribute and neither could have known.
    */
-  [data-ui='tag'][data-part='root'][hidden] {
+  [data-ui-tag][data-part-root][hidden] {
     display: none;
   }
 
@@ -157,11 +157,11 @@
    * The one tone whose fill is the colour of the page. It keeps the tone's own
    * border, where the other four let their fill be their edge.
    */
-  [data-ui='tag'][data-part='root'][data-tone='secondary'] {
+  [data-ui-tag][data-part-root][data-tone='secondary'] {
     --_edge: var(--_border);
   }
 
-  [data-ui='tag'][data-part='root'][data-tone='accent'] {
+  [data-ui-tag][data-part-root][data-tone='accent'] {
     --_solid: var(--slotted-tone-accent-solid);
     --_solid-hover: var(--slotted-tone-accent-solid-hover);
     --_solid-active: var(--slotted-tone-accent-solid-active);
@@ -173,7 +173,7 @@
     --_text: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='tag'][data-part='root'][data-tone='success'] {
+  [data-ui-tag][data-part-root][data-tone='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_solid-hover: var(--slotted-tone-success-solid-hover);
     --_solid-active: var(--slotted-tone-success-solid-active);
@@ -185,7 +185,7 @@
     --_text: var(--slotted-tone-success-text);
   }
 
-  [data-ui='tag'][data-part='root'][data-tone='warning'] {
+  [data-ui-tag][data-part-root][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_solid-hover: var(--slotted-tone-warning-solid-hover);
     --_solid-active: var(--slotted-tone-warning-solid-active);
@@ -197,7 +197,7 @@
     --_text: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='tag'][data-part='root'][data-tone='danger'] {
+  [data-ui-tag][data-part-root][data-tone='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_solid-hover: var(--slotted-tone-danger-solid-hover);
     --_solid-active: var(--slotted-tone-danger-solid-active);
@@ -220,19 +220,19 @@
    * converges with `outline` — which is what a high-contrast scheme is for.
    */
 
-  [data-ui='tag'][data-part='root'][data-variant='solid'] {
+  [data-ui-tag][data-part-root][data-variant='solid'] {
     background-color: var(--_solid, ButtonFace);
     border-color: var(--_edge, ButtonFace);
     color: var(--_on-solid, ButtonText);
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='soft'] {
+  [data-ui-tag][data-part-root][data-variant='soft'] {
     background-color: var(--_surface, ButtonFace);
     border-color: var(--_border, ButtonBorder);
     color: var(--_text, ButtonText);
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='outline'] {
+  [data-ui-tag][data-part-root][data-variant='outline'] {
     background-color: transparent;
     border-color: var(--_border, ButtonBorder);
     color: var(--_text, ButtonText);
@@ -240,7 +240,7 @@
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
-  [data-ui='tag'][data-part='root'][data-size='sm'] {
+  [data-ui-tag][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_inset-block: var(--slotted-tag-inset-block, var(--slotted-space-1, 0.125rem));
     --_inset-inline: var(--slotted-space-3, 0.375rem);
@@ -252,7 +252,7 @@
    * the same reason: a 12px chip and a 13px chip should not carry visibly
    * different glyphs.
    */
-  [data-ui='tag'][data-part='root'][data-size='lg'] {
+  [data-ui-tag][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
     --_inner-size: var(--slotted-control-inner-size-md, 24px);
@@ -263,7 +263,7 @@
 
   /* ── Shape ────────────────────────────────────────────────────────────── */
 
-  [data-ui='tag'][data-part='root'][data-shape='square'] {
+  [data-ui-tag][data-part-root][data-shape='square'] {
     --_radius: var(--slotted-radius-sm, 4px);
   }
 
@@ -275,7 +275,7 @@
    * ground around itself. It is a `span` when the tag does nothing and the
    * element its member names when it does.
    */
-  [data-ui='tag'] [data-part='body'] {
+  [data-ui-tag] [data-part-body] {
     align-items: center;
     /* The root paints the ground; the body paints only its own states. */
     background-color: transparent;
@@ -304,7 +304,7 @@
   }
 
   /* The only child rounds both ends, which is every tag that cannot be removed. */
-  [data-ui='tag'] [data-part='body']:last-child {
+  [data-ui-tag] [data-part-body]:last-child {
     border-end-end-radius: var(--_inner-radius);
     border-start-end-radius: var(--_inner-radius);
   }
@@ -318,11 +318,11 @@
    * mostly of air. What is left is the gap the chip uses between any two things
    * inside it.
    */
-  [data-ui='tag'] [data-part='body']:has(+ [data-part='remove']) {
+  [data-ui-tag] [data-part-body]:has(+ [data-part-remove]) {
     padding-inline-end: var(--_gap);
   }
 
-  [data-ui='tag'] [data-part='body']:is(a, button) {
+  [data-ui-tag] [data-part-body]:is(a, button) {
     cursor: pointer;
   }
 
@@ -332,7 +332,7 @@
    * Where the line is clipped. `min-inline-size: 0` is what lets the box
    * shrink below its content inside the flex body.
    */
-  [data-ui='tag'] [data-part='label'] {
+  [data-ui-tag] [data-part-label] {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -349,7 +349,7 @@
   }
 
   @supports (text-box: trim-both cap alphabetic) {
-    [data-ui='tag'] [data-part='label'] {
+    [data-ui-tag] [data-part-label] {
       /**
        * The line box a flex container centres is not symmetric around the
        * letters inside it: the ascender reaches further above the cap than the
@@ -375,8 +375,8 @@
    * from its container, and a bare glyph host such as `ng-icon` reads the
    * slot's font-size, so both are the glyph scale.
    */
-  [data-ui='tag'] [data-part='start'],
-  [data-ui='tag'] [data-part='end'] {
+  [data-ui-tag] [data-part-start],
+  [data-ui-tag] [data-part-end] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -390,8 +390,8 @@
     line-height: 1;
   }
 
-  [data-ui='tag'] [data-part='start'] > *,
-  [data-ui='tag'] [data-part='end'] > * {
+  [data-ui-tag] [data-part-start] > *,
+  [data-ui-tag] [data-part-end] > * {
     block-size: 100%;
     display: block;
     inline-size: 100%;
@@ -410,7 +410,7 @@
    * `hideSingleSelectionIndicator` to avoid it; the transition is the third
    * answer, and the theme collapses its duration under reduced motion.
    */
-  [data-ui='tag'] [data-part='indicator'] {
+  [data-ui-tag] [data-part-indicator] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -433,7 +433,7 @@
       opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='tag'][data-part='root'][data-selected] [data-part='indicator'] {
+  [data-ui-tag][data-part-root][data-selected] [data-part-indicator] {
     inline-size: var(--_icon-size);
     margin-inline-end: 0;
     opacity: 1;
@@ -457,7 +457,7 @@
    * The mark is the `x` glyph the binding renders; the control hands its icon
    * box the chip's glyph size.
    */
-  [data-ui='tag'] [data-part='remove'] {
+  [data-ui-tag] [data-part-remove] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -491,7 +491,7 @@
    * falls short and is inert on the two larger sizes, where the chip is already
    * taller than the minimum.
    */
-  [data-ui='tag'] [data-part='remove']::after {
+  [data-ui-tag] [data-part-remove]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -504,7 +504,7 @@
    * segment 24 wide and 32 tall. The halo above grows to 44 pixels around it.
    */
   @media (pointer: coarse) {
-    [data-ui='tag'] [data-part='remove'] {
+    [data-ui-tag] [data-part-remove] {
       inline-size: max(
         var(--slotted-target-min, 24px),
         min(calc(var(--_icon-size) + 2 * var(--slotted-space-2, 0.25rem)), var(--_inner-size)),
@@ -512,14 +512,14 @@
       );
     }
 
-    [data-ui='tag'] [data-part='remove']::after {
+    [data-ui-tag] [data-part-remove]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
   }
 
   /* A tag that is only a remove control is not a tag, but the rounding is one
      rule either way rather than a case the sheet has to know about. */
-  [data-ui='tag'] [data-part='remove']:first-child {
+  [data-ui-tag] [data-part-remove]:first-child {
     border-end-start-radius: var(--_inner-radius);
     border-start-start-radius: var(--_inner-radius);
   }
@@ -531,7 +531,7 @@
    * is the rule `button` set for `pressed`: "on" is never one shade away from
    * "hovered".
    */
-  [data-ui='tag'][data-part='root'][data-selected]:not([data-disabled]) {
+  [data-ui-tag][data-part-root][data-selected]:not([data-disabled]) {
     background-color: var(--_solid, ButtonFace);
     border-color: var(--_edge, ButtonBorder);
     color: var(--_on-solid, ButtonText);
@@ -558,7 +558,7 @@
    * the two component tokens are for.
    */
 
-  [data-ui='tag'][data-part='root'] {
+  [data-ui-tag][data-part-root] {
     --_state-hover: color-mix(
       in oklab,
       currentColor var(--slotted-tag-state-layer-hover, 8%),
@@ -571,27 +571,23 @@
     );
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='soft']:not([data-disabled]):not([data-selected])
-    :is([data-part='body']:is(a, button), [data-part='remove']):hover:not(:disabled) {
+  [data-ui-tag][data-part-root][data-variant='soft']:not([data-disabled]):not([data-selected])
+    :is([data-part-body]:is(a, button), [data-part-remove]):hover:not(:disabled) {
     background-color: var(--_state-hover);
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='soft']:not([data-disabled]):not([data-selected])
-    :is([data-part='body']:is(a, button), [data-part='remove']):active:not(:disabled) {
+  [data-ui-tag][data-part-root][data-variant='soft']:not([data-disabled]):not([data-selected])
+    :is([data-part-body]:is(a, button), [data-part-remove]):active:not(:disabled) {
     background-color: var(--_state-active);
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='outline']:not([data-disabled]):not(
-      [data-selected]
-    )
-    :is([data-part='body']:is(a, button), [data-part='remove']):hover:not(:disabled) {
+  [data-ui-tag][data-part-root][data-variant='outline']:not([data-disabled]):not([data-selected])
+    :is([data-part-body]:is(a, button), [data-part-remove]):hover:not(:disabled) {
     background-color: var(--_subtle-hover, ButtonFace);
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='outline']:not([data-disabled]):not(
-      [data-selected]
-    )
-    :is([data-part='body']:is(a, button), [data-part='remove']):active:not(:disabled) {
+  [data-ui-tag][data-part-root][data-variant='outline']:not([data-disabled]):not([data-selected])
+    :is([data-part-body]:is(a, button), [data-part-remove]):active:not(:disabled) {
     background-color: var(--_subtle-active, ButtonFace);
   }
 
@@ -599,17 +595,17 @@
    * A filled chip washes along its own ramp, as `button` does — and a selected
    * chip is a filled chip whatever its variant, so the two share these rules.
    */
-  [data-ui='tag'][data-part='root'][data-variant='solid']:not([data-disabled])
-    :is([data-part='body']:is(a, button), [data-part='remove']):hover:not(:disabled),
-  [data-ui='tag'][data-part='root'][data-selected]:not([data-disabled])
-    :is([data-part='body']:is(a, button), [data-part='remove']):hover:not(:disabled) {
+  [data-ui-tag][data-part-root][data-variant='solid']:not([data-disabled])
+    :is([data-part-body]:is(a, button), [data-part-remove]):hover:not(:disabled),
+  [data-ui-tag][data-part-root][data-selected]:not([data-disabled])
+    :is([data-part-body]:is(a, button), [data-part-remove]):hover:not(:disabled) {
     background-color: var(--_solid-hover, Highlight);
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='solid']:not([data-disabled])
-    :is([data-part='body']:is(a, button), [data-part='remove']):active:not(:disabled),
-  [data-ui='tag'][data-part='root'][data-selected]:not([data-disabled])
-    :is([data-part='body']:is(a, button), [data-part='remove']):active:not(:disabled) {
+  [data-ui-tag][data-part-root][data-variant='solid']:not([data-disabled])
+    :is([data-part-body]:is(a, button), [data-part-remove]):active:not(:disabled),
+  [data-ui-tag][data-part-root][data-selected]:not([data-disabled])
+    :is([data-part-body]:is(a, button), [data-part-remove]):active:not(:disabled) {
     background-color: var(--_solid-active, Highlight);
   }
 
@@ -637,8 +633,8 @@
    * target: a rounded rectangle floating inside the segment would be prettier
    * and would say the hit area is somewhere it is not.
    */
-  [data-ui='tag'] [data-part='body']:focus-visible,
-  [data-ui='tag'] [data-part='remove']:focus-visible {
+  [data-ui-tag] [data-part-body]:focus-visible,
+  [data-ui-tag] [data-part-remove]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-2 * var(--slotted-focus-ring-width, 2px));
   }
@@ -648,7 +644,7 @@
    * It is drawn for one moment: the group takes focus when the last tag it
    * held is removed, so the keyboard is not returned to the top of the page.
    */
-  [data-ui='tag'][data-part='group']:focus-visible {
+  [data-ui-tag][data-part-group]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -664,7 +660,7 @@
    * a control and a control that keeps its place in the tab sequence carries
    * `aria-disabled` and no `:disabled`.
    */
-  [data-ui='tag'][data-part='root'][data-disabled] {
+  [data-ui-tag][data-part-root][data-disabled] {
     color: var(--slotted-disabled-foreground, GrayText);
   }
 
@@ -676,21 +672,21 @@
    * capture showed "Disabled selected" as a check and two words floating on
    * the page with no box around them.
    */
-  [data-ui='tag'][data-part='root'][data-variant='solid'][data-disabled],
-  [data-ui='tag'][data-part='root'][data-variant='soft'][data-disabled],
-  [data-ui='tag'][data-part='root'][data-selected][data-disabled] {
+  [data-ui-tag][data-part-root][data-variant='solid'][data-disabled],
+  [data-ui-tag][data-part-root][data-variant='soft'][data-disabled],
+  [data-ui-tag][data-part-root][data-selected][data-disabled] {
     background-color: var(--slotted-disabled-background, Canvas);
     border-color: var(--slotted-disabled-border, GrayText);
   }
 
-  [data-ui='tag'][data-part='root'][data-variant='outline'][data-disabled] {
+  [data-ui-tag][data-part-root][data-variant='outline'][data-disabled] {
     background-color: transparent;
     border-color: var(--slotted-disabled-border, GrayText);
   }
 
-  [data-ui='tag'][data-part='root'][data-disabled] :is([data-part='body'], [data-part='remove']),
-  [data-ui='tag'] [data-part='body']:disabled,
-  [data-ui='tag'] [data-part='remove']:disabled {
+  [data-ui-tag][data-part-root][data-disabled] :is([data-part-body], [data-part-remove]),
+  [data-ui-tag] [data-part-body]:disabled,
+  [data-ui-tag] [data-part-remove]:disabled {
     background-color: transparent;
     cursor: not-allowed;
   }
@@ -699,7 +695,7 @@
    * A remove control the consumer disabled on its own, inside a chip that is
    * otherwise operable. It loses its colour rather than the whole chip's.
    */
-  [data-ui='tag'] [data-part='remove']:disabled {
+  [data-ui-tag] [data-part-remove]:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
   }
 
@@ -711,14 +707,14 @@
    * the arrow keys move between the controls inside it — the APG Toolbar
    * pattern, which is a container for grouping a set of controls.
    */
-  [data-ui='tag'][data-part='group'] {
+  [data-ui-tag][data-part-group] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
     gap: var(--slotted-tag-group-gap, var(--slotted-space-2, 0.25rem));
   }
 
-  [data-ui='tag'][data-part='group'][data-orientation='vertical'] {
+  [data-ui-tag][data-part-group][data-orientation='vertical'] {
     align-items: start;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -731,7 +727,7 @@
    * that holds it — the defect `button-group` recorded when it found the same
    * thing.
    */
-  [data-ui='tag'][data-part='group']:empty {
+  [data-ui-tag][data-part-group]:empty {
     display: none;
   }
 
@@ -750,17 +746,17 @@
    * pair instead.
    */
   @media (forced-colors: active) {
-    [data-ui='tag'][data-part='root'] {
+    [data-ui-tag][data-part-root] {
       border-color: currentColor;
     }
 
-    [data-ui='tag'][data-part='root'][data-selected]:not([data-disabled]) {
+    [data-ui-tag][data-part-root][data-selected]:not([data-disabled]) {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='tag'][data-part='root'][data-disabled] {
+    [data-ui-tag][data-part-root][data-disabled] {
       border-color: GrayText;
       color: GrayText;
     }

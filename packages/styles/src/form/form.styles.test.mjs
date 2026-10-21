@@ -2,11 +2,24 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(new URL('../../../../specs/components/form/contract.json', import.meta.url), 'utf8'),
 );
 const css = readFileSync(new URL('./form.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./form.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./form.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -14,8 +27,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.form;
 
 /** The declarations of the first rule whose selector starts with `selector`. */
@@ -33,7 +46,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -60,7 +76,7 @@ test('arranges nothing but its own two parts', () => {
  * the same black.
  */
 test('draws the summary as a toned panel with a heavier reading edge', () => {
-  const summary = rule(`${ui}[data-part='summary']`);
+  const summary = rule(`${ui}[data-part-summary]`);
   assert.match(summary, /background-color:var\(--slotted-form-summary-background/);
   assert.match(summary, /border-inline-start-width:var\(--slotted-border-width-thick,2px\)/);
   assert.match(summary, /color:var\(--slotted-form-summary-color/);
@@ -72,7 +88,7 @@ test('draws the summary as a toned panel with a heavier reading edge', () => {
  * reader somewhere they cannot see.
  */
 test('shows the summary when focus is moved to it', () => {
-  const focused = rule(`${ui}[data-part='summary']:focus-visible`);
+  const focused = rule(`${ui}[data-part-summary]:focus-visible`);
   assert.match(focused, /outline:var\(--slotted-focus-ring-width,2px\)solid/);
 });
 
@@ -83,7 +99,7 @@ test('shows the summary when focus is moved to it', () => {
  * fraction of the viewport.
  */
 test('scrolls a long list instead of cutting it out of the DOM', () => {
-  const list = rule(`${ui}[data-part='summary']>[data-part='summary-list']`);
+  const list = rule(`${ui}[data-part-summary]>[data-part-summary-list]`);
   assert.match(list, /overflow-y:auto/);
   assert.match(list, /max-block-size:calc\(12em\*var\(--slotted-line-height-sm/);
   assert.ok(!/vh/.test(list), 'a summary that grew with the screen would push the actions off it');
@@ -99,7 +115,7 @@ test('makes the form the container the action row is measured against', () => {
   assert.match(form, /container-type:inline-size/);
   assert.match(form, new RegExp(`container-name:${contract.containerName}`));
 
-  const actions = rule(`${ui}[data-part='actions']`);
+  const actions = rule(`${ui}[data-part-actions]`);
   assert.ok(!/container-type/.test(actions), 'a container cannot answer its own query');
 });
 
@@ -122,11 +138,11 @@ test('offers every alignment the contract declares', () => {
   for (const align of contract.axes.align) {
     if (align === 'end') continue;
     assert.ok(
-      normalized.includes(`[data-part='actions'][data-align='${align}']`),
+      normalized.includes(`[data-part-actions][data-align='${align}']`),
       `no rule answers data-align="${align}"`,
     );
   }
-  assert.match(rule(`${ui}[data-part='actions']`), /justify-content:flex-end/);
+  assert.match(rule(`${ui}[data-part-actions]`), /justify-content:flex-end/);
 });
 
 /**
@@ -157,7 +173,7 @@ test('keeps the summary’s reading edge under forced colours', () => {
  * The summary and the action row stand anywhere inside the form — a consumer
  * places `summary="none"`'s summary where they choose — and so do other
  * families' parts of the same names: a `table`'s summary row, a `section`'s
- * actions. A rule that reached `[data-part='summary']` as any descendant of the
+ * actions. A rule that reached `[data-part-summary]` as any descendant of the
  * form painted a table's totals as an error panel. The two parts carry the
  * family's identifier, as `skeleton`'s region and `tag`'s group do, and every
  * rule names them by it; the summary's own parts are reached from it with a
@@ -165,18 +181,18 @@ test('keeps the summary’s reading edge under forced colours', () => {
  */
 test('reaches its own parts only, never a nested family’s part of the same name', () => {
   for (const part of ['summary', 'summary-title', 'summary-list', 'summary-item', 'actions']) {
-    const descendant = new RegExp(`\\[data-ui='form'\\][^{>,]*? \\[data-part='${part}'\\]`);
+    const descendant = new RegExp(`\\[data-ui-form\\][^{>,]*? \\[data-part-${part}\\]`);
     assert.ok(
       !descendant.test(normalized),
       `a descendant rule reaches ${part} in any family under the form`,
     );
   }
   assert.ok(
-    normalized.includes(`${ui}[data-part='summary']{`),
+    normalized.includes(`${ui}[data-part-summary]{`),
     'the summary is not named by its family',
   );
   assert.ok(
-    normalized.includes(`${ui}[data-part='actions']{`),
+    normalized.includes(`${ui}[data-part-actions]{`),
     'the action row is not named by its family',
   );
   assert.match(

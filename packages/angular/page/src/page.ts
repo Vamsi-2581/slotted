@@ -78,7 +78,7 @@ function warnWithoutBody(root: HTMLElement) {
   selector: '[slPage]',
   standalone: true,
   exportAs: 'slPage',
-  template: `<div data-part="scroll">
+  template: `<div data-part="scroll" data-part-scroll="">
       <ng-content select="[slPageHeader]" />
       <ng-content />
     </div>
@@ -88,7 +88,9 @@ function warnWithoutBody(root: HTMLElement) {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'page',
+    'data-ui-page': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'role()',
     '[attr.data-width]': 'resolvedWidth()',
     '[attr.data-scroll]': 'resolvedScroll()',
@@ -152,9 +154,13 @@ export class SlPage {
       if (typeof ResizeObserver === 'undefined') return;
       const target = findScrollParent(this.native) ?? this.native.ownerDocument.documentElement;
       const bar = () => this.native.querySelector<HTMLElement>(':scope > [data-part="footer"]');
+      /* The property inherits, so every write invalidates style for everything
+         under the scroller: it is written only when the height changes. */
       const publish = () => {
         const height = this.resolvedScroll() === 'self' ? 0 : (bar()?.offsetHeight ?? 0);
-        target.style.setProperty(STICKY_BOTTOM_PROPERTY, `${height}px`);
+        const value = `${height}px`;
+        if (target.style.getPropertyValue(STICKY_BOTTOM_PROPERTY) === value) return;
+        target.style.setProperty(STICKY_BOTTOM_PROPERTY, value);
       };
       const observer = new ResizeObserver(publish);
       observer.observe(this.native);
@@ -187,6 +193,7 @@ export class SlPage {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'body',
+    'data-part-body': '',
     '[attr.aria-busy]': "page?.loading() ? 'true' : null",
   },
 })
@@ -207,12 +214,13 @@ export class SlPageBody {
   exportAs: 'slPageFooter',
   imports: [SlContainer],
   template: `<div slContainer [size]="page?.resolvedWidth()" [inset]="page?.resolvedInset()">
-    <div data-part="actions"><ng-content /></div>
+    <div data-part="actions" data-part-actions=""><ng-content /></div>
   </div>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'footer',
+    'data-part-footer': '',
     '[attr.aria-label]': 'label()',
     '[attr.data-status]': 'status()',
     '[attr.hidden]': "status() === 'unmounted' ? '' : null",

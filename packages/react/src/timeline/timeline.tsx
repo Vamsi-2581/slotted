@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import '@slotted/styles/timeline/timeline.css';
 import '@slotted/styles/spinner/spinner.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
@@ -220,6 +221,7 @@ export function Timeline({
     'aria-label': labelledBy === undefined ? label : undefined,
     'aria-labelledby': labelledBy,
     'data-part': 'list',
+    ...selectorKeyProps('part', 'list'),
     id: listId,
     onKeyDown: handleKeyDown,
   };
@@ -241,13 +243,25 @@ export function Timeline({
 
   const more =
     resolvedGrowing === 'none' ? null : loading ? (
-      <div aria-live="polite" data-part="more" ref={moreRef as RefObject<HTMLDivElement | null>}>
-        <span aria-hidden="true" data-part="root" data-ui="spinner" />
+      <div
+        aria-live="polite"
+        data-part="more"
+        data-part-more=""
+        ref={moreRef as RefObject<HTMLDivElement | null>}
+      >
+        <span
+          aria-hidden="true"
+          data-part="root"
+          data-part-root=""
+          data-ui="spinner"
+          data-ui-spinner=""
+        />
         {t('loading')}
       </div>
     ) : resolvedGrowing === 'button' ? (
       <button
         data-part="more"
+        data-part-more=""
         onClick={(event) => onLoadMore?.(event.detail === 0 ? 'keyboard' : 'pointer', event)}
         ref={moreRef as RefObject<HTMLButtonElement | null>}
         type="button"
@@ -255,10 +269,10 @@ export function Timeline({
         {t('loadMore')}
       </button>
     ) : (
-      <div data-part="more" ref={moreRef as RefObject<HTMLDivElement | null>} />
+      <div data-part="more" data-part-more="" ref={moreRef as RefObject<HTMLDivElement | null>} />
     );
 
-  const rootProps: TimelineRootProps = {
+  const rootProps: TimelineRootProps = keyedProps({
     ...nativeProps,
     children: (
       <TimelineContext.Provider value={context}>
@@ -268,6 +282,7 @@ export function Timeline({
           {heldCount > 0 ? (
             <button
               data-part="fresh"
+              data-part-fresh=""
               hidden={freshCount <= 0}
               onClick={(event) => onReveal?.(event.detail === 0 ? 'keyboard' : 'pointer', event)}
               ref={freshRef}
@@ -279,7 +294,9 @@ export function Timeline({
           {list}
           {more}
           {layout.count === 0 && !loading ? (
-            <div data-part="empty">{empty ?? t('empty')}</div>
+            <div data-part="empty" data-part-empty="">
+              {empty ?? t('empty')}
+            </div>
           ) : null}
         </TimelineListContext.Provider>
       </TimelineContext.Provider>
@@ -296,7 +313,7 @@ export function Timeline({
     'data-tone': context.tone,
     'data-ui': 'timeline',
     'data-variant': context.variant,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

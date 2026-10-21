@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/pagination/pagination.css';
 
 import { paginationMessages } from '@slotted/core/i18n';
@@ -180,7 +181,7 @@ export function Pagination({
     t,
   };
 
-  const rootProps: PaginationRootProps = {
+  const rootProps: PaginationRootProps = keyedProps({
     'aria-label': t('label'),
     ...nativeProps,
     'aria-busy': resolvedLoading ? true : nativeProps['aria-busy'],
@@ -189,7 +190,7 @@ export function Pagination({
     'data-loading': resolvedLoading ? '' : undefined,
     'data-part': 'root',
     'data-ui': 'pagination',
-  };
+  });
 
   return (
     <PaginationContext.Provider value={context}>

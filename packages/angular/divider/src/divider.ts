@@ -30,7 +30,7 @@ export type DividerAlign = 'start' | 'center' | 'end';
   exportAs: 'slDivider',
   template: `
     @if (labelled()) {
-      <span data-part="label">{{ label() }}</span>
+      <span data-part="label" data-part-label="">{{ label() }}</span>
     }
   `,
   styleUrl: '../../../styles/src/divider/divider.css',
@@ -38,7 +38,9 @@ export type DividerAlign = 'start' | 'center' | 'end';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'divider',
+    'data-ui-divider': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-orientation]': 'orientation()',
     '[attr.data-align]': 'labelled() ? align() : null',
     '[attr.data-inset]': "inset() ? '' : null",

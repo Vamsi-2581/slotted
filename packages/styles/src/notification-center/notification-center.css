@@ -26,7 +26,7 @@
    * the result-state inside are theirs, reached with child combinators so a
    * `title`, an `actions` or a `description` of theirs is never restyled.
    */
-  [data-ui='notification-center'] {
+  [data-ui-notification-center] {
     --_text: var(--slotted-text, CanvasText);
     --_muted: var(--slotted-text-muted, GrayText);
     --_rule: var(--slotted-notification-center-border, var(--slotted-border-subtle, ButtonBorder));
@@ -128,7 +128,7 @@
    * would collapse to nothing; `sm` states a floor, capped by the viewport
    * for a phone, and `100%` keeps it filling a host that has a width.
    */
-  [data-ui='notification-center'][data-size='sm'] {
+  [data-ui-notification-center][data-size='sm'] {
     min-inline-size: var(
       --slotted-notification-center-min-inline-size-sm,
       min(22rem, calc(100vw - var(--slotted-space-8, 2rem)))
@@ -165,7 +165,7 @@
    * The title pushes the rest to the end; a control that wraps lands at the
    * end of its own line, under the one before it, not at the start.
    */
-  [data-ui='notification-center'] > [data-part='header'] {
+  [data-ui-notification-center] > [data-part-header] {
     align-items: center;
     border-block-end: var(--_rule-size) solid var(--_rule);
     display: flex;
@@ -177,7 +177,7 @@
     padding-inline: var(--_inset-inline);
   }
 
-  [data-ui='notification-center'] > [data-part='header'] > [data-part='title'] {
+  [data-ui-notification-center] > [data-part-header] > [data-part-title] {
     align-items: center;
     color: var(--_text);
     display: inline-flex;
@@ -203,7 +203,7 @@
    * is what waits.
    */
   /** One measure for both dimensions: a single digit is a circle, two digits a pill. */
-  [data-ui='notification-center'] [data-part='count'] {
+  [data-ui-notification-center] [data-part-count] {
     align-items: center;
     background-color: var(--slotted-surface-sunken, Canvas);
     block-size: var(--_count-box);
@@ -223,21 +223,18 @@
     padding-inline: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='notification-center']
-    > [data-part='header']
-    > [data-part='title']
-    > [data-part='count'] {
+  [data-ui-notification-center] > [data-part-header] > [data-part-title] > [data-part-count] {
     background-color: var(--slotted-tone-accent-surface, Canvas);
     color: var(--slotted-tone-accent-text, Highlight);
   }
 
   /** The slot a Button sits in, pushed to the end of the row; the consumer's actions after it. */
-  [data-ui='notification-center'] > [data-part='header'] > [data-part='mark-all'] {
+  [data-ui-notification-center] > [data-part-header] > [data-part-mark-all] {
     display: inline-flex;
   }
 
   /** The consumer's controls read at the row's meta size: a link beside a small button, not beside the title. */
-  [data-ui='notification-center'] > [data-part='header'] > [data-part='actions'] {
+  [data-ui-notification-center] > [data-part-header] > [data-part-actions] {
     align-items: center;
     display: inline-flex;
     font-size: var(--_meta-size);
@@ -251,7 +248,7 @@
    * The strip sits on the header's rule, so the tabs family's own track is
    * off (`track="none"`) and the marker lands on the line the header drew.
    */
-  [data-ui='notification-center'] > [data-part='views'] {
+  [data-ui-notification-center] > [data-part-views] {
     border-block-end: var(--_rule-size) solid var(--_rule);
     min-inline-size: 0;
     padding-inline: var(--_inset-inline);
@@ -265,8 +262,8 @@
    * the idiom `timeline` set for the same two controls; `fresh` in the accent
    * pair so it reads as something new, `more` in the secondary.
    */
-  [data-ui='notification-center'] > [data-part='fresh'],
-  [data-ui='notification-center'] > button[data-part='more'] {
+  [data-ui-notification-center] > [data-part-fresh],
+  [data-ui-notification-center] > button[data-part-more] {
     align-items: center;
     appearance: none;
     background-color: var(--_ground);
@@ -292,35 +289,35 @@
       color var(--_duration) var(--_easing);
   }
 
-  [data-ui='notification-center'] > [data-part='fresh'] {
+  [data-ui-notification-center] > [data-part-fresh] {
     background-color: var(--slotted-tone-accent-surface, Canvas);
     border-color: var(--slotted-tone-accent-border, Highlight);
     color: var(--slotted-tone-accent-text, Highlight);
   }
 
-  [data-ui='notification-center'] > [data-part='fresh']:enabled:hover {
+  [data-ui-notification-center] > [data-part-fresh]:enabled:hover {
     background-color: var(--slotted-tone-accent-subtle-hover, Canvas);
   }
 
-  [data-ui='notification-center'] > [data-part='fresh']:enabled:active {
+  [data-ui-notification-center] > [data-part-fresh]:enabled:active {
     background-color: var(--slotted-tone-accent-subtle-active, Canvas);
   }
 
-  [data-ui='notification-center'] > button[data-part='more']:enabled:hover {
+  [data-ui-notification-center] > button[data-part-more]:enabled:hover {
     background-color: var(--_hover);
   }
 
-  [data-ui='notification-center'] > button[data-part='more']:enabled:active {
+  [data-ui-notification-center] > button[data-part-more]:enabled:active {
     background-color: var(--_active);
   }
 
-  [data-ui='notification-center'] > button[data-part='more']:disabled {
+  [data-ui-notification-center] > button[data-part-more]:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: default;
   }
 
   /** Under growing=scroll the sentinel is a box the observer watches, and it says it is waiting. */
-  [data-ui='notification-center'] > div[data-part='more'] {
+  [data-ui-notification-center] > div[data-part-more] {
     color: var(--_muted);
     font-size: var(--_meta-size);
     line-height: var(--_meta-line-height);
@@ -330,8 +327,8 @@
     text-align: center;
   }
 
-  [data-ui='notification-center'] > [data-part='fresh']:focus-visible,
-  [data-ui='notification-center'] > button[data-part='more']:focus-visible {
+  [data-ui-notification-center] > [data-part-fresh]:focus-visible,
+  [data-ui-notification-center] > button[data-part-more]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -347,7 +344,7 @@
    * is `scroll-area`'s: a reserved gutter so the rows do not move when the
    * feed grows past the panel, the thin platform bar, the family's ink on it.
    */
-  [data-ui='notification-center'] > [data-part='feed'] {
+  [data-ui-notification-center] > [data-part-feed] {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -361,17 +358,17 @@
   }
 
   /** The footer draws its own rule above, so the last row gives up the one below it: one seam, not two. */
-  [data-ui='notification-center']
-    > [data-part='feed']:has(+ [data-part='footer'])
-    > [data-part='item']:last-child,
-  [data-ui='notification-center']
-    > [data-part='feed']:has(+ [data-part='footer'])
-    > [data-part='group']:last-child
-    > [data-part='item']:last-child {
+  [data-ui-notification-center]
+    > [data-part-feed]:has(+ [data-part-footer])
+    > [data-part-item]:last-child,
+  [data-ui-notification-center]
+    > [data-part-feed]:has(+ [data-part-footer])
+    > [data-part-group]:last-child
+    > [data-part-item]:last-child {
     border-block-end: 0;
   }
 
-  [data-ui='notification-center'] > [data-part='feed'] > [data-part='group'] {
+  [data-ui-notification-center] > [data-part-feed] > [data-part-group] {
     display: flex;
     flex-direction: column;
     min-inline-size: 0;
@@ -381,10 +378,7 @@
    * A group's heading: an overline in the muted text, on the feed's inset, so
    * the groups read as one list with dates between rather than as boxes.
    */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    > [data-part='group']
-    > [data-part='group-label'] {
+  [data-ui-notification-center] > [data-part-feed] > [data-part-group] > [data-part-group-label] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -403,7 +397,7 @@
    * rows and not as a column of cards. The visual, the title's first line
    * and the controls are centred on one axis.
    */
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item] {
     align-items: flex-start;
     border-block-end: var(--_rule-size) solid var(--_rule);
     display: grid;
@@ -416,29 +410,29 @@
     transition: background-color var(--_duration) var(--_easing);
   }
 
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'][data-tone='secondary'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item][data-tone='secondary'] {
     --_tone-solid: var(--slotted-tone-secondary-solid, ButtonText);
     --_tone-text: var(--slotted-tone-secondary-text, ButtonText);
     --_tone-surface: var(--slotted-tone-secondary-surface, Canvas);
   }
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'][data-tone='success'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item][data-tone='success'] {
     --_tone-solid: var(--slotted-tone-success-solid, ButtonText);
     --_tone-text: var(--slotted-tone-success-text, ButtonText);
     --_tone-surface: var(--slotted-tone-success-surface, Canvas);
   }
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'][data-tone='warning'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item][data-tone='warning'] {
     --_tone-solid: var(--slotted-tone-warning-solid, ButtonText);
     --_tone-text: var(--slotted-tone-warning-text, ButtonText);
     --_tone-surface: var(--slotted-tone-warning-surface, Canvas);
   }
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'][data-tone='danger'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item][data-tone='danger'] {
     --_tone-solid: var(--slotted-tone-danger-solid, ButtonText);
     --_tone-text: var(--slotted-tone-danger-text, ButtonText);
     --_tone-surface: var(--slotted-tone-danger-surface, Canvas);
   }
 
   /** Unread stands on the wash; read stands on the surface. The dot says the same thing a second way. */
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item']:not([data-read]) {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item]:not([data-read]) {
     background-color: var(--_unread-ground);
   }
 
@@ -447,9 +441,7 @@
    * vocabulary's: an item is never disabled, and the rule says so where the
    * states test looks.
    */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']:not([data-disabled]):hover {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item]:not([data-disabled]):hover {
     background-color: var(--_hover);
   }
 
@@ -458,12 +450,12 @@
    * ring is drawn inward, because the rows touch and an outward ring would be
    * cut by the neighbours.
    */
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item']:focus-visible {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'] > [data-part='visual'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item] > [data-part-visual] {
     align-items: center;
     display: flex;
     grid-column: 1;
@@ -472,10 +464,10 @@
   }
 
   /** Without a visual the words take the column. */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']:not(:has(> [data-part='visual']))
-    > [data-part='content'] {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]:not(:has(> [data-part-visual]))
+    > [data-part-content] {
     grid-column: 1 / 3;
   }
 
@@ -504,10 +496,10 @@
    * the consumer put there. The disc is the wrapper's own background, centred
    * on the box the glyph is centred in, so the two stay concentric.
    */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='visual']:empty:not([data-tone]) {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-visual]:empty:not([data-tone]) {
     display: none;
   }
 
@@ -517,10 +509,10 @@
    * rather than percentages of the ray (Chrome paints a `calc(100% - …)`
    * stop as a ramp several pixels wide).
    */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='visual'][data-tone]:has(> [data-tone-glyph]) {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-visual][data-tone]:has(> [data-tone-glyph]) {
     --slotted-icon-size: var(--_visual-glyph);
 
     align-items: center;
@@ -541,7 +533,7 @@
    * line and the offset centres that line on the visual — a visual taller
    * than the line pushes the words down, never the other way.
    */
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'] > [data-part='content'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item] > [data-part-content] {
     display: flex;
     flex-direction: column;
     font-size: var(--_item-title-size);
@@ -552,11 +544,11 @@
     min-inline-size: 0;
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='content']
-    > [data-part='title'] {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-content]
+    > [data-part-title] {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: var(--slotted-notification-center-title-clamp, 2);
     color: var(--_text);
@@ -571,11 +563,11 @@
   }
 
   /** Unread says so with weight as well as with the dot and the wash. */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']:not([data-read])
-    > [data-part='content']
-    > [data-part='title'] {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]:not([data-read])
+    > [data-part-content]
+    > [data-part-title] {
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
@@ -584,38 +576,38 @@
    * opens the thing, and the controls stand above it so they take their own
    * press. The ring stays on the article, which is what has focus.
    */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='content']
-    > a[data-part='title']::after {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-content]
+    > a[data-part-title]::after {
     content: '';
     inset: 0;
     position: absolute;
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='content']
-    > a[data-part='title']:not([data-disabled]):hover {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-content]
+    > a[data-part-title]:not([data-disabled]):hover {
     text-decoration: underline;
     text-underline-offset: 0.15em;
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='content']
-    > a[data-part='title']:focus-visible {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-content]
+    > a[data-part-title]:focus-visible {
     outline: none;
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='content']
-    > [data-part='description'] {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-content]
+    > [data-part-description] {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: var(--slotted-notification-center-description-clamp, 3);
     color: var(--_muted);
@@ -627,11 +619,11 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='content']
-    > [data-part='time'] {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-content]
+    > [data-part-time] {
     color: var(--_muted);
     font-size: var(--_meta-size);
     font-variant-numeric: tabular-nums;
@@ -639,11 +631,11 @@
   }
 
   /** The consumer's controls for the item, above the covering link. */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='content']
-    > [data-part='actions'] {
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-content]
+    > [data-part-actions] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -655,7 +647,7 @@
 
   /* ── The family's controls ───────────────────────────────────────────── */
 
-  [data-ui='notification-center'] > [data-part='feed'] [data-part='item'] > [data-part='controls'] {
+  [data-ui-notification-center] > [data-part-feed] [data-part-item] > [data-part-controls] {
     display: flex;
     gap: var(--slotted-space-1, 0.125rem);
     grid-column: 3;
@@ -674,10 +666,10 @@
    * unread, `dot` while read (the control offers to mark it unread), and `x`
    * to dismiss; the control hands its icon box the glyph size.
    */
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls]
     > button {
     --slotted-icon-size: var(--_glyph);
 
@@ -700,10 +692,10 @@
       background-color var(--_duration) var(--_easing);
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls]
     > button::before {
     /* The halo: the target minimum, centred on the box, taking the press and drawing nothing. */
     block-size: max(var(--_control), var(--slotted-target-min, 24px));
@@ -715,58 +707,58 @@
     translate: -50% -50%;
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls]
     > button:enabled:hover {
     background-color: var(--_hover);
     color: var(--_text);
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls]
     > button:enabled:active {
     background-color: var(--_active);
   }
 
-  [data-ui='notification-center']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
+  [data-ui-notification-center]
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls]
     > button:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   /** The `controls` axis: a product with its own triage keeps one of the two, or neither. */
-  [data-ui='notification-center'][data-controls='read']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
-    > [data-part='dismiss'],
-  [data-ui='notification-center'][data-controls='dismiss']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls']
-    > [data-part='read-toggle'],
-  [data-ui='notification-center'][data-controls='none']
-    > [data-part='feed']
-    [data-part='item']
-    > [data-part='controls'] {
+  [data-ui-notification-center][data-controls='read']
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls]
+    > [data-part-dismiss],
+  [data-ui-notification-center][data-controls='dismiss']
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls]
+    > [data-part-read-toggle],
+  [data-ui-notification-center][data-controls='none']
+    > [data-part-feed]
+    [data-part-item]
+    > [data-part-controls] {
     display: none;
   }
 
   /* ── Loading, empty and the footer ───────────────────────────────────── */
 
   /** The waiting rows are skeleton's; the family gives them the item's inset and rule, and no wash. */
-  [data-ui='notification-center'] > [data-part='feed'] > [data-part='item'][aria-hidden] {
+  [data-ui-notification-center] > [data-part-feed] > [data-part-item][aria-hidden] {
     background-color: transparent;
   }
 
-  [data-ui='notification-center'] > [data-part='empty'] {
+  [data-ui-notification-center] > [data-part-empty] {
     color: var(--_muted);
     display: grid;
     font-size: var(--_meta-size);
@@ -778,7 +770,7 @@
     text-align: center;
   }
 
-  [data-ui='notification-center'] > [data-part='footer'] {
+  [data-ui-notification-center] > [data-part-footer] {
     align-items: center;
     border-block-start: var(--_rule-size) solid var(--_rule);
     display: flex;
@@ -799,14 +791,11 @@
    * the title.
    */
   @container notification-center (max-width: 319px) {
-    [data-ui='notification-center'] > [data-part='feed'] [data-part='item'] {
+    [data-ui-notification-center] > [data-part-feed] [data-part-item] {
       grid-template-columns: auto minmax(0, 1fr);
     }
 
-    [data-ui='notification-center']
-      > [data-part='feed']
-      [data-part='item']
-      > [data-part='controls'] {
+    [data-ui-notification-center] > [data-part-feed] [data-part-item] > [data-part-controls] {
       grid-column: 2;
       justify-content: flex-end;
       margin-block-start: var(--slotted-space-2, 0.25rem);
@@ -827,10 +816,7 @@
    * the halo already reached there.
    */
   @media (pointer: coarse) {
-    [data-ui='notification-center']
-      > [data-part='feed']
-      [data-part='item']
-      > [data-part='controls'] {
+    [data-ui-notification-center] > [data-part-feed] [data-part-item] > [data-part-controls] {
       --_control: var(--slotted-target-comfortable, 44px);
 
       margin-block-start: calc((var(--_visual) - var(--_control)) / 2);
@@ -846,7 +832,7 @@
    * carries unread.
    */
   @media (forced-colors: active) {
-    [data-ui='notification-center'] [data-part='count'] {
+    [data-ui-notification-center] [data-part-count] {
       background-color: Highlight;
       border-color: Highlight;
       color: HighlightText;

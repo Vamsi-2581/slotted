@@ -2,15 +2,28 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/stat-card/contract.json', import.meta.url),
     'utf8',
   ),
 );
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const css = readFileSync(new URL('./stat-card.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./stat-card.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./stat-card.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -80,7 +93,7 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part the contract declares, and the harness renders each', () => {
   for (const part of parts) {
     if (part === 'root') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `${part} is never painted`);
+    assert.ok(normalized.includes(`[data-part-${part.toLowerCase()}]`), `${part} is never painted`);
     assert.ok(fragment.includes(`data-part="${part}"`), `${part} never appears in the harness`);
   }
 });
@@ -96,8 +109,8 @@ test('measures itself on the root and lays out one element in', () => {
   assert.ok(root.includes('container-name:stat-card'));
   assert.ok(root.includes('display:flex'));
   assert.ok(root.includes('flex-direction:column'));
-  assert.ok(body(`${ui} [data-part='body']`).includes('display:grid'));
-  assert.ok(body(`${ui} [data-part='body']`).includes('flex:1 1 auto'));
+  assert.ok(body(`${ui} [data-part-body]`).includes('display:grid'));
+  assert.ok(body(`${ui} [data-part-body]`).includes('flex:1 1 auto'));
 });
 
 /**
@@ -106,12 +119,12 @@ test('measures itself on the root and lays out one element in', () => {
  * the trend gives way instead.
  */
 test('gives the value its width and lets the trend give way', () => {
-  const grid = body(`${ui} [data-part='body']`);
+  const grid = body(`${ui} [data-part-body]`);
   assert.ok(
     grid.includes('grid-template-columns:minmax(min-content,1fr) minmax(0,var(--_trend-size))'),
   );
-  assert.ok(body(`${ui} [data-part='value']`).includes('overflow-wrap:break-word'));
-  assert.doesNotMatch(body(`${ui} [data-part='value']`), /anywhere/);
+  assert.ok(body(`${ui} [data-part-value]`).includes('overflow-wrap:break-word'));
+  assert.doesNotMatch(body(`${ui} [data-part-value]`), /anywhere/);
 });
 
 /**
@@ -120,29 +133,25 @@ test('gives the value its width and lets the trend give way', () => {
  * values level at the top and its charts level at the bottom.
  */
 test('levels a row of cards: figures at the top, stacked trends at the bottom', () => {
-  assert.ok(
-    body(`${ui} [data-part='body']`).includes('grid-template-rows:auto minmax(0,1fr) auto'),
-  );
-  assert.ok(body(`${ui} [data-part='figure']`).includes('align-self:start'));
-  assert.ok(body(`${ui} [data-part='trend']`).includes('align-self:center'));
-  assert.ok(body(`${ui}[data-layout='stacked'] [data-part='trend']`).includes('align-self:end'));
+  assert.ok(body(`${ui} [data-part-body]`).includes('grid-template-rows:auto minmax(0,1fr) auto'));
+  assert.ok(body(`${ui} [data-part-figure]`).includes('align-self:start'));
+  assert.ok(body(`${ui} [data-part-trend]`).includes('align-self:center'));
+  assert.ok(body(`${ui}[data-layout='stacked'] [data-part-trend]`).includes('align-self:end'));
 });
 
 test('stacks the trend under the figure below 220 pixels, and steps the value down', () => {
   const scope = '@container stat-card (max-width:219px)';
-  assert.ok(body(`${ui} [data-part='body']`, scope).includes("'trend'"));
-  assert.ok(body(`${ui} [data-part='trend']`, scope).includes('align-self:end'));
-  assert.ok(
-    body(`${ui} [data-part='value']`, scope).includes('font-size:var(--_value-size-narrow)'),
-  );
+  assert.ok(body(`${ui} [data-part-body]`, scope).includes("'trend'"));
+  assert.ok(body(`${ui} [data-part-trend]`, scope).includes('align-self:end'));
+  assert.ok(body(`${ui} [data-part-value]`, scope).includes('font-size:var(--_value-size-narrow)'));
 });
 
 /** A trend narrower than forty pixels is a smear, and the region hides it. */
 test('hides a trend that was left no room', () => {
-  const trend = body(`${ui} [data-part='trend']`);
+  const trend = body(`${ui} [data-part-trend]`);
   assert.ok(trend.includes('container-type:inline-size'));
   assert.equal(
-    body(`${ui} [data-part='trend'] > *`, '@container stat-card-trend (max-width:39px)'),
+    body(`${ui} [data-part-trend] > *`, '@container stat-card-trend (max-width:39px)'),
     'visibility:hidden;',
   );
 });
@@ -171,19 +180,19 @@ test('scales the figure by size, reaching the new 4xl step at lg', () => {
  */
 test('paints the delta in the tone it earned and turns one glyph for the fall', () => {
   for (const tone of contract.axes.tone) {
-    assert.ok(rule(`${ui} [data-part='delta'][data-tone='${tone}']`), tone);
+    assert.ok(rule(`${ui} [data-part-delta][data-tone='${tone}']`), tone);
   }
-  const indicator = body(`${ui} [data-part='indicator']`);
+  const indicator = body(`${ui} [data-part-indicator]`);
   assert.ok(indicator.includes('--slotted-icon-size:var(--_indicator-size)'));
   assert.doesNotMatch(indicator, /mask|background/);
   /* The fall is the rise reflected across the horizontal axis; the mirror in
      a right-to-left document is the `directional` icon box, not the sheet. */
   assert.equal(
-    body(`${ui} [data-part='delta'][data-trend='down'] [data-part='indicator'] > [data-ui='icon']`),
+    body(`${ui} [data-part-delta][data-trend='down'] [data-part-indicator] > [data-ui-icon]`),
     'rotate:x 180deg;',
   );
   assert.doesNotMatch(css, /\bscale\s*:/);
-  assert.doesNotMatch(body(`${ui} [data-part='delta']`), /background/);
+  assert.doesNotMatch(body(`${ui} [data-part-delta]`), /background/);
 });
 
 /** The harness draws the glyph each trend's binding renders. */
@@ -207,17 +216,17 @@ test('draws trending-up for a rise or a fall and minus for no change', () => {
  * value's first element child and lost its margin: the sign hugged the digit.
  */
 test('spaces the unit from the figure on either side, without a first-child reset', () => {
-  const value = body(`${ui} [data-part='value']`);
+  const value = body(`${ui} [data-part-value]`);
   assert.ok(value.includes('display:inline-flex'));
   assert.ok(value.includes('align-items:baseline'));
   assert.match(value, /gap:0\.\d+em/);
-  assert.equal(rule(`${ui} [data-part='value'] > [data-part='unit']:first-child`), undefined);
-  assert.ok(!body(`${ui} [data-part='unit']`).includes('margin-inline'));
+  assert.equal(rule(`${ui} [data-part-value] > [data-part-unit]:first-child`), undefined);
+  assert.ok(!body(`${ui} [data-part-unit]`).includes('margin-inline'));
 });
 
 test('lays the value and the delta out by their own content', () => {
-  assert.ok(body(`${ui} [data-part='value']`).includes('unicode-bidi:plaintext'));
-  assert.ok(body(`${ui} [data-part='delta']`).includes('unicode-bidi:plaintext'));
+  assert.ok(body(`${ui} [data-part-value]`).includes('unicode-bidi:plaintext'));
+  assert.ok(body(`${ui} [data-part-delta]`).includes('unicode-bidi:plaintext'));
 });
 
 /**
@@ -228,22 +237,22 @@ test('lays the value and the delta out by their own content', () => {
 test('hands its tone and its ground to the sparkline in its trend', () => {
   for (const tone of ['success', 'danger', 'warning', 'accent', 'secondary']) {
     assert.equal(
-      body(`${ui}[data-tone='${tone}'] [data-part='trend']`),
+      body(`${ui}[data-tone='${tone}'] [data-part-trend]`),
       `--slotted-sparkline-color:var(--slotted-tone-${tone}-text);`,
     );
   }
-  assert.ok(!rule(`${ui}[data-tone='neutral'] [data-part='trend']`), 'neutral hands nothing');
+  assert.ok(!rule(`${ui}[data-tone='neutral'] [data-part-trend]`), 'neutral hands nothing');
   assert.ok(
-    body(`${ui} [data-part='trend']`).includes('--slotted-sparkline-ring-color:var(--_surface)'),
+    body(`${ui} [data-part-trend]`).includes('--slotted-sparkline-ring-color:var(--_surface)'),
   );
 });
 
 test('keeps the trend the height of the sparkline while it loads', () => {
   assert.ok(
-    body(`${ui}[data-loading] [data-part='trend']`).includes('--slotted-skeleton-block-size:'),
+    body(`${ui}[data-loading] [data-part-trend]`).includes('--slotted-skeleton-block-size:'),
   );
-  assert.ok(rule(`${ui}[data-loading][data-size='sm'] [data-part='trend']`));
-  assert.ok(rule(`${ui}[data-loading][data-size='lg'] [data-part='trend']`));
+  assert.ok(rule(`${ui}[data-loading][data-size='sm'] [data-part-trend]`));
+  assert.ok(rule(`${ui}[data-loading][data-size='lg'] [data-part-trend]`));
 });
 
 /**
@@ -254,12 +263,12 @@ test('keeps the trend the height of the sparkline while it loads', () => {
  */
 test('keeps the value the height of one of its own lines while it loads', () => {
   assert.equal(
-    body(`${ui}[data-loading] [data-part='value']`),
+    body(`${ui}[data-loading] [data-part-value]`),
     'min-block-size:calc(var(--_value-size) * var(--_value-line));',
   );
   const scope = '@container stat-card (max-width:219px)';
   assert.equal(
-    body(`${ui}[data-loading] [data-part='value']`, scope),
+    body(`${ui}[data-loading] [data-part-value]`, scope),
     'min-block-size:calc(var(--_value-size-narrow) * var(--_value-line-narrow));',
   );
 });
@@ -279,24 +288,24 @@ test('keeps the value the height of one of its own lines while it loads', () => 
  */
 test('keeps a consumer’s one-line text out of the width of the grid', () => {
   for (const part of ['header', 'message', 'comparison']) {
-    assert.match(body(`${ui} [data-part='${part}']`), /contain:inline-size/, part);
+    assert.match(body(`${ui} [data-part-${part.toLowerCase()}]`), /contain:inline-size/, part);
   }
 });
 
 test('sets the action on the label’s own line, whatever face has arrived', () => {
-  const action = body(`${ui} [data-part='action']`);
+  const action = body(`${ui} [data-part-action]`);
   assert.match(action, /font-size:var\(--_label-size\)/);
   assert.match(action, /line-height:var\(--_label-line\)/);
 });
 
 test('says a failed value in the danger tone and a missing one in the muted step', () => {
   assert.equal(
-    body(`${ui}[data-status='error'] [data-part='message']`),
+    body(`${ui}[data-status='error'] [data-part-message]`),
     'color:var(--slotted-tone-danger-text);',
   );
   assert.ok(
     rule(
-      `${ui}[data-status='empty'] [data-part='value'],${ui}[data-status='error'] [data-part='value']`,
+      `${ui}[data-status='empty'] [data-part-value],${ui}[data-status='error'] [data-part-value]`,
     ),
   );
 });
@@ -326,7 +335,7 @@ test('gives the action a comfortable target on a coarse pointer', () => {
     (entry) =>
       entry.scope.includes('pointer:coarse') &&
       entry.selector.startsWith(ui) &&
-      entry.selector.includes("[data-part='action']") &&
+      entry.selector.includes('[data-part-action]') &&
       entry.selector.includes('::before'),
   );
   assert.equal(coarse.length, 1, 'no halo on the action under a coarse pointer');
@@ -346,9 +355,9 @@ test('gives the action a comfortable target on a coarse pointer', () => {
  */
 test('reaches its own parts and stops at a nested family', () => {
   const flat = declarations.replace(/\s+/g, ' ');
-  assert.doesNotMatch(flat, /\[data-ui='stat-card'\][^{,]*\s\[data-part=/);
+  assert.doesNotMatch(flat, /\[data-ui-stat-card\][^{,]*\s\[data-part-/);
   for (const block of flat.match(/@scope \([^)]*\) to \([^{]*\) \{/g) ?? []) {
-    assert.equal(block, "@scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {");
+    assert.equal(block, '@scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {');
   }
   assert.ok((flat.match(/@scope /g) ?? []).length > 0);
 });

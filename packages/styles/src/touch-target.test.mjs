@@ -48,7 +48,7 @@ const BORDER = 'var(--slotted-control-border-width,1px)';
 
 for (const family of ['text-field', 'number-field', 'currency-field', 'combobox']) {
   test(`${family}: the input spans the frame's border box`, () => {
-    const input = body(normalized(family), `[data-ui='${family}']>[data-part='input']`);
+    const input = body(normalized(family), `[data-ui-${family.toLowerCase()}]>[data-part-input]`);
     assert.ok(input.includes('align-self:stretch;'), `${family} input: ${input}`);
     assert.ok(!/block-size:100%/.test(input), `${family} input keeps no percentage height`);
     assert.ok(input.includes(`margin-block:calc(${BORDER} * -1);`), `${family} input margin`);
@@ -56,7 +56,7 @@ for (const family of ['text-field', 'number-field', 'currency-field', 'combobox'
 }
 
 test("select: the trigger spans the frame's border box", () => {
-  const trigger = body(normalized('select'), "[data-ui='select']>[data-part='trigger']");
+  const trigger = body(normalized('select'), '[data-ui-select]>[data-part-trigger]');
   assert.ok(trigger.includes(`margin-block:calc(${BORDER} * -1);`), trigger);
   assert.ok(trigger.includes('min-block-size:var(--_height);'), trigger);
 });
@@ -64,13 +64,12 @@ test("select: the trigger spans the frame's border box", () => {
 const INNER = [
   {
     family: 'combobox',
-    selector: "[data-ui='combobox']>:is([data-part='clear'],[data-part='trigger'])",
+    selector: '[data-ui-combobox]>:is([data-part-clear],[data-part-trigger])',
   },
-  { family: 'select', selector: "[data-ui='select']>[data-part='clear']" },
+  { family: 'select', selector: '[data-ui-select]>[data-part-clear]' },
   {
     family: 'text-field',
-    selector:
-      "[data-ui='text-field']>:is([data-part='clear'],[data-part='copy'],[data-part='reveal'])",
+    selector: '[data-ui-text-field]>:is([data-part-clear],[data-part-copy],[data-part-reveal])',
   },
 ];
 

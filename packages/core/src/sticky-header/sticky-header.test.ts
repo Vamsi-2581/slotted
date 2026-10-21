@@ -141,6 +141,7 @@ describe('createStickyHeader', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     document.body.innerHTML = '';
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
 
   it('finds the element the header scrolls inside', () => {
@@ -498,7 +499,7 @@ describe('createStickyHeader', () => {
     scroller.style.overflowY = 'auto';
     Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 400 });
     const root = document.createElement('header');
-    Object.defineProperty(root, 'clientWidth', { configurable: true, value: 1024 });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
     const title = sized(document.createElement('div'), 80);
     const area = sized(document.createElement('div'), 120);
     root.append(title, area);
@@ -529,7 +530,7 @@ describe('createStickyHeader', () => {
     /* A phone's width says the same whatever the height. */
     state.pinned = false;
     sized(area, 40);
-    Object.defineProperty(root, 'clientWidth', { configurable: true, value: 390 });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
     (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).callback([], {} as ResizeObserver);
     expect(handle.tall()).toBe(true);
     handle.destroy();
@@ -614,7 +615,7 @@ describe('createStickyHeader', () => {
     scroller.style.overflowY = 'auto';
     Object.defineProperty(scroller, 'clientHeight', { configurable: true, value: 800 });
     const root = document.createElement('header');
-    Object.defineProperty(root, 'clientWidth', { configurable: true, value: COMPACT_BELOW });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: COMPACT_BELOW });
     const area = sized(document.createElement('div'), 40);
     root.append(area);
     scroller.append(root);
@@ -631,7 +632,7 @@ describe('createStickyHeader', () => {
     });
     expect(handle.tall()).toBe(false);
 
-    Object.defineProperty(root, 'clientWidth', { configurable: true, value: COMPACT_BELOW - 1 });
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: COMPACT_BELOW - 1 });
     (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
     expect(onTall).toHaveBeenLastCalledWith(true);
     handle.destroy();
@@ -946,7 +947,7 @@ describe('createStickyHeader', () => {
       const observersBefore = FakeIntersectionObserver.instances.length;
       const onCompact = vi.fn();
       built.handle.destroy();
-      Object.defineProperty(built.root, 'clientWidth', { configurable: true, value: width });
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: width });
       const onScrollRequest = vi.fn((expanded: boolean) => {
         built.state.expanded = expanded;
         handle.expandedChanged(expanded, 'scroll');
@@ -975,6 +976,20 @@ describe('createStickyHeader', () => {
       expect(onCompact).toHaveBeenLastCalledWith(true);
       expect(observers()).toBe(0);
       expect(scroller.style.getPropertyValue(STICKY_TOP_PROPERTY)).toBe('0px');
+      handle.destroy();
+    });
+
+    /**
+     * The class is a phone's. A detail panel scrolling itself as a pane beside
+     * a list is narrower than it in a frame of 1 440 pixels, and its header
+     * went out of `sticky` and scrolled away with the record.
+     */
+    it('is not compact for a narrow header in a wide frame', () => {
+      const { handle, onCompact, root } = compactScene(1440);
+      Object.defineProperty(root, 'clientWidth', { configurable: true, value: 420 });
+      (FakeResizeObserver.instances.at(-1) as FakeResizeObserver).fire();
+      expect(handle.compact()).toBe(false);
+      expect(onCompact).not.toHaveBeenCalledWith(true);
       handle.destroy();
     });
 
@@ -1007,9 +1022,8 @@ describe('createStickyHeader', () => {
 
     it('opens an area the scroll shut when the header turns compact, and observes again above it', () => {
       const width = { value: 1024 };
-      const { handle, onCompact, onScrollRequest, resize, root, scroller, state } =
-        compactScene(1024);
-      Object.defineProperty(root, 'clientWidth', { configurable: true, get: () => width.value });
+      const { handle, onCompact, onScrollRequest, resize, scroller, state } = compactScene(1024);
+      Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => width.value });
 
       scroller.scrollTop = 300;
       (FakeIntersectionObserver.instances.at(-1) as FakeIntersectionObserver).report(false);
@@ -1032,8 +1046,8 @@ describe('createStickyHeader', () => {
 
     it('leaves an area the control shut as it is when the header turns compact', () => {
       const width = { value: 1024 };
-      const { handle, onScrollRequest, resize, root, state } = compactScene(1024);
-      Object.defineProperty(root, 'clientWidth', { configurable: true, get: () => width.value });
+      const { handle, onScrollRequest, resize, state } = compactScene(1024);
+      Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => width.value });
       state.expanded = false;
       handle.expandedChanged(false, 'control');
       width.value = 390;

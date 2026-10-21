@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/toolbar/contract.json', import.meta.url),
@@ -13,7 +24,9 @@ const buttonGroupCss = readFileSync(
   'utf8',
 );
 const css = readFileSync(new URL('./toolbar.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./toolbar.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./toolbar.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -21,9 +34,9 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.toolbar;
-const part = (name) => `${ui} [data-part='${name}']`;
+const part = (name) => `${ui} [data-part-${name.toLowerCase()}]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -41,7 +54,7 @@ test('styles every part the contract declares', () => {
   for (const declared of member.parts) {
     if (declared === 'root') continue;
     assert.ok(
-      normalized.includes(`[data-part='${declared}']`),
+      normalized.includes(`[data-part-${declared.toLowerCase()}]`),
       `no rule reaches the ${declared} part`,
     );
   }
@@ -99,11 +112,11 @@ test('answers every size the contract declares from the control scales', () => {
  * Fluent's context-driven size does.
  */
 test('sizes the bar and never the controls in it', () => {
-  assert.doesNotMatch(declarations, /\[data-ui='button'\]/);
+  assert.doesNotMatch(declarations, /\[data-ui-button\]/);
   for (const line of declarations.split('}')) {
     if (!line.includes('font-size')) continue;
     assert.ok(
-      line.includes("[data-part='overflow']") || line.includes('--_font-size:'),
+      line.includes('[data-part-overflow]') || line.includes('--_font-size:'),
       'a type step is set on something other than the one control this family draws',
     );
   }
@@ -218,7 +231,7 @@ test('paints only the states of the one control it draws itself', () => {
       if (!line.includes(state)) continue;
       assert.match(
         line,
-        /\[data-part='overflow'\]/,
+        /\[data-part-overflow\]/,
         `${state} is painted on something other than the control this family draws`,
       );
     }
@@ -244,8 +257,7 @@ test('writes every rule in logical properties, and takes no duration at all', ()
  */
 test('makes the overflow trigger a full touch target on a coarse pointer', () => {
   const coarse = /@media \(pointer:coarse\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
-  const trigger =
-    coarse.split(`[data-ui='toolbar'] [data-part='overflow']{`)[1]?.split('}')[0] ?? '';
+  const trigger = coarse.split(`[data-ui-toolbar] [data-part-overflow]{`)[1]?.split('}')[0] ?? '';
   /* Both axes in one rule and one value, so the box is square whatever the
      bar's height is. */
   const side = 'max(var(--slotted-target-comfortable,44px),var(--_height))';

@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '../selector-key/selector-key';
 /**
  * One mark that travels between the items of a row: the selected tab's
  * underline, drawn once in the row rather than once per item.
@@ -54,7 +55,7 @@ export function createIndicator(
 ): IndicatorHandle {
   const doc = container.ownerDocument;
   const element = doc.createElement('span');
-  element.setAttribute('data-part', options.part ?? 'indicator');
+  writeSelectorKey(element, 'part', options.part ?? 'indicator');
   element.setAttribute('aria-hidden', 'true');
   element.hidden = true;
   container.append(element);

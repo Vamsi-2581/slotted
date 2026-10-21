@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/tree/tree.css';
 import '@slotted/styles/highlight/highlight.css';
 
@@ -1003,7 +1004,7 @@ export function Tree<T = unknown>({
       ? collection.nodes.length === 0 || (filtered !== undefined && filtered.kept.size === 0)
       : false;
 
-  const rootProps: TreeRootProps = {
+  const rootProps: TreeRootProps = keyedProps({
     ...nativeProps,
     ...(resolved.disabled ? { 'data-disabled': '' as const } : {}),
     'data-expand-on': resolved.expandOn,
@@ -1020,12 +1021,13 @@ export function Tree<T = unknown>({
     'data-structure': resolvedStructure,
     'data-ui': 'tree',
     'data-variant': resolved.variant,
-  };
+  });
 
   const canvas = (
     <ul
       ref={canvasRef}
       data-part="canvas"
+      data-part-canvas=""
       role="tree"
       aria-busy={loading === true ? true : undefined}
       aria-disabled={resolved.disabled ? true : undefined}
@@ -1057,7 +1059,9 @@ export function Tree<T = unknown>({
     <TreeContext.Provider value={context}>
       {canvas}
       {holdsNothing && emptyContent !== undefined ? (
-        <div data-part="empty">{emptyContent}</div>
+        <div data-part="empty" data-part-empty="">
+          {emptyContent}
+        </div>
       ) : null}
       {name === undefined
         ? null

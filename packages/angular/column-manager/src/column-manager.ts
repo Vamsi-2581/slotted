@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterEveryRender,
@@ -135,7 +136,7 @@ export class SlColumnManagerPart {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   constructor() {
-    afterNextRender(() => this.host.nativeElement.setAttribute('data-part', this.part()));
+    afterNextRender(() => writeSelectorKey(this.host.nativeElement, 'part', this.part()));
   }
 }
 
@@ -210,18 +211,20 @@ export class SlColumnManagerPart {
       <div
         #root
         data-ui="column-manager"
+        data-ui-column-manager=""
         data-part="root"
+        data-part-root=""
         role="group"
         [attr.id]="rootId"
         [attr.aria-labelledby]="titleId"
         [attr.data-presentation]="resolvedPresentation()"
         [attr.data-apply]="resolvedApply()"
       >
-        <div data-part="header">
-          <h2 data-part="title" [attr.id]="titleId">{{ t('title') }}</h2>
-          <span data-part="summary">{{ summary() }}</span>
+        <div data-part="header" data-part-header="">
+          <h2 data-part="title" data-part-title="" [attr.id]="titleId">{{ t('title') }}</h2>
+          <span data-part="summary" data-part-summary="">{{ summary() }}</span>
         </div>
-        <div data-part="search">
+        <div data-part="search" data-part-search="">
           <div slTextField size="sm" [clearable]="true">
             <span slTextFieldStart
               ><span slIcon><svg slGlyph name="search"></svg></span
@@ -236,13 +239,14 @@ export class SlColumnManagerPart {
             />
           </div>
         </div>
-        <div data-part="list">
+        <div data-part="list" data-part-list="">
           @if (sections().length === 0 && searching()) {
-            <div data-part="empty" role="status">{{ t('noResults') }}</div>
+            <div data-part="empty" data-part-empty="" role="status">{{ t('noResults') }}</div>
           }
           @for (section of sections(); track section.key) {
             <div
               data-part="section"
+              data-part-section=""
               role="group"
               [attr.data-zone]="section.key"
               [attr.aria-labelledby]="rootId + '-' + section.key"
@@ -251,15 +255,24 @@ export class SlColumnManagerPart {
                 drag().container === section.key && drag().index !== null ? '' : null
               "
             >
-              <div data-part="section-label" [attr.id]="rootId + '-' + section.key">
+              <div
+                data-part="section-label"
+                data-part-section-label=""
+                [attr.id]="rootId + '-' + section.key"
+              >
                 {{ section.label }}
               </div>
               @for (item of section.items; track item.id) {
                 @if (dropAt(section.key, item.index)) {
-                  <div data-part="drop-indicator" aria-hidden="true"></div>
+                  <div
+                    data-part="drop-indicator"
+                    data-part-drop-indicator=""
+                    aria-hidden="true"
+                  ></div>
                 }
                 <div
                   data-part="item"
+                  data-part-item=""
                   [attr.data-column]="item.id"
                   [attr.data-hidden]="item.hidden ? '' : null"
                   [attr.data-locked]="item.locked ? '' : null"
@@ -269,6 +282,7 @@ export class SlColumnManagerPart {
                 >
                   <button
                     data-part="handle"
+                    data-part-handle=""
                     type="button"
                     [attr.aria-label]="t('reorder', { column: item.column.label })"
                     [attr.aria-disabled]="item.handleDisabled ? 'true' : null"
@@ -277,7 +291,7 @@ export class SlColumnManagerPart {
                   >
                     <span slIcon size="sm"><svg slGlyph name="grip-vertical"></svg></span>
                   </button>
-                  <div data-part="visibility">
+                  <div data-part="visibility" data-part-visibility="">
                     <div
                       slCheckbox
                       [checked]="!item.hidden"
@@ -286,7 +300,7 @@ export class SlColumnManagerPart {
                     >
                       {{ item.column.label }}
                       @if (item.status) {
-                        <span data-part="status">{{ item.status }}</span>
+                        <span data-part="status" data-part-status="">{{ item.status }}</span>
                       }
                       @if (item.column.description) {
                         <p slCheckboxDescription>{{ item.column.description }}</p>
@@ -297,6 +311,7 @@ export class SlColumnManagerPart {
                     type="button"
                     slColumnManagerPart="pin"
                     data-part="pin"
+                    data-part-pin=""
                     [slMenuTriggerFor]="pinMenu"
                     [attr.aria-label]="t('pin', { column: item.column.label })"
                     [attr.data-pinned]="item.zone ? '' : null"
@@ -327,12 +342,16 @@ export class SlColumnManagerPart {
                 </div>
               }
               @if (section.dropAtEnd) {
-                <div data-part="drop-indicator" aria-hidden="true"></div>
+                <div
+                  data-part="drop-indicator"
+                  data-part-drop-indicator=""
+                  aria-hidden="true"
+                ></div>
               }
             </div>
           }
         </div>
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           <button
             slButton
             slColumnManagerPart="show-all"
@@ -846,13 +865,13 @@ export class SlColumnManagerTrigger {
 
     /* `slButton` writes `data-part="root"` statically; the part is this family's. */
     afterNextRender(() => {
-      this.host.setAttribute('data-part', 'trigger');
+      writeSelectorKey(this.host, 'part', 'trigger');
       const chip = this.renderer.createElement('span') as HTMLElement;
-      chip.setAttribute('data-part', 'count');
+      writeSelectorKey(chip, 'part', 'count');
       chip.setAttribute('aria-hidden', 'true');
       const sentence = this.renderer.createElement('span') as HTMLElement;
-      sentence.setAttribute('data-ui', 'visually-hidden');
-      sentence.setAttribute('data-part', 'root');
+      writeSelectorKey(sentence, 'ui', 'visually-hidden');
+      writeSelectorKey(sentence, 'part', 'root');
       this.count.set({ chip, sentence });
     });
 

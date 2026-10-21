@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useCallback, useRef } from 'react';
 import type { Ref } from 'react';
 
@@ -48,7 +49,7 @@ export function SplitButtonPrimary({
       disabled={disabled || family.disabled}
       loading={loading || family.loading}
       render={(props: ButtonRootProps) => {
-        const rootProps = { ...props, 'data-part': 'primary' } as ButtonRootProps;
+        const rootProps = keyedProps({ ...props, 'data-part': 'primary' }) as ButtonRootProps;
         return render === undefined ? <button {...rootProps} /> : render(rootProps);
       }}
     />
@@ -136,11 +137,11 @@ export function SplitButtonMenuTrigger({
                  would clear the one `menu` wrote for a disabled menu; while
                  the root is loading the menu is disabled and the trigger has
                  to say so, so it is written back after `button`'s own. */
-              const rootProps = {
+              const rootProps = keyedProps({
                 ...props,
                 ...(family.loading ? { 'aria-disabled': true } : {}),
                 'data-part': 'menu-trigger',
-              } as ButtonRootProps;
+              }) as ButtonRootProps;
               return render === undefined ? <button {...rootProps} /> : render(rootProps);
             }}
             shape="square"

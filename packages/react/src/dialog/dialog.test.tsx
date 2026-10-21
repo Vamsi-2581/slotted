@@ -229,6 +229,48 @@ describe('Dialog', () => {
     expect(root).toHaveAttribute('data-modal');
   });
 
+  /**
+   * An owner that passes an inline `onOpenChange` gives the root a new context
+   * value on each of its renders. A command palette re-renders on each highlight
+   * move, and a layer that re-registered
+   * on each one wrote `inert` on the whole background and the scroll lock on
+   * the body per pointer move.
+   */
+  it('registers the layer once per open, however often the root re-renders', () => {
+    function Owner({ tick }: { tick: number }) {
+      return (
+        <>
+          <div data-testid="sibling" />
+          <Basic onOpenChange={() => tick}>
+            <span>{tick}</span>
+          </Basic>
+        </>
+      );
+    }
+    const { rerender } = render(<Owner tick={0} />);
+    const sibling = screen.getByTestId('sibling').parentElement as HTMLElement;
+    const observer = new MutationObserver(() => {});
+    observer.observe(document.documentElement, {
+      attributeFilter: ['inert', 'style'],
+      attributes: true,
+      subtree: true,
+    });
+
+    press(trigger());
+    const opening = observer.takeRecords();
+    expect(opening.filter((r) => r.target === sibling && r.attributeName === 'inert')).toHaveLength(
+      1,
+    );
+
+    for (let tick = 1; tick <= 5; tick += 1) rerender(<Owner tick={tick} />);
+    const rerenders = observer.takeRecords();
+    observer.disconnect();
+
+    expect(sibling).toHaveAttribute('inert');
+    expect(rerenders.filter((r) => r.attributeName === 'inert')).toHaveLength(0);
+    expect(rerenders.filter((r) => r.target === document.body)).toHaveLength(0);
+  });
+
   it('is not in the document at all while it is closed', () => {
     render(<Basic />);
     expect(layer()).toBeNull();

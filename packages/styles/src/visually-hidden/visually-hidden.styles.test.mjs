@@ -48,7 +48,7 @@ test('holds the box at one pixel whatever element the consumer brought', () => {
  * opinion about how a revealed skip link looks, and it has none.
  */
 test('hides in one rule, and reveals by ceasing to match it', () => {
-  assert.deepEqual(rules(), ["[data-ui='visually-hidden']:not([data-focusable]:focus-within)"]);
+  assert.deepEqual(rules(), ['[data-ui-visually-hidden]:not([data-focusable]:focus-within)']);
 });
 
 test('is selected by the public identifier rather than by a class', () => {

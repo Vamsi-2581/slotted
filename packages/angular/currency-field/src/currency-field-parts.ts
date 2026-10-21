@@ -18,7 +18,7 @@ import { SlCurrencyField } from './currency-field';
   selector: '[slCurrencyFieldStart]',
   standalone: true,
   exportAs: 'slCurrencyFieldStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlCurrencyFieldStart {}
 
@@ -27,7 +27,7 @@ export class SlCurrencyFieldStart {}
   selector: '[slCurrencyFieldEnd]',
   standalone: true,
   exportAs: 'slCurrencyFieldEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlCurrencyFieldEnd {}
 
@@ -53,6 +53,7 @@ export class SlCurrencyFieldEnd {}
   exportAs: 'slCurrencyFieldScrub',
   host: {
     'data-part': 'scrub',
+    'data-part-scrub': '',
     'aria-hidden': 'true',
     '[attr.data-scrubbing]': "active() ? '' : null",
     '(pointerdown)': 'begin($event)',

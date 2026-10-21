@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import type { CascaderColumnView, CascaderCrumb, CascaderNodeView } from '@slotted/core/cascader';
 import { matchRanges } from '@slotted/core/highlight';
 import { useEffect, useRef } from 'react';
@@ -146,6 +147,7 @@ export function CascaderSurfaceBody<T>({
         data-indeterminate={node.indeterminate ? '' : undefined}
         data-loading={node.loading ? '' : undefined}
         data-part="node"
+        data-part-node=""
         data-selected={node.selected ? '' : undefined}
         id={state.nodeId(node.key)}
         key={node.key}
@@ -159,26 +161,34 @@ export function CascaderSurfaceBody<T>({
         style={style}
       >
         {state.multiple ? (
-          <span data-part="indicator">
+          <span data-part="indicator" data-part-indicator="">
             <Icon>
               <Glyph name={node.indeterminate ? 'minus' : 'check'} />
             </Icon>
           </span>
         ) : null}
-        {icon === undefined ? null : <span data-part="icon">{icon}</span>}
-        <span data-part="label">{renderLabel(node)}</span>
+        {icon === undefined ? null : (
+          <span data-part="icon" data-part-icon="">
+            {icon}
+          </span>
+        )}
+        <span data-part="label" data-part-label="">
+          {renderLabel(node)}
+        </span>
         {description === undefined || description === '' ? null : (
-          <span data-part="description">{description}</span>
+          <span data-part="description" data-part-description="">
+            {description}
+          </span>
         )}
         {meta === undefined ? null : (
-          <span aria-hidden="true" data-part="meta">
+          <span aria-hidden="true" data-part="meta" data-part-meta="">
             {meta}
           </span>
         )}
         {node.branch ? (
-          <span aria-hidden="true" data-part="expander">
+          <span aria-hidden="true" data-part="expander" data-part-expander="">
             {node.loading ? (
-              <span data-part="root" data-ui="spinner" />
+              <span data-part="root" data-part-root="" data-ui="spinner" data-ui-spinner="" />
             ) : (
               <Icon directional>
                 <Glyph name="chevron-right" />
@@ -186,7 +196,7 @@ export function CascaderSurfaceBody<T>({
             )}
           </span>
         ) : state.multiple ? null : (
-          <span data-part="indicator">
+          <span data-part="indicator" data-part-indicator="">
             <Icon>
               <Glyph name="check" />
             </Icon>
@@ -204,19 +214,27 @@ export function CascaderSurfaceBody<T>({
         aria-busy={column.pending && !column.failed ? true : undefined}
         aria-label={name}
         data-part="column"
+        data-part-column=""
         key={column.parent ?? `root-${index}`}
         role="group"
       >
         {column.nodes.map(renderNode)}
         {column.pending && !column.failed
           ? [0, 1, 2].map((row) => (
-              <div aria-hidden="true" data-part="loader" key={row}>
-                <span data-loading="" data-part="root" data-shape="text" data-ui="skeleton" />
+              <div aria-hidden="true" data-part="loader" data-part-loader="" key={row}>
+                <span
+                  data-loading=""
+                  data-part="root"
+                  data-part-root=""
+                  data-shape="text"
+                  data-ui="skeleton"
+                  data-ui-skeleton=""
+                />
               </div>
             ))
           : null}
         {column.failed && column.parent !== undefined ? (
-          <div data-part="status" role="status">
+          <div data-part="status" data-part-status="" role="status">
             {t('failed', { label: name })}
             <Button
               onClick={() => {
@@ -231,7 +249,9 @@ export function CascaderSurfaceBody<T>({
           </div>
         ) : null}
         {!column.pending && !column.failed && column.nodes.length === 0 ? (
-          <div data-part="empty">{t('empty')}</div>
+          <div data-part="empty" data-part-empty="">
+            {t('empty')}
+          </div>
         ) : null}
       </div>
     );
@@ -251,6 +271,7 @@ export function CascaderSurfaceBody<T>({
           aria-label={t('back', { label: labelOf(crumb.target) })}
           data-collapsed=""
           data-part="crumb"
+          data-part-crumb=""
           key="collapsed"
           onClick={(event) =>
             state.goTo(crumb.target, event.detail === 0 ? 'keyboard' : 'pointer', event.nativeEvent)
@@ -266,6 +287,7 @@ export function CascaderSurfaceBody<T>({
       <button
         aria-current={crumb.current ? 'location' : undefined}
         data-part="crumb"
+        data-part-crumb=""
         key={crumb.key ?? 'root'}
         onClick={(event) => {
           if (crumb.current) return;
@@ -283,7 +305,7 @@ export function CascaderSurfaceBody<T>({
   return (
     <>
       {crumbs.length > 0 ? (
-        <nav aria-label={t('breadcrumb')} data-part="breadcrumb">
+        <nav aria-label={t('breadcrumb')} data-part="breadcrumb" data-part-breadcrumb="">
           {crumbs.flatMap(renderCrumb)}
           {state.layout === 'columns' ? (
             <Icon directional>
@@ -293,7 +315,7 @@ export function CascaderSurfaceBody<T>({
         </nav>
       ) : null}
       <div
-        {...treeProps}
+        {...withSelectorKey(treeProps, 'part', 'panel')}
         aria-activedescendant={
           treeProps?.['tabIndex'] !== undefined && state.activeKey !== null
             ? state.nodeId(state.activeKey)
@@ -302,18 +324,20 @@ export function CascaderSurfaceBody<T>({
         aria-label={label}
         aria-labelledby={labelledBy}
         aria-multiselectable={state.multiple ? true : undefined}
-        data-part="panel"
+
         id={treeId}
         ref={treeRef}
         role="tree"
       >
         {view.searching ? (
-          <div aria-label={t('search')} data-part="column" role="group">
+          <div aria-label={t('search')} data-part="column" data-part-column="" role="group">
             {view.results.map(renderNode)}
             {view.results.length === 0 ? (
-              <div data-part="empty">{t('noResults', { query: state.query })}</div>
+              <div data-part="empty" data-part-empty="">
+                {t('noResults', { query: state.query })}
+              </div>
             ) : null}
-            <div data-part="status" role="status">
+            <div data-part="status" data-part-status="" role="status">
               {view.results.length === 0 ? '' : t('results', { count: view.results.length })}
             </div>
           </div>

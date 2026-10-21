@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/slider/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./slider.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./slider.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./slider.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,8 +30,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const member = contract.members.slider;
 /** The whole sheet with every space taken out, for matching a computed length. */
 const tight = normalized.replace(/\s/g, '');
@@ -43,7 +56,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of member.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -54,7 +70,7 @@ test('styles every part the contract declares', () => {
  * than `display` or `visibility`.
  */
 test('hides the native control without taking it out of the tab order', () => {
-  const input = rule(`${ui} [data-part='input']`);
+  const input = rule(`${ui} [data-part-input]`);
   assert.match(input, /opacity:0/);
   assert.match(input, /pointer-events:none/);
   assert.match(input, /position:absolute/);
@@ -69,7 +85,7 @@ test('hides the native control without taking it out of the tab order', () => {
  */
 test('draws focus on the thumb, from the input beneath it', () => {
   assert.ok(
-    normalized.includes(`${ui} [data-part='thumb']:has(>[data-part='input']:focus-visible){`),
+    normalized.includes(`${ui} [data-part-thumb]:has(>[data-part-input]:focus-visible){`),
     'the thumb does not answer the input’s focus',
   );
 });
@@ -81,7 +97,7 @@ test('draws focus on the thumb, from the input beneath it', () => {
  * neutral is the same black.
  */
 test('draws the rail as a channel rather than as a line', () => {
-  const track = rule(`${ui} [data-part='track']`);
+  const track = rule(`${ui} [data-part-track]`);
   assert.match(track, /background-color:var\(--slotted-slider-track-color/);
   assert.match(track, /border:var\(--slotted-control-border-width,1px\)solid/);
   assert.match(track, /box-sizing:border-box/);
@@ -106,7 +122,7 @@ test('positions the fill, the marks and the thumbs from private properties', () 
  * `translate`, so the mirrored document needs no rule of its own.
  */
 test('centres the thumb with a logical margin, not a physical transform', () => {
-  const thumb = rule(`${ui}[data-orientation='horizontal'] [data-part='thumb']`);
+  const thumb = rule(`${ui}[data-orientation='horizontal'] [data-part-thumb]`);
   assert.match(thumb, /margin-inline-start:calc\(var\(--_thumb-size\)\/-2\)/);
   assert.ok(!/translate/.test(thumb), 'a percentage translate moves left in both directions');
 });
@@ -116,10 +132,10 @@ test('centres the thumb with a logical margin, not a physical transform', () => 
  * own vertical range input and every surveyed implementation put it.
  */
 test('measures a vertical scale from the block end', () => {
-  const thumb = rule(`${ui}[data-orientation='vertical'] [data-part='thumb']`);
+  const thumb = rule(`${ui}[data-orientation='vertical'] [data-part-thumb]`);
   assert.match(thumb, /inset-block-end:calc\(var\(--_position,0\)\*1%\)/);
 
-  const indicator = rule(`${ui}[data-orientation='vertical'] [data-part='indicator']`);
+  const indicator = rule(`${ui}[data-orientation='vertical'] [data-part-indicator]`);
   assert.match(indicator, /inset-block-end:calc\(var\(--_start,0\)\*1%\)/);
 });
 
@@ -149,7 +165,7 @@ test('stays fluid rather than becoming a container that can collapse', () => {
 test('reserves the bubble’s room instead of letting it land on the read-out', () => {
   assert.ok(
     normalized.includes(
-      `${ui}[data-orientation='horizontal']:not([data-value-label='none']) [data-part='control']{`,
+      `${ui}[data-orientation='horizontal']:not([data-value-label='none']) [data-part-control]{`,
     ),
     'nothing reserves the bubble’s room',
   );
@@ -161,7 +177,7 @@ test('reserves the bubble’s room instead of letting it land on the read-out', 
  * mistakable for disabled.
  */
 test('paints read-only, and not as disabled', () => {
-  const indicator = rule(`${root}[data-readonly] [data-part='indicator']`);
+  const indicator = rule(`${root}[data-readonly] [data-part-indicator]`);
   assert.match(indicator, /background-color:var\(--slotted-slider-readonly-indicator-color/);
   assert.ok(
     !/--slotted-disabled/.test(indicator),
@@ -174,11 +190,11 @@ test('paints read-only, and not as disabled', () => {
  * `fieldset` disables every control inside it.
  */
 test('answers a control the browser disabled without being told', () => {
-  assert.ok(normalized.includes(`${root}:has([data-part='input']:disabled) [data-part='track']`));
+  assert.ok(normalized.includes(`${root}:has([data-part-input]:disabled) [data-part-track]`));
 });
 
 test('takes every duration and easing from the motion scale', () => {
-  const thumb = rule(`${ui} [data-part='thumb']`);
+  const thumb = rule(`${ui} [data-part-thumb]`);
   assert.match(thumb, /var\(--slotted-control-transition-duration\)/);
   assert.match(thumb, /var\(--slotted-control-transition-easing\)/);
 });
@@ -189,8 +205,8 @@ test('takes every duration and easing from the motion scale', () => {
  */
 test('keeps the rail, the fill and the thumb apart under forced colours', () => {
   const forced = normalized.split('@media (forced-colors:active){')[1]?.replace(/\s/g, '') ?? '';
-  assert.match(forced, /\[data-part='track'\]\{background-color:ButtonFace/);
-  assert.match(forced, /\[data-part='indicator'\]\{background-color:Highlight/);
+  assert.match(forced, /\[data-part-track\]\{background-color:ButtonFace/);
+  assert.match(forced, /\[data-part-indicator\]\{background-color:Highlight/);
 });
 
 test('renders every declared part in the harness fragment', () => {

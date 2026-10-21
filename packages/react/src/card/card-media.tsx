@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { CardRegionProps, CardRegionRootProps } from './card.types';
 
 /**
@@ -6,7 +7,7 @@ import type { CardRegionProps, CardRegionRootProps } from './card.types';
  * overlay opened inside it.
  */
 export function CardMedia({ render, ...nativeProps }: CardRegionProps) {
-  const rootProps: CardRegionRootProps = { ...nativeProps, 'data-part': 'media' };
+  const rootProps: CardRegionRootProps = keyedProps({ ...nativeProps, 'data-part': 'media' });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

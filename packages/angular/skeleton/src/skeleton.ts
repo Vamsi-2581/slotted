@@ -50,7 +50,9 @@ import {
   exportAs: 'slSkeleton',
   host: {
     'data-ui': 'skeleton',
+    'data-ui-skeleton': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-shape]': 'shape()',
     '[attr.data-size]': 'size()',
     '[attr.data-animation]': 'animationValue()',

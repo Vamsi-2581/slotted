@@ -154,6 +154,7 @@ function same(a: readonly string[], b: readonly string[]) {
   ],
   template: `<ul
       data-part="canvas"
+      data-part-canvas=""
       role="tree"
       #canvas
       [attr.aria-label]="ariaLabel()"
@@ -218,7 +219,9 @@ function same(a: readonly string[], b: readonly string[]) {
     </ng-template>`,
   host: {
     'data-ui': 'tree',
+    'data-ui-tree': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'size()',
     '[attr.data-variant]': 'variant()',
     '[attr.data-structure]': 'structureMode()',

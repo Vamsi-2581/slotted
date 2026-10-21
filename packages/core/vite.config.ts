@@ -32,6 +32,7 @@ export default defineConfig({
         fullscreen: resolve(import.meta.dirname, 'src/fullscreen/index.ts'),
         highlight: resolve(import.meta.dirname, 'src/highlight/index.ts'),
         identity: resolve(import.meta.dirname, 'src/identity/index.ts'),
+        'selector-key': resolve(import.meta.dirname, 'src/selector-key/index.ts'),
         i18n: resolve(import.meta.dirname, 'src/i18n/index.ts'),
         'i18n/pt-BR': resolve(import.meta.dirname, 'src/i18n/locales/pt-BR.ts'),
         keys: resolve(import.meta.dirname, 'src/keys/index.ts'),

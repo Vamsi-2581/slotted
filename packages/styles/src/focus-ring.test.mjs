@@ -119,7 +119,7 @@ test('a family that moves its ring suppresses the one the browser would draw', (
     const moved = /([^{}]*?:focus-visible[^{},]*?)\s+([^{},]+?)\s*\{([^{}]*?)\}/g;
     for (const [, focused, , body] of flat.matchAll(moved)) {
       if (!/outline\s*:\s*(?!none|0)/.test(body)) continue;
-      /* `:has(> [data-part='control']:focus-visible)` leaves a closing paren on
+      /* `:has(> [data-part-control]:focus-visible)` leaves a closing paren on
          the compound, and `[data-focus-origin]` narrows the focus without
          naming another element; the element is the same one either way. */
       const holder = (focused.trim().split(' ').pop() ?? '')
@@ -159,7 +159,7 @@ test('a chip in a scrolling chip row draws its ring inside its own box', () => {
       stripComments(readFileSync(join(source, family, `${family}.css`), 'utf8')),
     ).replace(/\s+/g, ' ');
     const rule = new RegExp(
-      `\\[data-ui='${family}'\\] \\[data-part='chips'\\] > :not\\(\\[data-part='field'\\]\\):focus-visible \\{([^}]*)\\}`,
+      `\\[data-ui-${family}\\] \\[data-part-chips\\] > :not\\(\\[data-part-field\\]\\):focus-visible \\{([^}]*)\\}`,
     ).exec(css);
     if (!rule) {
       offenders.push(`${family}: no ring rule for a focused chip`);

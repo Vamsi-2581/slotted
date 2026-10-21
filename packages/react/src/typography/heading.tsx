@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/typography/typography.css';
 
 import { createElement } from 'react';
@@ -50,20 +51,23 @@ export function Heading({
     );
   }
 
-  return createElement(`h${resolved}`, {
-    ...nativeProps,
-    ...axisAttributes({
-      align,
-      numeric,
-      size: size ?? SIZE_OF_LEVEL[resolved],
-      tone,
-      transform,
-      truncate,
-      weight,
-      wrap,
+  return createElement(
+    `h${resolved}`,
+    keyedProps({
+      ...nativeProps,
+      ...axisAttributes({
+        align,
+        numeric,
+        size: size ?? SIZE_OF_LEVEL[resolved],
+        tone,
+        transform,
+        truncate,
+        weight,
+        wrap,
+      }),
+      'data-part': 'root',
+      'data-ui': 'typography',
+      style: truncationStyle(truncate, style),
     }),
-    'data-part': 'root',
-    'data-ui': 'typography',
-    style: truncationStyle(truncate, style),
-  });
+  );
 }

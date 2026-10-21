@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/button/contract.json', import.meta.url),
@@ -9,10 +20,12 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./button.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./button.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./button.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations.replace(/\s+/g, ' ').replace(/\s*([{};,:])\s*/g, '$1');
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 /**
  * The same sheet with every space taken out. A selector's shape survives a
  * formatter reflowing it across three lines; an assertion written against one
@@ -405,7 +418,7 @@ test('shows focus only when the keyboard asked for it, and without moving anythi
  */
 test('waits without losing the size or the name of the control', () => {
   const faded = dense.match(
-    /\[data-loading\]:has\(>\[data-part='indicator'\]\)>:not\(\[data-part='indicator'\]\)\{([^}]*)\}/,
+    /\[data-loading\]:has\(>\[data-part-indicator\]\)>:not\(\[data-part-indicator\]\)\{([^}]*)\}/,
   );
   assert.ok(faded, 'the label of a control with no visual slot is not hidden');
   assert.ok(faded[1].includes('opacity:0'));
@@ -422,7 +435,7 @@ test('waits without losing the size or the name of the control', () => {
  * would have copied it.
  */
 test('sizes the ring to the glyph it stands in for, wherever it is drawn', () => {
-  const indicator = rule(`${ui} [data-part='indicator']`);
+  const indicator = rule(`${ui} [data-part-indicator]`);
   assert.ok(
     indicator.includes('--slotted-spinner-size:var(--_icon-size)'),
     'the ring is not the icon size',
@@ -431,7 +444,7 @@ test('sizes the ring to the glyph it stands in for, wherever it is drawn', () =>
   assert.doesNotMatch(indicator, /border|animation|border-radius/);
   assert.doesNotMatch(css, /slotted-button-spin/, 'the family still draws a ring of its own');
 
-  const centred = dense.split(`${ui}>[data-part='indicator']{`)[1]?.split('}')[0] ?? '';
+  const centred = dense.split(`${ui}>[data-part-indicator]{`)[1]?.split('}')[0] ?? '';
   assert.ok(centred.includes('position:absolute'), 'the ring without a slot is in the flow');
   assert.ok(centred.includes('inset:0'));
   assert.ok(centred.includes('margin:auto'));
@@ -450,7 +463,7 @@ test('stops the ring under reduced motion rather than slowing it', () => {
  */
 test('waits behind the label rather than over it', () => {
   const sweep = dense
-    .split(`${ui}:not([data-shape])[data-loading]:has([data-part='indicator'])::after{`)[1]
+    .split(`${ui}:not([data-shape])[data-loading]:has([data-part-indicator])::after{`)[1]
     ?.split('}')[0];
   assert.ok(sweep, 'no band is drawn');
   assert.ok(sweep.includes('position:absolute'), 'the band is in the flow');
@@ -465,13 +478,13 @@ test('waits behind the label rather than over it', () => {
 
   const restored = dense
     .split(
-      `${ui}:not([data-shape])[data-loading]:has(>[data-part='indicator'])>:not([data-part='indicator']){`,
+      `${ui}:not([data-shape])[data-loading]:has(>[data-part-indicator])>:not([data-part-indicator]){`,
     )[1]
     ?.split('}')[0];
   assert.ok(restored?.includes('opacity:1'), 'the label stays hidden behind the band');
 
   const stepped = dense
-    .split(`${ui}:not([data-shape])[data-loading][data-part='indicator']{`)[1]
+    .split(`${ui}:not([data-shape])[data-loading][data-part-indicator]{`)[1]
     ?.split('}')[0];
   assert.ok(stepped?.includes('opacity:0'), 'the ring is drawn under the band');
   assert.ok(stepped.includes('position:absolute'), 'the ring keeps the width of the glyph');
@@ -490,7 +503,7 @@ test('holds the band back for as long as loadingDelay holds the ring', () => {
   assert.ok(sweeps.length > 0, 'no band is drawn');
   for (const selector of sweeps) {
     assert.ok(
-      selector.includes(":has([data-part='indicator'])"),
+      selector.includes(':has([data-part-indicator])'),
       `${selector} sweeps before the delay has passed`,
     );
   }
@@ -519,13 +532,13 @@ test('draws the band only where it can move and be seen', () => {
   const guarded = declarations
     .slice(
       declarations.indexOf('@media (prefers-reduced-motion: no-preference)'),
-      declarations.indexOf(`${ui} [data-part='start'],`),
+      declarations.indexOf(`${ui} [data-part-start],`),
     )
     .replace(/\s+/g, '');
   assert.ok(guarded.includes('@medianot(forced-colors:active)'), 'the band outlives the gradient');
   for (const selector of [
     ...sweeps,
-    `${ui}:not([data-shape])[data-loading] [data-part='indicator']`,
+    `${ui}:not([data-shape])[data-loading] [data-part-indicator]`,
   ]) {
     assert.ok(guarded.includes(selector.replace(/\s+/g, '')), `${selector} is drawn unguarded`);
   }
@@ -562,7 +575,7 @@ test('insets the side that holds a glyph less than the side that holds a word', 
   ]) {
     assert.ok(
       dense.includes(
-        `${ui}:not([data-shape]):has(>[data-part='${part}']){${side}:var(--_padding-inline-visual)`,
+        `${ui}:not([data-shape]):has(>[data-part-${part.toLowerCase()}]){${side}:var(--_padding-inline-visual)`,
       ),
       `the ${part} side is not compensated`,
     );
@@ -570,7 +583,7 @@ test('insets the side that holds a glyph less than the side that holds a word', 
 });
 
 test('lets the label wrap instead of pushing the control past its container', () => {
-  const label = rule(`${ui} [data-part='label']`);
+  const label = rule(`${ui} [data-part-label]`);
   assert.ok(label.includes('overflow-wrap:anywhere'));
   assert.ok(label.includes('line-height:var(--slotted-line-height-sm'));
   assert.doesNotMatch(css, /white-space:nowrap/);
@@ -591,10 +604,10 @@ test('lets the label wrap instead of pushing the control past its container', ()
  */
 test('spreads the label and the end slot to opposite edges under justify between', () => {
   assert.match(rule(`${ui}[data-justify='between']`), /justify-content:space-between/);
-  const label = rule(`${ui}[data-justify='between'] > [data-part='label']`);
+  const label = rule(`${ui}[data-justify='between'] > [data-part-label]`);
   assert.match(label, /flex:1 1 auto/);
   assert.match(label, /text-align:start/);
-  assert.match(rule(`${ui}[data-justify='between'] > [data-part='end']`), /inline-size:auto/);
+  assert.match(rule(`${ui}[data-justify='between'] > [data-part-end]`), /inline-size:auto/);
   /* The default centres, from the base rule. */
   assert.match(rule(ui), /justify-content:center/);
 });

@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import {
   navigationMenuMessages,
@@ -125,7 +126,9 @@ export interface NavigationMenuCrossing {
   exportAs: 'slNavigationMenu',
   host: {
     'data-ui': 'navigation-menu',
+    'data-ui-navigation-menu': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.data-nested]': "nested ? '' : null",
     '[attr.data-orientation]': 'resolvedOrientation()',
@@ -237,9 +240,9 @@ export class SlNavigationMenu {
     if (!this.nested) {
       const document = this.host.ownerDocument;
       const viewport = document.createElement('div');
-      viewport.setAttribute('data-part', 'viewport');
+      writeSelectorKey(viewport, 'part', 'viewport');
       const arrow = document.createElement('span');
-      arrow.setAttribute('data-part', 'arrow');
+      writeSelectorKey(arrow, 'part', 'arrow');
       arrow.setAttribute('aria-hidden', 'true');
       afterNextRender(() => this.host.appendChild(viewport));
       effect(() => {

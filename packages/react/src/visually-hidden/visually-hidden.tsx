@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import type { VisuallyHiddenProps, VisuallyHiddenRootProps } from './visually-hidden.types';
@@ -13,12 +14,12 @@ import type { VisuallyHiddenProps, VisuallyHiddenRootProps } from './visually-hi
  * rule.
  */
 export function VisuallyHidden({ focusable = false, render, ...nativeProps }: VisuallyHiddenProps) {
-  const rootProps: VisuallyHiddenRootProps = {
+  const rootProps: VisuallyHiddenRootProps = keyedProps({
     ...nativeProps,
     'data-focusable': focusable ? '' : undefined,
     'data-part': 'root',
     'data-ui': 'visually-hidden',
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

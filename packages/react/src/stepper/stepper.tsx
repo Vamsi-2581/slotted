@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/stepper/stepper.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -150,7 +151,7 @@ export function Stepper({
     t,
   };
 
-  const rootProps: StepperRootProps = {
+  const rootProps: StepperRootProps = keyedProps({
     ...nativeProps,
     children: <StepperRegistry.Provider value={setSteps}>{children}</StepperRegistry.Provider>,
     'data-label-placement': context.labelPlacement,
@@ -158,7 +159,7 @@ export function Stepper({
     'data-orientation': context.orientation,
     'data-part': 'root',
     'data-ui': 'stepper',
-  };
+  });
 
   return (
     <StepperContext.Provider value={context}>

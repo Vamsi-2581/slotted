@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/status-indicator/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./status-indicator.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./status-indicator.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./status-indicator.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 /** Collapsed rather than stripped, for the reason `badge` records. */
 const normalized = declarations
@@ -18,8 +31,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 const { defaults, parts } = contract.members.statusIndicator;
 
 /** One entry per rule, keyed on the whole selector list. See `skeleton`. */
@@ -70,10 +83,13 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part it paints, and leaves the announcement to the family that clips it', () => {
   for (const part of parts) {
     if (part === 'announcement') continue;
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
   const announcementRules = rules.filter(({ selector }) =>
-    selector.includes(`[data-part='announcement']`),
+    selector.includes(`[data-part-announcement]`),
   );
   assert.equal(announcementRules.length, 1, 'the announcement is painted rather than measured');
   assert.equal(announcementRules[0]?.body, 'margin-inline-start:0;');
@@ -128,7 +144,7 @@ test('draws the glyph the contract names for every status', () => {
 test('tells the two grey statuses apart by shape rather than by colour', () => {
   assert.equal(contract.statusTones.neutral, contract.statusTones.unknown);
   assert.ok(rule(`${root}[data-status='unknown']`).includes('--_solid:transparent'));
-  const ring = rule(`${ui}[data-mark='dot'][data-status='unknown'] [data-part='mark']::before`);
+  const ring = rule(`${ui}[data-mark='dot'][data-status='unknown'] [data-part-mark]::before`);
   assert.ok(ring.includes('border:var(--slotted-border-width-thick,2px) dashed var(--_rim)'));
   assert.ok(
     ring.includes('inset:calc(-1 * var(--_halo-width))'),
@@ -174,7 +190,7 @@ test('sizes the disc on the space scale and rims it in its own fill', () => {
   assert.ok(
     rule(`${root}[data-status='unknown']`).includes('--_edge:var(--slotted-border-strong)'),
   );
-  const dot = rule(`${ui}[data-mark='dot'] [data-part='mark']`);
+  const dot = rule(`${ui}[data-mark='dot'] [data-part-mark]`);
   assert.ok(dot.includes('background-color:var(--_solid'));
   assert.ok(dot.includes('border:var(--_rim-width) solid var(--_rim'));
 });
@@ -188,7 +204,7 @@ test('sizes the disc on the space scale and rims it in its own fill', () => {
 test('puts the mark on the first line, however far the label runs', () => {
   assert.ok(rule(root).includes('align-items:flex-start'));
   assert.ok(rule(root).includes('--_pulse-inset:round(nearest,(1lh - var(--_mark-size)) / 2,1px)'));
-  assert.ok(rule(`${ui} [data-part='mark']`).includes('margin-block-start:var(--_pulse-inset)'));
+  assert.ok(rule(`${ui} [data-part-mark]`).includes('margin-block-start:var(--_pulse-inset)'));
 });
 
 /**
@@ -202,7 +218,7 @@ test('puts the mark on the first line, however far the label runs', () => {
  * auto-sized grid column on the reference page.
  */
 test('wraps the label and breaks the token nothing else can', () => {
-  const label = rule(`${ui} [data-part='label']`);
+  const label = rule(`${ui} [data-part-label]`);
   assert.ok(label.includes('overflow-wrap:break-word'));
   assert.ok(!/overflow-wrap:anywhere/.test(normalized), 'anywhere collapses an auto-sized column');
   assert.ok(label.includes('min-inline-size:0'));
@@ -221,7 +237,7 @@ test('wraps the label and breaks the token nothing else can', () => {
 test('takes the gap back when the label holds nothing a reader can see', () => {
   assert.ok(
     normalized.includes(
-      `${ui} [data-part='label']:has(> [data-part='announcement']){margin-inline-start:0`,
+      `${ui} [data-part-label]:has(> [data-part-announcement]){margin-inline-start:0`,
     ),
   );
 });
@@ -234,8 +250,8 @@ test('takes the gap back when the label holds nothing a reader can see', () => {
  */
 test('draws the pulse on the root, whatever draws the mark', () => {
   assert.ok(rule(`${ui}[data-pulse]::after`).includes('animation:slotted-status-indicator-pulse'));
-  assert.ok(!normalized.includes(`[data-pulse] [data-part='mark']::after`));
-  assert.ok(!rule(`${ui}[data-mark='icon'] [data-part='mark']`).includes('mask'));
+  assert.ok(!normalized.includes(`[data-pulse] [data-part-mark]::after`));
+  assert.ok(!rule(`${ui}[data-mark='icon'] [data-part-mark]`).includes('mask'));
 });
 
 /**
@@ -258,7 +274,7 @@ test('pulses a filled wave behind a dot, and none behind a glyph', () => {
 test('lights the dot with a halo of its own colour', () => {
   assert.ok(rule(root).includes('--_halo:color-mix(in oklab,var(--_rim) 20%,transparent)'));
   assert.ok(
-    rule(`${ui}[data-mark='dot'] [data-part='mark']`).includes(
+    rule(`${ui}[data-mark='dot'] [data-part-mark]`).includes(
       'box-shadow:0 0 0 var(--_halo-width) var(--_halo)',
     ),
   );
@@ -290,12 +306,10 @@ test('withdraws the endless ring under reduced motion rather than shortening it'
  */
 test('keeps the mark visible under forced colours and withdraws the ring', () => {
   const query = normalized.slice(normalized.indexOf('@media (forced-colors:active)'));
-  assert.ok(
-    query.includes(`${ui}[data-mark='dot'] [data-part='mark']{background-color:CanvasText`),
-  );
+  assert.ok(query.includes(`${ui}[data-mark='dot'] [data-part-mark]{background-color:CanvasText`));
   assert.ok(
     query.includes(
-      `${ui}[data-mark='dot'][data-status='unknown'] [data-part='mark']{background-color:Canvas`,
+      `${ui}[data-mark='dot'][data-status='unknown'] [data-part-mark]{background-color:Canvas`,
     ),
   );
   assert.ok(query.includes(`${ui}[data-pulse]::after{content:none`));

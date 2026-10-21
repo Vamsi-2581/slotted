@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/description-list/description-list.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -81,9 +82,13 @@ export function DescriptionList({
 
   const width = termWidth ?? defaults.termWidth;
 
-  const rootProps: DescriptionListRootProps = {
+  const rootProps: DescriptionListRootProps = keyedProps({
     ...nativeProps,
-    children: <dl data-part="list">{children}</dl>,
+    children: (
+      <dl data-part="list" data-part-list="">
+        {children}
+      </dl>
+    ),
     'data-columns': String(context.columns),
     'data-layout': context.layout,
     'data-part': 'root',
@@ -96,7 +101,7 @@ export function DescriptionList({
       width === undefined
         ? style
         : ({ ...style, '--slotted-description-list-term-width': width } as CSSProperties),
-  };
+  });
 
   return (
     <DescriptionListContext.Provider value={context}>

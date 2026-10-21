@@ -100,24 +100,25 @@ export class SlCodeBlockLine {
   imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlScrollArea, SlScrollAreaContent, SlSkeleton],
   template: `
     @if (hasHeader()) {
-      <div data-part="header">
+      <div data-part="header" data-part-header="">
         @if (icon(); as glyph) {
-          <span aria-hidden="true" data-part="icon"
+          <span aria-hidden="true" data-part="icon" data-part-icon=""
             ><span slIcon><svg slGlyph [name]="glyph"></svg></span
           ></span>
         }
         @if (title(); as words) {
-          <span data-part="title" [id]="id + '-title'">{{ words }}</span>
+          <span data-part="title" data-part-title="" [id]="id + '-title'">{{ words }}</span>
         }
         @if (language() !== 'text') {
-          <span data-part="language">{{ language() }}</span>
+          <span data-part="language" data-part-language="">{{ language() }}</span>
         }
         @if (!loading()) {
-          <div data-part="actions">
+          <div data-part="actions" data-part-actions="">
             <ng-content select="[slCodeBlockAction]"></ng-content>
             @if (overflow() || isWrapped()) {
               <button
                 data-part="wrap"
+                data-part-wrap=""
                 type="button"
                 [attr.aria-label]="t(isWrapped() ? 'unwrap' : 'wrap')"
                 [attr.aria-pressed]="isWrapped()"
@@ -131,6 +132,7 @@ export class SlCodeBlockLine {
             @if (copyControl()) {
               <button
                 data-part="copy"
+                data-part-copy=""
                 type="button"
                 [attr.aria-label]="t('copy')"
                 [attr.data-complete]="copied() ? '' : null"
@@ -149,6 +151,8 @@ export class SlCodeBlockLine {
       #body
       slScrollArea
       data-part="body"
+      data-part-body=""
+      [attr.data-part-root]="null"
       [axis]="maxLines() === undefined ? 'inline' : 'both'"
       fade="both"
       gutter="auto"
@@ -160,12 +164,14 @@ export class SlCodeBlockLine {
       <div slScrollAreaContent>
         <pre
           data-part="pre"
-        ><code data-part="code" [class]="'language-' + language()">@if (loading()) {@for (width of skeletonWidths; track $index) {<span slSkeleton shape="text" aria-hidden="true" [style.inline-size]="width + '%'"></span>}} @else {@for (line of rows(); track $index) {<span data-part="line" [attr.data-line]="line.number" [attr.data-mark]="line.mark ?? null" [attr.data-dim]="line.dim ? '' : null" [style.--slotted-code-block-indent]="line.indent > 0 ? line.indent : null"><span aria-hidden="true" data-part="number">@if (lineNumbersValue()) {{{ line.number }}}</span><span aria-hidden="true" data-part="marker"></span><span data-part="text">@if (lineTemplate(); as custom) {<ng-container [ngTemplateOutlet]="custom.template" [ngTemplateOutletContext]="{ $implicit: line.tokens, number: line.number, mark: line.mark, dim: line.dim }" />} @else {@for (token of line.tokens; track $index) {@if (token.scope) {<span data-part="token" [attr.data-token]="token.scope">{{ token.text }}</span>} @else {{{ token.text }}}}}</span></span>}}</code></pre>
+          data-part-pre=""
+        ><code data-part="code" data-part-code="" [class]="'language-' + language()">@if (loading()) {@for (width of skeletonWidths; track $index) {<span slSkeleton shape="text" aria-hidden="true" [style.inline-size]="width + '%'"></span>}} @else {@for (line of rows(); track $index) {<span data-part="line" data-part-line="" [attr.data-line]="line.number" [attr.data-mark]="line.mark ?? null" [attr.data-dim]="line.dim ? '' : null" [style.--slotted-code-block-indent]="line.indent > 0 ? line.indent : null"><span aria-hidden="true" data-part="number" data-part-number="">@if (lineNumbersValue()) {{{ line.number }}}</span><span aria-hidden="true" data-part="marker" data-part-marker=""></span><span data-part="text" data-part-text="">@if (lineTemplate(); as custom) {<ng-container [ngTemplateOutlet]="custom.template" [ngTemplateOutletContext]="{ $implicit: line.tokens, number: line.number, mark: line.mark, dim: line.dim }" />} @else {@for (token of line.tokens; track $index) {@if (token.scope) {<span data-part="token" data-part-token="" [attr.data-token]="token.scope">{{ token.text }}</span>} @else {{{ token.text }}}}}</span></span>}}</code></pre>
       </div>
     </div>
     @if (collapses()) {
       <button
         data-part="reveal"
+        data-part-reveal=""
         type="button"
         [attr.aria-controls]="id + '-body'"
         [attr.aria-expanded]="isRevealed()"
@@ -182,7 +188,9 @@ export class SlCodeBlockLine {
   exportAs: 'slCodeBlock',
   host: {
     'data-ui': 'code-block',
+    'data-ui-code-block': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-language]': 'language()',
     '[attr.data-wrap]': 'isWrapped() ? "" : null',
     '[attr.data-revealed]': 'isRevealed() ? "" : null',

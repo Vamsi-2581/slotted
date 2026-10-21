@@ -19,7 +19,7 @@
    * theme already holds to the highest ratio in each scheme cannot fail the
    * same way.
    */
-  [data-ui='link'] {
+  [data-ui-link] {
     --_strong: var(--slotted-text, CanvasText);
     --_rest: var(--slotted-link-color, var(--slotted-tone-accent-text, LinkText));
     --_hover: var(
@@ -80,7 +80,7 @@
    * pointer. Fluent calls it `subtle`, Primer `muted`, Polaris `monochrome`,
    * and all three describe the same two colours.
    */
-  [data-ui='link'][data-variant='neutral'] {
+  [data-ui-link][data-variant='neutral'] {
     --_rest: var(--slotted-link-color, currentColor);
     --_hover: var(--slotted-link-color-hover, var(--slotted-tone-accent-text, LinkText));
     --_active: var(
@@ -94,7 +94,7 @@
    * ground, so hover has nowhere further to go and the underline carries the
    * state on its own.
    */
-  [data-ui='link'][data-variant='inverse'] {
+  [data-ui-link][data-variant='inverse'] {
     --_strong: var(--slotted-text-inverse, Canvas);
     --_rest: var(--slotted-link-color, var(--slotted-text-inverse, Canvas));
   }
@@ -108,12 +108,12 @@
    * where there is no sentence for it to disappear into.
    */
 
-  [data-ui='link'][data-underline='hover'],
-  [data-ui='link'][data-underline='none'] {
+  [data-ui-link][data-underline='hover'],
+  [data-ui-link][data-underline='none'] {
     text-decoration-line: none;
   }
 
-  [data-ui='link'][data-underline='hover']:not([data-disabled]):hover {
+  [data-ui-link][data-underline='hover']:not([data-disabled]):hover {
     text-decoration-line: underline;
   }
 
@@ -122,7 +122,7 @@
    * `none` is left alone: it says the underline does not exist, not that it is
    * waiting for something.
    */
-  [data-ui='link'][data-underline='hover']:focus-visible {
+  [data-ui-link][data-underline='hover']:focus-visible {
     text-decoration-line: underline;
   }
 
@@ -134,19 +134,19 @@
    * in this repository can read this rule back.
    */
 
-  [data-ui='link'][data-visited]:visited {
+  [data-ui-link][data-visited]:visited {
     color: var(--_visited);
   }
 
   /* ── Hover and press, held back for disabled ────────────────────────────── */
 
-  [data-ui='link']:not([data-disabled]):hover {
+  [data-ui-link]:not([data-disabled]):hover {
     --_underline: currentColor;
 
     color: var(--_hover);
   }
 
-  [data-ui='link']:not([data-disabled]):active {
+  [data-ui-link]:not([data-disabled]):active {
     --_underline: currentColor;
 
     color: var(--_active);
@@ -159,7 +159,7 @@
    * offset reaches into the line above.
    */
 
-  [data-ui='link']:focus-visible {
+  [data-ui-link]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-link-focus-ring-offset, 1px);
   }
@@ -172,7 +172,7 @@
    * reads as a link that is not available rather than as plain text.
    */
 
-  [data-ui='link'][data-disabled] {
+  [data-ui-link][data-disabled] {
     color: var(--slotted-link-color-disabled, var(--slotted-disabled-foreground, GrayText));
     cursor: not-allowed;
   }
@@ -196,7 +196,7 @@
    * `--slotted-icon-size`, which the part states at the size of the text.
    */
 
-  [data-ui='link'] [data-part='external-icon'] {
+  [data-ui-link] [data-part-external-icon] {
     --slotted-icon-size: var(--slotted-link-external-icon-size, 1em);
 
     margin-inline-start: var(--slotted-link-external-icon-gap, 0.15em);
@@ -217,7 +217,7 @@
    * it.
    */
 
-  [data-ui='link'][aria-current]:not([aria-current='false']) {
+  [data-ui-link][aria-current]:not([aria-current='false']) {
     --_rest: var(--slotted-link-color-current, var(--slotted-text, CanvasText));
   }
 
@@ -230,7 +230,7 @@
    */
 
   @media (forced-colors: active) {
-    [data-ui='link'] {
+    [data-ui-link] {
       text-decoration-line: underline;
     }
   }

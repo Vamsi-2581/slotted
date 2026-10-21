@@ -12,7 +12,7 @@
    * rule `link` arrived at after painting hover with a fill role; a trail is
    * text for the same reason a link is.
    */
-  [data-ui='breadcrumb'] {
+  [data-ui-breadcrumb] {
     --_rest: var(--slotted-breadcrumb-color, var(--slotted-text-muted, GrayText));
     --_strong: var(--slotted-breadcrumb-color-current, var(--slotted-text, CanvasText));
     --_hover: var(
@@ -59,7 +59,7 @@
    * inline gap because two wrapped lines of one type size need less air between
    * them than two words do beside each other.
    */
-  [data-ui='breadcrumb'] [data-part='list'] {
+  [data-ui-breadcrumb] [data-part-list] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -79,7 +79,7 @@
     );
   }
 
-  [data-ui='breadcrumb'] [data-part='item'] {
+  [data-ui-breadcrumb] [data-part-item] {
     align-items: center;
     column-gap: var(--_gap);
     display: flex;
@@ -104,7 +104,7 @@
    * crumb rendered and the collapse did nothing at all. The capture is what
    * said so; both bindings write the attribute and neither could have known.
    */
-  [data-ui='breadcrumb'] [data-part='item'][hidden] {
+  [data-ui-breadcrumb] [data-part-item][hidden] {
     display: none;
   }
 
@@ -120,12 +120,12 @@
    * frame of a drag, and the ellipsis returns in the same frame to the place
    * the crumbs leave.
    */
-  [data-ui='breadcrumb'][data-expanded] [data-part='item'] {
+  [data-ui-breadcrumb][data-expanded] [data-part-item] {
     transition: opacity var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
   @starting-style {
-    [data-ui='breadcrumb'][data-expanded] [data-part='item'] {
+    [data-ui-breadcrumb][data-expanded] [data-part-item] {
       opacity: 0;
     }
   }
@@ -139,7 +139,7 @@
    * it distinguishes the one crumb being addressed from the seven beside it.
    */
 
-  [data-ui='breadcrumb'] :is([data-part='link'], [data-part='page'], [data-part='trigger']) {
+  [data-ui-breadcrumb] :is([data-part-link], [data-part-page], [data-part-trigger]) {
     border-radius: var(--slotted-breadcrumb-radius, var(--slotted-control-radius, 4px));
     display: block;
     /**
@@ -165,7 +165,7 @@
     white-space: nowrap;
   }
 
-  [data-ui='breadcrumb'] [data-part='link'] {
+  [data-ui-breadcrumb] [data-part-link] {
     color: inherit;
   }
 
@@ -175,7 +175,7 @@
    * the pointer, and a chevron after the label that says a list opens here
    * rather than a page. It keeps the line's height; the menu is the consumer's.
    */
-  [data-ui='breadcrumb'] [data-part='trigger'] {
+  [data-ui-breadcrumb] [data-part-trigger] {
     appearance: none;
     background-color: transparent;
     border: 0;
@@ -187,7 +187,7 @@
   }
 
   /* The switcher of the page the reader is on is still the page. */
-  [data-ui='breadcrumb'] [data-part='trigger'][aria-current='page'] {
+  [data-ui-breadcrumb] [data-part-trigger][aria-current='page'] {
     color: var(--_strong);
     font-weight: var(--slotted-breadcrumb-page-weight, var(--slotted-font-weight-medium, 500));
   }
@@ -201,26 +201,26 @@
    * An atomic inline box takes no underline, so the hover rule marks the words
    * and not the glyph.
    */
-  [data-ui='breadcrumb']
-    :is([data-part='link'], [data-part='page'], [data-part='trigger'])
-    > :is([data-ui='icon'], [data-ui='avatar']) {
+  [data-ui-breadcrumb]
+    :is([data-part-link], [data-part-page], [data-part-trigger])
+    > :is([data-ui-icon], [data-ui-avatar]) {
     margin-inline-end: var(--slotted-breadcrumb-content-gap, var(--slotted-space-3, 6px));
   }
 
-  [data-ui='breadcrumb']
-    :is([data-part='link'], [data-part='page'], [data-part='trigger'])
-    > [data-ui='badge'] {
+  [data-ui-breadcrumb]
+    :is([data-part-link], [data-part-page], [data-part-trigger])
+    > [data-ui-badge] {
     margin-inline-start: var(--slotted-breadcrumb-content-gap, var(--slotted-space-3, 6px));
   }
 
   /* The switcher's chevron is its last element, after the label. */
-  [data-ui='breadcrumb'] [data-part='trigger'] > [data-ui='icon']:last-child {
+  [data-ui-breadcrumb] [data-part-trigger] > [data-ui-icon]:last-child {
     margin-inline: var(--slotted-space-2, 4px) 0;
     transition: rotate var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
   /* The chevron turns while the menu it opened is up, and back when it closes. */
-  [data-ui='breadcrumb'] [data-part='trigger'][data-open] > [data-ui='icon']:last-child {
+  [data-ui-breadcrumb] [data-part-trigger][data-open] > [data-ui-icon]:last-child {
     rotate: 180deg;
   }
 
@@ -230,19 +230,19 @@
    * weight is on the one crumb that never moves, so nothing beside it shifts
    * when the pointer arrives.
    */
-  [data-ui='breadcrumb'] [data-part='page'] {
+  [data-ui-breadcrumb] [data-part-page] {
     color: var(--_strong);
     font-weight: var(--slotted-breadcrumb-page-weight, var(--slotted-font-weight-medium, 500));
   }
 
-  [data-ui='breadcrumb'] :is([data-part='link'], [data-part='trigger']):not([data-disabled]):hover {
+  [data-ui-breadcrumb] :is([data-part-link], [data-part-trigger]):not([data-disabled]):hover {
     color: var(--_hover);
     text-decoration-color: currentColor;
   }
 
   /* An open switcher holds the pressed colour for as long as its menu is up. */
-  [data-ui='breadcrumb']
-    :is([data-part='link'], [data-part='trigger']):not([data-disabled]):is(:active, [data-open]) {
+  [data-ui-breadcrumb]
+    :is([data-part-link], [data-part-trigger]):not([data-disabled]):is(:active, [data-open]) {
     color: var(--_strong);
     /* Without the pointer over it an open switcher would read as the page:
        same colour, no mark. The underline says which crumb the menu is from. */
@@ -254,12 +254,12 @@
    * brings only the underline, and a press — or the menu it opened — steps the
    * label back to the hover mix. Hover and press still differ, as on a link.
    */
-  [data-ui='breadcrumb'] [data-part='trigger'][aria-current='page']:not([data-disabled]):hover {
+  [data-ui-breadcrumb] [data-part-trigger][aria-current='page']:not([data-disabled]):hover {
     color: var(--_strong);
   }
 
-  [data-ui='breadcrumb']
-    [data-part='trigger'][aria-current='page']:not([data-disabled]):is(:active, [data-open]) {
+  [data-ui-breadcrumb]
+    [data-part-trigger][aria-current='page']:not([data-disabled]):is(:active, [data-open]) {
     color: var(--_hover);
   }
 
@@ -273,13 +273,13 @@
    * box, so a ring drawn outside crossed both separators — at two pixels out,
    * and on its own edge at dense.
    */
-  [data-ui='breadcrumb'] :is([data-part='link'], [data-part='trigger']):focus-visible {
+  [data-ui-breadcrumb] :is([data-part-link], [data-part-trigger]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-breadcrumb-focus-ring-offset, 1px);
     text-decoration-color: currentColor;
   }
 
-  [data-ui='breadcrumb'] [data-part='ellipsis']:focus-visible {
+  [data-ui-breadcrumb] [data-part-ellipsis]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(
       --slotted-breadcrumb-ellipsis-focus-ring-offset,
@@ -300,7 +300,7 @@
    * with children shows the children and the empty one shows the rule.
    */
 
-  [data-ui='breadcrumb'] [data-part='separator'] {
+  [data-ui-breadcrumb] [data-part-separator] {
     align-items: center;
     color: var(--_separator);
     display: flex;
@@ -308,7 +308,7 @@
     justify-content: center;
   }
 
-  [data-ui='breadcrumb'] [data-part='separator']:empty {
+  [data-ui-breadcrumb] [data-part-separator]:empty {
     background-color: currentColor;
     /* Rounded, so a rule of `0.9em` ends on a whole pixel: 12 at 13px, 11 dense. */
     block-size: round(nearest, var(--slotted-breadcrumb-separator-length, 0.9em), 1px);
@@ -325,7 +325,7 @@
    * trail itself runs the other way. `:dir()` rather than an ancestor `[dir]`,
    * so a trail inside a left-to-right island leans the way that island reads.
    */
-  [data-ui='breadcrumb'] [data-part='separator']:empty:dir(rtl) {
+  [data-ui-breadcrumb] [data-part-separator]:empty:dir(rtl) {
     rotate: calc(-1 * var(--slotted-breadcrumb-separator-skew, 20deg));
   }
 
@@ -359,7 +359,7 @@
    * reader hears is a count rather than three dots.
    */
 
-  [data-ui='breadcrumb'] [data-part='ellipsis'] {
+  [data-ui-breadcrumb] [data-part-ellipsis] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -394,7 +394,7 @@
   }
 
   /* The halo that completes the target where the line is shorter than it. */
-  [data-ui='breadcrumb'] [data-part='ellipsis']::after {
+  [data-ui-breadcrumb] [data-part-ellipsis]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -403,17 +403,17 @@
   /* On a finger the halo reaches the comfortable size in both axes; the box
      keeps the line's height, so the trail does not grow. */
   @media (pointer: coarse) {
-    [data-ui='breadcrumb'] [data-part='ellipsis']::after {
+    [data-ui-breadcrumb] [data-part-ellipsis]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
   }
 
   /* The ground moves under the pointer and nothing else does (R2). */
-  [data-ui='breadcrumb'] [data-part='ellipsis']:not([data-disabled]):hover {
+  [data-ui-breadcrumb] [data-part-ellipsis]:not([data-disabled]):hover {
     background-color: var(--slotted-breadcrumb-ellipsis-background-hover, var(--_ellipsis-hover));
   }
 
-  [data-ui='breadcrumb'] [data-part='ellipsis']:not([data-disabled]):active {
+  [data-ui-breadcrumb] [data-part-ellipsis]:not([data-disabled]):active {
     background-color: var(--slotted-breadcrumb-ellipsis-background-active, var(--_ellipsis-active));
   }
 
@@ -430,11 +430,11 @@
    */
 
   @media (forced-colors: active) {
-    [data-ui='breadcrumb'] [data-part='separator']:empty {
+    [data-ui-breadcrumb] [data-part-separator]:empty {
       background-color: GrayText;
     }
 
-    [data-ui='breadcrumb'] [data-part='ellipsis'] {
+    [data-ui-breadcrumb] [data-part-ellipsis] {
       border: var(--slotted-border-width-thin, 1px) solid ButtonBorder;
     }
   }

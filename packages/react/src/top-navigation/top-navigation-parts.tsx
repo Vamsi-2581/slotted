@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { FocusEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from 'react';
 import { createPortal } from 'react-dom';
@@ -95,7 +96,7 @@ export function TopNavigationBrand({
   render,
   ...nativeProps
 }: TopNavigationPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'brand' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'brand' });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -112,12 +113,12 @@ export function TopNavigationHome({
   render,
   ...nativeProps
 }: TopNavigationHomeProps) {
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'home',
     ...(href !== undefined ? { href } : {}),
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return href === undefined ? (
     <span {...(rootProps as HTMLAttributes<HTMLElement>)} ref={ref as Ref<HTMLSpanElement>} />
@@ -133,7 +134,12 @@ export function TopNavigationMark({
   render,
   ...nativeProps
 }: TopNavigationSpanPartProps) {
-  const rootProps = { ...nativeProps, 'aria-hidden': true, children, 'data-part': 'mark' };
+  const rootProps = keyedProps({
+    ...nativeProps,
+    'aria-hidden': true,
+    children,
+    'data-part': 'mark',
+  });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }
@@ -145,7 +151,7 @@ export function TopNavigationName({
   render,
   ...nativeProps
 }: TopNavigationSpanPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'name' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'name' });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }
@@ -168,7 +174,7 @@ export function TopNavigationContext({
     navigation.setHasContext(true);
     return () => navigation.setHasContext(false);
   }, [navigation.setHasContext]);
-  const rootProps = { ...nativeProps, children, 'data-part': 'context' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'context' });
   const element = render !== undefined ? render(rootProps) : <div {...rootProps} ref={ref} />;
   const inPanel = navigation.narrow && navigation.panelPresent && navigation.panelNode !== null;
   return inPanel ? createPortal(element, navigation.panelNode as HTMLElement) : element;
@@ -215,7 +221,7 @@ export function TopNavigationNav({
         openDelay={openDelay}
         render={(menu) => {
           /* One element, two families: the menu's root and the bar's nav part. */
-          const rootProps = { ...nativeProps, ...menu, 'data-part': 'nav' };
+          const rootProps = keyedProps({ ...nativeProps, ...menu, 'data-part': 'nav' });
           return render !== undefined ? (
             render(rootProps)
           ) : (
@@ -241,12 +247,12 @@ function Panel() {
   const navigation = useTopNavigation();
   return (
     <div
-      {...(navigation.moreOpen ? { 'data-open': '' } : {})}
-      data-part="panel"
+      {...withSelectorKey(navigation.moreOpen ? { 'data-open': '' } : {}, 'part', 'panel')}
+
       id={navigation.ids.panelId}
       ref={navigation.setPanelNode}
     >
-      <ul data-part="panel-list" ref={navigation.setPanelListNode} />
+      <ul data-part="panel-list" data-part-panel-list="" ref={navigation.setPanelListNode} />
     </div>
   );
 }
@@ -258,18 +264,18 @@ export function TopNavigationList({
   render,
   ...nativeProps
 }: TopNavigationListProps) {
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
         {children}
-        <li data-part="item">
+        <li data-part="item" data-part-item="">
           <More />
         </li>
       </>
     ),
     'data-part': 'list',
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <ul {...rootProps} ref={ref} />;
 }
@@ -291,7 +297,7 @@ function More() {
     navigation.setMoreOpen(!navigation.moreOpen, activationReason(event), event.nativeEvent);
   };
 
-  const rootProps: TopNavigationControlRootProps = {
+  const rootProps: TopNavigationControlRootProps = keyedProps({
     'aria-controls': navigation.ids.panelId,
     'aria-expanded': navigation.moreOpen,
     'aria-label': label,
@@ -303,7 +309,7 @@ function More() {
     id: navigation.ids.moreId,
     onClick: handleClick,
     type: 'button',
-  };
+  });
 
   return (
     <Hint text={label}>
@@ -359,7 +365,7 @@ export function TopNavigationItem({
     value,
   };
 
-  const rootProps: TopNavigationItemRootProps = {
+  const rootProps: TopNavigationItemRootProps = keyedProps({
     ...nativeProps,
     children,
     ...(collapsed ? { 'data-collapsed': '' as const } : {}),
@@ -368,7 +374,7 @@ export function TopNavigationItem({
     'data-part': 'item',
     'data-priority': priority,
     'data-value': value,
-  };
+  });
 
   const inPanel = collapsed && navigation.panelPresent && navigation.panelListNode !== null;
 
@@ -430,7 +436,7 @@ export function TopNavigationLink({
     }
   };
 
-  const rootProps: TopNavigationLinkRootProps = {
+  const rootProps: TopNavigationLinkRootProps = keyedProps({
     ...nativeProps,
     ...(resolvedCurrent ? { 'aria-current': 'page' as const } : {}),
     ...(item.disabled ? { 'aria-disabled': 'true' as const } : {}),
@@ -439,7 +445,7 @@ export function TopNavigationLink({
     'data-part': 'link',
     ...(href !== undefined ? { href } : {}),
     onClick: handleClick,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <a {...rootProps} ref={ref} />;
@@ -526,7 +532,7 @@ export function TopNavigationSearch({
     close('blur', event.nativeEvent);
   };
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -537,7 +543,7 @@ export function TopNavigationSearch({
     'data-part': 'search',
     onBlur: handleBlur,
     onKeyDown: handleKeyDown,
-  };
+  });
 
   const setBoth = useCallback(
     (element: HTMLElement | null) => {
@@ -563,6 +569,7 @@ function SearchClose({
       <TooltipTrigger
         aria-label={text}
         data-part="search-close"
+        data-part-search-close=""
         children={<Mark glyph="x" />}
         onClick={(event: MouseEvent<HTMLButtonElement>) =>
           onClose(activationReason(event), event.nativeEvent)
@@ -583,6 +590,7 @@ function SearchToggle() {
       <TooltipTrigger
         aria-label={text}
         data-part="search-toggle"
+        data-part-search-toggle=""
         children={<Mark glyph="search" />}
         onClick={(event: MouseEvent<HTMLButtonElement>) =>
           navigation.setSearchOpen(true, activationReason(event), event.nativeEvent)
@@ -612,7 +620,7 @@ export function TopNavigationActions({
   ...nativeProps
 }: TopNavigationPartProps) {
   const navigation = useTopNavigation();
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -621,7 +629,7 @@ export function TopNavigationActions({
       </>
     ),
     'data-part': 'actions',
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -655,7 +663,7 @@ function Control({
   ...nativeProps
 }: TopNavigationControlProps & { glyph?: GlyphName; message: string; part: string }) {
   const text = ariaLabel ?? message;
-  const rootProps: TopNavigationControlRootProps = {
+  const rootProps: TopNavigationControlRootProps = keyedProps({
     ...nativeProps,
     'aria-label': text,
     children:
@@ -669,7 +677,7 @@ function Control({
       ),
     'data-part': part,
     type: 'button',
-  };
+  });
   return (
     <Hint text={text}>
       <TooltipTrigger
@@ -712,7 +720,7 @@ export function TopNavigationHelp({
   }, [navigation.setHasHelp]);
   const text = ariaLabel ?? navigation.t('help');
   const inPanel = navigation.narrowest && navigation.panelPresent && navigation.panelNode !== null;
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     ...(ariaLabel !== undefined ? { 'aria-label': ariaLabel } : {}),
     children: (
@@ -723,7 +731,7 @@ export function TopNavigationHelp({
     ),
     'data-part': 'help',
     ...(href !== undefined ? { href } : {}),
-  };
+  });
   const element = (
     <Hint disabled={inPanel} text={text}>
       <TooltipTrigger
@@ -773,13 +781,13 @@ export function TopNavigationAction({
   ...nativeProps
 }: TopNavigationActionProps) {
   const text = ariaLabel ?? '';
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     ...(ariaLabel !== undefined ? { 'aria-label': ariaLabel } : {}),
     children,
     'data-part': 'action',
     ...(href !== undefined ? { href } : {}),
-  };
+  });
   return (
     <Hint disabled={text === ''} text={text}>
       <TooltipTrigger
@@ -811,7 +819,7 @@ export function TopNavigationCount({
   render,
   ...nativeProps
 }: TopNavigationSpanPartProps) {
-  const rootProps = { ...nativeProps, children, 'data-part': 'count' };
+  const rootProps = keyedProps({ ...nativeProps, children, 'data-part': 'count' });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }

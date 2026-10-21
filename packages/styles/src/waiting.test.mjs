@@ -14,9 +14,9 @@ const source = new URL('.', import.meta.url).pathname;
  * how big they are, through the size token the shared sheet reads.
  */
 const HOSTS = [
-  { family: 'select', busy: "[data-ui='select'] > [data-part='busy']" },
-  { family: 'combobox', busy: "[data-ui='combobox'] [data-part='busy']" },
-  { family: 'multi-select', busy: "[data-ui='multi-select'] [data-part='busy']" },
+  { family: 'select', busy: '[data-ui-select] > [data-part-busy]' },
+  { family: 'combobox', busy: '[data-ui-combobox] [data-part-busy]' },
+  { family: 'multi-select', busy: '[data-ui-multi-select] [data-part-busy]' },
 ];
 
 /** A repeating animation, which is what drawing a wait of one's own looks like. */
@@ -54,10 +54,10 @@ test('stands the shared ring where the chevron stood, and draws no arc of its ow
 test('waits as rows the height of an option, and paints no placeholder of its own', () => {
   for (const { family } of HOSTS) {
     const css = sheet(family);
-    const declarations = rule(css, `[data-ui='${family}'] [data-part='placeholder']`);
+    const declarations = rule(css, `[data-ui-${family.toLowerCase()}] [data-part-placeholder]`);
     assert.notEqual(declarations, '', `${family} shows no placeholder while an answer travels`);
     assert.match(declarations, /grid-column:1 \/ -1/, `${family} does not span the surface`);
-    const row = rule(css, `[data-ui='${family}'] [data-part='placeholder'] > *`);
+    const row = rule(css, `[data-ui-${family.toLowerCase()}] [data-part-placeholder] > *`);
     assert.match(
       row,
       /min-block-size:var\(--_item-height\)/,

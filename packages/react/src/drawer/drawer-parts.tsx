@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import {
   anchorsAtStart,
@@ -126,7 +127,7 @@ export function DrawerTrigger({
 }: DrawerTriggerProps) {
   const drawer = useDrawer();
 
-  const rootProps: DrawerTriggerRootProps = {
+  const rootProps: DrawerTriggerRootProps = keyedProps({
     ...nativeProps,
     'aria-controls': drawer.mounted ? drawer.panelId : undefined,
     'aria-expanded': drawer.open,
@@ -151,7 +152,7 @@ export function DrawerTrigger({
     },
     style,
     type: 'button',
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} />;
@@ -579,7 +580,7 @@ export function DrawerPanel({
     if (overlay) return null;
   } else if (!inHost) return null;
 
-  const panelProps: DrawerPanelRootProps = {
+  const panelProps: DrawerPanelRootProps = keyedProps({
     ...nativeProps,
     ...(drawer.descriptionId === '' ? {} : { 'aria-describedby': drawer.descriptionId }),
     ...(labelled ? { 'aria-labelledby': drawer.titleId } : {}),
@@ -601,16 +602,18 @@ export function DrawerPanel({
        says which. */
     ...(overlay ? { role: 'dialog' as const } : {}),
     style,
-  };
+  });
 
   const layerNode: ReactNode = (
     <div
       data-mode={drawer.mode}
       data-mount={drawer.mount}
       data-part="root"
+      data-part-root=""
       data-side={drawer.side}
       data-size={drawer.size}
       data-ui="drawer"
+      data-ui-drawer=""
       {...(drawer.dragging ? { 'data-dragging': '' } : {})}
       {...(overlay && drawer.side === 'bottom' ? { 'data-drag': drawer.drag } : {})}
       {...(overlay && (drawer.live ?? drawer.extent ?? drawer.rest ?? 1) < drawer.scrimFrom
@@ -631,7 +634,7 @@ export function DrawerPanel({
           decides what happens to the page behind it and never what is painted.
           `dialog` draws it the same way, and a consumer who wants none sets
           `--slotted-drawer-scrim: transparent`. */}
-      {overlay ? <div data-part="backdrop" /> : null}
+      {overlay ? <div data-part="backdrop" data-part-backdrop="" /> : null}
       {render === undefined ? <div {...panelProps} /> : render(panelProps)}
     </div>
   );
@@ -934,7 +937,7 @@ export function DrawerResizer({
       ? Math.min(drawer.minExtent, drawer.rest)
       : drawer.minExtent;
 
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-controls': drawer.panelId,
     ...(drawer.titleId === '' ? {} : { 'aria-labelledby': drawer.titleId }),
     'aria-orientation': (inline ? 'vertical' : 'horizontal') as 'vertical' | 'horizontal',
@@ -953,7 +956,7 @@ export function DrawerResizer({
     role: 'separator' as const,
     style,
     tabIndex: 0,
-  };
+  });
 
   const attach = (element: HTMLDivElement | null) => {
     node.current = element;
@@ -972,9 +975,9 @@ export function DrawerResizer({
    */
   const picture = (
     <>
-      <span aria-hidden="true" data-part="line" />
-      <span aria-hidden="true" data-part="grip" />
-      <span aria-hidden="true" data-part="line" />
+      <span aria-hidden="true" data-part="line" data-part-line="" />
+      <span aria-hidden="true" data-part="grip" data-part-grip="" />
+      <span aria-hidden="true" data-part="line" data-part-line="" />
     </>
   );
 
@@ -995,7 +998,13 @@ export function DrawerHeader({
   style,
   ...rest
 }: DrawerHeaderProps) {
-  const rootProps = { ...rest, children, className, 'data-part': 'header' as const, style };
+  const rootProps = keyedProps({
+    ...rest,
+    children,
+    className,
+    'data-part': 'header' as const,
+    style,
+  });
   if (render !== undefined) return render(rootProps);
   return <header {...rootProps} ref={ref} />;
 }
@@ -1013,14 +1022,14 @@ export function DrawerTitle({
   const drawer = useDrawer();
   useEffect(() => drawer.announce('title'), [drawer]);
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     children,
     className,
     'data-part': 'title' as const,
     id: drawer.titleId === '' ? undefined : drawer.titleId,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <h2 {...rootProps} ref={ref} />;
 }
@@ -1037,14 +1046,14 @@ export function DrawerDescription({
   const drawer = useDrawer();
   useEffect(() => drawer.announce('description'), [drawer]);
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     children,
     className,
     'data-part': 'description' as const,
     id: drawer.descriptionId === '' ? undefined : drawer.descriptionId,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <p {...rootProps} ref={ref} />;
 }
@@ -1065,7 +1074,7 @@ export function DrawerBody({
   ...rest
 }: DrawerBodyProps) {
   const drawer = useDrawer();
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     ...(drawer.loading ? { 'aria-busy': true } : {}),
     children,
@@ -1073,7 +1082,7 @@ export function DrawerBody({
     ...(inset === undefined ? {} : { 'data-inset': inset }),
     'data-part': 'body' as const,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -1086,7 +1095,13 @@ export function DrawerFooter({
   style,
   ...rest
 }: DrawerFooterProps) {
-  const rootProps = { ...rest, children, className, 'data-part': 'footer' as const, style };
+  const rootProps = keyedProps({
+    ...rest,
+    children,
+    className,
+    'data-part': 'footer' as const,
+    style,
+  });
   if (render !== undefined) return render(rootProps);
   return <footer {...rootProps} ref={ref} />;
 }
@@ -1108,7 +1123,7 @@ export function DrawerClose({
 }: DrawerCloseProps) {
   const drawer = useDrawer();
 
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-label': drawer.t('close'),
     ...rest,
     /* The cross is drawn unless the consumer wrote content of their own. */
@@ -1126,7 +1141,7 @@ export function DrawerClose({
     },
     style,
     type: 'button' as const,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} ref={ref} />;
 }

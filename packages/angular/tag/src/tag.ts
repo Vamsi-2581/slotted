@@ -62,7 +62,9 @@ export interface TagRemoveRequest {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'tag',
+    'data-ui-tag': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-size]': 'resolvedSize()',

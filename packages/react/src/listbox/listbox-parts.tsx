@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useId } from 'react';
 
 import { Glyph, Icon } from '../icon';
@@ -44,7 +45,7 @@ export function ListboxOption({
   const active = listbox.isActive(value);
   const isDisabled = disabled === true || listbox.disabled === true;
 
-  const rootProps: ListboxOptionRootProps = {
+  const rootProps: ListboxOptionRootProps = keyedProps({
     ...nativeProps,
     'aria-disabled': isDisabled ? true : undefined,
     'aria-posinset': listbox.posInSet(value),
@@ -77,7 +78,7 @@ export function ListboxOption({
       event.preventDefault();
     },
     role: 'option',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -97,12 +98,12 @@ export function ListboxGroup({
 }: ListboxGroupProps) {
   const labelId = `${useId()}label`;
 
-  const rootProps: ListboxGroupRootProps = {
+  const rootProps: ListboxGroupRootProps = keyedProps({
     ...nativeProps,
     'aria-labelledby': labelId,
     children: (
       <>
-        <div data-part="group-label" id={labelId} {...labelProps}>
+        <div data-part="group-label" data-part-group-label="" id={labelId} {...labelProps}>
           {label}
         </div>
         {children}
@@ -110,7 +111,7 @@ export function ListboxGroup({
     ),
     'data-part': 'group',
     role: 'group',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -125,7 +126,11 @@ export function ListboxGroup({
  * permit; with none, it is the container's own text.
  */
 export function ListboxEmpty({ children, render, ...nativeProps }: ListboxMessageProps) {
-  const rootProps: ListboxGroupRootProps = { ...nativeProps, children, 'data-part': 'empty' };
+  const rootProps: ListboxGroupRootProps = keyedProps({
+    ...nativeProps,
+    children,
+    'data-part': 'empty',
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -136,13 +141,13 @@ export function ListboxEmpty({ children, render, ...nativeProps }: ListboxMessag
  * — which is also why it is not counted in `aria-setsize`.
  */
 export function ListboxLoader({ children, render, ...nativeProps }: ListboxMessageProps) {
-  const rootProps: ListboxGroupRootProps = {
+  const rootProps: ListboxGroupRootProps = keyedProps({
     ...nativeProps,
     'aria-disabled': true,
     children,
     'data-part': 'loader',
     role: 'option',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -159,7 +164,7 @@ export function ListboxIndicator({ children, ...nativeProps }: ListboxPartProps)
   if (listbox.indicator === 'none') return null;
 
   return (
-    <span aria-hidden="true" data-part="indicator" {...nativeProps}>
+    <span aria-hidden="true" data-part="indicator" data-part-indicator="" {...nativeProps}>
       {children ?? (
         <Icon>
           <Glyph name="check" />
@@ -176,7 +181,7 @@ export function ListboxIndicator({ children, ...nativeProps }: ListboxPartProps)
  */
 export function ListboxIcon({ children, ...nativeProps }: ListboxPartProps) {
   return (
-    <span aria-hidden="true" data-part="icon" {...nativeProps}>
+    <span aria-hidden="true" data-part="icon" data-part-icon="" {...nativeProps}>
       {children}
     </span>
   );
@@ -185,7 +190,7 @@ export function ListboxIcon({ children, ...nativeProps }: ListboxPartProps) {
 /** The option's primary text, and the only column that gives way. */
 export function ListboxLabel({ children, ...nativeProps }: ListboxPartProps) {
   return (
-    <span data-part="label" {...nativeProps}>
+    <span data-part="label" data-part-label="" {...nativeProps}>
       {children}
     </span>
   );
@@ -194,7 +199,7 @@ export function ListboxLabel({ children, ...nativeProps }: ListboxPartProps) {
 /** A second line under the label, for what the label cannot say on its own. */
 export function ListboxDescription({ children, ...nativeProps }: ListboxPartProps) {
   return (
-    <span data-part="description" {...nativeProps}>
+    <span data-part="description" data-part-description="" {...nativeProps}>
       {children}
     </span>
   );
@@ -206,7 +211,7 @@ export function ListboxDescription({ children, ...nativeProps }: ListboxPartProp
  */
 export function ListboxMeta({ children, ...nativeProps }: ListboxPartProps) {
   return (
-    <span data-part="meta" {...nativeProps}>
+    <span data-part="meta" data-part-meta="" {...nativeProps}>
       {children}
     </span>
   );

@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/currency-field/currency-field.css';
 
 import {
@@ -668,6 +669,7 @@ export function CurrencyField({
         aria-controls={id ?? field?.ids.control}
         aria-label={t(part)}
         data-part={part}
+        {...selectorKeyProps('part', part)}
         disabled={inert || (direction === 1 ? atMax : atMin)}
         key={part}
         onLostPointerCapture={stopRepeating}
@@ -714,6 +716,7 @@ export function CurrencyField({
               : `${text} ${affix.text}`
       }
       data-part="input"
+      data-part-input=""
       disabled={resolvedDisabled}
       id={id ?? field?.ids.control}
       inputMode={inputMode ?? derivedInputMode}
@@ -800,7 +803,7 @@ export function CurrencyField({
       : resolvedStepper === 'split'
         ? [stepperButton(-1), stepperButton(1)]
         : [
-            <span data-part="stepper" key="stepper">
+            <span data-part="stepper" data-part-stepper="" key="stepper">
               {stepperButton(1)}
               {stepperButton(-1)}
             </span>,
@@ -814,11 +817,27 @@ export function CurrencyField({
   const children: ReactNode = (
     <CurrencyFieldScrubContext.Provider value={scrubContext}>
       {resolvedStepper === 'split' ? steppers?.[0] : null}
-      {start === undefined ? null : <span data-part="start">{start}</span>}
-      {affix?.position === 'start' ? <span data-part="symbol">{affix.text}</span> : null}
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
+      {affix?.position === 'start' ? (
+        <span data-part="symbol" data-part-symbol="">
+          {affix.text}
+        </span>
+      ) : null}
       {control}
-      {affix?.position === 'end' ? <span data-part="symbol">{affix.text}</span> : null}
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {affix?.position === 'end' ? (
+        <span data-part="symbol" data-part-symbol="">
+          {affix.text}
+        </span>
+      ) : null}
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
       {resolvedStepper === 'split' ? steppers?.[1] : steppers}
       {name === undefined ? null : (
         <input
@@ -841,7 +860,7 @@ export function CurrencyField({
     </CurrencyFieldScrubContext.Provider>
   );
 
-  const rootProps: CurrencyFieldRootProps = {
+  const rootProps: CurrencyFieldRootProps = keyedProps({
     children,
     className,
     style,
@@ -857,7 +876,7 @@ export function CurrencyField({
     'data-stepper': resolvedStepper,
     'data-ui': 'currency-field',
     'data-variant': resolvedVariant,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -902,9 +921,9 @@ export function CurrencyFieldScrub({
 
   return (
     <span
-      {...props}
+      {...withSelectorKey(props, 'part', 'scrub')}
       aria-hidden={ariaHidden}
-      data-part="scrub"
+
       data-scrubbing={active ? '' : undefined}
       onLostPointerCapture={finish(onLostPointerCapture)}
       onPointerCancel={finish(onPointerCancel)}

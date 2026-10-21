@@ -88,7 +88,7 @@ let sequence = 0;
   standalone: true,
   exportAs: 'slTimePicker',
   imports: [NgTemplateOutlet, SlGlyph, SlIcon, SlTimeField, SlTimeFieldEnd],
-  template: `<div data-part="control" (keydown)="onControlKeyDown($event)">
+  template: `<div data-part="control" data-part-control="" (keydown)="onControlKeyDown($event)">
       <div
         slTimeField
         #field="slTimeField"
@@ -115,6 +115,7 @@ let sequence = 0;
           <button
             #trigger
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-haspopup="listbox"
             [attr.aria-label]="triggerLabel()"
@@ -134,35 +135,40 @@ let sequence = 0;
       <div
         #layer
         data-ui="time-picker"
+        data-ui-time-picker=""
         data-part="positioner"
+        data-part-positioner=""
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
       >
         <div
           data-part="content"
+          data-part-content=""
           role="listbox"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
           [attr.aria-description]="truncated() ? t('truncated') : null"
         >
           <ng-content select="[slTimePickerPresets]" />
-          <div data-part="head">
-            <button data-part="now" type="button" (click)="chooseNow($event)">
+          <div data-part="head" data-part-head="">
+            <button data-part="now" data-part-now="" type="button" (click)="chooseNow($event)">
               {{ t('now') }}
             </button>
           </div>
           @if (list().length === 0) {
-            <div data-part="empty">{{ t('empty') }}</div>
+            <div data-part="empty" data-part-empty="">{{ t('empty') }}</div>
           } @else {
             <div
               #rows
               data-part="list"
+              data-part-list=""
               [attr.data-truncated]="truncated() ? '' : null"
               (keydown)="onListKeyDown($event)"
             >
               @for (option of list(); track $index) {
                 <div
                   data-part="option"
+                  data-part-option=""
                   role="option"
                   [attr.aria-selected]="isSelected(option)"
                   [attr.aria-disabled]="option.unavailable ? 'true' : null"
@@ -193,7 +199,9 @@ let sequence = 0;
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'time-picker',
+    'data-ui-time-picker': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-granularity]': 'resolvedGranularity()',

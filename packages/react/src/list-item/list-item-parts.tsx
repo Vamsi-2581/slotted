@@ -1,8 +1,13 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import type { ListItemRegionProps, ListItemRegionRootProps } from './list-item.types';
 
 function region(part: string) {
   return function Region({ render, ...nativeProps }: ListItemRegionProps) {
-    const rootProps: ListItemRegionRootProps = { ...nativeProps, 'data-part': part };
+    const rootProps: ListItemRegionRootProps = withSelectorKey(
+      { ...nativeProps, 'data-part': part },
+      'part',
+      part,
+    );
 
     return render === undefined ? <div {...rootProps} /> : render(rootProps);
   };

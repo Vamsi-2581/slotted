@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/inline-message/inline-message.css';
 
 import { useId } from 'react';
@@ -90,7 +91,7 @@ export function InlineMessage({
   /* Unstated asks the table; the empty string is a consumer removing the word. */
   const word = prefix ?? defaults.prefixes[resolvedTone] ?? '';
 
-  const rootProps: InlineMessageRootProps = {
+  const rootProps: InlineMessageRootProps = keyedProps({
     ...(role === undefined ? {} : { role }),
     ...nativeProps,
     ...(loading ? { 'data-loading': '' } : {}),
@@ -98,9 +99,13 @@ export function InlineMessage({
     ...(reserve ? { 'data-reserve': '' } : {}),
     children: (
       <>
-        {word === '' ? null : <span data-part="prefix">{word}</span>}
+        {word === '' ? null : (
+          <span data-part="prefix" data-part-prefix="">
+            {word}
+          </span>
+        )}
         {hideIcon ? null : (
-          <span aria-hidden="true" data-part="icon">
+          <span aria-hidden="true" data-part="icon" data-part-icon="">
             {icon ??
               (glyph === null ? null : (
                 <Icon>
@@ -112,7 +117,9 @@ export function InlineMessage({
         {/* The wrapper is the family's, not the consumer's: it is what makes
             "is there a message?" a question the stylesheet can ask, and what
             keeps a message holding a link one grid item rather than two. */}
-        <span data-part="text">{children}</span>
+        <span data-part="text" data-part-text="">
+          {children}
+        </span>
       </>
     ),
     'data-live': resolvedLive,
@@ -123,7 +130,7 @@ export function InlineMessage({
     'data-ui': 'inline-message',
     id: id ?? generatedId,
     ref,
-  };
+  });
 
   return render === undefined ? <p {...rootProps} /> : render(rootProps);
 }

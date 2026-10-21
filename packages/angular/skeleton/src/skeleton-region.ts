@@ -52,9 +52,14 @@ import {
   selector: '[slSkeletonRegion]',
   standalone: true,
   template: `@if (liveValue() !== 'off') {
-      <span data-part="announcement" data-ui="visually-hidden" role="status">{{
-        announcement()
-      }}</span>
+      <span
+        data-part="announcement"
+        data-part-announcement=""
+        data-ui="visually-hidden"
+        data-ui-visually-hidden=""
+        role="status"
+        >{{ announcement() }}</span
+      >
     }
     <ng-content />`,
   styleUrls: [
@@ -66,7 +71,9 @@ import {
   exportAs: 'slSkeletonRegion',
   host: {
     'data-ui': 'skeleton',
+    'data-ui-skeleton': '',
     'data-part': 'region',
+    'data-part-region': '',
     '[attr.data-animation]': 'animationValue()',
     '[attr.data-loading]': 'painted() ? "" : null',
     '[attr.aria-busy]': 'painted() ? "true" : null',

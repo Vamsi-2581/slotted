@@ -10,7 +10,7 @@
    * in: a container cannot change its own tracks
    * (`docs/build-briefing.md`, _Decisions already taken_).
    */
-  [data-ui='stat-card'] {
+  [data-ui-stat-card] {
     --_edge-width: var(--slotted-stat-card-border-width, var(--slotted-border-width-thin, 1px));
     --_radius: var(--slotted-stat-card-radius, var(--slotted-radius-lg, 8px));
     --_inset-block: var(--slotted-stat-card-padding-block, var(--slotted-space-6, 1rem));
@@ -87,7 +87,7 @@
   }
 
   /* The edge, out of flow, so a frame that changes width moves no text. */
-  [data-ui='stat-card']::before {
+  [data-ui-stat-card]::before {
     border: var(--_edge-width) solid var(--_edge);
     border-radius: inherit;
     content: '';
@@ -96,7 +96,7 @@
     position: absolute;
   }
 
-  [data-ui='stat-card'][data-size='sm'] {
+  [data-ui-stat-card][data-size='sm'] {
     --_inset-block: var(--slotted-stat-card-padding-block-sm, var(--slotted-space-5, 0.75rem));
     --_inset-inline: var(--slotted-stat-card-padding-inline-sm, var(--slotted-space-5, 0.75rem));
     --_region-gap: var(--slotted-stat-card-region-gap-sm, var(--slotted-space-2, 0.25rem));
@@ -126,7 +126,7 @@
     --_value-line-narrow: var(--slotted-line-height-xl, 1.45);
   }
 
-  [data-ui='stat-card'][data-size='lg'] {
+  [data-ui-stat-card][data-size='lg'] {
     --_inset-block: var(--slotted-stat-card-padding-block-lg, var(--slotted-space-8, 1.5rem));
     --_inset-inline: var(--slotted-stat-card-padding-inline-lg, var(--slotted-space-8, 1.5rem));
     --_region-gap: var(--slotted-stat-card-region-gap-lg, var(--slotted-space-4, 0.5rem));
@@ -170,11 +170,11 @@
 
   /* ── Fill: the three frames a card has, and none ─────────────────────── */
 
-  [data-ui='stat-card'][data-fill='elevated'] {
+  [data-ui-stat-card][data-fill='elevated'] {
     --_shadow: var(--slotted-stat-card-shadow-elevated, var(--slotted-shadow-md));
   }
 
-  [data-ui='stat-card'][data-fill='subtle'] {
+  [data-ui-stat-card][data-fill='subtle'] {
     --_surface: var(--slotted-stat-card-background-subtle, var(--slotted-surface-sunken, Canvas));
   }
 
@@ -183,7 +183,7 @@
    * of metrics separated by dividers, inside a card that is already a card.
    * It keeps no inset either, because the host's inset is the inset.
    */
-  [data-ui='stat-card'][data-fill='plain'] {
+  [data-ui-stat-card][data-fill='plain'] {
     --_surface: transparent;
     --_edge: transparent;
     --_shadow: none;
@@ -218,8 +218,8 @@
    * number is broken only when it is wider than the card itself. A floor on
    * the trend was tried and pushed the trend through the card's edge.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='body'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-body] {
       column-gap: var(--_trend-gap);
       display: grid;
       flex: 1 1 auto;
@@ -234,8 +234,8 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-layout='stacked'] [data-part='body'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-layout='stacked'] [data-part-body] {
       grid-template-areas:
         'header'
         'figure'
@@ -254,15 +254,15 @@
    * inline axis gives these regions no intrinsic width: the figure alone
    * decides the column, and the text is cut or wrapped by the card's width.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='header'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-header] {
       contain: inline-size;
       grid-area: header;
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='figure'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-figure] {
       align-self: start;
       grid-area: figure;
       min-inline-size: 0;
@@ -276,8 +276,8 @@
    * width is the space a wide value left, which a query on the card cannot
    * see.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-trend] {
       /* The marker's ring is the card's ground, not the page's. */
       --slotted-sparkline-ring-color: var(--_surface);
 
@@ -291,22 +291,22 @@
   }
 
   @container stat-card-trend (max-width: 39px) {
-    @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-      :scope [data-part='trend'] > * {
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope [data-part-trend] > * {
         visibility: hidden;
       }
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-layout='stacked'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-layout='stacked'] [data-part-trend] {
       align-self: end;
       margin-block-start: var(--slotted-space-2, 0.25rem);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='message'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-message] {
       contain: inline-size;
       grid-area: message;
     }
@@ -319,8 +319,8 @@
    * (`docs/token-foundation.md`, rule 4).
    */
   @container stat-card (max-width: 219px) {
-    @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-      :scope [data-part='body'] {
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope [data-part-body] {
         grid-template-areas:
           'header'
           'figure'
@@ -331,23 +331,23 @@
       }
     }
 
-    @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-      :scope [data-part='trend'] {
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope [data-part-trend] {
         align-self: end;
         margin-block-start: var(--slotted-space-2, 0.25rem);
       }
     }
 
-    @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-      :scope [data-part='value'] {
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope [data-part-value] {
         font-size: var(--_value-size-narrow);
         line-height: var(--_value-line-narrow);
       }
     }
 
     /* The value steps down here, and so does the line its placeholder keeps. */
-    @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-      :scope[data-loading] [data-part='value'] {
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope[data-loading] [data-part-value] {
         min-block-size: calc(var(--_value-size-narrow) * var(--_value-line-narrow));
       }
     }
@@ -361,8 +361,8 @@
    * them as part of the name, instead of floating them at the middle of the
    * block.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='header'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-header] {
       align-items: baseline;
       column-gap: var(--slotted-space-3, 0.375rem);
       display: flex;
@@ -381,8 +381,8 @@
    * proportion of the type rather than a scale step: it is a width of
    * words, and it scales with them.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='label'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-label] {
       color: var(--_ink-muted);
       flex: 1 1 0%;
       font-size: var(--_label-size);
@@ -394,8 +394,8 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='status'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-status] {
       display: inline-flex;
       flex: none;
     }
@@ -404,8 +404,8 @@
   /* The action takes the end of the header's first line and stays there
      when the label wraps: it is the one thing on the card the reader presses,
      and a corner is where a control is looked for. */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='action'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-action] {
       flex: none;
       /* The label's line, so a link here is as tall in the fallback face as in
          the web face and the header does not grow when the font arrives. */
@@ -420,15 +420,14 @@
      part itself when `render` made it one — reaches
      the comfortable size in both axes, and the header keeps its height. */
   @media (pointer: coarse) {
-    @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-      :scope :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button)) {
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope :is([data-part-action]:is(a, button), [data-part-action] > :is(a, button)) {
         position: relative;
       }
     }
 
-    @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-      :scope
-        :is([data-part='action']:is(a, button), [data-part='action'] > :is(a, button))::before {
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope :is([data-part-action]:is(a, button), [data-part-action] > :is(a, button))::before {
         content: '';
         inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
         position: absolute;
@@ -444,8 +443,8 @@
    * so a delta that does not fit beside a wide number drops under it rather
    * than pushing the number.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='figure'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-figure] {
       align-items: baseline;
       column-gap: var(--slotted-space-3, 0.375rem);
       display: flex;
@@ -454,8 +453,8 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='comparison'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-comparison] {
       contain: inline-size;
       flex: 1 1 100%;
     }
@@ -471,8 +470,8 @@
    * to pull a large numeral's counters back together, and it is the same
    * fraction at every size.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='value'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-value] {
       /* The figure and its unit are two flex items on one baseline — the text
          node is an item of its own — so the gap spaces the unit from the digit
          on whichever side it stands. A margin on the unit, reset by
@@ -502,8 +501,8 @@
 
   /* The unit is in the value's own line, a step down in size and weight, so
      `$` and `%` read as annotation of the number rather than as digits. */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='unit'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-unit] {
       color: var(--_ink-muted);
       font-size: var(--_delta-size);
       font-weight: var(--slotted-font-weight-medium, 500);
@@ -517,8 +516,8 @@
    * metrics, and the tone's text role already clears the reading ratio on
    * the surface. It sits on the value's baseline.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta] {
       align-items: center;
       color: var(--_tone-text);
       column-gap: var(--slotted-space-1, 0.125rem);
@@ -535,38 +534,38 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'][data-tone='neutral'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta][data-tone='neutral'] {
       --_tone-text: var(--_ink-muted);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'][data-tone='accent'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta][data-tone='accent'] {
       --_tone-text: var(--slotted-tone-accent-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'][data-tone='secondary'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta][data-tone='secondary'] {
       --_tone-text: var(--slotted-tone-secondary-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'][data-tone='success'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta][data-tone='success'] {
       --_tone-text: var(--slotted-tone-success-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'][data-tone='warning'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta][data-tone='warning'] {
       --_tone-text: var(--slotted-tone-warning-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'][data-tone='danger'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta][data-tone='danger'] {
       --_tone-text: var(--slotted-tone-danger-text);
     }
   }
@@ -579,8 +578,8 @@
    * change draws `minus`. The binding renders the glyph inside the icon box;
    * the part hands the box its size, and the box inherits the delta's ink.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='indicator'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-indicator] {
       --slotted-icon-size: var(--_indicator-size);
 
       display: inline-flex;
@@ -592,16 +591,16 @@
      a rise becomes a fall. Time runs from the right in a right-to-left
      document, so the rise points the other way there, as the sparkline beside
      it does — the `directional` icon box the binding draws does that. */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='delta'][data-trend='down'] [data-part='indicator'] > [data-ui='icon'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-delta][data-trend='down'] [data-part-indicator] > [data-ui-icon] {
       rotate: x 180deg;
     }
   }
 
   /* ── Comparison: the prose under the figure ───────────────────────────── */
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='comparison'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-comparison] {
       color: var(--_ink-muted);
       font-size: var(--_prose-size);
       line-height: var(--_prose-line);
@@ -612,8 +611,8 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='period'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-period] {
       color: var(--_ink-muted);
     }
   }
@@ -628,53 +627,53 @@
    * — a card with no delta, or a metric with no valence, draws its trend in
    * the theme's blue and not in grey.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-trend] {
       align-self: center;
       display: flex;
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-tone='success'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-tone='success'] [data-part-trend] {
       --slotted-sparkline-color: var(--slotted-tone-success-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-tone='danger'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-tone='danger'] [data-part-trend] {
       --slotted-sparkline-color: var(--slotted-tone-danger-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-tone='warning'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-tone='warning'] [data-part-trend] {
       --slotted-sparkline-color: var(--slotted-tone-warning-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-tone='accent'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-tone='accent'] [data-part-trend] {
       --slotted-sparkline-color: var(--slotted-tone-accent-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-tone='secondary'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-tone='secondary'] [data-part-trend] {
       --slotted-sparkline-color: var(--slotted-tone-secondary-text);
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-fill='plain'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-fill='plain'] [data-part-trend] {
       --slotted-sparkline-ring-color: var(--slotted-surface-raised, Canvas);
     }
   }
 
   /* ── Message: what stands in for a value that is missing or failed ────── */
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope [data-part='message'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-message] {
       color: var(--_ink-muted);
       font-size: var(--_prose-size);
       line-height: var(--_prose-line);
@@ -684,17 +683,17 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-status='error'] [data-part='message'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-status='error'] [data-part-message] {
       color: var(--slotted-tone-danger-text);
     }
   }
 
   /* A value that is not there is a dash in the muted step, at the value's
      own size, so the row keeps its height and its rhythm. */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-status='empty'] [data-part='value'],
-    :scope[data-status='error'] [data-part='value'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-status='empty'] [data-part-value],
+    :scope[data-status='error'] [data-part-value] {
       color: var(--_ink-muted);
     }
   }
@@ -716,14 +715,14 @@
    * arrived. The floor is one line of the value's own type, so the two states
    * occupy the same box.
    */
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-loading] [data-part='value'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-loading] [data-part-value] {
       min-block-size: calc(var(--_value-size) * var(--_value-line));
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-loading] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-loading] [data-part-trend] {
       --slotted-skeleton-block-size: var(
         --slotted-sparkline-block-size,
         var(--slotted-space-9, 2rem)
@@ -731,8 +730,8 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-loading][data-size='sm'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-loading][data-size='sm'] [data-part-trend] {
       --slotted-skeleton-block-size: var(
         --slotted-sparkline-block-size-sm,
         var(--slotted-space-7, 1.25rem)
@@ -740,8 +739,8 @@
     }
   }
 
-  @scope ([data-ui='stat-card']) to (:scope [data-ui] > *) {
-    :scope[data-loading][data-size='lg'] [data-part='trend'] {
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-loading][data-size='lg'] [data-part-trend] {
       --slotted-skeleton-block-size: var(
         --slotted-sparkline-block-size-lg,
         var(--slotted-space-11, 3rem)

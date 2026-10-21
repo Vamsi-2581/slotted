@@ -13,7 +13,7 @@
    * both `Message` and `Bubble`, and two answers to one question can disagree
    * (`docs/history/designs/2026-09-30-message-design.md` §2.2).
    */
-  [data-ui='message'][data-part='root'] {
+  [data-ui-message][data-part-root] {
     /**
      * The avatar column is the small avatar step, which the theme restates per
      * density; ReUI's 32 has no step there (dossier §3), and a row that follows
@@ -62,16 +62,15 @@
    * `MessageAvatar` in each of them (`c-message-6`); the column is read here
    * from the DOM instead.
    */
-  [data-ui='message'][data-part='root']:has(> [data-part='avatar']),
-  [data-ui='message'][data-part='group']:has([data-part='avatar'])
-    > [data-ui='message'][data-part='root'] {
+  [data-ui-message][data-part-root]:has(> [data-part-avatar]),
+  [data-ui-message][data-part-group]:has([data-part-avatar]) > [data-ui-message][data-part-root] {
     grid-template-areas: 'avatar body';
     grid-template-columns: var(--_avatar-size) minmax(0, 1fr);
   }
 
-  [data-ui='message'][data-part='root'][data-align='end']:has(> [data-part='avatar']),
-  [data-ui='message'][data-part='group']:has([data-part='avatar'])
-    > [data-ui='message'][data-part='root'][data-align='end'] {
+  [data-ui-message][data-part-root][data-align='end']:has(> [data-part-avatar]),
+  [data-ui-message][data-part-group]:has([data-part-avatar])
+    > [data-ui-message][data-part-root][data-align='end'] {
     grid-template-areas: 'body avatar';
     grid-template-columns: minmax(0, 1fr) var(--_avatar-size);
   }
@@ -81,7 +80,7 @@
    * rather than of the footer under it: in a run it marks where the run ends,
    * which is where the reader's eye arrives.
    */
-  [data-ui='message'][data-part='root'] > [data-part='avatar'] {
+  [data-ui-message][data-part-root] > [data-part-avatar] {
     grid-area: avatar;
     display: flex;
     align-self: end;
@@ -90,12 +89,12 @@
     min-block-size: var(--_avatar-size);
   }
 
-  [data-ui='message'][data-part='root']:has(> [data-part='body'] > [data-part='footer'])
-    > [data-part='avatar'] {
+  [data-ui-message][data-part-root]:has(> [data-part-body] > [data-part-footer])
+    > [data-part-avatar] {
     margin-block-end: calc(var(--_meta-leading) + var(--_stack-gap));
   }
 
-  [data-ui='message'][data-part='root'] > [data-part='body'] {
+  [data-ui-message][data-part-root] > [data-part-body] {
     grid-area: body;
     display: flex;
     flex-direction: column;
@@ -104,7 +103,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='message'][data-part='root'][data-align='end'] > [data-part='body'] {
+  [data-ui-message][data-part-root][data-align='end'] > [data-part-body] {
     align-items: flex-end;
   }
 
@@ -116,7 +115,7 @@
    * sender's side drawn in, it reads as one speaker holding the floor. The
    * gap between runs belongs to whatever stacks them — the scroller gives it.
    */
-  [data-ui='message'][data-part='group'] {
+  [data-ui-message][data-part-group] {
     display: flex;
     flex-direction: column;
     gap: var(--slotted-message-run-gap, var(--slotted-space-1, 0.125rem));
@@ -125,7 +124,7 @@
 
   /* ── Header and footer ──────────────────────────────────────────────── */
 
-  [data-ui='message'][data-part='root'] :is([data-part='header'], [data-part='footer']) {
+  [data-ui-message][data-part-root] :is([data-part-header], [data-part-footer]) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -139,8 +138,7 @@
     line-height: var(--_meta-leading);
   }
 
-  [data-ui='message'][data-part='root'][data-align='end']
-    :is([data-part='header'], [data-part='footer']) {
+  [data-ui-message][data-part-root][data-align='end'] :is([data-part-header], [data-part-footer]) {
     justify-content: flex-end;
   }
 
@@ -150,7 +148,7 @@
    * read aloud, copied with the name and wrapped onto a line of its own.
    * ReUI asks the consumer to write the dot (`c-message-3`).
    */
-  [data-ui='message'][data-part='root'] [data-part='header'] > * + [data-part='time']::before {
+  [data-ui-message][data-part-root] [data-part-header] > * + [data-part-time]::before {
     content: '';
     display: inline-block;
     inline-size: var(--slotted-space-2, 0.25rem);
@@ -162,14 +160,14 @@
     vertical-align: middle;
   }
 
-  [data-ui='message'][data-part='root'] [data-part='author'] {
+  [data-ui-message][data-part-root] [data-part-author] {
     min-inline-size: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  [data-ui='message'][data-part='root'] [data-part='time'] {
+  [data-ui-message][data-part-root] [data-part-time] {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
@@ -183,14 +181,11 @@
    * word of twelve pixels is two voices saying one thing, and the two never
    * shared a centre line.
    */
-  [data-ui='message'][data-part='root'] [data-part='footer'] > [data-part='receipt'] {
+  [data-ui-message][data-part-root] [data-part-footer] > [data-part-receipt] {
     white-space: nowrap;
   }
 
-  [data-ui='message'][data-part='root']
-    [data-part='footer']
-    > [data-part='receipt']
-    > [data-ui='icon'] {
+  [data-ui-message][data-part-root] [data-part-footer] > [data-part-receipt] > [data-ui-icon] {
     display: none;
   }
 
@@ -200,7 +195,7 @@
    * not with the words inside it — so the note reads as the bubble's caption.
    * The control that sends it again stands beside the surface (`retry`).
    */
-  [data-ui='message'][data-part='root'][data-invalid] > [data-part='body'] > [data-part='footer'] {
+  [data-ui-message][data-part-root][data-invalid] > [data-part-body] > [data-part-footer] {
     padding-inline: var(--slotted-space-2, 0.25rem);
     color: var(--slotted-tone-danger-text);
   }
@@ -212,7 +207,7 @@
    * always on a screen that cannot hover: a reveal by hover alone would hide
    * them from the keyboard and from a finger.
    */
-  [data-ui='message'][data-part='root'] [data-part='actions'] {
+  [data-ui-message][data-part-root] [data-part-actions] {
     display: inline-flex;
     align-items: center;
     gap: var(--slotted-space-1, 0.125rem);
@@ -220,15 +215,15 @@
   }
 
   @media (hover: hover) {
-    [data-ui='message'][data-part='root'][data-actions='hover'] [data-part='actions'] {
+    [data-ui-message][data-part-root][data-actions='hover'] [data-part-actions] {
       opacity: 0;
     }
 
-    [data-ui='message'][data-part='root'][data-actions='hover']:is(
+    [data-ui-message][data-part-root][data-actions='hover']:is(
         :hover:not([data-disabled]),
         :focus-within
       )
-      [data-part='actions'] {
+      [data-part-actions] {
       opacity: 1;
       transition-timing-function: var(--slotted-easing-enter, ease-out);
     }
@@ -248,7 +243,7 @@
    * moves only while the step is current, and under reduced motion the words
    * stand in the plain ink.
    */
-  [data-ui='message'][data-part='root'] [data-part='activity'] {
+  [data-ui-message][data-part-root] [data-part-activity] {
     display: inline-flex;
     flex-direction: column;
     gap: var(--slotted-space-3, 0.375rem);
@@ -265,7 +260,7 @@
     line-height: round(up, calc(1em * var(--slotted-line-height-md, 1.5)), 1px);
   }
 
-  [data-ui='message'][data-part='root'] [data-part='activity-step'] {
+  [data-ui-message][data-part-root] [data-part-activity-step] {
     display: flex;
     align-items: center;
     gap: var(--slotted-space-4, 0.5rem);
@@ -282,7 +277,7 @@
   }
 
   /** The mark column: a tick, or the ring, in one box so the words line up. */
-  [data-ui='message'][data-part='root'] [data-part='activity-step'] > :first-child {
+  [data-ui-message][data-part-root] [data-part-activity-step] > :first-child {
     --slotted-icon-size: var(--_glyph-size);
     --slotted-spinner-size: var(--_glyph-size);
 
@@ -293,19 +288,19 @@
     block-size: var(--_glyph-size);
   }
 
-  [data-ui='message'][data-part='root'] [data-part='activity-step'][data-complete] > :first-child {
+  [data-ui-message][data-part-root] [data-part-activity-step][data-complete] > :first-child {
     color: var(--slotted-tone-success-text);
   }
 
-  [data-ui='message'][data-part='root'] [data-part='activity-step'][data-current] {
+  [data-ui-message][data-part-root] [data-part-activity-step][data-current] {
     color: var(--slotted-text);
   }
 
-  [data-ui='message'][data-part='root'] [data-part='activity-step'][data-current] > :first-child {
+  [data-ui-message][data-part-root] [data-part-activity-step][data-current] > :first-child {
     color: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='message'][data-part='root'] [data-part='activity-step'][data-current] > :last-child {
+  [data-ui-message][data-part-root] [data-part-activity-step][data-current] > :last-child {
     --_base: color-mix(in oklab, var(--slotted-text) 72%, var(--slotted-text-muted));
 
     background-image: linear-gradient(
@@ -337,20 +332,19 @@
    * `2 de 3` between two inner controls. The chevron is one glyph turned for
    * the previous control, and a right-to-left document turns both.
    */
-  [data-ui='message'][data-part='root'] [data-part='versions'] {
+  [data-ui-message][data-part-root] [data-part-versions] {
     display: inline-flex;
     align-items: center;
     color: var(--slotted-text-muted);
   }
 
-  [data-ui='message'][data-part='root'] [data-part='version-label'] {
+  [data-ui-message][data-part-root] [data-part-version-label] {
     padding-inline: var(--slotted-space-2, 0.25rem);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
 
-  [data-ui='message'][data-part='root']
-    :is([data-part='version-previous'], [data-part='version-next']) {
+  [data-ui-message][data-part-root] :is([data-part-version-previous], [data-part-version-next]) {
     display: inline-grid;
     place-items: center;
     inline-size: var(--_inner-size);
@@ -367,45 +361,45 @@
       color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='root']
-    :is([data-part='version-previous'], [data-part='version-next'])
-    > [data-ui='icon'] {
+  [data-ui-message][data-part-root]
+    :is([data-part-version-previous], [data-part-version-next])
+    > [data-ui-icon] {
     --slotted-icon-size: var(--_glyph-size);
   }
 
-  [data-ui='message'][data-part='root'] [data-part='version-previous'] > [data-ui='icon'] {
+  [data-ui-message][data-part-root] [data-part-version-previous] > [data-ui-icon] {
     scale: -1 1;
   }
 
-  [data-ui='message'][data-part='root']:dir(rtl)
-    :is([data-part='version-previous'], [data-part='version-next'])
-    > [data-ui='icon'] {
+  [data-ui-message][data-part-root]:dir(rtl)
+    :is([data-part-version-previous], [data-part-version-next])
+    > [data-ui-icon] {
     scale: -1 1;
   }
 
-  [data-ui='message'][data-part='root']:dir(rtl) [data-part='version-previous'] > [data-ui='icon'] {
+  [data-ui-message][data-part-root]:dir(rtl) [data-part-version-previous] > [data-ui-icon] {
     scale: 1 1;
   }
 
-  [data-ui='message'][data-part='root']
-    :is([data-part='version-previous'], [data-part='version-next']):hover:not(:disabled) {
+  [data-ui-message][data-part-root]
+    :is([data-part-version-previous], [data-part-version-next]):hover:not(:disabled) {
     background-color: var(--slotted-tone-secondary-subtle-hover);
     color: var(--slotted-text);
   }
 
-  [data-ui='message'][data-part='root']
-    :is([data-part='version-previous'], [data-part='version-next']):active:not(:disabled) {
+  [data-ui-message][data-part-root]
+    :is([data-part-version-previous], [data-part-version-next]):active:not(:disabled) {
     background-color: var(--slotted-tone-secondary-subtle-active);
     color: var(--slotted-text);
   }
 
-  [data-ui='message'][data-part='root']
-    :is([data-part='version-previous'], [data-part='version-next']):disabled {
+  [data-ui-message][data-part-root]
+    :is([data-part-version-previous], [data-part-version-next]):disabled {
     color: var(--slotted-disabled-foreground);
   }
 
-  [data-ui='message'][data-part='root']
-    :is([data-part='version-previous'], [data-part='version-next']):focus-visible {
+  [data-ui-message][data-part-root]
+    :is([data-part-version-previous], [data-part-version-next]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -426,7 +420,7 @@
    * avatar at the top beside the name, the words unframed under it, and a
    * band under the pointer that says which message the actions belong to.
    */
-  [data-ui='message'][data-part='root'][data-layout='thread'] {
+  [data-ui-message][data-part-root][data-layout='thread'] {
     --_avatar-size: var(--slotted-message-thread-avatar-size, var(--slotted-avatar-size-md, 36px));
     --_pad-inline: 0px;
 
@@ -436,18 +430,18 @@
     transition: background-color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='root'][data-layout='thread'] > [data-part='avatar'] {
+  [data-ui-message][data-part-root][data-layout='thread'] > [data-part-avatar] {
     align-self: start;
     margin-block-end: 0;
   }
 
-  [data-ui='message'][data-part='root'][data-layout='thread'] [data-part='author'] {
+  [data-ui-message][data-part-root][data-layout='thread'] [data-part-author] {
     color: var(--slotted-text);
     font-size: var(--slotted-control-font-size-md, 13px);
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='message'][data-part='root'][data-layout='thread']:hover:not([data-disabled]) {
+  [data-ui-message][data-part-root][data-layout='thread']:hover:not([data-disabled]) {
     background-color: var(--slotted-tone-secondary-subtle-hover);
   }
 
@@ -459,14 +453,14 @@
    * A plate that is always painted, on a touch screen or with `always`, floated
    * over the words and covered them at 360 pixels.
    */
-  [data-ui='message'][data-part='root'][data-layout='thread'] > [data-part='actions'] {
+  [data-ui-message][data-part-root][data-layout='thread'] > [data-part-actions] {
     grid-column: body;
     justify-self: start;
   }
 
   @media (hover: hover) {
-    [data-ui='message'][data-part='root'][data-layout='thread'][data-actions='hover']
-      > [data-part='actions'] {
+    [data-ui-message][data-part-root][data-layout='thread'][data-actions='hover']
+      > [data-part-actions] {
       position: absolute;
       inset-block-start: calc(var(--slotted-space-2, 0.25rem) * -1);
       inset-inline-end: var(--slotted-space-4, 0.5rem);
@@ -480,7 +474,7 @@
 
   /* ══ The bubble ════════════════════════════════════════════════════════ */
 
-  [data-ui='message'][data-part='bubble'] {
+  [data-ui-message][data-part-bubble] {
     /**
      * The five tones, read into the roles a painting needs. `soft` writes in
      * the page's ink on the accent and secondary grounds — a paragraph set in
@@ -538,14 +532,14 @@
     max-inline-size: var(--slotted-message-bubble-share, 80%);
   }
 
-  [data-ui='message'][data-part='bubble'][data-tone='accent'] {
+  [data-ui-message][data-part-bubble][data-tone='accent'] {
     --_solid: var(--slotted-tone-accent-solid);
     --_on-solid: var(--slotted-tone-accent-on-solid);
     --_surface: var(--slotted-tone-accent-surface);
     --_border: var(--slotted-tone-accent-border);
   }
 
-  [data-ui='message'][data-part='bubble'][data-tone='success'] {
+  [data-ui-message][data-part-bubble][data-tone='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_on-solid: var(--slotted-tone-success-on-solid);
     --_surface: var(--slotted-tone-success-surface);
@@ -553,7 +547,7 @@
     --_soft-ink: var(--slotted-tone-success-text);
   }
 
-  [data-ui='message'][data-part='bubble'][data-tone='warning'] {
+  [data-ui-message][data-part-bubble][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_on-solid: var(--slotted-tone-warning-on-solid);
     --_surface: var(--slotted-tone-warning-surface);
@@ -561,7 +555,7 @@
     --_soft-ink: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='message'][data-part='bubble'][data-tone='danger'] {
+  [data-ui-message][data-part-bubble][data-tone='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_on-solid: var(--slotted-tone-danger-on-solid);
     --_surface: var(--slotted-tone-danger-surface);
@@ -580,7 +574,7 @@
    * page's ground, `plain` no box at all — the unframed assistant answer that
    * takes the whole row.
    */
-  [data-ui='message'][data-part='bubble'] > [data-part='content'] {
+  [data-ui-message][data-part-bubble] > [data-part-content] {
     --_ground: var(--_surface);
     --_ink: var(--_soft-ink);
     --_edge: color-mix(in oklab, var(--_surface), var(--slotted-border-subtle));
@@ -615,25 +609,25 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='solid'] > [data-part='content'] {
+  [data-ui-message][data-part-bubble][data-variant='solid'] > [data-part-content] {
     --_ground: var(--_solid);
     --_ink: var(--_on-solid);
     --_edge: var(--_solid);
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='outline'] > [data-part='content'] {
+  [data-ui-message][data-part-bubble][data-variant='outline'] > [data-part-content] {
     --_ground: var(--slotted-surface);
     --_ink: var(--slotted-text);
     --_edge: var(--_border);
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='plain'] {
+  [data-ui-message][data-part-bubble][data-variant='plain'] {
     --_pad-inline: 0px;
 
     max-inline-size: 100%;
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='plain'] > [data-part='content'] {
+  [data-ui-message][data-part-bubble][data-variant='plain'] > [data-part-content] {
     --_ground: transparent;
     --_ink: var(--slotted-text);
     --_edge: transparent;
@@ -647,13 +641,11 @@
    * The bubble sits on the sender's side, and so does everything it carries:
    * the corners that join a run are the ones that face the avatar.
    */
-  [data-ui='message'][data-part='root'][data-align='end'] [data-part='bubble'] {
+  [data-ui-message][data-part-root][data-align='end'] [data-part-bubble] {
     align-items: flex-end;
   }
 
-  [data-ui='message'][data-part='root'][data-align='end']
-    [data-part='bubble']
-    > [data-part='content'] {
+  [data-ui-message][data-part-root][data-align='end'] [data-part-bubble] > [data-part-content] {
     border-start-start-radius: var(--_radius);
     border-start-end-radius: var(--_top-side);
     border-end-start-radius: var(--_radius);
@@ -668,19 +660,19 @@
    * of a group. A run reads as one speaker by its shape, with no position
    * prop on each message (Chatscope asks for `first`, `normal`, `last`).
    */
-  [data-ui='message'][data-part='bubble']:has(~ [data-part='bubble']),
-  [data-ui='message'][data-part='group']
-    > [data-ui='message'][data-part='root']:not(:last-child)
-    > [data-part='body']
-    > [data-part='bubble']:not(:has(~ [data-part='bubble'])) {
+  [data-ui-message][data-part-bubble]:has(~ [data-part-bubble]),
+  [data-ui-message][data-part-group]
+    > [data-ui-message][data-part-root]:not(:last-child)
+    > [data-part-body]
+    > [data-part-bubble]:not(:has(~ [data-part-bubble])) {
     --_bottom-side: var(--_radius-joined);
   }
 
-  [data-ui='message'][data-part='bubble'] ~ [data-part='bubble'],
-  [data-ui='message'][data-part='group']
-    > [data-ui='message'][data-part='root']:not(:first-child)
-    > [data-part='body']
-    > [data-part='bubble']:not([data-part='bubble'] ~ [data-part='bubble']) {
+  [data-ui-message][data-part-bubble] ~ [data-part-bubble],
+  [data-ui-message][data-part-group]
+    > [data-ui-message][data-part-root]:not(:first-child)
+    > [data-part-body]
+    > [data-part-bubble]:not([data-part-bubble] ~ [data-part-bubble]) {
     --_top-side: var(--_radius-joined);
   }
 
@@ -694,7 +686,7 @@
    * `light`, 0.044 under the secondary ground, over the 0.02 step
    * `theme-conformance` asks of a hover, and the press twice that.
    */
-  [data-ui='message'][data-part='bubble'] > [data-part='content']:is(button, a) {
+  [data-ui-message][data-part-bubble] > [data-part-content]:is(button, a) {
     --_ground-hover: color-mix(
       in oklab,
       var(--_ink) var(--slotted-message-state-layer-hover, 6%),
@@ -713,25 +705,24 @@
       border-color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='plain']
-    > [data-part='content']:is(button, a) {
+  [data-ui-message][data-part-bubble][data-variant='plain'] > [data-part-content]:is(button, a) {
     padding-block: var(--slotted-space-1, 0.125rem);
     padding-inline: var(--slotted-space-2, 0.25rem);
     margin-inline: calc(var(--slotted-space-2, 0.25rem) * -1);
     border-radius: var(--slotted-radius-sm, 4px);
   }
 
-  [data-ui='message'][data-part='bubble']
-    > [data-part='content']:is(button, a):hover:not(:disabled):not([data-disabled]) {
+  [data-ui-message][data-part-bubble]
+    > [data-part-content]:is(button, a):hover:not(:disabled):not([data-disabled]) {
     background-color: var(--_ground-hover);
   }
 
-  [data-ui='message'][data-part='bubble']
-    > [data-part='content']:is(button, a):active:not(:disabled):not([data-disabled]) {
+  [data-ui-message][data-part-bubble]
+    > [data-part-content]:is(button, a):active:not(:disabled):not([data-disabled]) {
     background-color: var(--_ground-active);
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='content']:is(button, a):focus-visible {
+  [data-ui-message][data-part-bubble] > [data-part-content]:is(button, a):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -752,7 +743,7 @@
    * beside a line of text, the hanging meta read as misaligned. Read is the one state that changes the ink: full strength on a
    * solid fill, the accent on a tinted one; the other marks differ by shape.
    */
-  [data-ui='message'][data-part='bubble'] [data-part='meta'] {
+  [data-ui-message][data-part-bubble] [data-part-meta] {
     /*
      * Ninety per cent of the bubble's ink: the lowest share at which the hour
      * keeps 4.5:1 on every fill — 4.50 on the accent in `dark`, 5.74 in
@@ -778,11 +769,11 @@
     translate: 0 1px;
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='solid'] [data-part='meta'] {
+  [data-ui-message][data-part-bubble][data-variant='solid'] [data-part-meta] {
     --_read-ink: var(--_on-solid);
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='meta'] [data-part='receipt'] {
+  [data-ui-message][data-part-bubble] [data-part-meta] [data-part-receipt] {
     display: inline-grid;
     place-items: center;
   }
@@ -792,17 +783,11 @@
    * the two share one box and one centre; two ticks at twelve pixels were two
    * scratches.
    */
-  [data-ui='message'][data-part='bubble']
-    [data-part='meta']
-    [data-part='receipt']
-    > [data-ui='icon'] {
+  [data-ui-message][data-part-bubble] [data-part-meta] [data-part-receipt] > [data-ui-icon] {
     --slotted-icon-size: var(--slotted-control-icon-size-sm, 14px);
   }
 
-  [data-ui='message'][data-part='bubble']
-    [data-part='meta']
-    [data-part='receipt']
-    > span:not([data-ui]) {
+  [data-ui-message][data-part-bubble] [data-part-meta] [data-part-receipt] > span:not([data-ui]) {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
@@ -811,17 +796,15 @@
     white-space: nowrap;
   }
 
-  [data-ui='message'][data-part='bubble']
-    [data-part='meta']
-    [data-part='receipt'][data-status='read'] {
+  [data-ui-message][data-part-bubble] [data-part-meta] [data-part-receipt][data-status='read'] {
     color: var(--_read-ink);
   }
 
   /** A clock that breathes while the message is on its way. */
-  [data-ui='message'][data-part='bubble']
-    [data-part='meta']
-    [data-part='receipt'][data-status='sending']
-    > [data-ui='icon'] {
+  [data-ui-message][data-part-bubble]
+    [data-part-meta]
+    [data-part-receipt][data-status='sending']
+    > [data-ui-icon] {
     animation: slotted-message-pending var(--slotted-duration-loop-slow)
       var(--slotted-easing-standard, ease) infinite alternate;
   }
@@ -837,7 +820,7 @@
   }
 
   /** The meta of an unframed reply has no surface to ride in; it is the footer's. */
-  [data-ui='message'][data-part='bubble'][data-variant='plain'] [data-part='meta'] {
+  [data-ui-message][data-part-bubble][data-variant='plain'] [data-part-meta] {
     display: none;
   }
 
@@ -853,8 +836,7 @@
    * text jump twice when a reply streaming above it reflows the column. The
    * chevron turning is the motion that answers the press.
    */
-  [data-ui='message'][data-part='bubble'][data-clamped]:not([data-revealed])
-    > [data-part='content'] {
+  [data-ui-message][data-part-bubble][data-clamped]:not([data-revealed]) > [data-part-content] {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: var(--slotted-message-max-lines, 6);
@@ -868,7 +850,7 @@
     overflow-clip-margin: content-box;
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='more'] {
+  [data-ui-message][data-part-bubble] > [data-part-more] {
     display: inline-flex;
     align-items: center;
     gap: var(--slotted-space-1, 0.125rem);
@@ -886,25 +868,25 @@
     transition: color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='more'] > [data-ui='icon'] {
+  [data-ui-message][data-part-bubble] > [data-part-more] > [data-ui-icon] {
     --slotted-icon-size: var(--slotted-control-icon-size-sm, 14px);
 
     transition: rotate var(--slotted-duration-medium) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='bubble'][data-revealed] > [data-part='more'] > [data-ui='icon'] {
+  [data-ui-message][data-part-bubble][data-revealed] > [data-part-more] > [data-ui-icon] {
     rotate: 180deg;
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='more']:hover:not(:disabled) {
+  [data-ui-message][data-part-bubble] > [data-part-more]:hover:not(:disabled) {
     color: var(--slotted-text);
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='more']:active:not(:disabled) {
+  [data-ui-message][data-part-bubble] > [data-part-more]:active:not(:disabled) {
     color: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='more']:focus-visible {
+  [data-ui-message][data-part-bubble] > [data-part-more]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -917,7 +899,7 @@
    * the accent fill included, where a rail in the ink would be the only
    * saturated stroke in the thread.
    */
-  [data-ui='message'][data-part='bubble'] [data-part='quote'] {
+  [data-ui-message][data-part-bubble] [data-part-quote] {
     display: block;
     box-sizing: border-box;
     inline-size: 100%;
@@ -940,25 +922,25 @@
     -webkit-line-clamp: 3;
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='quote-author'] {
+  [data-ui-message][data-part-bubble] [data-part-quote-author] {
     display: block;
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='message'][data-part='bubble'] button[data-part='quote'] {
+  [data-ui-message][data-part-bubble] button[data-part-quote] {
     cursor: pointer;
     transition: background-color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='bubble'] button[data-part='quote']:hover:not(:disabled) {
+  [data-ui-message][data-part-bubble] button[data-part-quote]:hover:not(:disabled) {
     background-color: color-mix(in oklab, currentColor 13%, transparent);
   }
 
-  [data-ui='message'][data-part='bubble'] button[data-part='quote']:active:not(:disabled) {
+  [data-ui-message][data-part-bubble] button[data-part-quote]:active:not(:disabled) {
     background-color: color-mix(in oklab, currentColor 18%, transparent);
   }
 
-  [data-ui='message'][data-part='bubble'] button[data-part='quote']:focus-visible {
+  [data-ui-message][data-part-bubble] button[data-part-quote]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -986,11 +968,11 @@
    * stands lit and the typing dots stand at three strengths, so the state is
    * still drawn.
    */
-  [data-ui='message'][data-part='bubble'] [data-part='stream'] {
+  [data-ui-message][data-part-bubble] [data-part-stream] {
     white-space: pre-wrap;
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='stream-chunk'] {
+  [data-ui-message][data-part-bubble] [data-part-stream-chunk] {
     animation: slotted-message-word var(--slotted-duration-long) var(--slotted-easing-standard) both;
   }
 
@@ -1006,7 +988,7 @@
     }
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='caret'] {
+  [data-ui-message][data-part-bubble] [data-part-caret] {
     --_dot: round(nearest, 0.6em, 2px);
 
     display: inline-block;
@@ -1026,9 +1008,9 @@
   }
 
   /* `filter`, not `opacity`: the breath animates opacity, and an animation outranks the rule. */
-  [data-ui='message'][data-part='bubble']
-    [data-part='stream']:has(> [data-part='stream-chunk'])
-    + [data-part='caret'] {
+  [data-ui-message][data-part-bubble]
+    [data-part-stream]:has(> [data-part-stream-chunk])
+    + [data-part-caret] {
     filter: opacity(0);
     transition: filter var(--slotted-duration-short) var(--slotted-easing-exit);
   }
@@ -1059,7 +1041,7 @@
    * before, in the bubble of the person writing. The wave travels half a dot:
    * enough to read as a voice, not so much that the bubble seems to bounce.
    */
-  [data-ui='message'][data-part='bubble'] [data-part='typing'] {
+  [data-ui-message][data-part-bubble] [data-part-typing] {
     --_dot: round(calc(var(--_leading) / 3), 1px);
 
     display: inline-flex;
@@ -1077,7 +1059,7 @@
    * behind. The circles are the surface's own fill and edge, so they answer
    * every painting and every scheme with the bubble.
    */
-  [data-ui='message'][data-part='bubble'] > [data-part='content']:has(> [data-part='typing']) {
+  [data-ui-message][data-part-bubble] > [data-part-content]:has(> [data-part-typing]) {
     position: relative;
     padding-inline: calc(var(--_pad-inline) + var(--slotted-space-1, 0.125rem));
     transition:
@@ -1090,10 +1072,8 @@
     }
   }
 
-  [data-ui='message'][data-part='bubble']
-    > [data-part='content']:has(> [data-part='typing'])::before,
-  [data-ui='message'][data-part='bubble']
-    > [data-part='content']:has(> [data-part='typing'])::after {
+  [data-ui-message][data-part-bubble] > [data-part-content]:has(> [data-part-typing])::before,
+  [data-ui-message][data-part-bubble] > [data-part-content]:has(> [data-part-typing])::after {
     content: '';
     position: absolute;
     box-sizing: border-box;
@@ -1104,16 +1084,14 @@
       var(--slotted-easing-standard, ease) infinite alternate;
   }
 
-  [data-ui='message'][data-part='bubble']
-    > [data-part='content']:has(> [data-part='typing'])::before {
+  [data-ui-message][data-part-bubble] > [data-part-content]:has(> [data-part-typing])::before {
     inset-block-end: calc(var(--slotted-space-1, 0.125rem) * -1);
     inset-inline-start: calc(var(--slotted-space-1, 0.125rem) * -1);
     inline-size: var(--slotted-space-4, 0.5rem);
     block-size: var(--slotted-space-4, 0.5rem);
   }
 
-  [data-ui='message'][data-part='bubble']
-    > [data-part='content']:has(> [data-part='typing'])::after {
+  [data-ui-message][data-part-bubble] > [data-part-content]:has(> [data-part-typing])::after {
     inset-block-end: calc(var(--slotted-space-3, 0.375rem) * -1);
     inset-inline-start: calc(var(--slotted-space-3, 0.375rem) * -1);
     inline-size: var(--slotted-space-2, 0.25rem);
@@ -1122,9 +1100,9 @@
   }
 
   /** The line under a writing bubble clears the trail. */
-  [data-ui='message'][data-part='root']
-    > [data-part='body']:has(> [data-part='bubble'] [data-part='typing'])
-    > [data-part='footer'] {
+  [data-ui-message][data-part-root]
+    > [data-part-body]:has(> [data-part-bubble] [data-part-typing])
+    > [data-part-footer] {
     margin-block-start: var(--slotted-space-2, 0.25rem);
   }
 
@@ -1138,7 +1116,7 @@
     }
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='typing'] > span {
+  [data-ui-message][data-part-bubble] [data-part-typing] > span {
     inline-size: var(--_dot);
     block-size: var(--_dot);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -1148,11 +1126,11 @@
       var(--slotted-easing-standard, ease) infinite;
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='typing'] > span:nth-child(2) {
+  [data-ui-message][data-part-bubble] [data-part-typing] > span:nth-child(2) {
     animation-delay: calc(var(--slotted-duration-loop) / 6);
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='typing'] > span:nth-child(3) {
+  [data-ui-message][data-part-bubble] [data-part-typing] > span:nth-child(3) {
     animation-delay: calc(var(--slotted-duration-loop) / 3);
   }
 
@@ -1178,7 +1156,7 @@
    * line. It is the way to send it again, and its arrow turns a little under
    * the pointer toward the way it will go.
    */
-  [data-ui='message'][data-part='bubble'] > [data-part='retry'] {
+  [data-ui-message][data-part-bubble] > [data-part-retry] {
     --_size: max(var(--slotted-target-min, 24px), var(--slotted-control-inner-size-md, 24px));
     --_ground: var(--slotted-tone-danger-solid);
 
@@ -1206,13 +1184,11 @@
     transition: background-color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='root'][data-align='end']
-    [data-part='bubble']
-    > [data-part='retry'] {
+  [data-ui-message][data-part-root][data-align='end'] [data-part-bubble] > [data-part-retry] {
     inset-inline: auto calc(100% + var(--slotted-space-4, 0.5rem));
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='retry'] > [data-ui='icon'] {
+  [data-ui-message][data-part-bubble] > [data-part-retry] > [data-ui-icon] {
     --slotted-icon-size: var(--slotted-control-icon-size-sm, 14px);
 
     transition: rotate var(--slotted-duration-medium) var(--slotted-easing-emphasized, ease);
@@ -1223,8 +1199,8 @@
    * the 0.02 `theme-conformance` asks; the control's ink laid over the fill at
    * fourteen per cent answers visibly in every scheme.
    */
-  [data-ui='message'][data-part='bubble']
-    > [data-part='retry']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-message][data-part-bubble]
+    > [data-part-retry]:hover:not(:disabled):not([data-disabled]) {
     background-color: color-mix(
       in oklab,
       var(--slotted-tone-danger-on-solid) var(--slotted-message-retry-state-layer, 14%),
@@ -1232,48 +1208,46 @@
     );
   }
 
-  [data-ui='message'][data-part='bubble']
-    > [data-part='retry']:hover:not(:disabled):not([data-disabled])
-    > [data-ui='icon'] {
+  [data-ui-message][data-part-bubble]
+    > [data-part-retry]:hover:not(:disabled):not([data-disabled])
+    > [data-ui-icon] {
     rotate: -45deg;
   }
 
-  [data-ui='message'][data-part='bubble']
-    > [data-part='retry']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-message][data-part-bubble]
+    > [data-part-retry]:active:not(:disabled):not([data-disabled]) {
     background-color: var(--slotted-tone-danger-solid-active);
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='retry']:focus-visible {
+  [data-ui-message][data-part-bubble] > [data-part-retry]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='message'][data-part='bubble'] [data-part='caret'],
-    [data-ui='message'][data-part='bubble'] [data-part='stream-chunk'],
-    [data-ui='message'][data-part='bubble'] [data-part='typing'] > span,
-    [data-ui='message'][data-part='bubble']
-      > [data-part='content']:has(> [data-part='typing'])::before,
-    [data-ui='message'][data-part='bubble']
-      > [data-part='content']:has(> [data-part='typing'])::after,
-    [data-ui='message'][data-part='bubble']
-      [data-part='meta']
-      [data-part='receipt'][data-status='sending']
-      > [data-ui='icon'] {
+    [data-ui-message][data-part-bubble] [data-part-caret],
+    [data-ui-message][data-part-bubble] [data-part-stream-chunk],
+    [data-ui-message][data-part-bubble] [data-part-typing] > span,
+    [data-ui-message][data-part-bubble] > [data-part-content]:has(> [data-part-typing])::before,
+    [data-ui-message][data-part-bubble] > [data-part-content]:has(> [data-part-typing])::after,
+    [data-ui-message][data-part-bubble]
+      [data-part-meta]
+      [data-part-receipt][data-status='sending']
+      > [data-ui-icon] {
       animation: none;
     }
 
-    [data-ui='message'][data-part='root'] [data-part='activity-step'][data-current] > :last-child {
+    [data-ui-message][data-part-root] [data-part-activity-step][data-current] > :last-child {
       animation: none;
       background-image: none;
       color: inherit;
     }
 
-    [data-ui='message'][data-part='bubble'] [data-part='typing'] > span:nth-child(2) {
+    [data-ui-message][data-part-bubble] [data-part-typing] > span:nth-child(2) {
       opacity: 0.55;
     }
 
-    [data-ui='message'][data-part='bubble'] [data-part='typing'] > span:nth-child(3) {
+    [data-ui-message][data-part-bubble] [data-part-typing] > span:nth-child(3) {
       opacity: 0.8;
     }
   }
@@ -1288,11 +1262,11 @@
    * it (`c-bubble-4`). The pill draws its own edge and lift rather than a
    * ring in the colour of a card it assumes it is on.
    */
-  [data-ui='message'][data-part='bubble']:has(> [data-part='reactions']) {
+  [data-ui-message][data-part-bubble]:has(> [data-part-reactions]) {
     padding-block-end: calc(var(--_reactions-size) - var(--_pad-block, 8px) / 2);
   }
 
-  [data-ui='message'][data-part='bubble'] > [data-part='reactions'] {
+  [data-ui-message][data-part-bubble] > [data-part-reactions] {
     display: inline-flex;
     align-items: center;
     gap: var(--slotted-space-1, 0.125rem);
@@ -1306,9 +1280,7 @@
     box-shadow: var(--slotted-shadow-xs);
   }
 
-  [data-ui='message'][data-part='root'][data-align='end']
-    [data-part='bubble']
-    > [data-part='reactions'] {
+  [data-ui-message][data-part-root][data-align='end'] [data-part-bubble] > [data-part-reactions] {
     inset-inline: var(--_pad-inline, 12px) auto;
   }
 
@@ -1316,11 +1288,11 @@
    * In a thread there is no surface to straddle: the reactions are a row in
    * the flow under the words, the way Slack and GitHub set them.
    */
-  [data-ui='message'][data-part='bubble'][data-variant='plain']:has(> [data-part='reactions']) {
+  [data-ui-message][data-part-bubble][data-variant='plain']:has(> [data-part-reactions]) {
     padding-block-end: 0;
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='plain'] > [data-part='reactions'] {
+  [data-ui-message][data-part-bubble][data-variant='plain'] > [data-part-reactions] {
     position: static;
     padding: 0;
     border: 0;
@@ -1329,7 +1301,7 @@
     translate: none;
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='reaction'] {
+  [data-ui-message][data-part-bubble] [data-part-reaction] {
     display: inline-flex;
     align-items: center;
     gap: var(--slotted-space-1, 0.125rem);
@@ -1354,13 +1326,13 @@
       color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message'][data-part='bubble'][data-variant='plain'] [data-part='reaction'] {
+  [data-ui-message][data-part-bubble][data-variant='plain'] [data-part-reaction] {
     --_reaction-ground: var(--slotted-surface);
 
     border-color: var(--slotted-border-subtle);
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='reaction-count'] {
+  [data-ui-message][data-part-bubble] [data-part-reaction-count] {
     color: var(--slotted-text-muted);
     font-weight: var(--slotted-font-weight-medium, 500);
     font-variant-numeric: tabular-nums;
@@ -1372,8 +1344,8 @@
    * ink laid over it at six and twelve per cent, so a pressed reaction answers
    * a hover and a press as clearly as a bare one and the two never match.
    */
-  [data-ui='message'][data-part='bubble']
-    [data-part='reaction']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-message][data-part-bubble]
+    [data-part-reaction]:hover:not(:disabled):not([data-disabled]) {
     background-color: color-mix(
       in oklab,
       var(--slotted-text) var(--slotted-message-state-layer-hover, 6%),
@@ -1381,8 +1353,8 @@
     );
   }
 
-  [data-ui='message'][data-part='bubble']
-    [data-part='reaction']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-message][data-part-bubble]
+    [data-part-reaction]:active:not(:disabled):not([data-disabled]) {
     background-color: color-mix(
       in oklab,
       var(--slotted-text) var(--slotted-message-state-layer-active, 12%),
@@ -1395,24 +1367,24 @@
    * edge, and the count in the accent's ink. The pair carries the ratio the
    * ground alone cannot (`docs/token-foundation.md` › Semantic colour).
    */
-  [data-ui='message'][data-part='bubble'] [data-part='reaction'][data-pressed] {
+  [data-ui-message][data-part-bubble] [data-part-reaction][data-pressed] {
     --_reaction-ground: var(--slotted-tone-accent-surface);
 
     border-color: var(--slotted-tone-accent-border);
   }
 
-  [data-ui='message'][data-part='bubble']
-    [data-part='reaction'][data-pressed]
-    > [data-part='reaction-count'] {
+  [data-ui-message][data-part-bubble]
+    [data-part-reaction][data-pressed]
+    > [data-part-reaction-count] {
     color: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='reaction']:is(:disabled, [data-disabled]) {
+  [data-ui-message][data-part-bubble] [data-part-reaction]:is(:disabled, [data-disabled]) {
     color: var(--slotted-disabled-foreground);
     cursor: default;
   }
 
-  [data-ui='message'][data-part='bubble'] [data-part='reaction']:focus-visible {
+  [data-ui-message][data-part-bubble] [data-part-reaction]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -1425,28 +1397,28 @@
    * reader chose.
    */
   @media (forced-colors: active) {
-    [data-ui='message'][data-part='bubble'] > [data-part='content'] {
+    [data-ui-message][data-part-bubble] > [data-part-content] {
       border-color: CanvasText;
     }
 
     /* A background is the system's to repaint; the dot is ink, so it keeps the text's colour. */
-    [data-ui='message'][data-part='bubble'] [data-part='caret'] {
+    [data-ui-message][data-part-bubble] [data-part-caret] {
       forced-color-adjust: none;
       background-color: CanvasText;
     }
 
-    [data-ui='message'][data-part='bubble'][data-variant='plain'] > [data-part='content'] {
+    [data-ui-message][data-part-bubble][data-variant='plain'] > [data-part-content] {
       border-color: transparent;
     }
 
-    [data-ui='message'][data-part='bubble'] [data-part='reaction'][data-pressed] {
+    [data-ui-message][data-part-bubble] [data-part-reaction][data-pressed] {
       border-color: Highlight;
       forced-color-adjust: none;
       background-color: Highlight;
       color: HighlightText;
     }
 
-    [data-ui='message'][data-part='bubble'] [data-part='quote'] {
+    [data-ui-message][data-part-bubble] [data-part-quote] {
       border: var(--slotted-border-width-thin, 1px) solid CanvasText;
     }
   }

@@ -789,12 +789,12 @@ export const CustomEvent: Story = {
     props: { ...PROPS, today: plainDate(2026, 9, 16), noon: { hour: 12, minute: 0, second: 0 } },
     template: `<div slEventCalendar ${STUDIO} defaultView="day" [scrollTime]="noon">
       <ng-template slEventCalendarEvent let-occurrence let-time="time">
-        <span data-part="event-title">{{ occurrence.event.title }}</span>
+        <span data-part="event-title" data-part-event-title="">{{ occurrence.event.title }}</span>
         @if (time) {
-          <span data-part="event-time">{{ time }}</span>
+          <span data-part="event-time" data-part-event-time="">{{ time }}</span>
         }
         @if (occurrence.event.owner) {
-          <span data-part="event-location">{{ occurrence.event.owner }}</span>
+          <span data-part="event-location" data-part-event-location="">{{ occurrence.event.owner }}</span>
         }
       </ng-template>
     </div>`,

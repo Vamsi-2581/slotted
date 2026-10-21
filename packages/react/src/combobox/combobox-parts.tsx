@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -293,8 +294,10 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
 
   const rootProps: ComboboxInputRootProps = {
     'data-part': 'root',
+    ...selectorKeyProps('part', 'root'),
     'data-size': combobox.size,
     'data-ui': 'combobox',
+    ...selectorKeyProps('ui', 'combobox'),
     'data-variant': combobox.variant,
     ...(combobox.fullWidth ? { 'data-full-width': '' } : {}),
     ...(combobox.open ? { 'data-open': '' } : {}),
@@ -308,7 +311,7 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
   const inner = (
     <>
       <input
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'input')}
         aria-activedescendant={
           combobox.open && combobox.highlighted !== null
             ? combobox.optionId(combobox.highlighted)
@@ -320,7 +323,7 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
         aria-expanded={combobox.open}
         aria-invalid={combobox.invalid ? true : undefined}
         aria-readonly={combobox.readOnly ? true : undefined}
-        data-part="input"
+
         disabled={combobox.disabled}
         id={nativeProps.id ?? field?.ids.control ?? combobox.inputId}
         onBlur={compose(nativeProps.onBlur, onBlur)}
@@ -336,7 +339,13 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
         value={combobox.completion ?? combobox.inputValue}
       />
       {showClear ? (
-        <button aria-label={combobox.t('clear')} data-part="clear" onClick={clear} type="button">
+        <button
+          aria-label={combobox.t('clear')}
+          data-part="clear"
+          data-part-clear=""
+          onClick={clear}
+          type="button"
+        >
           <Icon>
             <Glyph name="x" />
           </Icon>
@@ -345,6 +354,7 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
       <button
         aria-label={combobox.t('trigger')}
         data-part="trigger"
+        data-part-trigger=""
         disabled={combobox.disabled}
         onClick={toggle}
         tabIndex={-1}
@@ -352,9 +362,15 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
       >
         {/* `select`'s decision and `select`'s reasons (SL6/CB5). */}
         {combobox.loading ? (
-          <span aria-hidden="true" data-part="busy" data-ui="spinner" />
+          <span
+            aria-hidden="true"
+            data-part="busy"
+            data-part-busy=""
+            data-ui="spinner"
+            data-ui-spinner=""
+          />
         ) : (
-          <span data-part="arrow">
+          <span data-part="arrow" data-part-arrow="">
             <Icon>
               <Glyph name="chevron-down" />
             </Icon>
@@ -698,14 +714,14 @@ export function ComboboxContent({
 
   if (!mounted) return null;
 
-  const rootProps: ComboboxPositionerProps = {
+  const rootProps: ComboboxPositionerProps = keyedProps({
     'data-align': align,
     ...(combobox.open ? {} : { inert: true }),
     'data-part': 'positioner',
     'data-size': combobox.size,
     'data-ui': 'combobox',
     'data-width': combobox.width,
-  };
+  });
 
   const message = (() => {
     if (statusMessage !== undefined) return statusMessage;
@@ -723,11 +739,11 @@ export function ComboboxContent({
       }}
     >
       <div
-        {...nativeProps}
+        {...withSelectorKey(nativeProps, 'part', 'content')}
         aria-busy={combobox.loading ? true : undefined}
         aria-label={nativeProps['aria-label'] ?? undefined}
         data-loading={combobox.loading ? '' : undefined}
-        data-part="content"
+
         id={combobox.contentId}
         ref={setSurfaceNode}
         role="listbox"
@@ -745,6 +761,7 @@ export function ComboboxContent({
           <div
             data-create=""
             data-part="item"
+            data-part-item=""
             data-value={combobox.query}
             id={combobox.optionId(combobox.query)}
             onClick={(event) => {
@@ -764,11 +781,15 @@ export function ComboboxContent({
             role="option"
             {...(combobox.highlighted === combobox.query ? { 'data-current': '' } : {})}
           >
-            <span data-part="label">{combobox.t('create', { query: combobox.query })}</span>
+            <span data-part="label" data-part-label="">
+              {combobox.t('create', { query: combobox.query })}
+            </span>
           </div>
         ) : null}
         {!combobox.loading && count === 0 && !(combobox.canCreate && combobox.query !== '') ? (
-          <div data-part="empty">{empty ?? combobox.t('empty')}</div>
+          <div data-part="empty" data-part-empty="">
+            {empty ?? combobox.t('empty')}
+          </div>
         ) : null}
         {combobox.loading ? (
           /*
@@ -777,10 +798,17 @@ export function ComboboxContent({
             assistive technology — the status row below is the live region and
             it already says what is happening.
           */
-          <div aria-hidden="true" data-part="placeholder">
+          <div aria-hidden="true" data-part="placeholder" data-part-placeholder="">
             {[0, 1, 2].map((row) => (
               <div key={row}>
-                <span data-part="root" data-shape="text" data-ui="skeleton" data-loading="" />
+                <span
+                  data-part="root"
+                  data-part-root=""
+                  data-shape="text"
+                  data-ui="skeleton"
+                  data-ui-skeleton=""
+                  data-loading=""
+                />
               </div>
             ))}
           </div>
@@ -788,6 +816,7 @@ export function ComboboxContent({
         <div
           aria-live="polite"
           data-part="status"
+          data-part-status=""
           {...(combobox.loading ? { 'data-loading': '' } : {})}
           role="status"
         >

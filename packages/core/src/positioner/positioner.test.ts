@@ -156,7 +156,7 @@ describe('submenuOffsets', () => {
 
   function surfaces() {
     document.body.innerHTML =
-      '<div id="parent"><button id="item"></button></div><div id="surface"><button data-part="item" id="first"></button></div>';
+      '<div id="parent"><button id="item"></button></div><div id="surface"><button data-part="item" data-part-item="" id="first"></button></div>';
     const parent = document.getElementById('parent') as HTMLElement;
     const item = document.getElementById('item') as HTMLElement;
     const surface = document.getElementById('surface') as HTMLElement;

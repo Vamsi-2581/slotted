@@ -11,7 +11,7 @@
    * chooses its own width: it is a thing read beside a value, and the value's
    * container is what has the room. The height is the family's, by size step.
    */
-  [data-ui='sparkline'] {
+  [data-ui-sparkline] {
     /* The height of the box, by size. Three steps of the space scale rather
        than of control geometry: a sparkline is content, not a control, and a
        dense table asks for `size="sm"` rather than for a shorter `md`. */
@@ -69,49 +69,49 @@
     vertical-align: middle;
   }
 
-  [data-ui='sparkline'][data-size='sm'] {
+  [data-ui-sparkline][data-size='sm'] {
     --_size: var(--slotted-sparkline-block-size-sm, var(--slotted-space-7, 1.25rem));
     --_stroke: var(--slotted-sparkline-line-width-sm, var(--slotted-border-width-medium, 1.5px));
     --_marker: var(--slotted-sparkline-marker-size-sm, var(--slotted-space-2, 0.25rem));
     --_ring: var(--slotted-sparkline-ring-width-sm, var(--slotted-border-width-medium, 1.5px));
   }
 
-  [data-ui='sparkline'][data-size='lg'] {
+  [data-ui-sparkline][data-size='lg'] {
     --_size: var(--slotted-sparkline-block-size-lg, var(--slotted-space-11, 3rem));
     --_marker: var(--slotted-sparkline-marker-size-lg, var(--slotted-space-4, 0.5rem));
   }
 
   /* ── Series: which one of eight this is ──────────────────────────────── */
 
-  [data-ui='sparkline'][data-series='1'] {
+  [data-ui-sparkline][data-series='1'] {
     --_color: var(--slotted-data-1);
   }
 
-  [data-ui='sparkline'][data-series='2'] {
+  [data-ui-sparkline][data-series='2'] {
     --_color: var(--slotted-data-2);
   }
 
-  [data-ui='sparkline'][data-series='3'] {
+  [data-ui-sparkline][data-series='3'] {
     --_color: var(--slotted-data-3);
   }
 
-  [data-ui='sparkline'][data-series='4'] {
+  [data-ui-sparkline][data-series='4'] {
     --_color: var(--slotted-data-4);
   }
 
-  [data-ui='sparkline'][data-series='5'] {
+  [data-ui-sparkline][data-series='5'] {
     --_color: var(--slotted-data-5);
   }
 
-  [data-ui='sparkline'][data-series='6'] {
+  [data-ui-sparkline][data-series='6'] {
     --_color: var(--slotted-data-6);
   }
 
-  [data-ui='sparkline'][data-series='7'] {
+  [data-ui-sparkline][data-series='7'] {
     --_color: var(--slotted-data-7);
   }
 
-  [data-ui='sparkline'][data-series='8'] {
+  [data-ui-sparkline][data-series='8'] {
     --_color: var(--slotted-data-8);
   }
 
@@ -123,33 +123,33 @@
    * shape rather than found. `neutral` is the comparison series and the aside,
    * in the step the page uses for one.
    */
-  [data-ui='sparkline'][data-tone='neutral'] {
+  [data-ui-sparkline][data-tone='neutral'] {
     --_color: var(--slotted-text-muted, GrayText);
   }
 
-  [data-ui='sparkline'][data-tone='accent'] {
+  [data-ui-sparkline][data-tone='accent'] {
     --_color: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='sparkline'][data-tone='secondary'] {
+  [data-ui-sparkline][data-tone='secondary'] {
     --_color: var(--slotted-tone-secondary-text);
   }
 
-  [data-ui='sparkline'][data-tone='success'] {
+  [data-ui-sparkline][data-tone='success'] {
     --_color: var(--slotted-tone-success-text);
   }
 
-  [data-ui='sparkline'][data-tone='warning'] {
+  [data-ui-sparkline][data-tone='warning'] {
     --_color: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='sparkline'][data-tone='danger'] {
+  [data-ui-sparkline][data-tone='danger'] {
     --_color: var(--slotted-tone-danger-text);
   }
 
   /* ── The drawing ───────────────────────────────────────────────────────── */
 
-  [data-ui='sparkline'] [data-part='plot'] {
+  [data-ui-sparkline] [data-part-plot] {
     block-size: 100%;
     display: block;
     inline-size: 100%;
@@ -165,7 +165,7 @@
    * of forty sparklines does not mint forty gradients. `mask-image` applies to
    * an SVG child from CSS in every engine that ships `@layer`.
    */
-  [data-ui='sparkline'] [data-part='area'] {
+  [data-ui-sparkline] [data-part-area] {
     fill: var(--_color);
     fill-opacity: var(--_area-opacity);
     mask-image: linear-gradient(to bottom, black, transparent);
@@ -179,7 +179,7 @@
    * stretched to the box; once measured, the grid is the box and the effect
    * changes nothing.
    */
-  [data-ui='sparkline'] [data-part='line'] {
+  [data-ui-sparkline] [data-part-line] {
     fill: none;
     stroke: var(--_color);
     stroke-linecap: round;
@@ -189,7 +189,7 @@
     vector-effect: non-scaling-stroke;
   }
 
-  [data-ui='sparkline'] [data-part='bar'] {
+  [data-ui-sparkline] [data-part-bar] {
     fill: var(--_bar-dim);
     stroke: none;
     transition:
@@ -198,7 +198,7 @@
   }
 
   /* The current period is the one the value beside the chart is about. */
-  [data-ui='sparkline'] [data-part='bar'][data-current] {
+  [data-ui-sparkline] [data-part-bar][data-current] {
     fill: var(--_color);
   }
 
@@ -207,7 +207,7 @@
    * that is not data, and the dash is what says so before the colour does.
    * The dash lengths are geometry of the stroke, not a scale step.
    */
-  [data-ui='sparkline'] [data-part='reference'] {
+  [data-ui-sparkline] [data-part-reference] {
     fill: none;
     stroke: var(--_reference-color);
     stroke-dasharray: 2 3;
@@ -226,20 +226,20 @@
    * in the colour of the ground so the disc stays legible where it lands on
    * the line.
    */
-  [data-ui='sparkline'] [data-part='ring'],
-  [data-ui='sparkline'] [data-part='marker'] {
+  [data-ui-sparkline] [data-part-ring],
+  [data-ui-sparkline] [data-part-marker] {
     fill: none;
     stroke-linecap: round;
     transition: d var(--slotted-duration-medium) var(--slotted-easing-standard);
     vector-effect: non-scaling-stroke;
   }
 
-  [data-ui='sparkline'] [data-part='ring'] {
+  [data-ui-sparkline] [data-part-ring] {
     stroke: var(--_ring-color);
     stroke-width: calc(var(--_marker) + 2 * var(--_ring));
   }
 
-  [data-ui='sparkline'] [data-part='marker'] {
+  [data-ui-sparkline] [data-part-marker] {
     stroke: var(--_color);
     stroke-width: var(--_marker);
   }
@@ -250,7 +250,7 @@
    * inline end. The grid is mirrored rather than recomputed, so both
    * bindings hand the engine the same box and the same order.
    */
-  [data-ui='sparkline']:dir(rtl) [data-part='plot'] {
+  [data-ui-sparkline]:dir(rtl) [data-part-plot] {
     transform: scaleX(-1);
   }
 
@@ -263,19 +263,19 @@
    * one `CanvasText`, and the wash goes.
    */
   @media (forced-colors: active) {
-    [data-ui='sparkline'] [data-part='area'] {
+    [data-ui-sparkline] [data-part-area] {
       display: none;
     }
 
-    [data-ui='sparkline'] [data-part='bar'] {
+    [data-ui-sparkline] [data-part-bar] {
       fill: GrayText;
     }
 
-    [data-ui='sparkline'] [data-part='bar'][data-current] {
+    [data-ui-sparkline] [data-part-bar][data-current] {
       fill: CanvasText;
     }
 
-    [data-ui='sparkline'] [data-part='ring'] {
+    [data-ui-sparkline] [data-part-ring] {
       stroke: Canvas;
     }
   }

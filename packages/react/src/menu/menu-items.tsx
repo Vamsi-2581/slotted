@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { keysMessages } from '@slotted/core/i18n';
 import type { KbdPlatform, KeysTranslator } from '@slotted/core/keys';
 import { canonicalKey, parseShortcut, resolveShortcut } from '@slotted/core/keys';
@@ -88,36 +89,20 @@ function legends(keys: string, platform: KbdPlatform, t: KeysTranslator): string
 
 /** The mark in the item's first column: a glyph, or the consumer's own node. */
 export function MenuItemIcon({ children, ...nativeProps }: MenuItemIconProps) {
-  return (
-    <span {...nativeProps} data-part="icon">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'icon')}>{children}</span>;
 }
 
 export function MenuItemLabel({ children, ...nativeProps }: MenuItemLabelProps) {
-  return (
-    <span {...nativeProps} data-part="label">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'label')}>{children}</span>;
 }
 
 export function MenuItemDescription({ children, ...nativeProps }: MenuItemDescriptionProps) {
-  return (
-    <span {...nativeProps} data-part="description">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'description')}>{children}</span>;
 }
 
 /** What the item holds or counts, in its own column before the shortcut. */
 export function MenuItemMeta({ children, ...nativeProps }: MenuItemMetaProps) {
-  return (
-    <span {...nativeProps} data-part="meta">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'meta')}>{children}</span>;
 }
 
 /**
@@ -138,8 +123,7 @@ export function MenuItemShortcut({ children, keys, ...nativeProps }: MenuItemSho
       /* Drawn for the eye and hidden from the reader who cannot see it: the
          binding reaches them through `aria-keyshortcuts` on the item, and an
          item named "Duplicate ⌘D" is a name with a legend stuck to it. */
-      {...(keys === undefined ? {} : { 'aria-hidden': true })}
-      data-part="shortcut"
+      {...withSelectorKey(keys === undefined ? {} : { 'aria-hidden': true }, 'part', 'shortcut')}
     >
       {keys === undefined ? children : legends(keys, platform, t)}
     </span>
@@ -267,7 +251,7 @@ function Item({
 
   /* `type` is the family's own button's: the element `render` returns is the
      consumer's, and on the anchor a link item renders it would be a MIME type. */
-  const rootProps: MenuItemRootProps = {
+  const rootProps: MenuItemRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -295,7 +279,7 @@ function Item({
     onPointerMove: compose(nativeProps.onPointerMove, onPointerMove),
     role,
     tabIndex: -1,
-  };
+  });
 
   /* The consumer's ref is the element's own; `render` receives the callback
      shape every part hands out, so a consumer's component can take it. */
@@ -357,7 +341,7 @@ export function MenuCheckboxItem({
  */
 function MenuIndicator({ glyph }: { glyph: GlyphName }) {
   return (
-    <span data-part="indicator">
+    <span data-part="indicator" data-part-indicator="">
       <Icon>
         <Glyph name={glyph} />
       </Icon>
@@ -396,7 +380,7 @@ export function MenuRadioGroup({
   );
 
   return (
-    <div {...nativeProps} data-part="group" role="group">
+    <div {...withSelectorKey(nativeProps, 'part', 'group')} role="group">
       <MenuRadioContext.Provider value={{ select, value: held }}>
         {children}
       </MenuRadioContext.Provider>
@@ -430,8 +414,8 @@ export function MenuGroup({ children, label, ...nativeProps }: MenuGroupProps) {
   return (
     <div
       {...nativeProps}
-      {...(label === undefined ? {} : { 'aria-labelledby': id })}
-      data-part="group"
+      {...withSelectorKey(label === undefined ? {} : { 'aria-labelledby': id }, 'part', 'group')}
+
       role="group"
     >
       {label === undefined ? null : <MenuGroupLabel id={id}>{label}</MenuGroupLabel>}
@@ -441,11 +425,7 @@ export function MenuGroup({ children, label, ...nativeProps }: MenuGroupProps) {
 }
 
 export function MenuGroupLabel({ children, ...nativeProps }: MenuGroupLabelProps) {
-  return (
-    <div {...nativeProps} data-part="group-label">
-      {children}
-    </div>
-  );
+  return <div {...withSelectorKey(nativeProps, 'part', 'group-label')}>{children}</div>;
 }
 
 /**
@@ -468,7 +448,7 @@ export function MenuHeader({ children, id, ...nativeProps }: MenuHeaderProps) {
   }, [own, register]);
 
   return (
-    <div {...nativeProps} data-part="header" id={own}>
+    <div {...withSelectorKey(nativeProps, 'part', 'header')} id={own}>
       {children}
     </div>
   );
@@ -477,15 +457,15 @@ export function MenuHeader({ children, id, ...nativeProps }: MenuHeaderProps) {
 /** Not focusable and not interactive, which is what the pattern asks of it. */
 export function MenuSeparator(nativeProps: MenuSeparatorProps) {
   return (
-    <hr {...nativeProps} aria-orientation="horizontal" data-part="separator" role="separator" />
+    <hr
+      {...withSelectorKey(nativeProps, 'part', 'separator')}
+      aria-orientation="horizontal"
+      role="separator"
+    />
   );
 }
 
 /** What a menu whose items were all filtered away says instead of nothing. */
 export function MenuEmpty({ children, ...nativeProps }: MenuEmptyProps) {
-  return (
-    <div {...nativeProps} data-part="empty">
-      {children}
-    </div>
-  );
+  return <div {...withSelectorKey(nativeProps, 'part', 'empty')}>{children}</div>;
 }

@@ -94,7 +94,7 @@ const INITIALS_MAX: Record<AvatarSize, number> = { xs: 1, sm: 2, md: 2, lg: 2, x
       <img slAvatarImage [src]="source" />
     }
     <ng-content select="img"></ng-content
-    ><span data-part="fallback">
+    ><span data-part="fallback" data-part-fallback="">
       @if (custom() === undefined) {
         <!-- No picture and no name to take initials from: the person glyph. -->
         @if (initials() === '') {
@@ -110,7 +110,9 @@ const INITIALS_MAX: Record<AvatarSize, number> = { xs: 1, sm: 2, md: 2, lg: 2, x
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'avatar',
+    'data-ui-avatar': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-shape]': 'resolvedShape()',
     '[attr.data-tone]': 'resolvedTone()',

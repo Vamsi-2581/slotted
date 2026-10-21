@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useEffect } from 'react';
 
 import { HeadingLevel } from '../typography';
@@ -20,13 +21,13 @@ function part(name: string, displayName: string) {
     style,
     ...nativeProps
   }: SectionPartComponentProps) {
-    const rootProps: SectionPartProps = {
+    const rootProps: SectionPartProps = keyedProps({
       ...nativeProps,
       children,
       className,
       'data-part': name,
       style,
-    };
+    });
     if (render !== undefined) return render(rootProps);
     return <div {...rootProps} ref={ref} />;
   }
@@ -53,13 +54,13 @@ export function SectionHeader({
     if (typeof ref === 'function') ref(own);
     else if (ref) ref.current = own;
   };
-  const rootProps: SectionPartProps = {
+  const rootProps: SectionPartProps = keyedProps({
     ...nativeProps,
     children,
     className,
     'data-part': 'header',
     style,
-  };
+  });
   if (render !== undefined) return render({ ...rootProps, ref: setRef });
   return <div {...rootProps} ref={setRef} />;
 }
@@ -77,13 +78,13 @@ export function SectionEyebrow({
   style,
   ...nativeProps
 }: SectionEyebrowProps) {
-  const rootProps: SectionPartProps = {
+  const rootProps: SectionPartProps = keyedProps({
     ...nativeProps,
     children,
     className,
     'data-part': 'eyebrow',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }
@@ -107,14 +108,14 @@ export function SectionHeading({
     return () => registerHeading(false);
   }, [registerHeading]);
 
-  const rootProps: SectionHeadingRootProps = {
+  const rootProps: SectionHeadingRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
     'data-part': 'heading',
     id: headingId,
     style,
-  };
+  });
   if (render !== undefined) {
     return render({ ...rootProps, role: 'heading', 'aria-level': level });
   }
@@ -131,13 +132,13 @@ export function SectionDescription({
   style,
   ...nativeProps
 }: SectionDescriptionProps) {
-  const rootProps: SectionPartProps = {
+  const rootProps: SectionPartProps = keyedProps({
     ...nativeProps,
     children,
     className,
     'data-part': 'description',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <p {...rootProps} ref={ref} />;
 }
@@ -151,13 +152,13 @@ export function SectionBody({
   style,
   ...nativeProps
 }: SectionPartComponentProps) {
-  const rootProps: SectionPartProps = {
+  const rootProps: SectionPartProps = keyedProps({
     ...nativeProps,
     children: <HeadingLevel>{children}</HeadingLevel>,
     className,
     'data-part': 'body',
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }

@@ -101,7 +101,7 @@ let sequence = 0;
   standalone: true,
   exportAs: 'slDatePicker',
   imports: [SlCalendar, SlDateField, SlDateFieldEnd, SlGlyph, SlIcon],
-  template: `<div data-part="control" (keydown)="onControlKeyDown($event)">
+  template: `<div data-part="control" data-part-control="" (keydown)="onControlKeyDown($event)">
       <div
         slDateField
         #field="slDateField"
@@ -130,6 +130,7 @@ let sequence = 0;
           <button
             #trigger
             data-part="trigger"
+            data-part-trigger=""
             type="button"
             aria-haspopup="dialog"
             [attr.aria-label]="triggerLabel()"
@@ -148,12 +149,15 @@ let sequence = 0;
       <div
         #layer
         data-ui="date-picker"
+        data-ui-date-picker=""
         data-part="positioner"
+        data-part-positioner=""
         data-open
         [attr.data-presentation]="sheet() ? 'sheet' : 'popover'"
       >
         <div
           data-part="content"
+          data-part-content=""
           role="dialog"
           [attr.id]="contentId"
           [attr.aria-label]="triggerLabel()"
@@ -192,7 +196,9 @@ let sequence = 0;
   ],
   host: {
     'data-ui': 'date-picker',
+    'data-ui-date-picker': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-calendar]': 'resolvedCalendar()',

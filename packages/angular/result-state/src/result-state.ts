@@ -57,7 +57,7 @@ export type {
      it: the stylesheet withdraws an empty box, so a region with no picture is
      a title, a description and an action with nothing standing above them
      (RS1). A stack of cards is the one drawing that stands without a glyph. */
-  template: `<div aria-hidden="true" data-part="media">
+  template: `<div aria-hidden="true" data-part="media" data-part-media="">
       <ng-content select="[slResultStateMedia]" />
     </div>
     <ng-content />`,
@@ -66,7 +66,9 @@ export type {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'result-state',
+    'data-ui-result-state': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-status]': 'resolvedStatus()',
     '[attr.data-reach]': 'resolvedReach()',
     '[attr.data-align]': 'resolvedAlign()',

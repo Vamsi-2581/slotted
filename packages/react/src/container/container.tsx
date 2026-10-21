@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/container/container.css';
 
 import { useContainerDefaults } from './container-defaults';
@@ -18,14 +19,14 @@ import type { ContainerProps, ContainerRootProps } from './container.types';
 export function Container({ align, inset, render, size, ...nativeProps }: ContainerProps) {
   const defaults = useContainerDefaults();
 
-  const rootProps: ContainerRootProps = {
+  const rootProps: ContainerRootProps = keyedProps({
     ...nativeProps,
     'data-align': align ?? defaults.align,
     'data-inset': String(inset ?? defaults.inset),
     'data-part': 'root',
     'data-size': size ?? defaults.size,
     'data-ui': 'container',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

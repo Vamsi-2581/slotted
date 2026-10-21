@@ -9,81 +9,124 @@
 -->
 
 <section data-scene="default">
-  <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md" data-layout="list">
-    <span data-part="label">Supporting documents</span>
-    <p data-part="description">
+  <div
+    data-part="root"
+    data-part-root=""
+    data-ui="upload"
+    data-ui-upload=""
+    data-variant="dropzone"
+    data-size="md"
+    data-layout="list"
+  >
+    <span data-part="label" data-part-label="">Supporting documents</span>
+    <p data-part="description" data-part-description="">
       PDF, JPEG or PNG, up to 10 MB each. Ten files at most; the rest are refused with a reason.
     </p>
-    <div data-part="dropzone" data-browsable>
-      <span data-ui="icon" data-part="root" aria-hidden="true"
-        ><svg data-part="glyph" data-glyph="upload"></svg
+    <div data-part="dropzone" data-part-dropzone="" data-browsable>
+      <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+        ><svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg
       ></span>
       Drop files here
-      <label data-part="trigger">
-        <input data-part="input" type="file" multiple />
+      <label data-part="trigger" data-part-trigger="">
+        <input data-part="input" data-part-input="" type="file" multiple />
         Browse files
       </label>
     </div>
-    <div data-part="summary">
+    <div data-part="summary" data-part-summary="">
       <span>2 of 3 uploaded · about 12 sec left</span>
-      <button data-part="clear" type="button">Remove all</button>
+      <button data-part="clear" data-part-clear="" type="button">Remove all</button>
     </div>
-    <ul data-part="list" style="--slotted-upload-visible-rows: 6">
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+    <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 6">
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">claim-form-2026-0914</span
-            ><span data-part="extension">.pdf</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">claim-form-2026-0914</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
-          <div data-part="detail">
-            <span data-part="meta">248 kB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">248 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove claim-form-2026-0914.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove claim-form-2026-0914.pdf"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
             <span hidden>Remove</span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="uploading">
-        <span data-part="preview" data-kind="image" data-extension="JPG">
+      <li data-part="item" data-part-item="" data-status="uploading">
+        <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG">
           <img
             alt=""
             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%230f766e'/%3E%3Cstop offset='1' stop-color='%2384cc16'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' fill='url(%23a)'/%3E%3C/svg%3E"
           />
         </span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">damage-front-quarter</span
-            ><span data-part="extension">.jpg</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">damage-front-quarter</span
+            ><span data-part="extension" data-part-extension="">.jpg</span>
           </button>
 
-          <div data-part="detail">
-            <span data-part="meta">4.1 MB</span>
-            <span data-part="status">Uploading · 62%</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">4.1 MB</span>
+            <span data-part="status" data-part-status="">Uploading · 62%</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="pause" type="button" aria-label="Pause damage-front-quarter.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="pause"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="pause"
+            data-part-pause=""
+            type="button"
+            aria-label="Pause damage-front-quarter.jpg"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="pause"></svg
             ></span>
           </button>
-          <button data-part="cancel" type="button" aria-label="Cancel damage-front-quarter.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button
+            data-part="cancel"
+            data-part-cancel=""
+            type="button"
+            aria-label="Cancel damage-front-quarter.jpg"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
-        <div data-part="progress">
+        <div data-part="progress" data-part-progress="">
           <div style="background-color: var(--slotted-surface-sunken); block-size: 3px">
             <div
               style="
@@ -95,38 +138,55 @@
           </div>
         </div>
       </li>
-      <li data-part="item" data-status="ready">
-        <span data-part="preview" data-kind="spreadsheet" data-extension="XLSX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+      <li data-part="item" data-part-item="" data-status="ready">
+        <span data-part="preview" data-part-preview="" data-kind="spreadsheet" data-extension="XLSX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-spreadsheet"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">repair-estimate-northgate-motors</span
-            ><span data-part="extension">.xlsx</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">repair-estimate-northgate-motors</span
+            ><span data-part="extension" data-part-extension="">.xlsx</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">96 kB</span>
-            <span data-part="status">Waiting to upload</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">96 kB</span>
+            <span data-part="status" data-part-status="">Waiting to upload</span>
           </div>
         </div>
-        <span data-part="actions">
+        <span data-part="actions" data-part-actions="">
           <button
             data-part="start"
+            data-part-start=""
             type="button"
             aria-label="Upload repair-estimate-northgate-motors.xlsx"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="play"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="play"></svg
             ></span>
           </button>
           <button
             data-part="remove"
+            data-part-remove=""
             type="button"
             aria-label="Remove repair-estimate-northgate-motors.xlsx"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
@@ -140,124 +200,217 @@
   three failures can be read against each other rather than one at a time.
 -->
 <section data-scene="statuses">
-  <div data-part="root" data-ui="upload" data-variant="button" data-size="md" data-layout="list">
-    <ul data-part="list" style="--slotted-upload-visible-rows: 14">
-      <li data-part="item" data-status="rejected">
-        <span data-part="preview" data-kind="archive" data-extension="ZIP"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-archive"></svg></span
+  <div
+    data-part="root"
+    data-part-root=""
+    data-ui="upload"
+    data-ui-upload=""
+    data-variant="button"
+    data-size="md"
+    data-layout="list"
+  >
+    <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 14">
+      <li data-part="item" data-part-item="" data-status="rejected">
+        <span data-part="preview" data-part-preview="" data-kind="archive" data-extension="ZIP"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-archive"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">policy-archive-2019-2024</span
-            ><span data-part="extension">.zip</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">policy-archive-2019-2024</span
+            ><span data-part="extension" data-part-extension="">.zip</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">41.8 MB</span>
-            <span data-part="status">Refused</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">41.8 MB</span>
+            <span data-part="status" data-part-status="">Refused</span>
           </div>
-          <p data-part="message">Archives are not accepted. Attach the documents themselves.</p>
+          <p data-part="message" data-part-message="">
+            Archives are not accepted. Attach the documents themselves.
+          </p>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove policy-archive-2019-2024.zip">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove policy-archive-2019-2024.zip"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="ready">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+      <li data-part="item" data-part-item="" data-status="ready">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">witness-statement-a-okafor</span
-            ><span data-part="extension">.pdf</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">witness-statement-a-okafor</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
-          <div data-part="detail">
-            <span data-part="meta">312 kB</span>
-            <span data-part="status">Waiting to upload</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">312 kB</span>
+            <span data-part="status" data-part-status="">Waiting to upload</span>
           </div>
         </div>
-        <span data-part="actions">
+        <span data-part="actions" data-part-actions="">
           <button
             data-part="start"
+            data-part-start=""
             type="button"
             aria-label="Upload witness-statement-a-okafor.pdf"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="play"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="play"></svg
             ></span>
           </button>
           <button
             data-part="remove"
+            data-part-remove=""
             type="button"
             aria-label="Remove witness-statement-a-okafor.pdf"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="queued">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+      <li data-part="item" data-part-item="" data-status="queued">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">garage-invoice-11482</span
-            ><span data-part="extension">.pdf</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">garage-invoice-11482</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
-          <div data-part="detail">
-            <span data-part="meta">188 kB</span>
-            <span data-part="status">Queued</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">188 kB</span>
+            <span data-part="status" data-part-status="">Queued</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="cancel" type="button" aria-label="Cancel garage-invoice-11482.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="cancel"
+            data-part-cancel=""
+            type="button"
+            aria-label="Cancel garage-invoice-11482.pdf"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
-          <button data-part="remove" type="button" aria-label="Remove garage-invoice-11482.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove garage-invoice-11482.pdf"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="uploading">
-        <span data-part="preview" data-kind="image" data-extension="JPG"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-image"></svg></span
+      <li data-part="item" data-part-item="" data-status="uploading">
+        <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-image"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">damage-rear-bumper</span><span data-part="extension">.jpg</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">damage-rear-bumper</span
+            ><span data-part="extension" data-part-extension="">.jpg</span>
           </button>
 
-          <div data-part="detail">
-            <span data-part="meta">3.2 MB</span>
-            <span data-part="status">Uploading · 34%</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">3.2 MB</span>
+            <span data-part="status" data-part-status="">Uploading · 34%</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="pause" type="button" aria-label="Pause damage-rear-bumper.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="pause"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="pause"
+            data-part-pause=""
+            type="button"
+            aria-label="Pause damage-rear-bumper.jpg"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="pause"></svg
             ></span>
           </button>
-          <button data-part="cancel" type="button" aria-label="Cancel damage-rear-bumper.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button
+            data-part="cancel"
+            data-part-cancel=""
+            type="button"
+            aria-label="Cancel damage-rear-bumper.jpg"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
-        <div data-part="progress">
+        <div data-part="progress" data-part-progress="">
           <div style="background-color: var(--slotted-surface-sunken); block-size: 3px">
             <div
               style="
@@ -269,35 +422,60 @@
           </div>
         </div>
       </li>
-      <li data-part="item" data-status="paused">
-        <span data-part="preview" data-kind="video" data-extension="MP4"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-video"></svg></span
+      <li data-part="item" data-part-item="" data-status="paused">
+        <span data-part="preview" data-part-preview="" data-kind="video" data-extension="MP4"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-video"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">dashcam-clip-0914-0731</span
-            ><span data-part="extension">.mp4</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">dashcam-clip-0914-0731</span
+            ><span data-part="extension" data-part-extension="">.mp4</span>
           </button>
 
-          <div data-part="detail">
-            <span data-part="meta">88.4 MB</span>
-            <span data-part="status">Paused · 71%</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">88.4 MB</span>
+            <span data-part="status" data-part-status="">Paused · 71%</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="start" type="button" aria-label="Resume dashcam-clip-0914-0731.mp4">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="play"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="start"
+            data-part-start=""
+            type="button"
+            aria-label="Resume dashcam-clip-0914-0731.mp4"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="play"></svg
             ></span>
           </button>
-          <button data-part="cancel" type="button" aria-label="Cancel dashcam-clip-0914-0731.mp4">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button
+            data-part="cancel"
+            data-part-cancel=""
+            type="button"
+            aria-label="Cancel dashcam-clip-0914-0731.mp4"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
-        <div data-part="progress">
+        <div data-part="progress" data-part-progress="">
           <div style="background-color: var(--slotted-surface-sunken); block-size: 3px">
             <div
               style="
@@ -309,29 +487,47 @@
           </div>
         </div>
       </li>
-      <li data-part="item" data-status="stalled">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+      <li data-part="item" data-part-item="" data-status="stalled">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">police-report-scan</span><span data-part="extension">.pdf</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">police-report-scan</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
 
-          <div data-part="detail">
-            <span data-part="meta">7.9 MB</span>
-            <span data-part="status">Stalled at 43% · no data for 12 seconds</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">7.9 MB</span>
+            <span data-part="status" data-part-status=""
+              >Stalled at 43% · no data for 12 seconds</span
+            >
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="cancel" type="button" aria-label="Cancel police-report-scan.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="cancel"
+            data-part-cancel=""
+            type="button"
+            aria-label="Cancel police-report-scan.pdf"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
-        <div data-part="progress">
+        <div data-part="progress" data-part-progress="">
           <div style="background-color: var(--slotted-surface-sunken); block-size: 3px">
             <div
               style="
@@ -343,81 +539,149 @@
           </div>
         </div>
       </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">claim-form-2026-0914</span
-            ><span data-part="extension">.pdf</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">claim-form-2026-0914</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
-          <div data-part="detail">
-            <span data-part="meta">248 kB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">248 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove claim-form-2026-0914.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="error">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
-        ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">medical-certificate</span><span data-part="extension">.pdf</span>
-          </button>
-          <div data-part="detail">
-            <span data-part="meta">1.4 MB</span>
-            <span data-part="status">Failed</span>
-          </div>
-          <p data-part="message">The server refused the file. Try again, or send it by post.</p>
-        </div>
-        <span data-part="actions">
-          <button data-part="retry" type="button" aria-label="Try medical-certificate.pdf again">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
-            ></span>
-          </button>
-          <button data-part="remove" type="button" aria-label="Remove medical-certificate.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="canceled">
-        <span data-part="preview" data-kind="video" data-extension="MOV"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-video"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">workshop-walkthrough</span
-            ><span data-part="extension">.mov</span></span
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove claim-form-2026-0914.pdf"
           >
-          <div data-part="detail">
-            <span data-part="meta">214 MB</span>
-            <span data-part="status">Stopped</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="start" type="button" aria-label="Upload workshop-walkthrough.mov">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="play"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
-          <button data-part="remove" type="button" aria-label="Remove workshop-walkthrough.mov">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="error">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">medical-certificate</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
+          </button>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">1.4 MB</span>
+            <span data-part="status" data-part-status="">Failed</span>
+          </div>
+          <p data-part="message" data-part-message="">
+            The server refused the file. Try again, or send it by post.
+          </p>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="retry"
+            data-part-retry=""
+            type="button"
+            aria-label="Try medical-certificate.pdf again"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
+            ></span>
+          </button>
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove medical-certificate.pdf"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="canceled">
+        <span data-part="preview" data-part-preview="" data-kind="video" data-extension="MOV"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-video"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">workshop-walkthrough</span
+            ><span data-part="extension" data-part-extension="">.mov</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">214 MB</span>
+            <span data-part="status" data-part-status="">Stopped</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="start"
+            data-part-start=""
+            type="button"
+            aria-label="Upload workshop-walkthrough.mov"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="play"></svg
+            ></span>
+          </button>
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove workshop-walkthrough.mov"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
@@ -435,28 +699,44 @@
   <!-- Scene scaffolding, not the family: two or more roots on one scene need a
        distance between them, and it is drawn from the space scale. -->
   <div style="display: flex; flex-direction: column; gap: var(--slotted-space-8)">
-    <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md" data-dragging>
-      <span data-part="label">A drag is over the page</span>
-      <div data-part="dropzone" data-browsable data-drop-target>
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="upload"></svg
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="dropzone"
+      data-size="md"
+      data-dragging
+    >
+      <span data-part="label" data-part-label="">A drag is over the page</span>
+      <div data-part="dropzone" data-part-dropzone="" data-browsable data-drop-target>
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg
         ></span>
         Drop files here
-        <label data-part="trigger">
-          <input data-part="input" type="file" multiple />
+        <label data-part="trigger" data-part-trigger="">
+          <input data-part="input" data-part-input="" type="file" multiple />
           Browse files
         </label>
       </div>
     </div>
-    <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md" data-dragging>
-      <span data-part="label">Two of these will be refused</span>
-      <div data-part="dropzone" data-browsable data-drop-invalid>
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="upload"></svg
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="dropzone"
+      data-size="md"
+      data-dragging
+    >
+      <span data-part="label" data-part-label="">Two of these will be refused</span>
+      <div data-part="dropzone" data-part-dropzone="" data-browsable data-drop-invalid>
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg
         ></span>
         These files are not accepted
-        <label data-part="trigger">
-          <input data-part="input" type="file" multiple />
+        <label data-part="trigger" data-part-trigger="">
+          <input data-part="input" data-part-input="" type="file" multiple />
           Browse files
         </label>
       </div>
@@ -473,74 +753,101 @@
   <!-- Scene scaffolding, not the family: two or more roots on one scene need a
        distance between them, and it is drawn from the space scale. -->
   <div style="display: flex; flex-direction: column; gap: var(--slotted-space-8)">
-    <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md" data-disabled>
-      <span data-part="label">Disabled</span>
-      <div data-part="dropzone">
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="upload"></svg
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="dropzone"
+      data-size="md"
+      data-disabled
+    >
+      <span data-part="label" data-part-label="">Disabled</span>
+      <div data-part="dropzone" data-part-dropzone="">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg
         ></span>
         Drop files here
-        <label data-part="trigger">
-          <input data-part="input" type="file" disabled />
+        <label data-part="trigger" data-part-trigger="">
+          <input data-part="input" data-part-input="" type="file" disabled />
           Browse files
         </label>
       </div>
     </div>
     <div
       data-part="root"
+      data-part-root=""
       data-ui="upload"
+      data-ui-upload=""
       data-variant="dropzone"
       data-size="md"
       data-invalid
       data-required
     >
-      <span data-part="label">Invalid and required</span>
-      <div data-part="dropzone" data-browsable>
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="upload"></svg
+      <span data-part="label" data-part-label="">Invalid and required</span>
+      <div data-part="dropzone" data-part-dropzone="" data-browsable>
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg
         ></span>
         Drop files here
-        <label data-part="trigger">
-          <input data-part="input" type="file" required />
+        <label data-part="trigger" data-part-trigger="">
+          <input data-part="input" data-part-input="" type="file" required />
           Browse files
         </label>
       </div>
-      <p data-part="message">At least one document is needed before the claim can be sent.</p>
+      <p data-part="message" data-part-message="">
+        At least one document is needed before the claim can be sent.
+      </p>
     </div>
     <div
       data-part="root"
+      data-part-root=""
       data-ui="upload"
+      data-ui-upload=""
       data-variant="button"
       data-size="md"
       data-readonly
       data-complete
     >
-      <span data-part="label">Read-only, and everything arrived</span>
-      <ul data-part="list" style="--slotted-upload-visible-rows: 2">
-        <li data-part="item" data-status="success">
-          <span data-part="preview" data-kind="pdf" data-extension="PDF"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="file-text"></svg></span
+      <span data-part="label" data-part-label="">Read-only, and everything arrived</span>
+      <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 2">
+        <li data-part="item" data-part-item="" data-status="success">
+          <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
           ></span>
-          <div data-part="body">
-            <button type="button" data-part="filename" dir="auto">
-              <span data-part="name">claim-form-2026-0914</span
-              ><span data-part="extension">.pdf</span>
+          <div data-part="body" data-part-body="">
+            <button type="button" data-part="filename" data-part-filename="" dir="auto">
+              <span data-part="name" data-part-name="">claim-form-2026-0914</span
+              ><span data-part="extension" data-part-extension="">.pdf</span>
             </button>
-            <div data-part="detail">
-              <span data-part="meta">248 kB</span>
-              <span data-part="status">Uploaded</span>
+            <div data-part="detail" data-part-detail="">
+              <span data-part="meta" data-part-meta="">248 kB</span>
+              <span data-part="status" data-part-status="">Uploaded</span>
             </div>
           </div>
-          <span data-part="actions"></span>
+          <span data-part="actions" data-part-actions=""></span>
         </li>
       </ul>
     </div>
-    <div data-part="root" data-ui="upload" data-variant="button" data-size="md" data-loading>
-      <span data-part="label">A transfer is running</span>
-      <div data-part="summary">
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="button"
+      data-size="md"
+      data-loading
+    >
+      <span data-part="label" data-part-label="">A transfer is running</span>
+      <div data-part="summary" data-part-summary="">
         <span>1 of 4 uploaded · about 40 sec left</span>
-        <button data-part="clear" type="button">Remove all</button>
+        <button data-part="clear" data-part-clear="" type="button">Remove all</button>
       </div>
     </div>
   </div>
@@ -554,57 +861,104 @@
   <!-- Scene scaffolding, not the family: two or more roots on one scene need a
        distance between them, and it is drawn from the space scale. -->
   <div style="display: flex; flex-direction: column; gap: var(--slotted-space-8)">
-    <div data-part="root" data-ui="upload" data-variant="button" data-size="sm">
-      <label data-part="trigger">
-        <span data-ui="icon" data-part="root" aria-hidden="true">
-          <svg data-part="glyph" data-glyph="upload"></svg>
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="button"
+      data-size="sm"
+    >
+      <label data-part="trigger" data-part-trigger="">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true">
+          <svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg>
         </span>
-        <input data-part="input" type="file" />
+        <input data-part="input" data-part-input="" type="file" />
         Attach a file
       </label>
     </div>
-    <div data-part="root" data-ui="upload" data-variant="button" data-size="md">
-      <label data-part="trigger">
-        <span data-ui="icon" data-part="root" aria-hidden="true">
-          <svg data-part="glyph" data-glyph="upload"></svg>
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="button"
+      data-size="md"
+    >
+      <label data-part="trigger" data-part-trigger="">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true">
+          <svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg>
         </span>
-        <input data-part="input" type="file" />
+        <input data-part="input" data-part-input="" type="file" />
         Attach a file
       </label>
     </div>
-    <div data-part="root" data-ui="upload" data-variant="button" data-size="lg">
-      <label data-part="trigger">
-        <span data-ui="icon" data-part="root" aria-hidden="true">
-          <svg data-part="glyph" data-glyph="upload"></svg>
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="button"
+      data-size="lg"
+    >
+      <label data-part="trigger" data-part-trigger="">
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true">
+          <svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg>
         </span>
-        <input data-part="input" type="file" />
+        <input data-part="input" data-part-input="" type="file" />
         Attach a file
       </label>
     </div>
-    <div data-part="root" data-ui="upload" data-variant="field" data-size="md">
-      <span data-part="label">Proof of ownership</span>
-      <div data-part="dropzone" data-browsable>
-        <label data-part="trigger">
-          <span data-ui="icon" data-part="root" aria-hidden="true">
-            <svg data-part="glyph" data-glyph="upload"></svg>
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="field"
+      data-size="md"
+    >
+      <span data-part="label" data-part-label="">Proof of ownership</span>
+      <div data-part="dropzone" data-part-dropzone="" data-browsable>
+        <label data-part="trigger" data-part-trigger="">
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+          >
+            <svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg>
           </span>
-          <input data-part="input" type="file" />
+          <input data-part="input" data-part-input="" type="file" />
           Browse
         </label>
-        <span data-part="meta">No file chosen</span>
+        <span data-part="meta" data-part-meta="">No file chosen</span>
       </div>
     </div>
-    <div data-part="root" data-ui="upload" data-variant="field" data-size="md">
-      <span data-part="label">Proof of ownership</span>
-      <div data-part="dropzone" data-browsable>
-        <label data-part="trigger">
-          <span data-ui="icon" data-part="root" aria-hidden="true">
-            <svg data-part="glyph" data-glyph="upload"></svg>
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="field"
+      data-size="md"
+    >
+      <span data-part="label" data-part-label="">Proof of ownership</span>
+      <div data-part="dropzone" data-part-dropzone="" data-browsable>
+        <label data-part="trigger" data-part-trigger="">
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+          >
+            <svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg>
           </span>
-          <input data-part="input" type="file" />
+          <input data-part="input" data-part-input="" type="file" />
           Browse
         </label>
-        <span data-part="meta">v5-logbook-scan.pdf · 512 kB</span>
+        <span data-part="meta" data-part-meta="">v5-logbook-scan.pdf · 512 kB</span>
       </div>
     </div>
   </div>
@@ -615,59 +969,88 @@
   the card and the controls move over the corner of the picture.
 -->
 <section data-scene="grid">
-  <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md" data-layout="grid">
-    <span data-part="label">Photographs of the damage</span>
-    <ul data-part="list" style="--slotted-upload-visible-rows: 4">
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="image" data-extension="JPG">
+  <div
+    data-part="root"
+    data-part-root=""
+    data-ui="upload"
+    data-ui-upload=""
+    data-variant="dropzone"
+    data-size="md"
+    data-layout="grid"
+  >
+    <span data-part="label" data-part-label="">Photographs of the damage</span>
+    <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 4">
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG">
           <img
             alt=""
             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231d4ed8'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='90' fill='url(%23b)'/%3E%3C/svg%3E"
           />
         </span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">damage-front-quarter</span
-            ><span data-part="extension">.jpg</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">damage-front-quarter</span
+            ><span data-part="extension" data-part-extension="">.jpg</span>
           </button>
-          <div data-part="detail">
-            <span data-part="meta">4.1 MB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">4.1 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove damage-front-quarter.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove damage-front-quarter.jpg"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="uploading">
-        <span data-part="preview" data-kind="image" data-extension="JPG">
+      <li data-part="item" data-part-item="" data-status="uploading">
+        <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG">
           <img
             alt=""
             src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 90'%3E%3Cdefs%3E%3ClinearGradient id='c' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23b45309'/%3E%3Cstop offset='1' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='120' height='90' fill='url(%23c)'/%3E%3C/svg%3E"
           />
         </span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">damage-rear-bumper</span><span data-part="extension">.jpg</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">damage-rear-bumper</span
+            ><span data-part="extension" data-part-extension="">.jpg</span>
           </button>
 
-          <div data-part="detail">
-            <span data-part="meta">3.2 MB</span>
-            <span data-part="status">Uploading · 34%</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">3.2 MB</span>
+            <span data-part="status" data-part-status="">Uploading · 34%</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="cancel" type="button" aria-label="Cancel damage-rear-bumper.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="cancel"
+            data-part-cancel=""
+            type="button"
+            aria-label="Cancel damage-rear-bumper.jpg"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
-        <div data-part="progress">
+        <div data-part="progress" data-part-progress="">
           <div style="background-color: var(--slotted-surface-sunken); block-size: 3px">
             <div
               style="
@@ -679,26 +1062,41 @@
           </div>
         </div>
       </li>
-      <li data-part="item" data-status="error">
-        <span data-part="preview" data-kind="image" data-extension="HEIC"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-image"></svg></span
+      <li data-part="item" data-part-item="" data-status="error">
+        <span data-part="preview" data-part-preview="" data-kind="image" data-extension="HEIC"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-image"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">interior-airbag</span
-            ><span data-part="extension">.heic</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">interior-airbag</span
+            ><span data-part="extension" data-part-extension="">.heic</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">2.8 MB</span>
-            <span data-part="status">Failed</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">2.8 MB</span>
+            <span data-part="status" data-part-status="">Failed</span>
           </div>
-          <p data-part="message">The server refused the file.</p>
+          <p data-part="message" data-part-message="">The server refused the file.</p>
         </div>
-        <span data-part="actions">
-          <button data-part="retry" type="button" aria-label="Try interior-airbag.heic again">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="rotate-ccw"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="retry"
+            data-part-retry=""
+            type="button"
+            aria-label="Try interior-airbag.heic again"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="rotate-ccw"></svg
             ></span>
           </button>
         </span>
@@ -714,56 +1112,83 @@
   sentence a rejection message can carry.
 -->
 <section data-scene="content">
-  <div data-part="root" data-ui="upload" data-variant="button" data-size="md">
-    <ul data-part="list" style="--slotted-upload-visible-rows: 4">
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+  <div
+    data-part="root"
+    data-part-root=""
+    data-ui="upload"
+    data-ui-upload=""
+    data-variant="button"
+    data-size="md"
+  >
+    <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 4">
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name"
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name=""
               >2026-09-14-northgate-motors-consolidated-repair-estimate-and-parts-schedule-revision-seven</span
-            ><span data-part="extension">.pdf</span>
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
-          <div data-part="detail">
-            <span data-part="meta">1.9 MB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">1.9 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button data-part="remove" data-part-remove="" type="button" aria-label="Remove">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="uploading">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+      <li data-part="item" data-part-item="" data-status="uploading">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">تقرير-الحادث-المفصل-من-شرطة-المرور</span
-            ><span data-part="extension">.pdf</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">تقرير-الحادث-المفصل-من-شرطة-المرور</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
 
-          <div data-part="detail">
-            <span data-part="meta">640 kB</span>
-            <span data-part="status">Uploading · 18%</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">640 kB</span>
+            <span data-part="status" data-part-status="">Uploading · 18%</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="cancel" type="button" aria-label="Cancel">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+        <span data-part="actions" data-part-actions="">
+          <button data-part="cancel" data-part-cancel="" type="button" aria-label="Cancel">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
-        <div data-part="progress">
+        <div data-part="progress" data-part-progress="">
           <div style="background-color: var(--slotted-surface-sunken); block-size: 3px">
             <div
               style="
@@ -775,26 +1200,38 @@
           </div>
         </div>
       </li>
-      <li data-part="item" data-status="rejected">
-        <span data-part="preview" data-kind="other" data-extension="FILE"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file"></svg></span
+      <li data-part="item" data-part-item="" data-status="rejected">
+        <span data-part="preview" data-part-preview="" data-kind="other" data-extension="FILE"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"><span data-part="name">scan0001</span></span>
-          <div data-part="detail">
-            <span data-part="meta">18.6 MB</span>
-            <span data-part="status">Refused</span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">scan0001</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">18.6 MB</span>
+            <span data-part="status" data-part-status="">Refused</span>
           </div>
-          <p data-part="message">
+          <p data-part="message" data-part-message="">
             This file is 18.6 MB and the limit is 10 MB. Scan the document again at 200 dpi, or
             split it into two attachments and send them separately.
           </p>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button data-part="remove" data-part-remove="" type="button" aria-label="Remove">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
@@ -815,212 +1252,351 @@
   mark.
 -->
 <section data-scene="kinds">
-  <div data-part="root" data-ui="upload" data-variant="button" data-size="md">
-    <ul data-part="list" style="--slotted-upload-visible-rows: 10">
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+  <div
+    data-part="root"
+    data-part-root=""
+    data-ui="upload"
+    data-ui-upload=""
+    data-variant="button"
+    data-size="md"
+  >
+    <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 10">
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">claim-form-2026-0914</span
-            ><span data-part="extension">.pdf</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">claim-form-2026-0914</span
+            ><span data-part="extension" data-part-extension="">.pdf</span>
           </button>
-          <div data-part="detail">
-            <span data-part="meta">248 kB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">248 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove claim-form-2026-0914.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="document" data-extension="DOCX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-type"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">loss-adjuster-notes</span
-            ><span data-part="extension">.docx</span></span
-          >
-          <div data-part="detail">
-            <span data-part="meta">86 kB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove loss-adjuster-notes.docx">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="spreadsheet" data-extension="XLSX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">repair-estimate-northgate-motors</span
-            ><span data-part="extension">.xlsx</span></span
-          >
-          <div data-part="detail">
-            <span data-part="meta">96 kB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
+        <span data-part="actions" data-part-actions="">
           <button
             data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove claim-form-2026-0914.pdf"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="document" data-extension="DOCX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-type"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">loss-adjuster-notes</span
+            ><span data-part="extension" data-part-extension="">.docx</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">86 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove loss-adjuster-notes.docx"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="spreadsheet" data-extension="XLSX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">repair-estimate-northgate-motors</span
+            ><span data-part="extension" data-part-extension="">.xlsx</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">96 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
             type="button"
             aria-label="Remove repair-estimate-northgate-motors.xlsx"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="presentation" data-extension="PPTX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="presentation"></svg></span
+      <li data-part="item" data-part-item="" data-status="success">
+        <span
+          data-part="preview"
+          data-part-preview=""
+          data-kind="presentation"
+          data-extension="PPTX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="presentation"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">settlement-review-board</span
-            ><span data-part="extension">.pptx</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">settlement-review-board</span
+            ><span data-part="extension" data-part-extension="">.pptx</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">2.4 MB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">2.4 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove settlement-review-board.pptx">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="image" data-extension="JPG"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-image"></svg></span
-        ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">damage-front-quarter</span
-            ><span data-part="extension">.jpg</span>
-          </button>
-          <div data-part="detail">
-            <span data-part="meta">4.1 MB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove damage-front-quarter.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="video" data-extension="MP4"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-video"></svg></span
-        ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">dashcam-clip-0914-0731</span
-            ><span data-part="extension">.mp4</span>
-          </button>
-          <div data-part="detail">
-            <span data-part="meta">88.4 MB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove dashcam-clip-0914-0731.mp4">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="audio" data-extension="M4A"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-audio"></svg></span
-        ></span>
-        <div data-part="body">
-          <button type="button" data-part="filename" dir="auto">
-            <span data-part="name">adjuster-call-recording</span
-            ><span data-part="extension">.m4a</span>
-          </button>
-          <div data-part="detail">
-            <span data-part="meta">11.2 MB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove adjuster-call-recording.m4a">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="archive" data-extension="ZIP"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-archive"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">policy-archive-2019-2024</span
-            ><span data-part="extension">.zip</span></span
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove settlement-review-board.pptx"
           >
-          <div data-part="detail">
-            <span data-part="meta">41.8 MB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove policy-archive-2019-2024.zip">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="other" data-extension="FILE"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file"></svg></span
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-image"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"><span data-part="name">scan0001</span></span>
-          <div data-part="detail">
-            <span data-part="meta">18.6 MB</span>
-            <span data-part="status">Uploaded</span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">damage-front-quarter</span
+            ><span data-part="extension" data-part-extension="">.jpg</span>
+          </button>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">4.1 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove scan0001">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove damage-front-quarter.jpg"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="video" data-extension="MP4"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-video"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">dashcam-clip-0914-0731</span
+            ><span data-part="extension" data-part-extension="">.mp4</span>
+          </button>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">88.4 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove dashcam-clip-0914-0731.mp4"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="audio" data-extension="M4A"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-audio"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <button type="button" data-part="filename" data-part-filename="" dir="auto">
+            <span data-part="name" data-part-name="">adjuster-call-recording</span
+            ><span data-part="extension" data-part-extension="">.m4a</span>
+          </button>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">11.2 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove adjuster-call-recording.m4a"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="archive" data-extension="ZIP"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-archive"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">policy-archive-2019-2024</span
+            ><span data-part="extension" data-part-extension="">.zip</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">41.8 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove policy-archive-2019-2024.zip"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="other" data-extension="FILE"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">scan0001</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">18.6 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button data-part="remove" data-part-remove="" type="button" aria-label="Remove scan0001">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
@@ -1045,7 +1621,9 @@
   >
     <div
       data-part="root"
+      data-part-root=""
       data-ui="field"
+      data-ui-field=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
@@ -1079,7 +1657,9 @@
 
     <div
       data-part="root"
+      data-part-root=""
       data-ui="field"
+      data-ui-field=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
@@ -1105,30 +1685,42 @@
       >
       <div
         data-part="root"
+        data-part-root=""
         data-ui="upload"
+        data-ui-upload=""
         data-variant="field"
         data-size="md"
         data-required
         style="margin-block-start: var(--slotted-space-2)"
       >
-        <span data-part="label">Proof of ownership</span>
-        <p data-part="description">This one is drawn by the field above.</p>
-        <div data-part="dropzone" data-browsable>
-          <label data-part="trigger">
-            <span data-ui="icon" data-part="root" aria-hidden="true">
-              <svg data-part="glyph" data-glyph="upload"></svg>
+        <span data-part="label" data-part-label="">Proof of ownership</span>
+        <p data-part="description" data-part-description="">
+          This one is drawn by the field above.
+        </p>
+        <div data-part="dropzone" data-part-dropzone="" data-browsable>
+          <label data-part="trigger" data-part-trigger="">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+            >
+              <svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg>
             </span>
-            <input data-part="input" type="file" required />
+            <input data-part="input" data-part-input="" type="file" required />
             Browse
           </label>
-          <span data-part="meta">v5-logbook-scan.pdf · 512 kB</span>
+          <span data-part="meta" data-part-meta="">v5-logbook-scan.pdf · 512 kB</span>
         </div>
       </div>
     </div>
 
     <div
       data-part="root"
+      data-part-root=""
       data-ui="field"
+      data-ui-field=""
       data-size="md"
       data-label-placement="top"
       data-necessity="mark"
@@ -1144,74 +1736,116 @@
       >
       <div
         data-part="root"
+        data-part-root=""
         data-ui="upload"
+        data-ui-upload=""
         data-variant="dropzone"
         data-size="md"
         style="margin-block-start: var(--slotted-space-2)"
       >
-        <div data-part="dropzone" data-browsable>
-          <span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="upload"></svg
+        <div data-part="dropzone" data-part-dropzone="" data-browsable>
+          <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg
           ></span>
           Drop files here
-          <label data-part="trigger">
-            <input data-part="input" type="file" multiple />
+          <label data-part="trigger" data-part-trigger="">
+            <input data-part="input" data-part-input="" type="file" multiple />
             Browse files
           </label>
         </div>
-        <ul data-part="list" style="--slotted-upload-visible-rows: 2">
-          <li data-part="item" data-status="success">
-            <span data-part="preview" data-kind="image" data-extension="JPG"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="file-image"></svg></span
+        <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 2">
+          <li data-part="item" data-part-item="" data-status="success">
+            <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="file-image"></svg></span
             ></span>
-            <div data-part="body">
-              <button type="button" data-part="filename" dir="auto">
-                <span data-part="name">damage-front-quarter</span
-                ><span data-part="extension">.jpg</span>
+            <div data-part="body" data-part-body="">
+              <button type="button" data-part="filename" data-part-filename="" dir="auto">
+                <span data-part="name" data-part-name="">damage-front-quarter</span
+                ><span data-part="extension" data-part-extension="">.jpg</span>
               </button>
-              <div data-part="detail">
-                <span data-part="meta">4.1 MB</span>
-                <span data-part="status">Uploaded</span>
+              <div data-part="detail" data-part-detail="">
+                <span data-part="meta" data-part-meta="">4.1 MB</span>
+                <span data-part="status" data-part-status="">Uploaded</span>
               </div>
             </div>
-            <span data-part="actions">
-              <button data-part="remove" type="button" aria-label="Remove damage-front-quarter.jpg">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="trash"></svg
+            <span data-part="actions" data-part-actions="">
+              <button
+                data-part="remove"
+                data-part-remove=""
+                type="button"
+                aria-label="Remove damage-front-quarter.jpg"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
                 ></span>
               </button>
             </span>
           </li>
-          <li data-part="item" data-status="uploading">
-            <span data-part="preview" data-kind="pdf" data-extension="PDF"
-              ><span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="file-text"></svg></span
+          <li data-part="item" data-part-item="" data-status="uploading">
+            <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+              ><span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
             ></span>
-            <div data-part="body">
-              <button type="button" data-part="filename" dir="auto">
-                <span data-part="name">police-report-scan</span
-                ><span data-part="extension">.pdf</span>
+            <div data-part="body" data-part-body="">
+              <button type="button" data-part="filename" data-part-filename="" dir="auto">
+                <span data-part="name" data-part-name="">police-report-scan</span
+                ><span data-part="extension" data-part-extension="">.pdf</span>
               </button>
 
-              <div data-part="detail">
-                <span data-part="meta">7.9 MB</span>
-                <span data-part="status">Uploading · 43%</span>
+              <div data-part="detail" data-part-detail="">
+                <span data-part="meta" data-part-meta="">7.9 MB</span>
+                <span data-part="status" data-part-status="">Uploading · 43%</span>
               </div>
             </div>
-            <span data-part="actions">
-              <button data-part="pause" type="button" aria-label="Pause police-report-scan.pdf">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="pause"></svg
+            <span data-part="actions" data-part-actions="">
+              <button
+                data-part="pause"
+                data-part-pause=""
+                type="button"
+                aria-label="Pause police-report-scan.pdf"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="pause"></svg
                 ></span>
               </button>
-              <button data-part="cancel" type="button" aria-label="Cancel police-report-scan.pdf">
-                <span data-ui="icon" data-part="root" aria-hidden="true"
-                  ><svg data-part="glyph" data-glyph="x"></svg
+              <button
+                data-part="cancel"
+                data-part-cancel=""
+                type="button"
+                aria-label="Cancel police-report-scan.pdf"
+              >
+                <span
+                  data-ui="icon"
+                  data-ui-icon=""
+                  data-part="root"
+                  data-part-root=""
+                  aria-hidden="true"
+                  ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
                 ></span>
               </button>
             </span>
-            <div data-part="progress">
+            <div data-part="progress" data-part-progress="">
               <div style="background-color: var(--slotted-surface-sunken); block-size: 3px">
                 <div
                   style="
@@ -1241,84 +1875,167 @@
   <!-- Scene scaffolding, not the family: two surfaces on one scene need a
        distance between them, and it is drawn from the space scale. -->
   <div style="display: flex; flex-direction: column; gap: var(--slotted-space-8)">
-    <div data-ui="upload" data-part="viewer" data-size="md" style="block-size: 22rem">
-      <div data-part="viewerHeader">
+    <div
+      data-ui="upload"
+      data-ui-upload=""
+      data-part="viewer"
+      data-part-viewer=""
+      data-size="md"
+      style="block-size: 22rem"
+    >
+      <div data-part="viewerHeader" data-part-viewerheader="">
         <div>
-          <h2 data-part="viewerTitle">damage-front-quarter.jpg</h2>
-          <span data-part="viewerMeta">4.1 MB · JPEG image · 2 of 6</span>
+          <h2 data-part="viewerTitle" data-part-viewertitle="">damage-front-quarter.jpg</h2>
+          <span data-part="viewerMeta" data-part-viewermeta="">4.1 MB · JPEG image · 2 of 6</span>
         </div>
-        <span data-part="viewerActions">
+        <span data-part="viewerActions" data-part-vieweractions="">
           <button
             data-part="viewerExternal"
+            data-part-viewerexternal=""
             type="button"
             aria-label="Open damage-front-quarter.jpg in a new tab"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="external"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="external"></svg
             ></span>
           </button>
-          <button data-part="viewerClose" type="button" aria-label="Close">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="viewerClose" data-part-viewerclose="" type="button" aria-label="Close">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
       </div>
-      <div data-part="viewerStage">
-        <button data-part="viewerPrevious" type="button" aria-label="Previous file">
-          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+      <div data-part="viewerStage" data-part-viewerstage="">
+        <button
+          data-part="viewerPrevious"
+          data-part-viewerprevious=""
+          type="button"
+          aria-label="Previous file"
+        >
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-directional
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg
           ></span>
         </button>
         <img
           alt=""
           src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 200'%3E%3Cdefs%3E%3ClinearGradient id='v' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%231d4ed8'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='320' height='200' fill='url(%23v)'/%3E%3C/svg%3E"
         />
-        <button data-part="viewerNext" type="button" aria-label="Next file">
-          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        <button data-part="viewerNext" data-part-viewernext="" type="button" aria-label="Next file">
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-directional
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg
           ></span>
         </button>
       </div>
     </div>
 
-    <div data-ui="upload" data-part="viewer" data-size="md" style="block-size: 22rem">
-      <div data-part="viewerHeader">
+    <div
+      data-ui="upload"
+      data-ui-upload=""
+      data-part="viewer"
+      data-part-viewer=""
+      data-size="md"
+      style="block-size: 22rem"
+    >
+      <div data-part="viewerHeader" data-part-viewerheader="">
         <div>
-          <h2 data-part="viewerTitle">repair-estimate-northgate-motors.xlsx</h2>
-          <span data-part="viewerMeta">96 kB · Spreadsheet · 4 of 6</span>
+          <h2 data-part="viewerTitle" data-part-viewertitle="">
+            repair-estimate-northgate-motors.xlsx
+          </h2>
+          <span data-part="viewerMeta" data-part-viewermeta="">96 kB · Spreadsheet · 4 of 6</span>
         </div>
-        <span data-part="viewerActions">
+        <span data-part="viewerActions" data-part-vieweractions="">
           <button
             data-part="viewerExternal"
+            data-part-viewerexternal=""
             type="button"
             aria-label="Open repair-estimate-northgate-motors.xlsx in a new tab"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="external"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="external"></svg
             ></span>
           </button>
-          <button data-part="viewerClose" type="button" aria-label="Close">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="x"></svg
+          <button data-part="viewerClose" data-part-viewerclose="" type="button" aria-label="Close">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="x"></svg
             ></span>
           </button>
         </span>
       </div>
-      <div data-part="viewerStage">
-        <button data-part="viewerPrevious" type="button" aria-label="Previous file">
-          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+      <div data-part="viewerStage" data-part-viewerstage="">
+        <button
+          data-part="viewerPrevious"
+          data-part-viewerprevious=""
+          type="button"
+          aria-label="Previous file"
+        >
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-directional
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg
           ></span>
         </button>
-        <span data-part="preview" data-kind="spreadsheet" data-extension="XLSX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
+        <span data-part="preview" data-part-preview="" data-kind="spreadsheet" data-extension="XLSX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-spreadsheet"></svg></span
         ></span>
         <p>This file cannot be previewed here.</p>
-        <button data-part="viewerNext" type="button" aria-label="Next file" disabled>
-          <span data-ui="icon" data-part="root" data-directional aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="chevron-right"></svg
+        <button
+          data-part="viewerNext"
+          data-part-viewernext=""
+          type="button"
+          aria-label="Next file"
+          disabled
+        >
+          <span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            data-directional
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-right"></svg
           ></span>
         </button>
       </div>
@@ -1333,213 +2050,352 @@
   tall enough for it.
 -->
 <section data-scene="bounded">
-  <div data-part="root" data-ui="upload" data-variant="button" data-size="md">
-    <span data-part="label">Nine rows in the room for three</span>
-    <ul data-part="list" style="--slotted-upload-visible-rows: 3">
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="pdf" data-extension="PDF"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-text"></svg></span
+  <div
+    data-part="root"
+    data-part-root=""
+    data-ui="upload"
+    data-ui-upload=""
+    data-variant="button"
+    data-size="md"
+  >
+    <span data-part="label" data-part-label="">Nine rows in the room for three</span>
+    <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 3">
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">claim-form-2026-0914</span
-            ><span data-part="extension">.pdf</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">claim-form-2026-0914</span
+            ><span data-part="extension" data-part-extension="">.pdf</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">248 kB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">248 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove claim-form-2026-0914.pdf">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="document" data-extension="DOCX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-type"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">loss-adjuster-notes</span
-            ><span data-part="extension">.docx</span></span
-          >
-          <div data-part="detail">
-            <span data-part="meta">86 kB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove loss-adjuster-notes.docx">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="spreadsheet" data-extension="XLSX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">repair-estimate-northgate-motors</span
-            ><span data-part="extension">.xlsx</span></span
-          >
-          <div data-part="detail">
-            <span data-part="meta">96 kB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
+        <span data-part="actions" data-part-actions="">
           <button
             data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove claim-form-2026-0914.pdf"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="document" data-extension="DOCX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-type"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">loss-adjuster-notes</span
+            ><span data-part="extension" data-part-extension="">.docx</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">86 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove loss-adjuster-notes.docx"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="spreadsheet" data-extension="XLSX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-spreadsheet"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">repair-estimate-northgate-motors</span
+            ><span data-part="extension" data-part-extension="">.xlsx</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">96 kB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
             type="button"
             aria-label="Remove repair-estimate-northgate-motors.xlsx"
           >
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="presentation" data-extension="PPTX"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="presentation"></svg></span
+      <li data-part="item" data-part-item="" data-status="success">
+        <span
+          data-part="preview"
+          data-part-preview=""
+          data-kind="presentation"
+          data-extension="PPTX"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="presentation"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">settlement-review-board</span
-            ><span data-part="extension">.pptx</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">settlement-review-board</span
+            ><span data-part="extension" data-part-extension="">.pptx</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">2.4 MB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">2.4 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove settlement-review-board.pptx">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="image" data-extension="JPG"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-image"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">damage-front-quarter</span
-            ><span data-part="extension">.jpg</span></span
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove settlement-review-board.pptx"
           >
-          <div data-part="detail">
-            <span data-part="meta">4.1 MB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove damage-front-quarter.jpg">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="video" data-extension="MP4"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-video"></svg></span
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-image"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">dashcam-clip-0914-0731</span
-            ><span data-part="extension">.mp4</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">damage-front-quarter</span
+            ><span data-part="extension" data-part-extension="">.jpg</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">88.4 MB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">4.1 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove dashcam-clip-0914-0731.mp4">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
-            ></span>
-          </button>
-        </span>
-      </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="audio" data-extension="M4A"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-audio"></svg></span
-        ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">adjuster-call-recording</span
-            ><span data-part="extension">.m4a</span></span
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove damage-front-quarter.jpg"
           >
-          <div data-part="detail">
-            <span data-part="meta">11.2 MB</span>
-            <span data-part="status">Uploaded</span>
-          </div>
-        </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove adjuster-call-recording.m4a">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="archive" data-extension="ZIP"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file-archive"></svg></span
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="video" data-extension="MP4"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-video"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"
-            ><span data-part="name">policy-archive-2019-2024</span
-            ><span data-part="extension">.zip</span></span
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">dashcam-clip-0914-0731</span
+            ><span data-part="extension" data-part-extension="">.mp4</span></span
           >
-          <div data-part="detail">
-            <span data-part="meta">41.8 MB</span>
-            <span data-part="status">Uploaded</span>
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">88.4 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove policy-archive-2019-2024.zip">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove dashcam-clip-0914-0731.mp4"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
       </li>
-      <li data-part="item" data-status="success">
-        <span data-part="preview" data-kind="other" data-extension="FILE"
-          ><span data-ui="icon" data-part="root" aria-hidden="true"
-            ><svg data-part="glyph" data-glyph="file"></svg></span
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="audio" data-extension="M4A"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-audio"></svg></span
         ></span>
-        <div data-part="body">
-          <span data-part="filename" dir="auto"><span data-part="name">scan0001</span></span>
-          <div data-part="detail">
-            <span data-part="meta">18.6 MB</span>
-            <span data-part="status">Uploaded</span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">adjuster-call-recording</span
+            ><span data-part="extension" data-part-extension="">.m4a</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">11.2 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
           </div>
         </div>
-        <span data-part="actions">
-          <button data-part="remove" type="button" aria-label="Remove scan0001">
-            <span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="trash"></svg
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove adjuster-call-recording.m4a"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="archive" data-extension="ZIP"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file-archive"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">policy-archive-2019-2024</span
+            ><span data-part="extension" data-part-extension="">.zip</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">41.8 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button
+            data-part="remove"
+            data-part-remove=""
+            type="button"
+            aria-label="Remove policy-archive-2019-2024.zip"
+          >
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+            ></span>
+          </button>
+        </span>
+      </li>
+      <li data-part="item" data-part-item="" data-status="success">
+        <span data-part="preview" data-part-preview="" data-kind="other" data-extension="FILE"
+          ><span
+            data-ui="icon"
+            data-ui-icon=""
+            data-part="root"
+            data-part-root=""
+            aria-hidden="true"
+            ><svg data-part="glyph" data-part-glyph="" data-glyph="file"></svg></span
+        ></span>
+        <div data-part="body" data-part-body="">
+          <span data-part="filename" data-part-filename="" dir="auto"
+            ><span data-part="name" data-part-name="">scan0001</span></span
+          >
+          <div data-part="detail" data-part-detail="">
+            <span data-part="meta" data-part-meta="">18.6 MB</span>
+            <span data-part="status" data-part-status="">Uploaded</span>
+          </div>
+        </div>
+        <span data-part="actions" data-part-actions="">
+          <button data-part="remove" data-part-remove="" type="button" aria-label="Remove scan0001">
+            <span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
             ></span>
           </button>
         </span>
@@ -1560,166 +2416,259 @@
   <!-- A panel that states its own height. The label, the region and the summary
        keep their size; the queue is the part that gives, and it scrolls. -->
   <div style="block-size: 26rem; display: flex; overflow: auto">
-    <div data-part="root" data-ui="upload" data-variant="dropzone" data-size="md">
-      <span data-part="label">Supporting documents</span>
-      <p data-part="description">PDF, JPEG or PNG, up to 10 MB each.</p>
-      <div data-part="dropzone" data-browsable>
-        <span data-ui="icon" data-part="root" aria-hidden="true"
-          ><svg data-part="glyph" data-glyph="upload"></svg
+    <div
+      data-part="root"
+      data-part-root=""
+      data-ui="upload"
+      data-ui-upload=""
+      data-variant="dropzone"
+      data-size="md"
+    >
+      <span data-part="label" data-part-label="">Supporting documents</span>
+      <p data-part="description" data-part-description="">PDF, JPEG or PNG, up to 10 MB each.</p>
+      <div data-part="dropzone" data-part-dropzone="" data-browsable>
+        <span data-ui="icon" data-ui-icon="" data-part="root" data-part-root="" aria-hidden="true"
+          ><svg data-part="glyph" data-part-glyph="" data-glyph="upload"></svg
         ></span>
         Drop files here
-        <label data-part="trigger">
-          <input data-part="input" type="file" multiple />
+        <label data-part="trigger" data-part-trigger="">
+          <input data-part="input" data-part-input="" type="file" multiple />
           Browse files
         </label>
       </div>
-      <div data-part="summary">
+      <div data-part="summary" data-part-summary="">
         <span>6 of 6 uploaded</span>
-        <button data-part="clear" type="button">Remove all</button>
+        <button data-part="clear" data-part-clear="" type="button">Remove all</button>
       </div>
-      <ul data-part="list" style="--slotted-upload-visible-rows: 6">
-        <li data-part="item" data-status="success">
-          <span data-part="preview" data-kind="pdf" data-extension="PDF"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="file-text"></svg></span
+      <ul data-part="list" data-part-list="" style="--slotted-upload-visible-rows: 6">
+        <li data-part="item" data-part-item="" data-status="success">
+          <span data-part="preview" data-part-preview="" data-kind="pdf" data-extension="PDF"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="file-text"></svg></span
           ></span>
-          <div data-part="body">
-            <span data-part="filename" dir="auto"
-              ><span data-part="name">claim-form-2026-0914</span
-              ><span data-part="extension">.pdf</span></span
+          <div data-part="body" data-part-body="">
+            <span data-part="filename" data-part-filename="" dir="auto"
+              ><span data-part="name" data-part-name="">claim-form-2026-0914</span
+              ><span data-part="extension" data-part-extension="">.pdf</span></span
             >
-            <div data-part="detail">
-              <span data-part="meta">248 kB</span>
-              <span data-part="status">Uploaded</span>
+            <div data-part="detail" data-part-detail="">
+              <span data-part="meta" data-part-meta="">248 kB</span>
+              <span data-part="status" data-part-status="">Uploaded</span>
             </div>
           </div>
-          <span data-part="actions">
-            <button data-part="remove" type="button" aria-label="Remove claim-form-2026-0914.pdf">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="trash"></svg
-              ></span>
-            </button>
-          </span>
-        </li>
-        <li data-part="item" data-status="success">
-          <span data-part="preview" data-kind="document" data-extension="DOCX"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="file-type"></svg></span
-          ></span>
-          <div data-part="body">
-            <span data-part="filename" dir="auto"
-              ><span data-part="name">loss-adjuster-notes</span
-              ><span data-part="extension">.docx</span></span
-            >
-            <div data-part="detail">
-              <span data-part="meta">86 kB</span>
-              <span data-part="status">Uploaded</span>
-            </div>
-          </div>
-          <span data-part="actions">
-            <button data-part="remove" type="button" aria-label="Remove loss-adjuster-notes.docx">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="trash"></svg
-              ></span>
-            </button>
-          </span>
-        </li>
-        <li data-part="item" data-status="success">
-          <span data-part="preview" data-kind="spreadsheet" data-extension="XLSX"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="file-spreadsheet"></svg></span
-          ></span>
-          <div data-part="body">
-            <span data-part="filename" dir="auto"
-              ><span data-part="name">repair-estimate-northgate-motors</span
-              ><span data-part="extension">.xlsx</span></span
-            >
-            <div data-part="detail">
-              <span data-part="meta">96 kB</span>
-              <span data-part="status">Uploaded</span>
-            </div>
-          </div>
-          <span data-part="actions">
+          <span data-part="actions" data-part-actions="">
             <button
               data-part="remove"
+              data-part-remove=""
+              type="button"
+              aria-label="Remove claim-form-2026-0914.pdf"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+              ></span>
+            </button>
+          </span>
+        </li>
+        <li data-part="item" data-part-item="" data-status="success">
+          <span data-part="preview" data-part-preview="" data-kind="document" data-extension="DOCX"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="file-type"></svg></span
+          ></span>
+          <div data-part="body" data-part-body="">
+            <span data-part="filename" data-part-filename="" dir="auto"
+              ><span data-part="name" data-part-name="">loss-adjuster-notes</span
+              ><span data-part="extension" data-part-extension="">.docx</span></span
+            >
+            <div data-part="detail" data-part-detail="">
+              <span data-part="meta" data-part-meta="">86 kB</span>
+              <span data-part="status" data-part-status="">Uploaded</span>
+            </div>
+          </div>
+          <span data-part="actions" data-part-actions="">
+            <button
+              data-part="remove"
+              data-part-remove=""
+              type="button"
+              aria-label="Remove loss-adjuster-notes.docx"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+              ></span>
+            </button>
+          </span>
+        </li>
+        <li data-part="item" data-part-item="" data-status="success">
+          <span
+            data-part="preview"
+            data-part-preview=""
+            data-kind="spreadsheet"
+            data-extension="XLSX"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="file-spreadsheet"></svg></span
+          ></span>
+          <div data-part="body" data-part-body="">
+            <span data-part="filename" data-part-filename="" dir="auto"
+              ><span data-part="name" data-part-name="">repair-estimate-northgate-motors</span
+              ><span data-part="extension" data-part-extension="">.xlsx</span></span
+            >
+            <div data-part="detail" data-part-detail="">
+              <span data-part="meta" data-part-meta="">96 kB</span>
+              <span data-part="status" data-part-status="">Uploaded</span>
+            </div>
+          </div>
+          <span data-part="actions" data-part-actions="">
+            <button
+              data-part="remove"
+              data-part-remove=""
               type="button"
               aria-label="Remove repair-estimate-northgate-motors.xlsx"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="trash"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
               ></span>
             </button>
           </span>
         </li>
-        <li data-part="item" data-status="success">
-          <span data-part="preview" data-kind="image" data-extension="JPG"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="file-image"></svg></span
+        <li data-part="item" data-part-item="" data-status="success">
+          <span data-part="preview" data-part-preview="" data-kind="image" data-extension="JPG"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="file-image"></svg></span
           ></span>
-          <div data-part="body">
-            <span data-part="filename" dir="auto"
-              ><span data-part="name">damage-front-quarter</span
-              ><span data-part="extension">.jpg</span></span
+          <div data-part="body" data-part-body="">
+            <span data-part="filename" data-part-filename="" dir="auto"
+              ><span data-part="name" data-part-name="">damage-front-quarter</span
+              ><span data-part="extension" data-part-extension="">.jpg</span></span
             >
-            <div data-part="detail">
-              <span data-part="meta">4.1 MB</span>
-              <span data-part="status">Uploaded</span>
+            <div data-part="detail" data-part-detail="">
+              <span data-part="meta" data-part-meta="">4.1 MB</span>
+              <span data-part="status" data-part-status="">Uploaded</span>
             </div>
           </div>
-          <span data-part="actions">
-            <button data-part="remove" type="button" aria-label="Remove damage-front-quarter.jpg">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="trash"></svg
-              ></span>
-            </button>
-          </span>
-        </li>
-        <li data-part="item" data-status="success">
-          <span data-part="preview" data-kind="video" data-extension="MP4"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="file-video"></svg></span
-          ></span>
-          <div data-part="body">
-            <span data-part="filename" dir="auto"
-              ><span data-part="name">dashcam-clip-0914-0731</span
-              ><span data-part="extension">.mp4</span></span
-            >
-            <div data-part="detail">
-              <span data-part="meta">88.4 MB</span>
-              <span data-part="status">Uploaded</span>
-            </div>
-          </div>
-          <span data-part="actions">
-            <button data-part="remove" type="button" aria-label="Remove dashcam-clip-0914-0731.mp4">
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="trash"></svg
-              ></span>
-            </button>
-          </span>
-        </li>
-        <li data-part="item" data-status="success">
-          <span data-part="preview" data-kind="archive" data-extension="ZIP"
-            ><span data-ui="icon" data-part="root" aria-hidden="true"
-              ><svg data-part="glyph" data-glyph="file-archive"></svg></span
-          ></span>
-          <div data-part="body">
-            <span data-part="filename" dir="auto"
-              ><span data-part="name">policy-archive-2019-2024</span
-              ><span data-part="extension">.zip</span></span
-            >
-            <div data-part="detail">
-              <span data-part="meta">41.8 MB</span>
-              <span data-part="status">Uploaded</span>
-            </div>
-          </div>
-          <span data-part="actions">
+          <span data-part="actions" data-part-actions="">
             <button
               data-part="remove"
+              data-part-remove=""
+              type="button"
+              aria-label="Remove damage-front-quarter.jpg"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+              ></span>
+            </button>
+          </span>
+        </li>
+        <li data-part="item" data-part-item="" data-status="success">
+          <span data-part="preview" data-part-preview="" data-kind="video" data-extension="MP4"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="file-video"></svg></span
+          ></span>
+          <div data-part="body" data-part-body="">
+            <span data-part="filename" data-part-filename="" dir="auto"
+              ><span data-part="name" data-part-name="">dashcam-clip-0914-0731</span
+              ><span data-part="extension" data-part-extension="">.mp4</span></span
+            >
+            <div data-part="detail" data-part-detail="">
+              <span data-part="meta" data-part-meta="">88.4 MB</span>
+              <span data-part="status" data-part-status="">Uploaded</span>
+            </div>
+          </div>
+          <span data-part="actions" data-part-actions="">
+            <button
+              data-part="remove"
+              data-part-remove=""
+              type="button"
+              aria-label="Remove dashcam-clip-0914-0731.mp4"
+            >
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
+              ></span>
+            </button>
+          </span>
+        </li>
+        <li data-part="item" data-part-item="" data-status="success">
+          <span data-part="preview" data-part-preview="" data-kind="archive" data-extension="ZIP"
+            ><span
+              data-ui="icon"
+              data-ui-icon=""
+              data-part="root"
+              data-part-root=""
+              aria-hidden="true"
+              ><svg data-part="glyph" data-part-glyph="" data-glyph="file-archive"></svg></span
+          ></span>
+          <div data-part="body" data-part-body="">
+            <span data-part="filename" data-part-filename="" dir="auto"
+              ><span data-part="name" data-part-name="">policy-archive-2019-2024</span
+              ><span data-part="extension" data-part-extension="">.zip</span></span
+            >
+            <div data-part="detail" data-part-detail="">
+              <span data-part="meta" data-part-meta="">41.8 MB</span>
+              <span data-part="status" data-part-status="">Uploaded</span>
+            </div>
+          </div>
+          <span data-part="actions" data-part-actions="">
+            <button
+              data-part="remove"
+              data-part-remove=""
               type="button"
               aria-label="Remove policy-archive-2019-2024.zip"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="trash"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="trash"></svg
               ></span>
             </button>
           </span>

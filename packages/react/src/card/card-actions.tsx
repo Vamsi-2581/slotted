@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { CardRegionProps, CardRegionRootProps } from './card.types';
 
 /**
@@ -6,7 +7,7 @@ import type { CardRegionProps, CardRegionRootProps } from './card.types';
  * sits above the hit area a card link stretches, so it stays operable.
  */
 export function CardActions({ render, ...nativeProps }: CardRegionProps) {
-  const rootProps: CardRegionRootProps = { ...nativeProps, 'data-part': 'actions' };
+  const rootProps: CardRegionRootProps = keyedProps({ ...nativeProps, 'data-part': 'actions' });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

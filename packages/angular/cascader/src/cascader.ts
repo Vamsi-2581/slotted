@@ -265,7 +265,9 @@ abstract class CascaderBase<T> {
   ],
   host: {
     'data-ui': 'cascader',
+    'data-ui-cascader': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-full-width]': "resolvedFullWidth() ? '' : null",
@@ -282,6 +284,7 @@ abstract class CascaderBase<T> {
       type="button"
       role="combobox"
       data-part="trigger"
+      data-part-trigger=""
       [attr.aria-haspopup]="engineSearch() ? 'dialog' : 'tree'"
       [attr.aria-expanded]="open()"
       [attr.aria-controls]="open() ? (engineSearch() ? contentId : treeId) : null"
@@ -297,37 +300,47 @@ abstract class CascaderBase<T> {
       (blur)="onTouched()"
     >
       @if (engine.multiple) {
-        <span data-part="value"
-          ><span data-part="summary">{{ summary() }}</span></span
+        <span data-part="value" data-part-value=""
+          ><span data-part="summary" data-part-summary="">{{ summary() }}</span></span
         >
       } @else if (engine.emitted().length === 0) {
-        <span data-part="placeholder">{{ t('placeholder') }}</span>
+        <span data-part="placeholder" data-part-placeholder="">{{ t('placeholder') }}</span>
       } @else if (valueTemplate(); as template) {
-        <span data-part="value">
+        <span data-part="value" data-part-value="">
           <ng-container *ngTemplateOutlet="template; context: { $implicit: valuePath() }" />
         </span>
       } @else {
-        <span data-part="value">
+        <span data-part="value" data-part-value="">
           @for (segment of segments(); track segment.key) {
             @if (!$first) {
-              <span data-part="value-separator" aria-hidden="true">{{ resolvedSeparator() }}</span>
+              <span data-part="value-separator" data-part-value-separator="" aria-hidden="true">{{
+                resolvedSeparator()
+              }}</span>
             }
-            <span data-part="value-segment">{{ segment.label }}</span>
+            <span data-part="value-segment" data-part-value-segment="">{{ segment.label }}</span>
           }
         </span>
       }
     </button>
 
     @if (engine.multiple && engine.emitted().length > 0) {
-      <span data-part="tags">
+      <span data-part="tags" data-part-tags="">
         @for (key of engine.emitted(); track key) {
-          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
-            <span data-part="body"
-              ><span data-part="label">{{ engine.labelOf(key) }}</span></span
+          <span
+            data-ui="tag"
+            data-ui-tag=""
+            data-part="root"
+            data-part-root=""
+            data-size="sm"
+            data-variant="soft"
+          >
+            <span data-part="body" data-part-body=""
+              ><span data-part="label" data-part-label="">{{ engine.labelOf(key) }}</span></span
             >
             <button
               type="button"
               data-part="remove"
+              data-part-remove=""
               [disabled]="resolvedDisabled() || readOnlyState()"
               [attr.aria-label]="removeLabel(key)"
               (click)="onRemove(key, $event)"
@@ -343,6 +356,7 @@ abstract class CascaderBase<T> {
       <button
         type="button"
         data-part="clear"
+        data-part-clear=""
         [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
@@ -350,9 +364,15 @@ abstract class CascaderBase<T> {
       </button>
     }
     @if (loading()) {
-      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+      <span
+        data-part="busy"
+        data-part-busy=""
+        data-ui="spinner"
+        data-ui-spinner=""
+        aria-hidden="true"
+      ></span>
     } @else {
-      <span data-part="arrow"
+      <span data-part="arrow" data-part-arrow=""
         ><span slIcon><svg slGlyph name="chevron-down"></svg></span
       ></span>
     }
@@ -365,7 +385,9 @@ abstract class CascaderBase<T> {
     <ng-template #layer>
       <div
         data-ui="cascader"
+        data-ui-cascader=""
         data-part="positioner"
+        data-part-positioner=""
         [attr.data-layout]="engine.layout()"
         [attr.data-size]="resolvedSize()"
         [attr.data-selection]="engine.multiple ? 'multiple' : null"
@@ -374,15 +396,17 @@ abstract class CascaderBase<T> {
       >
         <div
           data-part="content"
+          data-part-content=""
           [id]="contentId"
           [attr.role]="engineSearch() ? 'dialog' : null"
           [attr.aria-label]="engineSearch() ? (ariaLabel() ?? t('search')) : null"
         >
           @if (engineSearch()) {
-            <div data-part="search">
+            <div data-part="search" data-part-search="">
               <span slIcon><svg slGlyph name="search"></svg></span>
               <input
                 data-part="search-input"
+                data-part-search-input=""
                 role="combobox"
                 aria-autocomplete="list"
                 aria-expanded="true"
@@ -806,7 +830,9 @@ export class SlCascader<T = unknown>
   ],
   host: {
     'data-ui': 'cascader',
+    'data-ui-cascader': '',
     'data-part': 'content',
+    'data-part-content': '',
     '[attr.data-layout]': 'engine.layout()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-selection]': "engine.multiple ? 'multiple' : null",

@@ -168,25 +168,26 @@ function platformClick(event: MouseEvent): boolean {
       <button
         #trigger
         data-part="trigger"
+        data-part-trigger=""
         type="button"
         [attr.aria-controls]="panelId"
         [attr.aria-expanded]="open()"
         (click)="toggle($event)"
       >
-        <span data-part="label" [id]="labelId">
+        <span data-part="label" data-part-label="" [id]="labelId">
           @if (labelTemplate(); as label) {
             <ng-container *ngTemplateOutlet="label.template" />
           } @else {
             {{ resolvedLabel() }}
           }
         </span>
-        <span data-part="current">{{ currentLabel() }}</span>
-        <span data-part="indicator" aria-hidden="true"
+        <span data-part="current" data-part-current="">{{ currentLabel() }}</span>
+        <span data-part="indicator" data-part-indicator="" aria-hidden="true"
           ><span slIcon><svg slGlyph name="chevron-down"></svg></span
         ></span>
       </button>
     } @else if (hasLabel()) {
-      <div data-part="label" [id]="labelId">
+      <div data-part="label" data-part-label="" [id]="labelId">
         @if (labelTemplate(); as label) {
           <ng-container *ngTemplateOutlet="label.template" />
         } @else {
@@ -194,12 +195,12 @@ function platformClick(event: MouseEvent): boolean {
         }
       </div>
     }
-    <div #panel data-part="panel" [id]="panelId">
-      <div #marker data-part="marker" aria-hidden="true"></div>
-      <ol data-part="list">
+    <div #panel data-part="panel" data-part-panel="" [id]="panelId">
+      <div #marker data-part="marker" data-part-marker="" aria-hidden="true"></div>
+      <ol data-part="list" data-part-list="">
         @if (loading()) {
           @for (width of skeletonRows; track width) {
-            <li data-part="skeleton" aria-hidden="true">
+            <li data-part="skeleton" data-part-skeleton="" aria-hidden="true">
               <span slSkeleton shape="text" [inlineSize]="width"></span>
             </li>
           }
@@ -215,12 +216,14 @@ function platformClick(event: MouseEvent): boolean {
       @for (entry of list; track entry.id) {
         <li
           data-part="item"
+          data-part-item=""
           [attr.data-depth]="depth"
           [attr.data-value]="entry.id"
           [attr.data-current]="value() === entry.id ? '' : null"
         >
           <a
             data-part="link"
+            data-part-link=""
             [attr.href]="'#' + entry.id"
             [attr.aria-current]="value() === entry.id ? 'location' : null"
             [attr.data-current]="value() === entry.id ? '' : null"
@@ -238,7 +241,7 @@ function platformClick(event: MouseEvent): boolean {
             }
           </a>
           @if (entry.children?.length) {
-            <ol data-part="group">
+            <ol data-part="group" data-part-group="">
               <ng-container
                 *ngTemplateOutlet="
                   entriesTemplate;
@@ -256,7 +259,9 @@ function platformClick(event: MouseEvent): boolean {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'table-of-contents',
+    'data-ui-table-of-contents': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-labelledby]': 'ariaLabelledBy()',
     '[attr.aria-busy]': "loading() ? 'true' : null",

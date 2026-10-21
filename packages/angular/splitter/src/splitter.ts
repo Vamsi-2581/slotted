@@ -61,16 +61,18 @@ const NO_SNAP_POINTS: readonly number[] = [];
   standalone: true,
   exportAs: 'slSplitter',
   template: `
-    <span data-part="line" aria-hidden="true"></span>
-    <span data-part="grip" aria-hidden="true"></span>
-    <span data-part="line" aria-hidden="true"></span>
+    <span data-part="line" data-part-line="" aria-hidden="true"></span>
+    <span data-part="grip" data-part-grip="" aria-hidden="true"></span>
+    <span data-part="line" data-part-line="" aria-hidden="true"></span>
   `,
   styleUrl: '../../../styles/src/splitter/splitter.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'splitter',
+    'data-ui-splitter': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'role()',
     '[attr.tabindex]': 'tabIndex()',
     '[attr.data-orientation]': 'resolvedOrientation()',

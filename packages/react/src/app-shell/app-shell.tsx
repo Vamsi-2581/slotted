@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/app-shell/app-shell.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
@@ -698,16 +699,20 @@ export function AppShell({
     );
   }
 
-  const rootProps: AppShellRootProps = {
+  const rootProps: AppShellRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
-        {skipLinks.length > 0 ? <div data-part="skip">{skipLinks}</div> : null}
+        {skipLinks.length > 0 ? (
+          <div data-part="skip" data-part-skip="">
+            {skipLinks}
+          </div>
+        ) : null}
         {children}
         {veilStatus === 'unmounted' ? null : (
-          <div data-part="scrim" data-status={veilStatus} ref={setVeil} />
+          <div data-part="scrim" data-part-scrim="" data-status={veilStatus} ref={setVeil} />
         )}
-        <div data-part="layer" ref={setLayer} />
+        <div data-part="layer" data-part-layer="" ref={setLayer} />
       </>
     ),
     className,
@@ -727,7 +732,7 @@ export function AppShell({
     'data-ui': 'app-shell',
     onClick: onRootClick,
     style,
-  };
+  });
 
   return (
     <AppShellContext.Provider value={context}>

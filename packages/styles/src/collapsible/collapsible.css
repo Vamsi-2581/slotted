@@ -19,7 +19,7 @@
    * ordinary case — a nested accordion is two of these — and a descendant rule
    * would open the inner panel because the outer one is open.
    */
-  [data-ui='collapsible'] {
+  [data-ui-collapsible] {
     /**
      * The control scales, read once at the root, so `size` and the three
      * densities are one decision each rather than one per rule.
@@ -74,7 +74,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='collapsible'][data-size='sm'] {
+  [data-ui-collapsible][data-size='sm'] {
     --_height: var(--slotted-control-height-sm, 30px);
     --_font-size: var(--slotted-font-size-sm, 0.8125rem);
     --_description-font-size: var(--slotted-font-size-xs, 0.75rem);
@@ -85,7 +85,7 @@
     --_padding-block: var(--slotted-space-3, 0.375rem);
   }
 
-  [data-ui='collapsible'][data-size='lg'] {
+  [data-ui-collapsible][data-size='lg'] {
     --_height: var(--slotted-control-height-lg, 38px);
     --_font-size: var(--slotted-font-size-lg, 1rem);
     --_description-font-size: var(--slotted-font-size-sm, 0.8125rem);
@@ -103,7 +103,7 @@
    * and type size would then make one disclosure taller than the next. The
    * family states both, so the outline is semantic and the picture is not.
    */
-  [data-ui='collapsible'] > [data-part='header'] {
+  [data-ui-collapsible] > [data-part-header] {
     font: inherit;
     grid-column: 1;
     grid-row: 1;
@@ -120,7 +120,7 @@
    * that title instead; the row growing is the honest answer, and `truncate`
    * is the word for the case where it may not.
    */
-  [data-ui='collapsible'] > [data-part='header'] > [data-part='trigger'] {
+  [data-ui-collapsible] > [data-part-header] > [data-part-trigger] {
     align-items: center;
     appearance: none;
     background-color: var(--slotted-collapsible-background, transparent);
@@ -151,7 +151,7 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='collapsible'] > [data-part='header'] > [data-part='trigger']:focus-visible {
+  [data-ui-collapsible] > [data-part-header] > [data-part-trigger]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(-1 * var(--slotted-focus-ring-offset, 2px));
   }
@@ -161,7 +161,7 @@
    * second across both rows, so it is centred on the pair rather than on the
    * title alone.
    */
-  [data-ui='collapsible'] > [data-part='header'] > [data-part='trigger'] > [data-part='label'] {
+  [data-ui-collapsible] > [data-part-header] > [data-part-trigger] > [data-part-label] {
     grid-column: 1;
     grid-row: 1;
     min-inline-size: 0;
@@ -193,10 +193,10 @@
     unicode-bidi: isolate;
   }
 
-  [data-ui='collapsible'][data-truncate]
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='label'] {
+  [data-ui-collapsible][data-truncate]
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-label] {
     overflow: hidden;
     overflow-wrap: normal;
     text-overflow: ellipsis;
@@ -208,10 +208,7 @@
    * name — "Entrega, 3 de 12 itens" is what a reader hears, which is what a
    * summary of the hidden content is for.
    */
-  [data-ui='collapsible']
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='description'] {
+  [data-ui-collapsible] > [data-part-header] > [data-part-trigger] > [data-part-description] {
     color: var(--slotted-collapsible-description-color, var(--slotted-text-muted, GrayText));
     font-size: var(--_description-font-size);
     font-weight: var(--slotted-font-weight-regular, 400);
@@ -222,10 +219,10 @@
     unicode-bidi: isolate;
   }
 
-  [data-ui='collapsible'][data-truncate]
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='description'] {
+  [data-ui-collapsible][data-truncate]
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-description] {
     overflow: hidden;
     overflow-wrap: normal;
     text-overflow: ellipsis;
@@ -245,7 +242,7 @@
    * right-to-left document, and a mark that rotates between down and up is the
    * same mark in every direction.
    */
-  [data-ui='collapsible'] > [data-part='header'] > [data-part='trigger'] > [data-part='indicator'] {
+  [data-ui-collapsible] > [data-part-header] > [data-part-trigger] > [data-part-indicator] {
     /**
      * On the first line of the title, by R5, and not on the middle of what the
      * trigger holds. Centred over both rows the mark stood 9.25 to 10.25 pixels
@@ -270,20 +267,20 @@
     margin-block-start: calc((1lh - var(--_icon-size)) / 2);
   }
 
-  [data-ui='collapsible']
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='indicator']
-    > [data-ui='icon'] {
+  [data-ui-collapsible]
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-indicator]
+    > [data-ui-icon] {
     transition: rotate var(--slotted-duration-medium)
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='collapsible'][data-open]
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='indicator']
-    > [data-ui='icon'] {
+  [data-ui-collapsible][data-open]
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-indicator]
+    > [data-ui-icon] {
     rotate: 180deg;
   }
 
@@ -293,11 +290,11 @@
    * rotates, because a plus turning into a minus by rotation is a plus with a
    * stroke that vanished.
    */
-  [data-ui='collapsible'][data-indicator='plus-minus']
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='indicator']
-    > [data-ui='icon'] {
+  [data-ui-collapsible][data-indicator='plus-minus']
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-indicator]
+    > [data-ui-icon] {
     rotate: none;
   }
 
@@ -305,27 +302,25 @@
    * The mark before the words. The two columns swap and nothing else moves,
    * which is what a logical grid is for.
    */
-  [data-ui='collapsible'][data-toggle-placement='start']
-    > [data-part='header']
-    > [data-part='trigger'] {
+  [data-ui-collapsible][data-toggle-placement='start'] > [data-part-header] > [data-part-trigger] {
     grid-template-columns: auto minmax(0, 1fr);
   }
 
-  [data-ui='collapsible'][data-toggle-placement='start']
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='indicator'] {
+  [data-ui-collapsible][data-toggle-placement='start']
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-indicator] {
     grid-column: 1;
   }
 
-  [data-ui='collapsible'][data-toggle-placement='start']
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='label'],
-  [data-ui='collapsible'][data-toggle-placement='start']
-    > [data-part='header']
-    > [data-part='trigger']
-    > [data-part='description'] {
+  [data-ui-collapsible][data-toggle-placement='start']
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-label],
+  [data-ui-collapsible][data-toggle-placement='start']
+    > [data-part-header]
+    > [data-part-trigger]
+    > [data-part-description] {
     grid-column: 2;
   }
 
@@ -336,9 +331,7 @@
    * hangs to the left of the heading it belongs to — which was what the first
    * capture showed.
    */
-  [data-ui='collapsible'][data-toggle-placement='start']
-    > [data-part='panel']
-    > [data-part='content'] {
+  [data-ui-collapsible][data-toggle-placement='start'] > [data-part-panel] > [data-part-content] {
     padding-inline-start: calc(
       var(--slotted-collapsible-padding-inline, var(--_padding-inline)) + var(--_icon-size) +
         var(--_gap)
@@ -353,7 +346,7 @@
    * controls the page puts there, and the reader reaches it after the trigger
    * rather than inside it.
    */
-  [data-ui='collapsible'] > [data-part='actions'] {
+  [data-ui-collapsible] > [data-part-actions] {
     align-items: center;
     align-self: center;
     column-gap: var(--_gap);
@@ -381,7 +374,7 @@
    * available: animating it to an intrinsic height needs `interpolate-size`,
    * which is not baseline.
    */
-  [data-ui='collapsible'] > [data-part='panel'] {
+  [data-ui-collapsible] > [data-part-panel] {
     display: grid;
     grid-column: 1 / -1;
     grid-row: 2;
@@ -391,7 +384,7 @@
       var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='collapsible'][data-open] > [data-part='panel'] {
+  [data-ui-collapsible][data-open] > [data-part-panel] {
     grid-template-rows: 1fr;
   }
 
@@ -403,7 +396,7 @@
    * frame. The binding writes `inert` alongside it, so a browser without the
    * property still cannot put focus inside a closed panel.
    */
-  [data-ui='collapsible'] > [data-part='panel'] > [data-part='content'] {
+  [data-ui-collapsible] > [data-part-panel] > [data-part-content] {
     color: var(--slotted-collapsible-panel-color, var(--slotted-text, CanvasText));
     content-visibility: hidden;
     font-size: var(--_panel-font-size);
@@ -426,7 +419,7 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='collapsible'][data-open] > [data-part='panel'] > [data-part='content'] {
+  [data-ui-collapsible][data-open] > [data-part-panel] > [data-part-content] {
     content-visibility: visible;
     opacity: 1;
     padding-block-end: var(--_padding-block);
@@ -439,7 +432,7 @@
    * content is `skeleton`'s, composed by the consumer: a second family drawing
    * placeholder geometry would be two answers to one question.
    */
-  [data-ui='collapsible'][data-loading][data-open] > [data-part='panel'] > [data-part='content'] {
+  [data-ui-collapsible][data-loading][data-open] > [data-part-panel] > [data-part-content] {
     min-block-size: calc(var(--_panel-font-size) * var(--slotted-line-height-md, 1.5));
   }
 
@@ -451,9 +444,9 @@
    * already taken out of action — the library learned that from a defect, and
    * `states.test.mjs` is what keeps it from being relearned the same way.
    */
-  [data-ui='collapsible']:not([data-disabled])
-    > [data-part='header']
-    > [data-part='trigger']:enabled:hover {
+  [data-ui-collapsible]:not([data-disabled])
+    > [data-part-header]
+    > [data-part-trigger]:enabled:hover {
     background-color: var(
       --slotted-collapsible-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -461,16 +454,16 @@
     color: var(--slotted-collapsible-hover-color, var(--slotted-text, CanvasText));
   }
 
-  [data-ui='collapsible']:not([data-disabled])
-    > [data-part='header']
-    > [data-part='trigger']:enabled:active {
+  [data-ui-collapsible]:not([data-disabled])
+    > [data-part-header]
+    > [data-part-trigger]:enabled:active {
     background-color: var(
       --slotted-collapsible-active-background,
       var(--slotted-tone-secondary-subtle-active)
     );
   }
 
-  [data-ui='collapsible'] > [data-part='header'] > [data-part='trigger']:disabled {
+  [data-ui-collapsible] > [data-part-header] > [data-part-trigger]:disabled {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: not-allowed;
   }
@@ -480,14 +473,14 @@
    * `aria-disabled="true"`, so it is still focusable and still announced — the
    * mark simply says the press will do nothing.
    */
-  [data-ui='collapsible']
-    > [data-part='header']
-    > [data-part='trigger'][aria-disabled='true']
-    > [data-part='indicator'] {
+  [data-ui-collapsible]
+    > [data-part-header]
+    > [data-part-trigger][aria-disabled='true']
+    > [data-part-indicator] {
     opacity: 0.45;
   }
 
-  [data-ui='collapsible'][data-disabled] {
+  [data-ui-collapsible][data-disabled] {
     color: var(--slotted-disabled-foreground, GrayText);
   }
 
@@ -498,7 +491,7 @@
    * list. The group closes the bottom of the stack with a rule of its own, so
    * the item never has to know whether it is the last one.
    */
-  [data-ui='collapsible'][data-variant='ruled'] {
+  [data-ui-collapsible][data-variant='ruled'] {
     border-block-start: var(--_rule-size) solid
       var(--slotted-collapsible-rule-color, var(--slotted-border-subtle, ButtonBorder));
   }
@@ -507,7 +500,7 @@
    * Its own card. It is the standalone disclosure's shape, and it is what an
    * accordion hands its items under `separated`.
    */
-  [data-ui='collapsible'][data-variant='framed'] {
+  [data-ui-collapsible][data-variant='framed'] {
     background-color: var(--slotted-collapsible-surface, var(--slotted-surface-raised, Canvas));
     border: var(--_rule-size) solid
       var(--slotted-collapsible-rule-color, var(--slotted-border-subtle, ButtonBorder));
@@ -525,13 +518,13 @@
    * `@container (min-inline-size: var(--x))` is invalid CSS, so a reflowing
    * family owns its container and writes the number.
    */
-  [data-ui='collapsible'] {
+  [data-ui-collapsible] {
     container-name: slotted-collapsible;
     container-type: inline-size;
   }
 
   @container slotted-collapsible (max-inline-size: 22rem) {
-    [data-ui='collapsible'] > [data-part='actions'] {
+    [data-ui-collapsible] > [data-part-actions] {
       grid-column: 1 / -1;
       grid-row: 2;
       justify-content: flex-end;
@@ -539,7 +532,7 @@
       padding-inline-start: var(--slotted-collapsible-padding-inline, var(--_padding-inline));
     }
 
-    [data-ui='collapsible'] > [data-part='panel'] {
+    [data-ui-collapsible] > [data-part-panel] {
       grid-row: 3;
     }
   }

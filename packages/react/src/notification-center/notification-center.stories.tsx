@@ -543,14 +543,14 @@ export const Composition: Story = {
         <Inbox
           renderItem={(item, state) => (
             <>
-              <span data-part="title" id={state.ids.title}>
+              <span data-part="title" data-part-title="" id={state.ids.title}>
                 {item.title}
               </span>
               <Inline gap={3}>
                 <Badge shape="pill" size="sm" tone={state.tone} variant="soft">
                   {state.tone}
                 </Badge>
-                <time data-part="time" dateTime={state.time.dateTime}>
+                <time data-part="time" data-part-time="" dateTime={state.time.dateTime}>
                   {state.time.text}
                 </time>
               </Inline>

@@ -25,7 +25,7 @@
    * it to the consumer's own content, and a family that covers a box has no
    * business changing how that box lays itself out.
    */
-  [data-ui='loading-overlay'][data-part='root'] {
+  [data-ui-loading-overlay][data-part-root] {
     /**
      * The distance the panel keeps from the region's edges. It is the panel's
      * own margin rather than the layer's padding, and the difference is not
@@ -45,7 +45,7 @@
    * position is the overlay step, below `popover` and `toast`, because a
    * message about a wait has to stay readable over anything the wait raises.
    */
-  [data-ui='loading-overlay'][data-part='root'][data-scope='page'] {
+  [data-ui-loading-overlay][data-part-root][data-scope='page'] {
     inset: 0;
     position: fixed;
     z-index: var(--slotted-z-index-overlay, 1000);
@@ -73,7 +73,7 @@
    * a `table` or a `tbody` cannot legally hold this `div`, so a family covering
    * table internals covers the table instead.
    */
-  [data-ui='loading-overlay'] > [data-part='content'] {
+  [data-ui-loading-overlay] > [data-part-content] {
     display: contents;
   }
 
@@ -92,7 +92,7 @@
    * padding box, the scrim measures the inline size the root does and contains
    * nothing but the panel.
    */
-  [data-ui='loading-overlay'] > [data-part='scrim'] {
+  [data-ui-loading-overlay] > [data-part-scrim] {
     align-items: center;
     container-name: slotted-loading-overlay;
     container-type: size;
@@ -108,8 +108,8 @@
    * `dialog` and `drawer` already read: three families dimming a surface in
    * three tints would be three answers to one question.
    */
-  [data-ui='loading-overlay'][data-veil='wash'] > [data-part='scrim'],
-  [data-ui='loading-overlay'][data-veil='blur'] > [data-part='scrim'] {
+  [data-ui-loading-overlay][data-veil='wash'] > [data-part-scrim],
+  [data-ui-loading-overlay][data-veil='blur'] > [data-part-scrim] {
     background: var(--slotted-loading-overlay-scrim, var(--slotted-scrim, Canvas));
   }
 
@@ -123,7 +123,7 @@
    * parallel scale `docs/token-foundation.md` refuses. A theme retunes the
    * hook instead.
    */
-  [data-ui='loading-overlay'][data-veil='blur'] > [data-part='scrim'] {
+  [data-ui-loading-overlay][data-veil='blur'] > [data-part-scrim] {
     backdrop-filter: blur(var(--slotted-loading-overlay-blur, 3px));
   }
 
@@ -157,13 +157,13 @@
    * so a click during those hundred and twenty milliseconds has somewhere to
    * land.
    */
-  [data-ui='loading-overlay'] > [data-part='scrim'] {
+  [data-ui-loading-overlay] > [data-part-scrim] {
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit, ease);
   }
 
-  [data-ui='loading-overlay'] > [data-part='scrim'][data-loading] {
+  [data-ui-loading-overlay] > [data-part-scrim][data-loading] {
     opacity: 1;
     pointer-events: auto;
     transition-duration: var(--slotted-duration-medium);
@@ -189,7 +189,7 @@
    * the shadow is dropped and the scrim goes opaque, so the edge is the only
    * thing left separating the panel from what is behind it.
    */
-  [data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel'] {
+  [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] {
     align-items: center;
     background: var(--slotted-loading-overlay-surface, var(--slotted-surface-raised, Canvas));
     border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle, CanvasText);
@@ -240,7 +240,7 @@
    * holds at every step; a second, smaller step would have run out of scale
    * under `sm`.
    */
-  [data-ui='loading-overlay'][data-size='sm'] > [data-part='scrim'] > [data-part='panel'] {
+  [data-ui-loading-overlay][data-size='sm'] > [data-part-scrim] > [data-part-panel] {
     --_floor: min(100%, calc(3 * var(--slotted-control-height-sm, 30px)));
     --_line-height: var(--slotted-line-height-sm, 1.35);
     --_text-size: var(--slotted-control-font-size-sm, 12px);
@@ -249,7 +249,7 @@
     --_padding-inline: var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='loading-overlay'][data-size='md'] > [data-part='scrim'] > [data-part='panel'] {
+  [data-ui-loading-overlay][data-size='md'] > [data-part-scrim] > [data-part-panel] {
     --_floor: min(100%, calc(3 * var(--slotted-control-height-md, 34px)));
     --_line-height: var(--slotted-line-height-md, 1.4);
     --_text-size: var(--slotted-control-font-size-md, 13px);
@@ -258,7 +258,7 @@
     --_padding-inline: var(--slotted-space-6, 1rem);
   }
 
-  [data-ui='loading-overlay'][data-size='lg'] > [data-part='scrim'] > [data-part='panel'] {
+  [data-ui-loading-overlay][data-size='lg'] > [data-part-scrim] > [data-part-panel] {
     --_floor: min(100%, calc(3 * var(--slotted-control-height-lg, 38px)));
     --_line-height: var(--slotted-line-height-lg, 1.45);
     --_text-size: var(--slotted-control-font-size-lg, 14px);
@@ -307,10 +307,7 @@
    * gave up, at the 3:1 `progress-indicator` holds between a contained shape
    * and its container, in every scheme rather than in one.
    */
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='indicator'] {
+  [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-indicator] {
     display: grid;
     justify-items: stretch;
     justify-self: stretch;
@@ -326,10 +323,10 @@
    * `ProgressBar` in a centred, content-sized slot drew a two-pixel dash at
    * the left of the panel: a bar has no intrinsic width to be centred at.
    */
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='indicator'][data-default] {
+  [data-ui-loading-overlay]
+    > [data-part-scrim]
+    > [data-part-panel]
+    > [data-part-indicator][data-default] {
     justify-items: center;
     justify-self: center;
   }
@@ -350,17 +347,14 @@
    * a scrollbar that flickered in and out for as long as the wait lasted. A
    * scrollbar nobody can reach for is not worth a defect that visible.
    */
-  [data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel'] > [data-part='label'] {
+  [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-label] {
     font-size: var(--_text-size);
     font-weight: var(--slotted-font-weight-medium, 500);
     line-height: var(--_line-height);
     overflow-wrap: anywhere;
   }
 
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='description'] {
+  [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-description] {
     color: var(--slotted-text-muted, GrayText);
     font-size: var(--_text-size);
     line-height: var(--_line-height);
@@ -398,10 +392,10 @@
    * move and the tight-region rules all still find it — and only the paint
    * steps back.
    */
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='cancel']:not([data-ui]) {
+  [data-ui-loading-overlay]
+    > [data-part-scrim]
+    > [data-part-panel]
+    > [data-part-cancel]:not([data-ui]) {
     align-items: center;
     background: transparent;
     border: var(--slotted-control-border-width, 1px) solid
@@ -430,33 +424,33 @@
    * `packages/styles/src/states.test.mjs` enforces. A control the browser has
    * already switched off must not look operable.
    */
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='cancel']:not([data-ui]):hover:not(:disabled) {
+  [data-ui-loading-overlay]
+    > [data-part-scrim]
+    > [data-part-panel]
+    > [data-part-cancel]:not([data-ui]):hover:not(:disabled) {
     background: var(--slotted-tone-secondary-subtle-hover);
   }
 
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='cancel']:not([data-ui]):active:not(:disabled) {
+  [data-ui-loading-overlay]
+    > [data-part-scrim]
+    > [data-part-panel]
+    > [data-part-cancel]:not([data-ui]):active:not(:disabled) {
     background: var(--slotted-tone-secondary-subtle-active);
   }
 
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='cancel']:not([data-ui]):disabled {
+  [data-ui-loading-overlay]
+    > [data-part-scrim]
+    > [data-part-panel]
+    > [data-part-cancel]:not([data-ui]):disabled {
     border-color: var(--slotted-disabled-border);
     color: var(--slotted-disabled-foreground);
     cursor: default;
   }
 
-  [data-ui='loading-overlay']
-    > [data-part='scrim']
-    > [data-part='panel']
-    > [data-part='cancel']:not([data-ui]):focus-visible {
+  [data-ui-loading-overlay]
+    > [data-part-scrim]
+    > [data-part-panel]
+    > [data-part-cancel]:not([data-ui]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -467,7 +461,7 @@
    * before it is operated. Script puts focus there and Tab never does, so the
    * ring is the only thing the part needs.
    */
-  [data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel']:focus-visible {
+  [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -503,7 +497,7 @@
      * holding it to eighteen rem is what squeezed a sentence into one word per
      * line beside a control that then had nowhere to sit.
      */
-    [data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel'] {
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] {
       grid-template-columns: auto minmax(0, 1fr) auto;
       justify-items: stretch;
       max-inline-size: calc(100% - 2 * var(--_inset));
@@ -535,22 +529,19 @@
      * dash at the left of the panel, which is what the first reference page
      * showed.
      */
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']:not(:has(> [data-part='indicator'][data-default])) {
+    [data-ui-loading-overlay]
+      > [data-part-scrim]
+      > [data-part-panel]:not(:has(> [data-part-indicator][data-default])) {
       grid-template-columns: minmax(6rem, 2fr) minmax(0, 3fr) auto;
     }
 
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']
-      > [data-part='indicator'] {
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-indicator] {
       align-self: center;
       grid-column: 1;
       grid-row: 1 / span 2;
     }
 
-    [data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel'] > [data-part='label'] {
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-label] {
       align-self: end;
       grid-column: 2;
       grid-row: 1;
@@ -565,27 +556,24 @@
      * with six pixels of nothing under them. The reviewer read it as text
      * pinned to the ceiling of the bar, which is exactly what it was.
      */
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']:not(:has(> [data-part='description']))
-      > [data-part='label'] {
+    [data-ui-loading-overlay]
+      > [data-part-scrim]
+      > [data-part-panel]:not(:has(> [data-part-description]))
+      > [data-part-label] {
       align-self: center;
       grid-row: 1 / span 2;
     }
 
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']
-      > [data-part='description'] {
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-description] {
       align-self: start;
       grid-column: 2;
       grid-row: 2;
     }
 
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']
-      > [data-part='cancel']:not([data-ui]) {
+    [data-ui-loading-overlay]
+      > [data-part-scrim]
+      > [data-part-panel]
+      > [data-part-cancel]:not([data-ui]) {
       align-self: center;
       grid-column: 3;
       grid-row: 1 / span 2;
@@ -625,7 +613,7 @@
      * hold a mark and a Cancel, so a 58-pixel pill overhangs it by eleven
      * pixels at each end — visible, pressable, and the lesser of the two.
      */
-    [data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel'] {
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] {
       --_floor: auto;
       --_inset: 0px;
 
@@ -651,24 +639,24 @@
      * a mark shrunk to the region's height beside a control that was not is
      * two objects at two scales in one pill.
      */
-    [data-ui='loading-overlay'][data-size='sm']
-      > [data-part='scrim']
-      > [data-part='panel']:not(:has(> [data-part='cancel']))
-      > [data-part='indicator'] {
+    [data-ui-loading-overlay][data-size='sm']
+      > [data-part-scrim]
+      > [data-part-panel]:not(:has(> [data-part-cancel]))
+      > [data-part-indicator] {
       --slotted-progress-indicator-size: min(var(--slotted-control-height-sm, 30px), 100cqb);
     }
 
-    [data-ui='loading-overlay'][data-size='md']
-      > [data-part='scrim']
-      > [data-part='panel']:not(:has(> [data-part='cancel']))
-      > [data-part='indicator'] {
+    [data-ui-loading-overlay][data-size='md']
+      > [data-part-scrim]
+      > [data-part-panel]:not(:has(> [data-part-cancel]))
+      > [data-part-indicator] {
       --slotted-progress-indicator-size: min(var(--slotted-control-height-md, 34px), 100cqb);
     }
 
-    [data-ui='loading-overlay'][data-size='lg']
-      > [data-part='scrim']
-      > [data-part='panel']:not(:has(> [data-part='cancel']))
-      > [data-part='indicator'] {
+    [data-ui-loading-overlay][data-size='lg']
+      > [data-part-scrim]
+      > [data-part-panel]:not(:has(> [data-part-cancel]))
+      > [data-part-indicator] {
       --slotted-progress-indicator-size: min(var(--slotted-control-height-lg, 38px), 100cqb);
     }
 
@@ -688,9 +676,7 @@
      * few pixels is better than a control clipped out of reach — which is the
      * one thing this family exists to avoid doing to a reader.
      */
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']:has(> [data-part='cancel']) {
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel]:has(> [data-part-cancel]) {
       align-items: center;
       grid-auto-flow: column;
       grid-template-columns: none;
@@ -709,9 +695,9 @@
       );
     }
 
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']:not(:has(> [data-part='cancel'])) {
+    [data-ui-loading-overlay]
+      > [data-part-scrim]
+      > [data-part-panel]:not(:has(> [data-part-cancel])) {
       background: none;
       border: 0;
       box-shadow: none;
@@ -719,11 +705,8 @@
       padding-inline: 0;
     }
 
-    [data-ui='loading-overlay'] > [data-part='scrim'] > [data-part='panel'] > [data-part='label'],
-    [data-ui='loading-overlay']
-      > [data-part='scrim']
-      > [data-part='panel']
-      > [data-part='description'] {
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-label],
+    [data-ui-loading-overlay] > [data-part-scrim] > [data-part-panel] > [data-part-description] {
       display: none;
     }
   }

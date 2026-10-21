@@ -33,7 +33,7 @@
    * The backdrop holds it and fades it, so the scrim arrives and leaves the way
    * `dialog`'s does (`scrim-motion.test.mjs`).
    */
-  [data-ui='tour'] {
+  [data-ui-tour] {
     --_scrim: var(--slotted-tour-scrim, var(--slotted-scrim, Canvas));
     --_spotlight-padding: var(--slotted-tour-spotlight-padding, var(--slotted-space-3, 0.375rem));
     --_spotlight-radius: var(--slotted-tour-spotlight-radius, var(--slotted-radius-md, 6px));
@@ -83,12 +83,12 @@
 
   /* Visible at once on the way in: a frame hidden until the end of a transition
      cannot take focus in the frame it opens, and the card is focused then. */
-  [data-ui='tour'][data-open] {
+  [data-ui-tour][data-open] {
     visibility: visible;
     transition: none;
   }
 
-  [data-ui='tour'][data-size='sm'] {
+  [data-ui-tour][data-size='sm'] {
     --_inset-block: var(--slotted-tour-padding-block-sm, var(--slotted-space-5, 0.75rem));
     --_inset-inline: var(--slotted-tour-padding-inline-sm, var(--slotted-space-5, 0.75rem));
     --_title-font-size: var(--slotted-font-size-md, 0.875rem);
@@ -96,7 +96,7 @@
     --_measure: var(--slotted-tour-measure-sm, 16rem);
   }
 
-  [data-ui='tour'][data-size='lg'] {
+  [data-ui-tour][data-size='lg'] {
     --_inset-block: var(--slotted-tour-padding-block-lg, var(--slotted-space-7, 1.25rem));
     --_inset-inline: var(--slotted-tour-padding-inline-lg, var(--slotted-space-7, 1.25rem));
     --_title-font-size: var(--slotted-font-size-xl, 1.125rem);
@@ -110,7 +110,7 @@
    * step — the backdrop paints the scrim itself, as `dialog`'s does. With one,
    * the spotlight's shadow paints it and the backdrop only carries the fade.
    */
-  [data-ui='tour'] > [data-part='backdrop'] {
+  [data-ui-tour] > [data-part-backdrop] {
     position: absolute;
     inset: 0;
     overflow: clip;
@@ -119,19 +119,19 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='tour'][data-open] > [data-part='backdrop'] {
+  [data-ui-tour][data-open] > [data-part-backdrop] {
     opacity: 1;
     transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
 
-  [data-ui='tour'][data-spotlight] > [data-part='backdrop'] {
+  [data-ui-tour][data-spotlight] > [data-part-backdrop] {
     background: transparent;
   }
 
   /* A modal step takes every press outside the card, the target's included:
      the page beneath is inert, and a press that reached it would do nothing
      a reader could see. */
-  [data-ui='tour'][data-modal] > [data-part='backdrop'] {
+  [data-ui-tour][data-modal] > [data-part-backdrop] {
     pointer-events: auto;
   }
 
@@ -144,7 +144,7 @@
    * it from any position the cutout can take, a target half off screen
    * included.
    */
-  [data-ui='tour'] > [data-part='backdrop'] > [data-part='spotlight'] {
+  [data-ui-tour] > [data-part-backdrop] > [data-part-spotlight] {
     position: absolute;
     left: calc(var(--slotted-tour-target-x, 0px) - var(--_spotlight-padding));
     top: calc(var(--slotted-tour-target-y, 0px) - var(--_spotlight-padding));
@@ -179,17 +179,17 @@
    *   before the cutout goes, and the backdrop, which paints the same ink,
    *   takes over without a seam.
    */
-  [data-ui='tour'][data-spot='travel'] > [data-part='backdrop'] > [data-part='spotlight'] {
+  [data-ui-tour][data-spot='travel'] > [data-part-backdrop] > [data-part-spotlight] {
     transition-property: left, top, width, height;
     transition-duration: var(--slotted-duration-long);
     transition-timing-function: var(--slotted-easing-standard);
   }
 
-  [data-ui='tour'][data-spot='light'] > [data-part='backdrop'] > [data-part='spotlight'] {
+  [data-ui-tour][data-spot='light'] > [data-part-backdrop] > [data-part-spotlight] {
     animation: slotted-tour-light var(--slotted-duration-long) var(--slotted-easing-standard);
   }
 
-  [data-ui='tour'][data-spot='close'] > [data-part='backdrop'] > [data-part='spotlight'] {
+  [data-ui-tour][data-spot='close'] > [data-part-backdrop] > [data-part-spotlight] {
     background-color: var(--_scrim);
     transition: background-color var(--slotted-duration-long) var(--slotted-easing-standard);
   }
@@ -208,7 +208,7 @@
    * positioner writes `left` and never `right`, and `inset-inline-start`
    * resolves to `right` in a right-to-left document.
    */
-  [data-ui='tour'] > [data-part='surface'] {
+  [data-ui-tour] > [data-part-surface] {
     position: absolute;
     inset-block-start: 0;
 
@@ -243,12 +243,12 @@
    * card between two steps, still at the old target with the new words, is
    * never drawn.
    */
-  [data-ui='tour'][data-open] > [data-part='surface'][data-ready]:not([data-leaving]) {
+  [data-ui-tour][data-open] > [data-part-surface][data-ready]:not([data-leaving]) {
     opacity: 1;
     transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
 
-  [data-ui='tour'] > [data-part='surface'][data-detached] {
+  [data-ui-tour] > [data-part-surface][data-detached] {
     visibility: hidden;
   }
 
@@ -258,7 +258,7 @@
    * absolutely placed box with all four insets at zero centre it without a
    * transform, which the entrance owns.
    */
-  [data-ui='tour'] > [data-part='surface'][data-placement='centered'] {
+  [data-ui-tour] > [data-part-surface][data-placement='centered'] {
     inset: 0;
     margin: auto;
     block-size: max-content;
@@ -272,7 +272,7 @@
    * answers zero everywhere else.
    */
   @supports (inset: env(safe-area-inset-top)) {
-    [data-ui='tour'] > [data-part='surface'][data-placement='centered'] {
+    [data-ui-tour] > [data-part-surface][data-placement='centered'] {
       inset: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
         env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
     }
@@ -286,7 +286,7 @@
    * one narrower than the screen leaves a sliver of page on either side
    * that nobody can use.
    */
-  [data-ui='tour'][data-compact] > [data-part='surface'][data-placement='anchored'] {
+  [data-ui-tour][data-compact] > [data-part-surface][data-placement='anchored'] {
     /* Capped, so layout="compact" forced on a wide screen is a wide card and
        not a banner across the page. */
     --_compact-measure: var(--slotted-tour-measure-compact, 32rem);
@@ -294,11 +294,11 @@
     max-inline-size: min(var(--slotted-positioner-available-width, 100vw), var(--_compact-measure));
   }
 
-  [data-ui='tour'] > [data-part='surface'][data-placement='centered'] > [data-part='arrow'] {
+  [data-ui-tour] > [data-part-surface][data-placement='centered'] > [data-part-arrow] {
     display: none;
   }
 
-  [data-ui='tour'] > [data-part='surface'] > [data-part='focus-guard'] {
+  [data-ui-tour] > [data-part-surface] > [data-part-focus-guard] {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
@@ -311,7 +311,7 @@
 
   /* ── The card ─────────────────────────────────────────────────────────── */
 
-  [data-ui='tour'] > [data-part='surface'] > [data-part='content'] {
+  [data-ui-tour] > [data-part-surface] > [data-part-content] {
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -336,11 +336,11 @@
     outline: none;
   }
 
-  [data-ui='tour'] > [data-part='surface'][data-placement='centered'] > [data-part='content'] {
+  [data-ui-tour] > [data-part-surface][data-placement='centered'] > [data-part-content] {
     max-block-size: calc(100vh - 2 * var(--_gap));
   }
 
-  [data-ui='tour'] > [data-part='surface'] > [data-part='content']:focus-visible {
+  [data-ui-tour] > [data-part-surface] > [data-part-content]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
@@ -351,7 +351,7 @@
    * top rather than as an image placed inside it; its height is its own, and
    * a consumer who wants a fixed frame writes `aspect-ratio` on it.
    */
-  [data-ui='tour'] [data-part='content'] > [data-part='media'] {
+  [data-ui-tour] [data-part-content] > [data-part-media] {
     display: block;
     flex: none;
     inline-size: 100%;
@@ -361,7 +361,7 @@
     border-block-end: var(--_border-width) solid var(--_border-color);
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='media'] > :is(img, video, svg) {
+  [data-ui-tour] [data-part-content] > [data-part-media] > :is(img, video, svg) {
     display: block;
     inline-size: 100%;
     block-size: auto;
@@ -372,7 +372,7 @@
    * close control sits in it without stretching it, and the progress text is
    * centred on the same line.
    */
-  [data-ui='tour'] [data-part='content'] > [data-part='header'] {
+  [data-ui-tour] [data-part-content] > [data-part-header] {
     display: flex;
     flex: none;
     /* `start`, so a progress text a translation wraps keeps the close control
@@ -386,7 +386,7 @@
       calc(var(--_inset-inline) - var(--slotted-space-3, 0.375rem));
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='header'] > [data-part='progress'] {
+  [data-ui-tour] [data-part-content] > [data-part-header] > [data-part-progress] {
     flex: 1 1 auto;
     min-inline-size: 0;
     margin: 0;
@@ -403,7 +403,7 @@
     unicode-bidi: plaintext;
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='header'] > [data-part='close'] {
+  [data-ui-tour] [data-part-content] > [data-part-header] > [data-part-close] {
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -427,31 +427,22 @@
         var(--slotted-control-transition-easing, var(--slotted-easing-standard));
   }
 
-  [data-ui='tour']
-    [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:enabled:hover {
+  [data-ui-tour] [data-part-content] > [data-part-header] > [data-part-close]:enabled:hover {
     background: var(--slotted-tone-secondary-subtle-hover, rgb(15 23 42 / 0.06));
     color: var(--_text);
   }
 
-  [data-ui='tour']
-    [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:enabled:active {
+  [data-ui-tour] [data-part-content] > [data-part-header] > [data-part-close]:enabled:active {
     background: var(--slotted-tone-secondary-subtle-active, rgb(15 23 42 / 0.1));
   }
 
-  [data-ui='tour']
-    [data-part='content']
-    > [data-part='header']
-    > [data-part='close']:focus-visible {
+  [data-ui-tour] [data-part-content] > [data-part-header] > [data-part-close]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='title'] {
+  [data-ui-tour] [data-part-content] > [data-part-title] {
     flex: none;
     margin: 0;
     padding-inline: var(--_inset-inline);
@@ -470,12 +461,12 @@
 
   /* A card with no header — the consumer composed their own — starts at the
      title, and the title takes the header's inset. */
-  [data-ui='tour'] [data-part='content'] > [data-part='title']:first-child,
-  [data-ui='tour'] [data-part='content'] > [data-part='media'] + [data-part='title'] {
+  [data-ui-tour] [data-part-content] > [data-part-title]:first-child,
+  [data-ui-tour] [data-part-content] > [data-part-media] + [data-part-title] {
     padding-block-start: var(--_inset-block);
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='description'] {
+  [data-ui-tour] [data-part-content] > [data-part-description] {
     flex: none;
     margin: 0;
     padding-inline: var(--_inset-inline);
@@ -489,7 +480,7 @@
    * The step's own content, and the only part that scrolls. The shadow at each
    * edge is popover's, for the reason recorded there.
    */
-  [data-ui='tour'] [data-part='content'] > [data-part='body'] {
+  [data-ui-tour] [data-part-content] > [data-part-body] {
     flex: 1 1 auto;
     min-block-size: 0;
     overflow-x: hidden;
@@ -534,7 +525,7 @@
    * stacks the line skip was pushed onto above the pair. The document order,
    * which is the tab order, is still skip, back, next, and so is the picture.
    */
-  [data-ui='tour'] [data-part='content'] > [data-part='footer'] {
+  [data-ui-tour] [data-part-content] > [data-part-footer] {
     display: flex;
     flex: none;
     flex-direction: row-reverse;
@@ -546,15 +537,15 @@
     padding-inline: var(--_inset-inline);
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='footer'] > [data-part='next'] {
+  [data-ui-tour] [data-part-content] > [data-part-footer] > [data-part-next] {
     order: 1;
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='footer'] > [data-part='prev'] {
+  [data-ui-tour] [data-part-content] > [data-part-footer] > [data-part-prev] {
     order: 2;
   }
 
-  [data-ui='tour'] [data-part='content'] > [data-part='footer'] > [data-part='skip'] {
+  [data-ui-tour] [data-part-content] > [data-part-footer] > [data-part-skip] {
     order: 3;
     margin-inline-end: auto;
     /* A ghost button's label sits a button's padding in from its edge; pulled
@@ -568,7 +559,7 @@
    * popover's, in physical properties and over the card, for the two reasons
    * `tooltip.css` sets out.
    */
-  [data-ui='tour'] > [data-part='surface'] > [data-part='arrow'] {
+  [data-ui-tour] > [data-part-surface] > [data-part-arrow] {
     /**
      * Where the arrow may stand: on the straight run of the card's edge. The
      * positioner keeps it `arrowPadding` from the edge of the **layer**, and
@@ -601,7 +592,7 @@
     border: 0 solid var(--_border-color);
   }
 
-  [data-ui='tour'] > [data-part='surface'][data-side='top'] > [data-part='arrow'] {
+  [data-ui-tour] > [data-part-surface][data-side='top'] > [data-part-arrow] {
     left: var(--_arrow-x);
     top: auto;
     bottom: calc(var(--_gap) - var(--_arrow-size) / 2);
@@ -610,7 +601,7 @@
     border-bottom-right-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='tour'] > [data-part='surface'][data-side='bottom'] > [data-part='arrow'] {
+  [data-ui-tour] > [data-part-surface][data-side='bottom'] > [data-part-arrow] {
     left: var(--_arrow-x);
     top: calc(var(--_gap) - var(--_arrow-size) / 2);
     bottom: auto;
@@ -619,7 +610,7 @@
     border-top-left-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='tour'] > [data-part='surface'][data-side='left'] > [data-part='arrow'] {
+  [data-ui-tour] > [data-part-surface][data-side='left'] > [data-part-arrow] {
     top: var(--_arrow-y);
     left: auto;
     right: calc(var(--_gap) - var(--_arrow-size) / 2);
@@ -628,7 +619,7 @@
     border-top-right-radius: var(--_arrow-tip-radius);
   }
 
-  [data-ui='tour'] > [data-part='surface'][data-side='right'] > [data-part='arrow'] {
+  [data-ui-tour] > [data-part-surface][data-side='right'] > [data-part-arrow] {
     top: var(--_arrow-y);
     left: calc(var(--_gap) - var(--_arrow-size) / 2);
     right: auto;
@@ -644,9 +635,9 @@
    * card holds focus the arrow's two outer edges are drawn as the ring, and
    * the ring runs round the point instead of stopping at it.
    */
-  [data-ui='tour']
-    > [data-part='surface']:has(> [data-part='content']:focus-visible)
-    > [data-part='arrow'] {
+  [data-ui-tour]
+    > [data-part-surface]:has(> [data-part-content]:focus-visible)
+    > [data-part-arrow] {
     --_border-width: var(--slotted-focus-ring-width, 2px);
     border-color: var(--slotted-focus-ring-color, currentColor);
   }
@@ -658,7 +649,7 @@
    * sets its own `display`, which outranks the user agent's rule for the
    * attribute, so the attribute is restated last.
    */
-  [data-ui='tour'] [data-part='content'] [data-part][hidden] {
+  [data-ui-tour] [data-part-content] [data-part][hidden] {
     display: none;
   }
 
@@ -669,11 +660,11 @@
      * what forced colours keep, so the target is ringed in the system's
      * highlight instead of being lit.
      */
-    [data-ui='tour'] > [data-part='backdrop'] > [data-part='spotlight'] {
+    [data-ui-tour] > [data-part-backdrop] > [data-part-spotlight] {
       outline: var(--slotted-focus-ring-width, 2px) solid Highlight;
     }
 
-    [data-ui='tour'][data-spotlight] > [data-part='backdrop'] {
+    [data-ui-tour][data-spotlight] > [data-part-backdrop] {
       background: transparent;
     }
   }

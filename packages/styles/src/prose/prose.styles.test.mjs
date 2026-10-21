@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/prose/contract.json', import.meta.url),
@@ -9,10 +20,12 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./prose.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./prose.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./prose.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const guard = ":not(:where([data-part='exclude'], [data-part='exclude'] *))";
 
 /** Every selector in the sheet, one entry per selector, comments removed. */
@@ -78,7 +91,12 @@ test('is selected by the identifier the contract declares', () => {
 test('styles every part the contract declares', () => {
   for (const part of contract.members.prose.parts) {
     if (part === 'root') continue;
-    assert.ok(declarations.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    /* `lead`, `exclude` and `footnotes` are written by the consumer's content,
+       so the sheet keys them on the value rather than on the selector key. */
+    const selector = ['lead', 'exclude', 'footnotes'].includes(part)
+      ? `[data-part='${part}']`
+      : `[data-part-${part.toLowerCase()}]`;
+    assert.ok(declarations.includes(selector), `no rule reaches the ${part} part`);
   }
 });
 
@@ -151,13 +169,13 @@ test('spaces blocks from their leading edge only', () => {
  * pointers only.
  */
 test('hides the heading anchor without removing it', () => {
-  const rule = declarations.split(`${ui} [data-part='anchor'] {`)[1]?.split('}')[0] ?? '';
+  const rule = declarations.split(`${ui} [data-part-anchor] {`)[1]?.split('}')[0] ?? '';
 
   assert.match(rule, /opacity:\s*0/, 'the anchor is not hidden by opacity');
   assert.ok(!/display:\s*none/.test(rule), 'display: none takes the anchor out of the sequence');
   assert.ok(!/visibility:\s*hidden/.test(rule), 'visibility: hidden does the same');
   assert.ok(
-    declarations.includes(`${ui} [data-part='anchor']:focus-visible`),
+    declarations.includes(`${ui} [data-part-anchor]:focus-visible`),
     'the anchor appears on hover and never on focus',
   );
 });
@@ -171,7 +189,7 @@ test('hides the heading anchor without removing it', () => {
 test('rings the scrolling block only where it is focusable', () => {
   assert.ok(declarations.includes(`${contract.scroll.focusSelector}:focus-visible`));
   assert.ok(
-    !declarations.includes(`[data-part='scroll']:focus-visible`),
+    !declarations.includes(`[data-part-scroll]:focus-visible`),
     'the ring must not be painted on a block that takes no focus',
   );
 });
@@ -204,7 +222,7 @@ test('borrows the token of each family whose bare element it paints', () => {
   }
   for (const family of ['link', 'divider', 'kbd', 'checkbox', 'card']) {
     assert.ok(
-      !declarations.includes(`[data-ui='${family}']`),
+      !declarations.includes(`[data-ui-${family.toLowerCase()}]`),
       `a rule here reaches into ${family}`,
     );
   }

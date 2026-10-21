@@ -27,6 +27,7 @@ import {
   model,
   output,
   signal,
+  untracked,
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
@@ -328,8 +329,10 @@ export abstract class SlDialogBase {
         outsidePressEvent: 'click',
       });
 
-      const wanted = this.resolvedInitialFocus();
-      const returnTo = this.finalFocus();
+      /* Read once per open: a focus input that changes while the layer is open
+         does not take the layer down and build it again. */
+      const wanted = untracked(() => this.resolvedInitialFocus());
+      const returnTo = untracked(() => this.finalFocus());
       this.scope = createFocusScope(panel, {
         contain: modal,
         initial:
@@ -488,8 +491,8 @@ const LAYER_TEMPLATE = `
   @if (mounted()) {
     <div
       #layer
-      data-ui="dialog"
-      data-part="root"
+      data-ui="dialog" data-ui-dialog=""
+      data-part="root" data-part-root=""
       [attr.data-size]="resolvedSize()"
       [attr.data-placement]="resolvedPlacement()"
       [attr.data-scroll]="resolvedScroll()"
@@ -504,11 +507,11 @@ const LAYER_TEMPLATE = `
       [attr.data-loading]="loading() ? '' : null"
       [attr.inert]="interactive() ? null : ''"
     >
-      <div data-part="backdrop"></div>
-      <div data-part="viewport">
+      <div data-part="backdrop" data-part-backdrop=""></div>
+      <div data-part="viewport" data-part-viewport="">
         <div
           #panel
-          data-part="content"
+          data-part="content" data-part-content=""
           [id]="contentId"
           [attr.role]="role()"
           [attr.aria-modal]="resolvedModal() ? 'true' : null"

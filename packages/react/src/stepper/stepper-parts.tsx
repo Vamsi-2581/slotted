@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import { stepFocusIndex } from '@slotted/core/steps';
 import { Children, isValidElement, useContext, useEffect, useRef, type ReactNode } from 'react';
 
@@ -67,7 +68,7 @@ export function StepperList({
        every render. */
   }, [key, register]);
 
-  const rootProps: StepperListRootProps = {
+  const rootProps: StepperListRootProps = keyedProps({
     'aria-label': stepper.t('label'),
     ...nativeProps,
     children: items.map((child, index) => (
@@ -110,7 +111,7 @@ export function StepperList({
       event.preventDefault();
       event.currentTarget.ownerDocument.getElementById(stepper.ids.trigger(next))?.focus();
     },
-  };
+  });
 
   return render === undefined ? <ol {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -185,10 +186,11 @@ export function StepperStep({
     'aria-current': current ? ('step' as const) : undefined,
     'data-index': index,
     'data-part': 'trigger',
+    ...selectorKeyProps('part', 'trigger'),
     id: stepper.ids.trigger(index),
     children: (
       <>
-        <span aria-hidden="true" data-part="marker">
+        <span aria-hidden="true" data-part="marker" data-part-marker="">
           {marker ?? index + 1}
           {mark === undefined ? null : (
             <Icon>
@@ -196,14 +198,23 @@ export function StepperStep({
             </Icon>
           )}
         </span>
-        <span data-part="label">
+        <span data-part="label" data-part-label="">
           {label}
-          {description === undefined ? null : <span data-part="description">{description}</span>}
+          {description === undefined ? null : (
+            <span data-part="description" data-part-description="">
+              {description}
+            </span>
+          )}
         </span>
         {/* The visible name and this run concatenate into one accessible
             name, and nothing separates two elements' text: without the comma a
             reader hears "CartStep 1 of 4". */}
-        <span data-part="status" data-ui="visually-hidden">
+        <span
+          data-part="status"
+          data-part-status=""
+          data-ui="visually-hidden"
+          data-ui-visually-hidden=""
+        >
           {`, ${announced}`}
         </span>
       </>
@@ -234,7 +245,7 @@ export function StepperStep({
       />
     );
 
-  const rootProps: StepperStepRootProps = {
+  const rootProps: StepperStepRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -245,6 +256,7 @@ export function StepperStep({
             aria-hidden="true"
             data-complete={step?.travelled === true ? '' : undefined}
             data-part="separator"
+            data-part-separator=""
           />
         )}
       </>
@@ -255,7 +267,7 @@ export function StepperStep({
     'data-invalid': invalid === true ? '' : undefined,
     'data-loading': loading === true ? '' : undefined,
     'data-part': 'item',
-  };
+  });
 
   return render === undefined ? <li {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -273,7 +285,7 @@ export function StepperPanel({ children, ref, render, ...nativeProps }: StepperP
 
   if (index !== stepper.step) return null;
 
-  const rootProps: StepperPanelRootProps = {
+  const rootProps: StepperPanelRootProps = keyedProps({
     'aria-labelledby': stepper.ids.trigger(index),
     ...nativeProps,
     children,
@@ -281,7 +293,7 @@ export function StepperPanel({ children, ref, render, ...nativeProps }: StepperP
     id: nativeProps.id ?? stepper.ids.panel(index),
     role: 'group',
     tabIndex: nativeProps.tabIndex ?? -1,
-  };
+  });
 
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }

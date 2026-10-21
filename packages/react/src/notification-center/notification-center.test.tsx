@@ -509,7 +509,7 @@ describe('NotificationCenter', () => {
     render(
       <Centre
         renderItem={(item, state) => (
-          <span data-part="title" id={state.ids.title}>
+          <span data-part="title" data-part-title="" id={state.ids.title}>
             {state.position}. {item.title} · {state.time.dateTime}
           </span>
         )}

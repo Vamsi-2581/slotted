@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/event-calendar/event-calendar.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -209,10 +210,14 @@ function When({ when }: { when: { day: string | null; range: string } }) {
     <>
       {when.day === null ? null : (
         <>
-          <span data-part="detail-day">{when.day},</span>{' '}
+          <span data-part="detail-day" data-part-detail-day="">
+            {when.day},
+          </span>{' '}
         </>
       )}
-      <span data-part="detail-range">{when.range}</span>
+      <span data-part="detail-range" data-part-detail-range="">
+        {when.range}
+      </span>
     </>
   );
 }
@@ -1244,17 +1249,23 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
 
   const titleElement = createElement(
     `h${level}`,
-    { 'aria-live': 'polite', 'data-part': 'title', id: titleId },
+    {
+      'aria-live': 'polite',
+      'data-part': 'title',
+      ...selectorKeyProps('part', 'title'),
+      id: titleId,
+    },
     title,
   );
 
   const headerElement = header ? (
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       {titleElement}
-      <div aria-label={t('navigation')} data-part="navigation" role="group">
+      <div aria-label={t('navigation')} data-part="navigation" data-part-navigation="" role="group">
         <button
           aria-label={t(`previous.${currentView}` as const)}
           data-part="previous"
+          data-part-previous=""
           onClick={(clicked) =>
             requestDate(
               stepView(currentView, currentDate, -1, viewOptions),
@@ -1270,6 +1281,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         </button>
         <button
           data-part="today"
+          data-part-today=""
           onClick={(clicked) =>
             requestDate(
               today ?? todayIn(resolvedZone),
@@ -1284,6 +1296,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         <button
           aria-label={t(`next.${currentView}` as const)}
           data-part="next"
+          data-part-next=""
           onClick={(clicked) =>
             requestDate(
               stepView(currentView, currentDate, 1, viewOptions),
@@ -1299,7 +1312,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         </button>
       </div>
       {views.length > 1 ? (
-        <div data-part="views">
+        <div data-part="views" data-part-views="">
           <SegmentedControl
             aria-label={t('views')}
             fullWidth
@@ -1320,7 +1333,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         <Menu>
           <MenuTrigger
             render={(triggerProps) => (
-              <button {...triggerProps} data-part="filter" type="button">
+              <button {...withSelectorKey(triggerProps, 'part', 'filter')} type="button">
                 <Icon>
                   <Glyph name="funnel" />
                 </Icon>
@@ -1368,7 +1381,11 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
           </MenuContent>
         </Menu>
       ) : null}
-      {actions === undefined || actions === null ? null : <div data-part="actions">{actions}</div>}
+      {actions === undefined || actions === null ? null : (
+        <div data-part="actions" data-part-actions="">
+          {actions}
+        </div>
+      )}
     </div>
   ) : null;
 
@@ -1377,7 +1394,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   const emptyKey = currentView === 'month' ? 'month' : currentView === 'day' ? 'day' : 'week';
   const bodyContent = (
     <>
-      <div data-part="loader">
+      <div data-part="loader" data-part-loader="">
         {loaderMounted ? (
           <ProgressBar
             delay={delay}
@@ -1390,7 +1407,11 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
           />
         ) : null}
       </div>
-      {error === undefined || error === null ? null : <div data-part="error">{error}</div>}
+      {error === undefined || error === null ? null : (
+        <div data-part="error" data-part-error="">
+          {error}
+        </div>
+      )}
       {layout === 'list' ? (
         <List
           days={range.days}
@@ -1418,6 +1439,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
   const bodyProps = {
     'aria-busy': loading ? true : undefined,
     'data-part': 'body',
+    ...selectorKeyProps('part', 'body'),
     onKeyDown: handleKeyDown,
     onPointerDown: startDrag,
   } as const;
@@ -1455,8 +1477,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         <ContextMenuTrigger
           render={(trigger) => (
             <div
-              {...trigger}
-              {...bodyProps}
+              {...keyedProps({ ...trigger, ...bodyProps })}
               onContextMenuCapture={(event) => {
                 if (aimAt(event.target, event.clientY) === null) event.stopPropagation();
               }}
@@ -1494,6 +1515,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         aria-label={t('dayEvents', { day: moreTitle ?? '' })}
         data-layout="stacked"
         data-part="list-events"
+        data-part-list-events=""
         role="list"
       >
         {moreOccurrences.map((occurrence) => (
@@ -1631,7 +1653,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
     </>
   );
 
-  const rootProps: EventCalendarRootProps = {
+  const rootProps: EventCalendarRootProps = keyedProps({
     ...nativeProps,
     className,
     'data-layout': layout,
@@ -1659,7 +1681,7 @@ export function EventCalendar<E extends CalendarEvent = CalendarEvent>({
         {panels}
       </EventCalendarContext.Provider>
     ),
-  };
+  });
 
   return render === undefined ? (
     <div {...(rootProps as EventCalendarRootProps & { ref?: Ref<HTMLDivElement> })} />

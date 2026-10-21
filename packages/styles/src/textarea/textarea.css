@@ -13,7 +13,7 @@
    * `text-field` itself, so a theme can move one without the other and neither
    * stylesheet depends on the other's selectors.
    */
-  [data-ui='textarea'][data-part='root'] {
+  [data-ui-textarea][data-part-root] {
     /**
      * Type, height, inline padding and glyph size come from the control
      * scales, the only ones the theme restates per density.
@@ -85,7 +85,7 @@
       box-shadow var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
   }
 
-  [data-ui='textarea'][data-part='root']::placeholder {
+  [data-ui-textarea][data-part-root]::placeholder {
     color: var(--slotted-textarea-placeholder-color, var(--slotted-text-muted, GrayText));
   }
 
@@ -96,19 +96,19 @@
    * height and its own line box.
    */
 
-  [data-ui='textarea'][data-part='root'][data-size='sm'] {
+  [data-ui-textarea][data-part-root][data-size='sm'] {
     --_font-size: var(--slotted-control-font-size-sm, 12px);
     --_height: var(--slotted-control-height-sm, 30px);
     --_padding-inline: var(--slotted-control-padding-inline-sm, 10px);
   }
 
-  [data-ui='textarea'][data-part='root'][data-size='md'] {
+  [data-ui-textarea][data-part-root][data-size='md'] {
     --_font-size: var(--slotted-control-font-size-md, 13px);
     --_height: var(--slotted-control-height-md, 34px);
     --_padding-inline: var(--slotted-control-padding-inline-md, 13px);
   }
 
-  [data-ui='textarea'][data-part='root'][data-size='lg'] {
+  [data-ui-textarea][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
     --_height: var(--slotted-control-height-lg, 38px);
     --_padding-inline: var(--slotted-control-padding-inline-lg, 16px);
@@ -121,7 +121,7 @@
    * into the page, and one that shows nothing until it is used.
    */
 
-  [data-ui='textarea'][data-part='root'][data-variant='subtle'] {
+  [data-ui-textarea][data-part-root][data-variant='subtle'] {
     background-color: var(
       --slotted-textarea-subtle-background,
       var(--slotted-surface-sunken, Canvas)
@@ -135,7 +135,7 @@
   /* No edge, no lift, no ground and no corner of its own: the cell it sits in
      is the box, the row is the ground, a cell has no corner, and the resting
      shadow would draw the cell where there is none. */
-  [data-ui='textarea'][data-part='root'][data-variant='plain'] {
+  [data-ui-textarea][data-part-root][data-variant='plain'] {
     background-color: transparent;
     border-color: transparent;
     border-radius: var(--slotted-radius-none, 0px);
@@ -144,12 +144,12 @@
 
   /** A transparent border has no system colour to be remapped to. */
   @media (forced-colors: active) {
-    [data-ui='textarea'][data-part='root'][data-variant='plain'] {
+    [data-ui-textarea][data-part-root][data-variant='plain'] {
       border-color: ButtonBorder;
     }
   }
 
-  [data-ui='textarea'][data-part='root'][data-mono] {
+  [data-ui-textarea][data-part-root][data-mono] {
     font-family: var(--slotted-font-family-mono, monospace);
     font-variant-numeric: tabular-nums;
   }
@@ -162,11 +162,11 @@
    * Horizontal resize is offered and is not the default.
    */
 
-  [data-ui='textarea'][data-part='root'][data-resize='none'] {
+  [data-ui-textarea][data-part-root][data-resize='none'] {
     resize: none;
   }
 
-  [data-ui='textarea'][data-part='root'][data-resize='both'] {
+  [data-ui-textarea][data-part-root][data-resize='both'] {
     resize: both;
   }
 
@@ -188,7 +188,7 @@
    * Where `field-sizing` is unsupported the control keeps the block size
    * `rows` gives it — a smaller box, not a broken one.
    */
-  [data-ui='textarea'][data-part='root'][data-auto-size] {
+  [data-ui-textarea][data-part-root][data-auto-size] {
     field-sizing: content;
     max-block-size: calc(var(--_max-rows) * 1lh + var(--_scroll-frame));
     /**
@@ -209,13 +209,13 @@
    * held back for every stronger one it can meet.
    */
 
-  [data-ui='textarea'][data-part='root']:hover:not([data-disabled]):not(:disabled):not(
+  [data-ui-textarea][data-part-root]:hover:not([data-disabled]):not(:disabled):not(
       [data-readonly]
     ):not([data-invalid]) {
     border-color: var(--slotted-textarea-hover-border-color, var(--slotted-tone-accent-border));
   }
 
-  [data-ui='textarea'][data-part='root'][data-variant='subtle']:hover:not([data-disabled]):not(
+  [data-ui-textarea][data-part-root][data-variant='subtle']:hover:not([data-disabled]):not(
       :disabled
     ):not([data-readonly]):not([data-invalid]) {
     background-color: var(
@@ -224,7 +224,7 @@
     );
   }
 
-  [data-ui='textarea'][data-part='root'][data-variant='plain']:hover:not([data-disabled]):not(
+  [data-ui-textarea][data-part-root][data-variant='plain']:hover:not([data-disabled]):not(
       :disabled
     ):not([data-readonly]):not([data-invalid]) {
     background-color: var(
@@ -235,7 +235,7 @@
     border-color: transparent;
   }
 
-  [data-ui='textarea'][data-part='root']:focus-visible {
+  [data-ui-textarea][data-part-root]:focus-visible {
     /** Foundation geometry, focus-ring ink: the lift and the ring are one colour. */
     box-shadow: var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
       var(--slotted-focus-ring-color, Highlight);
@@ -250,7 +250,7 @@
    * shadow that appears only under focus is a cell that changes size when it
    * is used.
    */
-  [data-ui='textarea'][data-part='root'][data-variant='plain']:focus-visible {
+  [data-ui-textarea][data-part-root][data-variant='plain']:focus-visible {
     box-shadow: none;
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -260,7 +260,7 @@
    * reads `--slotted-focus-ring-color`, so pointing that one name at the
    * invalid colour on the element moves the outline and the shadow together.
    */
-  [data-ui='textarea'][data-part='root'][data-invalid] {
+  [data-ui-textarea][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-textarea-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
@@ -285,14 +285,14 @@
     box-shadow: var(--_invalid-edge);
   }
 
-  [data-ui='textarea'][data-part='root'][data-invalid]:focus-visible {
+  [data-ui-textarea][data-part-root][data-invalid]:focus-visible {
     box-shadow:
       var(--_invalid-edge),
       var(--slotted-control-shadow-focus-geometry, 0 1px 4px -1px)
         var(--slotted-focus-ring-color, Highlight);
   }
 
-  [data-ui='textarea'][data-part='root'][data-variant='plain'][data-invalid]:focus-visible {
+  [data-ui-textarea][data-part-root][data-variant='plain'][data-invalid]:focus-visible {
     /* The ring lies inside the box here, over the border and an edge as wide as
        it; the edge reaches past the ring. */
     box-shadow: inset 0 0 0
@@ -309,20 +309,20 @@
    * control draws its ring double, which a valid ring is not.
    */
   @media (forced-colors: active) {
-    [data-ui='textarea'][data-part='root'][data-invalid] {
+    [data-ui-textarea][data-part-root][data-invalid] {
       outline: var(--_invalid-edge-width) solid CanvasText;
       outline-offset: calc(
         -1 * (var(--slotted-control-border-width, 1px) + var(--_invalid-edge-width))
       );
     }
 
-    [data-ui='textarea'][data-part='root'][data-invalid]:focus-visible {
+    [data-ui-textarea][data-part-root][data-invalid]:focus-visible {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: var(--slotted-focus-ring-offset, 2px);
     }
 
-    [data-ui='textarea'][data-part='root'][data-variant='plain'][data-invalid]:focus-visible {
+    [data-ui-textarea][data-part-root][data-variant='plain'][data-invalid]:focus-visible {
       outline: calc(var(--slotted-focus-ring-width, 2px) + var(--_invalid-edge-width)) double
         var(--slotted-focus-ring-color, Highlight);
       outline-offset: calc(
@@ -336,7 +336,7 @@
    * has to copy is the commonest thing a read-only textarea holds, so the ink
    * does not change at all and only the ground says the value is not theirs.
    */
-  [data-ui='textarea'][data-part='root'][data-readonly] {
+  [data-ui-textarea][data-part-root][data-readonly] {
     background-color: var(
       --slotted-textarea-readonly-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -348,8 +348,8 @@
    * `:disabled` beside `data-disabled`, because a disabled `fieldset` disables
    * every control inside it and tells none of them.
    */
-  [data-ui='textarea'][data-part='root'][data-disabled],
-  [data-ui='textarea'][data-part='root']:disabled {
+  [data-ui-textarea][data-part-root][data-disabled],
+  [data-ui-textarea][data-part-root]:disabled {
     background-color: var(
       --slotted-textarea-disabled-background,
       var(--slotted-disabled-background)

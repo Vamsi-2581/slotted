@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { afterNextRender, Directive, ElementRef, HostAttributeToken, inject } from '@angular/core';
 
 /**
@@ -15,7 +16,7 @@ import { afterNextRender, Directive, ElementRef, HostAttributeToken, inject } fr
   selector: '[slTextFieldStart]',
   standalone: true,
   exportAs: 'slTextFieldStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlTextFieldStart {}
 
@@ -24,7 +25,7 @@ export class SlTextFieldStart {}
   selector: '[slTextFieldEnd]',
   standalone: true,
   exportAs: 'slTextFieldEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlTextFieldEnd {}
 
@@ -43,13 +44,13 @@ export class SlTextFieldEnd {}
   selector: 'button[slTextFieldAction]',
   standalone: true,
   exportAs: 'slTextFieldAction',
-  host: { 'data-part': 'action', '[attr.type]': 'type' },
+  host: { 'data-part': 'action', 'data-part-action': '', '[attr.type]': 'type' },
 })
 export class SlTextFieldAction {
   protected readonly type = inject(new HostAttributeToken('type'), { optional: true }) ?? 'button';
 
   constructor() {
     const element: HTMLElement = inject(ElementRef).nativeElement;
-    afterNextRender(() => element.setAttribute('data-part', 'action'));
+    afterNextRender(() => writeSelectorKey(element, 'part', 'action'));
   }
 }

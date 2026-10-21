@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/avatar-group/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./avatar-group.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./avatar-group.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./avatar-group.harness.html', import.meta.url), 'utf8'),
+);
 const normalized = css
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\s+/g, ' ')
@@ -28,9 +41,9 @@ function rule(selector) {
   return rules.find((candidate) => candidate.selectors.includes(selector))?.body ?? '';
 }
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
-const member = `[data-ui='${contract.memberFamily}'][data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
+const member = `[data-ui-${contract.memberFamily.toLowerCase()}][data-part-root]`;
 
 test('lives in the component layer', () => {
   assert.match(css, /@layer slotted\.components/);
@@ -42,7 +55,10 @@ test('is selected by the identifier the contract declares', () => {
 
 test('styles every part the contract declares', () => {
   for (const part of contract.members.avatarGroup.parts) {
-    assert.ok(normalized.includes(`[data-part='${part}']`), `no rule reaches the ${part} part`);
+    assert.ok(
+      normalized.includes(`[data-part-${part.toLowerCase()}]`),
+      `no rule reaches the ${part} part`,
+    );
   }
 });
 
@@ -208,7 +224,7 @@ test('drops the movement under reduced motion and keeps the answer', () => {
 
 /** Not a stacking context: a raised member has to rise past its whole row. */
 test('leaves the item positioned and unlayered', () => {
-  const item = rule(`${ui} [data-part='item']`);
+  const item = rule(`${ui} [data-part-item]`);
   assert.ok(item.includes('position:relative'));
   assert.ok(!item.includes('z-index'));
 });
@@ -219,7 +235,7 @@ test('leaves the item positioned and unlayered', () => {
  * `badge` applies to its own count.
  */
 test('gives the summary room for a third figure', () => {
-  const overflow = rule(`${ui} [data-part='overflow'] ${member}`);
+  const overflow = rule(`${ui} [data-part-overflow] ${member}`);
   assert.ok(overflow.includes('--slotted-avatar-initials-size:round(nearest,calc('));
   assert.ok(overflow.includes('font-variant-numeric:tabular-nums'));
 });

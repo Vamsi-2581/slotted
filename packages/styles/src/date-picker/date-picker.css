@@ -19,7 +19,7 @@
    * trigger, and the layer the calendar stands on. A family that reached into
    * another family's parts would be a second place to fix one defect.
    */
-  [data-ui='date-picker'][data-part='root'] {
+  [data-ui-date-picker][data-part-root] {
     display: block;
     /* The anchor the positioner measures is the control, and a block root
        lets the frame take the width the form gave it. */
@@ -35,7 +35,7 @@
    * would then have to reach into another family's parts to suppress the first
    * — which is the rule the whole family is built to keep.
    */
-  [data-ui='date-picker'] [data-part='control'] {
+  [data-ui-date-picker] [data-part-control] {
     --_icon-size: var(--slotted-control-icon-size-md, 16px);
     --_height: var(--slotted-control-height-md, 34px);
 
@@ -46,12 +46,12 @@
     position: relative;
   }
 
-  [data-ui='date-picker'][data-part='root'][data-size='sm'] [data-part='control'] {
+  [data-ui-date-picker][data-part-root][data-size='sm'] [data-part-control] {
     --_icon-size: var(--slotted-control-icon-size-sm, 14px);
     --_height: var(--slotted-control-height-sm, 30px);
   }
 
-  [data-ui='date-picker'][data-part='root'][data-size='lg'] [data-part='control'] {
+  [data-ui-date-picker][data-part-root][data-size='lg'] [data-part-control] {
     --_icon-size: var(--slotted-control-icon-size-lg, 18px);
     --_height: var(--slotted-control-height-lg, 38px);
   }
@@ -65,7 +65,7 @@
    * `Alt`+`ArrowDown` into `PageDown` before the browser sees it, so the chord
    * cannot be the only way in.
    */
-  [data-ui='date-picker'] [data-part='trigger'] {
+  [data-ui-date-picker] [data-part-trigger] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -110,7 +110,7 @@
 
   /* The hit area, recovered outside the paint, exactly as every other inner
      control in the library recovers it. */
-  [data-ui='date-picker'] [data-part='trigger']::after {
+  [data-ui-date-picker] [data-part-trigger]::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -121,13 +121,13 @@
      the hit area above grows to 44 pixels around them. Before the field's
      clear it does not reach across it. */
   @media (pointer: coarse) {
-    [data-ui='date-picker'] [data-part='trigger']::after {
+    [data-ui-date-picker] [data-part-trigger]::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
-    [data-ui='date-picker']
-      [data-part='end']:has(+ [data-part='clear']:not([hidden]))
-      > [data-part='trigger']::after {
+    [data-ui-date-picker]
+      [data-part-end]:has(+ [data-part-clear]:not([hidden]))
+      > [data-part-trigger]::after {
       inset-inline-end: 0;
     }
   }
@@ -142,14 +142,14 @@
    * that never changes.
    */
 
-  [data-ui='date-picker'] [data-part='trigger']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-date-picker] [data-part-trigger]:hover:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-date-picker-trigger-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
     );
   }
 
-  [data-ui='date-picker'] [data-part='trigger']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-date-picker] [data-part-trigger]:active:not(:disabled):not([data-disabled]) {
     background-color: var(
       --slotted-date-picker-trigger-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -158,19 +158,19 @@
 
   /* Its own ring: tabbing from the last segment to the trigger has to move
      something visible, and the frame's ring would sit still. */
-  [data-ui='date-picker'] [data-part='trigger']:focus-visible {
+  [data-ui-date-picker] [data-part-trigger]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
 
-  [data-ui='date-picker'][data-part='root'][data-invalid] {
+  [data-ui-date-picker][data-part-root][data-invalid] {
     --slotted-focus-ring-color: var(
       --slotted-date-picker-invalid-focus-ring-color,
       var(--slotted-focus-ring-color-invalid, Highlight)
     );
   }
 
-  [data-ui='date-picker'] [data-part='trigger']:disabled {
+  [data-ui-date-picker] [data-part-trigger]:disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -181,7 +181,7 @@
    * onto. The painted surface is one element in, as `tooltip`, `popover`,
    * `menu` and `select` are all built.
    */
-  [data-ui='date-picker'][data-part='positioner'] {
+  [data-ui-date-picker][data-part-positioner] {
     /* Only the block inset: the positioner writes `left` and never `right`,
        and `inset-inline-start` would resolve to `right` in a right-to-left
        document and win over the measured value. */
@@ -207,16 +207,16 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='date-picker'][data-part='positioner'][data-side='top'] {
+  [data-ui-date-picker][data-part-positioner][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* A lateral side has no block direction to arrive from, so it only fades. */
-  [data-ui='date-picker'][data-part='positioner']:is([data-side='left'], [data-side='right']) {
+  [data-ui-date-picker][data-part-positioner]:is([data-side='left'], [data-side='right']) {
     translate: 0 0;
   }
 
-  [data-ui='date-picker'][data-part='positioner'][data-open] {
+  [data-ui-date-picker][data-part-positioner][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -232,16 +232,16 @@
    * markup — the harness, a docs snippet — is simply there, and is
    * photographed where it stands.
    */
-  [data-ui='date-picker'][data-part='positioner'][data-open][data-positioned] {
+  [data-ui-date-picker][data-part-positioner][data-open][data-positioned] {
     animation: slotted-date-picker-enter-down var(--slotted-duration-medium)
       var(--slotted-easing-enter);
   }
 
-  [data-ui='date-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'] {
+  [data-ui-date-picker][data-part-positioner][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-date-picker-enter-up;
   }
 
-  [data-ui='date-picker'][data-part='positioner'][data-open][data-positioned]:is(
+  [data-ui-date-picker][data-part-positioner][data-open][data-positioned]:is(
       [data-side='left'],
       [data-side='right']
     ) {
@@ -270,25 +270,25 @@
 
   /* Stillness keeps the fade and drops the movement. */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='date-picker'][data-part='positioner'],
-    [data-ui='date-picker'][data-part='positioner'][data-side='top'],
-    [data-ui='date-picker'][data-part='positioner'][data-side='left'],
-    [data-ui='date-picker'][data-part='positioner'][data-side='right'] {
+    [data-ui-date-picker][data-part-positioner],
+    [data-ui-date-picker][data-part-positioner][data-side='top'],
+    [data-ui-date-picker][data-part-positioner][data-side='left'],
+    [data-ui-date-picker][data-part-positioner][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='date-picker'][data-part='positioner'][data-open][data-positioned],
-    [data-ui='date-picker'][data-part='positioner'][data-open][data-positioned][data-side='top'],
-    [data-ui='date-picker'][data-part='positioner'][data-open][data-positioned][data-side='left'],
-    [data-ui='date-picker'][data-part='positioner'][data-open][data-positioned][data-side='right'] {
+    [data-ui-date-picker][data-part-positioner][data-open][data-positioned],
+    [data-ui-date-picker][data-part-positioner][data-open][data-positioned][data-side='top'],
+    [data-ui-date-picker][data-part-positioner][data-open][data-positioned][data-side='left'],
+    [data-ui-date-picker][data-part-positioner][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-date-picker-fade;
     }
   }
 
   /* The anchor scrolled out of its own clipper. The calendar is still open and
      still belongs to a control the reader can no longer see. */
-  [data-ui='date-picker'][data-part='positioner'][data-detached] {
+  [data-ui-date-picker][data-part-positioner][data-detached] {
     visibility: hidden;
   }
 
@@ -298,7 +298,7 @@
    * wide as the form, and forcing one to the other would either crush the grid
    * or stretch it.
    */
-  [data-ui='date-picker'] [data-part='content'] {
+  [data-ui-date-picker] [data-part-content] {
     background-color: var(--slotted-date-picker-surface, var(--slotted-surface-raised, Canvas));
     border: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-date-picker-content-border-color, var(--slotted-border-subtle, ButtonBorder));
@@ -327,12 +327,12 @@
   }
 
   /* The shortcuts take a column of their own only when there are any. */
-  [data-ui='date-picker'] [data-part='content']:has([data-part='presets']) {
+  [data-ui-date-picker] [data-part-content]:has([data-part-presets]) {
     grid-template-areas: 'presets calendar' 'footer footer';
     grid-template-columns: auto auto;
   }
 
-  [data-ui='date-picker'] [data-part='content'] > [data-ui='calendar'] {
+  [data-ui-date-picker] [data-part-content] > [data-ui-calendar] {
     grid-area: calendar;
   }
 
@@ -341,7 +341,7 @@
    * days" is a business calendar and a library that guessed at one would be
    * guessing at a fiscal year. What it ships is the column they stand in.
    */
-  [data-ui='date-picker'] [data-part='presets'] {
+  [data-ui-date-picker] [data-part-presets] {
     /* A list of shortcuts reads from the start edge. Stretched, each button
        centred its own label and the four labels formed a ragged column with
        no left edge to run down. */
@@ -355,7 +355,7 @@
     padding-inline-end: var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='date-picker'] [data-part='footer'] {
+  [data-ui-date-picker] [data-part-footer] {
     align-items: center;
     border-block-start: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-date-picker-content-border-color, var(--slotted-border-subtle, ButtonBorder));
@@ -377,7 +377,7 @@
    * ask, and the question really is how much screen there is.
    */
   @media (max-width: 480px) and (pointer: coarse) {
-    [data-ui='date-picker'][data-part='positioner'][data-presentation='sheet'] {
+    [data-ui-date-picker][data-part-positioner][data-presentation='sheet'] {
       /* The positioner's own measurement is overridden here on purpose: a
          sheet is not placed against an anchor, it is placed against the
          screen. */
@@ -388,12 +388,11 @@
       translate: 0 var(--slotted-space-9, 2rem);
     }
 
-    [data-ui='date-picker'][data-part='positioner'][data-presentation='sheet'][data-open] {
+    [data-ui-date-picker][data-part-positioner][data-presentation='sheet'][data-open] {
       translate: 0 0;
     }
 
-    [data-ui='date-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='content'] {
+    [data-ui-date-picker][data-part-positioner][data-presentation='sheet'] [data-part-content] {
       border-end-end-radius: 0;
       border-end-start-radius: 0;
       border-inline: 0;
@@ -404,8 +403,7 @@
       justify-content: center;
     }
 
-    [data-ui='date-picker'][data-part='positioner'][data-presentation='sheet']
-      [data-part='presets'] {
+    [data-ui-date-picker][data-part-positioner][data-presentation='sheet'] [data-part-presets] {
       /* Beside the grid there is no room for a column of shortcuts, so they
          become a row above it and keep their labels. */
       border-inline-end: 0;

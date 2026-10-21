@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
   afterNextRender,
@@ -98,7 +99,7 @@ export class SlSavedViewsPart {
 
   constructor() {
     const element: HTMLElement = inject(ElementRef).nativeElement;
-    afterNextRender(() => element.setAttribute('data-part', this.slSavedViewsPart()));
+    afterNextRender(() => writeSelectorKey(element, 'part', this.slSavedViewsPart()));
   }
 }
 
@@ -137,7 +138,9 @@ export class SlSavedViewsPart {
   ],
   host: {
     'data-ui': 'saved-views',
+    'data-ui-saved-views': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'role',
     '[attr.aria-label]': 'resolvedLabel()',
     '[attr.data-modified]': 'modified() ? "" : null',
@@ -155,11 +158,12 @@ export class SlSavedViewsPart {
         slPopoverTrigger
         type="button"
         data-part="trigger"
+        data-part-trigger=""
         [attr.title]="activeName()"
       >
         <span data-label>{{ activeName() }}</span>
         @if (modified()) {
-          <span data-part="modified">{{ t('modified') }}</span>
+          <span data-part="modified" data-part-modified="">{{ t('modified') }}</span>
         }
         <span slIcon size="md"><svg slGlyph name="chevron-down"></svg></span>
       </button>
@@ -168,11 +172,18 @@ export class SlSavedViewsPart {
         <div slPopoverContent [attr.aria-label]="resolvedLabel()">
           <!-- The family's identifier is on its own element rather than on
                the popover's: slPopoverContent names its own part. -->
-          <div data-ui="saved-views" data-part="panel" [id]="panelId">
-            <ul data-part="list" role="list">
+          <div
+            data-ui="saved-views"
+            data-ui-saved-views=""
+            data-part="panel"
+            data-part-panel=""
+            [id]="panelId"
+          >
+            <ul data-part="list" data-part-list="" role="list">
               @for (row of rows(); track row.key) {
                 <li
                   data-part="item"
+                  data-part-item=""
                   [attr.data-view]="row.key"
                   [attr.data-current]="row.current ? '' : null"
                   [attr.data-default]="row.isDefault ? '' : null"
@@ -189,6 +200,7 @@ export class SlSavedViewsPart {
                     @case ('delete') {
                       <div
                         data-part="confirm"
+                        data-part-confirm=""
                         role="group"
                         [attr.aria-labelledby]="panelId + '-confirm-' + row.key"
                       >
@@ -220,6 +232,7 @@ export class SlSavedViewsPart {
                     @default {
                       <button
                         data-part="apply"
+                        data-part-apply=""
                         type="button"
                         [attr.aria-current]="row.current ? 'true' : null"
                         (click)="apply(row.id, pressReason($event), $event)"
@@ -229,7 +242,7 @@ export class SlSavedViewsPart {
                         }
                         <span data-label>{{ row.name }}</span>
                         @if (row.isDefault) {
-                          <span data-part="default-mark"
+                          <span data-part="default-mark" data-part-default-mark=""
                             ><span slIcon size="sm"><svg slGlyph name="pin"></svg></span
                             ><span>{{ t('isDefault') }}</span></span
                           >
@@ -238,6 +251,7 @@ export class SlSavedViewsPart {
                       <button
                         type="button"
                         data-part="actions"
+                        data-part-actions=""
                         slSavedViewsPart="actions"
                         [slMenuTriggerFor]="menu"
                         [attr.aria-label]="t('actions', { name: row.name })"
@@ -274,7 +288,7 @@ export class SlSavedViewsPart {
                 [ngTemplateOutletContext]="{ kind: 'create', name: '' }"
               />
             }
-            <div data-part="footer">
+            <div data-part="footer" data-part-footer="">
               <button
                 slButton
                 data-save-as
@@ -295,7 +309,7 @@ export class SlSavedViewsPart {
     </ng-container>
 
     @if (modified()) {
-      <button data-part="revert" type="button" (click)="revert($event)">
+      <button data-part="revert" data-part-revert="" type="button" (click)="revert($event)">
         <!-- An arrow that turns back turns the other way in a right-to-left document. -->
         <span slIcon size="sm" directional><svg slGlyph name="rotate-ccw"></svg></span>
         {{ t('revert') }}
@@ -305,6 +319,7 @@ export class SlSavedViewsPart {
     <ng-template #nameForm let-kind="kind" let-name="name">
       <form
         data-part="form"
+        data-part-form=""
         novalidate
         [attr.aria-label]="kind === 'create' ? t('saveAs') : t('renameView', { name: name })"
         (submit)="submit($event)"

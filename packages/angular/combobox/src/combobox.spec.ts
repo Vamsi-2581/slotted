@@ -561,7 +561,7 @@ describe('SlCombobox, the icon column', () => {
   template: `
     <sl-combobox aria-label="Reviewer" [portal]="false">
       <sl-combobox-item value="amanda" label="Amanda Okoro">
-        <span slComboboxItemIcon><span data-ui="avatar">AO</span></span>
+        <span slComboboxItemIcon><span data-ui="avatar" data-ui-avatar="">AO</span></span>
       </sl-combobox-item>
       <sl-combobox-item value="norman" label="Norman Vaz" />
     </sl-combobox>

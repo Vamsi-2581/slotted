@@ -3,6 +3,17 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
 /**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
+/**
  * The ring has no contract of its own: it is declared by the family that
  * carries it, as the shared identifier its `indicator` part wears and the
  * glyph that draws it, and a second host declares the same.
@@ -14,11 +25,13 @@ const contract = JSON.parse(
   ),
 ).spinner;
 const css = readFileSync(new URL('./spinner.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./spinner.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./spinner.harness.html', import.meta.url), 'utf8'),
+);
 const buttonCss = readFileSync(new URL('../button/button.css', import.meta.url), 'utf8');
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations.replace(/\s+/g, ' ').replace(/\s*([{};,:])\s*/g, '$1');
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -110,10 +123,7 @@ test('chases its own tail rather than turning a shape', () => {
 });
 
 test('arrives on a fade rather than a cut', () => {
-  assert.match(
-    css,
-    /@starting-style\s*\{\s*\[data-ui='spinner'\]\s*\{\s*opacity: 0;\s*scale: 0\.6/,
-  );
+  assert.match(css, /@starting-style\s*\{\s*\[data-ui-spinner\]\s*\{\s*opacity: 0;\s*scale: 0\.6/);
   assert.match(rule(ui), /transition:opacity var\(--slotted-control-transition-duration\)/);
 });
 

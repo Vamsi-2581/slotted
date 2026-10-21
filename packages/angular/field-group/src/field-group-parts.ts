@@ -26,12 +26,15 @@ import { SlFieldGroup } from './field-group';
   exportAs: 'slFieldGroupLegend',
   template: `<ng-content />
     @if (mark(); as text) {
-      <span data-part="mark" [attr.aria-hidden]="markHidden() ? 'true' : null">{{ text }}</span>
+      <span data-part="mark" data-part-mark="" [attr.aria-hidden]="markHidden() ? 'true' : null">{{
+        text
+      }}</span>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'legend',
+    'data-part-legend': '',
     '[attr.id]': 'legendId()',
   },
 })

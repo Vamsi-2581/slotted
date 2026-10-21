@@ -48,7 +48,9 @@ const TRIGGER_SELECTOR = "[data-part='trigger']";
   template: '<ng-content />',
   host: {
     'data-ui': 'menubar',
+    'data-ui-menubar': '',
     'data-part': 'root',
+    'data-part-root': '',
     role: 'menubar',
     '[attr.data-orientation]': 'orientation()',
     '[attr.data-size]': 'size()',

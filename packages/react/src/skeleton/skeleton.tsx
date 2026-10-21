@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/skeleton/skeleton.css';
 
 import type { CSSProperties } from 'react';
@@ -63,7 +64,7 @@ export function Skeleton({
     animation: animation ?? region?.animation ?? defaults.animation ?? 'shimmer',
   };
 
-  const rootProps: SkeletonRootProps = {
+  const rootProps: SkeletonRootProps = keyedProps({
     ...nativeProps,
     'aria-hidden': painted ? (ariaHidden ?? 'true') : ariaHidden,
     children,
@@ -75,7 +76,7 @@ export function Skeleton({
     'data-ui': 'skeleton',
     inert: painted || undefined,
     style: geometryStyle({ blockSize, inlineSize }, style),
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

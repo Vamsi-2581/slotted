@@ -130,6 +130,7 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
       <input
         #duration
         data-part="duration"
+        data-part-duration=""
         type="text"
         placeholder="+40m"
         [attr.aria-label]="t('duration')"
@@ -141,6 +142,7 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
       />
       <span
         data-part="preview"
+        data-part-preview=""
         role="status"
         aria-live="polite"
         [attr.data-resolved]="resolved() === null ? null : ''"
@@ -151,6 +153,7 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
     } @else {
       <div
         data-part="segments"
+        data-part-segments=""
         role="group"
         [attr.id]="controlId()"
         [attr.aria-label]="label() ?? writtenLabel"
@@ -164,10 +167,13 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
       >
         @for (part of format().pattern; track $index) {
           @if (part.type === 'literal') {
-            <span data-part="literal" aria-hidden="true">{{ part.value }}</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">{{
+              part.value
+            }}</span>
           } @else {
             <div
               data-part="segment"
+              data-part-segment=""
               role="spinbutton"
               [attr.data-field]="part.type"
               [attr.data-placeholder]="valueOf(part.type) === null ? '' : null"
@@ -189,10 +195,13 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
         }
       </div>
     }
-    <span data-part="value-text" hidden [attr.id]="valueTextId">{{ spokenTime() }}</span>
+    <span data-part="value-text" data-part-value-text="" hidden [attr.id]="valueTextId">{{
+      spokenTime()
+    }}</span>
     @if (showClear()) {
       <button
         data-part="clear"
+        data-part-clear=""
         type="button"
         [attr.aria-label]="t('clear')"
         (click)="clear($event)"
@@ -201,7 +210,14 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
       </button>
     }
     <ng-content select="[slTimeFieldEnd]" />
-    <input data-part="hidden-input" type="hidden" readonly [attr.name]="name()" [value]="iso()" />`,
+    <input
+      data-part="hidden-input"
+      data-part-hidden-input=""
+      type="hidden"
+      readonly
+      [attr.name]="name()"
+      [value]="iso()"
+    />`,
   styleUrl: '../../../styles/src/time-field/time-field.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -211,7 +227,9 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
   ],
   host: {
     'data-ui': 'time-field',
+    'data-ui-time-field': '',
     'data-part': 'root',
+    'data-part-root': '',
     '(mousedown)': 'onRootMouseDown($event)',
     '(keydown)': 'onKeyDown($event)',
     '[attr.data-size]': 'resolvedSize()',

@@ -1,3 +1,4 @@
+import { hostSelectorKey } from '@slotted/core/selector-key';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -69,7 +70,7 @@ export class SlDialogTrigger implements OnInit, OnDestroy {
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
 
   /** `trigger`, unless the element is another family's root. */
-  protected readonly part = ownPart(this.native, 'trigger');
+  protected readonly part = hostSelectorKey(this.native, 'part', ownPart(this.native, 'trigger'));
 
   protected readonly controls = computed(() =>
     this.dialog().mounted() ? this.dialog().contentId : null,
@@ -121,6 +122,7 @@ export class SlDialogTrigger implements OnInit, OnDestroy {
       <button
         type="button"
         data-part="fullscreen"
+        data-part-fullscreen=""
         [attr.aria-label]="dialog.t('fullScreen')"
         [attr.aria-pressed]="dialog.resolvedFullscreen()"
         (click)="toggle($event)"
@@ -131,7 +133,7 @@ export class SlDialogTrigger implements OnInit, OnDestroy {
       </button>
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'data-part': 'header' },
+  host: { 'data-part': 'header', 'data-part-header': '' },
 })
 export class SlDialogHeader {
   protected readonly dialog = inject(SlDialogBase);
@@ -151,7 +153,7 @@ export class SlDialogHeader {
   selector: '[slDialogTitle]',
   standalone: true,
   exportAs: 'slDialogTitle',
-  host: { 'data-part': 'title', '[id]': 'dialog.titleId' },
+  host: { 'data-part': 'title', 'data-part-title': '', '[id]': 'dialog.titleId' },
 })
 export class SlDialogTitle implements OnInit, OnDestroy {
   protected readonly dialog = inject(SlDialogBase);
@@ -174,7 +176,7 @@ export class SlDialogTitle implements OnInit, OnDestroy {
   selector: '[slDialogDescription]',
   standalone: true,
   exportAs: 'slDialogDescription',
-  host: { 'data-part': 'description', '[id]': 'dialog.descriptionId' },
+  host: { 'data-part': 'description', 'data-part-description': '', '[id]': 'dialog.descriptionId' },
 })
 export class SlDialogDescription implements OnInit, OnDestroy {
   protected readonly dialog = inject(SlDialogBase);
@@ -198,7 +200,11 @@ export class SlDialogDescription implements OnInit, OnDestroy {
   selector: '[slDialogBody]',
   standalone: true,
   exportAs: 'slDialogBody',
-  host: { 'data-part': 'body', '[attr.aria-busy]': "dialog.loading() ? 'true' : null" },
+  host: {
+    'data-part': 'body',
+    'data-part-body': '',
+    '[attr.aria-busy]': "dialog.loading() ? 'true' : null",
+  },
 })
 export class SlDialogBody {
   protected readonly dialog = inject(SlDialogBase);
@@ -208,7 +214,7 @@ export class SlDialogBody {
   selector: '[slDialogFooter]',
   standalone: true,
   exportAs: 'slDialogFooter',
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlDialogFooter {}
 
@@ -230,6 +236,7 @@ export class SlDialogFooter {}
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'data-part': 'close',
+    'data-part-close': '',
     type: 'button',
     '[attr.aria-label]': 'label()',
     '(click)': 'press($event)',
@@ -285,7 +292,7 @@ const TONE_GLYPH: Record<DialogTone, GlyphName> = {
     ><span slIcon><svg slGlyph [name]="glyph()"></svg></span
   ></ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'data-part': 'icon', 'aria-hidden': 'true' },
+  host: { 'data-part': 'icon', 'data-part-icon': '', 'aria-hidden': 'true' },
 })
 export class SlAlertDialogIcon {
   private readonly dialog = inject(SlDialogBase);
@@ -314,7 +321,7 @@ export class SlAlertDialogCancel implements OnInit, OnDestroy {
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
 
   /** `cancel`, unless the element is another family's root. */
-  protected readonly part = ownPart(this.native, 'cancel');
+  protected readonly part = hostSelectorKey(this.native, 'part', ownPart(this.native, 'cancel'));
 
   ngOnInit() {
     this.dialog.cancelNode.set(this.native);
@@ -346,7 +353,8 @@ export class SlAlertDialogAction {
   private readonly dialog = inject(SlDialogBase);
 
   /** `action`, unless the element is another family's root. */
-  protected readonly part = ownPart(inject(ElementRef).nativeElement as HTMLElement, 'action');
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+  protected readonly part = hostSelectorKey(this.native, 'part', ownPart(this.native, 'action'));
 
   protected press(event: MouseEvent) {
     if (event.defaultPrevented) return;

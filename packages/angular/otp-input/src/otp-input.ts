@@ -66,12 +66,13 @@ function partition(length: number, groups: readonly number[] | undefined): numbe
   template: `<ng-content />
     @for (group of groups(); track $index; let first = $first) {
       @if (!first) {
-        <div data-part="separator" aria-hidden="true"></div>
+        <div data-part="separator" data-part-separator="" aria-hidden="true"></div>
       }
-      <div data-part="group" aria-hidden="true">
+      <div data-part="group" data-part-group="" aria-hidden="true">
         @for (slot of group; track slot.index) {
           <div
             data-part="slot"
+            data-part-slot=""
             [attr.data-index]="slot.index"
             [attr.data-current]="slot.current ? '' : null"
             [attr.data-placeholder]="
@@ -87,7 +88,9 @@ function partition(length: number, groups: readonly number[] | undefined): numbe
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'otp-input',
+    'data-ui-otp-input': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-attached]': "resolvedAttached() ? '' : null",

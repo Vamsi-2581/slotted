@@ -126,7 +126,9 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
   ],
   host: {
     'data-ui': 'select',
+    'data-ui-select': '',
     'data-part': 'root',
+    'data-part-root': '',
     /* The name a page writes on the element is forwarded to the control, and
        the root keeps none: ARIA 1.2 does not name a generic element. */
     '[attr.aria-label]': 'null',
@@ -151,6 +153,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
       type="button"
       role="combobox"
       data-part="trigger"
+      data-part-trigger=""
       [id]="triggerId"
       [attr.aria-haspopup]="resolvedSearch() ? 'dialog' : 'listbox'"
       [disabled]="resolvedDisabled()"
@@ -169,6 +172,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
     >
       <span
         data-part="value"
+        data-part-value=""
         [attr.data-placeholder]="selection().length === 0 ? '' : null"
         [attr.data-unmatched]="unmatched() ? '' : null"
       >
@@ -178,7 +182,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
             [ngTemplateOutletContext]="{ $implicit: selection(), labels: labels() }"
           />
         } @else if (resolvedMultiple() && selection().length > 1) {
-          <span data-part="summary">{{ summary() }}</span>
+          <span data-part="summary" data-part-summary="">{{ summary() }}</span>
         } @else {
           {{ summary() }}
         }
@@ -192,15 +196,23 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
       and lets every press it does not want through to the button underneath.
     -->
     @if (resolvedMultiple() && selection().length > 0) {
-      <span #tags data-part="tags">
+      <span #tags data-part="tags" data-part-tags="">
         @for (value of selection(); track value) {
-          <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
-            <span data-part="body">
-              <span data-part="label">{{ labelFor(value) ?? value }}</span>
+          <span
+            data-ui="tag"
+            data-ui-tag=""
+            data-part="root"
+            data-part-root=""
+            data-size="sm"
+            data-variant="soft"
+          >
+            <span data-part="body" data-part-body="">
+              <span data-part="label" data-part-label="">{{ labelFor(value) ?? value }}</span>
             </span>
             <button
               type="button"
               data-part="remove"
+              data-part-remove=""
               [disabled]="resolvedDisabled() || resolvedReadOnly()"
               [attr.aria-label]="removeLabelFor(value)"
               (click)="onRemoveChip(value, $event)"
@@ -212,14 +224,16 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
         <span
           #chipOverflow
           data-ui="tag"
+          data-ui-tag=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="soft"
           data-overflow
           hidden
         >
-          <span data-part="body"
-            ><span data-part="label">+{{ collapsedCount() || 1 }}</span></span
+          <span data-part="body" data-part-body=""
+            ><span data-part="label" data-part-label="">+{{ collapsedCount() || 1 }}</span></span
           >
         </span>
       </span>
@@ -229,6 +243,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
       <button
         type="button"
         data-part="clear"
+        data-part-clear=""
         [attr.aria-label]="t('clear')"
         (click)="onClear($event)"
       >
@@ -236,9 +251,15 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
       </button>
     }
     @if (loading()) {
-      <span data-part="busy" data-ui="spinner" aria-hidden="true"></span>
+      <span
+        data-part="busy"
+        data-part-busy=""
+        data-ui="spinner"
+        data-ui-spinner=""
+        aria-hidden="true"
+      ></span>
     } @else {
-      <span data-part="arrow"
+      <span data-part="arrow" data-part-arrow=""
         ><span slIcon><svg slGlyph name="chevron-down"></svg></span
       ></span>
     }
@@ -292,11 +313,18 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
             by the trigger's own name and by each option's aria-selected.
           -->
       @if (resolvedMultiple() && selection().length > 0) {
-        <div data-part="chosen" aria-hidden="true">
+        <div data-part="chosen" data-part-chosen="" aria-hidden="true">
           @for (value of selection(); track value) {
-            <span data-ui="tag" data-part="root" data-size="sm" data-variant="soft">
-              <span data-part="body">
-                <span data-part="label">{{ labelFor(value) ?? value }}</span>
+            <span
+              data-ui="tag"
+              data-ui-tag=""
+              data-part="root"
+              data-part-root=""
+              data-size="sm"
+              data-variant="soft"
+            >
+              <span data-part="body" data-part-body="">
+                <span data-part="label" data-part-label="">{{ labelFor(value) ?? value }}</span>
               </span>
             </span>
           }
@@ -309,16 +337,23 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
               height of an option, drawn by the skeleton sheet (SL6/CB5). Hidden
               assistive technology — the status row is the live region.
             -->
-        <div data-part="placeholder" aria-hidden="true">
+        <div data-part="placeholder" data-part-placeholder="" aria-hidden="true">
           @for (row of [0, 1, 2]; track row) {
             <div>
-              <span data-ui="skeleton" data-part="root" data-shape="text" data-loading></span>
+              <span
+                data-ui="skeleton"
+                data-ui-skeleton=""
+                data-part="root"
+                data-part-root=""
+                data-shape="text"
+                data-loading
+              ></span>
             </div>
           }
         </div>
       }
       @if (!loading() && empty()) {
-        <div data-part="empty">{{ t('empty') }}</div>
+        <div data-part="empty" data-part-empty="">{{ t('empty') }}</div>
       }
       @if (loading() || resolvedSearch()) {
         <!--
@@ -329,6 +364,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
             -->
         <div
           data-part="status"
+          data-part-status=""
           role="status"
           aria-live="polite"
           [attr.data-loading]="loading() ? '' : null"
@@ -341,7 +377,9 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
     <ng-template #layer>
       <div
         data-ui="select"
+        data-ui-select=""
         data-part="positioner"
+        data-part-positioner=""
         [attr.data-align]="resolvedAlign()"
         [attr.data-size]="resolvedSize()"
         [attr.data-width]="resolvedWidth()"
@@ -351,6 +389,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
         <div
           #surface
           data-part="content"
+          data-part-content=""
           [attr.role]="resolvedSearch() ? 'dialog' : 'listbox'"
           [attr.data-search]="resolvedSearch() ? '' : null"
           [id]="contentId"
@@ -367,8 +406,8 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
             it: a listbox holds options and groups, and a text field is neither.
           -->
           @if (resolvedSearch()) {
-            <div data-part="search">
-              <span data-part="search-icon" aria-hidden="true"
+            <div data-part="search" data-part-search="">
+              <span data-part="search-icon" data-part-search-icon="" aria-hidden="true"
                 ><span slIcon><svg slGlyph name="search"></svg></span
               ></span>
               <input
@@ -376,6 +415,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
                 type="text"
                 role="combobox"
                 data-part="search-input"
+                data-part-search-input=""
                 autocomplete="off"
                 spellcheck="false"
                 aria-expanded="true"
@@ -394,6 +434,7 @@ const flatten = (items: SelectItems | undefined): readonly SelectOption[] =>
           @if (resolvedSearch()) {
             <div
               data-part="list"
+              data-part-list=""
               role="listbox"
               [id]="listId"
               [attr.aria-labelledby]="triggerId"

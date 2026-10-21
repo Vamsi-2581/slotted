@@ -32,6 +32,7 @@ import { SlButtonGroup } from './button-group';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'separator',
+    'data-part-separator': '',
     '[attr.role]': 'decorative() ? "none" : "separator"',
     '[attr.aria-hidden]': 'decorative() ? "true" : null',
     '[attr.aria-orientation]': 'axis()',

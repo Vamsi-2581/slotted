@@ -21,26 +21,36 @@
 -->
 
 <section data-scene="default">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -52,9 +62,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -67,18 +78,30 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
@@ -94,23 +117,33 @@
   <div style="position: relative; min-block-size: 22rem">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -122,9 +155,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -137,25 +171,39 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-presentation="popover"
@@ -169,16 +217,41 @@
         --slotted-positioner-transform-origin: left top;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Hora de início">
-        <div data-part="head">
-          <button data-part="now" type="button">Agora</button>
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Hora de início">
+        <div data-part="head" data-part-head="">
+          <button data-part="now" data-part-now="" type="button">Agora</button>
         </div>
-        <div data-part="list">
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:15</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:30</div>
+        <div data-part="list" data-part-list="">
           <div
             data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:15
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:30
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
             role="option"
             tabindex="-1"
             aria-selected="false"
@@ -187,18 +260,80 @@
           >
             09:45
           </div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="true" data-selected>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="true"
+            data-selected
+          >
             10:00
           </div>
-          <div data-part="option" role="option" tabindex="0" aria-selected="false" data-current>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="0"
+            aria-selected="false"
+            data-current
+          >
             10:15
           </div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">10:30</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">10:45</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">11:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">11:15</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">11:30</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">11:45</div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            10:30
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            10:45
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            11:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            11:15
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            11:30
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            11:45
+          </div>
         </div>
       </div>
     </div>
@@ -213,23 +348,33 @@
   <div style="position: relative; min-block-size: 22rem">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -241,9 +386,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -256,25 +402,39 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-presentation="popover"
@@ -288,22 +448,93 @@
         --slotted-positioner-transform-origin: left top;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Hora de início">
-        <div data-part="head">
-          <button data-part="now" type="button">Agora</button>
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Hora de início">
+        <div data-part="head" data-part-head="">
+          <button data-part="now" data-part-now="" type="button">Agora</button>
         </div>
-        <div data-part="list">
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">07:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">08:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="true" data-selected>
+        <div data-part="list" data-part-list="">
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            07:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            08:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="true"
+            data-selected
+          >
             10:00
           </div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">11:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">12:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">13:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">14:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">15:00</div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            11:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            12:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            13:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            14:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            15:00
+          </div>
         </div>
       </div>
     </div>
@@ -321,23 +552,33 @@
   <div style="position: relative; min-block-size: 20rem">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora da consulta, 11:40">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora da consulta, 11:40"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -349,9 +590,10 @@
             >
               11
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -364,25 +606,39 @@
               40
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-label="Alterar hora, 11:40"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="11:40:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="11:40:00"
+          />
         </div>
       </div>
     </div>
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-presentation="popover"
@@ -396,18 +652,57 @@
         --slotted-positioner-transform-origin: left top;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Hora da consulta">
-        <div data-part="head">
-          <button data-part="now" type="button">Agora</button>
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Hora da consulta">
+        <div data-part="head" data-part-head="">
+          <button data-part="now" data-part-now="" type="button">Agora</button>
         </div>
-        <div data-part="list">
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:20</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="true" data-selected>
+        <div data-part="list" data-part-list="">
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:20
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="true"
+            data-selected
+          >
             11:40
           </div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">13:45</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">16:00</div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            13:45
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            16:00
+          </div>
         </div>
       </div>
     </div>
@@ -425,23 +720,33 @@
   <div style="position: relative; min-block-size: 18rem">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="second"
         >
-          <div data-part="segments" role="group" aria-label="Marca do intervalo, 00:00:30">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Marca do intervalo, 00:00:30"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -453,9 +758,10 @@
             >
               00
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -467,9 +773,10 @@
             >
               00
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="second"
               role="spinbutton"
               tabindex="-1"
@@ -482,25 +789,39 @@
               30
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-label="Alterar marca, 00:00:30"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="00:00:30" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="00:00:30"
+          />
         </div>
       </div>
     </div>
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-presentation="popover"
@@ -514,18 +835,57 @@
         --slotted-positioner-transform-origin: left top;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Marca do intervalo">
-        <div data-part="head">
-          <button data-part="now" type="button">Agora</button>
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Marca do intervalo">
+        <div data-part="head" data-part-head="">
+          <button data-part="now" data-part-now="" type="button">Agora</button>
         </div>
-        <div data-part="list" data-truncated>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">00:00:15</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="true" data-selected>
+        <div data-part="list" data-part-list="" data-truncated>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            00:00:15
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="true"
+            data-selected
+          >
             00:00:30
           </div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">00:00:45</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">00:01:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">00:01:15</div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            00:00:45
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            00:01:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            00:01:15
+          </div>
         </div>
       </div>
     </div>
@@ -541,23 +901,33 @@
   <div style="position: relative; min-block-size: 22rem">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -569,9 +939,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -584,25 +955,39 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-presentation="popover"
@@ -616,48 +1001,79 @@
         --slotted-positioner-transform-origin: left top;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Hora de início">
-        <div data-part="presets">
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Hora de início">
+        <div data-part="presets" data-part-presets="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-variant="ghost"
             data-tone="secondary"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Início do turno</span>
+            <span data-part="label" data-part-label="">Início do turno</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-variant="ghost"
             data-tone="secondary"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Almoço</span>
+            <span data-part="label" data-part-label="">Almoço</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-variant="ghost"
             data-tone="secondary"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Fim do turno</span>
+            <span data-part="label" data-part-label="">Fim do turno</span>
           </button>
         </div>
-        <div data-part="head">
-          <button data-part="now" type="button">Agora</button>
+        <div data-part="head" data-part-head="">
+          <button data-part="now" data-part-now="" type="button">Agora</button>
         </div>
-        <div data-part="list">
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:00</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:15</div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">09:30</div>
+        <div data-part="list" data-part-list="">
           <div
             data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:00
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:15
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            09:30
+          </div>
+          <div
+            data-part="option"
+            data-part-option=""
             role="option"
             tabindex="-1"
             aria-selected="false"
@@ -666,31 +1082,50 @@
           >
             09:45
           </div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="true" data-selected>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="true"
+            data-selected
+          >
             10:00
           </div>
-          <div data-part="option" role="option" tabindex="-1" aria-selected="false">10:15</div>
+          <div
+            data-part="option"
+            data-part-option=""
+            role="option"
+            tabindex="-1"
+            aria-selected="false"
+          >
+            10:15
+          </div>
         </div>
-        <div data-part="footer">
+        <div data-part="footer" data-part-footer="">
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-variant="ghost"
             data-tone="secondary"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Cancelar</span>
+            <span data-part="label" data-part-label="">Cancelar</span>
           </button>
           <button
             data-ui="button"
+            data-ui-button=""
             data-part="root"
+            data-part-root=""
             data-variant="solid"
             data-tone="accent"
             data-size="sm"
             type="button"
           >
-            <span data-part="label">Aplicar</span>
+            <span data-part="label" data-part-label="">Aplicar</span>
           </button>
         </div>
       </div>
@@ -707,23 +1142,33 @@
   <div style="position: relative; min-block-size: 12rem">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, vazia">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, vazia"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -735,9 +1180,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -750,25 +1196,39 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-label="Escolher hora"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="positioner"
+      data-part-positioner=""
       data-side="bottom"
       data-align="start"
       data-presentation="popover"
@@ -782,37 +1242,47 @@
         --slotted-positioner-transform-origin: left top;
       "
     >
-      <div data-part="content" role="listbox" aria-label="Hora de início">
-        <div data-part="head">
-          <button data-part="now" type="button">Agora</button>
+      <div data-part="content" data-part-content="" role="listbox" aria-label="Hora de início">
+        <div data-part="head" data-part-head="">
+          <button data-part="now" data-part-now="" type="button">Agora</button>
         </div>
-        <div data-part="empty">Nenhuma hora disponível neste dia.</div>
+        <div data-part="empty" data-part-empty="">Nenhuma hora disponível neste dia.</div>
       </div>
     </div>
   </div>
 </section>
 
 <section data-scene="sizes">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="sm"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="sm"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -824,9 +1294,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -839,41 +1310,63 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
 
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -885,9 +1378,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -900,41 +1394,63 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
 
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="lg"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="lg"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -946,9 +1462,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -961,18 +1478,30 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
@@ -980,26 +1509,36 @@
 </section>
 
 <section data-scene="variants">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -1011,9 +1550,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -1026,41 +1566,63 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
 
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="subtle"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="subtle"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -1072,9 +1634,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -1087,41 +1650,63 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
 
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="plain"
       data-granularity="minute"
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="plain"
           data-cycle="24"
           data-granularity="minute"
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -1133,9 +1718,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -1148,18 +1734,30 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
@@ -1167,28 +1765,38 @@
 </section>
 
 <section data-scene="states">
-  <div data-ui="stack" data-part="root" data-gap="6">
+  <div data-ui="stack" data-ui-stack="" data-part="root" data-part-root="" data-gap="6">
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
       data-disabled
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
           data-disabled
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00, desativada">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00, desativada"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -1200,9 +1808,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -1215,43 +1824,65 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
 
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
       data-readonly
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
           data-readonly
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00, só de leitura">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00, só de leitura"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -1263,9 +1894,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -1278,34 +1910,50 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
 
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
       data-invalid
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
@@ -1314,11 +1962,13 @@
         >
           <div
             data-part="segments"
+            data-part-segments=""
             role="group"
             aria-label="Hora de início, 10:00, fora do intervalo"
           >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -1330,9 +1980,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -1345,43 +1996,65 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>
 
     <div
       data-ui="time-picker"
+      data-ui-time-picker=""
       data-part="root"
+      data-part-root=""
       data-size="md"
       data-variant="outline"
       data-granularity="minute"
       data-required
     >
-      <div data-part="control">
+      <div data-part="control" data-part-control="">
         <div
           data-ui="time-field"
+          data-ui-time-field=""
           data-part="root"
+          data-part-root=""
           data-size="md"
           data-variant="outline"
           data-cycle="24"
           data-granularity="minute"
           data-required
         >
-          <div data-part="segments" role="group" aria-label="Hora de início, 10:00, obrigatória">
+          <div
+            data-part="segments"
+            data-part-segments=""
+            role="group"
+            aria-label="Hora de início, 10:00, obrigatória"
+          >
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="hour"
               role="spinbutton"
               tabindex="0"
@@ -1393,9 +2066,10 @@
             >
               10
             </div>
-            <span data-part="literal" aria-hidden="true">:</span>
+            <span data-part="literal" data-part-literal="" aria-hidden="true">:</span>
             <div
               data-part="segment"
+              data-part-segment=""
               data-field="minute"
               role="spinbutton"
               tabindex="-1"
@@ -1408,18 +2082,30 @@
               00
             </div>
           </div>
-          <span data-part="end"
+          <span data-part="end" data-part-end=""
             ><button
               data-part="trigger"
+              data-part-trigger=""
               type="button"
               aria-haspopup="listbox"
               aria-label="Alterar hora, 10:00"
             >
-              <span data-ui="icon" data-part="root" aria-hidden="true"
-                ><svg data-part="glyph" data-glyph="clock"></svg
+              <span
+                data-ui="icon"
+                data-ui-icon=""
+                data-part="root"
+                data-part-root=""
+                aria-hidden="true"
+                ><svg data-part="glyph" data-part-glyph="" data-glyph="clock"></svg
               ></span></button
           ></span>
-          <input data-part="hidden-input" type="hidden" name="inicio" value="10:00:00" />
+          <input
+            data-part="hidden-input"
+            data-part-hidden-input=""
+            type="hidden"
+            name="inicio"
+            value="10:00:00"
+          />
         </div>
       </div>
     </div>

@@ -75,23 +75,25 @@ const LIVE_ROLE: Record<InlineMessageLive, string | null> = {
   exportAs: 'slInlineMessage',
   imports: [SlGlyph, SlIcon],
   template: `@if (prefixWord() !== '') {
-      <span data-part="prefix">{{ prefixWord() }}</span>
+      <span data-part="prefix" data-part-prefix="">{{ prefixWord() }}</span>
     }
     @if (!hideIcon()) {
-      <span aria-hidden="true" data-part="icon"
+      <span aria-hidden="true" data-part="icon" data-part-icon=""
         ><ng-content select="[slInlineMessageIcon]">
           @if (glyph(); as name) {
             <span slIcon><svg slGlyph [name]="name"></svg></span>
           }</ng-content
       ></span>
     }
-    <span data-part="text"><ng-content /></span>`,
+    <span data-part="text" data-part-text=""><ng-content /></span>`,
   styleUrl: '../../../styles/src/inline-message/inline-message.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'inline-message',
+    'data-ui-inline-message': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-live]': 'resolvedLive()',

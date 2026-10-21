@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/datetime-field/datetime-field.css';
 
 import {
@@ -639,7 +640,11 @@ export function DateTimeField({
 
   const children: ReactNode = (
     <>
-      {start === undefined ? null : <span data-part="start">{start}</span>}
+      {start === undefined ? null : (
+        <span data-part="start" data-part-start="">
+          {start}
+        </span>
+      )}
       {relativeOpen ? (
         <>
           <input
@@ -648,6 +653,7 @@ export function DateTimeField({
             }
             aria-label={t('duration')}
             data-part="duration"
+            data-part-duration=""
             onBlur={(event) => commitExpression(event)}
             onChange={(event) => setExpression(event.target.value)}
             onKeyDown={onExpressionKeyDown}
@@ -659,6 +665,7 @@ export function DateTimeField({
           <span
             aria-live="polite"
             data-part="preview"
+            data-part-preview=""
             role="status"
             {...(resolved === null ? {} : { 'data-resolved': '' })}
             {...(rollsDay ? { 'data-rolls-day': '' } : {})}
@@ -674,7 +681,9 @@ export function DateTimeField({
                     written out and lifted from the time beside it, so the eye
                     lands on the part that moved — where `time-field` has to
                     raise a warning, because a `PlainTime` has no day. */}
-                <span data-part="preview-date">{format.describeDate(resolved.date, 'short')}</span>
+                <span data-part="preview-date" data-part-preview-date="">
+                  {format.describeDate(resolved.date, 'short')}
+                </span>
                 {', '}
                 {format.time.format(resolved.time)}
               </>
@@ -699,12 +708,13 @@ export function DateTimeField({
           aria-readonly={resolvedReadOnly === true ? true : undefined}
           aria-required={resolvedRequired === true ? true : undefined}
           data-part="segments"
+          data-part-segments=""
           id={id ?? field?.ids.control}
           onPaste={onPaste}
           role="group"
         >
           {halves.map((group) => (
-            <span data-half={group.half} data-part="half" key={group.half}>
+            <span data-half={group.half} data-part="half" data-part-half="" key={group.half}>
               {group.parts.map((part, index) => {
                 if (part.type === 'literal') {
                   /* A boundary the locale writes as whitespace alone is not
@@ -716,6 +726,7 @@ export function DateTimeField({
                     <span
                       aria-hidden="true"
                       data-part="literal"
+                      data-part-literal=""
                       key={`literal-${group.half}-${String(index)}`}
                       {...(part.boundary === true ? { 'data-boundary': '' } : {})}
                     >
@@ -746,19 +757,30 @@ export function DateTimeField({
         </div>
       )}
       {/* The whole value in words, for the group's own accessible name. */}
-      <span data-part="value-text" hidden id={valueTextId}>
+      <span data-part="value-text" data-part-value-text="" hidden id={valueTextId}>
         {spoken}
       </span>
       {showClear ? (
-        <button aria-label={t('clear')} data-part="clear" onClick={clear} type="button">
+        <button
+          aria-label={t('clear')}
+          data-part="clear"
+          data-part-clear=""
+          onClick={clear}
+          type="button"
+        >
           <Icon>
             <Glyph name="x" />
           </Icon>
         </button>
       ) : null}
-      {end === undefined ? null : <span data-part="end">{end}</span>}
+      {end === undefined ? null : (
+        <span data-part="end" data-part-end="">
+          {end}
+        </span>
+      )}
       <input
         data-part="hidden-input"
+        data-part-hidden-input=""
         name={name}
         readOnly
         type="hidden"
@@ -767,7 +789,7 @@ export function DateTimeField({
     </>
   );
 
-  const rootProps: DateTimeFieldRootProps = {
+  const rootProps: DateTimeFieldRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
@@ -787,7 +809,7 @@ export function DateTimeField({
     'data-variant': resolvedVariant,
     onMouseDown: onRootMouseDown,
     ref: rootRef,
-  } as DateTimeFieldRootProps;
+  }) as DateTimeFieldRootProps;
 
   return render === undefined ? (
     <div {...(rootProps as DateTimeFieldRootProps & { ref?: React.Ref<HTMLDivElement> })} />
@@ -875,6 +897,7 @@ function Segment({
       data-field={field}
       data-half={halfOfField(field)}
       data-part="segment"
+      data-part-segment=""
       {...(raw === null ? { 'data-placeholder': '' } : {})}
       onBlur={onBlur}
       onFocus={onFocus}

@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/section/section.css';
 
 import { createContext, useContext, useEffect, useId, useState } from 'react';
@@ -105,7 +106,7 @@ export function Section({
     };
   }, [header, resolvedSticky]);
 
-  const rootProps: SectionRootProps = {
+  const rootProps: SectionRootProps = keyedProps({
     ...nativeProps,
     ...(hasHeading ? { 'aria-labelledby': context.headingId } : {}),
     children,
@@ -119,7 +120,7 @@ export function Section({
     'data-ui': 'section',
     id: rootId,
     style,
-  };
+  });
 
   return (
     <SectionContext.Provider value={context}>

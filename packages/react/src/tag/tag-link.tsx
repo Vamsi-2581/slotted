@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useId } from 'react';
 import type { SyntheticEvent } from 'react';
 
@@ -54,7 +55,7 @@ export function TagLink({
     return true;
   };
 
-  const bodyProps: TagLinkBodyProps = {
+  const bodyProps: TagLinkBodyProps = keyedProps({
     ...nativeProps,
     children: (
       <TagContent end={end} labelId={labelId} start={start}>
@@ -77,7 +78,7 @@ export function TagLink({
     ...(disabled
       ? { 'aria-disabled': true, role: nativeProps.role ?? 'link', tabIndex: tabIndex ?? 0 }
       : { href, ...(tabIndex === undefined ? {} : { tabIndex }) }),
-  };
+  });
 
   return (
     <TagFrame appearance={appearance} disabled={disabled} removal={removal} rootProps={rootProps}>

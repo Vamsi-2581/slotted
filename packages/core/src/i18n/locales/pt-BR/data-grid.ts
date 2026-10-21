@@ -88,6 +88,7 @@ export const ptBR: DataGridMessages = {
   groupCount: '{count, plural, one {# linha} other {# linhas}}',
   hide: 'Ocultar coluna',
   loadMore: 'Carregar mais',
+  loadingMore: 'Carregando mais linhas…',
   manageColumns: 'Gerenciar colunas…',
   noResults: 'Nenhuma linha corresponde aos filtros atuais',
   pinEnd: 'Fixar no fim',

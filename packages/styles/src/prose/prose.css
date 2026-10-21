@@ -8,20 +8,20 @@
    * two: a Slotted family placed inside the region, selected by `data-ui` at
    * 0-1-0, and the consumer's own rule. So every content rule below is written
    *
-   *   [data-ui='prose'] :where(<tag>):not(:where(<the donut>))
+   *   [data-ui-prose] :where(<tag>):not(:where(<the donut>))
    *
    * which weighs 0-1-0 — the root and nothing else. `:where()` has no weight,
    * and `:not()` takes the weight of its argument, which here is also none.
    *
    * The donut is the opt-out: `data-part='exclude'` and everything inside it.
-   * `@scope ([data-ui='prose']) to ([data-part='exclude'])` says the same thing
+   * `@scope ([data-ui-prose]) to ([data-part='exclude'])` says the same thing
    * in one line and resolves lower still, and it was refused on a date rather
    * than on a principle: it reached Baseline in March 2026, and an `@scope`
    * block a browser cannot parse drops this whole stylesheet instead of one
    * declaration. The attribute is the same either way, so the move costs no
    * contract change. `specs/components/prose/contract.json` holds the note.
    */
-  [data-ui='prose'] {
+  [data-ui-prose] {
     /**
      * The space between blocks. Typeset proves one number governs a whole page
      * — heading gaps, list gaps and the room around a rule all derive from it —
@@ -95,27 +95,27 @@
    * is, so the offset from control type is a fact a reader can check rather
    * than one hidden behind `sm`.
    */
-  [data-ui='prose'][data-size='md'] {
+  [data-ui-prose][data-size='md'] {
     font-size: var(--slotted-font-size-md, 0.875rem);
   }
 
-  [data-ui='prose'][data-size='lg'] {
+  [data-ui-prose][data-size='lg'] {
     font-size: var(--slotted-font-size-lg, 1rem);
   }
 
-  [data-ui='prose'][data-size='xl'] {
+  [data-ui-prose][data-size='xl'] {
     font-size: var(--slotted-font-size-xl, 1.125rem);
   }
 
-  [data-ui='prose'][data-flow='tight'] {
+  [data-ui-prose][data-flow='tight'] {
     --_flow: var(--slotted-prose-flow-tight, 0.75em);
   }
 
-  [data-ui='prose'][data-flow='normal'] {
+  [data-ui-prose][data-flow='normal'] {
     --_flow: var(--slotted-prose-flow-normal, 1.15em);
   }
 
-  [data-ui='prose'][data-flow='loose'] {
+  [data-ui-prose][data-flow='loose'] {
     --_flow: var(--slotted-prose-flow-loose, 1.6em);
   }
 
@@ -129,7 +129,7 @@
    * and are stable, and `prose.styles.test.mjs` holds the distinction.
    */
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(
       p,
       ul,
@@ -147,7 +147,7 @@
       h4,
       h5,
       h6,
-      [data-part='scroll'],
+      [data-part-scroll],
       [data-part='footnotes']
     ):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     margin-block-end: 0;
@@ -159,9 +159,9 @@
    * child of the region and of every box that holds blocks of its own, so a
    * quotation, a list item and a table cell each start flush.
    */
-  [data-ui='prose'] > :first-child,
-  [data-ui='prose']
-    :where(li, blockquote, td, th, details, figure, [data-part='scroll'])
+  [data-ui-prose] > :first-child,
+  [data-ui-prose]
+    :where(li, blockquote, td, th, details, figure, [data-part-scroll])
     > :first-child {
     margin-block-start: 0;
   }
@@ -171,7 +171,7 @@
    * The pair is what keeps two consecutive headings — a section title followed
    * by its first subsection — from collapsing into one block.
    */
-  [data-ui='prose']
+  [data-ui-prose]
     :where(h1, h2, h3, h4, h5, h6):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     color: var(--slotted-text, CanvasText);
     font-family: var(
@@ -197,31 +197,31 @@
     text-wrap: balance;
   }
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(h1, h2, h3, h4, h5, h6)
     + :not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     margin-block-start: calc(var(--_flow) * 0.5);
   }
 
-  [data-ui='prose'] :where(h1):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(h1):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-size: var(--_h1);
     line-height: var(--slotted-line-height-3xl, 1.3);
   }
 
-  [data-ui='prose'] :where(h2):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(h2):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-size: var(--_h2);
     line-height: var(--slotted-line-height-3xl, 1.3);
   }
 
-  [data-ui='prose'] :where(h3):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(h3):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-size: var(--_h3);
   }
 
-  [data-ui='prose'] :where(h4):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(h4):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-size: var(--_h4);
   }
 
-  [data-ui='prose'] :where(h5):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(h5):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-size: var(--_h5);
   }
 
@@ -229,7 +229,7 @@
    * The sixth level is smaller than the body text, so weight and case are what
    * carry it. A heading that is merely smaller reads as a caption.
    */
-  [data-ui='prose'] :where(h6):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(h6):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     color: var(--_muted);
     font-size: var(--_h6);
     letter-spacing: var(--slotted-prose-h6-tracking, 0.06em);
@@ -242,7 +242,7 @@
    * is the common languages written in it, which is the correction
    * `typography` already carries.
    */
-  [data-ui='prose']
+  [data-ui-prose]
     :where(h6):not(:where([data-part='exclude'], [data-part='exclude'] *)):where(
       :lang(ar),
       :lang(fa),
@@ -254,7 +254,7 @@
 
   /* ── Running text ───────────────────────────────────────────────────── */
 
-  [data-ui='prose'] :where(p):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(p):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     /**
      * `pretty` asks the browser for the last few lines rather than the whole
      * paragraph, which is what keeps a widow off the end without the cost
@@ -263,11 +263,11 @@
     text-wrap: pretty;
   }
 
-  [data-ui='prose'] :where(strong, b):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(strong, b):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='prose'] :where(small):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(small):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-size: var(--slotted-prose-small-size, 0.875em);
   }
 
@@ -277,15 +277,14 @@
    * theme's own — a mark painted with a background and no matching ink is a
    * mark that vanishes in the dark scheme.
    */
-  [data-ui='prose'] :where(mark):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(mark):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     background-color: var(--slotted-tone-warning-surface, Mark);
     border-radius: var(--slotted-radius-xs, 2px);
     color: var(--slotted-tone-warning-text, MarkText);
     padding-inline: var(--slotted-prose-mark-inset, 0.2em);
   }
 
-  [data-ui='prose']
-    :where(abbr[title]):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(abbr[title]):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     text-decoration-line: underline;
     text-decoration-style: dotted;
     text-underline-offset: 0.2em;
@@ -296,7 +295,7 @@
    * sits in; zero is what keeps the paragraph's rhythm even where a footnote
    * reference lands.
    */
-  [data-ui='prose'] :where(sub, sup):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(sub, sup):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-size: 0.75em;
     line-height: 0;
   }
@@ -310,7 +309,7 @@
    * `<Link>` placed inside this region wins on specificity and is left alone.
    */
 
-  [data-ui='prose'] :where(a[href]):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(a[href]):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     color: var(--slotted-link-color, var(--slotted-tone-accent-text, LinkText));
     text-decoration-color: var(
       --slotted-link-underline-color,
@@ -324,7 +323,7 @@
       text-decoration-color var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(a[href]):not(:where([data-part='exclude'], [data-part='exclude'] *)):not(
       [data-disabled]
     ):hover {
@@ -339,7 +338,7 @@
     text-decoration-color: currentColor;
   }
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(a[href]):not(:where([data-part='exclude'], [data-part='exclude'] *)):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-link-focus-ring-offset, 1px);
@@ -354,16 +353,16 @@
    * <https://www.scottohara.me/blog/2019/01/12/lists-and-safari.html>.
    */
 
-  [data-ui='prose'] :where(ul, ol):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(ul, ol):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     padding-inline-start: var(--slotted-prose-list-inset, 1.5em);
   }
 
-  [data-ui='prose'] :where(li):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(li):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     margin-block-start: calc(var(--_flow) * 0.35);
     padding-inline-start: var(--slotted-prose-marker-gap, 0.25em);
   }
 
-  [data-ui='prose'] :where(li):not(:where([data-part='exclude'], [data-part='exclude'] *))::marker {
+  [data-ui-prose] :where(li):not(:where([data-part='exclude'], [data-part='exclude'] *))::marker {
     color: var(--_muted);
   }
 
@@ -371,24 +370,24 @@
    * A nested list belongs to the row above it, so it takes the gap between two
    * rows rather than the gap between two blocks.
    */
-  [data-ui='prose']
+  [data-ui-prose]
     :where(li)
     > :where(ul, ol):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     margin-block-start: calc(var(--_flow) * 0.35);
   }
 
-  [data-ui='prose'] :where(dt):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(dt):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-weight: var(--slotted-font-weight-semibold, 600);
     margin-block-start: calc(var(--_flow) * 0.5);
   }
 
-  [data-ui='prose'] :where(dd):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(dd):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     margin-inline-start: var(--slotted-prose-list-inset, 1.5em);
   }
 
   /* ── Quotation ──────────────────────────────────────────────────────── */
 
-  [data-ui='prose'] :where(blockquote):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(blockquote):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     border-inline-start: var(
         --slotted-prose-quote-thickness,
         var(--slotted-border-width-thick, 2px)
@@ -408,11 +407,11 @@
   }
 
   /** The same forty pixels, on the element that holds an image. */
-  [data-ui='prose'] :where(figure):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(figure):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     margin-inline: 0;
   }
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(figcaption, caption):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     color: var(--_muted);
     font-size: var(--slotted-prose-caption-size, 0.875em);
@@ -422,7 +421,7 @@
 
   /* ── Media ──────────────────────────────────────────────────────────── */
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(img, svg, video, canvas):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     block-size: auto;
     border-radius: var(--slotted-prose-media-radius, var(--slotted-radius-md, 6px));
@@ -441,21 +440,21 @@
    * code starts.
    */
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(code, kbd, samp, var):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-family: var(--slotted-font-family-mono, ui-monospace, monospace);
     /* The mono face runs large beside the sans at the same size. */
     font-size: var(--slotted-prose-code-size, 0.9em);
   }
 
-  [data-ui='prose'] :where(code):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(code):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     background-color: var(--_ground);
     border: var(--slotted-border-width-thin, 1px) solid var(--_rule);
     border-radius: var(--slotted-radius-sm, 4px);
     padding-inline: var(--slotted-prose-code-inset, 0.3em);
   }
 
-  [data-ui='prose'] :where(kbd):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(kbd):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     background-color: var(--slotted-surface-raised, Canvas);
     border: var(--slotted-kbd-border-width, var(--slotted-border-width-thin, 1px)) solid
       var(--slotted-border-strong, ButtonBorder);
@@ -465,7 +464,7 @@
     padding-inline: var(--slotted-prose-code-inset, 0.3em);
   }
 
-  [data-ui='prose'] :where(pre):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(pre):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     background-color: var(--_ground);
     /**
      * A fence reads left to right in a right-to-left document: the order of
@@ -483,7 +482,7 @@
   }
 
   /** A fence is one box, not a box of boxes. */
-  [data-ui='prose']
+  [data-ui-prose]
     :where(pre)
     > :where(code):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     background-color: transparent;
@@ -502,7 +501,7 @@
    * so a row appended to a streaming answer restyles nothing above it.
    */
 
-  [data-ui='prose'] :where(table):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(table):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     border-collapse: collapse;
     inline-size: 100%;
     text-align: start;
@@ -519,25 +518,25 @@
    * `min-inline-size` keeps a narrow table filling the column, so wrapping a
    * table that happens to fit costs nothing.
    */
-  [data-ui='prose']
-    [data-part='scroll']
+  [data-ui-prose]
+    [data-part-scroll]
     > :where(table):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     inline-size: max-content;
     min-inline-size: 100%;
   }
 
-  [data-ui='prose'] :where(th, td):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(th, td):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     padding-block: var(--slotted-space-4, 0.5rem);
     padding-inline: var(--slotted-space-5, 0.75rem);
     text-align: start;
     vertical-align: baseline;
   }
 
-  [data-ui='prose'] :where(th):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(th):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(thead)
     > :where(tr)
     > :where(th, td):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
@@ -545,7 +544,7 @@
       var(--slotted-border-strong, ButtonBorder);
   }
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(tr + tr)
     > :where(th, td):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     border-block-start: var(--slotted-border-width-thin, 1px) solid var(--_rule);
@@ -553,19 +552,19 @@
 
   /* ── Rules and disclosure ───────────────────────────────────────────── */
 
-  [data-ui='prose'] :where(hr):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(hr):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     border: 0;
     border-block-start: var(--slotted-divider-thickness, var(--slotted-border-width-thin, 1px))
       solid var(--slotted-divider-color, var(--slotted-border-subtle, ButtonBorder));
     margin-block-start: calc(var(--_flow) * 1.75);
   }
 
-  [data-ui='prose'] :where(summary):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+  [data-ui-prose] :where(summary):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     cursor: pointer;
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='prose']
+  [data-ui-prose]
     :where(summary):not(:where([data-part='exclude'], [data-part='exclude'] *)):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-prose-focus-ring-offset, 2px);
@@ -579,13 +578,13 @@
    * several. The selector looks backwards, which is what keeps it stable while
    * the rest of the document is still arriving.
    */
-  [data-ui='prose']
+  [data-ui-prose]
     [data-part='lead']
     + :not(:where([data-part='exclude'], [data-part='exclude'] *)) {
     margin-block-start: calc(var(--_flow) * 1.35);
   }
 
-  [data-ui='prose'] [data-part='lead'] {
+  [data-ui-prose] [data-part='lead'] {
     color: var(--_muted);
     font-size: var(--slotted-prose-lead-size, 1.125em);
     line-height: var(--slotted-prose-lead-line-height, var(--slotted-line-height-lg, 1.5));
@@ -615,7 +614,7 @@
    * reason: a no-break space would carry a full word space with it.
    */
 
-  [data-ui='prose'] [data-part='anchor'] {
+  [data-ui-prose] [data-part-anchor] {
     align-items: center;
     color: var(--_muted);
     display: inline-flex;
@@ -629,14 +628,12 @@
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
-  [data-ui='prose']
-    :where(h1, h2, h3, h4, h5, h6):hover
-    > [data-part='anchor']:not([data-disabled]),
-  [data-ui='prose'] [data-part='anchor']:focus-visible {
+  [data-ui-prose] :where(h1, h2, h3, h4, h5, h6):hover > [data-part-anchor]:not([data-disabled]),
+  [data-ui-prose] [data-part-anchor]:focus-visible {
     opacity: 1;
   }
 
-  [data-ui='prose'] [data-part='anchor']:focus-visible {
+  [data-ui-prose] [data-part-anchor]:focus-visible {
     border-radius: var(--slotted-radius-sm, 4px);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-prose-focus-ring-offset, 2px);
@@ -659,7 +656,7 @@
    * a ring nobody asked for.
    */
 
-  [data-ui='prose'] [data-part='scroll'] {
+  [data-ui-prose] [data-part-scroll] {
     max-inline-size: 100%;
     /* The page does not scroll sideways because one table is wide. */
     overflow-x: auto;
@@ -667,14 +664,14 @@
     overscroll-behavior-inline: contain;
   }
 
-  [data-ui='prose'] [data-part='scroll'][tabindex]:focus-visible {
+  [data-ui-prose] [data-part-scroll][tabindex]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-prose-focus-ring-offset, 2px);
   }
 
   /* ── Footnotes ──────────────────────────────────────────────────────── */
 
-  [data-ui='prose'] [data-part='footnotes'] {
+  [data-ui-prose] [data-part='footnotes'] {
     border-block-start: var(--slotted-border-width-thin, 1px) solid var(--_rule);
     color: var(--_muted);
     font-size: var(--slotted-prose-footnotes-size, 0.875em);
@@ -692,7 +689,7 @@
    * expects, and a component that sets its own overrides all four.
    */
 
-  [data-ui='prose'] [data-part='exclude'] {
+  [data-ui-prose] [data-part='exclude'] {
     font-family: var(--slotted-font-family-sans, ui-sans-serif, system-ui, sans-serif);
     font-size: var(--slotted-font-size-md, 0.875rem);
     line-height: var(--slotted-line-height-md, 1.5);
@@ -711,22 +708,21 @@
 
   @container slotted-prose (max-width: 34rem) {
     /* A 2em heading in a 400-pixel column is six words a line. */
-    [data-ui='prose'] :where(h1):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+    [data-ui-prose] :where(h1):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
       font-size: var(--slotted-prose-h1-size-narrow, 1.6em);
     }
 
-    [data-ui='prose'] :where(h2):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+    [data-ui-prose] :where(h2):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
       font-size: var(--slotted-prose-h2-size-narrow, 1.35em);
     }
   }
 
   @container slotted-prose (max-width: 22rem) {
-    [data-ui='prose']
-      :where(blockquote):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+    [data-ui-prose] :where(blockquote):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
       padding-inline-start: calc(var(--slotted-prose-quote-inset, 1em) / 2);
     }
 
-    [data-ui='prose'] :where(ul, ol):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
+    [data-ui-prose] :where(ul, ol):not(:where([data-part='exclude'], [data-part='exclude'] *)) {
       padding-inline-start: var(--slotted-prose-list-inset-narrow, 1.15em);
     }
   }

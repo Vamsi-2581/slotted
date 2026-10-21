@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/wizard/wizard.css';
 import '@slotted/styles/field/field.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
@@ -872,6 +873,7 @@ export function Wizard({
       <div
         data-open={open ? '' : undefined}
         data-part="progress"
+        data-part-progress=""
         onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
           if (event.key !== 'Escape' || !open) return;
           event.preventDefault();
@@ -883,16 +885,17 @@ export function Wizard({
           aria-controls={listId}
           aria-expanded={open}
           data-part="progress-toggle"
+          data-part-progress-toggle=""
           onClick={(event) =>
             requestOpen(!open, event.detail === 0 ? 'keyboard' : 'pointer', event)
           }
           ref={toggleRef}
           type="button"
         >
-          <span data-part="progress-position">
+          <span data-part="progress-position" data-part-progress-position="">
             {t('position', { index: position.index, count: position.count })}
           </span>
-          <span aria-hidden="true" data-part="progress-track">
+          <span aria-hidden="true" data-part="progress-track" data-part-progress-track="">
             {entries.map((entry) => (
               <span
                 data-complete={
@@ -903,6 +906,7 @@ export function Wizard({
                 data-current={!finished && entry.name === current ? '' : undefined}
                 data-invalid={invalid.has(entry.name) ? '' : undefined}
                 data-part="progress-segment"
+                data-part-progress-segment=""
                 key={entry.name}
               />
             ))}
@@ -955,20 +959,27 @@ export function Wizard({
 
   const skeletonPart = (
     <>
-      <div aria-hidden="true" data-part="step-header">
-        <div data-part="step-title">
-          <span data-part="position">
+      <div aria-hidden="true" data-part="step-header" data-part-step-header="">
+        <div data-part="step-title" data-part-step-title="">
+          <span data-part="position" data-part-position="">
             <Skeleton inlineSize="5.5rem" />
           </span>
           <Skeleton inlineSize="13rem" />
         </div>
       </div>
-      <div aria-hidden="true" data-part="skeleton">
-        <div data-label-placement="top" data-part="root" data-size="md" data-ui="field">
-          <span data-part="label">
+      <div aria-hidden="true" data-part="skeleton" data-part-skeleton="">
+        <div
+          data-label-placement="top"
+          data-part="root"
+          data-part-root=""
+          data-size="md"
+          data-ui="field"
+          data-ui-field=""
+        >
+          <span data-part="label" data-part-label="">
             <Skeleton inlineSize="7rem" />
           </span>
-          <div data-part="control">
+          <div data-part="control" data-part-control="">
             <Skeleton blockSize="var(--slotted-control-height-md)" shape="block" />
           </div>
         </div>
@@ -979,14 +990,20 @@ export function Wizard({
   const stepPart =
     currentElement === undefined ? null : (
       <>
-        <div data-part="step-header">
-          <Heading data-part="step-title" id={titleId} ref={titleRef} tabIndex={-1}>
-            <span data-part="position">
+        <div data-part="step-header" data-part-step-header="">
+          <Heading
+            data-part="step-title"
+            data-part-step-title=""
+            id={titleId}
+            ref={titleRef}
+            tabIndex={-1}
+          >
+            <span data-part="position" data-part-position="">
               {t('position', { index: position.index, count: position.count })}
             </span>{' '}
             {currentElement.props.label}
             {optional ? (
-              <span data-part="optional">
+              <span data-part="optional" data-part-optional="">
                 {' '}
                 <Tag shape="pill" size="sm" tone="secondary" variant="soft">
                   {t('optional')}
@@ -995,7 +1012,9 @@ export function Wizard({
             ) : null}
           </Heading>
           {currentElement.props.description === undefined ? null : (
-            <p data-part="step-description">{currentElement.props.description}</p>
+            <p data-part="step-description" data-part-step-description="">
+              {currentElement.props.description}
+            </p>
           )}
         </div>
         <Form
@@ -1028,9 +1047,9 @@ export function Wizard({
 
   const completeProps = completeElement?.props ?? {};
   const main = (
-    <div data-part="main">
+    <div data-part="main" data-part-main="">
       {shownError === undefined ? null : (
-        <div data-part="error">
+        <div data-part="error" data-part-error="">
           <Alert live="off" ref={alertRef} reach="section" tone="danger">
             <AlertContent>
               <AlertTitle>{errorTitle}</AlertTitle>
@@ -1043,8 +1062,8 @@ export function Wizard({
       )}
       {phase === 'complete' ? (
         <div
-          {...completeProps}
-          data-part="complete"
+          {...withSelectorKey(completeProps, 'part', 'complete')}
+
           ref={(element: HTMLDivElement | null) => {
             completeRef.current = element;
             const own = completeProps.ref;
@@ -1057,7 +1076,7 @@ export function Wizard({
         </div>
       ) : (
         <>
-          <div aria-busy={restoring ? true : undefined} data-part="step">
+          <div aria-busy={restoring ? true : undefined} data-part="step" data-part-step="">
             {restoring ? (skeleton ? skeletonPart : null) : stepPart}
           </div>
           {restoring ? null : (actions ?? <WizardActions />)}
@@ -1066,11 +1085,11 @@ export function Wizard({
     </div>
   );
 
-  const rootProps: WizardRootProps = {
+  const rootProps: WizardRootProps = keyedProps({
     ...nativeProps,
     children: (
       <WizardContext.Provider value={context}>
-        <div data-part="layout">
+        <div data-part="layout" data-part-layout="">
           {progressPart}
           {main}
         </div>
@@ -1084,7 +1103,7 @@ export function Wizard({
     'data-progress': resolvedProgress,
     'data-scroll': resolvedScroll,
     'data-ui': 'wizard',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

@@ -1,8 +1,9 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createFocusScope } from '@slotted/core/focus';
 import { observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { MouseEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -62,7 +63,7 @@ export function DialogTrigger({
 }: DialogTriggerProps) {
   const dialog = useDialog();
 
-  const rootProps: DialogTriggerRootProps = {
+  const rootProps: DialogTriggerRootProps = keyedProps({
     ...nativeProps,
     'aria-controls': dialog.mounted ? `${dialog.triggerId}-content` : undefined,
     'aria-expanded': dialog.open,
@@ -88,7 +89,7 @@ export function DialogTrigger({
     },
     style,
     type: 'button',
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} />;
@@ -176,13 +177,20 @@ export function DialogContent({
    * background's `inert` for those two hundred milliseconds is a page nobody
    * can touch.
    */
+  /* The context is a new object on every render of the root, and a palette
+     re-renders it on every highlight move: the layer reads it through a ref,
+     and only the values that change what the layer is re-register it. */
+  const latest = useRef(dialog);
+  latest.current = dialog;
+  const { back, escape, modal, open, outsidePress } = dialog;
+  const trigger = dialog.nodes.trigger;
   useEffect(() => {
-    if (content === null || !dialog.open) return;
+    if (content === null || !open) return;
 
     const root = content.closest<HTMLElement>('[data-ui="dialog"]');
     if (root === null) return;
 
-    const branches = dialog.nodes.trigger === null ? [] : [dialog.nodes.trigger];
+    const branches = trigger === null ? [] : [trigger];
     /* The frame is the layer and the panel is what a press is inside of: the
        scrim and the viewport around the panel are the way out. The click, not
        the pointerdown, so a selection dragged out of the panel is not a press
@@ -190,28 +198,28 @@ export function DialogContent({
     const layerHandle = createDismissableLayer(root, {
       /* A history entry is a modal layer's: a layer the page stays reachable
          under has no claim on the way back. */
-      back: dialog.modal && dialog.back === 'close',
+      back: modal && back === 'close',
       branches,
       content,
-      escape: dialog.escape === 'close',
-      modal: dialog.modal,
+      escape: escape === 'close',
+      modal,
       onDismiss: (request) => {
-        if (request.reason === 'outsidePress' && dialog.outsidePress === 'none') {
+        if (request.reason === 'outsidePress' && outsidePress === 'none') {
           return request.cancel();
         }
-        dialog.close(request.reason as DialogOpenReason, undefined, request.source);
+        latest.current.close(request.reason as DialogOpenReason, undefined, request.source);
       },
-      outsidePress: dialog.outsidePress === 'close',
+      outsidePress: outsidePress === 'close',
       outsidePressEvent: 'click',
     });
 
-    const wanted = dialog.initialFocus;
-    const returnTo = dialog.finalFocus;
+    const wanted = latest.current.initialFocus;
+    const returnTo = latest.current.finalFocus;
     const scope = createFocusScope(content, {
-      contain: dialog.modal,
+      contain: modal,
       initial:
         wanted === 'cancel'
-          ? () => dialog.nodes.cancel
+          ? () => latest.current.nodes.cancel
           : typeof wanted === 'object' && wanted !== null
             ? () => wanted.current
             : wanted,
@@ -228,7 +236,7 @@ export function DialogContent({
       layerHandle.destroy();
       scope.destroy();
     };
-  }, [content, dialog]);
+  }, [back, content, escape, modal, open, outsidePress, trigger]);
 
   /**
    * The virtual keyboard, while the panel can cover the layer: the layer
@@ -252,7 +260,7 @@ export function DialogContent({
 
   if (!dialog.mounted || layer === null) return null;
 
-  const rootProps = {
+  const rootProps = keyedProps({
     'data-full-screen': dialog.fullScreen,
     ...(dialog.fullscreen ? { 'data-fullscreen': '' } : {}),
     ...(dialog.loading ? { 'data-loading': '' } : {}),
@@ -267,7 +275,7 @@ export function DialogContent({
     'data-surface': dialog.surface,
     ...(dialog.tone === undefined ? {} : { 'data-tone': dialog.tone }),
     'data-ui': 'dialog',
-  };
+  });
 
   /**
    * `render` substitutes the panel and not the layer. The layer, the scrim and
@@ -276,7 +284,7 @@ export function DialogContent({
    * holding — while the panel is the element a consumer has a reason to change:
    * a `form` that submits, a `section` that is a landmark.
    */
-  const panelProps = {
+  const panelProps = keyedProps({
     ...nativeProps,
     ...(described ? { 'aria-describedby': dialog.descriptionId } : {}),
     ...(labelled ? { 'aria-labelledby': dialog.titleId } : {}),
@@ -293,7 +301,7 @@ export function DialogContent({
     },
     role: dialog.member === 'alertDialog' ? ('alertdialog' as const) : ('dialog' as const),
     style,
-  };
+  });
 
   const panel: ReactNode = render === undefined ? <div {...panelProps} /> : render(panelProps);
 
@@ -301,8 +309,10 @@ export function DialogContent({
      `content-visibility` still cannot put focus inside a layer that is shut. */
   return createPortal(
     <div {...rootProps} {...(dialog.interactive ? {} : { inert: true })} ref={dialog.registerLayer}>
-      <div data-part="backdrop" />
-      <div data-part="viewport">{panel}</div>
+      <div data-part="backdrop" data-part-backdrop="" />
+      <div data-part="viewport" data-part-viewport="">
+        {panel}
+      </div>
     </div>,
     layer,
   );
@@ -328,7 +338,7 @@ export function DialogHeader({
   ...rest
 }: DialogHeaderProps) {
   const dialog = useDialog();
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     children: (
       <>
@@ -339,7 +349,7 @@ export function DialogHeader({
     className,
     'data-part': 'header' as const,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <header {...rootProps} ref={ref} />;
 }
@@ -359,6 +369,7 @@ function DialogFullscreen() {
       aria-label={dialog.t('fullScreen')}
       aria-pressed={dialog.fullscreen}
       data-part="fullscreen"
+      data-part-fullscreen=""
       onClick={(event) => {
         if (event.defaultPrevented) return;
         dialog.setFullscreen(
@@ -388,14 +399,14 @@ export function DialogTitle({
   const dialog = useDialog();
   useEffect(() => dialog.announce('title', null), [dialog]);
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     children,
     className,
     'data-part': 'title' as const,
     id: dialog.titleId === '' ? undefined : dialog.titleId,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <h2 {...rootProps} ref={ref} />;
 }
@@ -412,14 +423,14 @@ export function DialogDescription({
   const dialog = useDialog();
   useEffect(() => dialog.announce('description', null), [dialog]);
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     children,
     className,
     'data-part': 'description' as const,
     id: dialog.descriptionId === '' ? undefined : dialog.descriptionId,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <p {...rootProps} ref={ref} />;
 }
@@ -432,14 +443,14 @@ export function DialogDescription({
  */
 export function DialogBody({ children, className, ref, render, style, ...rest }: DialogBodyProps) {
   const dialog = useDialog();
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     ...(dialog.loading ? { 'aria-busy': true } : {}),
     children,
     className,
     'data-part': 'body' as const,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
 }
@@ -452,7 +463,13 @@ export function DialogFooter({
   style,
   ...rest
 }: DialogFooterProps) {
-  const rootProps = { ...rest, children, className, 'data-part': 'footer' as const, style };
+  const rootProps = keyedProps({
+    ...rest,
+    children,
+    className,
+    'data-part': 'footer' as const,
+    style,
+  });
   if (render !== undefined) return render(rootProps);
   return <footer {...rootProps} ref={ref} />;
 }
@@ -500,7 +517,7 @@ export function DialogClose({
     );
   }
 
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-label': dialog.t('close'),
     ...rest,
     /* The cross is drawn unless the consumer wrote content of their own. */
@@ -514,7 +531,7 @@ export function DialogClose({
     onClick: handleClick,
     style,
     type: 'button' as const,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} ref={ref} />;
 }
@@ -545,7 +562,7 @@ export function AlertDialogIcon({
   ...rest
 }: AlertDialogIconProps) {
   const dialog = useDialog();
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-hidden': true,
     ...rest,
     children: children ?? (
@@ -556,7 +573,7 @@ export function AlertDialogIcon({
     className,
     'data-part': 'icon' as const,
     style,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <span {...rootProps} ref={ref} />;
 }
@@ -578,7 +595,7 @@ export function AlertDialogCancel({
 }: AlertDialogCancelProps) {
   const { dialog, handleClick } = useClosingButton('cancel', 'dismiss', onClick, value ?? 'cancel');
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     children,
     className,
@@ -586,7 +603,7 @@ export function AlertDialogCancel({
     onClick: handleClick,
     style,
     type: 'button' as const,
-  };
+  });
 
   const attach = (node: HTMLButtonElement | null) => {
     dialog.announce('cancel', node);
@@ -614,7 +631,7 @@ export function AlertDialogAction({
 }: AlertDialogActionProps) {
   const { handleClick } = useClosingButton('action', 'submit', onClick, value ?? 'confirm');
 
-  const rootProps = {
+  const rootProps = keyedProps({
     ...rest,
     children,
     className,
@@ -622,7 +639,7 @@ export function AlertDialogAction({
     onClick: handleClick,
     style,
     type: 'button' as const,
-  };
+  });
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} ref={ref} />;
 }

@@ -63,6 +63,7 @@ export interface OtpInputRejection {
   ],
   host: {
     'data-part': 'input',
+    'data-part-input': '',
     '[attr.id]': 'controlId()',
     '[attr.type]': 'resolvedType()',
     '[attr.autocomplete]': 'resolvedAutocomplete()',

@@ -35,7 +35,7 @@ test('styles every part the contract declares', () => {
   ]);
   for (const part of contract.members.wizard.parts) {
     if (composed.has(part)) continue;
-    const selector = part === 'root' ? "[data-ui='wizard']{" : `[data-part='${part}']`;
+    const selector = part === 'root' ? '[data-ui-wizard]{' : `[data-part-${part.toLowerCase()}]`;
     assert.ok(normalized.includes(selector), `Missing part ${part}`);
   }
 });
@@ -80,9 +80,6 @@ test('leaves room for a focus ring inside every region that scrolls', () => {
 
 /** Every segment fills the track's height; colour separates the states. */
 test('draws the compact track in one thickness', () => {
-  assert.match(
-    normalized,
-    /\[data-part='progress-segment'\]\{background-color:[^}]*block-size:100%/,
-  );
-  assert.doesNotMatch(normalized, /\[data-part='progress-segment'\]:is\([^)]*\)\{block-size:/);
+  assert.match(normalized, /\[data-part-progress-segment\]\{background-color:[^}]*block-size:100%/);
+  assert.doesNotMatch(normalized, /\[data-part-progress-segment\]:is\([^)]*\)\{block-size:/);
 });

@@ -87,7 +87,7 @@ export class SlAlertIcon {}
   exportAs: 'slAlert',
   imports: [SlGlyph, SlIcon],
   template: `@if (!hideIcon() && (glyph() || suppliedIcon())) {
-      <span aria-hidden="true" data-part="icon"
+      <span aria-hidden="true" data-part="icon" data-part-icon=""
         ><ng-content select="[slAlertIcon]">
           @if (glyph(); as name) {
             <span slIcon><svg slGlyph [name]="name" solid></svg></span>
@@ -99,6 +99,7 @@ export class SlAlertIcon {}
       <button
         type="button"
         data-part="dismiss"
+        data-part-dismiss=""
         [attr.aria-label]="t('dismiss')"
         (click)="onDismiss($event)"
       >
@@ -110,7 +111,9 @@ export class SlAlertIcon {}
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'alert',
+    'data-ui-alert': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-reach]': 'resolvedReach()',

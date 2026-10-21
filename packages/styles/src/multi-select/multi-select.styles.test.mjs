@@ -25,7 +25,7 @@ function declarationsFor(selector) {
  */
 test('takes a hidden option and a hidden group out of the list', () => {
   for (const part of ['item', 'group']) {
-    const selector = `[data-ui='multi-select'] [data-part='${part}'][hidden]`;
+    const selector = `[data-ui-multi-select] [data-part-${part.toLowerCase()}][hidden]`;
     assert.match(declarationsFor(selector), /display:none/, `${part}[hidden] is still drawn`);
   }
 });
@@ -37,11 +37,11 @@ test('takes a hidden option and a hidden group out of the list', () => {
  * and ends in an ellipsis, and the grid's aria-label still carries the count.
  */
 test('lets the counter shrink so the buttons stay inside a narrow frame', () => {
-  const rules = declarationsFor("[data-ui='multi-select'] > [data-part='counter']");
+  const rules = declarationsFor('[data-ui-multi-select] > [data-part-counter]');
   assert.match(rules, /flex:0 1 auto/, 'the counter does not shrink');
   assert.match(rules, /min-inline-size:0/, 'the counter keeps its content width');
   assert.match(rules, /overflow:hidden/, 'the counter draws past its box');
   assert.match(rules, /text-overflow:ellipsis/, 'a cut counter gives no sign of it');
-  const row = declarationsFor("[data-ui='multi-select'][data-narrow] > [data-part='control']");
+  const row = declarationsFor('[data-ui-multi-select][data-narrow] > [data-part-control]');
   assert.match(row, /flex-basis:0/, 'the empty row takes room the count needs');
 });

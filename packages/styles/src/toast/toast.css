@@ -39,7 +39,7 @@
    * The stylesheet's part in it is that no rule assumes a role: the same
    * picture is drawn whether a reader hears the words or reads them.
    */
-  [data-ui='toast'][data-part='root'] {
+  [data-ui-toast][data-part-root] {
     /**
      * The distance from the edge of the screen, and the greatest width a
      * message is allowed. The width is the smaller of the two, so at 320
@@ -93,7 +93,7 @@
    * demonstrable on a documentation page: everything else about it is the
    * same, including the placement, which now names the edges of the panel.
    */
-  [data-ui='toast'][data-part='root'][data-attach='inline'] {
+  [data-ui-toast][data-part-root][data-attach='inline'] {
     position: absolute;
   }
 
@@ -104,19 +104,19 @@
    * an Arabic one. Sonner's `bottom-right` is `bottom-right` in both.
    */
 
-  [data-ui='toast'][data-part='root'][data-placement^='top'] {
+  [data-ui-toast][data-part-root][data-placement^='top'] {
     inset-block-start: var(--_offset);
   }
 
-  [data-ui='toast'][data-part='root'][data-placement^='bottom'] {
+  [data-ui-toast][data-part-root][data-placement^='bottom'] {
     inset-block-end: var(--_offset);
   }
 
-  [data-ui='toast'][data-part='root'][data-placement$='-start'] {
+  [data-ui-toast][data-part-root][data-placement$='-start'] {
     inset-inline-start: var(--_offset);
   }
 
-  [data-ui='toast'][data-part='root'][data-placement$='-end'] {
+  [data-ui-toast][data-part-root][data-placement$='-end'] {
     inset-inline-end: var(--_offset);
   }
 
@@ -125,8 +125,8 @@
    * divide what is left. It is the one centring that needs no transform, so
    * the transform stays free for the enter, the exit and the swipe.
    */
-  [data-ui='toast'][data-part='root'][data-placement='top'],
-  [data-ui='toast'][data-part='root'][data-placement='bottom'] {
+  [data-ui-toast][data-part-root][data-placement='top'],
+  [data-ui-toast][data-part-root][data-placement='bottom'] {
     inset-inline: var(--_offset);
     margin-inline: auto;
   }
@@ -139,7 +139,7 @@
    * order, which puts the newest nearest the edge of the screen — where the
    * reader's eye already is — without moving it in the accessibility tree.
    */
-  [data-ui='toast'] > [data-part='list'] {
+  [data-ui-toast] > [data-part-list] {
     display: flex;
     flex-direction: column;
     gap: var(--_gap);
@@ -149,7 +149,7 @@
     pointer-events: none;
   }
 
-  [data-ui='toast'][data-placement^='bottom'] > [data-part='list'] {
+  [data-ui-toast][data-placement^='bottom'] > [data-part-list] {
     flex-direction: column-reverse;
   }
 
@@ -162,7 +162,7 @@
    * focus already inside a message can cause, so no press meant for the page
    * lands on an empty region.
    */
-  [data-ui='toast'][data-expanded] > [data-part='list'] {
+  [data-ui-toast][data-expanded] > [data-part-list] {
     pointer-events: auto;
   }
 
@@ -172,7 +172,7 @@
    * the message away, with the actions under the words rather than beside
    * them so a second row exists only when there are actions to put in it.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item] {
     /* The tone's five roles, defaulted to `accent`, restated by each tone
        below. Every one of them is a role the theme's contrast test measures. */
     --_solid: var(--slotted-tone-accent-solid);
@@ -302,11 +302,11 @@
    * shift is the same distance in the other direction rather than a second
    * number, so the two placements are one motion seen twice.
    */
-  [data-ui='toast'][data-placement^='top'] > [data-part='list'] > [data-part='item'] {
+  [data-ui-toast][data-placement^='top'] > [data-part-list] > [data-part-item] {
     translate: 0 calc(-1 * var(--_enter-shift));
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-open] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-open] {
     opacity: 1;
     translate: 0;
     transition:
@@ -325,7 +325,7 @@
    * is left, which is WCAG 2.2 SC 1.4.1 as well as a preference.
    */
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='accent'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-tone='accent'] {
     --_solid: var(--slotted-tone-accent-solid);
     --_on-solid: var(--slotted-tone-accent-on-solid);
     --_tone-surface: var(--slotted-tone-accent-surface);
@@ -333,7 +333,7 @@
     --_tone-text: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='secondary'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-tone='secondary'] {
     --_solid: var(--slotted-tone-secondary-solid);
     --_on-solid: var(--slotted-tone-secondary-on-solid);
     --_tone-surface: var(--slotted-tone-secondary-surface);
@@ -341,7 +341,7 @@
     --_tone-text: var(--slotted-tone-secondary-text);
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='success'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-tone='success'] {
     --_solid: var(--slotted-tone-success-solid);
     --_on-solid: var(--slotted-tone-success-on-solid);
     --_tone-surface: var(--slotted-tone-success-surface);
@@ -349,7 +349,7 @@
     --_tone-text: var(--slotted-tone-success-text);
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='warning'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-tone='warning'] {
     --_solid: var(--slotted-tone-warning-solid);
     --_on-solid: var(--slotted-tone-warning-on-solid);
     --_tone-surface: var(--slotted-tone-warning-surface);
@@ -357,7 +357,7 @@
     --_tone-text: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-tone='danger'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-tone='danger'] {
     --_solid: var(--slotted-tone-danger-solid);
     --_on-solid: var(--slotted-tone-danger-on-solid);
     --_tone-surface: var(--slotted-tone-danger-surface);
@@ -373,7 +373,7 @@
    * tone is in the mark and in nothing else, which is enough — it is the
    * silhouette that survives forced colours anyway.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-variant='soft'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-variant='soft'] {
     --_ground: var(--_tone-surface);
     --_edge: var(--_tone-border);
     /* The tone's own text on the tone's own surface is the pair the theme
@@ -383,7 +383,7 @@
     --_ink-muted: var(--_tone-text);
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-variant='solid'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-variant='solid'] {
     --_ground: var(--_solid);
     --_edge: var(--_solid);
     --_ink: var(--_on-solid);
@@ -426,7 +426,7 @@
    * message waiting on a promise with no mark of its own draws none, and the
    * box stays, so the layout does not jump when the spinner becomes a tick.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-icon] {
     --slotted-icon-size: calc(var(--_mark-size) * 12 / 11);
     /**
      * The loading mark is `progress-indicator`'s contained loader, and these
@@ -466,7 +466,7 @@
    * to be clamped too, or an unbreakable word in the title sizes the track to
    * itself and the words run past the box that holds them.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='content'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-content] {
     /* The other half of the mark's baseline group: see the mark above. */
     align-self: baseline;
     display: grid;
@@ -489,11 +489,7 @@
    * `Zwischenspeicherung` set the track to 183 pixels inside a box of 155, and
    * the words stood outside the message in every scheme.
    */
-  [data-ui='toast']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content']
-    > [data-part='title'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-content] > [data-part-title] {
     font-family: var(
       --slotted-toast-title-font-family,
       var(
@@ -507,11 +503,11 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='toast']
-    > [data-part='list']
-    > [data-part='item']
-    > [data-part='content']
-    > [data-part='description'] {
+  [data-ui-toast]
+    > [data-part-list]
+    > [data-part-item]
+    > [data-part-content]
+    > [data-part-description] {
     color: var(--_ink-muted);
     margin: 0;
     min-inline-size: 0;
@@ -525,7 +521,7 @@
    * the consumer's own buttons: `button` already owns what a button is, and
    * naming one of two controls `cancel` would privilege one arrangement.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='actions'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-actions] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -543,7 +539,7 @@
    * margin box is exactly one line and the inset above the message equals the
    * inset below.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close] {
     /* The cross is the binding's `Glyph` in an `icon` box at the glyph size
        the formula for this box reads. */
     --slotted-icon-size: var(--_glyph-size);
@@ -579,11 +575,11 @@
 
   /* `:enabled` is the guard the shared state test requires, and the reason it
      exists: a control the browser has already refused answers no pointer. */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']:enabled:hover {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close]:enabled:hover {
     background-color: var(--_state-hover);
   }
 
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']:enabled:active {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close]:enabled:active {
     background-color: var(--_state-active);
   }
 
@@ -592,11 +588,11 @@
      44 pixels, and the ground and the ring stay square. The message clips its
      overflow, so the target ends at the message's padding edge. */
   @media (pointer: coarse) {
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close] {
       position: relative;
     }
 
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']::after {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close]::after {
       content: '';
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
       position: absolute;
@@ -611,8 +607,8 @@
    * it exists because `F6` sends the keyboard here — a message the reader
    * cannot see they have arrived at is a message they cannot act on.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']:focus-visible,
-  [data-ui='toast'] > [data-part='list'] > [data-part='item']:focus-visible {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close]:focus-visible,
+  [data-ui-toast] > [data-part-list] > [data-part-item]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
   }
 
@@ -621,7 +617,7 @@
    * the remaining-time bar has to stop at the rounded corner — and a ring
    * outside a control at that corner would be cut in half by it.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']:focus-visible {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close]:focus-visible {
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
@@ -630,7 +626,7 @@
    * of the screen, and read on the box itself the ring was a thick blue border
    * rather than a ring around a card.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item']:focus-visible {
+  [data-ui-toast] > [data-part-list] > [data-part-item]:focus-visible {
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
@@ -643,10 +639,10 @@
    * fill, so a solid message adds a halo one ring-width wide just inside it,
    * in the ink its own words are in, for the ring to be read against.
    */
-  [data-ui='toast']
-    > [data-part='list']
-    > [data-part='item'][data-variant='solid']
-    > [data-part='close']:focus-visible {
+  [data-ui-toast]
+    > [data-part-list]
+    > [data-part-item][data-variant='solid']
+    > [data-part-close]:focus-visible {
     box-shadow: inset 0 0 0 calc(2 * var(--slotted-focus-ring-width, 2px)) var(--_on-solid);
   }
 
@@ -664,7 +660,7 @@
    * from the inline start in every writing direction with no origin to mirror.
    * The box is positioned, so nothing it does moves a word.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='progress'] {
+  [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-progress] {
     animation-duration: var(--slotted-toast-duration, var(--slotted-duration-long));
     animation-fill-mode: forwards;
     animation-name: slotted-toast-countdown;
@@ -688,10 +684,10 @@
    * the one ink the contrast test holds against it, held back so it reads as a
    * measure rather than as a second border.
    */
-  [data-ui='toast']
-    > [data-part='list']
-    > [data-part='item'][data-variant='solid']
-    > [data-part='progress'] {
+  [data-ui-toast]
+    > [data-part-list]
+    > [data-part-item][data-variant='solid']
+    > [data-part-progress] {
     background-color: var(--_on-solid);
     opacity: 0.7;
   }
@@ -730,12 +726,12 @@
    * back in opacity, and the front one, which is the one being read, is at
    * full strength.
    */
-  [data-ui='toast'][data-stacking='stack'] > [data-part='list'] {
+  [data-ui-toast][data-stacking='stack'] > [data-part-list] {
     display: block;
     position: relative;
   }
 
-  [data-ui='toast'][data-stacking='stack'] > [data-part='list'] > [data-part='item'] {
+  [data-ui-toast][data-stacking='stack'] > [data-part-list] > [data-part-item] {
     block-size: var(--slotted-toast-front-height, auto);
     inset-inline: 0;
     position: absolute;
@@ -756,20 +752,20 @@
    * everything behind it share one strength: below that the pile is a stack of
    * ghosts, and only the front two edges are showing anyway.
    */
-  [data-ui='toast'][data-stacking='stack'] > [data-part='list'] > [data-part='item'][data-open] {
+  [data-ui-toast][data-stacking='stack'] > [data-part-list] > [data-part-item][data-open] {
     opacity: calc(1 - min(var(--slotted-toast-index, 0), 2) * var(--_stack-fade));
   }
 
-  [data-ui='toast'][data-stacking='stack'][data-placement^='bottom']
-    > [data-part='list']
-    > [data-part='item'] {
+  [data-ui-toast][data-stacking='stack'][data-placement^='bottom']
+    > [data-part-list]
+    > [data-part-item] {
     inset-block-end: 0;
     translate: 0 calc(-1 * var(--slotted-toast-index, 0) * var(--_stack-step));
   }
 
-  [data-ui='toast'][data-stacking='stack'][data-placement^='top']
-    > [data-part='list']
-    > [data-part='item'] {
+  [data-ui-toast][data-stacking='stack'][data-placement^='top']
+    > [data-part-list]
+    > [data-part-item] {
     inset-block-start: 0;
     translate: 0 calc(var(--slotted-toast-index, 0) * var(--_stack-step));
   }
@@ -779,9 +775,7 @@
    * column, and the gap between two of them is the region's own gap — the
    * offset script writes already carries it.
    */
-  [data-ui='toast'][data-stacking='stack'][data-expanded]
-    > [data-part='list']
-    > [data-part='item'] {
+  [data-ui-toast][data-stacking='stack'][data-expanded] > [data-part-list] > [data-part-item] {
     block-size: var(--slotted-toast-height, auto);
   }
 
@@ -793,25 +787,25 @@
    * messages hang from the list's edge at `placement`, so the list grows away
    * from that edge and nothing it holds moves.
    */
-  [data-ui='toast'][data-stacking='stack'][data-expanded] > [data-part='list'] {
+  [data-ui-toast][data-stacking='stack'][data-expanded] > [data-part-list] {
     block-size: var(--slotted-toast-stack-height, auto);
   }
 
-  [data-ui='toast'][data-stacking='stack'][data-expanded]
-    > [data-part='list']
-    > [data-part='item'][data-open] {
+  [data-ui-toast][data-stacking='stack'][data-expanded]
+    > [data-part-list]
+    > [data-part-item][data-open] {
     opacity: 1;
   }
 
-  [data-ui='toast'][data-stacking='stack'][data-expanded][data-placement^='bottom']
-    > [data-part='list']
-    > [data-part='item'] {
+  [data-ui-toast][data-stacking='stack'][data-expanded][data-placement^='bottom']
+    > [data-part-list]
+    > [data-part-item] {
     translate: 0 calc(-1 * var(--slotted-toast-stack-offset, 0px));
   }
 
-  [data-ui='toast'][data-stacking='stack'][data-expanded][data-placement^='top']
-    > [data-part='list']
-    > [data-part='item'] {
+  [data-ui-toast][data-stacking='stack'][data-expanded][data-placement^='top']
+    > [data-part-list]
+    > [data-part-item] {
     translate: 0 var(--slotted-toast-stack-offset, 0px);
   }
 
@@ -821,11 +815,11 @@
    * `min()` is what turns an index into that rule without a rule per depth —
    * the front message resolves to one and every other to zero.
    */
-  [data-ui='toast'][data-stacking='stack'] > [data-part='list'] > [data-part='item'] > * {
+  [data-ui-toast][data-stacking='stack'] > [data-part-list] > [data-part-item] > * {
     transition: opacity var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
-  [data-ui='toast'][data-stacking='stack']:not([data-expanded]) [data-part='item'] > * {
+  [data-ui-toast][data-stacking='stack']:not([data-expanded]) [data-part-item] > * {
     opacity: calc(1 - min(1, var(--slotted-toast-index, 0)));
   }
 
@@ -837,7 +831,7 @@
    * message follows it exactly, with no transition in the way: a drag that
    * lags the finger reads as a stuck interface.
    */
-  [data-ui='toast'] > [data-part='list'] > [data-part='item'][data-dragging] {
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-dragging] {
     cursor: grabbing;
     transition: none;
     translate: var(--slotted-toast-swipe-x, 0px) var(--slotted-toast-swipe-y, 0px);
@@ -846,7 +840,7 @@
     user-select: none;
   }
 
-  [data-ui='toast'][data-swipe='true'] > [data-part='list'] > [data-part='item'] {
+  [data-ui-toast][data-swipe='true'] > [data-part-list] > [data-part-item] {
     touch-action: none;
   }
 
@@ -859,7 +853,7 @@
    * container condition.
    */
   @container slotted-toast (max-width: 20rem) {
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] {
       --_inset-block: var(--slotted-toast-padding-block, var(--slotted-space-4, 0.5rem));
       --_inset-inline: var(--slotted-toast-padding-inline, var(--slotted-space-5, 0.75rem));
     }
@@ -870,7 +864,7 @@
      * the control, and `button` already ships `fullWidth` for a consumer who
      * wants otherwise.
      */
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='actions'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-actions] {
       align-items: flex-start;
       flex-direction: column;
     }
@@ -885,11 +879,11 @@
    * own fill and a transparent border is not a colour the system remaps.
    */
   @media (forced-colors: active) {
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] {
       border-color: CanvasText;
     }
 
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='icon'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-icon] {
       color: CanvasText;
     }
 
@@ -897,15 +891,12 @@
      * The control's glyph is stroked in `currentcolor`, so giving the control
      * a system colour repaints it, and the mark's slot the same.
      */
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close] {
       color: CanvasText;
     }
 
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='close']:enabled:hover,
-    [data-ui='toast']
-      > [data-part='list']
-      > [data-part='item']
-      > [data-part='close']:enabled:active {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close]:enabled:hover,
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-close]:enabled:active {
       background-color: Highlight;
       color: HighlightText;
     }
@@ -914,7 +905,7 @@
      * A bar of system ink under every message, shortening, is a moving line
      * with no colour to say what it belongs to. The message still expires.
      */
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='progress'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-progress] {
       background-color: CanvasText;
       opacity: 1;
     }
@@ -935,7 +926,7 @@
    * reached over the declared one, and the `timing` scene froze at 80 per cent.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='toast'] > [data-part='list'] > [data-part='item'] > [data-part='progress'] {
+    [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-progress] {
       animation-name: none;
       inline-size: 100%;
     }

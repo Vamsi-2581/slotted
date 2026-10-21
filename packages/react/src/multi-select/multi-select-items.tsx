@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import { matchRanges } from '@slotted/core/highlight';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent, ReactNode, Ref } from 'react';
@@ -97,12 +98,12 @@ export function MultiSelectItem({
 
   return (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'item')}
       aria-disabled={inert ? true : undefined}
       aria-posinset={position}
       aria-selected={selected}
       aria-setsize={position === undefined ? undefined : multiSelect.total}
-      data-part="item"
+
       data-value={value}
       {...(text === undefined ? {} : { 'data-text-value': text })}
       {...(disabled ? { 'data-disabled': '' } : {})}
@@ -119,10 +120,20 @@ export function MultiSelectItem({
       }}
       role="option"
     >
-      {icon === undefined ? null : <span data-part="icon">{icon}</span>}
-      <span data-part="label">{marked}</span>
-      {description === undefined ? null : <span data-part="description">{description}</span>}
-      <span data-part="indicator">
+      {icon === undefined ? null : (
+        <span data-part="icon" data-part-icon="">
+          {icon}
+        </span>
+      )}
+      <span data-part="label" data-part-label="">
+        {marked}
+      </span>
+      {description === undefined ? null : (
+        <span data-part="description" data-part-description="">
+          {description}
+        </span>
+      )}
+      <span data-part="indicator" data-part-indicator="">
         <Icon>
           <Glyph name="check" />
         </Icon>
@@ -154,14 +165,14 @@ export function MultiSelectGroup({ children, label, ...nativeProps }: MultiSelec
 
   return (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'group')}
       aria-labelledby={labelId}
-      data-part="group"
+
       hidden={empty}
       ref={setNode}
       role="group"
     >
-      <div data-part="group-label" id={labelId}>
+      <div data-part="group-label" data-part-group-label="" id={labelId}>
         {label}
       </div>
       {children}
@@ -170,5 +181,5 @@ export function MultiSelectGroup({ children, label, ...nativeProps }: MultiSelec
 }
 
 export function MultiSelectSeparator(props: { ref?: Ref<HTMLDivElement> }) {
-  return <div data-part="separator" ref={props.ref} role="separator" />;
+  return <div data-part="separator" data-part-separator="" ref={props.ref} role="separator" />;
 }

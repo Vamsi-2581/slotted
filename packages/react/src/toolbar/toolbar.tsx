@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/toolbar/toolbar.css';
 
 import { createRovingTabindex, TOOLBAR_ITEM_SELECTOR, toolbarOwnedKeys } from '@slotted/core/focus';
@@ -215,7 +216,7 @@ export function Toolbar({
     };
   }, [resolvedOrientation, resolvedOverflow, trigger]);
 
-  const rootProps: ToolbarRootProps = {
+  const rootProps: ToolbarRootProps = keyedProps({
     ...nativeProps,
     ...(resolvedOverflow === 'menu' ? { 'data-collapsed': String(collapsed.length) } : {}),
     ...(resolvedOrientation === 'vertical' ? { 'aria-orientation': 'vertical' as const } : {}),
@@ -229,7 +230,7 @@ export function Toolbar({
     'data-variant': resolvedVariant,
     role: 'toolbar',
     style,
-  };
+  });
 
   return (
     <ToolbarOverflowContext.Provider value={overflowValue}>

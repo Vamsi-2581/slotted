@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { ContainerBreakoutProps, ContainerBreakoutRootProps } from './container.types';
 
 /**
@@ -9,7 +10,10 @@ import type { ContainerBreakoutProps, ContainerBreakoutRootProps } from './conta
  * page. Bounded content returns inside it by nesting another `Container`.
  */
 export function ContainerBreakout({ render, ...nativeProps }: ContainerBreakoutProps) {
-  const rootProps: ContainerBreakoutRootProps = { ...nativeProps, 'data-part': 'breakout' };
+  const rootProps: ContainerBreakoutRootProps = keyedProps({
+    ...nativeProps,
+    'data-part': 'breakout',
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

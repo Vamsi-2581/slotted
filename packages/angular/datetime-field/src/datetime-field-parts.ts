@@ -13,7 +13,7 @@ import { Directive } from '@angular/core';
   selector: '[slDateTimeFieldStart]',
   standalone: true,
   exportAs: 'slDateTimeFieldStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlDateTimeFieldStart {}
 
@@ -22,6 +22,6 @@ export class SlDateTimeFieldStart {}
   selector: '[slDateTimeFieldEnd]',
   standalone: true,
   exportAs: 'slDateTimeFieldEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlDateTimeFieldEnd {}

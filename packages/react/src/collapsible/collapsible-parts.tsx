@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useEffect, useRef } from 'react';
 import type { MouseEvent } from 'react';
 
@@ -45,13 +46,13 @@ export function CollapsibleHeader({
 }: CollapsibleHeaderProps) {
   const { level } = useCollapsible();
 
-  const rootProps: CollapsibleHeaderRootProps = {
+  const rootProps: CollapsibleHeaderRootProps = keyedProps({
     ...nativeProps,
     children,
     className,
     'data-part': 'header',
     style,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
 
@@ -86,7 +87,7 @@ export function CollapsibleTrigger({
   let indicatorGlyph: GlyphName = 'chevron-down';
   if (indicator === 'plus-minus') indicatorGlyph = open ? 'minus' : 'plus';
 
-  const rootProps: CollapsibleTriggerRootProps = {
+  const rootProps: CollapsibleTriggerRootProps = keyedProps({
     ...nativeProps,
     'aria-controls': ids.panelId,
     ...(held ? { 'aria-disabled': 'true' as const } : {}),
@@ -94,14 +95,20 @@ export function CollapsibleTrigger({
     children: (
       <>
         {indicator === 'none' ? null : (
-          <span aria-hidden="true" data-part="indicator">
+          <span aria-hidden="true" data-part="indicator" data-part-indicator="">
             <Icon>
               <Glyph name={indicatorGlyph} />
             </Icon>
           </span>
         )}
-        <span data-part="label">{children}</span>
-        {description === undefined ? null : <span data-part="description">{description}</span>}
+        <span data-part="label" data-part-label="">
+          {children}
+        </span>
+        {description === undefined ? null : (
+          <span data-part="description" data-part-description="">
+            {description}
+          </span>
+        )}
       </>
     ),
     className,
@@ -117,7 +124,7 @@ export function CollapsibleTrigger({
     },
     style,
     type: 'button',
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <button {...rootProps} ref={ref} />;
@@ -139,13 +146,13 @@ export function CollapsibleActions({
   style,
   ...nativeProps
 }: CollapsibleActionsProps) {
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children,
     className,
     'data-part': 'actions',
     style,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <div {...rootProps} ref={ref} />;
@@ -216,17 +223,21 @@ export function CollapsiblePanel({
   const mounted =
     mount !== 'active' && mount !== 'lazy' ? true : open || (mount === 'lazy' && seen);
 
-  const rootProps: CollapsiblePanelRootProps = {
+  const rootProps: CollapsiblePanelRootProps = keyedProps({
     ...nativeProps,
     'aria-labelledby': ids.triggerId,
     ...(loading ? { 'aria-busy': true } : {}),
-    children: mounted ? <div data-part="content">{children}</div> : null,
+    children: mounted ? (
+      <div data-part="content" data-part-content="">
+        {children}
+      </div>
+    ) : null,
     className,
     'data-part': 'panel',
     id: ids.panelId,
     ...(region ? { role: 'region' as const } : {}),
     style,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
 

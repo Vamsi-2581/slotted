@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/transfer/transfer.css';
 
 import { createFilter } from '@slotted/core/collection';
@@ -720,7 +721,7 @@ export function Transfer<T = TransferItem>({
         disabled={frozen || keys.length === 0}
         focusableWhenDisabled={!isDisabled}
         onClick={(event) => move(keys, to, pressReason(event), event)}
-        render={(props) => <button {...props} data-part={part} />}
+        render={(props) => <button {...withSelectorKey(props, 'part', part)} />}
         size={innerSize}
         tone="secondary"
         variant="outline"
@@ -760,6 +761,7 @@ export function Transfer<T = TransferItem>({
       <div
         aria-labelledby={titleId(side)}
         data-part="pane"
+        data-part-pane=""
         data-side={side}
         role="group"
         {...(pane === side ? { 'data-current': '' } : {})}
@@ -767,9 +769,9 @@ export function Transfer<T = TransferItem>({
           ? { 'data-drop-target': '' }
           : {})}
       >
-        <div data-part="pane-header">
+        <div data-part="pane-header" data-part-pane-header="">
           {withSelectAll ? (
-            <span data-part="select-all">
+            <span data-part="select-all" data-part-select-all="">
               <Checkbox
                 aria-label={t('selectAll', { pane: title(side) })}
                 checked={reach.length > 0 && chosenReach === reach.length}
@@ -780,13 +782,15 @@ export function Transfer<T = TransferItem>({
               />
             </span>
           ) : null}
-          <span data-part="title" id={titleId(side)}>
+          <span data-part="title" data-part-title="" id={titleId(side)}>
             {title(side)}
           </span>
-          <span data-part="count">{count}</span>
+          <span data-part="count" data-part-count="">
+            {count}
+          </span>
         </div>
         {searchable ? (
-          <div data-part="search">
+          <div data-part="search" data-part-search="">
             <TextField
               aria-label={t('search', { pane: title(side) })}
               clearable
@@ -797,7 +801,7 @@ export function Transfer<T = TransferItem>({
               placeholder={t('search', { pane: title(side) })}
               size={innerSize}
               start={
-                <span data-part="search-icon">
+                <span data-part="search-icon" data-part-search-icon="">
                   <Icon>
                     <Glyph name="search" />
                   </Icon>
@@ -810,6 +814,7 @@ export function Transfer<T = TransferItem>({
         ) : null}
         <div
           data-part="list"
+          data-part-list=""
           onFocusCapture={(event) => {
             /* Tab lands on the option holding the tab stop, and the keyboard
                is on it from then on. */
@@ -831,7 +836,7 @@ export function Transfer<T = TransferItem>({
             aria-labelledby={titleId(side)}
             disabled={isDisabled}
             emptyContent={
-              <div data-part="empty" {...(typed ? { 'data-query': '' } : {})}>
+              <div data-part="empty" data-part-empty="" {...(typed ? { 'data-query': '' } : {})}>
                 <Icon>
                   <Glyph name={typed ? 'search-x' : 'inbox'} />
                 </Icon>
@@ -899,18 +904,21 @@ export function Transfer<T = TransferItem>({
             <div
               aria-hidden="true"
               data-part="drop-indicator"
+              data-part-drop-indicator=""
               style={{ '--_drop-offset': `${dropOffset}px` } as CSSProperties}
             />
           ) : null}
         </div>
         {footer === undefined || footer === null ? null : (
-          <div data-part="pane-footer">{footer}</div>
+          <div data-part="pane-footer" data-part-pane-footer="">
+            {footer}
+          </div>
         )}
       </div>
     );
   };
 
-  const rootProps: TransferRootProps = {
+  const rootProps: TransferRootProps = keyedProps({
     ...nativeProps,
     ...(nativeProps['aria-label'] === undefined &&
     nativeProps['aria-labelledby'] === undefined &&
@@ -938,7 +946,7 @@ export function Transfer<T = TransferItem>({
          control: the field wires the root, and a listbox that read it too
          would take its label and its disabled state a second time. */
       <FieldContext.Provider value={undefined}>
-        <div data-part="switch">
+        <div data-part="switch" data-part-switch="">
           <SegmentedControl
             aria-label={t('panes')}
             disabled={isDisabled}
@@ -960,9 +968,9 @@ export function Transfer<T = TransferItem>({
             ))}
           </SegmentedControl>
         </div>
-        <div data-part="body">
+        <div data-part="body" data-part-body="">
           {renderPane('source')}
-          <div aria-label={t('actions')} data-part="actions" role="group">
+          <div aria-label={t('actions')} data-part="actions" data-part-actions="" role="group">
             {moveButton(
               'move-to-target',
               t('moveToTarget'),
@@ -994,7 +1002,7 @@ export function Transfer<T = TransferItem>({
               'start',
             )}
             {reorderable ? (
-              <div aria-label={t('reorder')} data-part="reorder" role="group">
+              <div aria-label={t('reorder')} data-part="reorder" data-part-reorder="" role="group">
                 {(['move-up', 'move-down'] as const).map((part) => (
                   <Button
                     aria-keyshortcuts={part === 'move-up' ? 'Alt+ArrowUp' : 'Alt+ArrowDown'}
@@ -1004,7 +1012,7 @@ export function Transfer<T = TransferItem>({
                     onClick={(event) =>
                       shift(part === 'move-up' ? -1 : 1, pressReason(event), event, false)
                     }
-                    render={(props) => <button {...props} data-part={part} />}
+                    render={(props) => <button {...withSelectorKey(props, 'part', part)} />}
                     size={innerSize}
                     start={
                       /* One chevron for both; the stylesheet turns it up for
@@ -1031,7 +1039,7 @@ export function Transfer<T = TransferItem>({
             ))}
       </FieldContext.Provider>
     ),
-  };
+  });
 
   if (render !== undefined) return render(rootProps) as ReactNode;
   return <div {...rootProps} />;

@@ -85,7 +85,9 @@ function provideGroupPaint() {
   providers: [provideGroupPaint()],
   host: {
     'data-ui': 'button-group',
+    'data-ui-button-group': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'role',
     '[attr.data-orientation]': 'orientation() ?? null',
     '[attr.data-align]': 'align() ?? null',

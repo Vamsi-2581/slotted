@@ -114,12 +114,14 @@
   "data": {
     "rows": "the consumer's array, read every render; the family never mutates it",
     "rowKey": "a field name or a function of the row; the key survives sorting, filtering, windowing and editing, and every state model names rows by it",
-    "columns": "GridColumn[]: id, label, description, kind, accessor, format, compare, align, numeric, text, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, options, aggregate, validate, parse",
+    "columns": "GridColumn[]: id, label, description, kind, accessor, format, compare, align, numeric, text, width, minWidth, maxWidth, flex, priority, sortable, filterable, searchable, editable, resizable, reorderable, hideable, rowHeader, pinned, options, aggregate, validate, parse",
     "columnGroups": "GridColumnGroup[]: id, label and the ids it spans, drawn as a header row above the columns with aria-colspan",
     "kind": "a FilterKind of @slotted/core/filter — text, number, date, time, datetime, boolean, set — or actions or custom. It decides the operators, the comparator, the default alignment, the default editor and whether the column is searchable.",
     "accessor": "accessor(row) gives the domain value; format(value, row) gives the text. Sorting and filtering read the value; the cell draws the text. §2.9: a number, a currency and a date are values, not strings.",
     "mode": "client applies the query to rows with applyQuery; server reports the query and draws the rows it is given, reading totalCount or hasMore. Resolved to client when both are omitted.",
-    "reason": "AG Grid, MUI X, Kendo, DevExtreme and Glide own the rows and apply the query; TanStack, React Aria, Fluent and Carbon leave it to the consumer. docs/process/build-order.md wave 9 decides it for this family: it applies the descriptor, and table reports."
+    "reason": "AG Grid, MUI X, Kendo, DevExtreme and Glide own the rows and apply the query; TanStack, React Aria, Fluent and Carbon leave it to the consumer. docs/process/build-order.md wave 9 decides it for this family: it applies the descriptor, and table reports.",
+    "loadMore": "shouldLoadMore over the window; onLoadMore when fewer than loadMoreThreshold rows remain below the window, unless loadMoreTrigger is button or loadMoreFailed is true; under scroll the footer draws a status while loading and offers Try again only after a failure, under button or both a Load more control",
+    "pinnedDefault": "a column of kind actions is pinned to the end, and a column's own pinned states its edge, while the column state names no pins; a state that names them wins, and the serialised view writes pins only when they differ from the model's"
   },
   "query": {
     "shape": "{ sort: { column, direction }[], filter: FilterGroup | null, search: string, page: { index, size } | { cursor, size } | null, group: string[] }",
@@ -713,6 +715,7 @@
     "groupCount",
     "hide",
     "loadMore",
+    "loadingMore",
     "manageColumns",
     "noResults",
     "pinEnd",
@@ -773,7 +776,8 @@
     "align": ["column", "kind", "start"],
     "numeric": ["column", "kind", false],
     "text": ["column", "defaults", "truncate"],
-    "density": ["prop", "page", null]
+    "density": ["prop", "page", null],
+    "loadMoreTrigger": ["prop", "defaults", "scroll"]
   },
   "provides": {
     "dataGridDefaults": [
@@ -790,6 +794,7 @@
       "pageSizes",
       "filterDebounce",
       "loadMoreThreshold",
+      "loadMoreTrigger",
       "skeletonRows"
     ]
   },
@@ -884,6 +889,7 @@
         "skeletonRows": 8,
         "filterDebounce": 300,
         "loadMoreThreshold": 20,
+        "loadMoreTrigger": "scroll",
         "pageSizes": [25, 50, 100]
       },
       "capabilities": [

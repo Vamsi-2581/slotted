@@ -85,18 +85,32 @@ export interface UploadViewingRequest {
       fullScreen="always"
     >
       @if (current(); as file) {
-        <div [attr.data-size]="size()" data-part="viewer" data-ui="upload">
-          <div data-part="viewerHeader">
+        <div
+          [attr.data-size]="size()"
+          data-part="viewer"
+          data-part-viewer=""
+          data-ui="upload"
+          data-ui-upload=""
+        >
+          <div data-part="viewerHeader" data-part-viewerheader="">
             <div>
-              <h2 data-part="viewerTitle" slDialogTitle>{{ file.name }}</h2>
-              <span data-part="viewerMeta">{{ metaText() }}</span>
+              <h2
+                data-part="viewerTitle"
+                data-part-viewertitle=""
+                [attr.data-part-title]="null"
+                slDialogTitle
+              >
+                {{ file.name }}
+              </h2>
+              <span data-part="viewerMeta" data-part-viewermeta="">{{ metaText() }}</span>
             </div>
-            <span data-part="viewerActions">
+            <span data-part="viewerActions" data-part-vieweractions="">
               @if (url()) {
                 <button
                   (click)="openExternally()"
                   [attr.aria-label]="t('viewerExternal')"
                   data-part="viewerExternal"
+                  data-part-viewerexternal=""
                   type="button"
                 >
                   <span slIcon><svg slGlyph name="external"></svg></span>
@@ -106,6 +120,7 @@ export interface UploadViewingRequest {
                 (click)="close($event)"
                 [attr.aria-label]="t('viewerClose')"
                 data-part="viewerClose"
+                data-part-viewerclose=""
                 type="button"
               >
                 <span slIcon><svg slGlyph name="x"></svg></span>
@@ -113,13 +128,14 @@ export interface UploadViewingRequest {
             </span>
           </div>
 
-          <div data-part="viewerStage">
+          <div data-part="viewerStage" data-part-viewerstage="">
             @if (shown().length > 1) {
               <button
                 (click)="move(-1, $event)"
                 [attr.aria-label]="t('viewerPrevious')"
                 [disabled]="index() <= 0"
                 data-part="viewerPrevious"
+                data-part-viewerprevious=""
                 type="button"
               >
                 <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>
@@ -147,6 +163,7 @@ export interface UploadViewingRequest {
                   [attr.data-extension]="extensionLabel()"
                   [attr.data-kind]="file.kind"
                   data-part="preview"
+                  data-part-preview=""
                 >
                   <span slIcon><svg slGlyph [name]="kindGlyph[file.kind]"></svg></span>
                 </span>
@@ -160,6 +177,7 @@ export interface UploadViewingRequest {
                 [attr.aria-label]="t('viewerNext')"
                 [disabled]="index() === -1 || index() >= shown().length - 1"
                 data-part="viewerNext"
+                data-part-viewernext=""
                 type="button"
               >
                 <span slIcon directional><svg slGlyph name="chevron-right"></svg></span>

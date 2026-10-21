@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { MouseEvent } from 'react';
 
 import { useToggleGroup } from './toggle-group';
@@ -44,17 +45,21 @@ export function ToggleGroupItem({
   const pressed = group.holds(value);
   const resolvedDisabled = disabled ?? group.disabled;
 
-  const rootProps: ToggleGroupItemRootProps = {
+  const rootProps: ToggleGroupItemRootProps = keyedProps({
     ...nativeProps,
     'aria-pressed': pressed,
     children: (
       <>
         {icon === undefined ? null : (
-          <span aria-hidden="true" data-part="icon">
+          <span aria-hidden="true" data-part="icon" data-part-icon="">
             {icon}
           </span>
         )}
-        {children === undefined ? null : <span data-part="label">{children}</span>}
+        {children === undefined ? null : (
+          <span data-part="label" data-part-label="">
+            {children}
+          </span>
+        )}
       </>
     ),
     className,
@@ -67,7 +72,7 @@ export function ToggleGroupItem({
       group.toggle(value, activationReason(event), event);
     },
     style,
-  };
+  });
 
   return render === undefined ? (
     <button {...rootProps} disabled={resolvedDisabled} ref={ref} type={type ?? 'button'} />

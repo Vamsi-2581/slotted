@@ -32,35 +32,37 @@ import type { RatingDisplayVariant, RatingSize, RatingTone } from './rating-defa
   standalone: true,
   exportAs: 'slRatingDisplay',
   imports: [SlGlyph, SlIcon],
-  template: `<div data-part="symbols">
+  template: `<div data-part="symbols" data-part-symbols="">
       @for (fill of fills(); track $index) {
-        <span data-part="item" [style.--slotted-rating-fill]="fill"
-          ><span data-part="symbol"
+        <span data-part="item" data-part-item="" [style.--slotted-rating-fill]="fill"
+          ><span data-part="symbol" data-part-symbol=""
             ><span slIcon><svg slGlyph name="star"></svg></span></span
-          ><span data-part="fill"
+          ><span data-part="fill" data-part-fill=""
             ><span slIcon><svg slGlyph name="star"></svg></span></span
         ></span>
       }
     </div>
     @if (showValue()) {
-      <span data-part="value" aria-hidden="true">{{ valueText() }}</span>
+      <span data-part="value" data-part-value="" aria-hidden="true">{{ valueText() }}</span>
     }
     @if (resolvedVariant() === 'histogram') {
-      <span data-part="histogram" aria-hidden="true">
+      <span data-part="histogram" data-part-histogram="" aria-hidden="true">
         @for (share of shares(); track $index) {
-          <span data-part="bar" [style.--slotted-rating-share]="share"></span>
+          <span data-part="bar" data-part-bar="" [style.--slotted-rating-share]="share"></span>
         }
       </span>
     }
     @if (countText(); as text) {
-      <span data-part="count" aria-hidden="true">{{ text }}</span>
+      <span data-part="count" data-part-count="" aria-hidden="true">{{ text }}</span>
     }`,
   styleUrl: '../../../styles/src/rating/rating.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'rating',
+    'data-ui-rating': '',
     'data-part': 'root',
+    'data-part-root': '',
     role: 'img',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-tone]': 'resolvedTone()',

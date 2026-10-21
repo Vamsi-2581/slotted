@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createRovingTabindex } from '@slotted/core/focus';
 import type { RovingTabindexHandle } from '@slotted/core/focus';
 import { createTypeahead, isPrintable } from '@slotted/core/typeahead';
@@ -137,7 +138,7 @@ export function ActionSheetContent({
               render(props as unknown as ActionSheetContentRootProps),
           })}
     >
-      <div data-part="root" data-ui="action-sheet">
+      <div data-part="root" data-part-root="" data-ui="action-sheet" data-ui-action-sheet="">
         {children}
       </div>
     </DrawerPanel>
@@ -145,7 +146,7 @@ export function ActionSheetContent({
 }
 
 export function ActionSheetHeader(props: ActionSheetHeaderProps) {
-  return <header data-part="header" {...props} />;
+  return <header data-part="header" data-part-header="" {...props} />;
 }
 
 /**
@@ -177,11 +178,11 @@ export function ActionSheetMessage({ ref, render, ...nativeProps }: ActionSheetM
     <DrawerDescription
       {...nativeProps}
       render={(props) => {
-        const root = {
+        const root = keyedProps({
           ...props,
           'data-part': 'message',
           ref: (node: HTMLElement | null) => attach(node as HTMLParagraphElement | null, ref),
-        } as ActionSheetMessageRootProps;
+        }) as ActionSheetMessageRootProps;
         return render === undefined ? <p {...(root as ActionSheetMessageProps)} /> : render(root);
       }}
     />
@@ -230,8 +231,8 @@ export function ActionSheetList({ onFocus, onKeyDown, ref, ...nativeProps }: Act
     <div
       aria-orientation="vertical"
       {...(labelled ? { 'aria-labelledby': titleId } : {})}
-      {...nativeProps}
-      data-part="list"
+      {...withSelectorKey(nativeProps, 'part', 'list')}
+
       onFocus={compose(onFocus, (event) => {
         /* Focus that arrived by the pointer or by entry moves the stop with
            it, so `Tab` out and back returns to the same item. */
@@ -259,7 +260,7 @@ export function ActionSheetList({ onFocus, onKeyDown, ref, ...nativeProps }: Act
 }
 
 export function ActionSheetGroupLabel(props: ActionSheetGroupLabelProps) {
-  return <div data-part="group-label" {...props} />;
+  return <div data-part="group-label" data-part-group-label="" {...props} />;
 }
 
 /** A run of related actions, named by its label when it has one. */
@@ -268,8 +269,8 @@ export function ActionSheetGroup({ children, label, ...nativeProps }: ActionShee
   return (
     <div
       {...(label === undefined ? {} : { 'aria-labelledby': labelId })}
-      {...nativeProps}
-      data-part="group"
+      {...withSelectorKey(nativeProps, 'part', 'group')}
+
       role="group"
     >
       {label === undefined ? null : (
@@ -281,7 +282,7 @@ export function ActionSheetGroup({ children, label, ...nativeProps }: ActionShee
 }
 
 export function ActionSheetSeparator(props: ActionSheetSeparatorProps) {
-  return <hr data-part="separator" role="separator" {...props} />;
+  return <hr data-part="separator" data-part-separator="" role="separator" {...props} />;
 }
 
 /**
@@ -331,19 +332,21 @@ export function ActionSheetItem({
     if (closeOnSelect ?? sheet.closeOnSelect) sheet.close('select', value, source);
   };
 
-  const rootProps: ActionSheetItemRootProps = {
+  const rootProps: ActionSheetItemRootProps = keyedProps({
     ...(nativeProps as Omit<typeof nativeProps, 'type'>),
     type: 'button',
     children: (
       <>
         {icon === undefined && loading !== true ? null : (
-          <span aria-hidden="true" data-part="icon">
-            {loading === true ? <span data-ui="spinner" /> : icon}
+          <span aria-hidden="true" data-part="icon" data-part-icon="">
+            {loading === true ? <span data-ui="spinner" data-ui-spinner="" /> : icon}
           </span>
         )}
-        <span data-part="label">{children}</span>
+        <span data-part="label" data-part-label="">
+          {children}
+        </span>
         {description === undefined ? null : (
-          <span data-part="description" id={descriptionId}>
+          <span data-part="description" data-part-description="" id={descriptionId}>
             {description}
           </span>
         )}
@@ -379,7 +382,7 @@ export function ActionSheetItem({
     ref: (node: HTMLElement | null) => attach(node as HTMLButtonElement | null, ref),
     role: 'menuitem',
     tabIndex: -1,
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
   return <button {...(rootProps as unknown as ComponentPropsWithRef<'button'>)} />;
@@ -398,7 +401,7 @@ export function ActionSheetCancel({
 }: ActionSheetCancelProps) {
   const sheet = useActionSheet();
 
-  const rootProps: ActionSheetCancelRootProps = {
+  const rootProps: ActionSheetCancelRootProps = keyedProps({
     ...nativeProps,
     children: children ?? sheet.t('cancel'),
     'data-part': 'cancel',
@@ -407,10 +410,10 @@ export function ActionSheetCancel({
     ) as ActionSheetCancelRootProps['onClick'],
     ref: (node: HTMLElement | null) => attach(node as HTMLButtonElement | null, ref),
     type: 'button',
-  };
+  });
 
   return (
-    <div data-part="footer">
+    <div data-part="footer" data-part-footer="">
       {render === undefined ? (
         <button {...(rootProps as ActionSheetCancelProps)} disabled={false} />
       ) : (

@@ -1,3 +1,4 @@
+import { keyedProps, selectorKeyProps } from '@slotted/core/selector-key';
 import { useId, type ReactNode, type Ref } from 'react';
 
 import { Glyph, Icon } from '../icon';
@@ -56,7 +57,7 @@ function Trigger({
   const href = pagination.itemHref?.(target);
   const unavailable = !usable;
 
-  const rootProps: PaginationTriggerRootProps = {
+  const rootProps: PaginationTriggerRootProps = keyedProps({
     'aria-label': label,
     ...nativeProps,
     children: children ?? (
@@ -72,7 +73,7 @@ function Trigger({
       if (event.defaultPrevented || unavailable) return;
       pagination.goToPage(target, 'pointer', event);
     },
-  };
+  });
 
   if (render !== undefined) return render(rootProps);
 
@@ -161,28 +162,28 @@ export function PaginationItems({ ref, render, ...nativeProps }: PaginationItems
   const pagination = usePagination();
   if (pagination.count === undefined) return null;
 
-  const rootProps: PaginationItemsRootProps = {
+  const rootProps: PaginationItemsRootProps = keyedProps({
     ...nativeProps,
     children: pagination.items.map((item) =>
       item.type === 'ellipsis' ? (
-        <li data-part="item" key={`ellipsis-${item.side}`}>
-          <span aria-hidden="true" data-part="ellipsis">
+        <li data-part="item" data-part-item="" key={`ellipsis-${item.side}`}>
+          <span aria-hidden="true" data-part="ellipsis" data-part-ellipsis="">
             {'…'}
           </span>
         </li>
       ) : (
-        <li data-part="item" key={item.value}>
+        <li data-part="item" data-part-item="" key={item.value}>
           <Page page={item.value} />
         </li>
       ),
     ),
     'data-part': 'list',
-  };
+  });
 
   return (
     <>
       {render === undefined ? <ul {...rootProps} ref={ref} /> : render(rootProps)}
-      <span data-part="summary">
+      <span data-part="summary" data-part-summary="">
         {pagination.t('summary', { page: pagination.page, pages: pagination.pages })}
       </span>
     </>
@@ -207,6 +208,7 @@ function Page({ page }: { page: number }) {
     'data-disabled': pagination.disabled ? '' : undefined,
     'data-loading': pagination.loading ? '' : undefined,
     'data-part': 'page',
+    ...selectorKeyProps('part', 'page'),
     onClick: (event: { defaultPrevented: boolean }) => {
       if (event.defaultPrevented) return;
       pagination.goToPage(page, 'pointer', event);
@@ -233,7 +235,7 @@ function Page({ page }: { page: number }) {
 export function PaginationStatus({ children, ref, render, ...nativeProps }: PaginationStatusProps) {
   const pagination = usePagination();
 
-  const rootProps: PaginationStatusRootProps = {
+  const rootProps: PaginationStatusRootProps = keyedProps({
     ...nativeProps,
     'aria-live': pagination.live,
     children:
@@ -244,7 +246,7 @@ export function PaginationStatus({ children, ref, render, ...nativeProps }: Pagi
         count: pagination.count ?? 0,
       }),
     'data-part': 'status',
-  };
+  });
 
   return render === undefined ? <p {...rootProps} ref={ref} /> : render(rootProps);
 }
@@ -268,7 +270,7 @@ export function PaginationPageSize({
   const pagination = usePagination();
   const generatedId = useId();
 
-  const rootProps: PaginationPageSizeRootProps = {
+  const rootProps: PaginationPageSizeRootProps = keyedProps({
     ...nativeProps,
     children: pagination.pageSizeOptions.map((size) => (
       <option key={size} value={size}>
@@ -284,13 +286,13 @@ export function PaginationPageSize({
       pagination.setPageSize(Number(event.currentTarget.value), 'select', event);
     },
     value: nativeProps.value ?? pagination.pageSize,
-  };
+  });
 
   const control: ReactNode =
     render === undefined ? <select {...rootProps} ref={ref} /> : render(rootProps);
 
   return (
-    <label data-part="page-size-label">
+    <label data-part="page-size-label" data-part-page-size-label="">
       {label ?? pagination.t('pageSize')}
       {control}
       <Icon>

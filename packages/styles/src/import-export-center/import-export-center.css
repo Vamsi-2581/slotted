@@ -34,7 +34,7 @@
    * another. The threshold is the family's own, for the reason `list-item`
    * and `card` keep theirs: it answers the job's content, not the page.
    */
-  [data-ui='import-export-center'] {
+  [data-ui-import-export-center] {
     --_text: var(--slotted-text, CanvasText);
     --_muted: var(--slotted-text-muted, GrayText);
     --_rule: var(--slotted-import-export-center-border, var(--slotted-border-subtle, ButtonBorder));
@@ -109,7 +109,7 @@
    * would collapse to nothing; `sm` states a floor capped by the viewport, as
    * `notification-center` does for the same host.
    */
-  [data-ui='import-export-center'][data-size='sm'] {
+  [data-ui-import-export-center][data-size='sm'] {
     min-inline-size: var(
       --slotted-import-export-center-min-inline-size-sm,
       min(24rem, calc(100vw - var(--slotted-space-8, 2rem)))
@@ -142,7 +142,7 @@
    * The title pushes the rest to the end; a control that wraps lands at the
    * end of its own line, under the one before it.
    */
-  [data-ui='import-export-center'] > [data-part='header'] {
+  [data-ui-import-export-center] > [data-part-header] {
     align-items: center;
     border-block-end: var(--_rule-size) solid var(--_rule);
     display: flex;
@@ -154,7 +154,7 @@
     padding-inline: var(--_inset-inline);
   }
 
-  [data-ui='import-export-center'] > [data-part='header'] > [data-part='title'] {
+  [data-ui-import-export-center] > [data-part-header] > [data-part-title] {
     align-items: center;
     color: var(--_text);
     display: inline-flex;
@@ -178,10 +178,7 @@
    * tabular figures, in the accent pair, because what it counts is what is
    * running. Absent at nought.
    */
-  [data-ui='import-export-center']
-    > [data-part='header']
-    > [data-part='title']
-    > [data-part='count'] {
+  [data-ui-import-export-center] > [data-part-header] > [data-part-title] > [data-part-count] {
     align-items: center;
     background-color: var(--slotted-tone-accent-surface, Canvas);
     block-size: var(--_count-box);
@@ -208,7 +205,7 @@
    * narrow header keeps the title on its line and the controls together on
    * the next, at the end.
    */
-  [data-ui='import-export-center'] > [data-part='header'] > [data-part='tools'] {
+  [data-ui-import-export-center] > [data-part-header] > [data-part-tools] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -217,8 +214,8 @@
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='tools'] > [data-part='clear'],
-  [data-ui='import-export-center'] [data-part='tools'] > [data-part='actions'] {
+  [data-ui-import-export-center] [data-part-tools] > [data-part-clear],
+  [data-ui-import-export-center] [data-part-tools] > [data-part-actions] {
     align-items: center;
     display: inline-flex;
     flex-wrap: wrap;
@@ -228,7 +225,7 @@
   /* ── The views ───────────────────────────────────────────────────────── */
 
   /** The strip sits on the header's rule, so the tabs family's own track is off. */
-  [data-ui='import-export-center'] > [data-part='views'] {
+  [data-ui-import-export-center] > [data-part-views] {
     border-block-end: var(--_rule-size) solid var(--_rule);
     min-inline-size: 0;
     padding-inline: var(--_inset-inline);
@@ -241,7 +238,7 @@
    * — bounds the list alone and the header keeps its row; a page gets the
    * whole list and no bar.
    */
-  [data-ui='import-export-center'] > [data-part='list'] {
+  [data-ui-import-export-center] > [data-part-list] {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -257,7 +254,7 @@
   }
 
   /** The list is where focus lands when the last job it held leaves; it draws the ring inward. */
-  [data-ui='import-export-center'] > [data-part='list']:focus-visible {
+  [data-ui-import-export-center] > [data-part-list]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -270,7 +267,7 @@
    * title's first line; the details, when shown, run under the words and the
    * controls, never under the tile.
    */
-  [data-ui='import-export-center'] > [data-part='list'] > [data-part='job'] {
+  [data-ui-import-export-center] > [data-part-list] > [data-part-job] {
     /**
      * The status, in the tone of the outcome. The rows below retune the roles;
      * the status glyph itself is the binding's, chosen from the same state.
@@ -293,37 +290,31 @@
     row-gap: var(--slotted-space-4, 0.5rem);
   }
 
-  [data-ui='import-export-center'] > [data-part='list'] > [data-part='job']:last-child {
+  [data-ui-import-export-center] > [data-part-list] > [data-part-job]:last-child {
     border-block-end: 0;
   }
 
-  [data-ui='import-export-center'] > [data-part='list'] > [data-part='job'][data-status='running'] {
+  [data-ui-import-export-center] > [data-part-list] > [data-part-job][data-status='running'] {
     --_tone-text: var(--slotted-tone-accent-text, Highlight);
     --_tone-solid: var(--slotted-tone-accent-solid, Highlight);
   }
 
-  [data-ui='import-export-center']
-    > [data-part='list']
-    > [data-part='job'][data-outcome='success'] {
+  [data-ui-import-export-center] > [data-part-list] > [data-part-job][data-outcome='success'] {
     --_tone-text: var(--slotted-tone-success-text, CanvasText);
     --_tone-solid: var(--slotted-tone-success-solid, CanvasText);
   }
 
-  [data-ui='import-export-center']
-    > [data-part='list']
-    > [data-part='job'][data-outcome='partial'] {
+  [data-ui-import-export-center] > [data-part-list] > [data-part-job][data-outcome='partial'] {
     --_tone-text: var(--slotted-tone-warning-text, CanvasText);
     --_tone-solid: var(--slotted-tone-warning-solid, CanvasText);
   }
 
-  [data-ui='import-export-center'] > [data-part='list'] > [data-part='job'][data-outcome='failed'] {
+  [data-ui-import-export-center] > [data-part-list] > [data-part-job][data-outcome='failed'] {
     --_tone-text: var(--slotted-tone-danger-text, CanvasText);
     --_tone-solid: var(--slotted-tone-danger-solid, CanvasText);
   }
 
-  [data-ui='import-export-center']
-    > [data-part='list']
-    > [data-part='job'][data-outcome='canceled'] {
+  [data-ui-import-export-center] > [data-part-list] > [data-part-job][data-outcome='canceled'] {
     --_tone-text: var(--_muted);
     --_tone-solid: var(--_muted);
   }
@@ -334,7 +325,7 @@
    * it in the scale's foreground. Aligned to the job title's first line box,
    * so the tile and the name start on one line.
    */
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual] {
     --_kind-tile: var(--slotted-upload-kind-other);
     --slotted-icon-size: var(--_glyph);
 
@@ -365,39 +356,35 @@
     );
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'][data-kind='pdf'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='pdf'] {
     --_kind-tile: var(--slotted-upload-kind-pdf);
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'][data-kind='document'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='document'] {
     --_kind-tile: var(--slotted-upload-kind-document);
   }
 
-  [data-ui='import-export-center']
-    [data-part='job']
-    > [data-part='visual'][data-kind='spreadsheet'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='spreadsheet'] {
     --_kind-tile: var(--slotted-upload-kind-spreadsheet);
   }
 
-  [data-ui='import-export-center']
-    [data-part='job']
-    > [data-part='visual'][data-kind='presentation'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='presentation'] {
     --_kind-tile: var(--slotted-upload-kind-presentation);
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'][data-kind='image'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='image'] {
     --_kind-tile: var(--slotted-upload-kind-image);
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'][data-kind='video'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='video'] {
     --_kind-tile: var(--slotted-upload-kind-video);
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'][data-kind='audio'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='audio'] {
     --_kind-tile: var(--slotted-upload-kind-audio);
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'][data-kind='archive'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-visual][data-kind='archive'] {
     --_kind-tile: var(--slotted-upload-kind-archive);
   }
 
@@ -408,7 +395,7 @@
    * the summary and the message, each present only when it has something to
    * say; the gap between them is the one the meta line keeps from the title.
    */
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='body'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-body] {
     display: grid;
     gap: var(--slotted-space-3, 0.375rem);
     grid-area: body;
@@ -416,7 +403,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='body'] > [data-part='heading'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-body] > [data-part-heading] {
     display: flex;
     flex-direction: column;
     gap: var(--slotted-space-1, 0.125rem);
@@ -429,7 +416,7 @@
    * is set on a line of the tile's own height, and the meta line under it
    * starts where the tile ends.
    */
-  [data-ui='import-export-center'] [data-part='heading'] > [data-part='job-title'] {
+  [data-ui-import-export-center] [data-part-heading] > [data-part-job-title] {
     align-self: flex-start;
     color: var(--_text);
     font-size: var(--_job-title-size);
@@ -439,7 +426,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='import-export-center'] [data-part='heading'] > a[data-part='job-title'] {
+  [data-ui-import-export-center] [data-part-heading] > a[data-part-job-title] {
     border-radius: var(--slotted-radius-xs, 2px);
     text-decoration-color: transparent;
     text-decoration-line: underline;
@@ -448,21 +435,19 @@
     transition: text-decoration-color var(--_duration) var(--_easing);
   }
 
-  [data-ui='import-export-center']
-    [data-part='heading']
-    > a[data-part='job-title']:not([data-disabled]):hover {
+  [data-ui-import-export-center]
+    [data-part-heading]
+    > a[data-part-job-title]:not([data-disabled]):hover {
     text-decoration-color: currentcolor;
   }
 
-  [data-ui='import-export-center'] [data-part='heading'] > a[data-part='job-title']:focus-visible {
+  [data-ui-import-export-center] [data-part-heading] > a[data-part-job-title]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   /** A title the family focuses — reveal(), a withdrawn control — without making it a tab stop. */
-  [data-ui='import-export-center']
-    [data-part='heading']
-    > span[data-part='job-title']:focus-visible {
+  [data-ui-import-export-center] [data-part-heading] > span[data-part-job-title]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -476,7 +461,7 @@
    * an item that wrapped to the start of a line hangs outside the box and is
    * not drawn: a line never begins with a separator.
    */
-  [data-ui='import-export-center'] [data-part='heading'] > [data-part='meta'] {
+  [data-ui-import-export-center] [data-part-heading] > [data-part-meta] {
     align-items: baseline;
     color: var(--_muted);
     display: flex;
@@ -499,9 +484,9 @@
    * The margin is a bare `var()`: a `calc()` there computes to nought
    * (`docs/token-foundation.md`, rule 7).
    */
-  [data-ui='import-export-center'] [data-part='meta'] > *,
-  [data-ui='import-export-center'] [data-part='summary'] > *,
-  [data-ui='import-export-center'] [data-part='progress-text'] > * {
+  [data-ui-import-export-center] [data-part-meta] > *,
+  [data-ui-import-export-center] [data-part-summary] > *,
+  [data-ui-import-export-center] [data-part-progress-text] > * {
     max-inline-size: 100%;
     min-inline-size: 0;
     overflow: clip;
@@ -510,10 +495,10 @@
     white-space: nowrap;
   }
 
-  [data-ui='import-export-center'] [data-part='meta'] > * + *::before,
-  [data-ui='import-export-center'] [data-part='summary'] > * + *::before,
-  [data-ui='import-export-center'] [data-part='progress-text'] > * + *::before,
-  [data-ui='import-export-center'] [data-part='status-label'] > [data-part='stage']::before {
+  [data-ui-import-export-center] [data-part-meta] > * + *::before,
+  [data-ui-import-export-center] [data-part-summary] > * + *::before,
+  [data-ui-import-export-center] [data-part-progress-text] > * + *::before,
+  [data-ui-import-export-center] [data-part-status-label] > [data-part-stage]::before {
     background-color: currentcolor;
     block-size: var(--_separator);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -543,31 +528,31 @@
    * an item carrying `dir="auto"` would hang it on the wrong side of an
    * Arabic name in a left-to-right page.
    */
-  [data-ui='import-export-center'] [data-part='meta'] > :has(> [data-part='file-name']) {
+  [data-ui-import-export-center] [data-part-meta] > :has(> [data-part-file-name]) {
     max-inline-size: 100%;
     white-space: nowrap;
   }
 
-  [data-ui='import-export-center'] [data-part='meta'] [data-part='file-name'] {
+  [data-ui-import-export-center] [data-part-meta] [data-part-file-name] {
     display: inline-flex;
     max-inline-size: 100%;
     min-inline-size: 0;
     unicode-bidi: isolate;
   }
 
-  [data-ui='import-export-center'] [data-part='file-name'] > [data-part='name'] {
+  [data-ui-import-export-center] [data-part-file-name] > [data-part-name] {
     min-inline-size: 1ch;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  [data-ui='import-export-center'] [data-part='file-name'] > [data-part='extension'] {
+  [data-ui-import-export-center] [data-part-file-name] > [data-part-extension] {
     flex: none;
     white-space: nowrap;
   }
 
-  [data-ui='import-export-center'] [data-part='meta'] > [data-part='time'] {
+  [data-ui-import-export-center] [data-part-meta] > [data-part-time] {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
@@ -586,7 +571,7 @@
    * version put the centre on the band's top instead of its middle, and the
    * mark stood four pixels above the words at every size.
    */
-  [data-ui='import-export-center'] [data-part='body'] > [data-part='status'] {
+  [data-ui-import-export-center] [data-part-body] > [data-part-status] {
     align-items: baseline;
     color: var(--_tone-text);
     column-gap: var(--_mark-gap);
@@ -603,7 +588,7 @@
    * the two never part: a narrow job wraps the words inside their column,
    * under the first word and never under the mark.
    */
-  [data-ui='import-export-center'] [data-part='status'] > [data-part='mark'] {
+  [data-ui-import-export-center] [data-part-status] > [data-part-mark] {
     --slotted-icon-size: 1em;
     --slotted-spinner-size: 1em;
 
@@ -619,7 +604,7 @@
    * while there is room and starts the next line flush with the word when
    * there is not, its separator clipped as the meta line clips its own.
    */
-  [data-ui='import-export-center'] [data-part='status'] > [data-part='status-label'] {
+  [data-ui-import-export-center] [data-part-status] > [data-part-status-label] {
     align-items: baseline;
     display: flex;
     flex-wrap: wrap;
@@ -629,7 +614,7 @@
     overflow-x: clip;
   }
 
-  [data-ui='import-export-center'] [data-part='status-label'] > * {
+  [data-ui-import-export-center] [data-part-status-label] > * {
     min-inline-size: 0;
   }
 
@@ -640,7 +625,7 @@
    * ellipsis on its own line when it does not fit beside the word; the whole
    * phrase stays in the DOM, and the binding repeats it in `title`.
    */
-  [data-ui='import-export-center'] [data-part='status-label'] > [data-part='stage'] {
+  [data-ui-import-export-center] [data-part-status-label] > [data-part-stage] {
     max-inline-size: 100%;
     overflow: clip;
     overflow-clip-margin: var(--_separator-gap);
@@ -654,13 +639,13 @@
    * the offset above measures from; an icon in flow gave the mark the icon's
    * baseline and raised it off the line.
    */
-  [data-ui='import-export-center'] [data-part='status'] > [data-part='mark'] > [data-ui='icon'],
-  [data-ui='import-export-center'] [data-part='status'] > [data-part='mark'] > [data-ui='spinner'] {
+  [data-ui-import-export-center] [data-part-status] > [data-part-mark] > [data-ui-icon],
+  [data-ui-import-export-center] [data-part-status] > [data-part-mark] > [data-ui-spinner] {
     inset: 0;
     position: absolute;
   }
 
-  [data-ui='import-export-center'] [data-part='status-label'] > [data-part='stage'] {
+  [data-ui-import-export-center] [data-part-status-label] > [data-part-stage] {
     color: var(--_muted);
     font-weight: var(--slotted-font-weight-regular, 400);
   }
@@ -681,13 +666,13 @@
    * small step; the words beside it are the family's, in tabular figures so
    * a number that moves does not move the rest of the line.
    */
-  [data-ui='import-export-center'] [data-part='body'] > [data-part='progress'] {
+  [data-ui-import-export-center] [data-part-body] > [data-part-progress] {
     display: grid;
     gap: var(--slotted-space-2, 0.25rem);
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='progress'] > [data-part='progress-text'] {
+  [data-ui-import-export-center] [data-part-progress] > [data-part-progress-text] {
     color: var(--_muted);
     display: flex;
     flex-wrap: wrap;
@@ -699,7 +684,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='body'] > [data-part='summary'] {
+  [data-ui-import-export-center] [data-part-body] > [data-part-summary] {
     color: var(--_muted);
     display: flex;
     flex-wrap: wrap;
@@ -717,7 +702,7 @@
    * the outcome's tone, because it is what went wrong; an expiry or a
    * permission says it in the muted voice, because it is what to know.
    */
-  [data-ui='import-export-center'] [data-part='body'] > [data-part='message'] {
+  [data-ui-import-export-center] [data-part-body] > [data-part-message] {
     color: var(--_muted);
     font-size: var(--_meta-size);
     line-height: var(--_meta-line-height);
@@ -726,14 +711,14 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='import-export-center']
-    [data-part='job'][data-outcome='failed']
-    [data-part='body']
-    > [data-part='message'],
-  [data-ui='import-export-center']
-    [data-part='job'][data-outcome='partial']
-    [data-part='body']
-    > [data-part='message'] {
+  [data-ui-import-export-center]
+    [data-part-job][data-outcome='failed']
+    [data-part-body]
+    > [data-part-message],
+  [data-ui-import-export-center]
+    [data-part-job][data-outcome='partial']
+    [data-part-body]
+    > [data-part-message] {
     color: var(--_tone-text);
   }
 
@@ -745,7 +730,7 @@
    * remove control is the family's own icon button and sits at the far end,
    * away from the controls that start something.
    */
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='controls'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-controls] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -754,17 +739,17 @@
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='controls'] > [data-part='download'],
-  [data-ui='import-export-center'] [data-part='controls'] > [data-part='cancel'],
-  [data-ui='import-export-center'] [data-part='controls'] > [data-part='retry'],
-  [data-ui='import-export-center'] [data-part='controls'] > [data-part='toggle'],
-  [data-ui='import-export-center'] [data-part='controls'] > [data-part='job-actions'] {
+  [data-ui-import-export-center] [data-part-controls] > [data-part-download],
+  [data-ui-import-export-center] [data-part-controls] > [data-part-cancel],
+  [data-ui-import-export-center] [data-part-controls] > [data-part-retry],
+  [data-ui-import-export-center] [data-part-controls] > [data-part-toggle],
+  [data-ui-import-export-center] [data-part-controls] > [data-part-job-actions] {
     align-items: center;
     display: inline-flex;
     gap: var(--slotted-control-gap-sm, 6px);
   }
 
-  [data-ui='import-export-center'] [data-part='controls'] > [data-part='remove'] {
+  [data-ui-import-export-center] [data-part-controls] > [data-part-remove] {
     margin-inline-start: auto;
   }
 
@@ -773,7 +758,7 @@
    * turns to point at the details it opened. The turn is a state the eye
    * follows, so it carries the control's own transition.
    */
-  [data-ui='import-export-center'] [data-part='toggle'] [data-part='chevron'] {
+  [data-ui-import-export-center] [data-part-toggle] [data-part-chevron] {
     --slotted-icon-size: var(--_control-glyph);
 
     block-size: var(--_control-glyph);
@@ -782,12 +767,12 @@
     transition: transform var(--_duration) var(--_easing);
   }
 
-  [data-ui='import-export-center'] [data-part='toggle'][data-expanded] [data-part='chevron'] {
+  [data-ui-import-export-center] [data-part-toggle][data-expanded] [data-part-chevron] {
     transform: rotate(180deg);
   }
 
   /** The family's own icon control: muted at rest, the text ink under the pointer. */
-  [data-ui='import-export-center'] button[data-part='remove'] {
+  [data-ui-import-export-center] button[data-part-remove] {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -808,27 +793,27 @@
   }
 
   /** The target reaches the WCAG minimum through a transparent halo, as every inner control does. */
-  [data-ui='import-export-center'] button[data-part='remove']::after {
+  [data-ui-import-export-center] button[data-part-remove]::after {
     content: '';
     inset: min(0px, calc((var(--_control) - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
   }
 
   /* The cross is an `Icon` the binding draws inside the control. */
-  [data-ui='import-export-center'] button[data-part='remove'] > [data-ui='icon'] {
+  [data-ui-import-export-center] button[data-part-remove] > [data-ui-icon] {
     --slotted-icon-size: var(--_control-glyph);
   }
 
-  [data-ui='import-export-center'] button[data-part='remove']:not([data-disabled]):hover {
+  [data-ui-import-export-center] button[data-part-remove]:not([data-disabled]):hover {
     background-color: var(--_hover);
     color: var(--_text);
   }
 
-  [data-ui='import-export-center'] button[data-part='remove']:not([data-disabled]):active {
+  [data-ui-import-export-center] button[data-part-remove]:not([data-disabled]):active {
     background-color: var(--_active);
   }
 
-  [data-ui='import-export-center'] button[data-part='remove']:focus-visible {
+  [data-ui-import-export-center] button[data-part-remove]:focus-visible {
     color: var(--_text);
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
@@ -841,7 +826,7 @@
    * files and the rows that failed, on the sunken ground so the region reads
    * as the job's own and not as the next job.
    */
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='details'] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-details] {
     background-color: var(--slotted-surface-sunken, Canvas);
     /* The family's rule as the region's edge: faint on the sunken ground in light and dark, and the one separation left where high-contrast paints the sunken ground as the page. */
     border: var(--_rule-size) solid var(--_rule);
@@ -855,7 +840,7 @@
     padding-inline: var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='import-export-center'] [data-part='job'] > [data-part='details'][hidden] {
+  [data-ui-import-export-center] [data-part-job] > [data-part-details][hidden] {
     display: none;
   }
 
@@ -863,7 +848,7 @@
    * The counts: figures a reader compares, so each is a label over a
    * number, in tabular figures, laid out in as many columns as fit.
    */
-  [data-ui='import-export-center'] [data-part='details'] > [data-part='counts'] {
+  [data-ui-import-export-center] [data-part-details] > [data-part-counts] {
     display: grid;
     gap: var(--slotted-space-4, 0.5rem) var(--slotted-space-7, 1.25rem);
     grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
@@ -871,20 +856,20 @@
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='counts'] > div {
+  [data-ui-import-export-center] [data-part-counts] > div {
     display: flex;
     flex-direction: column;
     gap: var(--slotted-space-1, 0.125rem);
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='counts'] dt {
+  [data-ui-import-export-center] [data-part-counts] dt {
     color: var(--_muted);
     font-size: var(--_small-size);
     line-height: var(--_small-line-height);
   }
 
-  [data-ui='import-export-center'] [data-part='counts'] dd {
+  [data-ui-import-export-center] [data-part-counts] dd {
     color: var(--_text);
     font-size: var(--_job-title-size);
     font-variant-numeric: tabular-nums;
@@ -893,12 +878,12 @@
     margin: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='counts'] > div[data-count='failed'] dd {
+  [data-ui-import-export-center] [data-part-counts] > div[data-count='failed'] dd {
     color: var(--slotted-tone-danger-text, CanvasText);
   }
 
   /** The files: one row each — what the file is, its name, its availability, its control. */
-  [data-ui='import-export-center'] [data-part='details'] > [data-part='files'] {
+  [data-ui-import-export-center] [data-part-details] > [data-part-files] {
     display: grid;
     gap: var(--slotted-space-3, 0.375rem);
     list-style: none;
@@ -907,7 +892,7 @@
     padding: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='files'] > [data-part='file'] {
+  [data-ui-import-export-center] [data-part-files] > [data-part-file] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -919,7 +904,7 @@
   }
 
   /** The words take the row and the control follows them; a row too narrow for both puts the control under them. */
-  [data-ui='import-export-center'] [data-part='file'] > [data-part='meta'] {
+  [data-ui-import-export-center] [data-part-file] > [data-part-meta] {
     flex: 1 1 14rem;
     align-items: baseline;
     color: var(--_muted);
@@ -930,12 +915,12 @@
     overflow-x: clip;
   }
 
-  [data-ui='import-export-center'] [data-part='file'] > [data-part='meta'] > strong {
+  [data-ui-import-export-center] [data-part-file] > [data-part-meta] > strong {
     color: var(--_text);
     font-weight: var(--slotted-font-weight-medium, 500);
   }
 
-  [data-ui='import-export-center'] [data-part='file'] > [data-part='download'] {
+  [data-ui-import-export-center] [data-part-file] > [data-part-download] {
     display: inline-flex;
   }
 
@@ -944,19 +929,19 @@
    * size that scrolls, so twelve thousand rows do not become the page. The
    * caption is the table's; the note under it is the family's.
    */
-  [data-ui='import-export-center'] [data-part='details'] > [data-part='errors'] {
+  [data-ui-import-export-center] [data-part-details] > [data-part-errors] {
     display: grid;
     gap: var(--slotted-space-3, 0.375rem);
     min-inline-size: 0;
   }
 
-  [data-ui='import-export-center'] [data-part='errors'] > [data-ui='table'] {
+  [data-ui-import-export-center] [data-part-errors] > [data-ui-table] {
     max-block-size: var(--slotted-import-export-center-errors-max-block-size, 16rem);
     min-inline-size: 0;
     overflow: auto;
   }
 
-  [data-ui='import-export-center'] [data-part='errors'] > [data-part='errors-note'] {
+  [data-ui-import-export-center] [data-part-errors] > [data-part-errors-note] {
     align-items: center;
     color: var(--_muted);
     display: flex;
@@ -971,7 +956,7 @@
   /* ── More, empty, error, footer ──────────────────────────────────────── */
 
   /** The end of what has been loaded: a pill on the control scale, the idiom `notification-center` set. */
-  [data-ui='import-export-center'] > button[data-part='more'] {
+  [data-ui-import-export-center] > button[data-part-more] {
     align-items: center;
     appearance: none;
     background-color: var(--_ground);
@@ -996,32 +981,32 @@
       border-color var(--_duration) var(--_easing);
   }
 
-  [data-ui='import-export-center'] > button[data-part='more']:not([data-loading]):enabled:hover {
+  [data-ui-import-export-center] > button[data-part-more]:not([data-loading]):enabled:hover {
     background-color: var(--_hover);
   }
 
-  [data-ui='import-export-center'] > button[data-part='more']:not([data-loading]):enabled:active {
+  [data-ui-import-export-center] > button[data-part-more]:not([data-loading]):enabled:active {
     background-color: var(--_active);
   }
 
-  [data-ui='import-export-center'] > button[data-part='more'][data-loading] {
+  [data-ui-import-export-center] > button[data-part-more][data-loading] {
     color: var(--_muted);
     cursor: progress;
   }
 
-  [data-ui='import-export-center'] > button[data-part='more']:focus-visible {
+  [data-ui-import-export-center] > button[data-part-more]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
-  [data-ui='import-export-center'] > [data-part='empty'],
-  [data-ui='import-export-center'] > [data-part='error'] {
+  [data-ui-import-export-center] > [data-part-empty],
+  [data-ui-import-export-center] > [data-part-error] {
     min-inline-size: 0;
     padding-block: var(--slotted-space-9, 2rem);
     padding-inline: var(--_inset-inline);
   }
 
-  [data-ui='import-export-center'] > [data-part='footer'] {
+  [data-ui-import-export-center] > [data-part-footer] {
     align-items: center;
     border-block-start: var(--_rule-size) solid var(--_rule);
     display: flex;
@@ -1040,17 +1025,17 @@
    * The first wait: skeleton jobs with the anatomy of a job — the tile, the
    * name, the meta line and the bar — in the boxes the loaded jobs occupy.
    */
-  [data-ui='import-export-center']
-    > [data-part='list']
-    > [data-part='job'][aria-hidden='true']
-    > [data-part='visual'] {
+  [data-ui-import-export-center]
+    > [data-part-list]
+    > [data-part-job][aria-hidden='true']
+    > [data-part-visual] {
     background-color: transparent;
   }
 
-  [data-ui='import-export-center']
-    [data-part='job'][aria-hidden='true']
-    > [data-part='visual']
-    > [data-ui='skeleton'] {
+  [data-ui-import-export-center]
+    [data-part-job][aria-hidden='true']
+    > [data-part-visual]
+    > [data-ui-skeleton] {
     block-size: 100%;
     inline-size: 100%;
   }
@@ -1060,7 +1045,7 @@
    * needs the width more than the edge needs to line up with the words.
    */
   @container import-export-center (inline-size < 22rem) {
-    [data-ui='import-export-center'] > [data-part='list'] > [data-part='job'] {
+    [data-ui-import-export-center] > [data-part-list] > [data-part-job] {
       grid-template-areas:
         'visual body'
         'visual controls'
@@ -1087,13 +1072,13 @@
    * the status column spaces its own parts instead.
    */
   @container import-export-center (inline-size >= 42rem) {
-    [data-ui='import-export-center'] > [data-part='list'] {
+    [data-ui-import-export-center] > [data-part-list] {
       column-gap: var(--_gap);
       display: grid;
       grid-template-columns: auto minmax(0, 6fr) minmax(var(--_status-column), 5fr);
     }
 
-    [data-ui='import-export-center'] > [data-part='list'] > [data-part='job'] {
+    [data-ui-import-export-center] > [data-part-list] > [data-part-job] {
       grid-column: 1 / -1;
       grid-template-areas: none;
       grid-template-columns: subgrid;
@@ -1101,45 +1086,39 @@
       row-gap: 0;
     }
 
-    [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'] {
+    [data-ui-import-export-center] [data-part-job] > [data-part-visual] {
       grid-column: 1;
       grid-row: 1 / span 5;
     }
 
-    [data-ui='import-export-center'] [data-part='job'] > [data-part='body'] {
+    [data-ui-import-export-center] [data-part-job] > [data-part-body] {
       display: contents;
     }
 
-    [data-ui='import-export-center']
-      [data-part='job']
-      > [data-part='body']
-      > [data-part='heading'] {
+    [data-ui-import-export-center] [data-part-job] > [data-part-body] > [data-part-heading] {
       grid-column: 2;
       grid-row: 1 / span 5;
     }
 
-    [data-ui='import-export-center']
-      [data-part='job']
-      > [data-part='body']
-      > :not([data-part='heading']) {
+    [data-ui-import-export-center] [data-part-job] > [data-part-body] > :not([data-part-heading]) {
       grid-column: 3;
     }
 
-    [data-ui='import-export-center']
-      [data-part='job']
-      > [data-part='body']
-      > :not([data-part='heading'])
-      + :not([data-part='heading']) {
+    [data-ui-import-export-center]
+      [data-part-job]
+      > [data-part-body]
+      > :not([data-part-heading])
+      + :not([data-part-heading]) {
       margin-block-start: var(--slotted-space-3, 0.375rem);
     }
 
-    [data-ui='import-export-center'] [data-part='job'] > [data-part='controls'] {
+    [data-ui-import-export-center] [data-part-job] > [data-part-controls] {
       grid-column: 3;
       grid-row: 5;
       margin-block-start: var(--slotted-space-4, 0.5rem);
     }
 
-    [data-ui='import-export-center'] [data-part='job'] > [data-part='details'] {
+    [data-ui-import-export-center] [data-part-job] > [data-part-details] {
       grid-column: 2 / -1;
       grid-row: 6;
       margin-block-start: var(--_gap);
@@ -1155,20 +1134,20 @@
      * keeps the author's `currentcolor`, which has already been forced, so the
      * dot is drawn in the system's palette.
      */
-    [data-ui='import-export-center'] [data-part='meta'] > * + *::before,
-    [data-ui='import-export-center'] [data-part='summary'] > * + *::before,
-    [data-ui='import-export-center'] [data-part='progress-text'] > * + *::before,
-    [data-ui='import-export-center'] [data-part='status-label'] > [data-part='stage']::before {
+    [data-ui-import-export-center] [data-part-meta] > * + *::before,
+    [data-ui-import-export-center] [data-part-summary] > * + *::before,
+    [data-ui-import-export-center] [data-part-progress-text] > * + *::before,
+    [data-ui-import-export-center] [data-part-status-label] > [data-part-stage]::before {
       forced-color-adjust: none;
     }
 
     /** The tile loses its kind's colour, as every tone does here; its edge keeps the square. */
-    [data-ui='import-export-center'] [data-part='job'] > [data-part='visual'] {
+    [data-ui-import-export-center] [data-part-job] > [data-part-visual] {
       border: var(--slotted-border-width-thin, 1px) solid CanvasText;
       color: CanvasText;
     }
 
-    [data-ui='import-export-center'] [data-part='job'] > [data-part='details'] {
+    [data-ui-import-export-center] [data-part-job] > [data-part-details] {
       border-color: CanvasText;
     }
   }

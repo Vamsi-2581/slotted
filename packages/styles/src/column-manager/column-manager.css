@@ -27,7 +27,7 @@
    * control's inline padding and a row's air is the sm control's gap, so a
    * dense panel is tighter by the amount a dense control is.
    */
-  [data-ui='column-manager'] {
+  [data-ui-column-manager] {
     --_text: var(--slotted-text, CanvasText);
     --_muted: var(--slotted-text-muted, GrayText);
     --_rule: var(--slotted-border-subtle, ButtonBorder);
@@ -71,7 +71,7 @@
    * the popover's lg measure is the cap around it, and the positioner's room
    * the cap around that.
    */
-  [data-ui='column-manager'][data-presentation='popover'] {
+  [data-ui-column-manager][data-presentation='popover'] {
     /* The layer sizes to its content, so a percentage here would read a
        width the root itself decides. The positioner's room, less the layer's
        own inset, is the cap a narrow viewport needs. */
@@ -82,16 +82,16 @@
   }
 
   /** In a drawer the root fills the panel and the list takes what is left. */
-  [data-ui='column-manager'][data-presentation='drawer'] {
+  [data-ui-column-manager][data-presentation='drawer'] {
     block-size: 100%;
     inline-size: 100%;
   }
 
-  [data-ui='column-manager'][data-presentation='inline'] {
+  [data-ui-column-manager][data-presentation='inline'] {
     inline-size: 100%;
   }
 
-  [data-ui='column-manager'] > [data-part='header'] {
+  [data-ui-column-manager] > [data-part-header] {
     align-items: baseline;
     column-gap: var(--_gap);
     display: flex;
@@ -100,7 +100,7 @@
     padding-inline: var(--_inset);
   }
 
-  [data-ui='column-manager'] > [data-part='header'] > [data-part='title'] {
+  [data-ui-column-manager] > [data-part-header] > [data-part-title] {
     color: var(--_text);
     font-family: var(
       --slotted-font-family-heading,
@@ -113,7 +113,7 @@
     min-inline-size: 0;
   }
 
-  [data-ui='column-manager'] > [data-part='header'] > [data-part='summary'] {
+  [data-ui-column-manager] > [data-part-header] > [data-part-summary] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-sm, 0.8125rem);
     font-variant-numeric: tabular-nums;
@@ -122,12 +122,12 @@
     white-space: nowrap;
   }
 
-  [data-ui='column-manager'] > [data-part='search'] {
+  [data-ui-column-manager] > [data-part-search] {
     padding-block-end: var(--_gap);
     padding-inline: var(--_inset);
   }
 
-  [data-ui='column-manager'] > [data-part='search'] > [data-ui='text-field'] {
+  [data-ui-column-manager] > [data-part-search] > [data-ui-text-field] {
     inline-size: 100%;
   }
 
@@ -136,7 +136,7 @@
    * popover and an inline host bound the list; a drawer gives it the rest of
    * the panel.
    */
-  [data-ui='column-manager'] > [data-part='list'] {
+  [data-ui-column-manager] > [data-part-list] {
     border-block: var(--slotted-border-width-thin, 1px) solid var(--_rule);
     max-block-size: var(--_list-max);
     min-block-size: 0;
@@ -145,23 +145,20 @@
     padding-block: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='column-manager'][data-presentation='drawer'] > [data-part='list'] {
+  [data-ui-column-manager][data-presentation='drawer'] > [data-part-list] {
     max-block-size: none;
   }
 
-  [data-ui='column-manager'] > [data-part='list'] > [data-part='section'] {
+  [data-ui-column-manager] > [data-part-list] > [data-part-section] {
     padding-block: var(--slotted-space-2, 0.25rem);
     position: relative;
   }
 
-  [data-ui='column-manager'] > [data-part='list'] > [data-part='section'] + [data-part='section'] {
+  [data-ui-column-manager] > [data-part-list] > [data-part-section] + [data-part-section] {
     border-block-start: var(--slotted-border-width-thin, 1px) solid var(--_rule);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='section-label'] {
+  [data-ui-column-manager] > [data-part-list] > [data-part-section] > [data-part-section-label] {
     color: var(--_muted);
     font-size: var(--slotted-font-size-xs, 0.75rem);
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -174,10 +171,10 @@
    * A section alone needs no heading on screen — "Columns" under "Columns" —
    * but the group keeps its name, so the label is read and not shown.
    */
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section'][data-sole]
-    > [data-part='section-label'] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section][data-sole]
+    > [data-part-section-label] {
     block-size: 1px;
     clip-path: inset(50%);
     inline-size: 1px;
@@ -192,7 +189,7 @@
    * checkbox's first line, so a column with a description keeps them level
    * with its name rather than with the middle of two lines.
    */
-  [data-ui='column-manager'] > [data-part='list'] > [data-part='section'] > [data-part='item'] {
+  [data-ui-column-manager] > [data-part-list] > [data-part-section] > [data-part-item] {
     align-items: start;
     column-gap: var(--slotted-space-2, 0.25rem);
     display: grid;
@@ -203,18 +200,18 @@
     transition: opacity var(--_duration) var(--_easing);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item'][data-dragging] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item][data-dragging] {
     opacity: 0.5;
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > :is([data-part='handle'], [data-part='pin']) {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > :is([data-part-handle], [data-part-pin]) {
     align-items: center;
     background-color: transparent;
     block-size: var(--_control);
@@ -233,91 +230,91 @@
       color var(--_duration) var(--_easing);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > [data-part='handle'] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > [data-part-handle] {
     cursor: grab;
     touch-action: none;
   }
 
   /* A pinned column's pin is in the accent ink: the zone it is in is also the
      section it stands under, so the colour is the second of two signals. */
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > [data-part='pin'][data-pinned] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > [data-part-pin][data-pinned] {
     color: var(--slotted-tone-accent-text, LinkText);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > :is([data-part='handle'], [data-part='pin']):not([data-disabled]):hover,
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > [data-part='pin'][data-open]:not([data-disabled]) {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > :is([data-part-handle], [data-part-pin]):not([data-disabled]):hover,
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > [data-part-pin][data-open]:not([data-disabled]) {
     background-color: var(--_hover);
     color: var(--_text);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > :is([data-part='handle'], [data-part='pin']):not([data-disabled]):active {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > :is([data-part-handle], [data-part-pin]):not([data-disabled]):active {
     background-color: var(--_active);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > :is([data-part='handle'], [data-part='pin']):focus-visible {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > :is([data-part-handle], [data-part-pin]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(var(--slotted-focus-ring-width, 2px) * -1);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > [data-part='handle'][data-disabled] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > [data-part-handle][data-disabled] {
     color: var(--slotted-disabled-foreground, GrayText);
     cursor: default;
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item'][data-dragging]
-    > [data-part='handle'] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item][data-dragging]
+    > [data-part-handle] {
     cursor: grabbing;
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > [data-part='visibility'] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > [data-part-visibility] {
     display: block;
     min-inline-size: 0;
     overflow-wrap: anywhere;
     padding-inline: var(--slotted-space-2, 0.25rem);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > [data-part='visibility']
-    [data-part='description'] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > [data-part-visibility]
+    [data-part-description] {
     text-wrap: pretty;
   }
 
@@ -327,23 +324,23 @@
    * checkbox's label, so it is heard with the name, a step down in size and
    * ink so the name still reads first.
    */
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item']
-    > [data-part='visibility']
-    [data-part='status'] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item]
+    > [data-part-visibility]
+    [data-part-status] {
     color: var(--_muted);
     display: inline-block;
     font-size: var(--slotted-font-size-xs, 0.75rem);
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='item'][data-space-hidden]
-    > [data-part='visibility']
-    [data-part='status'] {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-item][data-space-hidden]
+    > [data-part-visibility]
+    [data-part-status] {
     color: var(--slotted-tone-warning-text, CanvasText);
   }
 
@@ -352,19 +349,16 @@
    * nothing moves while the reader aims. It is drawn in the section's inset
    * and in the accent solid, the colour the grid's own drop line takes.
    */
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='drop-indicator'] {
+  [data-ui-column-manager] > [data-part-list] > [data-part-section] > [data-part-drop-indicator] {
     block-size: 0;
     pointer-events: none;
     position: relative;
   }
 
-  [data-ui='column-manager']
-    > [data-part='list']
-    > [data-part='section']
-    > [data-part='drop-indicator']::before {
+  [data-ui-column-manager]
+    > [data-part-list]
+    > [data-part-section]
+    > [data-part-drop-indicator]::before {
     background-color: var(--slotted-tone-accent-solid);
     block-size: var(--slotted-border-width-thick, 2px);
     border-radius: var(--slotted-radius-full, 9999px);
@@ -374,18 +368,18 @@
     position: absolute;
   }
 
-  [data-ui='column-manager'] > [data-part='list'] > [data-part='section'][data-drop-target] {
+  [data-ui-column-manager] > [data-part-list] > [data-part-section][data-drop-target] {
     background-color: var(--_hover);
   }
 
-  [data-ui='column-manager'] > [data-part='list'] > [data-part='empty'] {
+  [data-ui-column-manager] > [data-part-list] > [data-part-empty] {
     color: var(--_muted);
     padding-block: var(--slotted-space-8, 1.5rem);
     padding-inline: var(--_inset);
     text-align: center;
   }
 
-  [data-ui='column-manager'] > [data-part='footer'] {
+  [data-ui-column-manager] > [data-part-footer] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -393,18 +387,16 @@
     padding: var(--_inset);
   }
 
-  [data-ui='column-manager']
-    > [data-part='footer']
-    > :is([data-part='show-all'], [data-part='reset']) {
+  [data-ui-column-manager] > [data-part-footer] > :is([data-part-show-all], [data-part-reset]) {
     flex: none;
   }
 
   /* Cancel and Apply stand at the end, away from the two that act at once. */
-  [data-ui='column-manager'] > [data-part='footer'] > [data-part='cancel'] {
+  [data-ui-column-manager] > [data-part-footer] > [data-part-cancel] {
     margin-inline-start: auto;
   }
 
-  [data-ui='column-manager'] > [data-part='footer'] > [data-part='apply'] {
+  [data-ui-column-manager] > [data-part-footer] > [data-part-apply] {
     flex: none;
   }
 
@@ -413,12 +405,12 @@
    * over the pair that settles the draft — rather than wrapping one by one.
    */
   @container column-manager (max-width: 20rem) {
-    [data-ui='column-manager'] > [data-part='footer'] {
+    [data-ui-column-manager] > [data-part-footer] {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    [data-ui='column-manager'] > [data-part='footer'] > [data-part='cancel'] {
+    [data-ui-column-manager] > [data-part-footer] > [data-part-cancel] {
       margin-inline-start: 0;
     }
   }
@@ -429,12 +421,12 @@
    * part it could not keep. The count is a chip beside the words, in the
    * accent pair, as the notification centre draws an unread count.
    */
-  [data-part='trigger'][data-column-manager-trigger],
+  [data-part-trigger][data-column-manager-trigger],
   [data-column-manager-trigger] {
     --_count-size: var(--slotted-font-size-xs, 0.75rem);
   }
 
-  [data-column-manager-trigger] [data-part='count'] {
+  [data-column-manager-trigger] [data-part-count] {
     background-color: var(--slotted-tone-accent-surface, Canvas);
     border-radius: var(--slotted-radius-full, 9999px);
     box-sizing: border-box;

@@ -8,7 +8,7 @@ const declarations = css
   .replace(/\s+/g, ' ')
   .replace(/\s*([{};,:>])\s*/g, '$1');
 
-const root = "[data-ui='progress-indicator'][data-part='root']";
+const root = '[data-ui-progress-indicator][data-part-root]';
 
 /** The declaration block of the rule whose selector is exactly `selector`. */
 function block(selector) {
@@ -27,7 +27,7 @@ test('the bar thickness steps 4, 6 and 8 pixels: no size draws a 2-pixel hairlin
   assert.equal(thickness(block(`${root}[data-size='sm']`)), '--slotted-space-2');
   assert.equal(thickness(block(`${root}[data-size='lg']`)), '--slotted-space-4');
   const base = declarations.match(
-    /\[data-ui='progress-indicator'\]\[data-part='root'\]\{([^}]*--_thickness[^}]*)\}/,
+    /\[data-ui-progress-indicator\]\[data-part-root\]\{([^}]*--_thickness[^}]*)\}/,
   );
   assert.ok(base, 'no base rule declares --_thickness');
   assert.equal(thickness(base[1]), '--slotted-space-3');

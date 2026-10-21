@@ -105,7 +105,9 @@ const MEASURE = 'var(--slotted-action-sheet-inline-size, 32rem)';
       (openChangeRequest)="fromDrawer($event)"
       (closed)="onClosed()"
     >
-      <div data-ui="action-sheet" data-part="root"><ng-content /></div>
+      <div data-ui="action-sheet" data-ui-action-sheet="" data-part="root" data-part-root="">
+        <ng-content />
+      </div>
     </sl-drawer>
   `,
   styleUrls: [

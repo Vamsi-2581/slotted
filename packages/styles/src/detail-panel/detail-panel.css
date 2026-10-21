@@ -28,7 +28,7 @@
    * `body`, a description-list has a `description`, a result-state has a
    * `message` — and a descendant rule would restyle theirs.
    */
-  [data-ui='detail-panel'] {
+  [data-ui-detail-panel] {
     --_text: var(--slotted-text, CanvasText);
     --_muted: var(--slotted-text-muted, GrayText);
     --_rule: var(--slotted-detail-panel-border, var(--slotted-border-subtle, ButtonBorder));
@@ -68,13 +68,13 @@
     position: relative;
   }
 
-  [data-ui='detail-panel'][data-size='sm'] {
+  [data-ui-detail-panel][data-size='sm'] {
     --_aside-size: var(--slotted-detail-panel-aside-size-sm, 14rem);
     --_gap: var(--slotted-detail-panel-gap-sm, var(--slotted-space-7, 1.25rem));
     --_inset-block: var(--slotted-detail-panel-inset-block-sm, var(--slotted-space-7, 1.25rem));
   }
 
-  [data-ui='detail-panel'][data-size='lg'] {
+  [data-ui-detail-panel][data-size='lg'] {
     --_aside-size: var(--slotted-detail-panel-aside-size-lg, 18rem);
     --_gap: var(--slotted-detail-panel-gap-lg, var(--slotted-space-9, 2rem));
     --_inset-block: var(--slotted-detail-panel-inset-block-lg, var(--slotted-space-9, 2rem));
@@ -86,7 +86,7 @@
    * shrink it, which `min-block-size: 0` is what allows. `overscroll-behavior`
    * keeps a wheel at the end of the record from scrolling the page behind.
    */
-  [data-ui='detail-panel'][data-scroll='self'] {
+  [data-ui-detail-panel][data-scroll='self'] {
     block-size: 100%;
     min-block-size: 0;
     overflow: auto;
@@ -101,7 +101,7 @@
    * is `container`'s own grid — its children land in the content track — so
    * the banner, the columns and the message share one column and one rhythm.
    */
-  [data-ui='detail-panel'] > [data-part='body'] {
+  [data-ui-detail-panel] > [data-part-body] {
     display: flex;
     flex: 1 0 auto;
     flex-direction: column;
@@ -109,28 +109,28 @@
     padding-block: var(--_inset-block);
   }
 
-  [data-ui='detail-panel'] > [data-part='body'] > [data-ui='container'] {
+  [data-ui-detail-panel] > [data-part-body] > [data-ui-container] {
     row-gap: var(--_rhythm);
   }
 
-  [data-ui='detail-panel'] > [data-part='body'] > [data-ui='container'] > [data-part='banner'] {
+  [data-ui-detail-panel] > [data-part-body] > [data-ui-container] > [data-part-banner] {
     min-inline-size: 0;
   }
 
   /* ── The columns ─────────────────────────────────────────────────────── */
 
-  [data-ui='detail-panel'] > [data-part='body'] > [data-ui='container'] > [data-part='columns'] {
+  [data-ui-detail-panel] > [data-part-body] > [data-ui-container] > [data-part-columns] {
     display: grid;
     gap: var(--_gap);
     grid-template-columns: minmax(0, 1fr);
     min-inline-size: 0;
   }
 
-  [data-ui='detail-panel']
-    > [data-part='body']
-    > [data-ui='container']
-    > [data-part='columns']
-    > [data-part='main'] {
+  [data-ui-detail-panel]
+    > [data-part-body]
+    > [data-ui-container]
+    > [data-part-columns]
+    > [data-part-main] {
     display: flex;
     flex-direction: column;
     gap: var(--_rhythm);
@@ -143,11 +143,11 @@
    * with no spaces, an identifier or a URL, which would otherwise widen the
    * column past the record.
    */
-  [data-ui='detail-panel']
-    > [data-part='body']
-    > [data-ui='container']
-    > [data-part='columns']
-    > [data-part='aside'] {
+  [data-ui-detail-panel]
+    > [data-part-body]
+    > [data-ui-container]
+    > [data-part-columns]
+    > [data-part-aside] {
     border-block-start: var(--_rule-size) solid var(--_rule);
     min-inline-size: 0;
     overflow-wrap: anywhere;
@@ -162,40 +162,40 @@
    * as an edge of the aside.
    */
   @container detail-panel (min-width: 600px) {
-    [data-ui='detail-panel'] > [data-part='body'] > [data-ui='container'] > [data-part='columns'] {
+    [data-ui-detail-panel] > [data-part-body] > [data-ui-container] > [data-part-columns] {
       grid-template-columns: minmax(0, 1fr) var(--_aside-size);
     }
 
-    [data-ui='detail-panel'][data-aside='start']
-      > [data-part='body']
-      > [data-ui='container']
-      > [data-part='columns'] {
+    [data-ui-detail-panel][data-aside='start']
+      > [data-part-body]
+      > [data-ui-container]
+      > [data-part-columns] {
       grid-template-columns: var(--_aside-size) minmax(0, 1fr);
     }
 
-    [data-ui='detail-panel'][data-aside='none']
-      > [data-part='body']
-      > [data-ui='container']
-      > [data-part='columns'] {
+    [data-ui-detail-panel][data-aside='none']
+      > [data-part-body]
+      > [data-ui-container]
+      > [data-part-columns] {
       grid-template-columns: minmax(0, 1fr);
     }
 
-    [data-ui='detail-panel']
-      > [data-part='body']
-      > [data-ui='container']
-      > [data-part='columns']
-      > [data-part='aside'] {
+    [data-ui-detail-panel]
+      > [data-part-body]
+      > [data-ui-container]
+      > [data-part-columns]
+      > [data-part-aside] {
       border-block-start: 0;
       border-inline-start: var(--_rule-size) solid var(--_rule);
       padding-block-start: 0;
       padding-inline-start: var(--_gap);
     }
 
-    [data-ui='detail-panel'][data-aside='start']
-      > [data-part='body']
-      > [data-ui='container']
-      > [data-part='columns']
-      > [data-part='aside'] {
+    [data-ui-detail-panel][data-aside='start']
+      > [data-part-body]
+      > [data-ui-container]
+      > [data-part-columns]
+      > [data-part-aside] {
       border-inline-end: var(--_rule-size) solid var(--_rule);
       border-inline-start: 0;
       order: -1;
@@ -211,12 +211,12 @@
    * chrome rather than behind it: the page-header republishes where its
    * chrome ends, and the section reads it.
    */
-  [data-ui='detail-panel']
-    > [data-part='body']
-    > [data-ui='container']
-    > [data-part='columns']
-    > [data-part='main']
-    > [data-part='section'] {
+  [data-ui-detail-panel]
+    > [data-part-body]
+    > [data-ui-container]
+    > [data-part-columns]
+    > [data-part-main]
+    > [data-part-section] {
     min-inline-size: 0;
     scroll-margin-block-start: var(--slotted-page-sticky-top, 0px);
   }
@@ -226,12 +226,12 @@
    * `[hidden]` carries `display: none` from the user-agent sheet at a
    * specificity any rule here would beat, so the attribute is restated.
    */
-  [data-ui='detail-panel']
-    > [data-part='body']
-    > [data-ui='container']
-    > [data-part='columns']
-    > [data-part='main']
-    > [data-part='section'][hidden] {
+  [data-ui-detail-panel]
+    > [data-part-body]
+    > [data-ui-container]
+    > [data-part-columns]
+    > [data-part-main]
+    > [data-part-section][hidden] {
     display: none;
   }
 
@@ -241,12 +241,12 @@
    * own panel: the section holds the consumer's content and has no inset of
    * its own, so an inset ring would be drawn through its first line.
    */
-  [data-ui='detail-panel']
-    > [data-part='body']
-    > [data-ui='container']
-    > [data-part='columns']
-    > [data-part='main']
-    > [data-part='section'][role='tabpanel']:focus-visible {
+  [data-ui-detail-panel]
+    > [data-part-body]
+    > [data-ui-container]
+    > [data-part-columns]
+    > [data-part-main]
+    > [data-part-section][role='tabpanel']:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
@@ -257,12 +257,12 @@
    * panel, because the section is the thing that changed. Under `stacked`
    * nothing arrives, so nothing moves.
    */
-  [data-ui='detail-panel'][data-layout='tabs']
-    > [data-part='body']
-    > [data-ui='container']
-    > [data-part='columns']
-    > [data-part='main']
-    > [data-part='section']:not([hidden]) {
+  [data-ui-detail-panel][data-layout='tabs']
+    > [data-part-body]
+    > [data-ui-container]
+    > [data-part-columns]
+    > [data-part-main]
+    > [data-part-section]:not([hidden]) {
     animation: slotted-detail-panel-section-in var(--slotted-duration-short)
       var(--slotted-easing-enter);
   }
@@ -278,13 +278,13 @@
    * own controls sit in a row at the inline end, above the content, where a
    * stacked section's actions column would have put them.
    */
-  [data-ui='detail-panel']
-    > [data-part='body']
-    > [data-ui='container']
-    > [data-part='columns']
-    > [data-part='main']
-    > [data-part='section']
-    > [data-part='section-actions'] {
+  [data-ui-detail-panel]
+    > [data-part-body]
+    > [data-ui-container]
+    > [data-part-columns]
+    > [data-part-main]
+    > [data-part-section]
+    > [data-part-section-actions] {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -301,7 +301,7 @@
    * the header: four of the largest space step, which is the height of a
    * short record.
    */
-  [data-ui='detail-panel'] > [data-part='body'] > [data-ui='container'] > [data-part='message'] {
+  [data-ui-detail-panel] > [data-part-body] > [data-ui-container] > [data-part-message] {
     display: grid;
     min-block-size: calc(4 * var(--slotted-space-12, 4rem));
     min-inline-size: 0;
@@ -317,7 +317,7 @@
    * than its host, and the container inside aligns its actions with the
    * column above.
    */
-  [data-ui='detail-panel'] > [data-part='footer'] {
+  [data-ui-detail-panel] > [data-part-footer] {
     background-color: var(--_ground);
     border-block-start: var(--_rule-size) solid var(--_rule);
     inset-block-end: var(--slotted-page-sticky-bottom, 0px);

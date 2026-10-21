@@ -45,7 +45,9 @@ export type GridJustify = 'start' | 'center' | 'end' | 'stretch';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'grid',
+    'data-ui-grid': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-gap]': 'gap() ?? null',
     '[attr.data-columns]': 'columns() ?? null',
     '[attr.data-min-item-width]': 'minItemWidth() ?? null',

@@ -89,7 +89,7 @@ export interface SlSegmentedControlSegment {
   standalone: true,
   exportAs: 'slSegmentedControl',
   template: `@if (checkedIndex() >= 0) {
-      <span data-part="indicator" aria-hidden="true"></span>
+      <span data-part="indicator" data-part-indicator="" aria-hidden="true"></span>
     }
     <ng-content />`,
   styleUrl: '../../../styles/src/segmented-control/segmented-control.css',
@@ -101,7 +101,9 @@ export interface SlSegmentedControlSegment {
   ],
   host: {
     'data-ui': 'segmented-control',
+    'data-ui-segmented-control': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'resolvedRole()',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-orientation]': 'resolvedOrientation()',

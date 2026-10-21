@@ -7,6 +7,7 @@ import { createFilterGroupPredicate, ruleFor, withoutRuleFor } from '@slotted/co
 import type { FilterDescriptor } from '@slotted/core/filter';
 import {
   applyQuery,
+  groupInOrder,
   cellText,
   cellValue,
   columnsOutOfSpace,
@@ -87,9 +88,12 @@ import {
   DataGridSummary,
 } from './data-grid-body';
 import {
+  createDataGridRowStore,
   DataGridInternalContext,
+  DataGridRowStoreContext,
   type ColumnMenuAnchor,
   type DataGridInternal,
+  type DataGridRowStore,
   type EditSession,
 } from './data-grid-context';
 import { useDataGridDefaults } from './data-grid-defaults';
@@ -233,6 +237,8 @@ export function DataGrid<Row>({
   highlightChanges,
   labelledBy,
   loadMoreThreshold,
+  loadMoreTrigger,
+  loadMoreFailed,
   loading: givenLoading,
   locale,
   messages,
@@ -313,6 +319,7 @@ export function DataGrid<Row>({
   const resolvedOverscan = overscan ?? defaults.overscan ?? 6;
   const resolvedDebounce = filterDebounce ?? defaults.filterDebounce ?? 300;
   const resolvedThreshold = loadMoreThreshold ?? defaults.loadMoreThreshold ?? 20;
+  const resolvedLoadMore = loadMoreTrigger ?? defaults.loadMoreTrigger ?? 'scroll';
   const resolvedSkeleton = skeletonRows ?? defaults.skeletonRows ?? 8;
   const resolvedLocale = locale ?? providedLocale;
   const resolvedActivatable = activatable ?? false;
@@ -569,18 +576,16 @@ export function DataGrid<Row>({
   const result = useMemo(() => {
     const rows = bodyRows;
     if (resolvedMode === 'server') {
-      const nodes: GridNode<Row>[] = rows.map((row, index) => ({
-        kind: 'row',
-        key: rowKeyOf(row),
-        row,
-        index:
-          (query.page && 'index' in query.page ? query.page.index * query.page.size : 0) + index,
-        groups: [],
-        level: 1,
-        parent: null,
-        childCount: 0,
-        open: false,
-      }));
+      /* Sorted, filtered and paged by the server; grouped here, in the order
+         the rows came, so a page ordered by date shows its days. */
+      const nodes = groupInOrder(rows, columns, query.group, {
+        rowKey: rowKeyOf,
+        expandedGroups,
+        offset: query.page && 'index' in query.page ? query.page.index * query.page.size : 0,
+        locale: resolvedLocale,
+        timeZone,
+        booleans: formatOptions.booleans,
+      });
       return {
         nodes,
         rows,
@@ -1939,9 +1944,11 @@ export function DataGrid<Row>({
     [resolvedRowHeight, measuredRow, autoRows, remeasure],
   );
 
-  /* Load more when the window nears the end. */
+  /* Load more when the window nears the end, unless only the control asks, or
+     the last page failed and a retry is the reader's to press. */
   useEffect(() => {
     if (!onLoadMore || !hasMore || loading) return;
+    if (resolvedLoadMore === 'button' || loadMoreFailed === true) return;
     const remaining = nodes.length - rowWindow.endIndex;
     if (
       windowsRows
@@ -1955,6 +1962,8 @@ export function DataGrid<Row>({
     onLoadMore,
     hasMore,
     loading,
+    resolvedLoadMore,
+    loadMoreFailed,
     nodes.length,
     rowWindow.endIndex,
     windowsRows,
@@ -2917,6 +2926,12 @@ export function DataGrid<Row>({
     ],
   );
 
+  /* Body rows read the grid through this store rather than the context, so a
+     selection click or a scroll step renders only the rows it changed. */
+  const [rowStore] = useState(() => createDataGridRowStore(internal));
+  rowStore.set(internal);
+  useLayoutEffect(() => rowStore.publish(), [internal, rowStore]);
+
   const rootStyle = {
     ...style,
     '--slotted-data-grid-template': template,
@@ -2949,6 +2964,37 @@ export function DataGrid<Row>({
     return total === null || total < 0
       ? t('rangeUnknown', { start, end: last })
       : t('range', { start, end: last, total });
+  })();
+
+  /**
+   * What the footer offers for the next page. Under `scroll` the request is
+   * automatic: a quiet status while the page loads, and a retry only once one
+   * failed. A Load more control beside a list that loads itself read as a
+   * control with no purpose.
+   */
+  const moreControl = (() => {
+    if (!hasMore || !onLoadMore) return null;
+    const offersControl = resolvedLoadMore !== 'scroll' || loadMoreFailed === true;
+    if (!offersControl) {
+      return loading === true ? (
+        <span data-loading-more="" role="status">
+          {t('loadingMore')}
+        </span>
+      ) : null;
+    }
+    return (
+      <div>
+        <Button
+          disabled={loading === true}
+          onClick={() => onLoadMore()}
+          size="sm"
+          tone="secondary"
+          variant="outline"
+        >
+          {loadMoreFailed === true ? t('retry') : t('loadMore')}
+        </Button>
+      </div>
+    );
   })();
 
   const emptyContent = (() => {
@@ -2991,135 +3037,129 @@ export function DataGrid<Row>({
   })();
 
   return (
-    <DataGridInternalContext.Provider value={internal as DataGridInternal<unknown>}>
-      <div
-        {...nativeProps}
-        aria-busy={loading && rows.length > 0 ? true : undefined}
-        aria-colcount={ariaColCount}
-        aria-label={nativeProps['aria-label'] ?? (labelledBy ? undefined : t('grid'))}
-        aria-labelledby={labelledBy}
-        aria-multiselectable={
-          resolvedSelection === 'multiple' || resolvedSelection === 'range' ? true : undefined
-        }
-        aria-rowcount={
-          (total === null ? -1 : total) +
-          pinned.top.length +
-          pinned.bottom.length +
-          headerRowCount +
-          (hasSummary ? 1 : 0)
-        }
-        data-part="root"
-        data-popin={hasPopin ? outOfSpace.popin.length : undefined}
-        data-rows={autoRows ? 'auto' : 'fixed'}
-        data-slotted-density={density ?? undefined}
-        data-ui="data-grid"
-        data-variant={resolvedVariant}
-        onBlur={onRootBlur}
-        onKeyDown={(event) => {
-          onKeyDown?.(event);
-          if (event.defaultPrevented) return;
-          if (drag.current?.handleKeydown(event.nativeEvent)) return;
-          rowDrag.current?.handleKeydown(event.nativeEvent);
-        }}
-        ref={attachRoot}
-        role={tree ? 'treegrid' : 'grid'}
-        style={rootStyle}
-        {...(resolvedStriped ? { 'data-striped': '' } : {})}
-        {...(resolvedSticky ? { 'data-sticky-header': '' } : {})}
-        {...(resolvedFilterRow ? { 'data-filter-row': '' } : {})}
-        {...(resolvedStickyTo === 'page' ? { 'data-sticky-to': 'page' } : {})}
-        {...(resolvedSelection === 'none' ? {} : { 'data-selection': resolvedSelection })}
-      >
-        <div data-part="scroll" ref={scroll}>
-          <DataGridHead<Row> columnGroups={columnGroups} headerRowCount={headerRowCount} />
-          {pinned.top.length > 0 ? (
-            <DataGridPinnedRows<Row>
-              edge="top"
-              firstRowIndex={headerRowCount + 1}
-              nodes={pinned.top}
-            />
-          ) : null}
-          {status === 'loading' ? (
-            <DataGridLoader<Row> rowSize={rowSize} rows={skeletonCount} />
-          ) : (
-            <DataGridBody<Row>
-              bodyStyle={bodyStyle}
-              firstIndex={windowsRows ? rowWindow.startIndex : 0}
-              headerRowCount={headerRowCount + pinned.top.length}
-              measureRow={autoRows || measuredRow === null ? measureRow : undefined}
-              nodes={mountedNodes}
-              heldRows={heldRows}
-              allNodes={nodes}
-            />
-          )}
-          {emptyContent !== null && status !== 'loading' ? (
-            <DataGridEmpty>{emptyContent}</DataGridEmpty>
-          ) : null}
-          {pinned.bottom.length > 0 ? (
-            <DataGridPinnedRows<Row>
-              edge="bottom"
-              firstRowIndex={headerRowCount + pinned.top.length + (total ?? nodes.length) + 1}
-              nodes={pinned.bottom}
-            />
-          ) : null}
-          {hasSummary && status === 'rows' ? (
-            <DataGridSummary<Row>
-              aggregates={result.aggregates}
-              rowIndex={
-                headerRowCount +
-                pinned.top.length +
-                (total ?? nodes.length) +
-                pinned.bottom.length +
-                1
-              }
-            />
-          ) : null}
-          {dragState.offset !== null ? (
-            <div
-              aria-hidden
-              data-part="drop-indicator"
-              style={
-                {
-                  '--slotted-data-grid-drop-offset': `${dragState.offset}px`,
-                  '--slotted-data-grid-drop-scroll': `${dragState.scrollTop}px`,
-                } as CSSProperties
-              }
-            />
-          ) : null}
-          {rowDragState.offset !== null ? (
-            <div
-              aria-hidden
-              data-axis="row"
-              data-part="drop-indicator"
-              style={
-                {
-                  '--slotted-data-grid-drop-offset': `${rowDragState.offset}px`,
-                  '--slotted-data-grid-drop-scroll': `${rowDragState.scrollLeft}px`,
-                } as CSSProperties
-              }
-            />
-          ) : null}
-        </div>
-        {footer !== undefined || rangeText !== null || (hasMore && onLoadMore) ? (
-          <div data-part="footer">
-            {rangeText !== null ? <span data-range="">{rangeText}</span> : null}
-            {footer}
-            {hasMore && onLoadMore && footer === undefined ? (
-              <div>
-                <Button
-                  disabled={loading === true}
-                  onClick={() => onLoadMore()}
-                  size="sm"
-                  tone="secondary"
-                  variant="outline"
-                >
-                  {t('loadMore')}
-                </Button>
-              </div>
+    <DataGridInternalContext.Provider value={rowStore.grid as DataGridInternal<unknown>}>
+      <DataGridRowStoreContext.Provider value={rowStore as DataGridRowStore<unknown>}>
+        <div
+          {...nativeProps}
+          aria-busy={loading && rows.length > 0 ? true : undefined}
+          aria-colcount={ariaColCount}
+          aria-label={nativeProps['aria-label'] ?? (labelledBy ? undefined : t('grid'))}
+          aria-labelledby={labelledBy}
+          aria-multiselectable={
+            resolvedSelection === 'multiple' || resolvedSelection === 'range' ? true : undefined
+          }
+          aria-rowcount={
+            (total === null ? -1 : total) +
+            pinned.top.length +
+            pinned.bottom.length +
+            headerRowCount +
+            (hasSummary ? 1 : 0)
+          }
+          data-part="root"
+          data-part-root=""
+          data-popin={hasPopin ? outOfSpace.popin.length : undefined}
+          data-rows={autoRows ? 'auto' : 'fixed'}
+          data-slotted-density={density ?? undefined}
+          data-ui="data-grid"
+          data-ui-data-grid=""
+          data-variant={resolvedVariant}
+          onBlur={onRootBlur}
+          onKeyDown={(event) => {
+            onKeyDown?.(event);
+            if (event.defaultPrevented) return;
+            if (drag.current?.handleKeydown(event.nativeEvent)) return;
+            rowDrag.current?.handleKeydown(event.nativeEvent);
+          }}
+          ref={attachRoot}
+          role={tree ? 'treegrid' : 'grid'}
+          style={rootStyle}
+          {...(resolvedStriped ? { 'data-striped': '' } : {})}
+          {...(resolvedSticky ? { 'data-sticky-header': '' } : {})}
+          {...(resolvedFilterRow ? { 'data-filter-row': '' } : {})}
+          {...(resolvedStickyTo === 'page' ? { 'data-sticky-to': 'page' } : {})}
+          {...(resolvedSelection === 'none' ? {} : { 'data-selection': resolvedSelection })}
+        >
+          <div data-part="scroll" data-part-scroll="" ref={scroll}>
+            <DataGridHead<Row> columnGroups={columnGroups} headerRowCount={headerRowCount} />
+            {pinned.top.length > 0 ? (
+              <DataGridPinnedRows<Row>
+                edge="top"
+                firstRowIndex={headerRowCount + 1}
+                nodes={pinned.top}
+              />
+            ) : null}
+            {status === 'loading' ? (
+              <DataGridLoader<Row> rowSize={rowSize} rows={skeletonCount} />
+            ) : (
+              <DataGridBody<Row>
+                bodyStyle={bodyStyle}
+                firstIndex={windowsRows ? rowWindow.startIndex : 0}
+                headerRowCount={headerRowCount + pinned.top.length}
+                measureRow={autoRows || measuredRow === null ? measureRow : undefined}
+                nodes={mountedNodes}
+                heldRows={heldRows}
+                allNodes={nodes}
+              />
+            )}
+            {emptyContent !== null && status !== 'loading' ? (
+              <DataGridEmpty>{emptyContent}</DataGridEmpty>
+            ) : null}
+            {pinned.bottom.length > 0 ? (
+              <DataGridPinnedRows<Row>
+                edge="bottom"
+                firstRowIndex={headerRowCount + pinned.top.length + (total ?? nodes.length) + 1}
+                nodes={pinned.bottom}
+              />
+            ) : null}
+            {hasSummary && status === 'rows' ? (
+              <DataGridSummary<Row>
+                aggregates={result.aggregates}
+                rowIndex={
+                  headerRowCount +
+                  pinned.top.length +
+                  (total ?? nodes.length) +
+                  pinned.bottom.length +
+                  1
+                }
+              />
+            ) : null}
+            {dragState.offset !== null ? (
+              <div
+                aria-hidden
+                data-part="drop-indicator"
+                data-part-drop-indicator=""
+                style={
+                  {
+                    '--slotted-data-grid-drop-offset': `${dragState.offset}px`,
+                    '--slotted-data-grid-drop-scroll': `${dragState.scrollTop}px`,
+                  } as CSSProperties
+                }
+              />
+            ) : null}
+            {rowDragState.offset !== null ? (
+              <div
+                aria-hidden
+                data-axis="row"
+                data-part="drop-indicator"
+                data-part-drop-indicator=""
+                style={
+                  {
+                    '--slotted-data-grid-drop-offset': `${rowDragState.offset}px`,
+                    '--slotted-data-grid-drop-scroll': `${rowDragState.scrollLeft}px`,
+                  } as CSSProperties
+                }
+              />
             ) : null}
           </div>
-        ) : null}
-      </div>
+          {footer !== undefined || rangeText !== null || moreControl !== null ? (
+            <div data-part="footer" data-part-footer="">
+              {rangeText !== null ? <span data-range="">{rangeText}</span> : null}
+              {footer}
+              {footer === undefined ? moreControl : null}
+            </div>
+          ) : null}
+        </div>
+      </DataGridRowStoreContext.Provider>
     </DataGridInternalContext.Provider>
   );
 }

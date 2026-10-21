@@ -16,8 +16,8 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
-const root = `${ui}[data-part='root']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
+const root = `${ui}[data-part-root]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -41,7 +41,7 @@ test('is selected by the identifier the contract declares', () => {
  */
 test('reaches its parts through the anatomy’s chain, never into a nested family', () => {
   /* `normalized` drops the space before a colon, and that space is the
-     combinator in `[data-ui='list-item'] :is(…)`. This pass keeps it. */
+     combinator in `[data-ui-list-item] :is(…)`. This pass keeps it. */
   const spaced = declarations
     .replace(/\s+/g, ' ')
     .replace(/\s*([{};,>+~])\s*/g, '$1')
@@ -72,16 +72,16 @@ test('reaches its parts through the anatomy’s chain, never into a nested famil
     return false;
   });
   assert.deepEqual(descendant, [], 'a descendant combinator reaches past the row’s own parts');
-  const content = `${ui}>[data-part='content']`;
+  const content = `${ui}>[data-part-content]`;
   for (const part of ['start', 'body', 'end']) {
     assert.ok(
-      normalized.includes(`${content}>[data-part='${part}']{`),
+      normalized.includes(`${content}>[data-part-${part.toLowerCase()}]{`),
       `${part} is not content’s child`,
     );
   }
   for (const part of ['label', 'description']) {
     assert.ok(
-      normalized.includes(`${content}>[data-part='body']>[data-part='${part}']{`),
+      normalized.includes(`${content}>[data-part-body]>[data-part-${part.toLowerCase()}]{`),
       `${part} is not body’s child`,
     );
   }
@@ -95,9 +95,7 @@ test('reaches its parts through the anatomy’s chain, never into a nested famil
  * chooser's own square, fixed across densities as the chooser is (CK1).
  */
 test('stands a chooser in the leading column on the title’s first line', () => {
-  const chooser = rule(
-    `${ui}>[data-part='content']>[data-part='start']:has(>[data-ui='checkbox'])`,
-  );
+  const chooser = rule(`${ui}>[data-part-content]>[data-part-start]:has(>[data-ui-checkbox])`);
   assert.match(chooser, /align-items:start/);
   assert.match(chooser, /inline-size:var\(--_control-size\)/);
   assert.match(
@@ -121,7 +119,7 @@ test('stands a chooser in the leading column on the title’s first line', () =>
     );
   }
   /* The gap beside the chooser is the row's own control gap, nothing added. */
-  const start = rule(`${ui}>[data-part='content']>[data-part='start']`);
+  const start = rule(`${ui}>[data-part-content]>[data-part-start]`);
   assert.match(start, /margin-inline-end:var\(--_gap\)/);
   assert.doesNotMatch(chooser, /margin-inline|padding-inline/);
 });
@@ -155,7 +153,7 @@ test('is one control height tall per density, with one inline inset per density'
       /--_min-block:var\(--slotted-list-item-min-block-size-/,
     );
   }
-  const content = rule(`${ui}>[data-part='content']`);
+  const content = rule(`${ui}>[data-part-content]`);
   assert.match(content, /min-block-size:var\(--_min-block\)/);
   assert.match(content, /padding-block:var\(--_pad-block\)/);
   assert.match(content, /padding-inline:var\(--_pad-inline\)/);
@@ -166,12 +164,12 @@ test('draws the leading visual at the control glyph size in the row’s own ink,
     rule(root),
     /--_icon-size:var\(--slotted-list-item-icon-size,var\(--slotted-control-icon-size-md,16px\)\)/,
   );
-  const start = rule(`${ui}>[data-part='content']>[data-part='start']`);
+  const start = rule(`${ui}>[data-part-content]>[data-part-start]`);
   assert.match(start, /color:var\(--_text\)/);
   assert.match(start, /min-inline-size:var\(--_icon-size\)/);
   assert.doesNotMatch(start, /background|border-radius/);
   assert.match(
-    rule(`${ui}>[data-part='content']>[data-part='body']>[data-part='description']`),
+    rule(`${ui}>[data-part-content]>[data-part-body]>[data-part-description]`),
     /color:var\(--_muted\)/,
   );
   assert.match(
@@ -179,7 +177,7 @@ test('draws the leading visual at the control glyph size in the row’s own ink,
     /--_muted:var\(--slotted-list-item-color-muted,var\(--slotted-text-muted,GrayText\)\)/,
   );
   assert.match(
-    rule(`${ui}>[data-part='content']>[data-part='body']`),
+    rule(`${ui}>[data-part-content]>[data-part-body]`),
     /row-gap:var\(--slotted-list-item-body-gap,var\(--slotted-space-1,0\.125rem\)\)/,
   );
 });
@@ -260,7 +258,7 @@ test('paints hover, active, selected, focus-visible and disabled as five differe
     'selected does not lay the accent ground',
   );
   assert.match(
-    rule(`${ui}>[data-part='content']:focus-visible`),
+    rule(`${ui}>[data-part-content]:focus-visible`),
     /outline:var\(--slotted-focus-ring-width,2px\) solid var\(--slotted-focus-ring-color,Highlight\)/,
   );
   assert.match(rule(`${ui}[data-disabled]`), /--_text:/);
@@ -275,19 +273,19 @@ test('paints hover, active, selected, focus-visible and disabled as five differe
  * stood twenty-six pixels wider than the row.
  */
 test('yields at 240px: the content shrinks and the actions take a line that fits', () => {
-  assert.match(rule(`${ui}>[data-part='content']`), /min-inline-size:0/);
-  assert.match(rule(`${ui}>[data-part='content']>[data-part='body']`), /min-inline-size:0/);
-  const actions = rule(`${ui}>[data-part='actions']`);
+  assert.match(rule(`${ui}>[data-part-content]`), /min-inline-size:0/);
+  assert.match(rule(`${ui}>[data-part-content]>[data-part-body]`), /min-inline-size:0/);
+  const actions = rule(`${ui}>[data-part-actions]`);
   assert.match(actions, /box-sizing:border-box/);
   const narrow = normalized.split('@container slotted-list-item (max-inline-size:22rem){')[1] ?? '';
   assert.match(
-    narrow.split(`${ui}>[data-part='actions']{`)[1]?.split('}')[0] ?? '',
+    narrow.split(`${ui}>[data-part-actions]{`)[1]?.split('}')[0] ?? '',
     /flex-basis:100%/,
     'the actions do not take their own line below the breakpoint',
   );
   /* A pair of glyph targets is narrower than the visual: it keeps its line. */
   const glyphs =
-    narrow.split(`${ui}>[data-part='actions']:not(:has(>:not([data-shape]))){`)[1]?.split('}')[0] ??
+    narrow.split(`${ui}>[data-part-actions]:not(:has(>:not([data-shape]))){`)[1]?.split('}')[0] ??
     '';
   assert.match(glyphs, /flex-basis:auto/, 'icon-only targets take a line of their own');
   assert.match(glyphs, /padding-block-end:0/);

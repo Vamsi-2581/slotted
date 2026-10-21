@@ -52,7 +52,9 @@ const SIZE_OF_LEVEL: Record<HeadingLevelValue, TypographySize> = {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'typography',
+    'data-ui-typography': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-weight]': 'weight()',
     '[attr.data-tone]': 'toneAttribute()',

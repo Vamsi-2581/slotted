@@ -38,7 +38,7 @@ const anatomy: AnatomyRow[] = [
     element: 'the header carrying slPageHeader',
     required: true,
     purpose:
-      'The family: sticky with a negative offset the size of the header area, carrying data-ui="page-header", the four axes, data-expanded, data-revealed, data-loading and the measured facts data-scrolled, data-stuck and data-compact. Below 600 pixels of its own width it carries data-compact, is not sticky and scrolls away with the page. It is its own container, so the rows reflow on its own inline size.',
+      'The family: sticky with a negative offset the size of the header area, carrying data-ui="page-header", the four axes, data-expanded, data-revealed, data-loading and the measured facts data-scrolled, data-stuck and data-compact. In a frame narrower than 600 pixels — a phone — it carries data-compact, is not sticky and scrolls away with the page. It is its own container, so the rows reflow on its own inline size.',
   },
   {
     part: 'title-area',

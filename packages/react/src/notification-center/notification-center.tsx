@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/notification-center/notification-center.css';
 
 import { tabbables } from '@slotted/core/focus';
@@ -195,27 +196,38 @@ function Item({
     context.renderItem === undefined ? (
       <>
         {item.href === undefined ? (
-          <span data-part="title" id={ids.title}>
+          <span data-part="title" data-part-title="" id={ids.title}>
             {item.title}
           </span>
         ) : (
-          <a data-part="title" href={item.href} id={ids.title} onClick={onTitleClick}>
+          <a
+            data-part="title"
+            data-part-title=""
+            href={item.href}
+            id={ids.title}
+            onClick={onTitleClick}
+          >
             {item.title}
           </a>
         )}
         {described ? (
-          <p data-part="description" id={ids.description}>
+          <p data-part="description" data-part-description="" id={ids.description}>
             {item.description}
           </p>
         ) : null}
         <time
           data-part="time"
+          data-part-time=""
           dateTime={time.dateTime}
           {...(time.title === null ? {} : { title: time.title })}
         >
           {time.text}
         </time>
-        {presentNode(item.actions) ? <div data-part="actions">{item.actions}</div> : null}
+        {presentNode(item.actions) ? (
+          <div data-part="actions" data-part-actions="">
+            {item.actions}
+          </div>
+        ) : null}
       </>
     ) : (
       context.renderItem(item, state)
@@ -232,12 +244,13 @@ function Item({
       aria-setsize={context.setSize}
       data-key={item.key}
       data-part="item"
+      data-part-item=""
       {...(item.read ? { 'data-read': '' } : {})}
       data-tone={tone}
       tabIndex={0}
     >
       {presentNode(item.visual) || item.tone !== undefined ? (
-        <span data-part="visual" data-tone={item.tone}>
+        <span data-part="visual" data-part-visual="" data-tone={item.tone}>
           {presentNode(item.visual) ? (
             item.visual
           ) : (
@@ -248,12 +261,15 @@ function Item({
           )}
         </span>
       ) : null}
-      <div data-part="content">{content}</div>
+      <div data-part="content" data-part-content="">
+        {content}
+      </div>
       {readToggle || dismiss ? (
-        <div data-part="controls">
+        <div data-part="controls" data-part-controls="">
           {readToggle ? (
             <Control
               data-part="read-toggle"
+              data-part-read-toggle=""
               onClick={(event) => context.onRead([item.key], !item.read, pressReason(event), event)}
               text={item.read ? context.t('markUnread') : context.t('markRead')}
             >
@@ -266,6 +282,7 @@ function Item({
           {dismiss ? (
             <Control
               data-part="dismiss"
+              data-part-dismiss=""
               onClick={(event) =>
                 context.onRemove?.(item.key, createRequest(pressReason(event), event))
               }
@@ -646,16 +663,20 @@ export function NotificationCenter({
   const GroupHeading = `h${Math.min(Number(resolvedLevel) + 1, 6)}` as 'h3' | 'h4' | 'h5';
 
   const waiting = loading && visibleItems.length === 0;
-  const chip = (value: number) => <span data-part="count">{value}</span>;
+  const chip = (value: number) => (
+    <span data-part="count" data-part-count="">
+      {value}
+    </span>
+  );
 
   const renderRows = () => {
     if (waiting) {
       return Array.from({ length: WAITING_ROWS }, (_, index) => (
-        <div aria-hidden="true" data-part="item" key={index}>
-          <span data-part="visual">
+        <div aria-hidden="true" data-part="item" data-part-item="" key={index}>
+          <span data-part="visual" data-part-visual="">
             <Skeleton shape="circle" size="sm" />
           </span>
-          <div data-part="content">
+          <div data-part="content" data-part-content="">
             <SkeletonText lines={2} />
           </div>
         </div>
@@ -668,8 +689,10 @@ export function NotificationCenter({
     }
     let position = 0;
     return groupItems(visibleItems, groupBy).map((group, index) => (
-      <div data-part="group" key={index}>
-        <GroupHeading data-part="group-label">{group.label}</GroupHeading>
+      <div data-part="group" data-part-group="" key={index}>
+        <GroupHeading data-part="group-label" data-part-group-label="">
+          {group.label}
+        </GroupHeading>
         {group.items.map((item) => (
           <Item context={itemContext} item={item} key={item.key} position={++position} />
         ))}
@@ -679,12 +702,18 @@ export function NotificationCenter({
 
   const more =
     resolvedGrowing === 'none' ? null : loading && !waiting ? (
-      <div aria-live="polite" data-part="more" ref={moreRef as RefObject<HTMLDivElement>}>
+      <div
+        aria-live="polite"
+        data-part="more"
+        data-part-more=""
+        ref={moreRef as RefObject<HTMLDivElement>}
+      >
         {t('loading')}
       </div>
     ) : resolvedGrowing === 'button' ? (
       <button
         data-part="more"
+        data-part-more=""
         onClick={(event) => onLoadMore?.(createRequest(pressReason(event), event))}
         ref={moreRef as RefObject<HTMLButtonElement>}
         type="button"
@@ -692,24 +721,24 @@ export function NotificationCenter({
         {t('loadMore')}
       </button>
     ) : (
-      <div data-part="more" ref={moreRef as RefObject<HTMLDivElement>} />
+      <div data-part="more" data-part-more="" ref={moreRef as RefObject<HTMLDivElement>} />
     );
 
   const showEmpty = !waiting && visibleItems.length === 0;
 
-  const rootProps: NotificationCenterRootProps = {
+  const rootProps: NotificationCenterRootProps = keyedProps({
     ...nativeProps,
     ...(ariaLabel !== undefined
       ? { 'aria-label': ariaLabel }
       : { 'aria-labelledby': ariaLabelledby ?? titleId }),
     children: (
       <>
-        <div data-part="header">
-          <Heading data-part="title" id={titleId}>
+        <div data-part="header" data-part-header="">
+          <Heading data-part="title" data-part-title="" id={titleId}>
             {t('title')}
             {unread > 0 ? <> {chip(unread)}</> : null}
           </Heading>
-          <span data-part="mark-all">
+          <span data-part="mark-all" data-part-mark-all="">
             <Button
               disabled={unread === 0}
               onClick={(event) =>
@@ -727,10 +756,14 @@ export function NotificationCenter({
               {t('markAll')}
             </Button>
           </span>
-          {presentNode(actions) ? <div data-part="actions">{actions}</div> : null}
+          {presentNode(actions) ? (
+            <div data-part="actions" data-part-actions="">
+              {actions}
+            </div>
+          ) : null}
         </div>
         {resolvedViews.length > 1 ? (
-          <div data-part="views">
+          <div data-part="views" data-part-views="">
             <Tabs
               onValueChange={(value: string, request: TabsChangeRequest) =>
                 selectView(value, request.reason as NotificationCenterViewReason, request.source)
@@ -755,6 +788,7 @@ export function NotificationCenter({
         {held.length > 0 ? (
           <button
             data-part="fresh"
+            data-part-fresh=""
             onClick={(event) => reveal(pressReason(event), event)}
             ref={freshRef}
             type="button"
@@ -766,6 +800,7 @@ export function NotificationCenter({
           aria-busy={loading ? true : undefined}
           aria-labelledby={titleId}
           data-part="feed"
+          data-part-feed=""
           id={feedId}
           ref={feedRef}
           role="feed"
@@ -773,13 +808,17 @@ export function NotificationCenter({
           {renderRows()}
         </div>
         {showEmpty ? (
-          <div data-part="empty">
+          <div data-part="empty" data-part-empty="">
             {empty ?? (currentView === 'unread' ? t('caughtUp') : t('empty'))}
           </div>
         ) : (
           more
         )}
-        {presentNode(footer) ? <div data-part="footer">{footer}</div> : null}
+        {presentNode(footer) ? (
+          <div data-part="footer" data-part-footer="">
+            {footer}
+          </div>
+        ) : null}
       </>
     ),
     className,
@@ -795,7 +834,7 @@ export function NotificationCenter({
     'data-view': currentView,
     onKeyDown: handleKeyDown,
     style,
-  };
+  });
 
   return render === undefined ? (
     <section {...rootProps} ref={setRoot} />

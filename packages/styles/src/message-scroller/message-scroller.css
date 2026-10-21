@@ -9,7 +9,7 @@
    * `data-scrollable`, `data-following`, `data-pending` and
    * `--slotted-message-scroller-room` — and draws nothing the engine decides.
    */
-  [data-ui='message-scroller'][data-part='root'] {
+  [data-ui-message-scroller][data-part-root] {
     --_inset: var(--slotted-message-scroller-padding, var(--slotted-space-6, 1rem));
     /**
      * The gap between two runs of a conversation. Twenty at comfortable, the
@@ -33,7 +33,7 @@
     font-family: var(--slotted-font-family-sans, sans-serif);
   }
 
-  [data-ui='message-scroller'] [data-part='viewport'] {
+  [data-ui-message-scroller] [data-part-viewport] {
     /* The rows' offset parent, so the engine reads their layout offset rather than a rectangle an entrance has moved. */
     position: relative;
     flex: 1 1 auto;
@@ -57,16 +57,16 @@
    * An edge the reader can still scroll toward fades the rows into it, so a
    * row cut by the frame reads as continuing rather than as ending there.
    */
-  [data-ui='message-scroller'] [data-part='viewport'][data-scrollable~='start'] {
+  [data-ui-message-scroller] [data-part-viewport][data-scrollable~='start'] {
     mask-image: linear-gradient(to bottom, transparent, #000 var(--_fade));
   }
 
-  [data-ui='message-scroller'] [data-part='viewport'][data-scrollable~='end'] {
+  [data-ui-message-scroller] [data-part-viewport][data-scrollable~='end'] {
     mask-image: linear-gradient(to top, transparent, #000 var(--_fade));
   }
 
-  [data-ui='message-scroller']
-    [data-part='viewport'][data-scrollable~='start'][data-scrollable~='end'] {
+  [data-ui-message-scroller]
+    [data-part-viewport][data-scrollable~='start'][data-scrollable~='end'] {
     mask-image: linear-gradient(
       to bottom,
       transparent,
@@ -81,11 +81,11 @@
    * shows its oldest rows first. The frame stays and the rows wait, laid out,
    * so the engine measures them before the reader sees them.
    */
-  [data-ui='message-scroller'] [data-part='viewport'][data-pending] {
+  [data-ui-message-scroller] [data-part-viewport][data-pending] {
     visibility: hidden;
   }
 
-  [data-ui='message-scroller'] [data-part='viewport']:focus-visible {
+  [data-ui-message-scroller] [data-part-viewport]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -95,7 +95,7 @@
    * holds, where a conversation is read from; the room an anchored turn needs
    * is added under the last one.
    */
-  [data-ui='message-scroller'] [data-part='content'] {
+  [data-ui-message-scroller] [data-part-content] {
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -115,7 +115,7 @@
    * jump on glows in the accent's pointer tint and loses it slowly, so the
    * reader sees where the jump ended.
    */
-  [data-ui='message-scroller'] [data-part='item'] {
+  [data-ui-message-scroller] [data-part-item] {
     min-inline-size: 0;
     border-radius: var(--slotted-radius-md, 6px);
     content-visibility: auto;
@@ -132,7 +132,7 @@
     }
   }
 
-  [data-ui='message-scroller'] [data-part='item'][data-current] {
+  [data-ui-message-scroller] [data-part-item][data-current] {
     background-color: var(--slotted-tone-accent-subtle-hover);
     box-shadow: 0 0 0 var(--slotted-space-3, 0.375rem) var(--slotted-tone-accent-subtle-hover);
   }
@@ -144,7 +144,7 @@
    * does not leave with its first message; its label carries a ground of its
    * own for the rows passing under it.
    */
-  [data-ui='message-scroller'] :is([data-part='separator'], [data-part='unread']) {
+  [data-ui-message-scroller] :is([data-part-separator], [data-part-unread]) {
     display: flex;
     align-items: center;
     gap: var(--slotted-space-4, 0.5rem);
@@ -158,8 +158,8 @@
     );
   }
 
-  [data-ui='message-scroller'] :is([data-part='separator'], [data-part='unread'])::before,
-  [data-ui='message-scroller'] :is([data-part='separator'], [data-part='unread'])::after {
+  [data-ui-message-scroller] :is([data-part-separator], [data-part-unread])::before,
+  [data-ui-message-scroller] :is([data-part-separator], [data-part-unread])::after {
     content: '';
     flex: 1 1 0;
     min-inline-size: var(--slotted-space-6, 1rem);
@@ -171,8 +171,8 @@
    * holds the separator that sticks, not the separator inside it. Each later
    * day stacks over the one before it as it arrives at the top.
    */
-  [data-ui='message-scroller'] [data-part='item']:has(> [data-part='separator'][data-sticky]),
-  [data-ui='message-scroller'] [data-part='separator'][data-sticky]:not([data-part='item'] > *) {
+  [data-ui-message-scroller] [data-part-item]:has(> [data-part-separator][data-sticky]),
+  [data-ui-message-scroller] [data-part-separator][data-sticky]:not([data-part-item] > *) {
     position: sticky;
     inset-block-start: var(--_fade);
     z-index: 1;
@@ -185,20 +185,20 @@
    * label stands below the faded edge so it is read whole. WhatsApp and
    * Telegram float the same pill.
    */
-  [data-ui='message-scroller'] [data-part='separator'][data-sticky]::before,
-  [data-ui='message-scroller'] [data-part='separator'][data-sticky]::after {
+  [data-ui-message-scroller] [data-part-separator][data-sticky]::before,
+  [data-ui-message-scroller] [data-part-separator][data-sticky]::after {
     content: none;
   }
 
-  [data-ui='message-scroller'] [data-part='separator'][data-sticky] {
+  [data-ui-message-scroller] [data-part-separator][data-sticky] {
     justify-content: center;
   }
 
-  [data-ui='message-scroller'] [data-part='separator'][data-sticky] > * {
+  [data-ui-message-scroller] [data-part-separator][data-sticky] > * {
     box-shadow: var(--slotted-shadow-xs);
   }
 
-  [data-ui='message-scroller'] [data-part='separator'] > * {
+  [data-ui-message-scroller] [data-part-separator] > * {
     padding-block: var(--slotted-space-1, 0.125rem);
     padding-inline: var(--slotted-space-4, 0.5rem);
     border: var(--slotted-border-width-thin, 1px) solid var(--slotted-border-subtle);
@@ -206,12 +206,12 @@
     background-color: var(--slotted-surface);
   }
 
-  [data-ui='message-scroller'] [data-part='unread'] {
+  [data-ui-message-scroller] [data-part-unread] {
     color: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='message-scroller'] [data-part='unread']::before,
-  [data-ui='message-scroller'] [data-part='unread']::after {
+  [data-ui-message-scroller] [data-part-unread]::before,
+  [data-ui-message-scroller] [data-part-unread]::after {
     border-block-start-color: var(--slotted-tone-accent-border);
   }
 
@@ -220,7 +220,7 @@
    * Older rows on their way: the shared ring and a line of muted text, at the
    * head of the rows. The ring is `spinner`'s.
    */
-  [data-ui='message-scroller'] [data-part='loader'] {
+  [data-ui-message-scroller] [data-part-loader] {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -230,7 +230,7 @@
     font-size: var(--slotted-control-font-size-md, 13px);
   }
 
-  [data-ui='message-scroller'] [data-part='loader'] > [data-ui='spinner'] {
+  [data-ui-message-scroller] [data-part-loader] > [data-ui-spinner] {
     --slotted-spinner-size: var(--slotted-control-icon-size-sm, 14px);
   }
 
@@ -248,7 +248,7 @@
    * ReUI's leaves in twice the time it arrives (dossier §5). It does not
    * scale: it holds text.
    */
-  [data-ui='message-scroller'] [data-part='jump'] {
+  [data-ui-message-scroller] [data-part-jump] {
     --_size: var(--slotted-message-scroller-jump-size, var(--slotted-control-height-md, 34px));
     --_ground: var(--slotted-surface-raised);
     --_ink: var(--slotted-text);
@@ -286,34 +286,34 @@
       background-color var(--slotted-duration-short) var(--slotted-easing-standard, ease);
   }
 
-  [data-ui='message-scroller'] [data-part='jump']:dir(rtl) {
+  [data-ui-message-scroller] [data-part-jump]:dir(rtl) {
     translate: 50% 0;
   }
 
-  [data-ui='message-scroller'] [data-part='jump'][data-direction='start'] {
+  [data-ui-message-scroller] [data-part-jump][data-direction='start'] {
     inset-block: var(--_inset) auto;
     --_shift: calc(var(--slotted-space-4, 0.5rem) * -1);
   }
 
-  [data-ui='message-scroller'] [data-part='jump'] > [data-ui='icon'] {
+  [data-ui-message-scroller] [data-part-jump] > [data-ui-icon] {
     --slotted-icon-size: var(--slotted-control-icon-size-md, 16px);
 
     rotate: -90deg;
   }
 
-  [data-ui='message-scroller'] [data-part='jump'][data-direction='start'] > [data-ui='icon'] {
+  [data-ui-message-scroller] [data-part-jump][data-direction='start'] > [data-ui-icon] {
     rotate: 90deg;
   }
 
-  [data-ui='message-scroller'] [data-part='jump']:has(> [data-part='jump-count']) {
+  [data-ui-message-scroller] [data-part-jump]:has(> [data-part-jump-count]) {
     padding-inline: var(--slotted-space-4, 0.5rem) var(--slotted-space-5, 0.75rem);
   }
 
-  [data-ui='message-scroller'] [data-part='jump-count'] {
+  [data-ui-message-scroller] [data-part-jump-count] {
     font-variant-numeric: tabular-nums;
   }
 
-  [data-ui='message-scroller'] [data-part='jump'][data-active='false'] {
+  [data-ui-message-scroller] [data-part-jump][data-active='false'] {
     opacity: 0;
     pointer-events: none;
     translate: -50% var(--_shift);
@@ -322,11 +322,11 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit, ease-in);
   }
 
-  [data-ui='message-scroller'] [data-part='jump'][data-active='false']:dir(rtl) {
+  [data-ui-message-scroller] [data-part-jump][data-active='false']:dir(rtl) {
     translate: 50% var(--_shift);
   }
 
-  [data-ui='message-scroller'] [data-part='jump']:hover:not(:disabled):not([data-disabled]) {
+  [data-ui-message-scroller] [data-part-jump]:hover:not(:disabled):not([data-disabled]) {
     background-color: color-mix(
       in oklab,
       var(--_ink) var(--slotted-message-scroller-state-layer-hover, 6%),
@@ -339,7 +339,7 @@
    * control points to, the way a key goes down; a scale would resample the
    * count it carries (R7, `text-scale.test.mjs`).
    */
-  [data-ui='message-scroller'] [data-part='jump']:active:not(:disabled):not([data-disabled]) {
+  [data-ui-message-scroller] [data-part-jump]:active:not(:disabled):not([data-disabled]) {
     background-color: color-mix(
       in oklab,
       var(--_ink) var(--slotted-message-scroller-state-layer-active, 12%),
@@ -348,23 +348,22 @@
     translate: -50% var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='message-scroller']
-    [data-part='jump']:active:not(:disabled):not([data-disabled]):dir(rtl) {
+  [data-ui-message-scroller] [data-part-jump]:active:not(:disabled):not([data-disabled]):dir(rtl) {
     translate: 50% var(--slotted-space-1, 0.125rem);
   }
 
-  [data-ui='message-scroller'] [data-part='jump']:focus-visible {
+  [data-ui-message-scroller] [data-part-jump]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
   @media (forced-colors: active) {
-    [data-ui='message-scroller'] [data-part='item'][data-current] {
+    [data-ui-message-scroller] [data-part-item][data-current] {
       outline: var(--slotted-border-width-thick, 2px) solid Highlight;
       outline-offset: var(--slotted-space-2, 0.25rem);
     }
 
-    [data-ui='message-scroller'] [data-part='viewport'][data-scrollable] {
+    [data-ui-message-scroller] [data-part-viewport][data-scrollable] {
       mask-image: none;
     }
   }

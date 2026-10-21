@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import {
   BUILT_IN_VIEW_ID,
   emptySavedViews,
@@ -326,6 +327,7 @@ export function SavedViews({
       <form
         aria-label={kind === 'create' ? t('saveAs') : t('renameView', { name: name ?? '' })}
         data-part="form"
+        data-part-form=""
         noValidate
         onSubmit={submit}
       >
@@ -368,6 +370,7 @@ export function SavedViews({
     return (
       <li
         data-part="item"
+        data-part-item=""
         data-view={key}
         key={key}
         {...(current ? { 'data-current': '' } : {})}
@@ -378,7 +381,12 @@ export function SavedViews({
         {edit?.kind === 'rename' ? (
           renderForm('rename', name)
         ) : edit?.kind === 'delete' && view !== null ? (
-          <div aria-labelledby={`${base}-confirm-${key}`} data-part="confirm" role="group">
+          <div
+            aria-labelledby={`${base}-confirm-${key}`}
+            data-part="confirm"
+            data-part-confirm=""
+            role="group"
+          >
             <p id={`${base}-confirm-${key}`}>{t('confirmDelete', { name })}</p>
             <div data-buttons="">
               <Button
@@ -399,6 +407,7 @@ export function SavedViews({
           <>
             <button
               data-part="apply"
+              data-part-apply=""
               onClick={(event) => apply(id, pressReason(event), event)}
               type="button"
               {...(current ? { 'aria-current': 'true' as const } : {})}
@@ -411,7 +420,7 @@ export function SavedViews({
               <span data-label="">{name}</span>
               {isDefault ? ' ' : null}
               {isDefault ? (
-                <span data-part="default-mark">
+                <span data-part="default-mark" data-part-default-mark="">
                   <Icon size="sm">
                     <Glyph name="pin" />
                   </Icon>
@@ -423,9 +432,9 @@ export function SavedViews({
               <MenuTrigger
                 render={(props) => (
                   <button
-                    {...props}
+                    {...withSelectorKey(props, 'part', 'actions')}
                     aria-label={t('actions', { name })}
-                    data-part="actions"
+
                     type="button"
                   >
                     <Icon size="md">
@@ -459,10 +468,11 @@ export function SavedViews({
 
   return (
     <div
-      {...rest}
+      {...withSelectorKey(rest, 'part', 'root')}
       aria-label={rest['aria-label'] ?? t('label')}
-      data-part="root"
+
       data-ui="saved-views"
+      data-ui-saved-views=""
       ref={rootRef}
       role={rest.role ?? 'group'}
       {...(modified ? { 'data-modified': '' } : {})}
@@ -485,8 +495,8 @@ export function SavedViews({
         <PopoverTrigger
           render={({ ref: anchor, ...props }) => (
             <button
-              {...props}
-              data-part="trigger"
+              {...withSelectorKey(props, 'part', 'trigger')}
+
               ref={(node) => {
                 anchor?.(node);
                 triggerRef.current = node;
@@ -495,7 +505,11 @@ export function SavedViews({
               type="button"
             >
               <span data-label="">{activeName}</span>
-              {modified ? <span data-part="modified">{t('modified')}</span> : null}
+              {modified ? (
+                <span data-part="modified" data-part-modified="">
+                  {t('modified')}
+                </span>
+              ) : null}
               <Icon size="md">
                 <Glyph name="chevron-down" />
               </Icon>
@@ -506,13 +520,20 @@ export function SavedViews({
           <PopoverContent aria-label={rest['aria-label'] ?? t('label')}>
             {/* The family's identifier is on its own element rather than on
                 the popover's: PopoverContent names its own part. */}
-            <div data-part="panel" data-ui="saved-views" id={panelId} ref={panelRef}>
-              <ul data-part="list" role="list">
+            <div
+              data-part="panel"
+              data-part-panel=""
+              data-ui="saved-views"
+              data-ui-saved-views=""
+              id={panelId}
+              ref={panelRef}
+            >
+              <ul data-part="list" data-part-list="" role="list">
                 {renderItem(null)}
                 {state.views.map((view) => renderItem(view))}
               </ul>
               {editing?.kind === 'create' ? renderForm('create') : null}
-              <div data-part="footer">
+              <div data-part="footer" data-part-footer="">
                 <Button
                   data-save-as=""
                   onClick={startCreate}
@@ -531,7 +552,7 @@ export function SavedViews({
         </PopoverLayer>
       </Popover>
       {modified ? (
-        <button data-part="revert" onClick={revert} type="button">
+        <button data-part="revert" data-part-revert="" onClick={revert} type="button">
           {/* An arrow that turns back turns the other way in a right-to-left document. */}
           <Icon directional size="sm">
             <Glyph name="rotate-ccw" />

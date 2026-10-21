@@ -71,7 +71,7 @@ test('finds every stylesheet in the package', () => {
  * under `:dir(rtl)`.
  */
 const PHYSICAL_BY_MEASUREMENT =
-  /\[data-part=['"](?:arrow|spotlight)['"]\]|\[data-ui=['"]tabs['"]\][^,]*\[data-part=['"]marker['"]\]/;
+  /\[data-part-(?:arrow|spotlight)\]|\[data-ui-tabs\][^,]*\[data-part-marker\]/;
 
 /**
  * Every declaration in a sheet, with the selectors it is nested inside. The
@@ -125,8 +125,8 @@ test('writes every rule in logical properties', () => {
 
 test('keeps the arrow exemption narrow enough to still catch a mirrored rule', () => {
   const sheet = `
-    [data-ui='popover'] [data-part='arrow'] { left: var(--slotted-positioner-arrow-x); }
-    [data-ui='popover'] [data-part='content'] { left: 0; padding-left: 4px; }
+    [data-ui-popover] [data-part-arrow] { left: var(--slotted-positioner-arrow-x); }
+    [data-ui-popover] [data-part-content] { left: 0; padding-left: 4px; }
   `;
   const offending = declarations(sheet).filter(
     ({ declaration, path }) =>

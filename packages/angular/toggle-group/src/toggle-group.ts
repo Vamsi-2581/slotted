@@ -72,7 +72,9 @@ const ITEM_SELECTOR = '[data-part="item"]';
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'toggle-group',
+    'data-ui-toggle-group': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': 'resolvedRole',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',

@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/action-bar/contract.json', import.meta.url),
@@ -9,7 +20,9 @@ const contract = JSON.parse(
   ),
 );
 const css = readFileSync(new URL('./action-bar.css', import.meta.url), 'utf8');
-const fragment = readFileSync(new URL('./action-bar.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./action-bar.harness.html', import.meta.url), 'utf8'),
+);
 const declarations = css.replace(/\/\*[\s\S]*?\*\//g, '');
 const normalized = declarations
   .replace(/\s+/g, ' ')
@@ -17,9 +30,9 @@ const normalized = declarations
   .replace(/\(\s+/g, '(')
   .replace(/\s+\)/g, ')');
 
-const ui = `[data-ui='${contract.ui}']`;
+const ui = `[data-ui-${contract.ui.toLowerCase()}]`;
 const member = contract.members.actionBar;
-const part = (name) => `${ui} [data-part='${name}']`;
+const part = (name) => `${ui} [data-part-${name.toLowerCase()}]`;
 
 function rule(selector) {
   return normalized.split(`${selector}{`)[1]?.split('}')[0] ?? '';
@@ -37,7 +50,7 @@ test('styles every part the contract declares', () => {
   for (const declared of member.parts) {
     if (declared === 'root') continue;
     assert.ok(
-      normalized.includes(`[data-part='${declared}']`),
+      normalized.includes(`[data-part-${declared.toLowerCase()}]`),
       `no rule reaches the ${declared} part`,
     );
   }
@@ -143,7 +156,7 @@ test('puts a rule between two runs at more than the distance between two control
  */
 test('keeps its rule when the system takes the palette over, and paints no mark', () => {
   const forced = css.slice(css.indexOf('@media (forced-colors: active)'));
-  assert.match(forced, /\[data-part='separator'\][\s\S]{0,200}forced-color-adjust: none/);
+  assert.match(forced, /\[data-part-separator\][\s\S]{0,200}forced-color-adjust: none/);
   assert.ok(!declarations.includes('mask'), 'the mark is the Glyph element, not a mask');
 });
 
@@ -164,11 +177,11 @@ test('holds hover and press back for the platform own disabled', () => {
  * nothing under it.
  */
 test('takes no room when it holds nothing at all', () => {
-  assert.match(normalized, /:not\(:has\(\[data-part='actions'\]>\*:not\(\[hidden\]\)\)\)/);
+  assert.match(normalized, /:not\(:has\(\[data-part-actions\]>\*:not\(\[hidden\]\)\)\)/);
 });
 
 /** The bar paints itself and the one control it draws, and nothing inside it. */
 test('paints no control it does not own', () => {
-  assert.ok(!normalized.includes("[data-ui='button']"), 'the bar reaches into another family');
+  assert.ok(!normalized.includes('[data-ui-button]'), 'the bar reaches into another family');
   assert.equal(rule(part('action')).includes('background'), false);
 });

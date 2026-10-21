@@ -90,6 +90,7 @@ function showsNothing(label: HTMLElement): boolean {
   template: `<input
       #control
       data-part="control"
+      data-part-control=""
       type="checkbox"
       [attr.id]="controlId"
       [attr.name]="resolvedName()"
@@ -106,10 +107,10 @@ function showsNothing(label: HTMLElement): boolean {
       (click)="onClick($event)"
       (blur)="onBlur()"
     />
-    <span data-part="indicator"
+    <span data-part="indicator" data-part-indicator=""
       ><span slIcon><svg slGlyph [name]="resolvedIndeterminate() ? 'minus' : 'check'"></svg></span
     ></span>
-    <label #label data-part="label" [attr.for]="controlId"><ng-content /></label>
+    <label #label data-part="label" data-part-label="" [attr.for]="controlId"><ng-content /></label>
     <ng-content select="[slCheckboxDescription]" />`,
   styleUrl: '../../../styles/src/checkbox/checkbox.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -119,7 +120,9 @@ function showsNothing(label: HTMLElement): boolean {
   ],
   host: {
     'data-ui': 'checkbox',
+    'data-ui-checkbox': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-label-placement]': 'resolvedLabelPlacement()',
     '[attr.data-variant]': 'resolvedVariant()',

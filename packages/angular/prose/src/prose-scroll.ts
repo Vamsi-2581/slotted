@@ -44,6 +44,7 @@ import { proseMessages, type PartialMessages, type ProseMessages } from '@slotte
   exportAs: 'slProseScroll',
   host: {
     'data-part': 'scroll',
+    'data-part-scroll': '',
     '[attr.role]': 'resolvedRole()',
     '[attr.tabindex]': 'resolvedTabIndex()',
     '[attr.aria-label]': 'resolvedLabel()',

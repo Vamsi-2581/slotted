@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { isRowAction } from '@slotted/core/pointer-intent';
 import {
   createContext,
@@ -92,15 +93,15 @@ function cellAttributes(
  * and the family writes no `aria-labelledby` restating what the browser states.
  */
 export function TableCaption({ ref, ...props }: TableCaptionProps) {
-  return <caption {...props} data-part="caption" ref={ref} />;
+  return <caption {...withSelectorKey(props, 'part', 'caption')} ref={ref} />;
 }
 
 export function TableHead({ ref, ...props }: TableHeadProps) {
-  return <thead {...props} data-part="head" ref={ref} />;
+  return <thead {...withSelectorKey(props, 'part', 'head')} ref={ref} />;
 }
 
 export function TableBody({ ref, ...props }: TableBodyProps) {
-  return <tbody {...props} data-part="body" ref={ref} />;
+  return <tbody {...withSelectorKey(props, 'part', 'body')} ref={ref} />;
 }
 
 /**
@@ -109,7 +110,7 @@ export function TableBody({ ref, ...props }: TableBodyProps) {
  * outside the table holding the consumer's own controls.
  */
 export function TableSummary({ ref, ...props }: TableSummaryProps) {
-  return <tfoot {...props} data-part="summary" ref={ref} />;
+  return <tfoot {...withSelectorKey(props, 'part', 'summary')} ref={ref} />;
 }
 
 /**
@@ -118,7 +119,7 @@ export function TableSummary({ ref, ...props }: TableSummaryProps) {
  * scrolled sideways does not take its pagination with it.
  */
 export function TableFooter({ ref, ...props }: TableFooterProps) {
-  return <div {...props} data-part="footer" ref={ref} />;
+  return <div {...withSelectorKey(props, 'part', 'footer')} ref={ref} />;
 }
 
 /**
@@ -160,7 +161,7 @@ export function TableRow({
           if (isRowAction(event.currentTarget, event.target)) onAction(event);
         };
 
-  const rowProps = {
+  const rowProps = keyedProps({
     ...nativeProps,
     children,
     ...(current === true ? { 'aria-current': 'true' as const, 'data-current': '' } : {}),
@@ -172,7 +173,7 @@ export function TableRow({
     ...(selected ? { 'data-selected': '' } : {}),
     ...(value === undefined ? {} : { 'data-value': value }),
     ...(rowIndex === undefined ? {} : { 'aria-rowindex': rowIndex }),
-  };
+  });
 
   const context: TableRowContextValue = {
     detailId: `${table.id}detail${value ?? ''}`,
@@ -235,14 +236,14 @@ export function TableColumnHeader({
   const node = useRef<HTMLElement | null>(null);
   const sorted = column !== undefined && table.sort?.column === column;
 
-  const headerProps = {
+  const headerProps = keyedProps({
     ...nativeProps,
     ...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style),
     ...(sorted ? { 'aria-sort': table.sort?.direction } : {}),
     children,
     'data-part': 'column-header',
     scope: scope ?? 'col',
-  };
+  });
 
   return (
     <TableColumnContext.Provider value={column}>
@@ -292,6 +293,7 @@ export function TableRowHeader({
       {...nativeProps}
       {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="row-header"
+      data-part-row-header=""
       ref={ref}
       scope={scope ?? 'row'}
     />
@@ -314,6 +316,7 @@ export function TableCell({
       {...nativeProps}
       {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="cell"
+      data-part-cell=""
       ref={ref}
     />
   );
@@ -345,7 +348,7 @@ export function TableSort({
     table.requestSort(key, event);
   }
 
-  const sortProps = {
+  const sortProps = keyedProps({
     ...nativeProps,
     /* The direction mark follows the name: one chevron the stylesheet turns
        over for ascending and shows, muted, under the pointer on an unsorted
@@ -361,7 +364,7 @@ export function TableSort({
     'data-part': 'sort',
     onClick: press,
     type: 'button' as const,
-  };
+  });
 
   return render === undefined ? <button {...sortProps} ref={ref} /> : render(sortProps);
 }
@@ -372,7 +375,7 @@ export function TableSort({
  * geometry; what a filter means is the consumer's query.
  */
 export function TableColumnActions({ ref, ...props }: TableColumnActionsProps) {
-  return <span {...props} data-part="column-actions" ref={ref} />;
+  return <span {...withSelectorKey(props, 'part', 'column-actions')} ref={ref} />;
 }
 
 /**
@@ -407,6 +410,7 @@ export function TableSelect({
       {...nativeProps}
       {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="selection"
+      data-part-selection=""
       ref={ref}
     >
       <Checkbox
@@ -449,6 +453,7 @@ export function TableSelectAll({
       {...nativeProps}
       {...cellAttributes({ align, blockAlign, numeric, sticky, stickyOffset, text }, style)}
       data-part="selection"
+      data-part-selection=""
       ref={ref}
       scope="col"
     >
@@ -495,6 +500,7 @@ export function TableExpander({ onClick, ref, value, ...nativeProps }: TableExpa
         )
       }
       data-part="expander"
+      data-part-expander=""
       onClick={press}
       ref={ref}
       type="button"
@@ -518,8 +524,12 @@ export function TableDetail({
   if (!table.isExpanded(value)) return null;
 
   return (
-    <tr {...nativeProps} data-part="detail" id={`${table.id}detail${value}`} ref={ref}>
-      <td colSpan={colSpan ?? table.columns} data-part="cell">
+    <tr
+      {...withSelectorKey(nativeProps, 'part', 'detail')}
+      id={`${table.id}detail${value}`}
+      ref={ref}
+    >
+      <td colSpan={colSpan ?? table.columns} data-part="cell" data-part-cell="">
         {children}
       </td>
     </tr>
@@ -542,15 +552,26 @@ export function TableGroupRow({
   const table = useTable();
   return (
     <tr
-      {...nativeProps}
-      data-part="group-row"
+      {...withSelectorKey(nativeProps, 'part', 'group-row')}
+
       {...(sticky === true ? { 'data-sticky': '' } : {})}
       ref={ref}
     >
-      <th colSpan={colSpan ?? table.columns} data-part="group-header" scope="rowgroup">
-        <div data-part="group-content">
-          <span data-part="group-start">{children}</span>
-          {end === undefined || end === null ? null : <span data-part="group-end">{end}</span>}
+      <th
+        colSpan={colSpan ?? table.columns}
+        data-part="group-header"
+        data-part-group-header=""
+        scope="rowgroup"
+      >
+        <div data-part="group-content" data-part-group-content="">
+          <span data-part="group-start" data-part-group-start="">
+            {children}
+          </span>
+          {end === undefined || end === null ? null : (
+            <span data-part="group-end" data-part-group-end="">
+              {end}
+            </span>
+          )}
         </div>
       </th>
     </tr>
@@ -570,7 +591,11 @@ export function TableEmpty({ colSpan, ref, ...nativeProps }: TableEmptyProps) {
   const table = useTable();
   return (
     <tr>
-      <td {...nativeProps} colSpan={colSpan ?? table.columns} data-part="empty" ref={ref} />
+      <td
+        {...withSelectorKey(nativeProps, 'part', 'empty')}
+        colSpan={colSpan ?? table.columns}
+        ref={ref}
+      />
     </tr>
   );
 }
@@ -584,12 +609,12 @@ export function TableLoader({ children, ref, skeletonRows, ...nativeProps }: Tab
   const table = useTable();
 
   return (
-    <tbody {...nativeProps} aria-hidden data-part="loader" ref={ref}>
+    <tbody {...withSelectorKey(nativeProps, 'part', 'loader')} aria-hidden ref={ref}>
       {children ??
         Array.from({ length: skeletonRows ?? 5 }, (_unused, row) => (
-          <tr data-part="row" key={row}>
+          <tr data-part="row" data-part-row="" key={row}>
             {Array.from({ length: table.columns }, (_cell, column) => (
-              <td data-part="cell" key={column}>
+              <td data-part="cell" data-part-cell="" key={column}>
                 <Skeleton inlineSize="100%" loading />
               </td>
             ))}

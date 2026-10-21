@@ -2,8 +2,21 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const css = readFileSync(new URL('./table-of-contents.css', import.meta.url), 'utf8');
-const harness = readFileSync(new URL('./table-of-contents.harness.html', import.meta.url), 'utf8');
+const harness = withoutSelectorKeys(
+  readFileSync(new URL('./table-of-contents.harness.html', import.meta.url), 'utf8'),
+);
 const contract = JSON.parse(
   readFileSync(
     new URL('../../../../specs/components/table-of-contents/contract.json', import.meta.url),
@@ -51,12 +64,12 @@ test('draws the track and the marker outside every state rule', () => {
       `${selector} draws the track for a state`,
     );
   }
-  const marker = rules(bare).filter(({ selector }) => selector.includes("[data-part='marker']"));
+  const marker = rules(bare).filter(({ selector }) => selector.includes('[data-part-marker]'));
   for (const { selector } of marker) {
     assert.doesNotMatch(selector, /data-current/, `${selector} keys the marker on a state`);
   }
   const current = rules(bare).find(
-    ({ selector }) => selector === "[data-ui='table-of-contents'] [data-part='link'][data-current]",
+    ({ selector }) => selector === '[data-ui-table-of-contents] [data-part-link][data-current]',
   );
   assert.ok(current, 'the current link has no rule');
   assert.match(current.body, /color: var\(--_current\)/);
@@ -72,7 +85,7 @@ test('draws the track and the marker outside every state rule', () => {
 test('paints the horizontal track as a background the marker can stand on', () => {
   const panel = rules(bare).find(
     ({ selector }) =>
-      selector === "[data-ui='table-of-contents'][data-layout='horizontal'] > [data-part='panel']",
+      selector === "[data-ui-table-of-contents][data-layout='horizontal'] > [data-part-panel]",
   );
   assert.ok(panel);
   assert.match(panel.body, /background: linear-gradient\(var\(--_track\), var\(--_track\)\)/);
@@ -80,14 +93,14 @@ test('paints the horizontal track as a background the marker can stand on', () =
   assert.doesNotMatch(panel.body, /border-block-end/);
   const marker = rules(bare).find(
     ({ selector }) =>
-      selector === "[data-ui='table-of-contents'][data-layout='horizontal'] [data-part='marker']",
+      selector === "[data-ui-table-of-contents][data-layout='horizontal'] [data-part-marker]",
   );
   assert.match(marker.body, /inset-block-end: 0;/);
 });
 
 /** The bar shows the first level only, as Ant's horizontal Anchor does, and says so where it scrolls past its room. */
 test('hides the groups in the bar and fades the edge it continues past', () => {
-  assert.match(bare, /\[data-layout='horizontal'\] \[data-part='group'\] \{\s*display: none;/);
+  assert.match(bare, /\[data-layout='horizontal'\] \[data-part-group\] \{\s*display: none;/);
   for (const side of ['start', 'end', 'both']) {
     assert.ok(bare.includes(`[data-overflow='${side}']`), `${side} overflow paints no fade`);
   }
@@ -97,7 +110,7 @@ test('hides the groups in the bar and fades the edge it continues past', () => {
 /** Where the page's chrome ends is read from the property `page` publishes and never measured here. */
 test('pins the sticky column under the page chrome by the published property', () => {
   const sticky = rules(bare).find(
-    ({ selector }) => selector === "[data-ui='table-of-contents'][data-sticky]",
+    ({ selector }) => selector === '[data-ui-table-of-contents][data-sticky]',
   );
   assert.match(sticky.body, /inset-block-start: var\(--slotted-page-sticky-top, 0px\)/);
   assert.match(
@@ -119,7 +132,7 @@ test('draws nothing while empty and rows of skeleton while loading', () => {
   assert.match(bare, /\[data-empty\]:not\(\[data-loading\]\) \{\s*display: none;/);
   assert.match(
     bare,
-    /\[data-part='skeleton'\] > \[data-ui='skeleton'\] \{\s*--slotted-skeleton-block-size: var\(--_font-size\)/,
+    /\[data-part-skeleton\] > \[data-ui-skeleton\] \{\s*--slotted-skeleton-block-size: var\(--_font-size\)/,
   );
 });
 
@@ -127,7 +140,7 @@ test('draws nothing while empty and rows of skeleton while loading', () => {
 test('numbers with counters that reset per level', () => {
   assert.match(
     bare,
-    /\[data-numbered\] :is\(\[data-part='list'\], \[data-part='group'\]\) \{\s*counter-reset: slotted-table-of-contents;/,
+    /\[data-numbered\] :is\(\[data-part-list\], \[data-part-group\]\) \{\s*counter-reset: slotted-table-of-contents;/,
   );
   assert.match(bare, /content: counters\(slotted-table-of-contents, '\.'\) '\.';/);
 });

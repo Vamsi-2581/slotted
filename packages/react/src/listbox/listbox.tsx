@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/listbox/listbox.css';
 
 import {
@@ -731,7 +732,7 @@ export function Listbox<T = unknown>({
   };
 
   const group = (key: string, label: string | undefined, content: ReactNode[]) => (
-    <div key={`group-${key}`} aria-label={label} data-part="group" role="group">
+    <div key={`group-${key}`} aria-label={label} data-part="group" data-part-group="" role="group">
       {content}
     </div>
   );
@@ -745,7 +746,7 @@ export function Listbox<T = unknown>({
       }
       return collection.sections.map((section) =>
         group(section.key, section.label, [
-          <div key="label" data-part="group-label">
+          <div key="label" data-part="group-label" data-part-group-label="">
             {section.label}
           </div>,
           ...collection.options
@@ -776,7 +777,7 @@ export function Listbox<T = unknown>({
         flush();
         run = { key: row.section.key, label: row.section.label, content: [] };
         run.content.push(
-          <div key="label" data-part="group-label">
+          <div key="label" data-part="group-label" data-part-group-label="">
             {row.section.label}
           </div>,
         );
@@ -808,6 +809,7 @@ export function Listbox<T = unknown>({
     return (
       <div
         data-part="canvas"
+        data-part-canvas=""
         role="presentation"
         style={
           {
@@ -824,7 +826,7 @@ export function Listbox<T = unknown>({
 
   const isEmpty = collection !== undefined && collection.options.length === 0;
 
-  const rootProps: ListboxRootProps = {
+  const rootProps: ListboxRootProps = keyedProps({
     ...nativeProps,
     'aria-activedescendant':
       mode === 'activedescendant' && active !== null ? `${idPrefix}${active}` : undefined,
@@ -879,7 +881,7 @@ export function Listbox<T = unknown>({
        option once there is one, and on the root until then, so a listbox
        nobody has touched is still reachable with Tab. */
     tabIndex: mode === 'activedescendant' || active === null ? 0 : -1,
-  };
+  });
 
   return (
     <ListboxContext.Provider value={context}>

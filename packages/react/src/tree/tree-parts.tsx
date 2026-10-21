@@ -1,3 +1,4 @@
+import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { Glyph, Icon } from '../icon';
 import { TreeDepthContext, useTree, useTreeDepth } from './tree-context';
 import type {
@@ -55,7 +56,7 @@ export function TreeNode({
   const isDisabled = disabled === true || tree.disabled === true;
   const chosen = tree.selectionMode === 'none' ? undefined : selected;
 
-  const rootProps: TreeNodeRootProps = {
+  const rootProps: TreeNodeRootProps = keyedProps({
     ...nativeProps,
     'aria-busy': branch && loading === true ? true : undefined,
     /* A leaf carrying `aria-expanded` is announced as a parent, so only a
@@ -90,25 +91,35 @@ export function TreeNode({
       ...(offset === undefined ? {} : { ['--slotted-tree-row-offset' as string]: `${offset}px` }),
     },
     tabIndex: tree.nodeTabIndex(value),
-  };
+  });
 
   const row = (
     <div
       data-part="row"
+      data-part-row=""
       onClick={(event) => {
         onClick?.(event as never);
         if (event.defaultPrevented) return;
         tree.press(value, event);
       }}
     >
-      {tree.guides && depth > 0 ? <span data-part="guide" aria-hidden="true" /> : null}
+      {tree.guides && depth > 0 ? (
+        <span data-part="guide" data-part-guide="" aria-hidden="true" />
+      ) : null}
       {/* The wait stands in the chevron's own cell, so a branch that starts
           fetching moves neither its own name nor the rows below it. */}
       {branch && loading === true ? (
-        <span data-part="loader" data-ui="spinner" aria-hidden="true" />
+        <span
+          data-part="loader"
+          data-part-loader=""
+          data-ui="spinner"
+          data-ui-spinner=""
+          aria-hidden="true"
+        />
       ) : (
         <span
           data-part="expander"
+          data-part-expander=""
           aria-hidden="true"
           onClick={(event) => {
             event.stopPropagation();
@@ -127,6 +138,7 @@ export function TreeNode({
       {tree.indicator === 'checkbox' ? (
         <span
           data-part="indicator"
+          data-part-indicator=""
           aria-hidden="true"
           onClick={(event) => {
             event.stopPropagation();
@@ -142,16 +154,28 @@ export function TreeNode({
         </span>
       ) : null}
       {icon === undefined ? null : (
-        <span data-part="icon" aria-hidden="true">
+        <span data-part="icon" data-part-icon="" aria-hidden="true">
           {icon}
         </span>
       )}
-      <span data-part="label" id={tree.labelId(value)}>
+      <span data-part="label" data-part-label="" id={tree.labelId(value)}>
         {label}
       </span>
-      {description === undefined ? null : <span data-part="description">{description}</span>}
-      {meta === undefined ? null : <span data-part="meta">{meta}</span>}
-      {actions === undefined ? null : <div data-part="actions">{actions}</div>}
+      {description === undefined ? null : (
+        <span data-part="description" data-part-description="">
+          {description}
+        </span>
+      )}
+      {meta === undefined ? null : (
+        <span data-part="meta" data-part-meta="">
+          {meta}
+        </span>
+      )}
+      {actions === undefined ? null : (
+        <div data-part="actions" data-part-actions="">
+          {actions}
+        </div>
+      )}
     </div>
   );
 
@@ -163,7 +187,12 @@ export function TreeNode({
    */
   const group =
     branch && expanded && children !== undefined ? (
-      <ul data-part="group" role="group" aria-busy={loading === true ? true : undefined}>
+      <ul
+        data-part="group"
+        data-part-group=""
+        role="group"
+        aria-busy={loading === true ? true : undefined}
+      >
         {children}
       </ul>
     ) : null;
@@ -186,48 +215,32 @@ export function TreeNode({
 export function TreeGroup({ children, ...nativeProps }: TreeGroupProps) {
   const depth = useTreeDepth();
   return (
-    <ul {...nativeProps} data-part="group" role="group">
+    <ul {...withSelectorKey(nativeProps, 'part', 'group')} role="group">
       <TreeDepthContext.Provider value={depth + 1}>{children}</TreeDepthContext.Provider>
     </ul>
   );
 }
 
 export function TreeLabel({ children, ...nativeProps }: TreePartProps) {
-  return (
-    <span {...nativeProps} data-part="label">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'label')}>{children}</span>;
 }
 
 export function TreeDescription({ children, ...nativeProps }: TreePartProps) {
-  return (
-    <span {...nativeProps} data-part="description">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'description')}>{children}</span>;
 }
 
 export function TreeMeta({ children, ...nativeProps }: TreePartProps) {
-  return (
-    <span {...nativeProps} data-part="meta">
-      {children}
-    </span>
-  );
+  return <span {...withSelectorKey(nativeProps, 'part', 'meta')}>{children}</span>;
 }
 
 export function TreeIcon({ children, ...nativeProps }: TreePartProps) {
   return (
-    <span {...nativeProps} data-part="icon" aria-hidden="true">
+    <span {...withSelectorKey(nativeProps, 'part', 'icon')} aria-hidden="true">
       {children}
     </span>
   );
 }
 
 export function TreeEmpty({ children, ...nativeProps }: TreeMessageProps) {
-  return (
-    <div {...nativeProps} data-part="empty">
-      {children}
-    </div>
-  );
+  return <div {...withSelectorKey(nativeProps, 'part', 'empty')}>{children}</div>;
 }

@@ -9,6 +9,6 @@ import { Directive } from '@angular/core';
   selector: '[slCardMedia]',
   standalone: true,
   exportAs: 'slCardMedia',
-  host: { 'data-part': 'media' },
+  host: { 'data-part': 'media', 'data-part-media': '' },
 })
 export class SlCardMedia {}

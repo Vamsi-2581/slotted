@@ -32,7 +32,7 @@ import { SlToastItem } from './toast';
     }
   </ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'data-part': 'icon', 'aria-hidden': 'true' },
+  host: { 'data-part': 'icon', 'data-part-icon': '', 'aria-hidden': 'true' },
 })
 export class SlToastIcon {
   private readonly item = inject(SlToastItem, { optional: true });
@@ -48,7 +48,7 @@ export class SlToastIcon {
   selector: '[slToastContent]',
   standalone: true,
   exportAs: 'slToastContent',
-  host: { 'data-part': 'content' },
+  host: { 'data-part': 'content', 'data-part-content': '' },
 })
 export class SlToastContent {}
 
@@ -60,7 +60,7 @@ export class SlToastContent {}
   selector: '[slToastTitle]',
   standalone: true,
   exportAs: 'slToastTitle',
-  host: { 'data-part': 'title' },
+  host: { 'data-part': 'title', 'data-part-title': '' },
 })
 export class SlToastTitle {}
 
@@ -69,7 +69,7 @@ export class SlToastTitle {}
   selector: '[slToastDescription]',
   standalone: true,
   exportAs: 'slToastDescription',
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlToastDescription {}
 
@@ -81,7 +81,7 @@ export class SlToastDescription {}
   selector: '[slToastActions]',
   standalone: true,
   exportAs: 'slToastActions',
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlToastActions {}
 
@@ -96,7 +96,7 @@ export class SlToastActions {}
     ><span slIcon><svg slGlyph name="x"></svg></span
   ></ng-content>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'data-part': 'close', type: 'button' },
+  host: { 'data-part': 'close', 'data-part-close': '', type: 'button' },
 })
 export class SlToastClose {}
 
@@ -105,6 +105,6 @@ export class SlToastClose {}
   selector: '[slToastProgress]',
   standalone: true,
   exportAs: 'slToastProgress',
-  host: { 'data-part': 'progress', 'aria-hidden': 'true' },
+  host: { 'data-part': 'progress', 'data-part-progress': '', 'aria-hidden': 'true' },
 })
 export class SlToastProgress {}

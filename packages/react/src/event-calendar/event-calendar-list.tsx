@@ -1,3 +1,4 @@
+import { selectorKeyProps } from '@slotted/core/selector-key';
 import { isSameDate, toISODate } from '@slotted/core/date';
 import type { PlainDate } from '@slotted/core/date';
 import { listDayParts, listDays } from '@slotted/core/event-calendar';
@@ -28,8 +29,8 @@ export function List({ days, empty, emptyText, occurrences }: ListProps) {
 
   if (grouped.length === 0) {
     return (
-      <div data-part="list">
-        <div data-part="empty">
+      <div data-part="list" data-part-list="">
+        <div data-part="empty" data-part-empty="">
           <p>{emptyText}</p>
           {empty}
         </div>
@@ -38,7 +39,7 @@ export function List({ days, empty, emptyText, occurrences }: ListProps) {
   }
 
   return (
-    <div data-part="list">
+    <div data-part="list" data-part-list="">
       {grouped.map((day) => {
         const iso = toISODate(day.date);
         const headingId = `${model.id}-list-${iso}`;
@@ -48,18 +49,28 @@ export function List({ days, empty, emptyText, occurrences }: ListProps) {
             aria-labelledby={headingId}
             data-date={iso}
             data-part="list-day"
+            data-part-list-day=""
             data-today={model.today !== null && isSameDate(day.date, model.today) ? '' : undefined}
             key={iso}
           >
             {createElement(
               headingTag,
-              { 'aria-label': parts.label, 'data-part': 'list-day-heading', id: headingId },
+              {
+                'aria-label': parts.label,
+                'data-part': 'list-day-heading',
+                ...selectorKeyProps('part', 'list-day-heading'),
+                id: headingId,
+              },
               <>
-                <span data-part="list-weekday">{parts.weekday}</span>{' '}
-                <span data-part="list-date">{parts.date}</span>
+                <span data-part="list-weekday" data-part-list-weekday="">
+                  {parts.weekday}
+                </span>{' '}
+                <span data-part="list-date" data-part-list-date="">
+                  {parts.date}
+                </span>
               </>,
             )}
-            <ul data-part="list-events" role="list">
+            <ul data-part="list-events" data-part-list-events="" role="list">
               {day.occurrences.map((occurrence) => (
                 <li key={occurrence.key}>
                   <EventItem

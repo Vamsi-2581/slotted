@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/breadcrumb/breadcrumb.css';
 
 import { breadcrumbMessages } from '@slotted/core/i18n';
@@ -120,7 +121,7 @@ export function Breadcrumb({
     t,
   };
 
-  const rootProps: BreadcrumbRootProps = {
+  const rootProps: BreadcrumbRootProps = keyedProps({
     'aria-label': t('label'),
     ...nativeProps,
     children,
@@ -128,7 +129,7 @@ export function Breadcrumb({
     'data-expanded': current ? '' : undefined,
     'data-part': 'root',
     'data-ui': 'breadcrumb',
-  };
+  });
 
   return (
     <BreadcrumbContext.Provider value={context}>

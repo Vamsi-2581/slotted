@@ -43,7 +43,12 @@ let nextId = 0;
   selector: '[slMessageGroup]',
   standalone: true,
   exportAs: 'slMessageGroup',
-  host: { 'data-ui': 'message', 'data-part': 'group' },
+  host: {
+    'data-ui': 'message',
+    'data-ui-message': '',
+    'data-part': 'group',
+    'data-part-group': '',
+  },
 })
 export class SlMessageGroup {
   /** The layout every row in the run takes unless it states its own. */
@@ -76,7 +81,9 @@ export class SlMessageGroup {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'message',
+    'data-ui-message': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-align]': 'align()',
     '[attr.data-layout]': 'resolvedLayout()',
     '[attr.data-actions]': 'resolvedActions()',

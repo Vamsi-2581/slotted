@@ -43,18 +43,44 @@ import type { ProgressShape } from './progress-indicator.constants';
   selector: '[slProgressCircle]',
   standalone: true,
   template: `<svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-      <svg:circle cx="24" cy="24" data-part="track" [attr.pathLength]="100" r="20" />
+      <svg:circle
+        cx="24"
+        cy="24"
+        data-part="track"
+        data-part-track=""
+        [attr.pathLength]="100"
+        r="20"
+      />
       @if (wave()) {
-        <svg:path [attr.d]="wavePath" data-part="indicator" [attr.pathLength]="100" />
+        <svg:path
+          [attr.d]="wavePath"
+          data-part="indicator"
+          data-part-indicator=""
+          [attr.pathLength]="100"
+        />
       } @else {
-        <svg:circle cx="24" cy="24" data-part="indicator" [attr.pathLength]="100" r="20" />
+        <svg:circle
+          cx="24"
+          cy="24"
+          data-part="indicator"
+          data-part-indicator=""
+          [attr.pathLength]="100"
+          r="20"
+        />
       }
     </svg>
     @if (labelText(); as text) {
-      <span data-part="label" [id]="labelId" [attr.data-ui]="labelUi()">{{ text }}</span>
+      <span
+        data-part="label"
+        data-part-label=""
+        [id]="labelId"
+        [attr.data-ui]="labelUi()"
+        [attr.data-ui-visually-hidden]="labelUi() ? '' : null"
+        >{{ text }}</span
+      >
     }
     @if (showValueValue()) {
-      <span data-part="value">{{ valueTextValue() }}</span>
+      <span data-part="value" data-part-value="">{{ valueTextValue() }}</span>
     }`,
   styleUrls: [
     '../../../styles/src/progress-indicator/progress-indicator.css',
@@ -65,7 +91,9 @@ import type { ProgressShape } from './progress-indicator.constants';
   exportAs: 'slProgressCircle',
   host: {
     'data-ui': 'progress-indicator',
+    'data-ui-progress-indicator': '',
     'data-part': 'root',
+    'data-part-root': '',
     'data-shape': 'circular',
     '[attr.role]': 'roleAttribute()',
     '[attr.aria-hidden]': 'hiddenFromTree()',

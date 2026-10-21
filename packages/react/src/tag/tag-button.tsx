@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import { useId } from 'react';
 
 import { TagContent, TagFrame, TagRemove, useAppearance, useRemoval } from './tag-chip';
@@ -37,7 +38,7 @@ export function TagButton({
   const labelId = `${id}label`;
   const wordId = `${id}remove`;
 
-  const bodyProps: TagButtonBodyProps = {
+  const bodyProps: TagButtonBodyProps = keyedProps({
     ...nativeProps,
     children: (
       <TagContent end={end} labelId={labelId} start={start}>
@@ -47,7 +48,7 @@ export function TagButton({
     'data-part': 'body',
     disabled,
     type,
-  };
+  });
 
   return (
     <TagFrame appearance={appearance} disabled={disabled} removal={removal} rootProps={rootProps}>

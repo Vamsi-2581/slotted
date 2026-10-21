@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/field/field.css';
 
 import { fieldMessages } from '@slotted/core/i18n';
@@ -227,6 +228,7 @@ export function Field({
       <span
         {...(isFieldCountOver(count) ? { 'data-invalid': '' } : {})}
         data-part="counter"
+        data-part-counter=""
         id={ids.counter}
       >
         {formatFieldCount(count)}
@@ -245,7 +247,7 @@ export function Field({
     );
   });
 
-  const rootProps: FieldRootProps = {
+  const rootProps: FieldRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
@@ -262,7 +264,7 @@ export function Field({
     'data-part': 'root',
     'data-size': resolvedSize,
     'data-ui': 'field',
-  };
+  });
 
   return (
     <FieldContext.Provider value={value}>

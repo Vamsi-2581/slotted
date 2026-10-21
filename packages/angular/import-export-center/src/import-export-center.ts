@@ -230,7 +230,7 @@ export class SlImportExportJobActions {
 @Directive({
   selector: '[slImportExportCenterActions]',
   standalone: true,
-  host: { 'data-part': 'actions' },
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
 })
 export class SlImportExportCenterActions {}
 
@@ -242,7 +242,7 @@ export class SlImportExportCenterEmpty {}
 @Directive({
   selector: '[slImportExportCenterFooter]',
   standalone: true,
-  host: { 'data-part': 'footer' },
+  host: { 'data-part': 'footer', 'data-part-footer': '' },
 })
 export class SlImportExportCenterFooter {}
 
@@ -298,36 +298,42 @@ export class SlImportExportCenterFooter {}
     SlTabs,
   ],
   template: `
-    <div data-part="header">
+    <div data-part="header" data-part-header="">
       @switch (levelValue()) {
         @case ('3') {
-          <h3 data-part="title" [id]="titleId">
+          <h3 data-part="title" data-part-title="" [id]="titleId">
             {{ t('title') }}
             @if (active() > 0) {
-              <span data-part="count">{{ t('active', { count: active() }) }}</span>
+              <span data-part="count" data-part-count="">{{
+                t('active', { count: active() })
+              }}</span>
             }
           </h3>
         }
         @case ('4') {
-          <h4 data-part="title" [id]="titleId">
+          <h4 data-part="title" data-part-title="" [id]="titleId">
             {{ t('title') }}
             @if (active() > 0) {
-              <span data-part="count">{{ t('active', { count: active() }) }}</span>
+              <span data-part="count" data-part-count="">{{
+                t('active', { count: active() })
+              }}</span>
             }
           </h4>
         }
         @default {
-          <h2 data-part="title" [id]="titleId">
+          <h2 data-part="title" data-part-title="" [id]="titleId">
             {{ t('title') }}
             @if (active() > 0) {
-              <span data-part="count">{{ t('active', { count: active() }) }}</span>
+              <span data-part="count" data-part-count="">{{
+                t('active', { count: active() })
+              }}</span>
             }
           </h2>
         }
       }
-      <div data-part="tools">
+      <div data-part="tools" data-part-tools="">
         @if (finished().length > 0) {
-          <span data-part="clear">
+          <span data-part="clear" data-part-clear="">
             <button
               slButton
               size="sm"
@@ -344,7 +350,7 @@ export class SlImportExportCenterFooter {}
       </div>
     </div>
     @if (viewList().length > 1) {
-      <div data-part="views">
+      <div data-part="views" data-part-views="">
         <div
           slTabs
           track="none"
@@ -361,7 +367,7 @@ export class SlImportExportCenterFooter {}
       </div>
     }
     @if (status() === 'error') {
-      <div data-part="error">
+      <div data-part="error" data-part-error="">
         <section slResultState reach="section" status="error" live="off">
           <div slResultStateContent>
             <div slResultStateTitle>{{ t('loadError') }}</div>
@@ -382,7 +388,7 @@ export class SlImportExportCenterFooter {}
         </section>
       </div>
     } @else if (showEmpty()) {
-      <div data-part="empty">
+      <div data-part="empty" data-part-empty="">
         <ng-content select="[slImportExportCenterEmpty]">
           <section slResultState reach="section" status="empty" live="off">
             <div slResultStateContent>
@@ -396,6 +402,7 @@ export class SlImportExportCenterFooter {}
       <ul
         #list
         data-part="list"
+        data-part-list=""
         tabindex="-1"
         [id]="listId"
         [attr.aria-labelledby]="titleId"
@@ -404,9 +411,11 @@ export class SlImportExportCenterFooter {}
       >
         @if (waiting()) {
           @for (row of waitingRows; track row) {
-            <li data-part="job" aria-hidden="true">
-              <span data-part="visual"><span slSkeleton shape="block"></span></span>
-              <div data-part="body">
+            <li data-part="job" data-part-job="" aria-hidden="true">
+              <span data-part="visual" data-part-visual=""
+                ><span slSkeleton shape="block"></span
+              ></span>
+              <div data-part="body" data-part-body="">
                 <span slSkeletonText [lines]="2"></span>
                 <span slSkeletonText [lines]="1"></span>
               </div>
@@ -425,6 +434,7 @@ export class SlImportExportCenterFooter {}
     @if (status() !== 'error' && growingValue() === 'button' && hasMore() && !waiting()) {
       <button
         data-part="more"
+        data-part-more=""
         type="button"
         [attr.aria-disabled]="loading() ? 'true' : null"
         [attr.data-loading]="loading() ? '' : null"
@@ -436,10 +446,10 @@ export class SlImportExportCenterFooter {}
     <ng-content select="[slImportExportCenterFooter]" />
 
     <ng-template #fileName let-stem="stem" let-extension="extension">
-      <span data-part="file-name" dir="auto"
-        ><span data-part="name">{{ stem }}</span>
+      <span data-part="file-name" data-part-file-name="" dir="auto"
+        ><span data-part="name" data-part-name="">{{ stem }}</span>
         @if (extension !== '') {
-          <span data-part="extension">{{ extension }}</span>
+          <span data-part="extension" data-part-extension="">{{ extension }}</span>
         }
       </span>
     </ng-template>
@@ -452,7 +462,7 @@ export class SlImportExportCenterFooter {}
       let-label="label"
       let-primary="primary"
     >
-      <span data-part="download">
+      <span data-part="download" data-part-download="">
         @if (file.href === undefined) {
           <button
             slButton
@@ -492,6 +502,7 @@ export class SlImportExportCenterFooter {}
     <ng-template #jobTemplate let-view>
       <li
         data-part="job"
+        data-part-job=""
         [attr.data-key]="view.job.key"
         [attr.data-direction]="view.job.direction"
         [attr.data-status]="view.job.status"
@@ -499,25 +510,30 @@ export class SlImportExportCenterFooter {}
         [attr.data-expired]="view.controls.expired ? '' : null"
         [attr.data-expanded]="view.expanded ? '' : null"
       >
-        <span data-part="visual" aria-hidden="true" [attr.data-kind]="view.kind"
+        <span data-part="visual" data-part-visual="" aria-hidden="true" [attr.data-kind]="view.kind"
           ><span slIcon><svg slGlyph [name]="view.kindGlyph"></svg></span
         ></span>
-        <div data-part="body">
-          <div data-part="heading">
+        <div data-part="body" data-part-body="">
+          <div data-part="heading" data-part-heading="">
             @if (view.job.href === undefined) {
-              <span data-part="job-title" tabindex="-1" [id]="view.ids.title">{{
-                view.job.title
-              }}</span>
+              <span
+                data-part="job-title"
+                data-part-job-title=""
+                tabindex="-1"
+                [id]="view.ids.title"
+                >{{ view.job.title }}</span
+              >
             } @else {
               <a
                 data-part="job-title"
+                data-part-job-title=""
                 [id]="view.ids.title"
                 [attr.href]="view.job.href"
                 (click)="open(view.job.key, $event)"
                 >{{ view.job.title }}</a
               >
             }
-            <p data-part="meta">
+            <p data-part="meta" data-part-meta="">
               <span>{{ view.directionText }}</span>
               @if (view.job.format !== undefined) {
                 <span>{{ view.job.format }}</span>
@@ -541,6 +557,7 @@ export class SlImportExportCenterFooter {}
               @if (view.time !== null) {
                 <time
                   data-part="time"
+                  data-part-time=""
                   [attr.datetime]="view.time.dateTime"
                   [attr.title]="view.time.title"
                   >{{ view.time.text }}</time
@@ -548,23 +565,25 @@ export class SlImportExportCenterFooter {}
               }
             </p>
           </div>
-          <div data-part="status" [id]="view.ids.status">
-            <span data-part="mark" aria-hidden="true">
+          <div data-part="status" data-part-status="" [id]="view.ids.status">
+            <span data-part="mark" data-part-mark="" aria-hidden="true">
               @if (view.mark === 'spinner') {
-                <span data-ui="spinner"></span>
+                <span data-ui="spinner" data-ui-spinner=""></span>
               } @else {
                 <span slIcon><svg slGlyph [name]="view.mark"></svg></span>
               }
             </span>
-            <span data-part="status-label"
+            <span data-part="status-label" data-part-status-label=""
               ><span>{{ view.statusText }}</span>
               @if (view.job.stage) {
-                <span data-part="stage" [attr.title]="view.job.stage">{{ view.job.stage }}</span>
+                <span data-part="stage" data-part-stage="" [attr.title]="view.job.stage">{{
+                  view.job.stage
+                }}</span>
               }
             </span>
           </div>
           @if (view.job.status === 'running') {
-            <div data-part="progress">
+            <div data-part="progress" data-part-progress="">
               <div
                 slProgressBar
                 hideLabel
@@ -579,7 +598,7 @@ export class SlImportExportCenterFooter {}
                 "
               ></div>
               @if (view.progressText.length > 0) {
-                <span data-part="progress-text">
+                <span data-part="progress-text" data-part-progress-text="">
                   @for (item of view.progressText; track item) {
                     <span>{{ item }}</span>
                   }
@@ -588,18 +607,18 @@ export class SlImportExportCenterFooter {}
             </div>
           }
           @if (view.summary.length > 0) {
-            <p data-part="summary">
+            <p data-part="summary" data-part-summary="">
               @for (item of view.summary; track item) {
                 <span>{{ item }}</span>
               }
             </p>
           }
           @if (view.message !== null) {
-            <p data-part="message">{{ view.message }}</p>
+            <p data-part="message" data-part-message="">{{ view.message }}</p>
           }
         </div>
         @if (view.ordered.length > 0 || view.removable || jobActionsTemplate()) {
-          <div data-part="controls">
+          <div data-part="controls" data-part-controls="">
             @for (part of view.ordered; track part) {
               @switch (part) {
                 @case ('download') {
@@ -617,7 +636,11 @@ export class SlImportExportCenterFooter {}
                   }
                 }
                 @case ('toggle') {
-                  <span data-part="toggle" [attr.data-expanded]="view.expanded ? '' : null">
+                  <span
+                    data-part="toggle"
+                    data-part-toggle=""
+                    [attr.data-expanded]="view.expanded ? '' : null"
+                  >
                     <button
                       slButton
                       size="sm"
@@ -632,14 +655,18 @@ export class SlImportExportCenterFooter {}
                     >
                       {{ t('details') }}
                       <span slButtonEnd
-                        ><span data-part="chevron"
+                        ><span data-part="chevron" data-part-chevron=""
                           ><span slIcon><svg slGlyph name="chevron-down"></svg></span></span
                       ></span>
                     </button>
                   </span>
                 }
                 @default {
-                  <span [attr.data-part]="part">
+                  <span
+                    [attr.data-part]="part"
+                    [attr.data-part-cancel]="part === 'cancel' ? '' : null"
+                    [attr.data-part-retry]="part === 'retry' ? '' : null"
+                  >
                     <button
                       slButton
                       size="sm"
@@ -658,7 +685,7 @@ export class SlImportExportCenterFooter {}
               }
             }
             @if (jobActionsTemplate(); as own) {
-              <span data-part="job-actions"
+              <span data-part="job-actions" data-part-job-actions=""
                 ><ng-container
                   [ngTemplateOutlet]="own.template"
                   [ngTemplateOutletContext]="{ $implicit: view.job }"
@@ -668,6 +695,7 @@ export class SlImportExportCenterFooter {}
               <button
                 slImportExportControl
                 data-part="remove"
+                data-part-remove=""
                 [text]="t('remove')"
                 [describedBy]="view.ids.title"
                 (click)="removeOne(view.job.key, $event)"
@@ -680,12 +708,13 @@ export class SlImportExportCenterFooter {}
         @if (view.expanded) {
           <div
             data-part="details"
+            data-part-details=""
             role="region"
             [id]="view.ids.details"
             [attr.aria-labelledby]="view.ids.toggle"
           >
             @if (view.counts.length > 0) {
-              <dl data-part="counts">
+              <dl data-part="counts" data-part-counts="">
                 @for (count of view.counts; track count.key) {
                   <div [attr.data-count]="count.key">
                     <dt>{{ count.label }}</dt>
@@ -695,10 +724,14 @@ export class SlImportExportCenterFooter {}
               </dl>
             }
             @if (view.files.length > 0) {
-              <ul data-part="files">
+              <ul data-part="files" data-part-files="">
                 @for (row of view.files; track row.role) {
-                  <li data-part="file" [attr.data-availability]="row.availability">
-                    <span data-part="meta">
+                  <li
+                    data-part="file"
+                    data-part-file=""
+                    [attr.data-availability]="row.availability"
+                  >
+                    <span data-part="meta" data-part-meta="">
                       <strong>{{ row.label }}</strong>
                       <span
                         ><ng-container
@@ -729,7 +762,7 @@ export class SlImportExportCenterFooter {}
               </ul>
             }
             @if ((view.job.errors?.length ?? 0) > 0) {
-              <div data-part="errors">
+              <div data-part="errors" data-part-errors="">
                 <div slTable variant="framed" [columns]="4">
                   <div slTableContent>
                     <caption slTableCaption>
@@ -758,7 +791,7 @@ export class SlImportExportCenterFooter {}
                   </div>
                 </div>
                 @if (view.errorNote !== null) {
-                  <p data-part="errors-note">
+                  <p data-part="errors-note" data-part-errors-note="">
                     <span>{{ view.errorNote }}</span>
                   </p>
                 }
@@ -775,7 +808,9 @@ export class SlImportExportCenterFooter {}
   exportAs: 'slImportExportCenter',
   host: {
     'data-ui': 'import-export-center',
+    'data-ui-import-export-center': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-size]': 'sizeValue()',
     '[attr.data-level]': 'levelValue()',
     '[attr.data-growing]': 'growingValue()',

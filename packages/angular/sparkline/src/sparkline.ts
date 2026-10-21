@@ -58,23 +58,30 @@ import {
   standalone: true,
   template: `<svg
     data-part="plot"
+    data-part-plot=""
     aria-hidden="true"
     focusable="false"
     preserveAspectRatio="none"
     [attr.viewBox]="viewBox()"
   >
     @if (layout().area) {
-      <path data-part="area" [attr.d]="layout().area" />
+      <path data-part="area" data-part-area="" [attr.d]="layout().area" />
     }
     @if (layout().line) {
-      <path data-part="line" [attr.d]="layout().line" />
+      <path data-part="line" data-part-line="" [attr.d]="layout().line" />
     }
     @for (bar of layout().bars; track bar.index; let last = $last) {
-      <path data-part="bar" [attr.data-current]="last ? '' : null" [attr.d]="bar.path" />
+      <path
+        data-part="bar"
+        data-part-bar=""
+        [attr.data-current]="last ? '' : null"
+        [attr.d]="bar.path"
+      />
     }
     @if (layout().reference !== null) {
       <line
         data-part="reference"
+        data-part-reference=""
         x1="0"
         [attr.x2]="width()"
         [attr.y1]="layout().reference"
@@ -82,8 +89,8 @@ import {
       />
     }
     @if (markerPath()) {
-      <path data-part="ring" [attr.d]="markerPath()" />
-      <path data-part="marker" [attr.d]="markerPath()" />
+      <path data-part="ring" data-part-ring="" [attr.d]="markerPath()" />
+      <path data-part="marker" data-part-marker="" [attr.d]="markerPath()" />
     }
   </svg>`,
   styleUrl: '../../../styles/src/sparkline/sparkline.css',
@@ -92,7 +99,9 @@ import {
   exportAs: 'slSparkline',
   host: {
     'data-ui': 'sparkline',
+    'data-ui-sparkline': '',
     'data-part': 'root',
+    'data-part-root': '',
     role: 'img',
     '[attr.aria-label]': 'name()',
     '[attr.data-type]': 'type()',

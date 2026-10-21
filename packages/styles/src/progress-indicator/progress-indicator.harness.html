@@ -16,16 +16,20 @@
       aria-valuenow="40"
       aria-valuetext="40%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 40"
     >
-      <span data-part="label" id="h-lin-a">Uploading invoices</span>
-      <span data-part="value">40%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-lin-a">Uploading invoices</span>
+      <span data-part="value" data-part-value="">40%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <!-- Four per cent: the stop indicator is what makes this read as four per
@@ -37,16 +41,20 @@
       aria-valuenow="4"
       aria-valuetext="4%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 4"
     >
-      <span data-part="label" id="h-lin-b">Copying 1 of 24 files</span>
-      <span data-part="value">4%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-lin-b">Copying 1 of 24 files</span>
+      <span data-part="value" data-part-value="">4%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <!-- No label, no value: the bar alone, named by a string a reader hears. -->
@@ -57,14 +65,18 @@
       aria-valuenow="68"
       aria-valuetext="68%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 68"
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <!-- Complete: the gap and the stop indicator both go. -->
@@ -76,16 +88,20 @@
       aria-valuetext="100%"
       data-complete=""
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="success"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 100"
     >
-      <span data-part="label" id="h-lin-c">Sync finished</span>
-      <span data-part="value">100%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-lin-c">Sync finished</span>
+      <span data-part="value" data-part-value="">100%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
   </div>
 </section>
@@ -98,14 +114,18 @@
       aria-valuemin="0"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
     >
-      <span data-part="label" id="h-ind-a">Preparing your export</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-ind-a">Preparing your export</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <!-- The name is clipped rather than absent: the words are on the row above
@@ -116,14 +136,25 @@
       aria-valuemin="0"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
     >
-      <span data-part="label" data-ui="visually-hidden" id="h-ind-b">Preparing your export</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span
+        data-part="label"
+        data-part-label=""
+        data-ui="visually-hidden"
+        data-ui-visually-hidden=""
+        id="h-ind-b"
+        >Preparing your export</span
+      >
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <!-- Wavy and indeterminate at once, which is the combination that had no
@@ -135,17 +166,20 @@
       aria-valuemin="0"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
     >
-      <div data-part="track">
+      <div data-part="track" data-part-track="">
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           viewBox="0 -1.25 1200 2.5"
@@ -170,19 +204,23 @@
       aria-valuetext="34%"
       data-buffered=""
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="
         --slotted-progress-indicator-percent: 34;
         --slotted-progress-indicator-buffer-percent: 72;
       "
     >
-      <span data-part="label" id="h-buf-a">Processing uploaded pages</span>
-      <span data-part="value">34%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-buf-a">Processing uploaded pages</span>
+      <span data-part="value" data-part-value="">34%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -192,16 +230,20 @@
       aria-valuenow="34"
       aria-valuetext="34%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 34"
     >
-      <span data-part="label" id="h-buf-b">The same value, unbuffered</span>
-      <span data-part="value">34%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-buf-b">The same value, unbuffered</span>
+      <span data-part="value" data-part-value="">34%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
   </div>
 </section>
@@ -215,20 +257,23 @@
       aria-valuenow="62"
       aria-valuetext="62%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 62"
     >
-      <span data-part="label" id="h-wav-a">Rendering the report</span>
-      <span data-part="value">62%</span>
-      <div data-part="track">
+      <span data-part="label" data-part-label="" id="h-wav-a">Rendering the report</span>
+      <span data-part="value" data-part-value="">62%</span>
+      <div data-part="track" data-part-track="">
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           viewBox="0 -1.25 1200 2.5"
@@ -248,24 +293,34 @@
       aria-valuenow="62"
       aria-valuetext="62%"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 62"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
         <path
           data-part="indicator"
+          data-part-indicator=""
           d="M45.6 24C45.6 26.83 41.92 28.82 41 31.04C40.08 33.27 41.27 37.27 39.27 39.27C37.27 41.27 33.27 40.08 31.04 41C28.82 41.92 26.83 45.6 24 45.6C21.17 45.6 19.18 41.92 16.96 41C14.73 40.08 10.73 41.27 8.73 39.27C6.73 37.27 7.92 33.27 7 31.04C6.08 28.82 2.4 26.83 2.4 24C2.4 21.17 6.08 19.18 7 16.96C7.92 14.73 6.73 10.73 8.73 8.73C10.73 6.73 14.73 7.92 16.96 7C19.18 6.08 21.17 2.4 24 2.4C26.83 2.4 28.82 6.08 31.04 7C33.27 7.92 37.27 6.73 39.27 8.73C41.27 10.73 40.08 14.73 41 16.96C41.92 19.18 45.6 21.17 45.6 24Z"
           pathLength="100"
         ></path>
       </svg>
-      <span data-part="label" id="h-wav-b">Rendering the report</span>
-      <span data-part="value">62%</span>
+      <span data-part="label" data-part-label="" id="h-wav-b">Rendering the report</span>
+      <span data-part="value" data-part-value="">62%</span>
     </div>
   </div>
 </section>
@@ -278,18 +333,21 @@
       aria-valuemin="0"
       aria-valuenow="5"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 5"
     >
-      <div data-part="track">
+      <div data-part="track" data-part-track="">
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           viewBox="0 -1.25 1200 2.5"
@@ -307,18 +365,21 @@
       aria-valuemin="0"
       aria-valuenow="12"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 12"
     >
-      <div data-part="track">
+      <div data-part="track" data-part-track="">
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           viewBox="0 -1.25 1200 2.5"
@@ -336,18 +397,21 @@
       aria-valuemin="0"
       aria-valuenow="50"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 50"
     >
-      <div data-part="track">
+      <div data-part="track" data-part-track="">
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           viewBox="0 -1.25 1200 2.5"
@@ -365,18 +429,21 @@
       aria-valuemin="0"
       aria-valuenow="88"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 88"
     >
-      <div data-part="track">
+      <div data-part="track" data-part-track="">
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           viewBox="0 -1.25 1200 2.5"
@@ -395,18 +462,21 @@
       aria-valuenow="100"
       data-complete=""
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 100"
     >
-      <div data-part="track">
+      <div data-part="track" data-part-track="">
         <svg
           aria-hidden="true"
           data-part="indicator"
+          data-part-indicator=""
           focusable="false"
           preserveAspectRatio="xMinYMid meet"
           viewBox="0 -1.25 1200 2.5"
@@ -429,18 +499,28 @@
       aria-valuemin="0"
       aria-valuenow="5"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 5"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
         <path
           data-part="indicator"
+          data-part-indicator=""
           d="M45.6 24C45.6 26.83 41.92 28.82 41 31.04C40.08 33.27 41.27 37.27 39.27 39.27C37.27 41.27 33.27 40.08 31.04 41C28.82 41.92 26.83 45.6 24 45.6C21.17 45.6 19.18 41.92 16.96 41C14.73 40.08 10.73 41.27 8.73 39.27C6.73 37.27 7.92 33.27 7 31.04C6.08 28.82 2.4 26.83 2.4 24C2.4 21.17 6.08 19.18 7 16.96C7.92 14.73 6.73 10.73 8.73 8.73C10.73 6.73 14.73 7.92 16.96 7C19.18 6.08 21.17 2.4 24 2.4C26.83 2.4 28.82 6.08 31.04 7C33.27 7.92 37.27 6.73 39.27 8.73C41.27 10.73 40.08 14.73 41 16.96C41.92 19.18 45.6 21.17 45.6 24Z"
           pathLength="100"
         ></path>
@@ -452,18 +532,28 @@
       aria-valuemin="0"
       aria-valuenow="12"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 12"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
         <path
           data-part="indicator"
+          data-part-indicator=""
           d="M45.6 24C45.6 26.83 41.92 28.82 41 31.04C40.08 33.27 41.27 37.27 39.27 39.27C37.27 41.27 33.27 40.08 31.04 41C28.82 41.92 26.83 45.6 24 45.6C21.17 45.6 19.18 41.92 16.96 41C14.73 40.08 10.73 41.27 8.73 39.27C6.73 37.27 7.92 33.27 7 31.04C6.08 28.82 2.4 26.83 2.4 24C2.4 21.17 6.08 19.18 7 16.96C7.92 14.73 6.73 10.73 8.73 8.73C10.73 6.73 14.73 7.92 16.96 7C19.18 6.08 21.17 2.4 24 2.4C26.83 2.4 28.82 6.08 31.04 7C33.27 7.92 37.27 6.73 39.27 8.73C41.27 10.73 40.08 14.73 41 16.96C41.92 19.18 45.6 21.17 45.6 24Z"
           pathLength="100"
         ></path>
@@ -475,18 +565,28 @@
       aria-valuemin="0"
       aria-valuenow="50"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 50"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
         <path
           data-part="indicator"
+          data-part-indicator=""
           d="M45.6 24C45.6 26.83 41.92 28.82 41 31.04C40.08 33.27 41.27 37.27 39.27 39.27C37.27 41.27 33.27 40.08 31.04 41C28.82 41.92 26.83 45.6 24 45.6C21.17 45.6 19.18 41.92 16.96 41C14.73 40.08 10.73 41.27 8.73 39.27C6.73 37.27 7.92 33.27 7 31.04C6.08 28.82 2.4 26.83 2.4 24C2.4 21.17 6.08 19.18 7 16.96C7.92 14.73 6.73 10.73 8.73 8.73C10.73 6.73 14.73 7.92 16.96 7C19.18 6.08 21.17 2.4 24 2.4C26.83 2.4 28.82 6.08 31.04 7C33.27 7.92 37.27 6.73 39.27 8.73C41.27 10.73 40.08 14.73 41 16.96C41.92 19.18 45.6 21.17 45.6 24Z"
           pathLength="100"
         ></path>
@@ -498,18 +598,28 @@
       aria-valuemin="0"
       aria-valuenow="88"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 88"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
         <path
           data-part="indicator"
+          data-part-indicator=""
           d="M45.6 24C45.6 26.83 41.92 28.82 41 31.04C40.08 33.27 41.27 37.27 39.27 39.27C37.27 41.27 33.27 40.08 31.04 41C28.82 41.92 26.83 45.6 24 45.6C21.17 45.6 19.18 41.92 16.96 41C14.73 40.08 10.73 41.27 8.73 39.27C6.73 37.27 7.92 33.27 7 31.04C6.08 28.82 2.4 26.83 2.4 24C2.4 21.17 6.08 19.18 7 16.96C7.92 14.73 6.73 10.73 8.73 8.73C10.73 6.73 14.73 7.92 16.96 7C19.18 6.08 21.17 2.4 24 2.4C26.83 2.4 28.82 6.08 31.04 7C33.27 7.92 37.27 6.73 39.27 8.73C41.27 10.73 40.08 14.73 41 16.96C41.92 19.18 45.6 21.17 45.6 24Z"
           pathLength="100"
         ></path>
@@ -522,18 +632,28 @@
       aria-valuenow="100"
       data-complete=""
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       data-wave=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 100"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
         <path
           data-part="indicator"
+          data-part-indicator=""
           d="M45.6 24C45.6 26.83 41.92 28.82 41 31.04C40.08 33.27 41.27 37.27 39.27 39.27C37.27 41.27 33.27 40.08 31.04 41C28.82 41.92 26.83 45.6 24 45.6C21.17 45.6 19.18 41.92 16.96 41C14.73 40.08 10.73 41.27 8.73 39.27C6.73 37.27 7.92 33.27 7 31.04C6.08 28.82 2.4 26.83 2.4 24C2.4 21.17 6.08 19.18 7 16.96C7.92 14.73 6.73 10.73 8.73 8.73C10.73 6.73 14.73 7.92 16.96 7C19.18 6.08 21.17 2.4 24 2.4C26.83 2.4 28.82 6.08 31.04 7C33.27 7.92 37.27 6.73 39.27 8.73C41.27 10.73 40.08 14.73 41 16.96C41.92 19.18 45.6 21.17 45.6 24Z"
           pathLength="100"
         ></path>
@@ -551,19 +671,35 @@
       aria-valuenow="70"
       aria-valuetext="70%"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 70"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-        <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="indicator"
+          data-part-indicator=""
+          pathLength="100"
+          r="20"
+        ></circle>
       </svg>
-      <span data-part="label" id="h-cir-a">Rebuilding the search index</span>
-      <span data-part="value">70%</span>
+      <span data-part="label" data-part-label="" id="h-cir-a">Rebuilding the search index</span>
+      <span data-part="value" data-part-value="">70%</span>
     </div>
 
     <!-- Nought per cent: a round cap on an empty dash would be a dot at twelve
@@ -575,19 +711,35 @@
       aria-valuenow="0"
       aria-valuetext="0%"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 0"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-        <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="indicator"
+          data-part-indicator=""
+          pathLength="100"
+          r="20"
+        ></circle>
       </svg>
-      <span data-part="label" id="h-cir-b">Queued</span>
-      <span data-part="value">0%</span>
+      <span data-part="label" data-part-label="" id="h-cir-b">Queued</span>
+      <span data-part="value" data-part-value="">0%</span>
     </div>
 
     <div
@@ -598,19 +750,35 @@
       aria-valuetext="100%"
       data-complete=""
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="md"
       data-tone="success"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 100"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-        <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="indicator"
+          data-part-indicator=""
+          pathLength="100"
+          r="20"
+        ></circle>
       </svg>
-      <span data-part="label" id="h-cir-c">Index rebuilt</span>
-      <span data-part="value">100%</span>
+      <span data-part="label" data-part-label="" id="h-cir-c">Index rebuilt</span>
+      <span data-part="value" data-part-value="">100%</span>
     </div>
 
     <!-- The spinner every surveyed library ships: the circle with no value. -->
@@ -620,17 +788,33 @@
       aria-valuemin="0"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-        <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="indicator"
+          data-part-indicator=""
+          pathLength="100"
+          r="20"
+        ></circle>
       </svg>
-      <span data-part="label" id="h-cir-d">Checking availability</span>
+      <span data-part="label" data-part-label="" id="h-cir-d">Checking availability</span>
     </div>
   </div>
 </section>
@@ -641,14 +825,18 @@
       aria-labelledby="h-loa-a"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="morph"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
-      <span data-part="label" id="h-loa-a">Signing you in</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
+      <span data-part="label" data-part-label="" id="h-loa-a">Signing you in</span>
     </div>
 
     <div
@@ -656,27 +844,35 @@
       data-contained=""
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="morph"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
-      <span data-part="label" id="h-loa-b">Signing you in</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
+      <span data-part="label" data-part-label="" id="h-loa-b">Signing you in</span>
     </div>
 
     <div
       aria-label="Loading"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="morph"
       data-size="sm"
       data-tone="secondary"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <!-- The contained shape at all three steps, which is where an odd
@@ -687,39 +883,51 @@
         data-contained=""
         data-indeterminate=""
         data-part="root"
+        data-part-root=""
         data-shape="morph"
         data-size="sm"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
       >
-        <div data-part="track"><div data-part="indicator"></div></div>
+        <div data-part="track" data-part-track="">
+          <div data-part="indicator" data-part-indicator=""></div>
+        </div>
       </div>
       <div
         aria-label="Medium"
         data-contained=""
         data-indeterminate=""
         data-part="root"
+        data-part-root=""
         data-shape="morph"
         data-size="md"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
       >
-        <div data-part="track"><div data-part="indicator"></div></div>
+        <div data-part="track" data-part-track="">
+          <div data-part="indicator" data-part-indicator=""></div>
+        </div>
       </div>
       <div
         aria-label="Large"
         data-contained=""
         data-indeterminate=""
         data-part="root"
+        data-part-root=""
         data-shape="morph"
         data-size="lg"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
       >
-        <div data-part="track"><div data-part="indicator"></div></div>
+        <div data-part="track" data-part-track="">
+          <div data-part="indicator" data-part-indicator=""></div>
+        </div>
       </div>
     </div>
   </div>
@@ -733,14 +941,18 @@
       aria-valuemin="0"
       aria-valuenow="55"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="sm"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 55"
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -749,14 +961,18 @@
       aria-valuemin="0"
       aria-valuenow="55"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 55"
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -765,14 +981,18 @@
       aria-valuemin="0"
       aria-valuenow="55"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="lg"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 55"
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div style="display: flex; align-items: center; gap: var(--slotted-space-7)">
@@ -782,16 +1002,32 @@
         aria-valuemin="0"
         aria-valuenow="55"
         data-part="root"
+        data-part-root=""
         data-shape="circular"
         data-size="sm"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
         style="--slotted-progress-indicator-percent: 55"
       >
         <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-          <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+          <circle
+            cx="24"
+            cy="24"
+            data-part="track"
+            data-part-track=""
+            pathLength="100"
+            r="20"
+          ></circle>
+          <circle
+            cx="24"
+            cy="24"
+            data-part="indicator"
+            data-part-indicator=""
+            pathLength="100"
+            r="20"
+          ></circle>
         </svg>
       </div>
 
@@ -801,16 +1037,32 @@
         aria-valuemin="0"
         aria-valuenow="55"
         data-part="root"
+        data-part-root=""
         data-shape="circular"
         data-size="md"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
         style="--slotted-progress-indicator-percent: 55"
       >
         <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-          <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+          <circle
+            cx="24"
+            cy="24"
+            data-part="track"
+            data-part-track=""
+            pathLength="100"
+            r="20"
+          ></circle>
+          <circle
+            cx="24"
+            cy="24"
+            data-part="indicator"
+            data-part-indicator=""
+            pathLength="100"
+            r="20"
+          ></circle>
         </svg>
       </div>
 
@@ -820,16 +1072,32 @@
         aria-valuemin="0"
         aria-valuenow="55"
         data-part="root"
+        data-part-root=""
         data-shape="circular"
         data-size="lg"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
         style="--slotted-progress-indicator-percent: 55"
       >
         <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-          <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-          <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+          <circle
+            cx="24"
+            cy="24"
+            data-part="track"
+            data-part-track=""
+            pathLength="100"
+            r="20"
+          ></circle>
+          <circle
+            cx="24"
+            cy="24"
+            data-part="indicator"
+            data-part-indicator=""
+            pathLength="100"
+            r="20"
+          ></circle>
         </svg>
       </div>
     </div>
@@ -845,16 +1113,20 @@
       aria-valuenow="62"
       aria-valuetext="62%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 62"
     >
-      <span data-part="label" id="h-ton-a">accent — the work in hand</span>
-      <span data-part="value">62%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-ton-a">accent — the work in hand</span>
+      <span data-part="value" data-part-value="">62%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -864,16 +1136,20 @@
       aria-valuenow="62"
       aria-valuetext="62%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="secondary"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 62"
     >
-      <span data-part="label" id="h-ton-b">secondary — a background job</span>
-      <span data-part="value">62%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-ton-b">secondary — a background job</span>
+      <span data-part="value" data-part-value="">62%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -884,16 +1160,20 @@
       aria-valuetext="100%"
       data-complete=""
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="success"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 100"
     >
-      <span data-part="label" id="h-ton-c">success — the upload landed</span>
-      <span data-part="value">100%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-ton-c">success — the upload landed</span>
+      <span data-part="value" data-part-value="">100%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -903,16 +1183,20 @@
       aria-valuenow="88"
       aria-valuetext="88%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="warning"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 88"
     >
-      <span data-part="label" id="h-ton-d">warning — 88% of the quota</span>
-      <span data-part="value">88%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-ton-d">warning — 88% of the quota</span>
+      <span data-part="value" data-part-value="">88%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -922,16 +1206,20 @@
       aria-valuenow="41"
       aria-valuetext="41%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="danger"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 41"
     >
-      <span data-part="label" id="h-ton-e">danger — the transfer failed</span>
-      <span data-part="value">41%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-ton-e">danger — the transfer failed</span>
+      <span data-part="value" data-part-value="">41%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
   </div>
 </section>
@@ -952,14 +1240,18 @@
         aria-valuemin="0"
         data-indeterminate=""
         data-part="root"
+        data-part-root=""
         data-placement="page"
         data-shape="linear"
         data-size="md"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
       >
-        <div data-part="track"><div data-part="indicator"></div></div>
+        <div data-part="track" data-part-track="">
+          <div data-part="indicator" data-part-indicator=""></div>
+        </div>
       </div>
     </div>
 
@@ -970,15 +1262,19 @@
         aria-valuemin="0"
         aria-valuenow="72"
         data-part="root"
+        data-part-root=""
         data-placement="page"
         data-shape="linear"
         data-size="md"
         data-tone="accent"
         data-ui="progress-indicator"
+        data-ui-progress-indicator=""
         role="progressbar"
         style="--slotted-progress-indicator-percent: 72"
       >
-        <div data-part="track"><div data-part="indicator"></div></div>
+        <div data-part="track" data-part-track="">
+          <div data-part="indicator" data-part-indicator=""></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1018,14 +1314,18 @@
           aria-valuemin="0"
           data-indeterminate=""
           data-part="root"
+          data-part-root=""
           data-placement="edge-start"
           data-shape="linear"
           data-size="sm"
           data-tone="accent"
           data-ui="progress-indicator"
+          data-ui-progress-indicator=""
           role="progressbar"
         >
-          <div data-part="track"><div data-part="indicator"></div></div>
+          <div data-part="track" data-part-track="">
+            <div data-part="indicator" data-part-indicator=""></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1054,15 +1354,19 @@
           aria-valuemin="0"
           aria-valuenow="62"
           data-part="root"
+          data-part-root=""
           data-placement="edge-end"
           data-shape="linear"
           data-size="sm"
           data-tone="accent"
           data-ui="progress-indicator"
+          data-ui-progress-indicator=""
           role="progressbar"
           style="--slotted-progress-indicator-percent: 62"
         >
-          <div data-part="track"><div data-part="indicator"></div></div>
+          <div data-part="track" data-part-track="">
+            <div data-part="indicator" data-part-indicator=""></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1091,15 +1395,19 @@
           aria-valuemin="0"
           aria-valuenow="38"
           data-part="root"
+          data-part-root=""
           data-placement="edge-start"
           data-shape="linear"
           data-size="sm"
           data-tone="danger"
           data-ui="progress-indicator"
+          data-ui-progress-indicator=""
           role="progressbar"
           style="--slotted-progress-indicator-percent: 38"
         >
-          <div data-part="track"><div data-part="indicator"></div></div>
+          <div data-part="track" data-part-track="">
+            <div data-part="indicator" data-part-indicator=""></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1117,16 +1425,22 @@
       aria-valuenow="47"
       aria-valuetext="47%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 47"
     >
-      <span data-part="label" id="h-con-a">Verificando assinaturas do pacote publicado</span>
-      <span data-part="value">47%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="label" data-part-label="" id="h-con-a"
+        >Verificando assinaturas do pacote publicado</span
+      >
+      <span data-part="value" data-part-value="">47%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -1136,18 +1450,22 @@
       aria-valuenow="47"
       aria-valuetext="47%"
       data-part="root"
+      data-part-root=""
       data-shape="linear"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 47"
     >
-      <span data-part="label" id="h-con-b"
+      <span data-part="label" data-part-label="" id="h-con-b"
         >sha256:9f2c4ae1b8d37c05e6f1a92b4d8c7e30f5a6b1c2d3e4f5061728394a5b6c7d8e</span
       >
-      <span data-part="value">47%</span>
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <span data-part="value" data-part-value="">47%</span>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
@@ -1157,19 +1475,35 @@
       aria-valuenow="47"
       aria-valuetext="47 من 100"
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
       role="progressbar"
       style="--slotted-progress-indicator-percent: 47"
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-        <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="indicator"
+          data-part-indicator=""
+          pathLength="100"
+          r="20"
+        ></circle>
       </svg>
-      <span data-part="label" id="h-con-c">جارٍ التحقق من التوقيعات</span>
-      <span data-part="value">٤٧٪</span>
+      <span data-part="label" data-part-label="" id="h-con-c">جارٍ التحقق من التوقيعات</span>
+      <span data-part="value" data-part-value="">٤٧٪</span>
     </div>
   </div>
 </section>
@@ -1186,26 +1520,46 @@
       aria-hidden="true"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="morph"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
     >
-      <div data-part="track"><div data-part="indicator"></div></div>
+      <div data-part="track" data-part-track="">
+        <div data-part="indicator" data-part-indicator=""></div>
+      </div>
     </div>
 
     <div
       aria-hidden="true"
       data-indeterminate=""
       data-part="root"
+      data-part-root=""
       data-shape="circular"
       data-size="md"
       data-tone="accent"
       data-ui="progress-indicator"
+      data-ui-progress-indicator=""
     >
       <svg aria-hidden="true" focusable="false" viewBox="0 0 48 48">
-        <circle cx="24" cy="24" data-part="track" pathLength="100" r="20"></circle>
-        <circle cx="24" cy="24" data-part="indicator" pathLength="100" r="20"></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="track"
+          data-part-track=""
+          pathLength="100"
+          r="20"
+        ></circle>
+        <circle
+          cx="24"
+          cy="24"
+          data-part="indicator"
+          data-part-indicator=""
+          pathLength="100"
+          r="20"
+        ></circle>
       </svg>
     </div>
   </div>

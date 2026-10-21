@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/top-navigation/top-navigation.css';
 
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
@@ -419,12 +420,12 @@ export function TopNavigation({
     ],
   );
 
-  const rootProps: TopNavigationRootProps = {
+  const rootProps: TopNavigationRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
         {skipTo !== undefined ? (
-          <a data-part="skip" href={`#${skipTo}`}>
+          <a data-part="skip" data-part-skip="" href={`#${skipTo}`}>
             {t('skip')}
           </a>
         ) : null}
@@ -439,7 +440,7 @@ export function TopNavigation({
     'data-ui': 'top-navigation',
     ref: setRoot,
     style,
-  };
+  });
 
   const Element = resolvedLandmark ? 'header' : 'div';
 

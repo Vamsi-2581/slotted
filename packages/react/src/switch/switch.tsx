@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/switch/switch.css';
 
 import { switchMessages } from '@slotted/core/i18n';
@@ -231,6 +232,7 @@ export function Switch({
         aria-readonly={ariaReadOnly ?? (resolvedReadOnly === true ? true : undefined)}
         aria-required={ariaRequired ?? (field?.required === true ? true : undefined)}
         data-part="control"
+        data-part-control=""
         disabled={resolvedDisabled}
         id={controlId}
         onChange={(event: ChangeEvent<HTMLInputElement>) => onChange?.(event)}
@@ -244,10 +246,10 @@ export function Switch({
         type="checkbox"
         {...(checked === undefined ? { defaultChecked } : { checked })}
       />
-      <span data-part="track">
+      <span data-part="track" data-part-track="">
         {/* The check is always in the DOM while there is a mark at all, and the
             stylesheet fades it in with the checked state. */}
-        <span data-part="thumb">
+        <span data-part="thumb" data-part-thumb="">
           {resolvedIndicator === 'mark' ? (
             <Icon>
               <Glyph name="check" />
@@ -256,12 +258,12 @@ export function Switch({
         </span>
       </span>
       {children === undefined ? null : (
-        <label data-part="label" htmlFor={controlId}>
+        <label data-part="label" data-part-label="" htmlFor={controlId}>
           {children}
         </label>
       )}
       {description === undefined ? null : (
-        <p data-part="description" id={descriptionId}>
+        <p data-part="description" data-part-description="" id={descriptionId}>
           {description}
         </p>
       )}
@@ -271,7 +273,7 @@ export function Switch({
     </>
   );
 
-  const rootProps: SwitchRootProps = {
+  const rootProps: SwitchRootProps = keyedProps({
     children: parts,
     className,
     style,
@@ -285,7 +287,7 @@ export function Switch({
     ...(resolvedReadOnly === true ? { 'data-readonly': '' } : {}),
     'data-size': resolvedSize,
     'data-ui': 'switch',
-  };
+  });
 
   return render === undefined ? <span {...rootProps} /> : render(rootProps);
 }

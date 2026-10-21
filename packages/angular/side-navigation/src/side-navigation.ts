@@ -96,7 +96,9 @@ function visible(element: HTMLElement, root: HTMLElement): boolean {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'side-navigation',
+    'data-ui-side-navigation': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.data-mode]': 'resolvedMode()',
     '[attr.data-size]': 'resolvedSize()',

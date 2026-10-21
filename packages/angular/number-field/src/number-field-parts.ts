@@ -18,7 +18,7 @@ import { SlNumberField } from './number-field';
   selector: '[slNumberFieldStart]',
   standalone: true,
   exportAs: 'slNumberFieldStart',
-  host: { 'data-part': 'start' },
+  host: { 'data-part': 'start', 'data-part-start': '' },
 })
 export class SlNumberFieldStart {}
 
@@ -27,7 +27,7 @@ export class SlNumberFieldStart {}
   selector: '[slNumberFieldEnd]',
   standalone: true,
   exportAs: 'slNumberFieldEnd',
-  host: { 'data-part': 'end' },
+  host: { 'data-part': 'end', 'data-part-end': '' },
 })
 export class SlNumberFieldEnd {}
 
@@ -51,6 +51,7 @@ export class SlNumberFieldEnd {}
   exportAs: 'slNumberFieldScrub',
   host: {
     'data-part': 'scrub',
+    'data-part-scrub': '',
     'aria-hidden': 'true',
     '[attr.data-scrubbing]': "active() ? '' : null",
     '(pointerdown)': 'begin($event)',

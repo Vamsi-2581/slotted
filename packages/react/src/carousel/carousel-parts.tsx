@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import {
   carouselKeyIntent,
   indicatorDistance,
@@ -78,7 +79,7 @@ export function CarouselViewport({
     carousel.go(target, 'keyboard', event, { instant: event.repeat });
   }
 
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-label': carousel.t('viewport'),
     role: 'group',
     tabIndex: 0,
@@ -87,7 +88,7 @@ export function CarouselViewport({
     'data-part': 'viewport',
     id: carousel.viewportId,
     onKeyDown: handleKeyDown,
-  };
+  });
 
   return render === undefined ? (
     <div {...rootProps} ref={attach} />
@@ -103,13 +104,13 @@ export function CarouselViewport({
  */
 export function CarouselSlide({ children, ref, render, ...nativeProps }: CarouselSlideProps) {
   const carousel = useCarousel();
-  const rootProps = {
+  const rootProps = keyedProps({
     role: 'group',
     'aria-roledescription': carousel.t('slideRoleDescription'),
     ...nativeProps,
     children,
     'data-part': 'slide',
-  };
+  });
   return render === undefined ? (
     <div {...rootProps} ref={ref} />
   ) : (
@@ -134,7 +135,7 @@ function StepButton({
     carousel.step(delta, activationReason(event), event);
   }
 
-  const rootProps: CarouselButtonRootProps = {
+  const rootProps: CarouselButtonRootProps = keyedProps({
     'aria-controls': carousel.viewportId,
     'aria-label': carousel.t(delta === 1 ? 'next' : 'previous'),
     ...nativeProps,
@@ -148,7 +149,7 @@ function StepButton({
     'data-part': delta === 1 ? 'next' : 'previous',
     onClick: handleClick,
     type: 'button',
-  };
+  });
 
   return render === undefined ? (
     <button {...rootProps} ref={ref} />
@@ -189,7 +190,7 @@ export function CarouselAutoplay({
     carousel.setPlaying(!carousel.playing, activationReason(event), event);
   }
 
-  const rootProps: CarouselButtonRootProps = {
+  const rootProps: CarouselButtonRootProps = keyedProps({
     'aria-controls': carousel.viewportId,
     'aria-label': carousel.t(carousel.playing ? 'stop' : 'start'),
     ...nativeProps,
@@ -201,7 +202,7 @@ export function CarouselAutoplay({
     'data-part': 'autoplay',
     onClick: handleClick,
     type: 'button',
-  };
+  });
 
   return render === undefined ? (
     <button {...rootProps} ref={ref} />
@@ -218,12 +219,12 @@ export function CarouselControls({
   render,
   ...nativeProps
 }: CarouselControlsProps) {
-  const rootProps = {
+  const rootProps = keyedProps({
     ...nativeProps,
     children,
     'data-part': 'controls',
     'data-placement': placement,
-  };
+  });
   return render === undefined ? (
     <div {...rootProps} ref={ref} />
   ) : (
@@ -277,7 +278,7 @@ export function CarouselIndicators({
   const adaptive = variant === 'dots' && indicatorDistance(0, 0, carousel.pageCount) !== null;
   const pagesList = Array.from({ length: carousel.pageCount }, (_, index) => index);
 
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-label': carousel.t('indicators'),
     ...nativeProps,
     children: pagesList.map((index) =>
@@ -287,7 +288,7 @@ export function CarouselIndicators({
     'data-variant': variant,
     ...(adaptive ? { 'data-adaptive': '' } : {}),
     role: 'tablist' as const,
-  };
+  });
 
   return render === undefined ? (
     <div {...rootProps} ref={attach} />
@@ -317,7 +318,7 @@ export function CarouselIndicator({
     carousel.go(page, activationReason(event), event);
   }
 
-  const rootProps: CarouselIndicatorRootProps = {
+  const rootProps: CarouselIndicatorRootProps = keyedProps({
     ...(children === undefined
       ? {
           'aria-label': carousel.t('indicator', { page: page + 1, count: carousel.pageCount }),
@@ -334,7 +335,7 @@ export function CarouselIndicator({
     role: 'tab',
     tabIndex: current ? 0 : -1,
     type: 'button',
-  };
+  });
 
   return render === undefined ? (
     <button {...rootProps} ref={ref} />
@@ -352,7 +353,7 @@ export function CarouselCounter({ children, ref, render, ...nativeProps }: Carou
   const carousel = useCarousel();
   const shown = carousel.pageCount === 0 ? 0 : carousel.page + 1;
   const number = new Intl.NumberFormat(carousel.locale);
-  const rootProps = {
+  const rootProps = keyedProps({
     'aria-hidden': true,
     ...nativeProps,
     children:
@@ -360,7 +361,7 @@ export function CarouselCounter({ children, ref, render, ...nativeProps }: Carou
         ? `${number.format(shown)} / ${number.format(carousel.pageCount)}`
         : children(shown, carousel.pageCount),
     'data-part': 'counter',
-  };
+  });
   return render === undefined ? (
     <span {...rootProps} ref={ref} />
   ) : (

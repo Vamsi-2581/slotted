@@ -41,7 +41,7 @@ function rules(css) {
 
 /** The family's own name for the label gap, read from its root rule. */
 function labelGapProperty(family, css) {
-  const root = `[data-ui='${family}'][data-part='root']`;
+  const root = `[data-ui-${family.toLowerCase()}][data-part-root]`;
   const body = css.split(`${root}{`)[1]?.split('}')[0] ?? '';
   return body.match(/(--_[a-z-]+):var\(--slotted-control-label-gap-md,12px\)/)?.[1];
 }
@@ -49,7 +49,7 @@ function labelGapProperty(family, css) {
 test('every selection control reads the label gap the theme restates per density', () => {
   for (const family of FAMILIES) {
     const css = normalized(family);
-    const root = `[data-ui='${family}'][data-part='root']`;
+    const root = `[data-ui-${family.toLowerCase()}][data-part-root]`;
     const property = labelGapProperty(family, css);
     assert.ok(property, `${family} does not read the label gap at rest`);
     for (const [size, px] of LABEL_GAP) {
@@ -78,7 +78,8 @@ test('every selection control puts that gap, and nothing else, between the contr
     const all = rules(normalized(family));
     const label = all.find(
       ({ selector }) =>
-        selector.endsWith("[data-part='label']") && selector.startsWith(`[data-ui='${family}']`),
+        selector.endsWith('[data-part-label]') &&
+        selector.startsWith(`[data-ui-${family.toLowerCase()}]`),
     );
     assert.ok(label, `${family} has no label rule`);
     assert.doesNotMatch(label.body, /margin-inline|column-gap|gap:/, `${family} adds to the gap`);
@@ -88,7 +89,7 @@ test('every selection control puts that gap, and nothing else, between the contr
     assert.equal(grid.length, 1, `${family} states the gap on the grid ${grid.length} times`);
     assert.match(
       grid[0].selector,
-      /:has\(>\[data-part='label'\]\)$/,
+      /:has\(>\[data-part-label\]\)$/,
       `${family} opens the gap when there is no label beside the control`,
     );
   }

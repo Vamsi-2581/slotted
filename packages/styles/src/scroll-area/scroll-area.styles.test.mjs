@@ -2,6 +2,17 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
+/**
+ * The fragment as its regular expressions read it: the selector keys the
+ * stylesheet matches are left out, and every tag stands on one line, as it did
+ * before the formatter wrapped the tags the keys made long.
+ */
+function withoutSelectorKeys(markup) {
+  return markup
+    .replace(/\s+data-(?:part|ui)-[a-z0-9-]+=""/g, '')
+    .replace(/<[^<>]+>/g, (tag) => tag.replace(/\s+/g, ' ').replace(/ (\/?>)$/, '$1'));
+}
+
 const source = readFileSync(new URL('./scroll-area.css', import.meta.url), 'utf8');
 
 /**
@@ -19,7 +30,9 @@ const contract = JSON.parse(
     'utf8',
   ),
 );
-const fragment = readFileSync(new URL('./scroll-area.harness.html', import.meta.url), 'utf8');
+const fragment = withoutSelectorKeys(
+  readFileSync(new URL('./scroll-area.harness.html', import.meta.url), 'utf8'),
+);
 
 /**
  * The whole of the family's headline decision, in one declaration each. A later
@@ -36,7 +49,7 @@ test('themes the platform scrollbar rather than hiding it', () => {
   );
   assert.doesNotMatch(
     css,
-    /\[data-part='(?:scrollbar|thumb|corner)'\]/,
+    /\[data-part-(?:scrollbar|thumb|corner)\]/,
     'a drawn scrollbar has parts, and this family draws none',
   );
 });
@@ -62,20 +75,20 @@ test('removes the bar only where the consumer asked for it', () => {
  */
 test('keeps the veil off the frame and off the focus ring', () => {
   const maskRule =
-    /\[data-ui='scroll-area'\] > \[data-part='viewport'\] \{[\s\S]*?mask-composite: intersect;/;
+    /\[data-ui-scroll-area\] > \[data-part-viewport\] \{[\s\S]*?mask-composite: intersect;/;
   assert.match(css, maskRule, 'the mask is on the viewport');
   assert.doesNotMatch(
     css,
-    /\[data-ui='scroll-area'\] \{[^}]*mask-image/,
+    /\[data-ui-scroll-area\] \{[^}]*mask-image/,
     'a mask on the root fades the border the consumer put there',
   );
 
   const focus =
-    /\[data-ui='scroll-area'\]:has\(\s*> \[data-part='viewport'\]:focus-visible\[data-focus-origin='keyboard'\]\s*\) \{[^}]*outline:/;
+    /\[data-ui-scroll-area\]:has\(\s*> \[data-part-viewport\]:focus-visible\[data-focus-origin='keyboard'\]\s*\) \{[^}]*outline:/;
   assert.match(css, focus, 'the ring is drawn by the element the mask is not on');
   assert.doesNotMatch(
     css,
-    /\[data-part='viewport'\]:focus-visible \{[^}]*outline:/,
+    /\[data-part-viewport\]:focus-visible \{[^}]*outline:/,
     'a ring on the masked element is a ring the veil cuts',
   );
 });
@@ -90,7 +103,7 @@ test('keeps the veil off the frame and off the focus ring', () => {
 test('mirrors the inline veil, once, with a selector that reads the direction', () => {
   assert.match(
     css,
-    /:dir\(rtl\) > \[data-part='viewport'\] \{\s*--_fade-left: var\(--_scroll-area-fade-inline-end\);\s*--_fade-right: var\(--_scroll-area-fade-inline-start\);/,
+    /:dir\(rtl\) > \[data-part-viewport\] \{\s*--_fade-left: var\(--_scroll-area-fade-inline-end\);\s*--_fade-right: var\(--_scroll-area-fade-inline-start\);/,
   );
   assert.doesNotMatch(css, /\[dir='rtl'\]/, 'an attribute misses a direction set in CSS');
 });
@@ -180,9 +193,9 @@ test('exercises every part and every axis value in the harness', () => {
 test('lets the wheel through on the axis it does not scroll', () => {
   const flat = css.replace(/\s+/g, '');
   const inline =
-    "[data-ui='scroll-area'][data-axis='inline']>[data-part='viewport']{overscroll-behavior-y:auto;overscroll-behavior-block:auto;}";
+    "[data-ui-scroll-area][data-axis='inline']>[data-part-viewport]{overscroll-behavior-y:auto;overscroll-behavior-block:auto;}";
   const block =
-    "[data-ui='scroll-area'][data-axis='block']>[data-part='viewport']{overscroll-behavior-x:auto;overscroll-behavior-inline:auto;}";
+    "[data-ui-scroll-area][data-axis='block']>[data-part-viewport]{overscroll-behavior-x:auto;overscroll-behavior-inline:auto;}";
   assert.ok(flat.includes(inline), 'an inline area passes the vertical wheel on');
   assert.ok(flat.includes(block), 'a block area passes the horizontal wheel on');
   const lastChaining = Math.max(
@@ -202,8 +215,7 @@ test('draws the viewport ring for a focus from the keyboard only', () => {
     m[1].replace(/\s+/g, ' ').trim(),
   );
   const ring = rules.filter(
-    (selector) =>
-      selector.includes("[data-part='viewport']") && selector.includes(':focus-visible'),
+    (selector) => selector.includes('[data-part-viewport]') && selector.includes(':focus-visible'),
   );
   assert.ok(ring.length > 0, 'the region has a ring');
   for (const selector of ring) {
@@ -211,7 +223,7 @@ test('draws the viewport ring for a focus from the keyboard only', () => {
   }
   const flat = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
   assert.ok(
-    flat.includes("[data-part='viewport']:focus { outline: none; }"),
+    flat.includes('[data-part-viewport]:focus { outline: none; }'),
     'the browser’s own ring is suppressed for a focus from the pointer',
   );
 });

@@ -77,6 +77,7 @@ export interface ScrollAreaScrollEvent {
     <div
       #viewport
       data-part="viewport"
+      data-part-viewport=""
       [attr.role]="wired() ? 'region' : null"
       [attr.tabindex]="wired() ? '0' : null"
       [attr.aria-label]="ariaLabel()"
@@ -91,7 +92,9 @@ export interface ScrollAreaScrollEvent {
   encapsulation: ViewEncapsulation.None,
   host: {
     'data-ui': 'scroll-area',
+    'data-ui-scroll-area': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.data-axis]': 'resolvedAxis()',
     '[attr.data-scrollbars]': 'resolvedScrollbars()',
     '[attr.data-gutter]': 'resolvedGutter()',
@@ -289,6 +292,6 @@ export class SlScrollArea {
   selector: '[slScrollAreaContent]',
   standalone: true,
   exportAs: 'slScrollAreaContent',
-  host: { 'data-part': 'content' },
+  host: { 'data-part': 'content', 'data-part-content': '' },
 })
 export class SlScrollAreaContent {}

@@ -51,7 +51,7 @@ test('reads the same breakpoint the contract states, and no other', () => {
  * geometry; the width only ever decides the mode.
  */
 test('draws the layer from the mode, never from the width', () => {
-  const layer = rule("[data-nav-mode='overlay'] > [data-part='nav'] {");
+  const layer = rule("[data-nav-mode='overlay'] > [data-part-nav] {");
   assert.match(layer.body, /position:\s*absolute/);
   assert.match(layer.body, /z-index:/);
   assert.match(layer.body, /translate:\s*-100% 0/);
@@ -91,7 +91,7 @@ test('never rewrites the root template from the root own query', () => {
  * sliver of unreachable content beside a narrow panel.
  */
 test('draws the layer wider than the column and leaves a strip to press', () => {
-  const layer = rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body;
+  const layer = rule("[data-nav-mode='overlay'] > [data-part-nav] {").body;
   assert.match(
     layer.replace(/\s+/g, ''),
     /inline-size:min\(var\(--_nav-overlay-size\),calc\(100%-var\(--_row-mark\)-2\*var\(--_gutter\)\)\)/,
@@ -102,10 +102,10 @@ test('draws the layer wider than the column and leaves a strip to press', () => 
 
 test('gives the layer the rows it should cover, and the veil the same ones', () => {
   assert.match(
-    rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body,
+    rule("[data-nav-mode='overlay'] > [data-part-nav] {").body,
     /grid-area:\s*2 \/ 1 \/ -1 \/ -1/,
   );
-  assert.match(rule("> [data-part='scrim'] {").body, /grid-area:\s*2 \/ 1 \/ -1 \/ -1/);
+  assert.match(rule('> [data-part-scrim] {').body, /grid-area:\s*2 \/ 1 \/ -1 \/ -1/);
 });
 
 /**
@@ -121,7 +121,7 @@ test('gives the layer the rows it should cover, and the veil the same ones', () 
  * `scroll='document'` and nothing leaves it that way.
  */
 test('clips its own inline axis, so a closed layer moves no scroll', () => {
-  const root = rule("[data-ui='app-shell'] {").body.replace(/\/\*[\s\S]*?\*\//g, '');
+  const root = rule('[data-ui-app-shell] {').body.replace(/\/\*[\s\S]*?\*\//g, '');
   assert.match(root, /overflow-x:\s*clip/);
   assert.match(root, /overflow-y:\s*visible/);
   assert.match(root, /overflow-inline:\s*clip/);
@@ -145,11 +145,11 @@ test('clips its own inline axis, so a closed layer moves no scroll', () => {
 test('insets the rows of the overlay card on the inset plane', () => {
   /* The card and the sheet alike: every layer has an edge, and the parts read
      the inset the layer states. */
-  const layer = rule("[data-nav-mode='overlay'] > [data-part='nav'] {").body;
+  const layer = rule("[data-nav-mode='overlay'] > [data-part-nav] {").body;
   assert.match(layer, /--_nav-inset:\s*var\(--_row-inset\)/);
   assert.match(layer, /padding-inline:\s*0/);
   const parts = rule(
-    "> [data-part='nav']\n    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {",
+    '> [data-part-nav]\n    > :is([data-part-nav-header], [data-part-nav-body], [data-part-nav-footer]) {',
   ).body;
   assert.match(parts, /padding-inline:\s*calc\(var\(--_nav-inset\) \+ var\(--_row-ring-inset\)\)/);
 });
@@ -166,7 +166,7 @@ test('insets the rows of the overlay card on the inset plane', () => {
  */
 test('flushes the content on the inset plane once the navigation is a layer', () => {
   const flush = rule(
-    "[data-canvas='inset'][data-nav-mode='overlay'] > [data-part='main'] {",
+    "[data-canvas='inset'][data-nav-mode='overlay'] > [data-part-main] {",
   ).body.replace(/\/\*[\s\S]*?\*\//g, '');
   assert.match(flush, /border-block-end:\s*0/);
   assert.match(flush, /border-inline:\s*0/);
@@ -180,7 +180,7 @@ test('flushes the content on the inset plane once the navigation is a layer', ()
     '';
   assert.match(
     narrow,
-    /:not\(\[data-nav-mode\]\)\[data-canvas='inset'\]\s*>\s*\[data-part='main'\]/,
+    /:not\(\[data-nav-mode\]\)\[data-canvas='inset'\]\s*>\s*\[data-part-main\]/,
     'a shell not yet measured draws the narrow picture from the width',
   );
 });
@@ -208,7 +208,7 @@ test('publishes the measures its rows stand on', () => {
   assert.match(css, /--slotted-app-shell-row-height: var\(--_row-mark\)/);
   /* The control in the bar is the mark column, or it does not stand over the
      marks in the column. */
-  const toggle = rule("[data-part='aside-toggle'] {");
+  const toggle = rule('[data-part-aside-toggle] {');
   assert.match(toggle.body, /inline-size:\s*var\(--_row-mark\)/);
   assert.match(toggle.body, /block-size:\s*var\(--_row-mark\)/);
   /* A rail is one mark column with a row's inset on each side, so it is
@@ -247,7 +247,7 @@ test('separates the inset canvas with a gutter and not with a rule', () => {
     if (/--_seam:/.test(css.slice(open, hit.index))) continue;
     assert.match(
       selector,
-      /data-canvas='flush'|data-canvas='panel'|data-primary='main'|data-part='nav-rail'/,
+      /data-canvas='flush'|data-canvas='panel'|data-primary='main'|data-part-nav-rail/,
       `${selector.trim().replace(/\s+/g, ' ')} draws a seam where a gutter separates`,
     );
     assert.doesNotMatch(selector, /data-canvas='(inset|floating)'/);
@@ -256,7 +256,7 @@ test('separates the inset canvas with a gutter and not with a rule', () => {
   assert.match(css, /box-shadow:\s*var\(--_elevation\)/);
   /* The gutter is a margin, so the navigation's own box is the strip a reader
      sees and a rail is centred in itself. */
-  const inset = rule("[data-canvas='inset'] > [data-part='nav'] {");
+  const inset = rule("[data-canvas='inset'] > [data-part-nav] {");
   assert.match(inset.body, /margin-inline-start:\s*var\(--_gutter\)/);
   assert.equal(/padding-inline-start/.test(inset.body), false);
 });
@@ -267,7 +267,7 @@ test('separates the inset canvas with a gutter and not with a rule', () => {
  */
 test('gives every region a ground and an ink of its own', () => {
   for (const region of ['banner', 'nav', 'main', 'aside', 'footer']) {
-    const body = rule(`> [data-part='${region}'] {`).body.replace(/\s+/g, ' ');
+    const body = rule(`> [data-part-${region.toLowerCase()}] {`).body.replace(/\s+/g, ' ');
     assert.match(
       body,
       new RegExp(`background-color: var\\( ?--slotted-app-shell-${region}-surface,`),
@@ -291,17 +291,17 @@ test('gives every region a ground and an ink of its own', () => {
     );
     /* And the plane is a second declaration on the region, not a second local. */
     assert.match(
-      rule(`[data-canvas='flush'] > [data-part='${region}'] {`).body.replace(/\s+/g, ' '),
+      rule(`[data-canvas='flush'] > [data-part-${region.toLowerCase()}] {`).body.replace(
+        /\s+/g,
+        ' ',
+      ),
       new RegExp(`background-color: var\\( ?--slotted-app-shell-${region}-surface,`),
       `${region} takes no ground of its own under flush`,
     );
   }
   /* And the control is of the region it stands in, whatever that was painted:
      read from a token it kept the light scheme's ink over a dark column. */
-  assert.match(
-    rule("[data-part='aside-toggle'] {").body,
-    /color: color-mix\(in oklab, currentcolor/,
-  );
+  assert.match(rule('[data-part-aside-toggle] {').body, /color: color-mix\(in oklab, currentcolor/);
 });
 
 /**
@@ -311,16 +311,16 @@ test('gives every region a ground and an ink of its own', () => {
  * as `padding`, and once more under `flush` after the first was fixed.
  */
 test('adds nothing to one side of the region under either plane', () => {
-  const inset = rule("[data-canvas='inset'] > [data-part='nav'] {");
+  const inset = rule("[data-canvas='inset'] > [data-part-nav] {");
   assert.equal(/padding-inline/.test(inset.body), false, 'inset pads the region on one side');
   /* Every inline padding the region takes is the one symmetric inset, and the
      closed width counts it on both sides. */
   const onOneSide = /padding-inline-(start|end)/;
-  for (const [, body] of css.matchAll(/> \[data-part='nav'\] \{([^}]*)\}/g)) {
+  for (const [, body] of css.matchAll(/> \[data-part-nav\] \{([^}]*)\}/g)) {
     assert.equal(onOneSide.test(body), false, 'a rule pads the region on one side');
   }
   assert.match(
-    rule("[data-nav-mode='inline'] > [data-part='nav'] {").body,
+    rule("[data-nav-mode='inline'] > [data-part-nav] {").body,
     /inline-size:\s*calc\(\s*var\(--_rail-size\) \+ 2 \* \(var\(--_nav-inset\) \+ var\(--_row-ring-inset\)\) \+ var\(--_nav-edges\)\s*\)/,
   );
   assert.match(rule("[data-canvas='flush'] {").body, /--_nav-inset:\s*var\(--_row-inset\)/);
@@ -343,11 +343,11 @@ test('pads the column parts by the focus ring and shares the body gutter', () =>
     /--_row-ring-inset:\s*calc\(\s*var\(--slotted-focus-ring-width, 2px\) \+ var\(--slotted-focus-ring-offset, 2px\)\s*\)/,
   );
   const parts = rule(
-    "> [data-part='nav']\n    > :is([data-part='nav-header'], [data-part='nav-body'], [data-part='nav-footer']) {",
+    '> [data-part-nav]\n    > :is([data-part-nav-header], [data-part-nav-body], [data-part-nav-footer]) {',
   ).body;
   assert.match(parts, /--slotted-app-shell-row-ring-inset:\s*var\(--_row-ring-inset\)/);
   const ends = rule(
-    "[data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-header'],\n  [data-ui='app-shell'] > [data-part='nav'] > [data-part='nav-footer'] {",
+    '[data-ui-app-shell] > [data-part-nav] > [data-part-nav-header],\n  [data-ui-app-shell] > [data-part-nav] > [data-part-nav-footer] {',
   ).body;
   assert.match(ends, /overflow:\s*hidden/);
   assert.match(ends, /scrollbar-gutter:\s*stable/);
@@ -366,15 +366,13 @@ test('makes the navigation region a query container of its own', () => {
 test('makes the bar a query container of its own', () => {
   assert.match(css, /container-name:\s*slotted-app-shell-banner/);
   /* And it may be narrower than what it holds without pushing the frame out. */
-  const actions = rule("> [data-part='banner'] > [data-part='actions'] {");
+  const actions = rule('> [data-part-banner] > [data-part-actions] {');
   assert.match(actions.body, /min-inline-size:\s*0/);
 });
 
 /** Every part the contract declares is painted, and no rule names another. */
 test('paints every part the contract declares and no other', () => {
-  const painted = new Set(
-    [...css.matchAll(/\[data-part=['"]([a-z-]+)['"]\]/g)].map(([, part]) => part),
-  );
+  const painted = new Set([...css.matchAll(/\[data-part-([a-z-]+)\]/g)].map(([, part]) => part));
   const declared = new Set(contract.members.appShell.parts);
 
   for (const part of declared) {
@@ -403,7 +401,7 @@ test('paints no disclosure mark of its own', () => {
  * the pane's geometry under the width's control.
  */
 test('draws the pane layer from the mode, and the pane column from the width', () => {
-  const layer = rule("[data-aside-mode='overlay'] > [data-part='aside'] {");
+  const layer = rule("[data-aside-mode='overlay'] > [data-part-aside] {");
   assert.match(layer.body, /position:\s*absolute/);
   assert.match(layer.body, /grid-area:\s*2 \/ 1 \/ -1 \/ -1/);
   assert.match(layer.body, /translate:\s*100% 0/);
@@ -414,7 +412,7 @@ test('draws the pane layer from the mode, and the pane column from the width', (
 
   /* Every width rule for the pane leaves the layer alone. */
   const queries = css.slice(css.indexOf('@container slotted-app-shell ('));
-  for (const hit of [...queries.matchAll(/> \[data-part='aside'\]/g)]) {
+  for (const hit of [...queries.matchAll(/> \[data-part-aside\]/g)]) {
     const start =
       Math.max(queries.lastIndexOf('}', hit.index), queries.lastIndexOf('{', hit.index)) + 1;
     const selector = queries.slice(start, hit.index).replace(/\s+/g, '');
@@ -422,7 +420,7 @@ test('draws the pane layer from the mode, and the pane column from the width', (
   }
   /* Closed, the pane leaves the layout: it has no rail. */
   const shut = css.indexOf(
-    ":not([data-aside-mode='overlay']) > [data-part='aside']:not([data-open])",
+    ":not([data-aside-mode='overlay']) > [data-part-aside]:not([data-open])",
   );
   assert.notEqual(shut, -1, 'a closed pane has no rule');
   assert.match(css.slice(shut, css.indexOf('}', shut)), /display:\s*none/);
@@ -430,12 +428,12 @@ test('draws the pane layer from the mode, and the pane column from the width', (
 
 /** The pane pins its ends and scrolls its middle, as the column does. */
 test('gives the pane a pinned head, a scrolling body and a pinned foot', () => {
-  assert.match(rule("> [data-part='aside'] > [data-part='aside-body'] {").body, /flex:\s*1 1 auto/);
-  const ends = rule("> [data-part='aside'] > [data-part='aside-header'],").body;
+  assert.match(rule('> [data-part-aside] > [data-part-aside-body] {').body, /flex:\s*1 1 auto/);
+  const ends = rule('> [data-part-aside] > [data-part-aside-header],').body;
   assert.match(ends, /flex:\s*0 0 auto/);
   assert.match(ends, /padding-block:\s*var\(--_row-inset\)/);
   /* And the middle of the bar grows, so a bar is three clusters and no void. */
-  const centre = rule("> [data-part='banner'] > [data-part='centre'] {").body;
+  const centre = rule('> [data-part-banner] > [data-part-centre] {').body;
   assert.match(centre, /flex:\s*1 1 auto/);
   assert.match(centre, /min-inline-size:\s*0/);
 });
@@ -449,8 +447,8 @@ test('gives the pane a pinned head, a scrolling body and a pinned foot', () => {
  */
 test('gives both scrolling bodies a gutter and the thin themed bar', () => {
   for (const selector of [
-    "> [data-part='nav'] > [data-part='nav-body'] {",
-    "> [data-part='aside'] > [data-part='aside-body'] {",
+    '> [data-part-nav] > [data-part-nav-body] {',
+    '> [data-part-aside] > [data-part-aside-body] {',
   ]) {
     const { body } = rule(selector);
     assert.match(body, /scrollbar-gutter:\s*stable/, `${selector} reserves no gutter`);
@@ -461,7 +459,7 @@ test('gives both scrolling bodies a gutter and the thin themed bar', () => {
       `${selector} leaves the bar unthemed`,
     );
   }
-  const root = rule("[data-ui='app-shell'] {").body;
+  const root = rule('[data-ui-app-shell] {').body;
   assert.match(root, /--_scrollbar-thumb:\s*var\(\s*--slotted-app-shell-scrollbar-thumb-color/);
   assert.match(
     root,
@@ -478,11 +476,11 @@ test('gives both scrolling bodies a gutter and the thin themed bar', () => {
 test('draws the pane control as the navigation control turned', () => {
   assert.match(
     css,
-    /\[data-part='nav-toggle'\],\s*\[data-ui='app-shell'\] \[data-part='aside-toggle'\] \{/,
+    /\[data-part-nav-toggle\],\s*\[data-ui-app-shell\] \[data-part-aside-toggle\] \{/,
   );
   assert.match(
     css,
-    /:not\(\[data-nav-side='end'\]\)\s+\[data-part='aside-toggle'\]\s*>\s*\[data-ui='icon'\]/,
+    /:not\(\[data-nav-side='end'\]\)\s+\[data-part-aside-toggle\]\s*>\s*\[data-ui-icon\]/,
   );
 });
 
@@ -523,14 +521,14 @@ test('separates by a tone that recalibrates the controls standing on it', () => 
  * declared again on every region, where a `var()` reads the region's scope.
  */
 test('re-reads the seam colour in each region', () => {
-  const region = rule("[data-ui='app-shell'] > [data-part] {").body;
+  const region = rule('[data-ui-app-shell] > [data-part] {').body;
   assert.match(region, /--_rule:\s*var\(--slotted-app-shell-border-color,/);
   assert.match(region, /--_seam:\s*var\(--_rule-width\) solid var\(--_rule\)/);
 });
 
 /** One box for a card over two regions, and none once the navigation is a layer. */
 test('paints a card over several regions as the root pseudo-element', () => {
-  const card = rule("[data-ui='app-shell'][data-canvas='panel']::before {");
+  const card = rule("[data-ui-app-shell][data-canvas='panel']::before {");
   assert.match(css, /content: '';\s*grid-area: 1 \/ 2 \/ 3 \/ 3;/);
   assert.ok(card.at > 0);
   assert.match(rule("[data-nav-mode='overlay'][data-canvas]::before {").body, /content:\s*none/);
@@ -538,13 +536,13 @@ test('paints a card over several regions as the root pseudo-element', () => {
 
 /** Closing to the rail keeps the strip and takes the column out after the move. */
 test('closes a two-level navigation to its own strip', () => {
-  const grid = rule("> [data-part='nav']:has(> [data-part='nav-rail']) {");
+  const grid = rule('> [data-part-nav]:has(> [data-part-nav-rail]) {');
   assert.match(
     grid.body,
     /grid-template-columns:\s*var\(--_rail-size\) minmax\(var\(--_nav-size\), 1fr\)/,
   );
   const closed = css.slice(
-    css.indexOf("[data-nav-mode='inline']:not([data-open])\n    > [data-part='nav']:has"),
+    css.indexOf("[data-nav-mode='inline']:not([data-open])\n    > [data-part-nav]:has"),
   );
   assert.match(closed, /transition: visibility var\(--_duration\) step-end;\s*visibility: hidden;/);
   assert.match(css, /background-image: var\(--slotted-app-shell-frame-image, none\)/);
@@ -556,10 +554,10 @@ test('closes a two-level navigation to its own strip', () => {
  * brings its own inset says so with the word `drawer` uses.
  */
 test('stands the pane body on the row inset, and drops it under data-inset none', () => {
-  const body = rule("> [data-part='aside'] > [data-part='aside-body'] {").body;
+  const body = rule('> [data-part-aside] > [data-part-aside-body] {').body;
   assert.match(body, /padding-block:\s*var\(--slotted-space-5, 0\.75rem\)/);
   assert.match(body, /padding-inline:\s*calc\(var\(--_row-inset\) \+ var\(--_row-gap\)\)/);
-  const bare = rule("> [data-part='aside'] > [data-part='aside-body'][data-inset='none'] {").body;
+  const bare = rule("> [data-part-aside] > [data-part-aside-body][data-inset='none'] {").body;
   assert.match(bare, /padding:\s*0/);
 });
 
@@ -570,7 +568,7 @@ test('stands the pane body on the row inset, and drops it under data-inset none'
  * layer's.
  */
 test('draws the pane edge on the column and never on the layer', () => {
-  const edge = rule("[data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer'] {");
+  const edge = rule('[data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] {');
   assert.match(edge.body, /display:\s*none/);
   assert.match(edge.body, /cursor:\s*col-resize/);
   assert.match(edge.body, /touch-action:\s*none/);
@@ -582,41 +580,38 @@ test('draws the pane edge on the column and never on the layer', () => {
     column
       .replace(/\s+/g, ' ')
       .includes(
-        ":not([data-aside-mode='overlay']) > [data-part='aside'] > [data-part='aside-resizer']:not([hidden]) { display: block;",
+        ":not([data-aside-mode='overlay']) > [data-part-aside] > [data-part-aside-resizer]:not([hidden]) { display: block;",
       ),
     'the wide query shows no edge on the column',
   );
   const positive = css.replaceAll(":not([data-aside-mode='overlay'])", '');
   for (const hit of positive.matchAll(
-    /\[data-aside-mode='overlay'\][^{,]*\[data-part='aside-resizer'\]/g,
+    /\[data-aside-mode='overlay'\][^{,]*\[data-part-aside-resizer\]/g,
   )) {
     assert.fail(`${hit[0]} draws the edge on the layer`);
   }
 
   /* On the inner edge: the start of an end pane, the end of a start pane. */
   assert.match(edge.body, /inset-inline-start:\s*0/);
-  const start = rule("[data-nav-side='end'] > [data-part='aside'] > [data-part='aside-resizer'] {");
+  const start = rule("[data-nav-side='end'] > [data-part-aside] > [data-part-aside-resizer] {");
   assert.match(start.body, /inset-inline-end:\s*0/);
   assert.match(start.body, /inset-inline-start:\s*auto/);
 });
 
 /** A line under the hand, under the drag and under the keyboard; the ring for the keyboard. */
 test('draws the pane edge as a line under the hand and a ring under the keyboard', () => {
-  const lit = css.indexOf("> [data-part='aside-resizer']:not([data-disabled]):hover,");
+  const lit = css.indexOf('> [data-part-aside-resizer]:not([data-disabled]):hover,');
   assert.notEqual(lit, -1, 'the edge answers no hover');
   const selector = css.slice(lit, css.indexOf('{', lit));
-  assert.match(selector, /aside-resizer'\]:focus-visible/);
-  assert.match(
-    selector,
-    /\[data-dragging\] > \[data-part='aside'\] > \[data-part='aside-resizer'\]/,
-  );
-  const ring = rule("> [data-part='aside'] > [data-part='aside-resizer']:focus-visible {").body;
+  assert.match(selector, /aside-resizer\]:focus-visible/);
+  assert.match(selector, /\[data-dragging\] > \[data-part-aside\] > \[data-part-aside-resizer\]/);
+  const ring = rule('> [data-part-aside] > [data-part-aside-resizer]:focus-visible {').body;
   assert.match(ring, /outline:\s*var\(--slotted-focus-ring-width, 2px\) solid/);
   /* The reach is a transparent box, so the target holds the floor while the line stays thin. */
-  const reach = rule("> [data-part='aside'] > [data-part='aside-resizer']::before {").body;
+  const reach = rule('> [data-part-aside] > [data-part-aside-resizer]::before {').body;
   assert.match(reach, /var\(--_resizer-reach\)/);
   assert.match(
-    rule("[data-ui='app-shell'] > [data-part='aside'] > [data-part='aside-resizer'] {").body,
+    rule('[data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] {').body,
     /--_resizer-reach:\s*var\(--slotted-target-min, 24px\)/,
   );
 });
@@ -629,14 +624,14 @@ test('draws the pane edge as a line under the hand and a ring under the keyboard
  */
 test('turns the extent into the width of the column and leaves the layer on its step', () => {
   const wide = css.slice(css.indexOf('@container slotted-app-shell (inline-size >= 600px)'));
-  const column = wide.indexOf(":not([data-aside-mode='overlay']) > [data-part='aside'] {");
+  const column = wide.indexOf(":not([data-aside-mode='overlay']) > [data-part-aside] {");
   assert.notEqual(column, -1);
   assert.match(
     wide.slice(column, wide.indexOf('}', column)),
     /inline-size:\s*var\(--slotted-app-shell-aside-extent, var\(--_aside-size\)\)/,
   );
   assert.match(
-    rule("[data-ui='app-shell'][data-aside-mode='overlay'] > [data-part='aside'] {").body,
+    rule("[data-ui-app-shell][data-aside-mode='overlay'] > [data-part-aside] {").body,
     /inline-size:\s*var\(--_aside-size\);/,
   );
   const tokens = JSON.parse(
@@ -684,17 +679,17 @@ test('keeps the frame of the wait on the box of the content in every arrangement
   }
 
   const mains = rules.filter(
-    ({ selector, geometry }) => / > \[data-part='main'\]$/.test(selector) && geometry.length > 0,
+    ({ selector, geometry }) => / > \[data-part-main\]$/.test(selector) && geometry.length > 0,
   );
   assert.ok(mains.length >= 9, `found ${mains.length} rules giving main a box`);
   for (const { selector, geometry } of mains) {
-    const twin = selector.replace(/\[data-part='main'\]$/, "[data-part='progress']");
+    const twin = selector.replace(/\[data-part-main\]$/, '[data-part-progress]');
     const found = rules.filter((rule) => rule.selector === twin);
     assert.ok(found.length > 0, `${twin} is missing`);
     assert.deepEqual(found.at(-1).geometry, geometry, `${twin} disagrees with main`);
   }
 
-  const frame = rule("[data-ui='app-shell'] > [data-part='progress'] {").body;
+  const frame = rule('[data-ui-app-shell] > [data-part-progress] {').body;
   assert.match(frame, /grid-area: 2 \/ 2 \/ 3 \/ 3/);
   assert.match(frame, /pointer-events: none/);
   assert.match(frame, /overflow: clip/);
@@ -708,7 +703,7 @@ test('keeps the frame of the wait on the box of the content in every arrangement
  * from the ground the navigation stands on, as the tone separation does.
  */
 test('recalibrates the hover of controls on an inset navigation', () => {
-  const inset = rule("[data-canvas='inset'] > [data-part='nav'] {").body;
+  const inset = rule("[data-canvas='inset'] > [data-part-nav] {").body;
   assert.match(
     inset,
     /--slotted-tone-secondary-subtle-hover:\s*color-mix\(\s*in oklab,\s*var\(--slotted-app-shell-nav-surface, var\(--_frame\)\),\s*var\(--slotted-text\) 4%/,
@@ -725,7 +720,7 @@ test('recalibrates the hover of controls on an inset navigation', () => {
  * axis, which the width transition needs, and scrolls its block axis.
  */
 test('the navigation region scrolls what overflows it along the block axis', () => {
-  const { body } = rule("[data-ui='app-shell'] > [data-part='nav'] {");
+  const { body } = rule('[data-ui-app-shell] > [data-part-nav] {');
   assert.match(body, /overflow-x: hidden;/);
   assert.match(body, /overflow-y: auto;/);
   assert.doesNotMatch(body, /overflow: hidden;/);

@@ -416,8 +416,10 @@ describe('SlEntityPicker openOn', () => {
   template: `
     <sl-entity-picker aria-label="Owner" searchDelay="0" [items]="people">
       <ng-template slEntityPickerOption let-entity let-selected="selected">
-        <span data-part="label">{{ entity.label }}{{ selected ? ' ✓' : '' }}</span>
-        <span data-part="description">#{{ entity.id }}</span>
+        <span data-part="label" data-part-label=""
+          >{{ entity.label }}{{ selected ? ' ✓' : '' }}</span
+        >
+        <span data-part="description" data-part-description="">#{{ entity.id }}</span>
       </ng-template>
     </sl-entity-picker>
   `,

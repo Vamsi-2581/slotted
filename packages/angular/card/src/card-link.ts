@@ -13,6 +13,6 @@ import { Directive } from '@angular/core';
   selector: 'a[slCardLink]',
   standalone: true,
   exportAs: 'slCardLink',
-  host: { 'data-part': 'link' },
+  host: { 'data-part': 'link', 'data-part-link': '' },
 })
 export class SlCardLink {}

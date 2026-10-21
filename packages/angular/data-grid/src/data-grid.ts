@@ -5,6 +5,7 @@ import { createFilterGroupPredicate, ruleFor, withoutRuleFor } from '@slotted/co
 import type { FilterDescriptor, FilterKind } from '@slotted/core/filter';
 import {
   applyQuery,
+  groupInOrder,
   cellText,
   columnsOutOfSpace,
   cellValue,
@@ -155,6 +156,7 @@ import {
   type DataGridSelectionMode,
   type DataGridStickyTo,
   type DataGridVariant,
+  type DataGridLoadMoreTrigger,
   type DataGridVirtualize,
 } from './data-grid-defaults';
 import {
@@ -350,13 +352,14 @@ function contentWidth(cell: HTMLElement): number {
     '../../../styles/src/visually-hidden/visually-hidden.css',
   ],
   template: `
-    <div #scroll data-part="scroll">
-      <div data-part="head" role="rowgroup">
+    <div #scroll data-part="scroll" data-part-scroll="">
+      <div data-part="head" data-part-head="" role="rowgroup">
         @if (hasGroups()) {
-          <div data-part="header-row" role="row" aria-rowindex="1">
+          <div data-part="header-row" data-part-header-row="" role="row" aria-rowindex="1">
             @for (cell of groupCells(); track cell.key) {
               <div
                 data-part="column-group"
+                data-part-column-group=""
                 role="columnheader"
                 tabindex="-1"
                 [attr.aria-colindex]="cell.first"
@@ -372,6 +375,7 @@ function contentWidth(cell: HTMLElement): number {
         }
         <div
           data-part="header-row"
+          data-part-header-row=""
           role="row"
           [attr.data-row]="HEADER"
           [attr.aria-rowindex]="hasGroups() ? 2 : 1"
@@ -379,6 +383,7 @@ function contentWidth(cell: HTMLElement): number {
           @if (hasSelectionColumn()) {
             <div
               data-part="selection"
+              data-part-selection=""
               role="gridcell"
               aria-colindex="1"
               [attr.data-column]="SELECTION"
@@ -397,7 +402,13 @@ function contentWidth(cell: HTMLElement): number {
                   [tabIndex]="isCurrent(HEADER, SELECTION) ? 0 : -1"
                   (checkedChange)="toggleAll($event.source)"
                 >
-                  <span data-ui="visually-hidden" data-part="root">{{ selectAllName() }}</span>
+                  <span
+                    data-ui="visually-hidden"
+                    data-ui-visually-hidden=""
+                    data-part="root"
+                    data-part-root=""
+                    >{{ selectAllName() }}</span
+                  >
                 </span>
               }
             </div>
@@ -405,6 +416,7 @@ function contentWidth(cell: HTMLElement): number {
           @if (hasDragColumn()) {
             <div
               data-part="column-header"
+              data-part-column-header=""
               role="columnheader"
               tabindex="-1"
               [attr.aria-colindex]="dragIndex()"
@@ -417,6 +429,7 @@ function contentWidth(cell: HTMLElement): number {
           @if (hasExpanderColumn()) {
             <div
               data-part="column-header"
+              data-part-column-header=""
               role="columnheader"
               tabindex="-1"
               [attr.aria-colindex]="expanderIndex()"
@@ -438,6 +451,7 @@ function contentWidth(cell: HTMLElement): number {
               <div
                 slPopoverAnchor
                 data-part="column-header"
+                data-part-column-header=""
                 role="columnheader"
                 [attr.aria-colindex]="indexOf(column.id)"
                 [attr.aria-sort]="ariaSort(column.id)"
@@ -485,6 +499,7 @@ function contentWidth(cell: HTMLElement): number {
                 @if (sortOf(column.id); as sort) {
                   <span
                     data-part="sort"
+                    data-part-sort=""
                     aria-hidden="true"
                     [attr.data-index]="query().sort.length > 1 ? sort.index : null"
                   >
@@ -496,17 +511,19 @@ function contentWidth(cell: HTMLElement): number {
                 @if (column.column.description; as description) {
                   <span
                     data-part="column-description"
+                    data-part-column-description=""
                     aria-hidden="true"
                     [id]="descriptionId(column.id)"
                     >{{ description }}</span
                   >
                 }
-                <span data-part="column-actions">
+                <span data-part="column-actions" data-part-column-actions="">
                   @if (hasHelp(column)) {
                     <ng-container slPopover side="bottom" align="start" size="sm">
                       <button
                         slPopoverTrigger
                         data-part="column-help"
+                        data-part-column-help=""
                         type="button"
                         tabindex="-1"
                         [attr.aria-label]="helpLabel(column)"
@@ -535,6 +552,7 @@ function contentWidth(cell: HTMLElement): number {
                   @if (column.filterable && (filterOf(column.id) || filterOpen() === column.id)) {
                     <button
                       data-part="filter"
+                      data-part-filter=""
                       type="button"
                       tabindex="-1"
                       aria-haspopup="dialog"
@@ -550,6 +568,7 @@ function contentWidth(cell: HTMLElement): number {
                   }
                   <button
                     data-part="column-menu"
+                    data-part-column-menu=""
                     type="button"
                     tabindex="-1"
                     [slMenuTriggerFor]="columnMenu"
@@ -570,7 +589,11 @@ function contentWidth(cell: HTMLElement): number {
                     "
                   >
                     @if (column.column.description; as description) {
-                      <div data-part="column-menu-description" aria-hidden="true">
+                      <div
+                        data-part="column-menu-description"
+                        data-part-column-menu-description=""
+                        aria-hidden="true"
+                      >
                         {{ description }}
                       </div>
                     }
@@ -646,6 +669,7 @@ function contentWidth(cell: HTMLElement): number {
                 @if (column.resizable) {
                   <div
                     data-part="resizer"
+                    data-part-resizer=""
                     aria-hidden="true"
                     [attr.title]="t('resize')"
                     [attr.data-resizing]="resizing() === column.id ? '' : null"
@@ -684,6 +708,7 @@ function contentWidth(cell: HTMLElement): number {
             <!-- The pop-in's column, named for a reader and given no track. -->
             <div
               data-part="popin-header"
+              data-part-popin-header=""
               role="columnheader"
               [attr.aria-colindex]="popinIndex()"
               [attr.data-column]="POPIN"
@@ -695,6 +720,7 @@ function contentWidth(cell: HTMLElement): number {
         @if (resolvedFilterRow()) {
           <div
             data-part="filter-row"
+            data-part-filter-row=""
             role="row"
             [attr.data-row]="FILTER"
             [attr.aria-rowindex]="headerRowCount()"
@@ -702,6 +728,7 @@ function contentWidth(cell: HTMLElement): number {
             @if (hasSelectionColumn()) {
               <div
                 data-part="filter-cell"
+                data-part-filter-cell=""
                 role="gridcell"
                 aria-colindex="1"
                 tabindex="-1"
@@ -712,6 +739,7 @@ function contentWidth(cell: HTMLElement): number {
             @if (hasDragColumn()) {
               <div
                 data-part="filter-cell"
+                data-part-filter-cell=""
                 role="gridcell"
                 tabindex="-1"
                 [attr.aria-colindex]="dragIndex()"
@@ -722,6 +750,7 @@ function contentWidth(cell: HTMLElement): number {
             @if (hasExpanderColumn()) {
               <div
                 data-part="filter-cell"
+                data-part-filter-cell=""
                 role="gridcell"
                 tabindex="-1"
                 [attr.aria-colindex]="expanderIndex()"
@@ -732,6 +761,7 @@ function contentWidth(cell: HTMLElement): number {
             @for (column of mountedColumns(); track column.id) {
               <div
                 data-part="filter-cell"
+                data-part-filter-cell=""
                 role="gridcell"
                 [attr.aria-colindex]="indexOf(column.id)"
                 [attr.data-column]="column.id"
@@ -771,6 +801,7 @@ function contentWidth(cell: HTMLElement): number {
       <ng-template #bodyRow let-entry>
         <div
           data-part="row"
+          data-part-row=""
           role="row"
           [attr.data-row]="entry.node.key"
           [attr.aria-rowindex]="entry.rowIndex"
@@ -794,6 +825,7 @@ function contentWidth(cell: HTMLElement): number {
           @if (hasSelectionColumn()) {
             <div
               data-part="selection"
+              data-part-selection=""
               role="gridcell"
               aria-colindex="1"
               [attr.data-column]="SELECTION"
@@ -816,15 +848,20 @@ function contentWidth(cell: HTMLElement): number {
                   })
                 "
               >
-                <span data-ui="visually-hidden" data-part="root">{{
-                  selectRowLabel(entry.node.key)
-                }}</span>
+                <span
+                  data-ui="visually-hidden"
+                  data-ui-visually-hidden=""
+                  data-part="root"
+                  data-part-root=""
+                  >{{ selectRowLabel(entry.node.key) }}</span
+                >
               </span>
             </div>
           }
           @if (hasDragColumn()) {
             <div
               data-part="cell"
+              data-part-cell=""
               role="gridcell"
               data-kind="drag"
               [attr.aria-colindex]="dragIndex()"
@@ -838,6 +875,7 @@ function contentWidth(cell: HTMLElement): number {
             >
               <button
                 data-part="row-handle"
+                data-part-row-handle=""
                 type="button"
                 [attr.tabindex]="isCurrent(entry.node.key, DRAG) ? 0 : -1"
                 [attr.aria-disabled]="rowsReorderableNow() ? null : 'true'"
@@ -851,6 +889,7 @@ function contentWidth(cell: HTMLElement): number {
           @if (hasExpanderColumn()) {
             <div
               data-part="cell"
+              data-part-cell=""
               data-kind="expander"
               role="gridcell"
               [attr.aria-colindex]="expanderIndex()"
@@ -865,6 +904,7 @@ function contentWidth(cell: HTMLElement): number {
               @if (isExpandable(entry.node.row)) {
                 <button
                   data-part="expander"
+                  data-part-expander=""
                   type="button"
                   tabindex="-1"
                   [attr.aria-expanded]="isExpanded(entry.node.key)"
@@ -883,6 +923,8 @@ function contentWidth(cell: HTMLElement): number {
             @let cell = cellState(entry.node, column);
             <div
               [attr.data-part]="column.column.rowHeader ? 'row-header' : 'cell'"
+              [attr.data-part-row-header]="column.column.rowHeader ? '' : null"
+              [attr.data-part-cell]="column.column.rowHeader ? null : ''"
               [attr.role]="column.column.rowHeader ? 'rowheader' : 'gridcell'"
               [attr.aria-colindex]="indexOf(column.id)"
               [attr.aria-readonly]="cell.readonly ? 'true' : null"
@@ -924,6 +966,7 @@ function contentWidth(cell: HTMLElement): number {
               @if (cell.tree === 'branch') {
                 <button
                   data-part="tree-toggle"
+                  data-part-tree-toggle=""
                   type="button"
                   tabindex="-1"
                   [attr.aria-expanded]="entry.node.open"
@@ -942,10 +985,15 @@ function contentWidth(cell: HTMLElement): number {
                   ></span>
                 </button>
               } @else if (cell.tree === 'leaf') {
-                <span data-part="tree-toggle" data-empty aria-hidden="true"></span>
+                <span
+                  data-part="tree-toggle"
+                  data-part-tree-toggle=""
+                  data-empty
+                  aria-hidden="true"
+                ></span>
               }
               @if (cell.editing) {
-                <div data-part="editor">
+                <div data-part="editor" data-part-editor="">
                   @if (editorTemplate(column.id); as template) {
                     <ng-container
                       [ngTemplateOutlet]="template"
@@ -977,6 +1025,7 @@ function contentWidth(cell: HTMLElement): number {
           @if (hasPopin()) {
             <div
               data-part="popin"
+              data-part-popin=""
               role="gridcell"
               [attr.aria-colindex]="popinIndex()"
               [attr.data-column]="POPIN"
@@ -991,12 +1040,18 @@ function contentWidth(cell: HTMLElement): number {
             >
               @for (column of popinColumns(); track column.id) {
                 @let cell = cellState(entry.node, column);
-                <div data-part="popin-field" [attr.data-field]="column.id">
+                <div data-part="popin-field" data-part-popin-field="" [attr.data-field]="column.id">
                   @if (column.column.label) {
-                    <span data-part="popin-label">{{ column.column.label }}</span>
+                    <span data-part="popin-label" data-part-popin-label="">{{
+                      column.column.label
+                    }}</span>
                   }
                   <!-- Read only: an edit happens in a visible cell, the detail or the record. -->
-                  <div data-part="popin-value" [attr.data-text]="column.text">
+                  <div
+                    data-part="popin-value"
+                    data-part-popin-value=""
+                    [attr.data-text]="column.text"
+                  >
                     @if (cellTemplate(column.id); as template) {
                       <ng-container
                         [ngTemplateOutlet]="template"
@@ -1014,6 +1069,7 @@ function contentWidth(cell: HTMLElement): number {
         @if (detailOpen(entry.node) && detailTemplate(); as template) {
           <div
             data-part="detail"
+            data-part-detail=""
             role="row"
             [attr.data-row]="entry.node.key + ':detail'"
             [attr.id]="detailId(entry.node.key)"
@@ -1039,7 +1095,7 @@ function contentWidth(cell: HTMLElement): number {
         }
       </ng-template>
       @if (pinned().top.length > 0) {
-        <div data-part="pinned-rows" data-edge="top" role="rowgroup">
+        <div data-part="pinned-rows" data-part-pinned-rows="" data-edge="top" role="rowgroup">
           @for (entry of pinnedTopEntries(); track entry.node.key) {
             <ng-container
               [ngTemplateOutlet]="bodyRow"
@@ -1051,12 +1107,13 @@ function contentWidth(cell: HTMLElement): number {
       @if (status() === 'loading') {
         <div
           data-part="loader"
+          data-part-loader=""
           role="rowgroup"
           aria-hidden="true"
           [style.--slotted-data-grid-loader-row-size]="rowSize() + 'px'"
         >
           @for (row of skeletonRowsList(); track row) {
-            <div data-part="row" role="row">
+            <div data-part="row" data-part-row="" role="row">
               @for (columnId of columnIds(); track columnId; let index = $index) {
                 <div role="gridcell" [style.--slotted-data-grid-column]="index + 1">
                   <!-- The gutters reserve their width and draw nothing: what
@@ -1075,6 +1132,7 @@ function contentWidth(cell: HTMLElement): number {
       } @else {
         <div
           data-part="body"
+          data-part-body=""
           role="rowgroup"
           [style.--slotted-data-grid-window-total]="
             windowsRows() ? rowWindow().totalSize + 'px' : null
@@ -1087,6 +1145,7 @@ function contentWidth(cell: HTMLElement): number {
             @if (entry.node.kind === 'group') {
               <div
                 data-part="group-row"
+                data-part-group-row=""
                 role="row"
                 [attr.data-row]="GROUP_PREFIX + entry.node.key"
                 [attr.aria-rowindex]="entry.rowIndex"
@@ -1129,6 +1188,7 @@ function contentWidth(cell: HTMLElement): number {
                 >
                   <button
                     data-part="group-toggle"
+                    data-part-group-toggle=""
                     type="button"
                     tabindex="-1"
                     [attr.aria-expanded]="entry.node.expanded"
@@ -1200,7 +1260,7 @@ function contentWidth(cell: HTMLElement): number {
       }
 
       @if (status() !== 'rows' && status() !== 'loading') {
-        <div data-part="empty">
+        <div data-part="empty" data-part-empty="">
           @if (emptyTemplate(); as template) {
             <ng-container
               [ngTemplateOutlet]="template.template"
@@ -1246,7 +1306,7 @@ function contentWidth(cell: HTMLElement): number {
         </div>
       }
       @if (pinned().bottom.length > 0) {
-        <div data-part="pinned-rows" data-edge="bottom" role="rowgroup">
+        <div data-part="pinned-rows" data-part-pinned-rows="" data-edge="bottom" role="rowgroup">
           @for (entry of pinnedBottomEntries(); track entry.node.key) {
             <ng-container
               [ngTemplateOutlet]="bodyRow"
@@ -1256,11 +1316,12 @@ function contentWidth(cell: HTMLElement): number {
         </div>
       }
       @if (hasSummary() && status() === 'rows') {
-        <div data-part="summary" role="rowgroup">
+        <div data-part="summary" data-part-summary="" role="rowgroup">
           <div role="row" [attr.data-row]="SUMMARY" [attr.aria-rowindex]="summaryRowIndex()">
             @for (columnId of gutterIds(); track columnId; let index = $index) {
               <div
                 data-part="summary-cell"
+                data-part-summary-cell=""
                 role="gridcell"
                 tabindex="-1"
                 [attr.aria-colindex]="index + 1"
@@ -1271,6 +1332,7 @@ function contentWidth(cell: HTMLElement): number {
             @for (column of mountedColumns(); track column.id) {
               <div
                 data-part="summary-cell"
+                data-part-summary-cell=""
                 role="gridcell"
                 [attr.aria-colindex]="indexOf(column.id)"
                 [attr.data-column]="column.id"
@@ -1294,6 +1356,7 @@ function contentWidth(cell: HTMLElement): number {
             @if (hasPopinCell(SUMMARY)) {
               <div
                 data-part="popin"
+                data-part-popin=""
                 role="gridcell"
                 [attr.aria-colindex]="popinIndex()"
                 [attr.data-column]="POPIN"
@@ -1305,11 +1368,17 @@ function contentWidth(cell: HTMLElement): number {
                 (pointerdown)="onCellPointerDown($event, { row: SUMMARY, column: POPIN })"
               >
                 @for (column of popinAggregated(); track column.id) {
-                  <div data-part="popin-field" [attr.data-field]="column.id">
+                  <div
+                    data-part="popin-field"
+                    data-part-popin-field=""
+                    [attr.data-field]="column.id"
+                  >
                     @if (column.column.label) {
-                      <span data-part="popin-label">{{ column.column.label }}</span>
+                      <span data-part="popin-label" data-part-popin-label="">{{
+                        column.column.label
+                      }}</span>
                     }
-                    <div data-part="popin-value">
+                    <div data-part="popin-value" data-part-popin-value="">
                       <span>{{ aggregateText(column, applied().aggregates[column.id]) }}</span>
                     </div>
                   </div>
@@ -1322,6 +1391,7 @@ function contentWidth(cell: HTMLElement): number {
       @if (dragState().offset !== null) {
         <div
           data-part="drop-indicator"
+          data-part-drop-indicator=""
           aria-hidden="true"
           [style.--slotted-data-grid-drop-offset]="dragState().offset + 'px'"
           [style.--slotted-data-grid-drop-scroll]="dragState().scrollTop + 'px'"
@@ -1330,6 +1400,7 @@ function contentWidth(cell: HTMLElement): number {
       @if (rowDragState().offset !== null) {
         <div
           data-part="drop-indicator"
+          data-part-drop-indicator=""
           data-axis="row"
           aria-hidden="true"
           [style.--slotted-data-grid-drop-offset]="rowDragState().offset + 'px'"
@@ -1338,25 +1409,29 @@ function contentWidth(cell: HTMLElement): number {
       }
     </div>
     @if (showsFooter()) {
-      <div data-part="footer">
+      <div data-part="footer" data-part-footer="">
         @if (rangeText(); as text) {
           <span data-range="">{{ text }}</span>
         }
         <ng-content select="[slDataGridFooter]" />
         @if (hasMore() && !hasFooterContent()) {
-          <div>
-            <button
-              slButton
-              type="button"
-              size="sm"
-              tone="secondary"
-              variant="outline"
-              [disabled]="loading()"
-              (click)="loadMore.emit()"
-            >
-              {{ t('loadMore') }}
-            </button>
-          </div>
+          @if (offersMoreControl()) {
+            <div>
+              <button
+                slButton
+                type="button"
+                size="sm"
+                tone="secondary"
+                variant="outline"
+                [disabled]="loading()"
+                (click)="loadMore.emit()"
+              >
+                {{ loadMoreFailed() ? t('retry') : t('loadMore') }}
+              </button>
+            </div>
+          } @else if (loading()) {
+            <span data-loading-more="" role="status">{{ t('loadingMore') }}</span>
+          }
         }
       </div>
     }
@@ -1368,7 +1443,9 @@ function contentWidth(cell: HTMLElement): number {
   ],
   host: {
     'data-ui': 'data-grid',
+    'data-ui-data-grid': '',
     'data-part': 'root',
+    'data-part-root': '',
     '[attr.role]': "tree() ? 'treegrid' : 'grid'",
     '[attr.aria-label]': 'ariaLabel()',
     '[attr.aria-labelledby]': 'labelledBy() ?? null',
@@ -1525,6 +1602,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly overscan = input<number | undefined>(undefined);
   readonly filterDebounce = input<number | undefined>(undefined);
   readonly loadMoreThreshold = input<number | undefined>(undefined);
+  /**
+   * What asks for the next page. `scroll` asks when the window nears the end,
+   * `button` only from the Load more control, `both` does the two. Default
+   * `scroll`.
+   */
+  readonly loadMoreTrigger = input<DataGridLoadMoreTrigger | undefined>(undefined);
+  /** The last page asked for failed: the automatic request stops and the footer offers a retry. */
+  readonly loadMoreFailed = input(false, { transform: booleanAttribute });
   readonly skeletonRows = input<number | undefined>(undefined);
   readonly activatable = input(false, { transform: booleanAttribute });
   /**
@@ -1620,6 +1705,17 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   );
   protected readonly resolvedThreshold = computed(
     () => this.loadMoreThreshold() ?? this.defaults.loadMoreThreshold,
+  );
+  protected readonly resolvedLoadMore = computed(
+    () => this.loadMoreTrigger() ?? this.defaults.loadMoreTrigger,
+  );
+  /**
+   * Under `scroll` the request is automatic: a quiet status while the page
+   * loads, and a control only to retry one that failed. A Load more control
+   * beside a list that loads itself read as a control with no purpose.
+   */
+  protected readonly offersMoreControl = computed(
+    () => this.resolvedLoadMore() !== 'scroll' || this.loadMoreFailed(),
   );
   protected readonly resolvedSkeleton = computed(
     () => this.skeletonRows() ?? this.defaults.skeletonRows,
@@ -1842,18 +1938,14 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     const rows = this.bodyRows();
     const query = this.query();
     if (this.resolvedMode() === 'server') {
-      const offset = query.page && 'index' in query.page ? query.page.index * query.page.size : 0;
-      const nodes: GridNode<Row>[] = rows.map((row, index) => ({
-        kind: 'row',
-        key: this.rowKeyOf(row),
-        row,
-        index: offset + index,
-        groups: [],
-        level: 1,
-        parent: null,
-        childCount: 0,
-        open: false,
-      }));
+      /* Sorted, filtered and paged by the server; grouped here, in the order
+         the rows came, so a page ordered by date shows its days. */
+      const nodes = groupInOrder(rows, this.columns(), query.group, {
+        rowKey: (row) => this.rowKeyOf(row),
+        expandedGroups: this.expandedGroups(),
+        offset: query.page && 'index' in query.page ? query.page.index * query.page.size : 0,
+        ...this.formatOptions(),
+      });
       return {
         nodes,
         rows,
@@ -3278,9 +3370,11 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       }
     });
 
-    /* Load more when the window nears the end. */
+    /* Load more when the window nears the end, unless only the control asks, or
+       the last page failed and a retry is the reader's to press. */
     effect(() => {
       if (this.hasMore() !== true || this.loading()) return;
+      if (this.resolvedLoadMore() === 'button' || this.loadMoreFailed()) return;
       const remaining = this.nodes().length - this.rowWindow().endIndex;
       const scroller = this.scrollRef()?.nativeElement;
       const near = this.windowsRows()

@@ -53,7 +53,7 @@
    * menu holds more commands and is the same component; only the surface's own
    * inset and radius come off the space and radius scales, as `popover`'s do.
    */
-  [data-ui='menu'] {
+  [data-ui-menu] {
     --_gap: var(--slotted-menu-gap, var(--slotted-space-2, 0.25rem));
 
     --_surface: var(--slotted-menu-surface, var(--slotted-surface-raised, #ffffff));
@@ -177,21 +177,21 @@
       translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='menu'][data-side='top'] {
+  [data-ui-menu][data-side='top'] {
     translate: 0 var(--_enter-distance);
   }
 
   /* A submenu, or a menu placed beside its anchor, arrives along the inline
      axis it opens on: from one step inside the parent's edge (M1). */
-  [data-ui='menu'][data-side='right'] {
+  [data-ui-menu][data-side='right'] {
     translate: calc(-1 * var(--_enter-distance)) 0;
   }
 
-  [data-ui='menu'][data-side='left'] {
+  [data-ui-menu][data-side='left'] {
     translate: var(--_enter-distance) 0;
   }
 
-  [data-ui='menu']:is([data-side='left'], [data-side='right']) {
+  [data-ui-menu]:is([data-side='left'], [data-side='right']) {
     padding-block: 0;
     padding-inline: var(--_gap);
   }
@@ -205,7 +205,7 @@
    * A keyframe states where it starts. The exit stays a transition: it
    * leaves from wherever the layer is, on the closed rule's durations.
    */
-  [data-ui='menu'][data-open] {
+  [data-ui-menu][data-open] {
     opacity: 1;
     translate: 0 0;
     transition: none;
@@ -216,19 +216,19 @@
    * with the side, and a layer written open in static markup — the harness,
    * a docs snippet — is simply there, and is photographed where it stands.
    */
-  [data-ui='menu'][data-open][data-positioned] {
+  [data-ui-menu][data-open][data-positioned] {
     animation: slotted-menu-enter-down var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
-  [data-ui='menu'][data-open][data-positioned][data-side='top'] {
+  [data-ui-menu][data-open][data-positioned][data-side='top'] {
     animation-name: slotted-menu-enter-up;
   }
 
-  [data-ui='menu'][data-open][data-positioned][data-side='right'] {
+  [data-ui-menu][data-open][data-positioned][data-side='right'] {
     animation-name: slotted-menu-enter-from-start;
   }
 
-  [data-ui='menu'][data-open][data-positioned][data-side='left'] {
+  [data-ui-menu][data-open][data-positioned][data-side='left'] {
     animation-name: slotted-menu-enter-from-end;
   }
 
@@ -268,25 +268,25 @@
 
   /* Stillness keeps the fade and drops the movement (R7). */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui='menu'],
-    [data-ui='menu'][data-side='top'],
-    [data-ui='menu'][data-side='left'],
-    [data-ui='menu'][data-side='right'] {
+    [data-ui-menu],
+    [data-ui-menu][data-side='top'],
+    [data-ui-menu][data-side='left'],
+    [data-ui-menu][data-side='right'] {
       translate: 0 0;
       transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
-    [data-ui='menu'][data-open][data-positioned],
-    [data-ui='menu'][data-open][data-positioned][data-side='top'],
-    [data-ui='menu'][data-open][data-positioned][data-side='left'],
-    [data-ui='menu'][data-open][data-positioned][data-side='right'] {
+    [data-ui-menu][data-open][data-positioned],
+    [data-ui-menu][data-open][data-positioned][data-side='top'],
+    [data-ui-menu][data-open][data-positioned][data-side='left'],
+    [data-ui-menu][data-open][data-positioned][data-side='right'] {
       animation-name: slotted-menu-fade;
     }
   }
 
   /* The anchor scrolled out of its own clipper. The menu is still open and its
      commands still belong to a control the reader can no longer see. */
-  [data-ui='menu'][data-detached] {
+  [data-ui-menu][data-detached] {
     visibility: hidden;
   }
 
@@ -299,11 +299,11 @@
    * row. Opened above or below, the layer has no inline padding, so the
    * content and the trigger share both edges.
    */
-  [data-ui='menu'][data-width='anchor'] {
+  [data-ui-menu][data-width='anchor'] {
     max-inline-size: var(--slotted-positioner-available-width, 100vw);
     min-inline-size: 0;
   }
-  [data-ui='menu'][data-width='anchor'] > [data-part='content'] {
+  [data-ui-menu][data-width='anchor'] > [data-part-content] {
     inline-size: var(--slotted-positioner-anchor-width, auto);
     max-inline-size: var(--slotted-positioner-available-width, 100vw);
     min-inline-size: min(
@@ -312,7 +312,7 @@
     );
   }
 
-  [data-ui='menu'][data-size='sm'] {
+  [data-ui-menu][data-size='sm'] {
     --_item-padding: var(--slotted-control-padding-inline-sm, 0.625rem);
     --_item-height: var(--slotted-control-height-sm, 30px);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
@@ -322,7 +322,7 @@
     --_measure: var(--slotted-menu-measure-sm, 14rem);
   }
 
-  [data-ui='menu'][data-size='lg'] {
+  [data-ui-menu][data-size='lg'] {
     --_item-padding: var(--slotted-control-padding-inline-lg, 1rem);
     --_item-height: var(--slotted-control-height-lg, 38px);
     --_font-size: var(--slotted-control-font-size-lg, 14px);
@@ -341,7 +341,7 @@
    * off the bottom of the screen. `overscroll-behavior` keeps the page still
    * once the surface has scrolled to its end.
    */
-  [data-ui='menu'] > [data-part='content'] {
+  [data-ui-menu] > [data-part-content] {
     background: var(--_surface);
     border: var(--_border-width) solid var(--_border-color);
     border-radius: var(--_radius);
@@ -366,7 +366,7 @@
    * the moment the menu opens, and a ring around the whole surface would say
    * the surface is the thing being operated.
    */
-  [data-ui='menu'] > [data-part='content']:focus-visible {
+  [data-ui-menu] > [data-part-content]:focus-visible {
     outline: none;
   }
 
@@ -378,13 +378,13 @@
    * second set. Without the subgrid a group would align its own labels and
    * disagree with the items outside it.
    */
-  [data-ui='menu'] [data-part='group'] {
+  [data-ui-menu] [data-part-group] {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
   }
 
-  [data-ui='menu'] [data-part='group-label'] {
+  [data-ui-menu] [data-part-group-label] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
@@ -404,7 +404,7 @@
    * lines; the name and its line reuse `label` and `description`. It starts
    * at the item inset, so the avatar's edge is the icons' edge.
    */
-  [data-ui='menu'] [data-part='header'] {
+  [data-ui-menu] [data-part-header] {
     align-items: center;
     column-gap: var(--slotted-space-5, 0.75rem);
     display: grid;
@@ -415,12 +415,12 @@
     padding-inline: var(--_item-inset);
   }
 
-  [data-ui='menu'] [data-part='header'] > :not([data-part='label'], [data-part='description']) {
+  [data-ui-menu] [data-part-header] > :not([data-part-label], [data-part-description]) {
     grid-column: 1;
     grid-row: 1 / span 2;
   }
 
-  [data-ui='menu'] [data-part='header'] > [data-part='label'] {
+  [data-ui-menu] [data-part-header] > [data-part-label] {
     font-weight: var(--slotted-font-weight-semibold, 600);
   }
 
@@ -442,7 +442,7 @@
    * `select` used to take the hand for its options holds here unchanged. An
    * unavailable item keeps the hand and refuses the press, as `button` does.
    */
-  [data-ui='menu'] [data-part='item'] {
+  [data-ui-menu] [data-part-item] {
     appearance: none;
     background: transparent;
     border: 0;
@@ -488,7 +488,7 @@
    * `data-highlighted` exists to prevent in Radix and Ark; here the platform
    * prevents it, because there is only ever one focused element.
    */
-  [data-ui='menu'] [data-part='item']:focus {
+  [data-ui-menu] [data-part-item]:focus {
     background-color: var(--_highlight);
     color: var(--_accent);
   }
@@ -499,13 +499,13 @@
    * reader did not ask for. Inset, so it never overflows the surface's own
    * rounded edge.
    */
-  [data-ui='menu'] [data-part='item']:focus-visible {
+  [data-ui-menu] [data-part-item]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid
       var(--slotted-focus-ring-color, currentColor);
     outline-offset: calc(-1 * var(--slotted-focus-ring-width, 2px));
   }
 
-  [data-ui='menu'] [data-part='item']:not([data-disabled]):active {
+  [data-ui-menu] [data-part-item]:not([data-disabled]):active {
     background-color: var(--_highlight-active);
   }
 
@@ -513,7 +513,7 @@
    * A parent item stays highlighted while its submenu is open, so the path from
    * the bar to the surface under the pointer reads as one line.
    */
-  [data-ui='menu'] [data-part='item'][data-open] {
+  [data-ui-menu] [data-part-item][data-open] {
     background-color: var(--_highlight);
   }
 
@@ -527,12 +527,12 @@
    * against the dark surface and 0 against the high-contrast one: the pointer
    * landed on an item and nothing answered.
    */
-  [data-ui='menu'] [data-part='item'][data-disabled] {
+  [data-ui-menu] [data-part-item][data-disabled] {
     color: var(--slotted-disabled-foreground, #64748b);
     cursor: not-allowed;
   }
 
-  [data-ui='menu'] [data-part='item'][data-disabled]:focus {
+  [data-ui-menu] [data-part-item][data-disabled]:focus {
     background-color: var(--_highlight);
     color: var(--slotted-disabled-foreground, #64748b);
   }
@@ -544,8 +544,8 @@
    * labels up: the mark's box exists whether or not the mark is drawn, so a
    * menu of options does not shift by sixteen pixels as one is checked.
    */
-  [data-ui='menu'] :is([data-part='indicator'], [data-part='icon']),
-  [data-ui='menu'] [data-part='item'][aria-haspopup='menu'] > [data-ui='icon'] {
+  [data-ui-menu] :is([data-part-indicator], [data-part-icon]),
+  [data-ui-menu] [data-part-item][aria-haspopup='menu'] > [data-ui-icon] {
     /**
      * One line box tall, so a mark beside a label that wrapped onto three
      * lines sits on the first of them rather than in the middle of the item —
@@ -562,7 +562,7 @@
    * a checkbox item, `dot` for a radio item — and it is shown while the item
    * is checked.
    */
-  [data-ui='menu'] [data-part='indicator'] {
+  [data-ui-menu] [data-part-indicator] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -586,7 +586,7 @@
       scale var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui='menu'] [data-part='item'][data-checked] > [data-part='indicator'] {
+  [data-ui-menu] [data-part-item][data-checked] > [data-part-indicator] {
     opacity: 1;
     scale: 1;
     transition:
@@ -595,7 +595,7 @@
   }
 
   /* The dot is drawn smaller than the check, at seven tenths of the column's glyph. */
-  [data-ui='menu'] [data-part='item'][role='menuitemradio'] > [data-part='indicator'] {
+  [data-ui-menu] [data-part-item][role='menuitemradio'] > [data-part-indicator] {
     --slotted-icon-size: calc(var(--_icon-size) * 0.7);
   }
 
@@ -622,7 +622,7 @@
    * the child and not on the box, because the box's `1lh` reads the item's
    * line box.
    */
-  [data-ui='menu'] [data-part='icon'] {
+  [data-ui-menu] [data-part-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     align-items: center;
@@ -635,19 +635,19 @@
     margin-inline-end: var(--_column-gap);
   }
 
-  [data-ui='menu'] [data-part='icon'] > * {
+  [data-ui-menu] [data-part-icon] > * {
     font-size: var(--_icon-size);
   }
 
   /* Column two, and the only column that gives way. */
-  [data-ui='menu'] [data-part='label'] {
+  [data-ui-menu] [data-part-label] {
     grid-column: 2;
     grid-row: 1;
     min-inline-size: 0;
     overflow-wrap: anywhere;
   }
 
-  [data-ui='menu'] [data-part='description'] {
+  [data-ui-menu] [data-part-description] {
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     grid-column: 2;
@@ -657,7 +657,7 @@
     overflow-wrap: anywhere;
   }
 
-  [data-ui='menu'] [data-part='item'][data-disabled] > [data-part='description'] {
+  [data-ui-menu] [data-part-item][data-disabled] > [data-part-description] {
     color: inherit;
   }
 
@@ -669,7 +669,7 @@
    * column, so counts stack on their last digit and a word ends where the
    * numbers end; tabular figures, muted like the shortcut, never wrapped.
    */
-  [data-ui='menu'] [data-part='meta'] {
+  [data-ui-menu] [data-part-meta] {
     align-items: center;
     color: var(--_muted);
     column-gap: var(--slotted-space-2, 0.25rem);
@@ -689,7 +689,7 @@
    * alone. Never narrower than its own content: a long label wraps in column
    * two rather than pushing the binding off the surface.
    */
-  [data-ui='menu'] [data-part='shortcut'] {
+  [data-ui-menu] [data-part-shortcut] {
     color: var(--_muted);
     grid-column: 4;
     grid-row: 1;
@@ -698,10 +698,8 @@
     white-space: nowrap;
   }
 
-  [data-ui='menu']
-    [data-part='item'][data-disabled]
-    > :is([data-part='shortcut'], [data-part='meta']),
-  [data-ui='menu'] [data-part='item'][data-disabled][aria-haspopup='menu'] > [data-ui='icon'] {
+  [data-ui-menu] [data-part-item][data-disabled] > :is([data-part-shortcut], [data-part-meta]),
+  [data-ui-menu] [data-part-item][data-disabled][aria-haspopup='menu'] > [data-ui-icon] {
     color: inherit;
   }
 
@@ -712,7 +710,7 @@
    * takes the shortcut's column, because an item that opens a submenu runs no
    * command and so carries no binding.
    */
-  [data-ui='menu'] [data-part='item'][aria-haspopup='menu'] > [data-ui='icon'] {
+  [data-ui-menu] [data-part-item][aria-haspopup='menu'] > [data-ui-icon] {
     --slotted-icon-size: var(--_icon-size);
 
     grid-column: 4;
@@ -729,7 +727,7 @@
 
   /* ── Separator, empty, loading ────────────────────────────────────────── */
 
-  [data-ui='menu'] [data-part='separator'] {
+  [data-ui-menu] [data-part-separator] {
     background-color: var(--slotted-menu-separator-color, var(--_border-color));
     block-size: var(--_border-width);
     border: 0;
@@ -748,7 +746,7 @@
    * stated here: a row that was wider than the menu around it made the menu
    * grow when its list emptied (M3).
    */
-  [data-ui='menu'] [data-part='empty'] {
+  [data-ui-menu] [data-part-empty] {
     color: var(--_muted);
     grid-column: 1 / -1;
     padding-block: var(--slotted-space-5, 0.75rem);
@@ -756,7 +754,7 @@
     text-align: center;
   }
 
-  [data-ui='menu'] > [data-part='content'][data-loading] {
+  [data-ui-menu] > [data-part-content][data-loading] {
     cursor: progress;
   }
 
@@ -768,7 +766,7 @@
    * the theme already carries at the contrast every scheme needs; `danger` is
    * the one a product reaches for, and the other four cost one line each.
    */
-  [data-ui='menu'] [data-part='item'][data-tone='accent'] {
+  [data-ui-menu] [data-part-item][data-tone='accent'] {
     --_accent: var(--slotted-tone-accent-text);
     --_highlight: var(--slotted-tone-accent-surface);
     --_highlight-active: var(--slotted-tone-accent-subtle-active);
@@ -776,7 +774,7 @@
     color: var(--slotted-tone-accent-text);
   }
 
-  [data-ui='menu'] [data-part='item'][data-tone='secondary'] {
+  [data-ui-menu] [data-part-item][data-tone='secondary'] {
     --_accent: var(--slotted-tone-secondary-text);
     --_highlight: var(--slotted-tone-secondary-surface);
     --_highlight-active: var(--slotted-tone-secondary-subtle-active);
@@ -784,7 +782,7 @@
     color: var(--slotted-tone-secondary-text);
   }
 
-  [data-ui='menu'] [data-part='item'][data-tone='success'] {
+  [data-ui-menu] [data-part-item][data-tone='success'] {
     --_accent: var(--slotted-tone-success-text);
     --_highlight: var(--slotted-tone-success-surface);
     --_highlight-active: var(--slotted-tone-success-subtle-active);
@@ -792,7 +790,7 @@
     color: var(--slotted-tone-success-text);
   }
 
-  [data-ui='menu'] [data-part='item'][data-tone='warning'] {
+  [data-ui-menu] [data-part-item][data-tone='warning'] {
     --_accent: var(--slotted-tone-warning-text);
     --_highlight: var(--slotted-tone-warning-surface);
     --_highlight-active: var(--slotted-tone-warning-subtle-active);
@@ -800,7 +798,7 @@
     color: var(--slotted-tone-warning-text);
   }
 
-  [data-ui='menu'] [data-part='item'][data-tone='danger'] {
+  [data-ui-menu] [data-part-item][data-tone='danger'] {
     --_accent: var(--slotted-tone-danger-text);
     --_highlight: var(--slotted-tone-danger-surface);
     --_highlight-active: var(--slotted-tone-danger-subtle-active);
@@ -809,7 +807,7 @@
   }
 
   /* An unavailable item keeps no tone: its highlight is the neutral one. */
-  [data-ui='menu'] [data-part='item'][data-tone][data-disabled] {
+  [data-ui-menu] [data-part-item][data-tone][data-disabled] {
     --_accent: var(--slotted-disabled-foreground, #64748b);
     --_highlight: var(--slotted-menu-highlight, var(--slotted-tone-secondary-subtle-hover));
 
@@ -825,13 +823,13 @@
    * to tell which command they are on.
    */
   @media (forced-colors: active) {
-    [data-ui='menu'] [data-part='item']:focus {
+    [data-ui-menu] [data-part-item]:focus {
       background-color: Highlight;
       color: HighlightText;
       forced-color-adjust: none;
     }
 
-    [data-ui='menu'] [data-part='item'][data-disabled]:focus {
+    [data-ui-menu] [data-part-item][data-disabled]:focus {
       background-color: Highlight;
       color: GrayText;
     }

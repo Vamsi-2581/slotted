@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import type { MouseEvent } from 'react';
 
 import { useListItem } from './list-item';
@@ -25,11 +26,11 @@ import type {
 export function ListItemContent({ render, ...nativeProps }: ListItemContentProps) {
   const row = useListItem();
 
-  const rootProps: ListItemContentRootProps = {
+  const rootProps: ListItemContentRootProps = keyedProps({
     ...nativeProps,
     ...(row.loading ? { 'aria-busy': true } : {}),
     'data-part': 'content',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }
@@ -44,13 +45,13 @@ export function ListItemButton({ render, type = 'button', ...nativeProps }: List
   const row = useListItem();
   const blocked = row.disabled || row.loading;
 
-  const rootProps: ListItemButtonRootProps = {
+  const rootProps: ListItemButtonRootProps = keyedProps({
     ...nativeProps,
     ...(row.loading ? { 'aria-busy': true } : {}),
     'data-part': 'content',
     disabled: blocked || nativeProps.disabled === true,
     type,
-  };
+  });
 
   return render === undefined ? <button {...rootProps} /> : render(rootProps);
 }
@@ -76,7 +77,7 @@ export function ListItemLink({ href, onClick, render, ...nativeProps }: ListItem
   const row = useListItem();
   const blocked = row.disabled || row.loading;
 
-  const rootProps: ListItemLinkRootProps = {
+  const rootProps: ListItemLinkRootProps = keyedProps({
     ...nativeProps,
     ...(row.loading ? { 'aria-busy': true } : {}),
     ...(blocked ? { 'aria-disabled': true } : {}),
@@ -89,7 +90,7 @@ export function ListItemLink({ href, onClick, render, ...nativeProps }: ListItem
       }
       onClick?.(event);
     },
-  };
+  });
 
   return render === undefined ? <a {...rootProps} /> : render(rootProps);
 }

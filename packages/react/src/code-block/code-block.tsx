@@ -1,3 +1,4 @@
+import { withSelectorKey } from '@slotted/core/selector-key';
 import '@slotted/styles/code-block/code-block.css';
 
 import { writeToClipboard } from '@slotted/core/clipboard';
@@ -219,13 +220,14 @@ export function CodeBlock({
   const hasHeader =
     title !== undefined || language !== 'text' || copyControl || actions !== undefined;
   const controls = loading ? null : (
-    <div data-part="actions">
+    <div data-part="actions" data-part-actions="">
       {actions}
       {overflow || wrap ? (
         <button
           aria-label={t(wrap ? 'unwrap' : 'wrap')}
           aria-pressed={wrap}
           data-part="wrap"
+          data-part-wrap=""
           onClick={(event) => requestWrap(!wrap, keyed.current ? 'keyboard' : 'pointer', event)}
           onKeyDown={(event) => {
             keyed.current = event.key === 'Enter' || event.key === ' ';
@@ -242,6 +244,7 @@ export function CodeBlock({
         <button
           aria-label={t('copy')}
           data-part="copy"
+          data-part-copy=""
           type="button"
           {...copyHandlers}
           {...(copied ? { 'data-complete': '' } : {})}
@@ -267,10 +270,11 @@ export function CodeBlock({
 
   return (
     <div
-      {...nativeProps}
+      {...withSelectorKey(nativeProps, 'part', 'root')}
       data-language={language}
-      data-part="root"
+
       data-ui="code-block"
+      data-ui-code-block=""
       onKeyDown={onRootKeyDown}
       ref={root}
       style={style}
@@ -284,20 +288,24 @@ export function CodeBlock({
       {...(wrap ? { 'data-wrap': '' } : {})}
     >
       {hasHeader ? (
-        <div data-part="header">
+        <div data-part="header" data-part-header="">
           {icon && title !== undefined ? (
-            <span aria-hidden="true" data-part="icon">
+            <span aria-hidden="true" data-part="icon" data-part-icon="">
               <Icon>
                 <Glyph name={icon} />
               </Icon>
             </span>
           ) : null}
           {title !== undefined ? (
-            <span data-part="title" id={`${base}title`}>
+            <span data-part="title" data-part-title="" id={`${base}title`}>
               {title}
             </span>
           ) : null}
-          {language !== 'text' ? <span data-part="language">{language}</span> : null}
+          {language !== 'text' ? (
+            <span data-part="language" data-part-language="">
+              {language}
+            </span>
+          ) : null}
           {controls}
         </div>
       ) : null}
@@ -319,14 +327,14 @@ export function CodeBlock({
            stays, as the harness fragment draws it. */
         render={(props) => (
           <div
-            {...props}
-            data-part="body"
+            {...withSelectorKey(props, 'part', 'body')}
+
             {...(maxLines !== undefined ? { 'data-max-lines': '' } : {})}
           />
         )}
       >
-        <pre {...preProps} data-part="pre">
-          <code className={`language-${language}`} data-part="code">
+        <pre {...withSelectorKey(preProps, 'part', 'pre')}>
+          <code className={`language-${language}`} data-part="code" data-part-code="">
             {loading
               ? [62, 78, 44, 70].map((width, index) => (
                   <Skeleton aria-hidden="true" inlineSize={`${width}%`} key={index} shape="text" />
@@ -340,6 +348,7 @@ export function CodeBlock({
                     <span
                       data-line={number}
                       data-part="line"
+                      data-part-line=""
                       key={index}
                       {...(mark ? { 'data-mark': mark } : {})}
                       {...(dim ? { 'data-dim': '' } : {})}
@@ -349,18 +358,23 @@ export function CodeBlock({
                           }
                         : {})}
                     >
-                      <span aria-hidden="true" data-part="number">
+                      <span aria-hidden="true" data-part="number" data-part-number="">
                         {lineNumbers ? number : null}
                       </span>
-                      <span aria-hidden="true" data-part="marker" />
-                      <span data-part="text">
+                      <span aria-hidden="true" data-part="marker" data-part-marker="" />
+                      <span data-part="text" data-part-text="">
                         {renderLine
                           ? renderLine({ dim, line, mark, number })
                           : line.map((token, position) =>
                               renderToken ? (
                                 renderToken(token, position, number)
                               ) : token.scope ? (
-                                <span data-part="token" data-token={token.scope} key={position}>
+                                <span
+                                  data-part="token"
+                                  data-part-token=""
+                                  data-token={token.scope}
+                                  key={position}
+                                >
                                   {token.text}
                                 </span>
                               ) : (
@@ -380,6 +394,7 @@ export function CodeBlock({
           aria-controls={`${base}body`}
           aria-expanded={revealed}
           data-part="reveal"
+          data-part-reveal=""
           onClick={(event) =>
             requestRevealed(!revealed, keyed.current ? 'keyboard' : 'pointer', event)
           }

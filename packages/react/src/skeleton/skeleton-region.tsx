@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/skeleton/skeleton.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -81,13 +82,19 @@ export function SkeletonRegion({
 
   const announcement = painted ? resolved.label : (resolved.loadedLabel ?? '');
 
-  const rootProps: SkeletonRegionRootProps = {
+  const rootProps: SkeletonRegionRootProps = keyedProps({
     ...nativeProps,
     'aria-busy': painted || undefined,
     children: (
       <>
         {resolved.live === 'off' ? null : (
-          <span data-part="announcement" data-ui="visually-hidden" role="status">
+          <span
+            data-part="announcement"
+            data-part-announcement=""
+            data-ui="visually-hidden"
+            data-ui-visually-hidden=""
+            role="status"
+          >
             {announcement}
           </span>
         )}
@@ -98,7 +105,7 @@ export function SkeletonRegion({
     'data-loading': painted || undefined,
     'data-part': 'region',
     'data-ui': 'skeleton',
-  };
+  });
 
   return (
     <SkeletonRegionProvider value={region}>

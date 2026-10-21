@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/fullscreen/fullscreen.css';
 
 import { fullscreenMessages } from '@slotted/core/i18n';
@@ -71,7 +72,7 @@ export function Fullscreen({
     assign(ref as Ref<HTMLElement> | undefined, node);
   };
 
-  const rootProps: FullscreenRootProps = {
+  const rootProps: FullscreenRootProps = keyedProps({
     ...nativeProps,
     children,
     ...(handle.fullscreen ? { 'data-fullscreen': '' } : {}),
@@ -79,7 +80,7 @@ export function Fullscreen({
     'data-part': 'root',
     'data-ui': 'fullscreen',
     ref: attach,
-  };
+  });
 
   return (
     <FullscreenContext.Provider value={handle}>
@@ -95,11 +96,11 @@ export function Fullscreen({
  * rest it is a plain block the consumer styles.
  */
 export function FullscreenContent({ ref, render, ...nativeProps }: FullscreenContentProps) {
-  const rootProps: FullscreenContentRootProps = {
+  const rootProps: FullscreenContentRootProps = keyedProps({
     ...nativeProps,
     'data-part': 'content',
     'data-ui': 'fullscreen',
-  };
+  });
   return render === undefined ? <div {...rootProps} ref={ref} /> : render(rootProps);
 }
 
@@ -144,11 +145,11 @@ export function FullscreenTrigger({
   const own = useMessages(fullscreenMessages);
   const t = handle?.t ?? own;
 
-  const rootProps: FullscreenTriggerRootProps = {
+  const rootProps: FullscreenTriggerRootProps = keyedProps({
     ...nativeProps,
     children: (
       <>
-        <span aria-hidden="true" data-part="icon">
+        <span aria-hidden="true" data-part="icon" data-part-icon="">
           {/* The mark follows the state unless the consumer drew their own. */}
           {mark ?? (
             <Icon>
@@ -156,7 +157,9 @@ export function FullscreenTrigger({
             </Icon>
           )}
         </span>
-        <span data-part="label">{words ?? t(on ? 'exit' : 'enter')}</span>
+        <span data-part="label" data-part-label="">
+          {words ?? t(on ? 'exit' : 'enter')}
+        </span>
       </>
     ),
     className,
@@ -174,7 +177,7 @@ export function FullscreenTrigger({
       handle?.toggle(activationReason(event), event);
     },
     style,
-  };
+  });
 
   return render === undefined ? (
     <button {...rootProps} disabled={disabled} ref={ref} type={type} />

@@ -10,7 +10,11 @@ const HEADINGS = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6']);
  * The row above the body: the title column and the actions. It hands the
  * root its element, so a sticky header's height reaches the stylesheet.
  */
-@Directive({ selector: '[slSectionHeader]', standalone: true, host: { 'data-part': 'header' } })
+@Directive({
+  selector: '[slSectionHeader]',
+  standalone: true,
+  host: { 'data-part': 'header', 'data-part-header': '' },
+})
 export class SlSectionHeader implements OnInit, OnDestroy {
   private readonly section = inject(SlSection);
   private readonly native: HTMLElement = inject(ElementRef).nativeElement;
@@ -25,23 +29,35 @@ export class SlSectionHeader implements OnInit, OnDestroy {
 }
 
 /** Eyebrow, heading, description, in that order. */
-@Directive({ selector: '[slSectionTitle]', standalone: true, host: { 'data-part': 'title' } })
+@Directive({
+  selector: '[slSectionTitle]',
+  standalone: true,
+  host: { 'data-part': 'title', 'data-part-title': '' },
+})
 export class SlSectionTitle {}
 
 /** A short overline above the heading — a count, a category. Structural, not status. */
-@Directive({ selector: '[slSectionEyebrow]', standalone: true, host: { 'data-part': 'eyebrow' } })
+@Directive({
+  selector: '[slSectionEyebrow]',
+  standalone: true,
+  host: { 'data-part': 'eyebrow', 'data-part-eyebrow': '' },
+})
 export class SlSectionEyebrow {}
 
 /** A paragraph under the heading, in the muted text, with a measure. */
 @Directive({
   selector: '[slSectionDescription]',
   standalone: true,
-  host: { 'data-part': 'description' },
+  host: { 'data-part': 'description', 'data-part-description': '' },
 })
 export class SlSectionDescription {}
 
 /** The end of the header row: a button, a toolbar, a link. */
-@Directive({ selector: '[slSectionActions]', standalone: true, host: { 'data-part': 'actions' } })
+@Directive({
+  selector: '[slSectionActions]',
+  standalone: true,
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
+})
 export class SlSectionActions {}
 
 /**
@@ -56,6 +72,7 @@ export class SlSectionActions {}
   exportAs: 'slSectionHeading',
   host: {
     'data-part': 'heading',
+    'data-part-heading': '',
     '[attr.id]': 'section.headingId()',
     '[attr.role]': 'ariaRole()',
     '[attr.aria-level]': 'ariaLevel()',
@@ -85,6 +102,6 @@ export class SlSectionHeading implements OnInit, OnDestroy {
   selector: '[slSectionBody]',
   standalone: true,
   hostDirectives: [SlHeadingLevel],
-  host: { 'data-part': 'body' },
+  host: { 'data-part': 'body', 'data-part-body': '' },
 })
 export class SlSectionBody {}

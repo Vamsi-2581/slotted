@@ -47,6 +47,7 @@ import { SlPromptComposerControl } from './prompt-composer-defaults';
   ],
   host: {
     'data-part': 'input',
+    'data-part-input': '',
     '[attr.id]': 'controlId()',
     '[attr.dir]': "writtenDir ?? 'auto'",
     '[attr.rows]': 'rows()',

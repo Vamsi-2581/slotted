@@ -1,3 +1,4 @@
+import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/prose/prose.css';
 
 import { useProseDefaults } from './prose-defaults';
@@ -29,13 +30,13 @@ import type { ProseProps, ProseRootProps } from './prose.types';
 export function Prose({ flow, render, size, ...nativeProps }: ProseProps) {
   const defaults = useProseDefaults();
 
-  const rootProps: ProseRootProps = {
+  const rootProps: ProseRootProps = keyedProps({
     ...nativeProps,
     'data-flow': flow ?? defaults.flow,
     'data-part': 'root',
     'data-size': size ?? defaults.size,
     'data-ui': 'prose',
-  };
+  });
 
   return render === undefined ? <div {...rootProps} /> : render(rootProps);
 }

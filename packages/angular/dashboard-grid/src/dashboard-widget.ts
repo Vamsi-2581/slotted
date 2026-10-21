@@ -1,3 +1,4 @@
+import { writeSelectorKey } from '@slotted/core/selector-key';
 import {
   afterNextRender,
   booleanAttribute,
@@ -60,7 +61,7 @@ export class SlDashboardPart {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   constructor() {
-    afterNextRender(() => this.host.nativeElement.setAttribute('data-part', this.part()));
+    afterNextRender(() => writeSelectorKey(this.host.nativeElement, 'part', this.part()));
   }
 }
 

@@ -22,15 +22,15 @@ const source = new URL('.', import.meta.url).pathname;
 const OPTIONS = [
   {
     family: 'select',
-    item: "[data-ui='select'] [data-part='item']",
-    mark: "[data-ui='select'] [data-part='indicator']",
-    line: "[data-ui='select'] :is([data-part='indicator'], [data-part='icon'])",
+    item: '[data-ui-select] [data-part-item]',
+    mark: '[data-ui-select] [data-part-indicator]',
+    line: '[data-ui-select] :is([data-part-indicator], [data-part-icon])',
   },
   {
     family: 'combobox',
-    item: "[data-ui='combobox'] [data-part='item']",
-    mark: "[data-ui='combobox'] [data-part='indicator']",
-    line: "[data-ui='combobox'] :is([data-part='indicator'], [data-part='icon'])",
+    item: '[data-ui-combobox] [data-part-item]',
+    mark: '[data-ui-combobox] [data-part-indicator]',
+    line: '[data-ui-combobox] :is([data-part-indicator], [data-part-icon])',
   },
   /*
    * `multi-select` scopes every option part to the option itself, because a
@@ -39,9 +39,9 @@ const OPTIONS = [
    */
   {
     family: 'multi-select',
-    item: "[data-ui='multi-select'] [data-part='item']",
-    mark: "[data-ui='multi-select'] [data-part='item'] > [data-part='indicator']",
-    line: "[data-ui='multi-select'] [data-part='item'] > :is([data-part='indicator'], [data-part='icon'])",
+    item: '[data-ui-multi-select] [data-part-item]',
+    mark: '[data-ui-multi-select] [data-part-item] > [data-part-indicator]',
+    line: '[data-ui-multi-select] [data-part-item] > :is([data-part-indicator], [data-part-icon])',
   },
 ];
 

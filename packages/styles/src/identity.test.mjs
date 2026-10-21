@@ -33,7 +33,7 @@ test('keys every stylesheet on the public identifier, never on a class', () => {
     for (const { file, css } of stylesheets) {
       const classes = [...css.matchAll(/\.slotted-[a-z0-9-]+/g)].map(([match]) => match);
       assert.deepEqual(classes, [], `${name}/${file} selects ${classes.join(', ')} by class`);
-      assert.match(css, /\[data-ui=['"]/, `${name}/${file} names no family identifier`);
+      assert.match(css, /\[data-ui-[a-z0-9-]+\]/, `${name}/${file} names no family identifier`);
     }
   }
 });

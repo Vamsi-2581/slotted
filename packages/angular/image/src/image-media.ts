@@ -21,6 +21,7 @@ import { IMAGE_MEDIA_HOST } from './image-media-host';
   exportAs: 'slImageMedia',
   host: {
     'data-part': 'image',
+    'data-part-image': '',
     '(load)': 'host.reportLoaded()',
     '(error)': 'host.reportError()',
   },

@@ -169,6 +169,7 @@ export class SlCommandPaletteEmpty {
         [attr.data-disabled]="disabled() ? '' : null"
         [attr.data-query]="query() === '' ? null : ''"
         [attr.data-empty]="isEmpty() ? '' : null"
+        (mousedown)="keepFocus($event)"
       >
         <div data-part="header">
           @if (loading()) {
@@ -605,10 +606,12 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
       );
     });
 
-    /* The row the highlight is on scrolls into view; it holds no focus. */
+    /* The row the highlight is on scrolls into view; it holds no focus. A row
+       the pointer highlighted is already under it, and scrolling it would
+       fight a finger or a wheel moving the list. */
     effect(() => {
       const id = this.highlightedId();
-      if (id === null) return;
+      if (id === null || id === this.pointerHighlight) return;
       const node = this.list()?.nativeElement.querySelector<HTMLElement>(
         `#${CSS.escape(this.domId(id))}`,
       );
@@ -685,8 +688,12 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
     if (state.request(next, reason, source)) this.query.set(next);
   }
 
+  /** The row the pointer last highlighted, which never scrolls the list. */
+  private pointerHighlight: string | null = null;
+
   setHighlighted(next: string | null, reason: CommandPaletteHighlightReason, source?: Event) {
     if (next === this.highlightedId()) return;
+    this.pointerHighlight = reason === 'pointer' ? next : null;
     const state = createControllable<string | null>({
       initial: this.highlightedId(),
       onRequest: (request) => this.highlightedIdChangeRequest.emit(request),
@@ -853,8 +860,20 @@ export class SlCommandPalette<Item extends CommandPaletteItem = CommandPaletteIt
     this.setPages(this.pages().slice(0, index + 1), 'pointer', event);
   }
 
-  protected hover(item: Item, event: Event) {
-    if (item.disabled === true) return;
+  /**
+   * Focus stays in the input while the palette is open, as in a platform
+   * search field: a press anywhere else — a group label, the list's empty
+   * space, a row — keeps it there, and on a phone the keyboard stays up. The
+   * press's click still runs.
+   */
+  protected keepFocus(event: MouseEvent) {
+    if (event.target !== this.field()?.nativeElement) event.preventDefault();
+  }
+
+  protected hover(item: Item, event: PointerEvent) {
+    /* A finger on the list is a scroll until it ends as a tap: the tap's click
+       executes, and a highlight on the way would trail the finger. */
+    if (item.disabled === true || event.pointerType === 'touch') return;
     this.setHighlighted(item.id, 'pointer', event);
   }
 

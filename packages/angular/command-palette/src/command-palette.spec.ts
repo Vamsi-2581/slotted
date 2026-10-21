@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ChangeRequest } from '@slotted/core/state';
 
@@ -456,5 +456,72 @@ describe('SlCommandPalette with a template and defaults', () => {
     fixture.detectChanges();
     expect(field().getAttribute('aria-label')).toBe('Search commands');
     expect(footer()).toContain('Navigate');
+  });
+});
+
+/**
+ * Focus stays in the input while the palette is open, and the highlight
+ * follows a mouse or a pen only: a finger that starts a scroll on the list
+ * fires a pointermove over a row before the pointercancel. A highlight the
+ * pointer made never scrolls the list under it.
+ */
+describe('SlCommandPalette under a press and a pointer', () => {
+  let fixture: ComponentFixture<InlineHost>;
+  const input = () => fixture.nativeElement.querySelector('[role="combobox"]') as HTMLInputElement;
+  const row = (label: string) =>
+    [...fixture.nativeElement.querySelectorAll('[data-part="item"]')].find((item: Element) =>
+      item.textContent?.includes(label),
+    ) as HTMLElement;
+  const pointer = (type: string, target: HTMLElement, pointerType: string) => {
+    target.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerType }));
+    fixture.detectChanges();
+  };
+  let scrollIntoView: ReturnType<typeof vi.fn<(arg?: boolean | ScrollIntoViewOptions) => void>>;
+
+  beforeEach(async () => {
+    scrollIntoView = vi.fn<(arg?: boolean | ScrollIntoViewOptions) => void>();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    await TestBed.configureTestingModule({ imports: [InlineHost] }).compileComponents();
+    fixture = TestBed.createComponent(InlineHost);
+    fixture.detectChanges();
+    scrollIntoView.mockClear();
+  });
+
+  afterEach(() => {
+    delete (Element.prototype as Partial<Element>).scrollIntoView;
+  });
+
+  it('cancels the focus a press on a group label or on the list would take', () => {
+    const press = (target: Element) =>
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+
+    expect(press(fixture.nativeElement.querySelector('[data-part="group-label"]'))).toBe(false);
+    expect(press(fixture.nativeElement.querySelector('[data-part="list"]'))).toBe(false);
+    expect(press(input())).toBe(true);
+  });
+
+  it('leaves the highlight where it is while a finger scrolls the list', () => {
+    const before = input().getAttribute('aria-activedescendant');
+    const deploy = row('Deploy to production');
+
+    pointer('pointerdown', deploy, 'touch');
+    pointer('pointermove', deploy, 'touch');
+    pointer('pointercancel', deploy, 'touch');
+
+    expect(input().getAttribute('aria-activedescendant')).toBe(before);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('follows a mouse without scrolling the row it moved onto', () => {
+    const deploy = row('Deploy to production');
+
+    pointer('pointermove', deploy, 'mouse');
+
+    expect(input().getAttribute('aria-activedescendant')).toBe(deploy.id);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    fixture.detectChanges();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 });

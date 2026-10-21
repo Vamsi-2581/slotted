@@ -225,10 +225,13 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
     recent,
   };
 
+  /** The row the pointer last highlighted, which never scrolls the list. */
+  const pointerHighlight = useRef<string | null>(null);
   const setHighlighted = useCallback(
     (next: string | null, reason: CommandPaletteHighlightReason, source?: unknown) => {
       const state = latest.current;
       if (next === state.currentHighlighted) return;
+      pointerHighlight.current = reason === 'pointer' ? next : null;
       const controllable = createControllable<string | null>({
         controlled: state.highlightedId,
         initial: state.currentHighlighted,
@@ -352,10 +355,11 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
   }, [currentHighlighted, currentOpen, enabled, resolved.autoHighlight, rowIds, setHighlighted]);
 
   /* The row the highlight is on scrolls into view; it is not focused, so the
-     browser will not do it. */
+     browser will not do it. A row the pointer highlighted is already under it,
+     and scrolling it would fight a finger or a wheel moving the list. */
   const listRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
-    if (currentHighlighted === null) return;
+    if (currentHighlighted === null || currentHighlighted === pointerHighlight.current) return;
     const node = listRef.current?.querySelector<HTMLElement>(
       `#${CSS.escape(domId(base, currentHighlighted))}`,
     );
@@ -705,7 +709,9 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
       role: 'option',
       title: item.label,
       onPointerMove: (event: PointerEvent) => {
-        if (isDisabled) return;
+        /* A finger on the list is a scroll until it ends as a tap: the tap's
+           click executes, and a highlight on the way would trail the finger. */
+        if (isDisabled || event.pointerType === 'touch') return;
         setHighlighted(item.id, 'pointer', event);
       },
       onClick: (event: MouseEvent) => {
@@ -805,6 +811,13 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
       {...(resolved.disabled ? { 'data-disabled': '' } : {})}
       {...(currentQuery === '' ? {} : { 'data-query': '' })}
       {...(isEmpty ? { 'data-empty': '' } : {})}
+      /* Focus stays in the input while the palette is open, as in a platform
+         search field: a press anywhere else — a group label, the list's empty
+         space, a row — keeps it there, and on a phone the keyboard stays up.
+         The press's click still runs. */
+      onMouseDown={compose(nativeProps.onMouseDown, (event) => {
+        if (event.target !== inputRef.current) event.preventDefault();
+      })}
       style={style}
     >
       <div data-part="header">

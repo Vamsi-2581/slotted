@@ -1,7 +1,7 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/command-palette/contract.json';
 import { SlottedProvider } from '../i18n';
@@ -547,5 +547,51 @@ describe('CommandPalette', () => {
     fireEvent.keyDown(input(), { key: 'ArrowDown' });
     expect(onKeyDown).toHaveBeenCalled();
     expect(current()?.textContent).toContain('Inbox');
+  });
+});
+
+/**
+ * A finger that starts a scroll on the list fires a pointermove over a row
+ * before the pointercancel. The highlight follows a mouse or a pen only, and a
+ * highlight the pointer made never scrolls the list under it.
+ */
+describe('the pointer and the highlight', () => {
+  /* jsdom has no scrollIntoView; each test stands one in and takes it away. */
+  afterEach(() => {
+    delete (Element.prototype as Partial<Element>).scrollIntoView;
+  });
+  const row = (label: string) =>
+    screen.getByText(label).closest('[data-part="item"]') as HTMLElement;
+
+  it('leaves the highlight where it is while a finger scrolls the list', () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    render(<Inline />);
+    const before = input().getAttribute('aria-activedescendant');
+    scrollIntoView.mockClear();
+
+    const deploy = row('Deploy to production');
+    fireEvent.pointerDown(deploy, { pointerType: 'touch' });
+    fireEvent.pointerMove(deploy, { pointerType: 'touch' });
+    fireEvent.pointerCancel(deploy, { pointerType: 'touch' });
+
+    expect(input().getAttribute('aria-activedescendant')).toBe(before);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it('follows a mouse without scrolling the row it moved onto', () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    render(<Inline />);
+    scrollIntoView.mockClear();
+
+    const deploy = row('Deploy to production');
+    fireEvent.pointerMove(deploy, { pointerType: 'mouse' });
+
+    expect(current()).toBe(deploy);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input(), { key: 'ArrowDown' });
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 });

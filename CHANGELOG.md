@@ -2,6 +2,16 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.8 — 2026-10-21
+
+- fix(drawer): abrir uma folha não força layout
+- feat(dialog): um diálogo em ecrã inteiro recua pelo teclado virtual
+- fix(command-palette): o foco fica no input enquanto a paleta está aberta, e um toque que rola a lista não move o destaque
+- test(react): testes em Chromium
+- fix(date-field, time-field, datetime-field): cada segmento tem o nome da unidade, do catálogo da língua em vigor
+- fix(calendar): os botões de paginação levam o nome do passo que dão
+- fix(tabs): o marcador anda por left e inline-size, as duas propriedades de layout na mesma thread
+
 ## 0.1.0-beta.7 — 2026-10-20
 
 - fix(presence): stop() reversível para o StrictMode do React, destroy() volta a ser final

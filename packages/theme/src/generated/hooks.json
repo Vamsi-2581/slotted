@@ -884,6 +884,7 @@
       "root"
     ],
     "inline-message": [
+      "actions",
       "icon",
       "prefix",
       "root",
@@ -1174,8 +1175,10 @@
       "action",
       "attach",
       "footer",
+      "glow",
       "header",
       "input",
+      "ring",
       "root",
       "submit"
     ],
@@ -1885,6 +1888,7 @@
     "data-edges",
     "data-editable",
     "data-editing",
+    "data-emphasis",
     "data-empty",
     "data-entry",
     "data-expand-on",

@@ -2858,6 +2858,8 @@ export type ComponentToken =
   | '--slotted-avatar-group-overlap'
   | '--slotted-avatar-group-raise-lift'
   | '--slotted-avatar-initials-size'
+  | '--slotted-avatar-plate-color'
+  | '--slotted-avatar-plate-surface'
   | '--slotted-avatar-radius'
   | '--slotted-avatar-ring-color'
   | '--slotted-avatar-ring-width'
@@ -3647,6 +3649,7 @@ export type ComponentToken =
   | '--slotted-filter-bar-value-max'
   | '--slotted-filter-bar-value-max-narrow'
   | '--slotted-form-color'
+  | '--slotted-form-field-gap'
   | '--slotted-form-summary-background'
   | '--slotted-form-summary-border-color'
   | '--slotted-form-summary-color'
@@ -3697,6 +3700,8 @@ export type ComponentToken =
   | '--slotted-import-export-center-inset-inline-sm'
   | '--slotted-import-export-center-min-inline-size-sm'
   | '--slotted-import-export-center-status-column'
+  | '--slotted-inline-message-actions-gap'
+  | '--slotted-inline-message-actions-offset'
   | '--slotted-inline-message-column-gap'
   | '--slotted-inline-message-font-family'
   | '--slotted-inline-message-line-height'
@@ -4079,6 +4084,13 @@ export type ComponentToken =
   | '--slotted-prompt-composer-raised-focus-shadow'
   | '--slotted-prompt-composer-raised-shadow'
   | '--slotted-prompt-composer-readonly-background'
+  | '--slotted-prompt-composer-ring-colors'
+  | '--slotted-prompt-composer-ring-duration'
+  | '--slotted-prompt-composer-ring-glow-opacity'
+  | '--slotted-prompt-composer-ring-glow-opacity-busy'
+  | '--slotted-prompt-composer-ring-glow-opacity-focus'
+  | '--slotted-prompt-composer-ring-glow-reach'
+  | '--slotted-prompt-composer-ring-width'
   | '--slotted-prompt-composer-rows'
   | '--slotted-prompt-composer-selection-background'
   | '--slotted-prompt-composer-shadow'
@@ -5078,6 +5090,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-avatar-group-overlap",
   "--slotted-avatar-group-raise-lift",
   "--slotted-avatar-initials-size",
+  "--slotted-avatar-plate-color",
+  "--slotted-avatar-plate-surface",
   "--slotted-avatar-radius",
   "--slotted-avatar-ring-color",
   "--slotted-avatar-ring-width",
@@ -5867,6 +5881,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-filter-bar-value-max",
   "--slotted-filter-bar-value-max-narrow",
   "--slotted-form-color",
+  "--slotted-form-field-gap",
   "--slotted-form-summary-background",
   "--slotted-form-summary-border-color",
   "--slotted-form-summary-color",
@@ -5917,6 +5932,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-import-export-center-inset-inline-sm",
   "--slotted-import-export-center-min-inline-size-sm",
   "--slotted-import-export-center-status-column",
+  "--slotted-inline-message-actions-gap",
+  "--slotted-inline-message-actions-offset",
   "--slotted-inline-message-column-gap",
   "--slotted-inline-message-font-family",
   "--slotted-inline-message-line-height",
@@ -6299,6 +6316,13 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-prompt-composer-raised-focus-shadow",
   "--slotted-prompt-composer-raised-shadow",
   "--slotted-prompt-composer-readonly-background",
+  "--slotted-prompt-composer-ring-colors",
+  "--slotted-prompt-composer-ring-duration",
+  "--slotted-prompt-composer-ring-glow-opacity",
+  "--slotted-prompt-composer-ring-glow-opacity-busy",
+  "--slotted-prompt-composer-ring-glow-opacity-focus",
+  "--slotted-prompt-composer-ring-glow-reach",
+  "--slotted-prompt-composer-ring-width",
   "--slotted-prompt-composer-rows",
   "--slotted-prompt-composer-selection-background",
   "--slotted-prompt-composer-shadow",

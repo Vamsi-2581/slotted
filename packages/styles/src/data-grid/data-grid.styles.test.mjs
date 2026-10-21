@@ -377,7 +377,7 @@ test('makes its own controls a full touch target on a coarse pointer, with the g
  */
 test('keeps the empty scene’s padding inside the frame’s viewport', () => {
   const body = rule('[data-ui-data-grid] > [data-part-scroll] > [data-part-empty]');
-  assert.match(body, /inline-size:100cqi/);
+  assert.match(body, /inline-size:var\(--slotted-data-grid-viewport,100%\)/);
   assert.match(body, /padding:/);
   assert.match(body, /box-sizing:border-box/);
 });
@@ -451,7 +451,7 @@ test('draws the pop-in on the row’s second line, across the frame, after the g
   assert.match(popin, /row-gap:var\(--slotted-space-2,0\.25rem\);/);
   assert.match(popin, /position:sticky;/);
   assert.match(popin, /inset-inline-start:0;/);
-  assert.match(popin, /max-inline-size:100cqi;/);
+  assert.match(popin, /max-inline-size:var\(--slotted-data-grid-viewport,100%\);/);
   assert.match(
     popin,
     /padding-inline:calc\(var\(--slotted-data-grid-leading,0px\) \+ var\(--_pad-inline\)\) var\(--_pad-inline\);/,
@@ -520,10 +520,9 @@ test('starts a compact frame’s pop-in at the row’s padding and sets one colu
     normalize(rule('[data-ui-data-grid] [data-part-popin]')),
     /container:slotted-data-grid-popin \/ inline-size;/,
   );
-  const compact = at('slotted-data-grid (width < 600px)');
   assert.match(
-    compact,
-    /\[data-ui-data-grid\] \[data-part-popin\]\{padding-inline-start:var\(--_pad-inline\);\}/,
+    normalize(rule('[data-ui-data-grid][data-narrow] [data-part-popin]')),
+    /padding-inline-start:var\(--_pad-inline\);/,
   );
   const single = at('slotted-data-grid-popin (width < 19rem)');
   assert.match(single, /\[data-part-popin-field\]\{[^}]*display:grid;/);
@@ -633,4 +632,24 @@ test('stands on the ground its container publishes before the page surface', () 
     normalized,
     /--_surface:var\(--slotted-data-grid-surface,var\(--slotted-ground,var\(--slotted-surface,Canvas\)\)\)/,
   );
+});
+
+/**
+ * Nothing the grid writes while it scrolls reaches past the body. As a size
+ * container the scroller made the browser lay out everything inside it
+ * whenever a row entered or left, and the window's offset, inherited, restyled
+ * every row and cell on every step; `data-grid.perf.browser.test.tsx` measures
+ * both against the grid's first render.
+ */
+test('keeps the scroller from being a size container and the window offsets from inheriting', () => {
+  const declarationsOnly = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.doesNotMatch(declarationsOnly, /container-type\s*:\s*(inline-)?size/);
+  assert.doesNotMatch(declarationsOnly, /\bcq(i|w|h|b|min|max)\b/);
+  for (const property of ['--slotted-data-grid-window-start', '--slotted-data-grid-window-total']) {
+    assert.match(
+      declarationsOnly,
+      new RegExp(`@property ${property} \\{\\s*syntax: '\\*';\\s*inherits: false;`),
+      `${property} is not registered without inheritance`,
+    );
+  }
 });

@@ -1,3 +1,4 @@
+import { COMPACT_BELOW } from '@slotted/core/measure';
 import '@slotted/styles/data-grid/data-grid.css';
 
 import { writeToClipboard } from '@slotted/core/clipboard';
@@ -1931,10 +1932,15 @@ export function DataGrid<Row>({
   const measureRow = useCallback(
     (index: number, node: HTMLElement | null) => {
       if (!node) return;
+      /* A row is read only when its height is still unknown: the first row of
+         a grid with no stated height, or every row of one that grows to its
+         content. A read forces layout inside the commit, and a scroll step
+         that read each row it mounted laid the page out once per row. */
+      const needsFirst = typeof resolvedRowHeight !== 'number' && measuredRow === null;
+      if (!needsFirst && !autoRows) return;
       const height = node.getBoundingClientRect().height;
       if (height === 0) return;
-      if (typeof resolvedRowHeight !== 'number' && measuredRow === null)
-        setMeasuredRow(Math.round(height));
+      if (needsFirst) setMeasuredRow(Math.round(height));
       if (autoRows) {
         setRowSizes((sizes) =>
           sizes.get(index) === height ? sizes : new Map(sizes).set(index, height),
@@ -2947,6 +2953,9 @@ export function DataGrid<Row>({
     ...(changedFor > 0 ? { '--slotted-data-grid-changed-duration': `${changedFor}ms` } : {}),
     /* Where a pop-in's fields start: after the gutters, with the first data column. */
     ...(hasPopin ? { '--slotted-data-grid-leading': `${leading}px` } : {}),
+    /* The scroller's width, which holds a detail, a group row and the empty
+       state to the frame without making the scroller a size container. */
+    ...(viewport.width > 0 ? { '--slotted-data-grid-viewport': `${viewport.width}px` } : {}),
   } as CSSProperties;
   const bodyStyle = windowsRows
     ? ({
@@ -3058,6 +3067,7 @@ export function DataGrid<Row>({
           data-part="root"
           data-part-root=""
           data-popin={hasPopin ? outOfSpace.popin.length : undefined}
+          data-narrow={viewport.width > 0 && viewport.width < COMPACT_BELOW ? '' : undefined}
           data-rows={autoRows ? 'auto' : 'fixed'}
           data-slotted-density={density ?? undefined}
           data-ui="data-grid"

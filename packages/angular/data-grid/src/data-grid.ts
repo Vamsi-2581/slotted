@@ -1,3 +1,4 @@
+import { COMPACT_BELOW } from '@slotted/core/measure';
 import { writeToClipboard } from '@slotted/core/clipboard';
 import { createRowMetrics, nextSelection, virtualWindow } from '@slotted/core/collection';
 import { createDragController, type DragController } from '@slotted/core/drag';
@@ -1463,6 +1464,8 @@ function contentWidth(cell: HTMLElement): number {
     '[attr.data-rows]': "autoRows() ? 'auto' : 'fixed'",
     '[attr.data-slotted-density]': 'density() ?? null',
     '[attr.data-popin]': 'hasPopin() ? outOfSpace().popin.length : null',
+    '[attr.data-narrow]': "viewport().width > 0 && viewport().width < narrowBelow ? '' : null",
+    '[style.--slotted-data-grid-viewport]': "viewport().width > 0 ? viewport().width + 'px' : null",
     '[style.--slotted-data-grid-template]': 'template()',
     '[style.--slotted-data-grid-block-size]': 'blockSize()',
     '[style.--slotted-data-grid-row-block-size]': 'rowBlockSize()',
@@ -2056,7 +2059,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   /* ── Virtual rows ───────────────────────────────────────────────────── */
   private readonly scrollTop = signal(0);
   private readonly scrollLeft = signal(0);
-  private readonly viewport = signal({ width: 0, height: 0 });
+  protected readonly viewport = signal({ width: 0, height: 0 });
+  /** The scroller's width under which the pop-in's fields start at the row's own padding. */
+  protected readonly narrowBelow = COMPACT_BELOW;
   private readonly measuredRow = signal<number | null>(null);
   private readonly rowSizes = signal<ReadonlyMap<number, number>>(new Map());
   /** The body row's height: stated, or measured from the rows drawn, or the default. */

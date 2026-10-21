@@ -207,11 +207,12 @@
    * the frame leaves after the footer and scrolls what does not fit.
    */
   [data-ui-data-grid] > [data-part-scroll] {
-    /* The container a detail row, a group row and the empty state measure
-       their width against: each spans every column of a template that may
-       be wider than the frame, and `100cqi` is what holds it to the frame. */
-    container-name: slotted-data-grid;
-    container-type: inline-size;
+    /* No `container-type`. A detail row, a group row and the empty state are
+       held to the frame by `--slotted-data-grid-viewport`, the scroller's
+       width the binding measures. As a size container the scroller made the
+       browser recalculate and lay out everything inside it whenever a row
+       entered or left: 45 ms of layout per scroll step on a grid of 29 mounted
+       rows, against 3 ms without it. */
     flex: 1 1 auto;
     min-block-size: 0;
     overflow: auto;
@@ -873,7 +874,7 @@
      lands in, as wide as the viewport and moved by the sideways scroll. */
   [data-ui-data-grid] [data-part-drop-indicator][data-axis='row'] {
     block-size: var(--slotted-border-width-thick, 2px);
-    inline-size: 100cqi;
+    inline-size: var(--slotted-data-grid-viewport, 100%);
     inset-block-start: calc(
       var(--slotted-data-grid-drop-offset, 0px) - var(--slotted-border-width-thick, 2px) / 2
     );
@@ -1930,7 +1931,7 @@
        the consumer's own layout and not a column. */
     position: sticky;
     inset-inline-start: 0;
-    max-inline-size: 100cqi;
+    max-inline-size: var(--slotted-data-grid-viewport, 100%);
   }
 
   /**
@@ -1980,7 +1981,7 @@
     grid-row: 2;
     grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
     inset-inline-start: 0;
-    max-inline-size: 100cqi;
+    max-inline-size: var(--slotted-data-grid-viewport, 100%);
     min-inline-size: 0;
     padding-block: 0 var(--_pad-block);
     padding-inline: calc(var(--slotted-data-grid-leading, 0px) + var(--_pad-inline))
@@ -1994,10 +1995,8 @@
      indent: with the chooser and the expander, 88 of 360 pixels left one
      column of fields where the row's whole width holds two. The fields start
      at the row's own padding, under the chooser. */
-  @container slotted-data-grid (width < 600px) {
-    [data-ui-data-grid] [data-part-popin] {
-      padding-inline-start: var(--_pad-inline);
-    }
+  [data-ui-data-grid][data-narrow] [data-part-popin] {
+    padding-inline-start: var(--_pad-inline);
   }
 
   /* The label above the value, as a form reads, so a narrow field keeps the
@@ -2327,7 +2326,7 @@
        stands in the middle of what the reader sees whatever the columns'
        width and however far the grid is scrolled sideways: laid out over the
        columns, the middle of a wide template was off screen. */
-    inline-size: 100cqi;
+    inline-size: var(--slotted-data-grid-viewport, 100%);
     inset-inline-start: 0;
     justify-content: center;
     min-block-size: calc(var(--_row-block) * 6);
@@ -2483,4 +2482,23 @@
       --_hover: transparent;
     }
   }
+}
+
+/**
+ * The row window's offset and the body's whole height, written on the body
+ * by script on every scroll step and read only by the body. Unregistered,
+ * each one inherited into every row and cell, and a scroll step restyled the
+ * whole window: 41 ms of style recalculation per step on 29 mounted rows.
+ * Registered without inheritance and without a type, a body the grid does not
+ * window still takes the fallback of `var()`. Outside the layer, because
+ * `@property` is a registration, not a rule a cascade layer holds.
+ */
+@property --slotted-data-grid-window-start {
+  syntax: '*';
+  inherits: false;
+}
+
+@property --slotted-data-grid-window-total {
+  syntax: '*';
+  inherits: false;
 }

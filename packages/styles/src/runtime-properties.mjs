@@ -143,6 +143,8 @@ export const RUNTIME_PROPERTY_PREFIXES = [
   '--slotted-data-grid-pinned-bottom-offset',
   '--slotted-data-grid-window-start',
   '--slotted-data-grid-window-total',
+  /** The scroller's measured width, which holds a detail, a group row and the empty state to the frame. */
+  '--slotted-data-grid-viewport',
   /** The measured body row height, which the skeleton rows take while the rows load. */
   '--slotted-data-grid-loader-row-size',
   '--slotted-data-grid-leading',

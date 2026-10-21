@@ -77,7 +77,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'playground',
     title: 'Playground',
-    note: 'A form of two fields with the family’s whole lifecycle on it. Submit it empty: the platform’s own messages appear in the summary, focus moves there, and each link jumps to the field it names.',
+    note: 'A form of two fields with the family’s whole lifecycle on it. Submit it empty: the platform’s own messages appear in the summary, focus moves there, and each link jumps to the field it names. Two fields written one after the other inside the form stand apart by --slotted-form-field-gap (space-6 by default); a layout the page draws itself — a Grid, a Stack — keeps its own gap.',
     snippet: defineSnippet({
       id: 'form-react-playground',
       language: 'tsx',

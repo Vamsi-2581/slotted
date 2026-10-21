@@ -1,4 +1,12 @@
-export { SlEntityPicker, SlEntityPickerChip, SlEntityPickerOption } from './entity-picker';
+export {
+  SlEntityPicker,
+  SlEntityPickerChip,
+  SlEntityPickerOption,
+  SlEntityPickerOptionDescription,
+  SlEntityPickerOptionLabel,
+  SlEntityPickerOptionMedia,
+  SlEntityPickerOptionMeta,
+} from './entity-picker';
 export {
   ENTITY_PICKER_DEFAULTS,
   ENTITY_PICKER_FALLBACK,

@@ -124,6 +124,14 @@ interface EntityPickerBaseProps extends Omit<
     | undefined;
   /** Replaces the content of an option; the face, the check and the row stay the family's. */
   renderOption?: ((entity: Entity, state: EntityPickerOptionState) => ReactNode) | undefined;
+  /**
+   * Draws only the options in view, and a few either side. On by default above
+   * 100 options in a list with no section headings: every keystroke over 500
+   * records with faces rendered all 500. A list with headings is drawn whole.
+   */
+  virtualize?: boolean | undefined;
+  /** The height an option is counted at until it has been drawn and measured. Defaults to 48. */
+  estimatedRowHeight?: number | undefined;
   /** Replaces the words of a chip; the face and the remove button stay the family's. */
   renderChip?: ((entity: Entity) => ReactNode) | undefined;
   /** Replaces the root element. */

@@ -152,6 +152,19 @@
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }
 
+  /**
+   * Two fields written one after the other directly inside the form stand
+   * apart by a step of the space scale. The root is a block and drew no
+   * distance at all, so a form written from the minimal example rendered its
+   * fields touching. A layout the page draws itself — a grid of two columns, a
+   * stack with its own gap — is not a field, and keeps its own spacing.
+   */
+  [data-ui-form][data-part-root]
+    > :is([data-ui-field], [data-ui-field-group])
+    + :is([data-ui-field], [data-ui-field-group]) {
+    margin-block-start: var(--slotted-form-field-gap, var(--slotted-space-6, 1rem));
+  }
+
   /* ── The action row ───────────────────────────────────────────────────
    *
    * Its own container, because the question it answers is how much room the

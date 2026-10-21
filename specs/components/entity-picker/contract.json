@@ -121,6 +121,8 @@
     "tabindex": "-1 on the trigger and on every remove button",
     "hidden inputs": "React: one per id, all under the same name"
   },
+  "optionParts": "renderOption (React) and the slEntityPickerOption template (Angular) write an option's content with EntityPickerOptionLabel / Description / Meta / Media and slEntityPickerOptionLabel / Description / Meta / Media, which carry data-part and its selector key, so the content takes the row's columns; with media=none the option's own face goes in the media part",
+  "virtualize": "above 100 options in a list with no section headings only the options in view and 6 either side are drawn, between two spacers sized from measured rows (estimatedRowHeight, 48, until measured); options carry aria-posinset and aria-setsize; a highlight outside the window scrolls the list to it first. virtualize=false draws every option, true windows a shorter list too",
   "entity": {
     "required": ["id", "label"],
     "optional": ["description", "meta", "avatar", "group", "scope", "disabled"],

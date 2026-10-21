@@ -25,7 +25,7 @@ export const REACT_ENTITY_PICKER_TOKENS = entityPickerTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { EntityPicker, EntityPickerDefaultsProvider, localEntitySource, rememberRecent } from '@slotted/react';",
+    "import { EntityPicker, EntityPickerDefaultsProvider, EntityPickerOptionDescription, EntityPickerOptionLabel, EntityPickerOptionMedia, EntityPickerOptionMeta, localEntitySource, rememberRecent } from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -473,7 +473,12 @@ const scenes: ReferenceSceneMeta[] = [
   <EntityPicker
     aria-label="Responsável"
     messages={{ retry: 'Buscar outra vez' }}
-    renderOption={(person) => <span data-part="label">{person.label}</span>}
+    renderOption={(person) => (
+      <>
+        <EntityPickerOptionLabel>{person.label}</EntityPickerOptionLabel>
+        <EntityPickerOptionDescription>{person.team}</EntityPickerOptionDescription>
+      </>
+    )}
     source={directory}
   />
 </SlottedProvider>;`,
@@ -617,11 +622,25 @@ export const REACT_ENTITY_PICKER_DOCS = {
         'Draws the offer to create',
       ],
       [
+        'virtualize',
+        'boolean',
+        'above 100 options without headings',
+        'EntityPicker',
+        'Draws only the options in view and a few either side; the keyboard, aria-activedescendant and scrolling to the highlight reach every option. A list with section headings is drawn whole',
+      ],
+      [
+        'estimatedRowHeight',
+        'number',
+        '48',
+        'EntityPicker',
+        'The height an option is counted at until it has been drawn and measured',
+      ],
+      [
         'renderOption',
         '(entity, state) => ReactNode',
         'name, identifier, fact',
         'EntityPicker',
-        'The content of an option; the face, the check and the row stay the family’s',
+        'The content of an option, written with EntityPickerOptionLabel, EntityPickerOptionDescription, EntityPickerOptionMeta and EntityPickerOptionMedia, which place it in the row; the face, the check and the row stay the family’s. With media="none" an option draws its own face in EntityPickerOptionMedia',
       ],
       ['renderChip', '(entity) => ReactNode', 'the name', 'EntityPicker', 'The words of a chip'],
       ['render', '(props) => ReactNode', 'a div', 'EntityPicker', 'Replaces the root element'],

@@ -1,5 +1,11 @@
 export { EntityPicker } from './entity-picker';
 export {
+  EntityPickerOptionDescription,
+  EntityPickerOptionLabel,
+  EntityPickerOptionMedia,
+  EntityPickerOptionMeta,
+} from './entity-picker-option-parts';
+export {
   ENTITY_PICKER_FALLBACK,
   EntityPickerDefaultsProvider,
   useEntityPickerDefaults,

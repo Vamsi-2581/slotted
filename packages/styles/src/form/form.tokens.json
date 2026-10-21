@@ -10,6 +10,7 @@
   "--slotted-font-family-sans",
   "--slotted-font-weight-semibold",
   "--slotted-form-color",
+  "--slotted-form-field-gap",
   "--slotted-form-summary-background",
   "--slotted-form-summary-border-color",
   "--slotted-form-summary-color",

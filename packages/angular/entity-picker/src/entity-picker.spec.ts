@@ -8,7 +8,12 @@ import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import type { ChangeRequest } from '@slotted/core/state';
 import { describe, expect, it } from 'vitest';
 
-import { SlEntityPicker, SlEntityPickerOption } from './entity-picker';
+import {
+  SlEntityPicker,
+  SlEntityPickerOption,
+  SlEntityPickerOptionDescription,
+  SlEntityPickerOptionLabel,
+} from './entity-picker';
 import {
   type Entity,
   type EntityPickerOpenOn,
@@ -424,14 +429,17 @@ describe('SlEntityPicker openOn', () => {
 
 @Component({
   standalone: true,
-  imports: [SlEntityPicker, SlEntityPickerOption],
+  imports: [
+    SlEntityPicker,
+    SlEntityPickerOption,
+    SlEntityPickerOptionLabel,
+    SlEntityPickerOptionDescription,
+  ],
   template: `
     <sl-entity-picker aria-label="Owner" searchDelay="0" [items]="people">
       <ng-template slEntityPickerOption let-entity let-selected="selected">
-        <span data-part="label" data-part-label=""
-          >{{ entity.label }}{{ selected ? ' ✓' : '' }}</span
-        >
-        <span data-part="description" data-part-description="">#{{ entity.id }}</span>
+        <span slEntityPickerOptionLabel>{{ entity.label }}{{ selected ? ' ✓' : '' }}</span>
+        <span slEntityPickerOptionDescription>#{{ entity.id }}</span>
       </ng-template>
     </sl-entity-picker>
   `,
@@ -450,6 +458,9 @@ describe('SlEntityPicker with an option template', () => {
     await settle(fixture);
     const row = options()[0]!;
     expect(row.querySelector("[data-part='description']")?.textContent).toBe('#bruno');
+    /* The parts write the selector key the stylesheet places them by. */
+    expect(row.querySelector('[data-part-label]')?.textContent).toContain('Bruno');
+    expect(row.querySelector('[data-part-description]')).not.toBeNull();
     expect(row.querySelector("[data-part='media'] [data-ui='avatar']")).not.toBeNull();
     expect(row.querySelector("[data-part='indicator']")).not.toBeNull();
   });
@@ -505,5 +516,39 @@ describe('SlEntityPicker in a form', () => {
     await settle(fixture);
     const label = document.querySelector('label')!;
     expect(label.getAttribute('for')).toBe(input().id);
+  });
+});
+
+@Component({
+  standalone: true,
+  imports: [SlEntityPicker],
+  template: `<sl-entity-picker aria-label="Owner" searchDelay="0" [items]="people" />`,
+})
+class ManyHost {
+  readonly people: Entity[] = Array.from({ length: 500 }, (_, index) => ({
+    id: `p${String(index)}`,
+    label: `Person ${String(index).padStart(3, '0')}`,
+  }));
+}
+
+/**
+ * Every keystroke over 500 records rendered all 500. Only the options in view
+ * are drawn; the keyboard still moves through every match.
+ */
+describe('SlEntityPicker over a long list', () => {
+  it('draws a window of options and keeps every match reachable', async () => {
+    const fixture = TestBed.createComponent(ManyHost);
+    fixture.detectChanges();
+    await settle(fixture);
+    input().focus();
+    type('P');
+    await settle(fixture);
+
+    expect(options().length).toBeLessThan(60);
+    expect(document.querySelector('[role="option"]')?.getAttribute('aria-setsize')).toBe('500');
+
+    for (let step = 0; step < 500; step += 1) press('ArrowDown', input());
+    await settle(fixture);
+    expect(input().getAttribute('aria-activedescendant')).toContain('p499');
   });
 });

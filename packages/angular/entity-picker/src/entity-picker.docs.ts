@@ -25,8 +25,9 @@ export const ANGULAR_ENTITY_PICKER_TOKENS = entityPickerTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { SlEntityPicker, SlEntityPickerChip, SlEntityPickerOption, provideEntityPickerDefaults } from '@slotted/angular/entity-picker';",
-  selector: 'sl-entity-picker, ng-template[slEntityPickerOption], ng-template[slEntityPickerChip]',
+    "import { SlEntityPicker, SlEntityPickerChip, SlEntityPickerOption, SlEntityPickerOptionDescription, SlEntityPickerOptionLabel, SlEntityPickerOptionMedia, SlEntityPickerOptionMeta, provideEntityPickerDefaults } from '@slotted/angular/entity-picker';",
+  selector:
+    'sl-entity-picker, ng-template[slEntityPickerOption], ng-template[slEntityPickerChip], [slEntityPickerOptionLabel], [slEntityPickerOptionDescription], [slEntityPickerOptionMeta], [slEntityPickerOptionMedia]',
   exportAs: 'slEntityPicker',
 };
 
@@ -445,8 +446,8 @@ const scenes: ReferenceSceneMeta[] = [
       label: 'Templates',
       source: `<sl-entity-picker aria-label="Reviewers" selectionMode="multiple" [source]="directory">
   <ng-template slEntityPickerOption let-person>
-    <span data-part="label">{{ person.label }}</span>
-    <span data-part="description">{{ person.description }} · Northwind</span>
+    <span slEntityPickerOptionLabel>{{ person.label }}</span>
+    <span slEntityPickerOptionDescription>{{ person.description }} · Northwind</span>
   </ng-template>
   <ng-template slEntityPickerChip let-person>{{ person.label }} · {{ person.meta }}</ng-template>
 </sl-entity-picker>`,
@@ -633,11 +634,25 @@ export const ANGULAR_ENTITY_PICKER_DOCS = {
       ],
       ['aria-label', 'string', '—', 'sl-entity-picker', 'The name when no field labels it'],
       [
+        'virtualize',
+        'boolean',
+        'above 100 options without headings',
+        'sl-entity-picker',
+        'Draws only the options in view and a few either side; the keyboard, aria-activedescendant and scrolling to the highlight reach every option. A list with section headings is drawn whole',
+      ],
+      [
+        'estimatedRowHeight',
+        'number',
+        '48',
+        'sl-entity-picker',
+        'The height an option is counted at until it has been drawn and measured',
+      ],
+      [
         'slEntityPickerOption',
         'ng-template, context { $implicit, query, selected, current, disabled }',
         '—',
         'option content',
-        'The content of an option',
+        'The content of an option, written with slEntityPickerOptionLabel, slEntityPickerOptionDescription, slEntityPickerOptionMeta and slEntityPickerOptionMedia, which place it in the row. With media="none" an option draws its own face in slEntityPickerOptionMedia',
       ],
       [
         'slEntityPickerChip',

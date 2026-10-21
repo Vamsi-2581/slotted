@@ -34,7 +34,12 @@ import { SlAvatar } from '@slotted/angular/avatar';
 import { SlField } from '@slotted/angular/field';
 import { SlHighlight } from '@slotted/angular/highlight';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
-import { moveIndex } from '@slotted/core/collection';
+import {
+  createRowMetrics,
+  moveIndex,
+  offsetForIndex,
+  virtualWindow,
+} from '@slotted/core/collection';
 import type { MoveIntent } from '@slotted/core/collection';
 import { createDismissableLayer, pressOrigin } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
@@ -115,6 +120,47 @@ export class SlEntityPickerOption {
   }
 }
 
+/**
+ * The parts of an option an option template writes. The stylesheet places an
+ * option's content by the part it is: the face in the first column, the name
+ * and the identifier in the second, the short fact in the third. An element
+ * written by hand with `data-part="label"` alone carried no selector key and
+ * fell out of the row's grid; these write both.
+ */
+@Directive({
+  selector: '[slEntityPickerOptionLabel]',
+  standalone: true,
+  host: { 'data-part': 'label', 'data-part-label': '' },
+})
+export class SlEntityPickerOptionLabel {}
+
+/** What tells two records of one name apart: under the name, one line. */
+@Directive({
+  selector: '[slEntityPickerOptionDescription]',
+  standalone: true,
+  host: { 'data-part': 'description', 'data-part-description': '' },
+})
+export class SlEntityPickerOptionDescription {}
+
+/** A short fact at the end of the first line. */
+@Directive({
+  selector: '[slEntityPickerOptionMeta]',
+  standalone: true,
+  host: { 'data-part': 'meta', 'data-part-meta': '' },
+})
+export class SlEntityPickerOptionMeta {}
+
+/**
+ * The face, spanning both lines. With `media="none"` the family draws none, and
+ * an option that has its own — a flag, a glyph — writes it here.
+ */
+@Directive({
+  selector: '[slEntityPickerOptionMedia]',
+  standalone: true,
+  host: { 'data-part': 'media', 'data-part-media': '' },
+})
+export class SlEntityPickerOptionMedia {}
+
 /** Replaces the words of a chip; the face and the remove button stay the family's. */
 @Directive({ selector: 'ng-template[slEntityPickerChip]', standalone: true })
 export class SlEntityPickerChip {
@@ -155,6 +201,11 @@ function sameIds(a: readonly string[], b: readonly string[]) {
  * whose records the popup lists first, and a scope stands in front of the
  * field, not above it.
  */
+/** Above this many options in one run, only the ones in view are drawn. */
+const VIRTUALIZE_FROM = 100;
+const ESTIMATED_ROW_HEIGHT = 48;
+const OVERSCAN = 6;
+
 @Component({
   selector: 'sl-entity-picker',
   standalone: true,
@@ -459,7 +510,7 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                     />
                   }
                 </div>
-              } @else {
+              } @else if (!windowing()) {
                 @for (entity of section.entities; track entity.id) {
                   <ng-container
                     [ngTemplateOutlet]="row"
@@ -467,6 +518,24 @@ function sameIds(a: readonly string[], b: readonly string[]) {
                   />
                 }
               }
+            }
+            @if (windowing()) {
+              <div
+                aria-hidden="true"
+                style="grid-column: 1 / -1"
+                [style.block-size.px]="spacerBefore()"
+              ></div>
+              @for (item of windowEntities(); track item.entity.id) {
+                <ng-container
+                  [ngTemplateOutlet]="row"
+                  [ngTemplateOutletContext]="{ $implicit: item.entity, position: item.position }"
+                />
+              }
+              <div
+                aria-hidden="true"
+                style="grid-column: 1 / -1"
+                [style.block-size.px]="spacerAfter()"
+              ></div>
             }
           }
           @if (firstPage() && search().indicator) {
@@ -588,11 +657,13 @@ function sameIds(a: readonly string[], b: readonly string[]) {
       </div>
     </ng-template>
 
-    <ng-template #row let-entity>
+    <ng-template #row let-entity let-position="position">
       <div
         role="option"
         data-part="item"
         data-part-item=""
+        [attr.aria-posinset]="position === undefined ? null : position + 1"
+        [attr.aria-setsize]="position === undefined ? null : (flat()?.length ?? null)"
         [attr.data-value]="entity.id"
         [id]="optionId(entity.id)"
         [attr.aria-selected]="isChosen(entity.id)"
@@ -726,6 +797,14 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
   readonly width = input<EntityPickerWidth | undefined>(undefined);
   readonly strategy = input<EntityPickerStrategy | undefined>(undefined);
   readonly searchDelay = input(undefined, { transform: SlEntityPicker.count });
+  /**
+   * Draws only the options in view, and a few either side. On by default above
+   * 100 options in a list with no section headings: every keystroke over 500
+   * records with faces rendered all 500. A list with headings is drawn whole.
+   */
+  readonly virtualize = input(undefined, { transform: SlEntityPicker.flag });
+  /** The height an option is counted at until it has been drawn and measured. Defaults to 48. */
+  readonly estimatedRowHeight = input(undefined, { transform: SlEntityPicker.count });
   readonly minQueryLength = input(undefined, { transform: SlEntityPicker.count });
   readonly clearable = input(undefined, { transform: SlEntityPicker.flag });
   readonly loop = input(undefined, { transform: SlEntityPicker.flag });
@@ -846,6 +925,60 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
   );
 
   readonly search = computed<EntitySearchState>(() => this.searchState() ?? this.session.state);
+
+  /* ── Windowing ──────────────────────────────────────────────────────── */
+
+  /** One run of options when the list has no section headings; `null` otherwise. */
+  protected readonly flat = computed(() => {
+    const sections = this.sections();
+    return sections.headings ? null : sections.sections.flatMap((section) => section.entities);
+  });
+  protected readonly windowing = computed(() => {
+    const flat = this.flat();
+    return flat !== null && (this.virtualize() ?? flat.length > VIRTUALIZE_FROM);
+  });
+  /** What each drawn option measured; the version below says when it moved. */
+  private readonly heights = new Map<string, number>();
+  private readonly measured = signal(0);
+  private readonly viewport = signal({ offset: 0, size: 0 });
+  private readonly metrics = computed(() => {
+    this.measured();
+    const flat = this.flat();
+    if (!this.windowing() || flat === null) return undefined;
+    const estimate = this.estimatedRowHeight() ?? ESTIMATED_ROW_HEIGHT;
+    return createRowMetrics(flat.map((entity) => this.heights.get(entity.id) ?? estimate));
+  });
+  private readonly slice = computed(() => {
+    const metrics = this.metrics();
+    const flat = this.flat();
+    if (metrics === undefined || flat === null) return null;
+    const { offset, size } = this.viewport();
+    return virtualWindow({
+      itemCount: flat.length,
+      metrics,
+      overscan: OVERSCAN,
+      scrollOffset: offset,
+      viewportSize: size,
+    });
+  });
+  protected readonly windowEntities = computed(() => {
+    const slice = this.slice();
+    const flat = this.flat();
+    if (slice === null || flat === null) return [];
+    return flat
+      .slice(slice.startIndex, slice.endIndex)
+      .map((entity, index) => ({ entity, position: slice.startIndex + index }));
+  });
+  protected readonly spacerBefore = computed(() => this.slice()?.startOffset ?? 0);
+  protected readonly spacerAfter = computed(() => {
+    const slice = this.slice();
+    const metrics = this.metrics();
+    return slice === null || metrics === undefined
+      ? 0
+      : slice.totalSize - metrics.offsetOf(slice.endIndex);
+  });
+  private rowObserver: ResizeObserver | null = null;
+  private unwatchViewport: (() => void) | null = null;
 
   readonly sections = computed(() => {
     this.version();
@@ -1081,6 +1214,11 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
       this.observeEnd();
     });
 
+    afterRenderEffect(() => {
+      this.windowEntities();
+      untracked(() => this.observeRows());
+    });
+
     afterNextRender(() => this.wireChips());
 
     destroyRef.onDestroy(() => {
@@ -1181,6 +1319,68 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
     if (next !== null) {
       const option = this.surfaceNode?.ownerDocument.getElementById(this.optionId(next));
       if (typeof option?.scrollIntoView === 'function') option.scrollIntoView({ block: 'nearest' });
+      else if (option === null || option === undefined) this.scrollToUndrawn(next);
+    }
+  }
+
+  /** The keyboard reaches an option the window has not drawn: the list scrolls to it first. */
+  private scrollToUndrawn(key: string) {
+    const root = this.surfaceNode;
+    const flat = this.flat();
+    const metrics = this.metrics();
+    if (root === null || flat === null || metrics === undefined) return;
+    const index = flat.findIndex((entity) => entity.id === key);
+    if (index < 0) return;
+    root.scrollTop = offsetForIndex({
+      index,
+      itemCount: flat.length,
+      metrics,
+      scrollOffset: root.scrollTop,
+      viewportSize: root.clientHeight,
+      align: 'nearest',
+    });
+    this.viewport.set({ offset: root.scrollTop, size: root.clientHeight });
+  }
+
+  /** The scroll and the size of the list, and the size of each option drawn. */
+  private watchViewport() {
+    this.unwatchViewport?.();
+    const root = this.surfaceNode;
+    if (root === null) return;
+    const read = () => this.viewport.set({ offset: root.scrollTop, size: root.clientHeight });
+    read();
+    root.addEventListener('scroll', read, { passive: true });
+    const sized = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(read);
+    sized?.observe(root);
+    this.rowObserver =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver((entries) => {
+            let changed = false;
+            for (const entry of entries) {
+              const key = (entry.target as HTMLElement).dataset['value'];
+              const size = (entry.target as HTMLElement).offsetHeight;
+              if (key === undefined || size === 0 || this.heights.get(key) === size) continue;
+              this.heights.set(key, size);
+              changed = true;
+            }
+            if (changed) this.measured.update((count) => count + 1);
+          });
+    this.unwatchViewport = () => {
+      root.removeEventListener('scroll', read);
+      sized?.disconnect();
+      this.rowObserver?.disconnect();
+      this.rowObserver = null;
+      this.unwatchViewport = null;
+    };
+  }
+
+  private observeRows() {
+    if (!this.windowing() || this.rowObserver === null || this.surfaceNode === null) return;
+    for (const row of this.surfaceNode.querySelectorAll<HTMLElement>(
+      "[role='option'][data-value]",
+    )) {
+      this.rowObserver.observe(row);
     }
   }
 
@@ -1627,6 +1827,7 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
       (node: unknown): node is HTMLElement => node instanceof HTMLElement,
     ) as HTMLElement | null;
     this.surfaceNode = this.layerNode?.querySelector<HTMLElement>("[data-part='content']") ?? null;
+    this.watchViewport();
     if (this.layerNode === null) return;
     this.portalRoot.container?.append(this.layerNode);
     this.presence = createPresence({ present: true });
@@ -1704,6 +1905,7 @@ export class SlEntityPicker implements ControlValueAccessor, Validator {
   }
 
   private teardown() {
+    this.unwatchViewport?.();
     this.layer?.destroy();
     this.positionerHandle?.destroy();
     this.presence?.destroy();

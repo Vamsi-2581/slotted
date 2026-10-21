@@ -99,6 +99,7 @@
   "literals": {
     "reflowBreakpoint": "360px is literal because CSS forbids a custom property in a container condition, which docs/token-foundation.md rule 4 records. It is the width below which two buttons side by side stop being two buttons and become two half-buttons. The container is the form rather than the action row, because a container cannot answer its own query."
   },
+  "fieldGap": "two field or field-group roots written one after the other directly inside the form stand apart by --slotted-form-field-gap (space-6); a layout the page draws itself keeps its own spacing",
   "members": {
     "form": {
       "nativeElement": "form",

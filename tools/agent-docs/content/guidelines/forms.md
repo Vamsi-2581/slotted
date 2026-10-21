@@ -220,3 +220,14 @@ Do: Write the picker with the limits the backend enforces as the picker's minimu
 Don't: Write `date-field` for every date because it is the smaller family; a form that does so states no reason for it.
 Seen in: Nexora · invoice, payment, purchase order, cycle count and quote forms (ledger row "date-picker, date-field") · corrected
 Check: Every date control of a form opens a calendar from its trigger, and a date the backend limits refuses the days outside the limit.
+
+### FM-17 · Fields take the form's spacing
+
+Level: SHOULD
+Applies to: every form that holds more than one field
+Rule: The fields of a form are written as its direct children, in a `field-group` or in a `grid` for fields that stand side by side; the form spaces consecutive fields by `--slotted-form-field-gap`, and no field carries a margin of its own.
+Why: A form whose fields touch reads as one control, and a spacing written field by field drifts from one form to the next.
+Do: Write one `field` after another inside the `form`; set `--slotted-form-field-gap` on the theme to change the step for every form.
+Don't: Write a margin or a spacer element between two fields, or wrap each field in an element of the page's own that breaks the run of fields the form spaces.
+Seen in: equori · forms written from the minimal example rendered their fields touching · corrected
+Check: Two consecutive fields of a form stand apart by the form's step, and no field or wrapper between them carries its own margin.

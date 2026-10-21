@@ -5,9 +5,10 @@ import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
 import type { PositionerHandle } from '@slotted/core/positioner';
+import { createRowMetrics, offsetForIndex, virtualWindow } from '@slotted/core/collection';
 import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { MouseEvent, PointerEvent } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -64,6 +65,11 @@ function SkeletonRow() {
  * minimum length while the query is shorter, the wait, the failure. The
  * skeleton beside it is hidden from assistive technology.
  */
+/** Above this many options in one run, only the ones in view are drawn. */
+const VIRTUALIZE_FROM = 100;
+const ESTIMATED_ROW_HEIGHT = 48;
+const OVERSCAN = 6;
+
 export function EntityPickerPopup() {
   const picker = useEntityPicker();
   const { t, search } = picker;
@@ -255,6 +261,103 @@ export function EntityPickerPopup() {
     return () => observer.disconnect();
   }, [search.hasMore, search.items.length, surfaceNode]);
 
+  /* ── Windowing ──────────────────────────────────────────────────────── */
+
+  /**
+   * A list with no section headings is one run of options, and above 100 of
+   * them only the ones in view are drawn, with a spacer standing for the
+   * rest: 500 records with faces were all rendered on every keystroke. Rows
+   * are counted at `estimatedRowHeight` until drawn, then at what they
+   * measured. A list with headings is drawn whole.
+   */
+  const flat = useMemo(
+    () => (picker.sections.headings ? null : picker.sections.sections.flatMap((s) => s.entities)),
+    [picker.sections],
+  );
+  const windowing =
+    flat !== null && (picker.props.virtualize ?? flat.length > VIRTUALIZE_FROM) !== false;
+  const estimate = picker.props.estimatedRowHeight ?? ESTIMATED_ROW_HEIGHT;
+  const [heights] = useState(() => new Map<string, number>());
+  const [measured, setMeasured] = useState(0);
+  const [viewport, setViewport] = useState({ offset: 0, size: 0 });
+  const rowObserver = useRef<ResizeObserver | null>(null);
+
+  useLayoutEffect(() => {
+    if (!windowing || surfaceNode === null) return undefined;
+    const read = () =>
+      setViewport({ offset: surfaceNode.scrollTop, size: surfaceNode.clientHeight });
+    read();
+    surfaceNode.addEventListener('scroll', read, { passive: true });
+    const viewportObserver =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(read);
+    viewportObserver?.observe(surfaceNode);
+    rowObserver.current =
+      typeof ResizeObserver === 'undefined'
+        ? null
+        : new ResizeObserver((entries) => {
+            let changed = false;
+            for (const entry of entries) {
+              const key = (entry.target as HTMLElement).dataset['value'];
+              const size = (entry.target as HTMLElement).offsetHeight;
+              if (key === undefined || size === 0 || heights.get(key) === size) continue;
+              heights.set(key, size);
+              changed = true;
+            }
+            if (changed) setMeasured((count) => count + 1);
+          });
+    return () => {
+      surfaceNode.removeEventListener('scroll', read);
+      viewportObserver?.disconnect();
+      rowObserver.current?.disconnect();
+      rowObserver.current = null;
+    };
+  }, [heights, surfaceNode, windowing]);
+
+  const metrics = useMemo(
+    () =>
+      windowing && flat !== null
+        ? createRowMetrics(flat.map((entity) => heights.get(entity.id) ?? estimate))
+        : undefined,
+    /* `measured` is the version of `heights`, which is mutated in place. */
+    [estimate, flat, heights, measured, windowing],
+  );
+  const slice =
+    metrics === undefined || flat === null
+      ? null
+      : virtualWindow({
+          itemCount: flat.length,
+          metrics,
+          overscan: OVERSCAN,
+          scrollOffset: viewport.offset,
+          viewportSize: viewport.size,
+        });
+
+  /* The keyboard reaches an option the window has not drawn: the list is
+     scrolled to it first, and the window follows the scroll. */
+  const highlightedIndex =
+    flat === null || picker.highlighted === null
+      ? -1
+      : flat.findIndex((entity) => entity.id === picker.highlighted);
+  useLayoutEffect(() => {
+    if (slice === null || surfaceNode === null || highlightedIndex < 0 || metrics === undefined) {
+      return;
+    }
+    if (highlightedIndex >= slice.startIndex && highlightedIndex < slice.endIndex) return;
+    surfaceNode.scrollTop = offsetForIndex({
+      index: highlightedIndex,
+      itemCount: flat?.length ?? 0,
+      metrics,
+      scrollOffset: surfaceNode.scrollTop,
+      viewportSize: surfaceNode.clientHeight,
+      align: 'nearest',
+    });
+    setViewport({ offset: surfaceNode.scrollTop, size: surfaceNode.clientHeight });
+  }, [flat, highlightedIndex, metrics, slice, surfaceNode]);
+
+  const measure = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) rowObserver.current?.observe(node);
+  }, []);
+
   if (!mounted) return null;
 
   const records = picker.options.filter(
@@ -283,7 +386,7 @@ export function EntityPickerPopup() {
     return null;
   })();
 
-  const option = (entity: Entity) => {
+  const option = (entity: Entity, position?: number) => {
     const key = entity.id;
     const selected = picker.chosen.includes(key);
     const current = picker.highlighted === key;
@@ -334,6 +437,9 @@ export function EntityPickerPopup() {
           if (!disabled) picker.setHighlighted(key, 'pointer', event.nativeEvent);
         }}
         role="option"
+        {...(position === undefined
+          ? {}
+          : { 'aria-posinset': position + 1, 'aria-setsize': flat?.length ?? 0, ref: measure })}
         {...(current ? { 'data-current': '' } : {})}
         {...(selected ? { 'data-selected': '' } : {})}
         {...(disabled ? { 'data-disabled': '' } : {})}
@@ -409,30 +515,47 @@ export function EntityPickerPopup() {
         {...(picker.multiple ? { 'aria-multiselectable': true } : {})}
         {...(refreshing ? { 'data-loading': '' } : {})}
       >
-        {showRecords
-          ? sections.map((section) =>
-              headings ? (
+        {showRecords && slice !== null && flat !== null && metrics !== undefined ? (
+          <>
+            <div
+              aria-hidden="true"
+              style={{ blockSize: slice.startOffset, gridColumn: '1 / -1' }}
+            />
+            {flat
+              .slice(slice.startIndex, slice.endIndex)
+              .map((entity, index) => option(entity, slice.startIndex + index))}
+            <div
+              aria-hidden="true"
+              style={{
+                blockSize: slice.totalSize - metrics.offsetOf(slice.endIndex),
+                gridColumn: '1 / -1',
+              }}
+            />
+          </>
+        ) : showRecords ? (
+          sections.map((section) =>
+            headings ? (
+              <div
+                aria-labelledby={`${headingPrefix}${section.key}`}
+                data-part="group"
+                data-part-group=""
+                key={section.key}
+                role="group"
+              >
                 <div
-                  aria-labelledby={`${headingPrefix}${section.key}`}
-                  data-part="group"
-                  data-part-group=""
-                  key={section.key}
-                  role="group"
+                  data-part="group-label"
+                  data-part-group-label=""
+                  id={`${headingPrefix}${section.key}`}
                 >
-                  <div
-                    data-part="group-label"
-                    data-part-group-label=""
-                    id={`${headingPrefix}${section.key}`}
-                  >
-                    {section.label}
-                  </div>
-                  {section.entities.map(option)}
+                  {section.label}
                 </div>
-              ) : (
-                section.entities.map(option)
-              ),
-            )
-          : null}
+                {section.entities.map(option)}
+              </div>
+            ) : (
+              section.entities.map(option)
+            ),
+          )
+        ) : null}
         {firstPage && search.indicator ? (
           <div aria-hidden="true" data-part="placeholder" data-part-placeholder="">
             <SkeletonRow />

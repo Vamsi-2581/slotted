@@ -12,6 +12,7 @@
 - Fatia 6: itens 12, 24, 13.
 - Fatia 7: itens 19, 30, 3.
 - Fatia 8: itens 29, 23, 11.
+- Fatia 9: itens 31, 26, 18.
 
 ## Testes
 - React: segmented-control browser 2/2, dialog browser 5/5, entity-picker unit 42/42; build com `package-boundary.verify.mjs` exit 0.
@@ -23,12 +24,13 @@
 - Fatia 6: styles 1701/1701; contratos 2180/2180; React famílias de tom 824/824, tsc 0; Angular famílias de tom 575/575, `ng build` development exit 0; agent-docs 137/137; theme 99 + 109; themes 92.
 - Fatia 7: styles 1707/1707; React avatar+entity-picker 103/103, browser avatar 2/2, glyph 1/1; core glyph+entity-picker 34/34; Angular avatar/entity-picker/text-field/otp/icon 133/133, `ng build` ok; themes 92/92.
 - Fatia 8: core presence 29/29, chart 67/67, tsc 0; React dialog/drawer 202/202 + browser 7/7, inline-message 20/20, chart 28/28, tsc 0; Angular dialog/drawer 106/106, inline-message 21/21, `ng build` ok; package-layers ok.
+- Fatia 9: React entity-picker 42/42 + browser 2/2, form browser 1/1, form/inline-message unit; Angular entity-picker 31/31, form 27/27, `ng build` ok; styles 1707/1707; agent-docs 137/137.
 
 ## Em curso
-- Fatia 9: itens 31, 26, 18.
+- Fatia 10: itens 22, 4, 5.
 
 ## Problemas conhecidos
 - Nenhum.
 
 ## Próxima ação exata
-Item 31: docs do entity-picker (`renderOption`): ler `packages/styles/src/entity-picker/entity-picker.css` (colocação por `[data-part-label]` etc.) e decidir exportar as partes da opção ou casar `data-part`.
+Item 22: anel de ênfase do prompt-composer — ler `packages/styles/src/prompt-composer/prompt-composer.css` (borda, foco, sombra) e implementar `emphasis: 'none' | 'ring'` com gradiente cónico girado por `transform`.

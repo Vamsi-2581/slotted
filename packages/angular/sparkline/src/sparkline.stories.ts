@@ -213,7 +213,7 @@ export const Tone: Story = {
     props: DATA,
     template: `
 <div slGrid [columns]="4" [gap]="6">
-  ${scene('no tone', 'The first slot of the data scale, the theme’s own blue: a series that means nothing but itself.', `<span slSparkline [data]="orders" label="Orders" area></span><span slSparkline [data]="orders" label="Orders" type="bar"></span>`)}
+  ${scene('no tone', 'The first slot of the data scale, the accent’s own hue: a series that means nothing but itself.', `<span slSparkline [data]="orders" label="Orders" area></span><span slSparkline [data]="orders" label="Orders" type="bar"></span>`)}
   ${scene('tone="success"', 'An error rate that fell: the fall is good, so the line says so.', `<span slSparkline [data]="errorRate" label="Error rate" tone="success" area></span><span slSparkline [data]="errorRate" label="Error rate" tone="success" type="bar"></span>`)}
   ${scene('tone="danger"', 'A lead time that grew. The shape is a rise; the tone is what the rise means.', `<span slSparkline [data]="leadTime" label="Lead time" tone="danger" area></span><span slSparkline [data]="leadTime" label="Lead time" tone="danger" type="bar"></span>`)}
   ${scene('tone="neutral"', 'The comparison series, in the step the page uses for an aside, behind a current one.', `<span slSparkline [data]="lastQuarter" label="Last quarter" tone="neutral"></span><span slSparkline [data]="orders" label="This quarter" area></span>`)}

@@ -11,6 +11,8 @@ export type { Luminance, Oklch } from './color';
 export { LAYER_NAMES, LAYER_ORDER_STATEMENT } from './layer-order';
 export { applyBounds, boundCss, boundValue, fitBound } from './bound';
 export type { Bound } from './bound';
+export { fitGamut, gamutChroma, limitedChroma } from './gamut';
+export type { ChromaLimit } from './gamut';
 export { derivationCss, evaluateRecipe, SCHEMES, SEED_NAMES } from './recipe';
 export type {
   AliasDerivation,

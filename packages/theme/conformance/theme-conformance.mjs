@@ -30,6 +30,8 @@ const NON_TEXT_RATIO = 3;
 const CONTROL_EDGE_RATIO = 1.5;
 /** The OKLab lightness step a neutral highlight keeps from the ground it is drawn on. */
 const HIGHLIGHT_STEP = 0.02;
+/** The OKLab lightness step a dark scheme's raised layer keeps above the page. */
+const LAYER_STEP = 0.04;
 
 /** The collapsed duration is short enough to read as instant, and never zero. */
 const MAX_REDUCED_MOTION_MS = 1;
@@ -266,6 +268,24 @@ function contrastCases(theme) {
         );
       }
     });
+
+    /**
+     * A card, a menu or a dialog is a layer over the page. In a light scheme
+     * its shadow separates it; in a dark scheme a shadow on a dark ground does
+     * not read, and the layer has to stand lighter than the page. At 0.017 in
+     * OKLab lightness a card read apart only by its border.
+     */
+    if (scheme === 'dark') {
+      test(`${label} ${scheme} raises a layer visibly above the page`, () => {
+        const step =
+          parseSeed(values['--slotted-surface-raised']).l -
+          parseSeed(values['--slotted-surface']).l;
+        assert.ok(
+          step >= LAYER_STEP,
+          `${scheme} --slotted-surface-raised is ${step.toFixed(3)} above --slotted-surface, below ${LAYER_STEP}`,
+        );
+      });
+    }
 
     test(`${label} ${scheme} inverts a surface without losing its text`, () => {
       assert.ok(

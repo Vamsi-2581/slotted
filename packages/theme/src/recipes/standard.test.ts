@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { fromSrgb, parseSeed, toLinearSrgb, type Oklch } from '../color';
+import { deltaE, fromSrgb, parseSeed, toLinearSrgb, type Oklch } from '../color';
 import { evaluateRecipe, SCHEMES, SEED_NAMES, type Scheme, type SeedName } from '../recipe';
 import { checkScheme, seedGrid } from '../recipe-checks';
 import { standard } from './standard';
@@ -17,8 +17,8 @@ const base = Object.fromEntries(
 ) as Record<SeedName, NonNullable<ReturnType<typeof parseSeed>>>;
 
 describe('recipes.standard', () => {
-  it('derives the same 72 tokens in every scheme', () => {
-    for (const scheme of SCHEMES) expect(Object.keys(standard[scheme])).toHaveLength(72);
+  it('derives the same 80 tokens in every scheme', () => {
+    for (const scheme of SCHEMES) expect(Object.keys(standard[scheme])).toHaveLength(80);
   });
 
   it('meets every ratio for every seed of the grid, one seed varied at a time', () => {
@@ -152,6 +152,104 @@ describe('recipes.standard', () => {
       }
     }
     expect([...misses]).toEqual([]);
+  });
+
+  /**
+   * The dark edge and ink of the accent keep its hue; the floor bounds alone
+   * lift them to the contrast the scheme needs. Fixed offsets of −10° and −13°
+   * copied the drift of the palette the default theme was matched to, and
+   * turned every other seed toward blue: #7c6cff, a violet at 283°, gave a
+   * dark border of #b1c7ff. The derivation is read for four hues; the screen
+   * is read for that violet, which the two tokens hold inside sRGB — a seed
+   * whose light tints leave the gamut is clipped by the display, a drift no
+   * offset in the recipe answers.
+   */
+  it('keeps the accent hue in the dark edge and ink for any accent seed', () => {
+    const misses: string[] = [];
+    const tokens = ['--slotted-tone-accent-border', '--slotted-tone-accent-text'];
+    for (const h of [30, 150, 230, 283]) {
+      const seed = { l: 0.6, c: 0.2, h };
+      const values = evaluateRecipe(standard, { ...base, accent: seed }, 'dark');
+      for (const token of tokens) {
+        if (turn(values[token]!, seed) > 3)
+          misses.push(`${h}° ${token}: ${turn(values[token]!, seed).toFixed(2)}° from the seed`);
+      }
+    }
+    const violet = parseSeed('#7c6cff')!;
+    const values = evaluateRecipe(standard, { ...base, accent: violet }, 'dark');
+    for (const token of tokens) {
+      const screen = painted(values[token]!);
+      if (turn(screen, violet) > 3)
+        misses.push(`#7c6cff ${token}: ${turn(screen, violet).toFixed(2)}° on screen`);
+    }
+    expect(misses).toEqual([]);
+  });
+
+  /**
+   * The categorical ladder turns with the accent: slot 1 is the accent's hue,
+   * so a new accent never sits beside a first series of another hue, and
+   * slots 2 to 8 step back 45° at a time. Two lightness steps alternate: at
+   * one lightness, a reader without red or green cones tells two hues on the
+   * red-green axis apart by nothing, and adjacent slots — the bars of a
+   * stacked chart, the lines of a legend — have to differ by more than hue.
+   * The chroma is capped where sRGB stops holding it, so a slot is painted as
+   * derived on any screen. Every accent hue is read, 15° apart.
+   */
+  describe('the data ladder', () => {
+    const SLOTS = Array.from({ length: 8 }, (_, index) => `--slotted-data-${index + 1}`);
+    /** Machado, Oliveira and Fernandes 2009, at severity 1, on linear sRGB. */
+    const DEFICIENCIES = {
+      deuteranopia: [
+        [0.367322, 0.860646, -0.227968],
+        [0.280085, 0.672501, 0.047413],
+        [-0.01182, 0.04294, 0.968881],
+      ],
+      protanopia: [
+        [0.152286, 1.052583, -0.204868],
+        [0.114503, 0.786281, 0.099216],
+        [-0.003882, -0.048116, 1.051998],
+      ],
+    };
+    const gamma = (channel: number) => {
+      const linear = Math.min(1, Math.max(0, channel));
+      return linear <= 0.0031308 ? linear * 12.92 : 1.055 * linear ** (1 / 2.4) - 0.055;
+    };
+    const simulate = (color: Oklch, matrix: number[][]) => {
+      const rgb = toLinearSrgb(color).map((channel) => Math.min(1, Math.max(0, channel)));
+      const [r, g, b] = matrix.map((row) => gamma(row.reduce((sum, k, i) => sum + k * rgb[i]!, 0)));
+      return fromSrgb(r!, g!, b!);
+    };
+
+    for (const scheme of SCHEMES) {
+      it(`follows the accent and stays apart without red or green cones in ${scheme}`, () => {
+        const misses: string[] = [];
+        for (let h = 0; h < 360; h += 15) {
+          const seed = { l: 0.6, c: 0.2, h };
+          const values = evaluateRecipe(standard, { ...base, accent: seed }, scheme);
+          const slots = SLOTS.map((slot) => values[slot]!);
+          if (turn(slots[0]!, seed) > 3)
+            misses.push(`${h}°: slot 1 is ${turn(slots[0]!, seed)}° off`);
+          for (const parity of [0, 1]) {
+            const steps = slots.filter((_, index) => index % 2 === parity).map((slot) => slot.l);
+            if (Math.max(...steps) - Math.min(...steps) > 0.01)
+              misses.push(`${h}°: the slots of one step differ in lightness`);
+          }
+          slots.forEach((slot, index) => {
+            if (!inside(slot)) misses.push(`${h}° ${SLOTS[index]} is outside sRGB`);
+            const next = slots[index + 1];
+            if (next === undefined) return;
+            for (const [name, matrix] of Object.entries(DEFICIENCIES)) {
+              const distance = deltaE(simulate(slot, matrix), simulate(next, matrix)) * 100;
+              if (distance < 8)
+                misses.push(
+                  `${h}° ${SLOTS[index]}–${index + 2}: ΔE ${distance.toFixed(1)}, ${name}`,
+                );
+            }
+          });
+        }
+        expect(misses).toEqual([]);
+      });
+    }
   });
 
   it('keeps the high-contrast grounds achromatic for any neutral seed', () => {

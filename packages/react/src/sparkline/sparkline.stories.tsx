@@ -204,7 +204,7 @@ export const Tone: Story = {
     <Grid columns={4} gap={6}>
       <Scene
         label="no tone"
-        note="The first slot of the data scale, the theme’s own blue: a series that means nothing but itself."
+        note="The first slot of the data scale, the accent’s own hue: a series that means nothing but itself."
       >
         <Sparkline area data={ORDERS} label="Orders" />
         <Sparkline data={ORDERS} label="Orders" type="bar" />

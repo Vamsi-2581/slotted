@@ -11,8 +11,11 @@ export const CONTRAST_REQUIREMENT: Readonly<Record<Scheme, number>> = {
 const NON_TEXT = 3;
 const CONTROL_EDGE = 1.5;
 const HIGHLIGHT_STEP = 0.02;
+/** The lightness a dark scheme's raised layer stands above the page: a shadow does not read there. */
+const LAYER_STEP = 0.04;
 const SURFACES = ['--slotted-surface', '--slotted-surface-raised', '--slotted-surface-sunken'];
 const TONES = ['accent', 'secondary', 'neutral', 'success', 'warning', 'danger'];
+const DATA_SLOTS = Array.from({ length: 8 }, (_, index) => `--slotted-data-${index + 1}`);
 
 /**
  * The ratios of `theme-conformance` over evaluated colours, as messages. A
@@ -34,6 +37,8 @@ export function checkScheme(values: Readonly<Record<string, Oklch>>, scheme: Sch
     pair('--slotted-control-border-color', surface, CONTROL_EDGE);
     pair('--slotted-focus-ring-color', surface, NON_TEXT);
     for (const tone of TONES) pair(`--slotted-tone-${tone}-text`, surface, text);
+    /* A mark is a non-text element; high contrast holds it to the text ratio. */
+    for (const slot of DATA_SLOTS) pair(slot, surface, scheme === 'high-contrast' ? 4.5 : NON_TEXT);
   }
   for (const surface of ['--slotted-surface', '--slotted-surface-raised']) {
     const ground = values[surface]!.l;
@@ -43,6 +48,13 @@ export function checkScheme(values: Readonly<Record<string, Oklch>>, scheme: Sch
       failures.push(`the neutral highlight is ${hover.toFixed(3)} from ${surface}`);
     if (active <= hover)
       failures.push(`the pressed highlight is not beyond the hover on ${surface}`);
+  }
+  if (scheme === 'dark') {
+    const step = values['--slotted-surface-raised']!.l - values['--slotted-surface']!.l;
+    if (step < LAYER_STEP)
+      failures.push(
+        `the raised surface is ${step.toFixed(3)} above the surface, below ${LAYER_STEP}`,
+      );
   }
   pair('--slotted-text-inverse', '--slotted-surface-inverse', text);
   pair('--slotted-text-inverse', '--slotted-surface-inverse-hover', text);

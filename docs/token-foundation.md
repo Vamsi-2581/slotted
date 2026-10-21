@@ -611,22 +611,22 @@ by forced colours instead.
 | ------------------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------- |
 | `--slotted-focus-ring-color`         | `var(--slotted-tone-accent-border)`                            | `var(--slotted-tone-accent-border)`                            | `var(--slotted-tone-accent-border)`                         |
 | `--slotted-focus-ring-color-invalid` | `var(--slotted-tone-danger-border)`                            | `var(--slotted-tone-danger-border)`                            | `var(--slotted-tone-danger-border)`                         |
-| `--slotted-border-subtle`            | `#d8dee6`                                                      | `#2c2f33`                                                      | `#000000`                                                   |
+| `--slotted-border-subtle`            | `#d8dee6`                                                      | `#25282c`                                                      | `#000000`                                                   |
 | `--slotted-text`                     | `#0d1828`                                                      | `#f8fafe`                                                      | `#000000`                                                   |
 | `--slotted-text-muted`               | `#5c6b7f`                                                      | `#9da3aa`                                                      | `#1f2937`                                                   |
 | `--slotted-disabled-background`      | `#e2e8f0`                                                      | `#16181c`                                                      | `#ffffff`                                                   |
 | `--slotted-disabled-foreground`      | `#64748b`                                                      | `#6d737a`                                                      | `#595959`                                                   |
 | `--slotted-disabled-border`          | `#ccd5e1`                                                      | `#25282c`                                                      | `#595959`                                                   |
-| `--slotted-surface`                  | `#f8fafe`                                                      | `#111417`                                                      | `#ffffff`                                                   |
+| `--slotted-surface`                  | `#f8fafe`                                                      | `#0a0c10`                                                      | `#ffffff`                                                   |
 | `--slotted-surface-raised`           | `#f8fafe`                                                      | `#15171b`                                                      | `#ffffff`                                                   |
-| `--slotted-surface-sunken`           | `#f1f5fb`                                                      | `#0a0c10`                                                      | `#ffffff`                                                   |
+| `--slotted-surface-sunken`           | `#f1f5fb`                                                      | `#06070b`                                                      | `#ffffff`                                                   |
 | `--slotted-surface-inverse`          | `#142133`                                                      | `#f8fafe`                                                      | `#000000`                                                   |
 | `--slotted-surface-inverse-hover`    | `#243041`                                                      | `#dee0e4`                                                      | `#020202`                                                   |
 | `--slotted-surface-inverse-active`   | `#323d4e`                                                      | `#c7cacd`                                                      | `#0b0b0b`                                                   |
 | `--slotted-surface-material`         | `color-mix(in oklab, var(--slotted-surface) 72%, transparent)` | `color-mix(in oklab, var(--slotted-surface) 68%, transparent)` | `var(--slotted-surface)`                                    |
 | `--slotted-text-inverse`             | `#f7faff`                                                      | `#16181c`                                                      | `#ffffff`                                                   |
 | `--slotted-border-strong`            | `#7a889c`                                                      | `#6d737a`                                                      | `#000000`                                                   |
-| `--slotted-control-border-color`     | `#bfc7d1`                                                      | `#3d4249`                                                      | `#000000`                                                   |
+| `--slotted-control-border-color`     | `#bfc7d1`                                                      | `#393d44`                                                      | `#000000`                                                   |
 | `--slotted-control-surface`          | `var(--slotted-surface)`                                       | `var(--slotted-surface)`                                       | `var(--slotted-surface)`                                    |
 | `--slotted-current-edge`             | `transparent`                                                  | `transparent`                                                  | `#000000`                                                   |
 | `--slotted-state-hover`              | `color-mix(in oklab, var(--slotted-text) 5%, transparent)`     | `color-mix(in oklab, var(--slotted-text) 6%, transparent)`     | `color-mix(in oklab, var(--slotted-text) 10%, transparent)` |
@@ -759,14 +759,14 @@ family's adjustment.
 
 | Token              | Light     | Dark      | High contrast |
 | ------------------ | --------- | --------- | ------------- |
-| `--slotted-data-1` | `#2563eb` | `#2563eb` | `#1d4ed8`     |
-| `--slotted-data-2` | `#ea580c` | `#ea580c` | `#c2410c`     |
-| `--slotted-data-3` | `#0891b2` | `#0891b2` | `#0e7490`     |
-| `--slotted-data-4` | `#dc2626` | `#ef4444` | `#b91c1c`     |
-| `--slotted-data-5` | `#7c3aed` | `#8b5cf6` | `#6d28d9`     |
-| `--slotted-data-6` | `#a16207` | `#d97706` | `#a16207`     |
-| `--slotted-data-7` | `#c026d3` | `#d946ef` | `#a21caf`     |
-| `--slotted-data-8` | `#16a34a` | `#16a34a` | `#15803d`     |
+| `--slotted-data-1` | `#22459d` | `#afc4ef` | `#0d2769`     |
+| `--slotted-data-2` | `#318da6` | `#318da6` | `#436a76`     |
+| `--slotted-data-3` | `#27574b` | `#41e1be` | `#16342c`     |
+| `--slotted-data-4` | `#63901e` | `#63901e` | `#506e29`     |
+| `--slotted-data-5` | `#594b2f` | `#edbc51` | `#362d1a`     |
+| `--slotted-data-6` | `#c85a34` | `#c85a34` | `#a1411e`     |
+| `--slotted-data-7` | `#822252` | `#f8a9c8` | `#501231`     |
+| `--slotted-data-8` | `#9b63c3` | `#9b63c3` | `#7b489e`     |
 
 The five tones cannot give it, for the reason they could not give **File
 kind**: a tone means something — `danger` is a failure — and a series means
@@ -776,27 +776,24 @@ that the fourth region had failed, and a sparkline of the error rate painted
 The slot says which series; the tone, where a family carries one, says how the
 series is doing.
 
-The order is the whole of the design. Slots are assigned in sequence and never
-cycled, so the pairs that sit beside each other in a stack or a legend are
-always the same pairs, and those pairs are the ones measured: blue, orange,
-cyan, red, violet, amber, magenta, green is the ordering of these eight hues
-that maximises the smallest separation between neighbours under simulated
-protanopia and deuteranopia, common to all three schemes, out of the 5040
-orderings enumerated. `docs/history/designs/2026-09-16-stat-card-sparkline-design.md`
-records the measurement; the floor is ΔE 8 in OKLab and every scheme clears
-16, and the normal-vision floor of 15 is cleared at 26 or more. The first
-three slots also separate under every pairing, which is the series cap for a
-chart form where any two marks can touch — a scatter, a map, small multiples.
-
-Slot 1 is the theme's own blue: `--slotted-tone-accent-border` in `light` and
-`--slotted-tone-accent-solid` in `dark` hold the same value, so a sparkline
-that names no series is drawn in the colour the reader has already learnt
-means _this application_. `dark` takes the mid step of each hue so a mark
-separates from a near-black page, and `high-contrast` the deepest, as **File
-kind** does. Every slot clears 3:1 against `--slotted-surface`,
-`--slotted-surface-raised` and `--slotted-surface-sunken` in `light` and
-`dark`, and 4.5:1 in `high-contrast`;
-`packages/themes/test/default-theme.test.mjs` measures all of them.
+The ladder is derived from the `accent` seed, so a theme with a new accent
+gets a first series of its own hue and seven that stand around it, where a
+fixed blue first series clashed with any other accent. Slot 1 takes the
+seed's hue; slots 2 to 8 step back 45° at a time. Odd and even slots stand at
+two lightness steps — 0.42 and 0.6 in `light`, 0.82 and 0.6 in `dark`, 0.3 and
+0.5 in `high-contrast` — because at one lightness a reader without red or
+green cones tells apart two hues on the red-green axis by nothing, and the
+slots beside each other in a stack or a legend have to differ by more than
+hue. The chroma asks for 0.14 to 0.15 and is capped where sRGB stops holding
+it at that lightness and hue (`fitGamut`, a Fourier series in the hue fitted
+toward the inside), so a slot is painted as derived on any screen. For every
+accent hue, 15° apart, neighbouring slots clear ΔE 8 in OKLab under simulated
+deuteranopia and protanopia, and every slot clears 3:1 against
+`--slotted-surface`, `--slotted-surface-raised` and `--slotted-surface-sunken`
+in `light` and `dark` and 4.5:1 in `high-contrast` for every seed of the grid
+(`packages/theme/src/recipes/standard.test.ts`).
+`packages/themes/test/default-theme.test.mjs` measures the default theme's.
+A theme still sets any slot by hand through `schemes`.
 
 What the scale does not hold is a neutral and a sequence. A series that is
 there for comparison rather than identity — last period behind this one —
@@ -1169,7 +1166,7 @@ sunken surface, and `--slotted-border-strong` in both schemes darkened to meet
 3:1 against the surface it separates. `--slotted-control-shadow` left `none`
 for the shadow tabled above, so a framed control is separated from its ground
 by something other than its own edge. `--slotted-focus-ring-color` in the dark
-scheme left the light grey `#d4d4d8` for `#60a5fa`, the accent border step,
+scheme left the light grey `#d4d4d8` for `#75a0fc`, the accent border step,
 which makes the ring the same idea in both schemes instead of a neutral in one
 of them.
 The three lifted shadow steps left their single symmetric blur for the two
@@ -1190,6 +1187,26 @@ over every seed of the same hue and chroma, so that the text holds 4.5:1 on its
 own tone surface for all of them and not only for the default seed. On the
 default seed the ceiling sits below the seed's own lightness, 0.527, and takes
 the text to 0.494: 5.25:1 on `#dcfce7` where it read 4.57:1.
+
+The dark scheme's `--slotted-tone-accent-border` and `--slotted-tone-accent-text`
+left `#60a5fa` and `#93c5fd` for `#75a0fc` and `#a2c0ff`, 0.025 and 0.022 in
+OKLab, and the focus ring, which aliases the border, moved with them. The
+recipe turned both 10° and 13° from the seed's hue, the drift of the palette
+the default theme was matched to; every other seed took that turn toward blue,
+and a violet accent at 283° drew a periwinkle edge. Both now keep the seed's
+hue, and the floor bounds alone lift them to the contrast the scheme needs.
+
+The dark scheme's grounds stepped apart. `--slotted-surface` and
+`--slotted-surface-raised` stood 0.017 apart in OKLab lightness, 0.188 and
+0.205, so a card or a menu read apart from the page only by its border: a
+shadow does not read on a dark ground. The page went down to 0.155 and the
+sunken ground to 0.13, the raised ground stayed at 0.205, and
+`theme-conformance` holds a dark scheme's raised ground 0.04 above its page.
+`--slotted-border-subtle` went from 0.303 to 0.275 and
+`--slotted-control-border-color` from 0.378 to 0.36, so each line keeps the
+step it had from the grounds it separates; each ground's chroma cap followed
+its lightness (0.025 for the page, 0.021 for the sunken ground, 0.046 for the
+subtle border).
 
 The neutral grounds left their achromatic values for a tint of the `neutral`
 seed. Fitted to the achromatic values they had, `--slotted-surface`,

@@ -4174,6 +4174,7 @@ export type ComponentToken =
   | '--slotted-sparkline-marker-size'
   | '--slotted-sparkline-marker-size-lg'
   | '--slotted-sparkline-marker-size-sm'
+  | '--slotted-sparkline-min-inline-size'
   | '--slotted-sparkline-reference-color'
   | '--slotted-sparkline-ring-color'
   | '--slotted-sparkline-ring-width'
@@ -6393,6 +6394,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-sparkline-marker-size",
   "--slotted-sparkline-marker-size-lg",
   "--slotted-sparkline-marker-size-sm",
+  "--slotted-sparkline-min-inline-size",
   "--slotted-sparkline-reference-color",
   "--slotted-sparkline-ring-color",
   "--slotted-sparkline-ring-width",

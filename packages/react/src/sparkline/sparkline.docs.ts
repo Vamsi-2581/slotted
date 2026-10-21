@@ -123,7 +123,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'tone',
     title: 'How the series is doing',
-    note: 'A tone paints the line in the tone’s text colour: success for an error rate that fell, danger for a lead time that grew, neutral for the comparison series behind a current one. Without a tone the line is the first slot of the data scale, the theme’s own blue.',
+    note: 'A tone paints the line in the tone’s text colour: success for an error rate that fell, danger for a lead time that grew, neutral for the comparison series behind a current one. Without a tone the line is the first slot of the data scale, the accent’s own hue.',
     snippet: defineSnippet({
       id: 'sparkline-react-tone',
       language: 'tsx',

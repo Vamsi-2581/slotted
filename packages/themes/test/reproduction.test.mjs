@@ -12,7 +12,16 @@ import theme from '../src/default/theme.mjs';
  * here, each taken deliberately and written into the Current boundary section
  * of `docs/token-foundation.md`.
  */
-const DEVIATIONS = new Set(['light --slotted-tone-success-text']);
+const DEVIATIONS = new Set([
+  'light --slotted-tone-success-text',
+  'dark --slotted-tone-accent-border',
+  'dark --slotted-tone-accent-text',
+  'dark --slotted-focus-ring-color',
+  'dark --slotted-surface',
+  'dark --slotted-surface-sunken',
+  'dark --slotted-border-subtle',
+  'dark --slotted-control-border-color',
+]);
 
 const reference = JSON.parse(
   await readFile(new URL('../src/default/reference.json', import.meta.url), 'utf8'),

@@ -1,6 +1,7 @@
 import { applyBounds, boundColorCss, type Bound } from './bound';
 import type { Oklch } from './color';
 import { fmt } from './format';
+import { limitedChroma, limitedColorCss, type ChromaLimit } from './gamut';
 import { SEED_NAMES, type SeedName } from './seeds';
 
 export { SEED_NAMES, type SeedName };
@@ -8,11 +9,16 @@ export { SEED_NAMES, type SeedName };
 export const SCHEMES = ['light', 'dark', 'high-contrast'] as const;
 export type Scheme = (typeof SCHEMES)[number];
 
-/** A colour taken from a seed: fixed or offset lightness, scaled chroma, shifted hue. */
+/**
+ * A colour taken from a seed: fixed or offset lightness, scaled or limited
+ * chroma, shifted hue. A limited chroma takes the seed's hue alone — a ladder
+ * turned from it stays as vivid whatever the seed's own chroma — and asks for
+ * `max` where sRGB holds it at the derivation's fixed lightness.
+ */
 export interface SeedDerivation {
   readonly seed: SeedName;
   readonly l: number | { readonly offset: number; readonly min?: number; readonly max?: number };
-  readonly c: { readonly scale: number; readonly max: number };
+  readonly c: { readonly scale: number; readonly max: number } | ChromaLimit;
   readonly h?: number;
   readonly bounds?: readonly Bound[];
 }
@@ -77,10 +83,10 @@ export function evaluateRecipe(
         typeof rule.l === 'number'
           ? rule.l
           : clamp(seed.l + rule.l.offset, rule.l.min ?? 0, rule.l.max ?? 1);
-      value = applyBounds(
-        { l, c: Math.min(seed.c * rule.c.scale, rule.c.max), h: hue(seed.h + (rule.h ?? 0)) },
-        rule.bounds,
-      );
+      const h = hue(seed.h + (rule.h ?? 0));
+      const c =
+        'gamut' in rule.c ? limitedChroma(rule.c, h) : Math.min(seed.c * rule.c.scale, rule.c.max);
+      value = applyBounds({ l, c, h }, rule.bounds);
     }
     values[name] = value;
     return value;
@@ -104,9 +110,12 @@ export function derivationCss(rule: Derivation): string {
       typeof rule.l === 'number'
         ? fmt(rule.l)
         : `clamp(${fmt(rule.l.min ?? 0)}, calc(l + ${fmt(rule.l.offset)}), ${fmt(rule.l.max ?? 1)})`;
-    const c = `min(calc(c * ${fmt(rule.c.scale)}), ${fmt(rule.c.max)})`;
     const h = rule.h ? `calc(h + ${fmt(rule.h)})` : 'h';
-    color = `oklch(from var(--slotted-seed-${rule.seed}) ${l} ${c} ${h})`;
+    const seed = `var(--slotted-seed-${rule.seed})`;
+    color =
+      'gamut' in rule.c
+        ? limitedColorCss(seed, l, h, rule.c)
+        : `oklch(from ${seed} ${l} min(calc(c * ${fmt(rule.c.scale)}), ${fmt(rule.c.max)}) ${h})`;
   }
   for (const bound of rule.bounds ?? []) {
     color = boundColorCss(color, bound);

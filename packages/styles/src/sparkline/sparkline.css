@@ -55,7 +55,7 @@
      * and wins; a series slot says which one it is; a sparkline that names
      * neither reads the colour its container states — a card's trend region
      * writes `--slotted-sparkline-color` from its own tone — or the first slot
-     * of the data scale, which is the theme's own blue.
+     * of the data scale, which takes the accent seed's hue.
      */
     --_color: var(--slotted-sparkline-color, var(--slotted-data-1));
 

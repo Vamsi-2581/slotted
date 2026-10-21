@@ -201,10 +201,10 @@ describe('interaction cost', () => {
     const section = (heading: string) =>
       source.split(/^## /m).find((part) => part.startsWith(heading)) ?? '';
 
-    expect(section('4. Compose')).toMatch(/CP-09/);
-    expect(section('4. Compose')).toMatch(/useDeferredValue|startTransition/);
-    expect(section('6. Done')).toMatch(/throttled 4×/);
-    expect(section('6. Done')).toMatch(/long task/);
+    expect(section('5. Compose')).toMatch(/CP-09/);
+    expect(section('5. Compose')).toMatch(/useDeferredValue|startTransition/);
+    expect(section('7. Done')).toMatch(/throttled 4×/);
+    expect(section('7. Done')).toMatch(/long task/);
   });
 });
 

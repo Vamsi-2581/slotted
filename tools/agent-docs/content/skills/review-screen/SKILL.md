@@ -43,6 +43,12 @@ Each search below finds a defect without running the screen.
 | A grid or flex track around a family that scrolls, with no zero minimum                                                  | the page scrolls, not the family                         | CP-03        |
 | A badge, a tag or a colour beside a family that already draws the same state                                             | a state stated twice                                     | CP-06        |
 | An element of the screen's own that takes focus with no ring in its `focus-visible` state                                | focus not drawn                                          | OE-03        |
+| A `data-grid` or `table` with no `variant` on a page whose `width` is not `bleed`                                        | a grid with no frame on the page's surface               | LP-15        |
+| A list page's `page-header` with a heading and no subheading, no figures and no solid primary action                     | a header that does not say what the list covers          | LP-16        |
+| A grid whose column state unpins its `actions` column                                                                    | the row's actions leave the frame                        | LP-17        |
+| A row of `stat-card`s where a label has more than three words, or one card has a comparison the others lack              | a row of cards with no shared structure                  | OV-06        |
+| Two destinations of the navigation whose `page`s state different `width`s                                                | the column's edges move between destinations             | CP-10        |
+| A write whose success handler refreshes only the region of the control that wrote                                        | figures elsewhere stay stale after the write             | AF-08        |
 
 A rule whose `Check` needs the screen running — a size class, a throttled
 network, the accessibility tree — is run when the environment can run it, and

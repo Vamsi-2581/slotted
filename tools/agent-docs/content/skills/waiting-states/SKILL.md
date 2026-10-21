@@ -136,4 +136,7 @@ animating behind a message.
       untouched.
 - [ ] Reduced motion stops the animation and keeps the shape.
 - [ ] Empty, no results and error are distinct states, each with its next step.
-- [ ] Each `Check` of AF-01 to AF-07 passes.
+- [ ] For each control that writes, the regions on any screen whose figures
+      the write changes are listed, and each is shown read again after the
+      write (AF-08).
+- [ ] Each `Check` of AF-01 to AF-08 passes.

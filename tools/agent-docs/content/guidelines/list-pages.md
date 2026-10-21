@@ -193,3 +193,36 @@ Why: `table` mounts every cell: a hundred rows of twenty columns measured 93 ms 
 Do: Give the store's list a `data-grid` with its query, and keep `table` for the bounded sets inside a record or a document.
 Don't: Render an unbounded store into a `table`, or page a `table` to keep it under a hundred rows where the grid's window would have kept the whole set reachable.
 Check: Every list over an unbounded store is a `data-grid`; every `table` on a page renders a set the page bounds.
+
+### LP-15 · A grid on the page's surface is framed
+
+Level: SHOULD
+Applies to: a `data-grid` or a `table` on a list page, a record or an overview
+Rule: A grid that stands on the page's surface beside other blocks takes the `framed` `variant`; a grid that is the page's only body under a `bleed` page may stay `ruled`; `plain` is for a grid inside a `card` or a panel that already draws the frame.
+Why: `ruled`, the grid's default, draws rules between rows and no outer edge, and on a raised page surface every grid read as a bare slab beside blocks that have edges.
+Do: Give every grid that shares the page with a header area, a filter bar or other blocks the `framed` `variant`, and leave `ruled` to the full-bleed list whose edges are the page's.
+Don't: Leave the variant at its default on a page whose width is not `bleed`, or frame a grid a second time inside a card.
+Seen in: equori · Transactions, Categories, Rules · corrected in `b0d77c1`, `699fa5c`
+Check: Every `data-grid` with no `variant` stands on a page whose `width` is `bleed`; every grid inside a `card` is `plain`.
+
+### LP-16 · A list's header says what the list covers
+
+Level: SHOULD
+Applies to: the `page-header` of a list page
+Rule: A list page's header holds a subheading that says what the list covers, the control of the period when the list reads one, the page's figures for that period in the header area as label-over-figure pairs, and the primary action as the last, solid control; a refresh control is an icon button and never the only action.
+Why: A header with a heading and a refresh icon left the period and the totals with no place, and the reader learned what the list covered only by reading its rows.
+Do: Write the `page-header`'s `subheading` part for what the list covers, the period's control and the figures in its `header-area` as `figure` parts, and end its `actions` with the solid primary action; the refresh stands before it as the `button` family's `iconButton`.
+Don't: Leave a list's header as a heading alone, put its figures in a row of cards above the grid, or make a refresh icon the header's only control.
+Seen in: equori · Transactions and Categories headers · corrected in `b0d77c1`, `699fa5c`
+Check: Every list page's header has a subheading, its figures in the header area, and a solid primary action last; no header's only control is a refresh.
+
+### LP-17 · The row header and the row's actions stay in the frame
+
+Level: SHOULD
+Applies to: a `data-grid` whose columns can scroll sideways
+Rule: The column of kind `actions` stays pinned to the end, which is the grid's default, and the row header is pinned to the start with `pinned: 'start'` when it is the first column; no other column is pinned without a reason the page states.
+Why: When the columns scrolled sideways the row's menu left the frame, and on a narrow frame the reader scrolled away from the actions to reach them.
+Do: Keep the `actions` column at its default pin, write `pinned: 'start'` on a row header that is the first column, and pin nothing else.
+Don't: Unpin the actions column, or pin a column the reader did not ask to keep in view.
+Seen in: equori · Categories, Payees and Rules grids, row menus out of reach on narrow frames · corrected in `699fa5c`
+Check: In a frame narrower than the grid's columns, scrolled to the end, every row's actions cell is in view, and so is the row header when it is the first column.

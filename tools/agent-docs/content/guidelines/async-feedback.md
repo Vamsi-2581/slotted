@@ -116,3 +116,14 @@ Don't: Offer Refresh on a record nothing else writes, or clear the record and dr
 Seen in: Nexora · customer, quote, purchase order, order, invoice and cycle count records · corrected
 Verified in: Press Refresh on an order: the values stay, the page body is busy until the answer, and the button waits on it
 Check: Press Refresh on a record another writer changes: the values stay, the page body is busy until the answer, and the button waits on it.
+
+### AF-08 · A write refreshes every view it changed
+
+Level: MUST
+Applies to: every control that writes — a create, an edit, a delete, a categorisation — and every region on any screen whose figures the write can change
+Rule: A successful write marks stale every query whose answer the write can change, and the regions on screen read again; an application that cannot list them marks every query stale; a region that reads again keeps its rows and dims them (LP-06).
+Why: Categorising a transaction left the category totals and the rules' coverage at their old figures until a reload, and the reader reloaded after every action to trust the screen.
+Do: Beside each write, list the queries its answer changes — the record, the lists it appears in, the totals and counts over them — and invalidate them on success; where the list cannot be stated, invalidate every query after a successful write.
+Don't: Refresh only the region the control stands in, or rely on the next navigation to read the other figures again.
+Seen in: equori · categorising a transaction left the category totals and the rules' coverage stale · corrected in `0f09168`
+Check: Perform each write: every figure on screen that the write changes shows the new value without a reload.

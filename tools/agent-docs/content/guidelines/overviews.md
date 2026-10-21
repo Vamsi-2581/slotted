@@ -71,3 +71,14 @@ Do: Give a plain chart a `title` that names the measure and not the section's wo
 Don't: Frame every chart by habit, or leave a chart plain among framed tiles where it reads as the page's background.
 Seen in: Nexora · inventory and finance overviews, receiving's chart tab: every chart is the plain body of a titled section · corrected
 Check: For each chart, name what frames it: a titled section (plain) or a grid of peers (card); a chart with neither frame, or with both, is a finding.
+
+### OV-06 · The stat-cards of one row share their structure
+
+Level: SHOULD
+Applies to: a row of `stat-card`s on an overview or a record page
+Rule: The cards of one row carry a label of at most three words, the figure, and the same optional parts on every card — a comparison of one line on each, or on none.
+Why: One card with a long label and a wrapping comparison beside three cards with a label and a value made four boxes of the tallest card's height, three of them mostly empty, and the row read as broken.
+Do: Give every card a short label, its figure and one comparison line; detail that only one card has goes into its comparison or a tooltip.
+Don't: Lengthen one card's label to carry its detail, or give one card of the row a part the others lack.
+Seen in: equori · Categories › Rules, the coverage row · corrected in `699fa5c`
+Check: In every row of `stat-card`s, every label has three words or fewer, and either every card has a comparison or none does.

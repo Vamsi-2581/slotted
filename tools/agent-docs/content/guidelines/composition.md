@@ -118,14 +118,7 @@ Check: For every axis a screen passes to a family, the screen can name what it a
 
 ### CP-07 · A page's width is its type's
 
-Level: SHOULD
-Applies to: every `page`
-Rule: A list page is `bleed` with `fill`; a record, a dashboard and an overview keep the default `wide`; a create or edit form is `content`; a page of preferences read as prose is `measure`.
-Why: The page's width is the one measure its header and its body share, and a form capped in its own stylesheet ran its body to 736 pixels under a header of 1280, so the two end edges did not meet.
-Do: Set the width on the page and nowhere else; a form with a table of lines keeps `content` and lets the table's columns truncate.
-Don't: Cap a form's body with a width of the screen's own, or leave a form at `wide` so its fields run the length of a monitor.
-Seen in: Nexora · twelve forms capped at 40, 46, 48 and 64rem or not at all · corrected
-Check: On every form the header's end edge and the body's end edge are the same line.
+Status: retired · rewritten as CP-10, which gives every destination one width
 
 ### CP-08 · A control that changes mode keeps every box where it was
 
@@ -148,3 +141,14 @@ Why: Mounting a region of families in the click's task blocks the next paint, an
 Do: Keep the selection state urgent and hand the region the deferred value; mount only the selected panel, with mount active.
 Don't: Set the selection and the region from one state update inside the click handler, or mount every panel to make switching look instant.
 Check: Switch the control with the CPU throttled 4× in Chrome: the selection marker moves in the next frame, and the Performance panel shows no long task between the click and that paint.
+
+### CP-10 · Every destination has one width
+
+Level: SHOULD
+Applies to: every `page`
+Rule: Every destination of the navigation — a list, a record, a dashboard, an overview — is `full`, so moving between destinations never moves the column's edges; a create or edit form is `wide` and lays its fields out in a grid of the form's own; a page of preferences read as prose is `measure`.
+Why: A list at `bleed`, a record at `wide` and a form at `content` moved the column's edges on every move between destinations, and a form 56rem wide stood narrow in a desktop frame; the owner read the pages as squeezed and without a pattern.
+Do: Set `full` on every destination and `wide` on every form, on the page and nowhere else; a list keeps `fill` (LP-12); a form arranges its fields in a `grid` within that width.
+Don't: Give each page type a measure of its own, or cap a form's body with a width of the screen's own.
+Seen in: equori · Transactions at `bleed`, Categories at `wide`, new transaction at `content` · corrected in `b55d4f2`
+Check: Move between two destinations of the navigation: the header's and the body's start and end edges stay on the same lines.

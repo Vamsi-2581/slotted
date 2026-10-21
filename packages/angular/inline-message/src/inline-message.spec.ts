@@ -3,7 +3,9 @@ import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/inline-message/contract.json';
-import { SlInlineMessage } from './inline-message';
+import { SlButton } from '@slotted/angular/button';
+
+import { SlInlineMessage, SlInlineMessageActions } from './inline-message';
 import { provideInlineMessageDefaults } from './inline-message-defaults';
 import { SlInlineMessageIcon } from './inline-message-parts';
 
@@ -13,7 +15,7 @@ import { SlInlineMessageIcon } from './inline-message-parts';
  */
 @Component({
   standalone: true,
-  imports: [SlInlineMessage, SlInlineMessageIcon],
+  imports: [SlInlineMessage, SlInlineMessageIcon, SlInlineMessageActions, SlButton],
   template: `<p slInlineMessage><span slInlineMessageIcon></span></p>`,
 })
 class Host {}
@@ -34,6 +36,33 @@ const parts = (element: HTMLElement) =>
   [...element.children].map((child) => child.getAttribute('data-part'));
 
 describe('SlInlineMessage', () => {
+  /**
+   * A message that offers its answers holds them: a paragraph cannot hold a
+   * button, so the root is a group named by the sentence, and a live message
+   * announces the sentence and not the buttons.
+   */
+  it('is a group named by its sentence when it holds actions', () => {
+    const fixture = renderTemplate(`<div slInlineMessage tone="warning" live="polite">
+      More than one number can be the amount.
+      <div slInlineMessageActions>
+        <button slButton>R$ 2,00</button>
+        <button slButton>R$ 15,00</button>
+      </div>
+    </div>`);
+    const message = root(fixture);
+    const text = message.querySelector('[data-part="text"]') as HTMLElement;
+    const actions = message.querySelector('[data-part="actions"]') as HTMLElement;
+
+    expect(message.getAttribute('role')).toBe('group');
+    expect(message.getAttribute('aria-labelledby')).toBe(text.id);
+    expect(text.getAttribute('role')).toBe('status');
+    expect(text.textContent).not.toContain('R$');
+    expect(actions.querySelectorAll('button')).toHaveLength(2);
+    for (const button of actions.querySelectorAll('button')) {
+      expect(button.getAttribute('data-size')).toBe('sm');
+    }
+  });
+
   it('is selected in public by the family identifier and its parts', () => {
     const fixture = renderTemplate(`<p slInlineMessage tone="danger">Informe um CNPJ válido.</p>`);
 

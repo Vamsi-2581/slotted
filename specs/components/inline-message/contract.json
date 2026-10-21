@@ -33,6 +33,12 @@
     "polite": "status",
     "assertive": "alert"
   },
+  "actions": {
+    "part": "actions, a div after the text holding the answers the message offers",
+    "root": "with actions the root is a div, role=group, aria-labelledby the text part; without them a p",
+    "live": "a live role moves to the text part when actions are present, so a live region announces the sentence and not the buttons",
+    "size": "buttons inside take the message's size (sm → sm, md → md) through the button defaults"
+  },
   "stateAttributes": {
     "loading": "data-loading",
     "disabled": "data-disabled"
@@ -51,7 +57,7 @@
       },
       "capabilities": ["appearance", "size", "live", "loading", "disabled"],
       "states": ["default", "loading", "disabled"],
-      "parts": ["root", "prefix", "icon", "text"]
+      "parts": ["root", "prefix", "icon", "text", "actions"]
     }
   },
   "scenarios": {

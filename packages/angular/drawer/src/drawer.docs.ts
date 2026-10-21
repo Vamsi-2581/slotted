@@ -421,6 +421,11 @@ const events: EventRow[] = [
     when: 'Before the drawer opens or closes, for every way it can: the trigger, the ✕, Escape, a press outside, the back gesture and a call from code. The request carries value, previous, reason (pointer, keyboard, dismiss, escape, outsidePress, back or programmatic), result, the source event and cancel(), which keeps the drawer as it is.',
   },
   {
+    name: 'openChangeComplete',
+    payload: 'boolean',
+    when: 'After the entrance or the exit has ended: true once the drawer is settled open, false once it has left — the moment an application that renders the drawer conditionally removes it, so the exit runs. A drawer mounted open enters from its closed style, as one opened later does.',
+  },
+  {
     name: 'extentChange',
     payload: 'number | undefined',
     when: 'The two-way half of extent, which [(extent)] binds. It fires once the measure has changed.',

@@ -115,6 +115,12 @@ export abstract class SlDialogBase {
    * layer has actually closed, with the result the close carried.
    */
   readonly closed = output<string | undefined>();
+  /**
+   * After the layer's entrance or exit has ended: `true` once it is settled
+   * open, `false` once it has left. An application that removes the dialog on
+   * close waits for `false`, so the exit runs.
+   */
+  readonly openChangeComplete = output<boolean>();
   /** One output for one transition of the state the toggle sets. */
   readonly fullscreenChangeRequest = output<DialogFullscreenRequest>();
 
@@ -175,6 +181,8 @@ export abstract class SlDialogBase {
       this.status.set(next);
       this.changes.markForCheck();
     },
+    onEnterComplete: () => this.openChangeComplete.emit(true),
+    onExitComplete: () => this.openChangeComplete.emit(false),
   });
 
   /** Whether this layer has ever been open, which is what `lazy` reads. */

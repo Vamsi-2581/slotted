@@ -220,6 +220,12 @@ export interface DrawerProps {
   defaultOpen?: boolean | undefined;
   onOpenChange?: ((open: boolean, request: DrawerChangeRequest) => void) | undefined;
   /**
+   * After the panel's entrance or exit has ended: `true` once it is settled
+   * open, `false` once it has left. An application that unmounts the drawer
+   * on close waits for `false`, so the exit runs.
+   */
+  onOpenChangeComplete?: ((open: boolean) => void) | undefined;
+  /**
    * How much of the box the panel is measured in it takes, in `[0, 1]`. Unset
    * means the `size` step decides. It is a fraction rather than a length so
    * that the separator's three ARIA values, the limits and the snap points are

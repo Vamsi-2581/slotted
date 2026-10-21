@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/inline-message/contract.json';
-import { InlineMessage, InlineMessageDefaultsProvider } from './index';
+import { Button } from '../button';
+import { InlineMessage, InlineMessageActions, InlineMessageDefaultsProvider } from './index';
 
 const parts = (element: HTMLElement) =>
   [...element.children].map((child) => child.getAttribute('data-part'));
@@ -284,5 +285,33 @@ describe('InlineMessage', () => {
     );
 
     expect(screen.getByTestId('message')).toHaveAttribute('role', 'note');
+  });
+});
+
+/**
+ * A message that offers its answers holds them. A paragraph cannot hold a
+ * button, so the root becomes a group named by the sentence, and a live
+ * message announces the sentence and not the buttons.
+ */
+describe('a message with actions', () => {
+  it('is a group named by its sentence, holding the buttons', () => {
+    render(
+      <InlineMessage tone="warning" live="polite">
+        More than one number can be the amount.
+        <InlineMessageActions>
+          <Button>R$ 2,00</Button>
+          <Button>R$ 15,00</Button>
+        </InlineMessageActions>
+      </InlineMessage>,
+    );
+    const group = screen.getByRole('group', { name: 'More than one number can be the amount.' });
+
+    expect(group.tagName).not.toBe('P');
+    expect(within(group).getAllByRole('button')).toHaveLength(2);
+    expect(screen.getByRole('status')).toHaveTextContent('More than one number can be the amount.');
+    expect(screen.getByRole('status')).not.toHaveTextContent('R$ 2,00');
+    for (const button of within(group).getAllByRole('button')) {
+      expect(button).toHaveAttribute('data-size', 'sm');
+    }
   });
 });

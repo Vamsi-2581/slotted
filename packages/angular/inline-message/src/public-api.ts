@@ -1,4 +1,4 @@
-export { SlInlineMessage } from './inline-message';
+export { SlInlineMessage, SlInlineMessageActions } from './inline-message';
 export {
   INLINE_MESSAGE_DEFAULTS,
   INLINE_MESSAGE_PREFIXES,

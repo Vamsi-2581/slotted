@@ -170,7 +170,8 @@
     "count": 8,
     "cycles": false,
     "overflow": "the ninth series on is drawn in --slotted-text-muted with a texture",
-    "precedence": ["tone", "slot", "position"]
+    "precedence": ["tone", "slot", "position"],
+    "pie": "a pie colours its slices in place of its series; slotField and toneField name the fields of each record that hold its slice's slot (1 to 8) and tone, which the legend, the tooltip and the table read; a record that names neither takes the next free slot"
   },
   "axes": {
     "kind": ["line", "area", "bar", "pie", "scatter"],

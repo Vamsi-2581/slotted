@@ -196,6 +196,12 @@ export class SlDrawer implements OnInit {
    * the drawer has actually closed, with the result the close carried.
    */
   readonly closed = output<string | undefined>();
+  /**
+   * After the panel's entrance or exit has ended: `true` once it is settled
+   * open, `false` once it has left. An application that removes the drawer on
+   * close waits for `false`, so the exit runs.
+   */
+  readonly openChangeComplete = output<boolean>();
 
   private readonly defaults = injectDrawerDefaults();
   /** The family's words in the language in force, with this drawer's `messages` laid over them. */
@@ -254,6 +260,8 @@ export class SlDrawer implements OnInit {
   private readonly presence: PresenceHandle = createPresence({
     present: false,
     onStatusChange: (next) => this.status.set(next),
+    onEnterComplete: () => this.openChangeComplete.emit(true),
+    onExitComplete: () => this.openChangeComplete.emit(false),
   });
 
   /** Whether this drawer has ever been open, which is what `lazy` reads. */

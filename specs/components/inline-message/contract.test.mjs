@@ -23,9 +23,19 @@ test('names the identifier a consumer selects the family by', () => {
  * there is a message at all: `text` is the family's own wrapper, so
  * `[data-part='text']:empty` is an exact question in both bindings.
  */
-test('is one member, and the four parts the family draws', () => {
+test('is one member, and the five parts the family draws', () => {
   assert.deepEqual(Object.keys(contract.members), ['inlineMessage']);
-  assert.deepEqual(member.parts, ['root', 'prefix', 'icon', 'text']);
+  assert.deepEqual(member.parts, ['root', 'prefix', 'icon', 'text', 'actions']);
+});
+
+/**
+ * A message that offers its answers — two amounts the reader may have meant —
+ * holds them, rather than standing beside them: a paragraph cannot hold a
+ * button, so the root becomes a group named by its sentence.
+ */
+test('becomes a group named by its sentence when it holds actions', () => {
+  assert.match(contract.actions.root, /role=group, aria-labelledby the text part/);
+  assert.match(contract.actions.live, /moves to the text part/);
 });
 
 /**

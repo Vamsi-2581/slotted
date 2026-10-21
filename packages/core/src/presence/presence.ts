@@ -62,6 +62,13 @@ export interface PresenceOptions {
   onStatusChange?: (status: PresenceStatus, previous: PresenceStatus) => void;
   /** Fires for an exit that finished. An exit interrupted by a re-open never fires it. */
   onExitComplete?: () => void;
+  /**
+   * Fires for an entrance that finished: the node's declared transition after
+   * `open`, or at once when it declares none. An entrance interrupted by a
+   * close never fires it, and a layer present on the first mount with
+   * `skipInitialAnimation` fires it on the first node it is handed.
+   */
+  onEnterComplete?: () => void;
 }
 
 export interface PresenceHandle {
@@ -159,6 +166,8 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
 
   let applied = state.value;
   let status: PresenceStatus = !applied ? 'unmounted' : skipInitialAnimation ? 'open' : 'entering';
+  /* A layer that skipped its entrance has entered once it has a node. */
+  let enteredWithoutNode = status === 'open';
 
   if (status === 'entering') enter();
 
@@ -227,8 +236,33 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
       }
       if (current) closedStyle(current);
       setStatus('open');
+      waitForEnter();
     };
     scheduleFrame(step);
+  }
+
+  /** The entrance's end, measured as the exit's is: the event, or the declared duration. */
+  function waitForEnter() {
+    scheduleFrame(() => {
+      if (status !== 'open') return;
+      const current = node;
+      const duration = current ? declaredDuration(current) : 0;
+      if (!current || duration <= 0) return enterComplete();
+      listening = current;
+      for (const event of EXIT_EVENTS) current.addEventListener(event, handleEnterEvent);
+      timer = setTimeout(enterComplete, duration + exitGrace);
+    });
+  }
+
+  function handleEnterEvent(event: Event) {
+    if (event.target !== listening) return;
+    enterComplete();
+  }
+
+  function enterComplete() {
+    if (status !== 'open') return;
+    stopWaiting();
+    options.onEnterComplete?.();
   }
 
   /** Reading one computed value is what makes the browser compute them all. */
@@ -248,7 +282,10 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
     if (timer !== null) clearTimeout(timer);
     timer = null;
     if (listening) {
-      for (const event of EXIT_EVENTS) listening.removeEventListener(event, handleExitEvent);
+      for (const event of EXIT_EVENTS) {
+        listening.removeEventListener(event, handleExitEvent);
+        listening.removeEventListener(event, handleEnterEvent);
+      }
       listening = null;
     }
   }
@@ -332,6 +369,10 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
       if (next !== null) resume();
       if (next === node) return;
       node = next;
+      if (node && enteredWithoutNode) {
+        enteredWithoutNode = false;
+        waitForEnter();
+      }
       /* Mid-exit, the listeners move with it: a re-render is not a new exit. */
       if (status === 'exiting') {
         stopWaiting();

@@ -11,6 +11,7 @@ const theme: ChartTheme = {
     accent: 'rgb(37, 99, 235)',
     secondary: 'rgb(100, 116, 139)',
     success: 'rgb(22, 163, 74)',
+    info: 'rgb(2, 132, 199)',
     warning: 'rgb(202, 138, 4)',
     danger: 'rgb(220, 38, 38)',
   },

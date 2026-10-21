@@ -1,3 +1,4 @@
+import { CHART_TONES } from './theme';
 import { chartNumber, chartTime, createNumberFormatter, createTimeFormatter } from './format';
 import type {
   ChartAnnotation,
@@ -222,7 +223,24 @@ export function createChartModel(spec: ChartSpec, options: ChartModelOptions = {
   );
 
   const pieSeries = pie ? spec.series[0] : undefined;
-  const categoryColors = pie ? assignColors(placed.map(() => ({}))) : [];
+  /* A slice names its slot or its tone through the fields the series points
+     at; what a record does not name, or names wrongly, is assigned in order. */
+  const categoryColors = pie
+    ? assignColors(
+        placed.map((entry) => {
+          const slot =
+            pieSeries?.slotField === undefined ? undefined : entry.record[pieSeries.slotField];
+          const tone =
+            pieSeries?.toneField === undefined ? undefined : entry.record[pieSeries.toneField];
+          return {
+            ...(SLOTS.includes(Number(slot) as ChartSlot) && slot !== null && slot !== ''
+              ? { slot: Number(slot) as ChartSlot }
+              : {}),
+            ...(CHART_TONES.includes(tone as ChartTone) ? { tone: tone as ChartTone } : {}),
+          };
+        }),
+      )
+    : [];
   const categories: ChartCategory[] = placed.map((entry, index) => ({
     key: keys[index]!,
     index,

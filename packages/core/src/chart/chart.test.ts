@@ -154,6 +154,32 @@ describe('colour', () => {
       { type: 'slot', slot: 2 },
     ]);
   });
+
+  /**
+   * An application gives each category a slot of its own, and a pie keeps it:
+   * a colour means the same category on every chart. A slice whose record
+   * names no slot takes the next one the others left free.
+   */
+  it('takes each slice’s slot or tone from the fields the series names', () => {
+    const model = createChartModel({
+      x: { field: 'name' },
+      data: [
+        { name: 'Rent', v: 5, slot: 5 },
+        { name: 'Food', v: 3, slot: 2 },
+        { name: 'Travel', v: 2, slot: 7 },
+        { name: 'Other', v: 1 },
+        { name: 'Refund', v: 1, tone: 'success', slot: 3 },
+      ],
+      series: [{ kind: 'pie', field: 'v', slotField: 'slot', toneField: 'tone' }],
+    });
+    expect(model.legend.map((entry) => entry.color)).toEqual([
+      { type: 'slot', slot: 5 },
+      { type: 'slot', slot: 2 },
+      { type: 'slot', slot: 7 },
+      { type: 'slot', slot: 1 },
+      { type: 'tone', tone: 'success' },
+    ]);
+  });
 });
 
 describe('stacks', () => {

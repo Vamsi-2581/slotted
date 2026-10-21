@@ -77,6 +77,7 @@ function DialogFamily({
   mount,
   onFullscreenChange,
   onOpenChange,
+  onOpenChangeComplete,
   open,
   outsidePress,
   placement,
@@ -120,10 +121,21 @@ function DialogFamily({
    * the whole reason it exists: a layer that appears already open gives its CSS
    * transition no closed style to start from.
    */
-  const [status, setStatus] = useState<PresenceStatus>(current ? 'open' : 'unmounted');
+  const [status, setStatus] = useState<PresenceStatus>(current ? 'entering' : 'unmounted');
   const presence = useRef<PresenceHandle | null>(null);
+  const settled = useRef(onOpenChangeComplete);
+  settled.current = onOpenChangeComplete;
   if (presence.current === null) {
-    presence.current = createPresence({ present: current, onStatusChange: setStatus });
+    /* A layer mounted open enters as one opened later does: an application
+       that renders it conditionally, `{subject && <Drawer open />}`, saw it
+       appear in its final state with no entrance. */
+    presence.current = createPresence({
+      onEnterComplete: () => settled.current?.(true),
+      onExitComplete: () => settled.current?.(false),
+      onStatusChange: setStatus,
+      present: current,
+      skipInitialAnimation: false,
+    });
   }
 
   useEffect(() => {

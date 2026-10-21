@@ -53,6 +53,7 @@ import {
       (openChangeRequest)="requests.push($event)"
       (fullscreenChangeRequest)="onFullscreenRequest($event)"
       (closed)="results.push($event)"
+      (openChangeComplete)="settled.push($event)"
     >
       <header slDialogHeader>
         <h2 slDialogTitle>Edit project</h2>
@@ -87,6 +88,7 @@ class DialogHost {
     if (this.refuseFullscreen()) request.cancel();
   }
   readonly results: (string | undefined)[] = [];
+  readonly settled: boolean[] = [];
 }
 
 @Component({
@@ -526,6 +528,25 @@ describe('SlDialog', () => {
     const request = fixture.componentInstance.requests.at(-1);
     expect(request?.reason).toBe('dismiss');
     expect(request?.result).toBe('dismissed');
+  });
+
+  /**
+   * An application that removes the dialog on close waits for the exit to
+   * end; `openChangeComplete` says when the entrance and the exit have ended.
+   */
+  it('reports when the layer is settled open and when it has left', async () => {
+    const frames = () => new Promise((resolve) => setTimeout(resolve, 60));
+    fixture.componentInstance.open.set(true);
+    fixture.detectChanges();
+    await frames();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.settled).toEqual([true]);
+
+    fixture.componentInstance.open.set(false);
+    fixture.detectChanges();
+    await frames();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.settled).toEqual([true, false]);
   });
 
   /** `afterClosed()` in Angular Material, as an output. */

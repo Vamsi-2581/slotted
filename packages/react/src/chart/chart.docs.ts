@@ -442,7 +442,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'donut',
     title: 'A donut with the total inside',
-    note: 'innerRadius opens the middle, and the center holds the total; legendValues puts each slice’s value beside its name.',
+    note: 'innerRadius opens the middle, and the center holds the total; legendValues puts each slice’s value beside its name. slotField and toneField give each slice the slot or tone its record names, so a category keeps the colour it has everywhere else; a slice that names none takes the next free slot.',
     snippet: defineSnippet({
       id: 'chart-react-donut',
       language: 'tsx',

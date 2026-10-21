@@ -52,6 +52,9 @@ export interface InlineMessageDefaultsProviderProps extends Partial<
   prefixes?: Partial<InlineMessagePrefixes> | undefined;
 }
 
+/** The answers a message offers, after its sentence. */
+export type InlineMessageActionsProps = ComponentPropsWithRef<'div'>;
+
 export interface InlineMessageRootProps extends ComponentPropsWithRef<'p'> {
   'data-live': InlineMessageLive;
   'data-mark': InlineMessageMark;

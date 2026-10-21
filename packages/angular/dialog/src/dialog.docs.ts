@@ -540,6 +540,11 @@ const events: EventRow[] = [
     when: 'Before the dialog opens or closes, whatever caused it. The request carries the new value, the previous value, the reason (pointer, keyboard, dismiss, escape, outsidePress, back, submit or programmatic), the result of the close, the originating event, and cancel(), which keeps the dialog as it is. One handler therefore guards the ✕, Escape, a press outside, the way back and close() together.',
   },
   {
+    name: '(openChangeComplete)',
+    payload: 'boolean',
+    when: 'After the entrance or the exit has ended: true once the layer is settled open, false once it has left — the moment an application that renders the layer conditionally removes it, so the exit runs.',
+  },
+  {
     name: '(openChange)',
     payload: 'boolean',
     when: 'After the open state changed, so a template can bind [(open)]. It carries the new state only; the reason is on (openChangeRequest).',

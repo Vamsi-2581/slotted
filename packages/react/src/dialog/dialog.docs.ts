@@ -618,6 +618,11 @@ const events: EventRow[] = [
     when: 'Before the dialog opens or closes, whatever caused it. The request carries the new value, the previous value, the reason (pointer, keyboard, dismiss, escape, outsidePress, back, submit or programmatic), the result of the close, the originating event, and cancel(), which keeps the dialog as it is. One handler therefore guards the ✕, Escape, a press outside, the way back and the ref handle together.',
   },
   {
+    name: 'onOpenChangeComplete',
+    payload: '(open: boolean)',
+    when: 'After the entrance or the exit has ended: true once the layer is settled open, false once it has left — the moment an application that renders the layer conditionally removes it, so the exit runs. A layer mounted open enters from its closed style, as one opened later does.',
+  },
+  {
     name: 'onFullscreenChange',
     payload: '(fullscreen: boolean, request: DialogFullscreenRequest)',
     when: 'Before the panel expands to the whole layer or is restored. The request carries the new value, the previous value, the reason (pointer, keyboard or programmatic), the originating event, and cancel(), which keeps the panel as it is.',

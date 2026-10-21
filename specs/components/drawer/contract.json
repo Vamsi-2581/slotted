@@ -131,7 +131,7 @@
     "reason": "There is no scroll axis, and dialog has one because a centred panel can be taller than the layer and the reader has to choose which box moves. A drawer's panel is exactly the layer's block extent on a side and its own extent on a top or bottom, so it never exceeds the layer and there is no second thing that could scroll. Ant, Fluent and MUI all scroll the body and none of them ships an axis for it"
   },
   "mount": {
-    "active": "the layer exists only while it is open, and @slotted/core/presence holds it through its own exit",
+    "active": "the layer exists only while it is open, and @slotted/core/presence holds it through its own exit; a layer mounted open enters from its closed style, and onOpenChangeComplete (React) / openChangeComplete (Angular) reports true when the entrance has ended and false when the exit has, so a layer rendered conditionally is removed after its exit",
     "lazy": "the layer is built on the first open and kept afterwards",
     "eager": "the layer exists from the start and is inert while closed",
     "default": "active",

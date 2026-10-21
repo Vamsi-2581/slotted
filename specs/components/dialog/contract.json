@@ -85,7 +85,7 @@
     "reason": "The content part is a three-row grid, auto minmax(0, 1fr) auto, inside a bounded block size. Radix and React Aria ship no layout at all, so a long body pushes the footer past the fold and the reader cannot reach Save — which is what the default exists to prevent"
   },
   "mount": {
-    "active": "the layer exists only while it is open, and @slotted/core/presence holds it through its own exit",
+    "active": "the layer exists only while it is open, and @slotted/core/presence holds it through its own exit; a layer mounted open enters from its closed style, and onOpenChangeComplete (React) / openChangeComplete (Angular) reports true when the entrance has ended and false when the exit has, so a layer rendered conditionally is removed after its exit",
     "lazy": "the layer is built on the first open and kept afterwards",
     "eager": "the layer exists from the start and is hidden while closed",
     "default": "active",

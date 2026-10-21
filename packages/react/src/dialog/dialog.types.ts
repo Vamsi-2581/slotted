@@ -210,6 +210,12 @@ interface DialogOwnProps {
   /** The value an uncontrolled layer starts from, read once. */
   defaultOpen?: boolean | undefined;
   onOpenChange?: ((open: boolean, request: DialogChangeRequest) => void) | undefined;
+  /**
+   * After the layer's entrance or exit has ended: `true` once it is settled
+   * open, `false` once it has left. An application that unmounts the dialog
+   * on close waits for `false`, so the exit runs.
+   */
+  onOpenChangeComplete?: ((open: boolean) => void) | undefined;
   size?: DialogSize | undefined;
   placement?: DialogPlacement | undefined;
   scroll?: DialogScroll | undefined;

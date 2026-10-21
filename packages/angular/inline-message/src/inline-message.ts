@@ -3,11 +3,15 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
+  Directive,
+  forwardRef,
   HostAttributeToken,
   inject,
   input,
   ViewEncapsulation,
 } from '@angular/core';
+import { BUTTON_DEFAULTS_TOKEN } from '@slotted/angular/button';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
 
@@ -70,6 +74,9 @@ const LIVE_ROLE: Record<InlineMessageLive, string | null> = {
  * and MDN's `alert` role reference is explicit that the role is for text
  * content alone. This family has no controls, so there is nothing to keep out.
  */
+/** What the message queries for, declared before the directive it stands for. */
+export abstract class SlInlineMessageActionsRef {}
+
 @Component({
   selector: '[slInlineMessage]',
   standalone: true,
@@ -86,7 +93,14 @@ const LIVE_ROLE: Record<InlineMessageLive, string | null> = {
           }</ng-content
       ></span>
     }
-    <span data-part="text" data-part-text=""><ng-content /></span>`,
+    <span
+      data-part="text"
+      data-part-text=""
+      [attr.id]="grouped() ? textId : null"
+      [attr.role]="grouped() ? liveRole() : null"
+      ><ng-content
+    /></span>
+    <ng-content select="[slInlineMessageActions]" />`,
   styleUrl: '../../../styles/src/inline-message/inline-message.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -103,6 +117,7 @@ const LIVE_ROLE: Record<InlineMessageLive, string | null> = {
     '[attr.data-disabled]': "disabled() === true ? '' : null",
     '[attr.data-reserve]': "reserve() ? '' : null",
     '[attr.role]': 'role()',
+    '[attr.aria-labelledby]': 'grouped() ? textId : null',
     '[attr.id]': 'messageId',
   },
 })
@@ -174,6 +189,10 @@ export class SlInlineMessage {
   get messageId(): string {
     return this.id() ?? this.writtenId ?? this.generatedId;
   }
+  /** The sentence's id, which names the group a message with actions becomes. */
+  protected get textId(): string {
+    return `${this.messageId}-text`;
+  }
 
   /**
    * A role the consumer wrote is never replaced by the family's. A host binding
@@ -184,7 +203,7 @@ export class SlInlineMessage {
   private readonly writtenRole = inject(new HostAttributeToken('role'), { optional: true });
 
   protected readonly resolvedTone = computed(() => this.tone() ?? this.defaults.tone);
-  protected readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
+  readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   protected readonly resolvedLive = computed(() => this.live() ?? this.defaults.live);
   protected readonly resolvedMark = computed(() => this.mark() ?? this.defaults.mark);
   /* The glyph the family draws when the page supplies none. A message that is
@@ -194,10 +213,43 @@ export class SlInlineMessage {
     if (this.loading() || mark === 'none') return null;
     return mark === 'dot' ? 'dot' : TONE_GLYPH[this.resolvedTone()];
   });
-  protected readonly role = computed(() => this.writtenRole ?? LIVE_ROLE[this.resolvedLive()]);
+  protected readonly liveRole = computed(() => LIVE_ROLE[this.resolvedLive()]);
+  /**
+   * A message that holds `[slInlineMessageActions]` is a group named by its
+   * sentence, written on a `div`: a paragraph cannot hold a button. Its live
+   * role moves to the sentence, so the buttons are not announced with it.
+   */
+  private readonly actions = contentChild(SlInlineMessageActionsRef);
+  protected readonly grouped = computed(() => this.actions() !== undefined);
+  protected readonly role = computed(
+    () => this.writtenRole ?? (this.grouped() ? 'group' : this.liveRole()),
+  );
 
   /* Unstated asks the table; the empty string is a consumer removing the word. */
   protected readonly prefixWord = computed(
     () => this.prefix() ?? this.defaults.prefixes[this.resolvedTone()] ?? '',
   );
 }
+
+/**
+ * The answers a message offers, after its sentence: two amounts the reader
+ * may have meant, a way to undo. Written on a `div` inside the message, which
+ * is then a `div` itself; the buttons take the message's size.
+ */
+@Directive({
+  selector: '[slInlineMessageActions]',
+  standalone: true,
+  exportAs: 'slInlineMessageActions',
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
+  providers: [
+    { provide: SlInlineMessageActionsRef, useExisting: forwardRef(() => SlInlineMessageActions) },
+    {
+      provide: BUTTON_DEFAULTS_TOKEN,
+      useFactory: () => ({
+        ...inject(BUTTON_DEFAULTS_TOKEN, { skipSelf: true }),
+        size: inject(SlInlineMessage).resolvedSize(),
+      }),
+    },
+  ],
+})
+export class SlInlineMessageActions {}

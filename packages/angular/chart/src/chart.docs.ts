@@ -446,7 +446,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'donut',
     title: 'A donut with the total inside',
-    note: 'innerRadius opens the middle and the center holds the total; a slChartCenter template replaces it, here with the resolution rate.',
+    note: 'innerRadius opens the middle and the center holds the total; a slChartCenter template replaces it, here with the resolution rate. slotField and toneField give each slice the slot or tone its record names, so a category keeps the colour it has everywhere else; a slice that names none takes the next free slot.',
     snippet: defineSnippet({
       id: 'chart-angular-donut',
       language: 'angular',

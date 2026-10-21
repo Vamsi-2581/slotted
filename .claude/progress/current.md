@@ -11,6 +11,7 @@
 - Fatia 5: itens 15, 16, 17.
 - Fatia 6: itens 12, 24, 13.
 - Fatia 7: itens 19, 30, 3.
+- Fatia 8: itens 29, 23, 11.
 
 ## Testes
 - React: segmented-control browser 2/2, dialog browser 5/5, entity-picker unit 42/42; build com `package-boundary.verify.mjs` exit 0.
@@ -21,12 +22,13 @@
 - Fatia 5: theme vitest 99/99, node 109/109; themes 91/91; CSS da escada de dados conferido no Chromium.
 - Fatia 6: styles 1701/1701; contratos 2180/2180; React famílias de tom 824/824, tsc 0; Angular famílias de tom 575/575, `ng build` development exit 0; agent-docs 137/137; theme 99 + 109; themes 92.
 - Fatia 7: styles 1707/1707; React avatar+entity-picker 103/103, browser avatar 2/2, glyph 1/1; core glyph+entity-picker 34/34; Angular avatar/entity-picker/text-field/otp/icon 133/133, `ng build` ok; themes 92/92.
+- Fatia 8: core presence 29/29, chart 67/67, tsc 0; React dialog/drawer 202/202 + browser 7/7, inline-message 20/20, chart 28/28, tsc 0; Angular dialog/drawer 106/106, inline-message 21/21, `ng build` ok; package-layers ok.
 
 ## Em curso
-- Fatia 8: itens 29, 23, 11.
+- Fatia 9: itens 31, 26, 18.
 
 ## Problemas conhecidos
 - Nenhum.
 
 ## Próxima ação exata
-Item 29: tipar `onEnterComplete` no core (rebuild de `@slotted/core`), testar Dialog e Drawer montados com `open` (primeiro quadro fechado) e `onOpenChangeComplete(false)` depois da saída; depois Angular.
+Item 31: docs do entity-picker (`renderOption`): ler `packages/styles/src/entity-picker/entity-picker.css` (colocação por `[data-part-label]` etc.) e decidir exportar as partes da opção ou casar `data-part`.

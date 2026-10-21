@@ -23,7 +23,8 @@ export const REACT_INLINE_MESSAGE_TOKENS = inlineMessageTokens.map((name) => ({
 }));
 
 const imports: ReferenceImport = {
-  source: "import {\n  InlineMessage,\n  InlineMessageDefaultsProvider,\n} from '@slotted/react';",
+  source:
+    "import {\n  InlineMessage,\n  InlineMessageActions,\n  InlineMessageDefaultsProvider,\n} from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -54,6 +55,13 @@ const anatomy: AnatomyRow[] = [
     required: true,
     purpose:
       'The sentence. Written by the family around children, which is what makes “is there a message?” a question the stylesheet can ask and keeps a message holding a link one grid item rather than two.',
+  },
+  {
+    part: 'actions',
+    element: 'div',
+    required: false,
+    purpose:
+      'The answers the message offers (InlineMessageActions), after the sentence and wrapping under it. Present, the root is a div with role="group" named by the sentence, the live role moves to the sentence, and the buttons take the message size.',
   },
 ];
 

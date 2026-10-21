@@ -180,6 +180,43 @@ describe('createPresence', () => {
     presence.destroy();
   });
 
+  /**
+   * A layer an application mounts already open — `{subject && <Drawer open />}`
+   * — enters as one that opens later does, and reports when its entrance has
+   * ended, so the application knows the layer is settled.
+   */
+  it('enters from the closed style when mounted present, and reports the end', () => {
+    const enters = vi.fn();
+    const node = mount({ 'transition-duration': '150ms', 'transition-property': 'opacity' });
+    const presence = createPresence({
+      initialPresent: true,
+      skipInitialAnimation: false,
+      onEnterComplete: enters,
+    });
+    expect(presence.status).toBe('entering');
+    presence.setNode(node);
+
+    vi.advanceTimersToNextFrame();
+    expect(presence.status).toBe('open');
+    vi.advanceTimersToNextFrame();
+    expect(enters).not.toHaveBeenCalled();
+
+    node.dispatchEvent(new Event('transitionend'));
+    expect(enters).toHaveBeenCalledTimes(1);
+    presence.destroy();
+  });
+
+  it('reports the end of an entrance it skipped once it has a node', () => {
+    const enters = vi.fn();
+    const presence = createPresence({ initialPresent: true, onEnterComplete: enters });
+    expect(presence.status).toBe('open');
+
+    presence.setNode(mount());
+    vi.advanceTimersToNextFrame();
+    expect(enters).toHaveBeenCalledTimes(1);
+    presence.destroy();
+  });
+
   it('unmounts in the same task when the node declares no animation', () => {
     const exits = vi.fn();
     const presence = createPresence({ initialPresent: true, onExitComplete: exits });

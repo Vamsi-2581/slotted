@@ -1,10 +1,11 @@
-export { InlineMessage } from './inline-message';
+export { InlineMessage, InlineMessageActions } from './inline-message';
 export {
   INLINE_MESSAGE_PREFIXES,
   InlineMessageDefaultsProvider,
   useInlineMessageDefaults,
 } from './inline-message-defaults';
 export type {
+  InlineMessageActionsProps,
   InlineMessageDefaults,
   InlineMessageDefaultsProviderProps,
   InlineMessageLive,

@@ -61,7 +61,7 @@ export const CHART_THEME_PROPERTIES = {
   easing: '--_chart-easing',
 } as const;
 
-const TONES: readonly ChartTone[] = [
+export const CHART_TONES: readonly ChartTone[] = [
   'neutral',
   'accent',
   'secondary',
@@ -142,7 +142,7 @@ function readTheme(element: Element): ChartTheme {
     return {
       slots: Array.from({ length: 8 }, (_, index) => color(slotProperty(index + 1), text)),
       tones: Object.fromEntries(
-        TONES.map((tone) => [tone, color(toneProperty(tone), text)]),
+        CHART_TONES.map((tone) => [tone, color(toneProperty(tone), text)]),
       ) as Record<ChartTone, string>,
       overflow: color(CHART_THEME_PROPERTIES.overflow, 'GrayText'),
       text,

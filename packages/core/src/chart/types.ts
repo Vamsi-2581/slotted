@@ -73,6 +73,14 @@ export interface ChartSeries {
   readonly sizeField?: string | undefined;
   /** A pie's hole, as a share of its radius from 0 to 0.9. Above 0 is a donut. */
   readonly innerRadius?: number | undefined;
+  /**
+   * A pie's slot per slice: the field of each record that holds its slot, 1
+   * to 8, so a category keeps the colour it has everywhere else in the
+   * application. A slice whose record holds none takes the next free slot.
+   */
+  readonly slotField?: string | undefined;
+  /** A pie's tone per slice, from the field of each record; wins over `slotField`. */
+  readonly toneField?: string | undefined;
   /** Overrides the value axis' format for this series. */
   readonly format?: ChartNumberFormat | undefined;
 }

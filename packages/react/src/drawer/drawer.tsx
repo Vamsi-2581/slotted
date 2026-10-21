@@ -87,6 +87,7 @@ export function Drawer({
   mount,
   onExtentChange,
   onOpenChange,
+  onOpenChangeComplete,
   open,
   outsidePress,
   ref,
@@ -152,10 +153,21 @@ export function Drawer({
    * the whole reason it exists: a panel that appears already open gives its CSS
    * transition no closed style to start from.
    */
-  const [status, setStatus] = useState<PresenceStatus>(currentOpen ? 'open' : 'unmounted');
+  const [status, setStatus] = useState<PresenceStatus>(currentOpen ? 'entering' : 'unmounted');
   const presence = useRef<PresenceHandle | null>(null);
+  const settled = useRef(onOpenChangeComplete);
+  settled.current = onOpenChangeComplete;
   if (presence.current === null) {
-    presence.current = createPresence({ present: currentOpen, onStatusChange: setStatus });
+    /* A layer mounted open enters as one opened later does: an application
+       that renders it conditionally, `{subject && <Drawer open />}`, saw it
+       appear in its final state with no entrance. */
+    presence.current = createPresence({
+      onEnterComplete: () => settled.current?.(true),
+      onExitComplete: () => settled.current?.(false),
+      onStatusChange: setStatus,
+      present: currentOpen,
+      skipInitialAnimation: false,
+    });
   }
 
   useEffect(() => {

@@ -291,6 +291,26 @@
   }
 
   /**
+   * The answers the message offers — "R$ 2,00 · R$ 15,00" under an amount that
+   * could be either. They wrap under the sentence, in its column, at the gap
+   * the family puts between its mark and its sentence; the root is then a
+   * group named by the sentence, so a reader hears what the buttons answer.
+   */
+  [data-ui-inline-message] > [data-part-actions] {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--slotted-inline-message-actions-gap, var(--_column-gap));
+    grid-column: 2;
+    grid-row: 2;
+    margin-block-start: var(
+      --slotted-inline-message-actions-offset,
+      var(--slotted-space-2, 0.25rem)
+    );
+    min-inline-size: 0;
+  }
+
+  /**
    * Nothing to say, so nothing is drawn. This is the half of `reserve` that
    * makes it usable: the line is held open, and a mark and a severity word
    * standing beside an empty sentence would be the layout shift moved rather

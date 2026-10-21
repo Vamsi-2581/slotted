@@ -1,5 +1,5 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -216,8 +216,10 @@ describe('Dialog', () => {
     });
   });
 
-  it('writes every axis the contract declares as an attribute a consumer can style', () => {
+  it('writes every axis the contract declares as an attribute a consumer can style', async () => {
     render(<Basic defaultOpen fullScreen="always" placement="top" scroll="viewport" size="lg" />);
+    /* A layer mounted open enters: `data-open` lands a frame after the mount. */
+    await waitFor(() => expect(layer()).toHaveAttribute('data-open'));
 
     const root = layer() as HTMLElement;
     expect(root.dataset['size']).toBe('lg');

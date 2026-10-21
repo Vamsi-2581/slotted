@@ -459,6 +459,11 @@ const events: EventRow[] = [
     when: 'Before the drawer opens or closes, for every way it can: the trigger, the ✕, Escape, a press outside, the back gesture and the handle. The request carries value, previous, reason (pointer, keyboard, dismiss, escape, outsidePress, back or programmatic), result, the source event and cancel(), which keeps the drawer as it is.',
   },
   {
+    name: 'onOpenChangeComplete',
+    payload: '(open: boolean)',
+    when: 'After the entrance or the exit has ended: true once the drawer is settled open, false once it has left — the moment an application that renders the drawer conditionally removes it, so the exit runs. A drawer mounted open enters from its closed style, as one opened later does.',
+  },
+  {
     name: 'onExtentChange',
     payload: '(extent: number | undefined, request: DrawerExtentRequest)',
     when: 'Before the panel’s measure changes, with the reason pointer for a drag or a tap on the grip, keyboard for an arrow key, Home, End or Enter, and programmatic for a change from code. A drag of the separator fires on every pointer move and can report a value below minExtent; a drag of a sheet’s body fires once, on release, with the stop it landed on. undefined means the panel is back on its size step, or on the height of its content under size="content".',

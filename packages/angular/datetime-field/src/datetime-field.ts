@@ -204,7 +204,7 @@ export interface DateTimeFieldChangeRequest extends ChangeRequest<PlainDateTime 
                   [attr.data-field]="part.type"
                   [attr.data-half]="halfOf(part.type)"
                   [attr.data-placeholder]="valueOf(part.type) === null ? '' : null"
-                  [attr.aria-label]="part.value"
+                  [attr.aria-label]="t(part.type)"
                   [attr.aria-valuenow]="valueOf(part.type)"
                   [attr.aria-valuemin]="rangeOf(part.type).min"
                   [attr.aria-valuemax]="rangeOf(part.type).max"

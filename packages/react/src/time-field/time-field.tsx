@@ -646,7 +646,7 @@ export function TimeField({
                 onBlur={onSegmentBlur}
                 onFocus={() => setActiveField(name)}
                 onKeyDown={onSegmentKeyDown(name)}
-                placeholder={part.value}
+                label={t(name)}
                 readOnly={resolvedReadOnly === true}
                 segments={segments}
                 tabIndex={name === (activeField ?? fields[0]) ? 0 : -1}
@@ -736,7 +736,7 @@ function Segment({
   onBlur,
   onFocus,
   onKeyDown,
-  placeholder,
+  label,
   readOnly,
   segments,
   tabIndex,
@@ -747,7 +747,8 @@ function Segment({
   onBlur: () => void;
   onFocus: () => void;
   onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
-  placeholder: string;
+  /** The unit's word; the placeholder is drawn, never spoken. */
+  label: string;
   readOnly: boolean;
   segments: SegmentState;
   tabIndex: number;
@@ -765,7 +766,7 @@ function Segment({
   return (
     <div
       aria-disabled={disabled ? true : undefined}
-      aria-label={placeholder}
+      aria-label={label}
       aria-readonly={readOnly ? true : undefined}
       aria-valuemax={range.max}
       aria-valuemin={range.min}

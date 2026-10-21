@@ -152,7 +152,7 @@
   "provides": {
     "timeFieldDefaults": ["granularity", "hourCycle", "relative", "size", "timeZone", "variant"]
   },
-  "messages": ["clear", "duration", "nextDay"],
+  "messages": ["clear", "duration", "nextDay", "hour", "minute", "second", "dayPeriod"],
   "imperative": ["focus", "clear"],
   "stateAttributes": {
     "disabled": "data-disabled",

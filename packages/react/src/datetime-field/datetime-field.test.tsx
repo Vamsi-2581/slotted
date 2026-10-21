@@ -614,3 +614,55 @@ describe('inside a field', () => {
     warn.mockRestore();
   });
 });
+
+/**
+ * A segment is named for the unit it holds, in the language in force. The
+ * placeholder is drawn and never spoken.
+ */
+describe('what each segment is called', () => {
+  it.each([
+    [
+      'en-US',
+      {
+        day: 'day',
+        month: 'month',
+        year: 'year',
+        hour: 'hour',
+        minute: 'minute',
+        second: 'second',
+        dayPeriod: 'AM/PM',
+      },
+    ],
+    [
+      'pt-BR',
+      {
+        day: 'dia',
+        month: 'mês',
+        year: 'ano',
+        hour: 'hora',
+        minute: 'minuto',
+        second: 'segundo',
+        dayPeriod: 'AM/PM',
+      },
+    ],
+  ] as const)('in %s', (locale, expected) => {
+    render(
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+        <Field>
+          <FieldLabel>Starts</FieldLabel>
+          <DateTimeField defaultValue={TENTH} granularity="second" hourCycle={12} />
+        </Field>
+      </SlottedProvider>,
+    );
+
+    const names = Object.fromEntries(
+      segments().map((segment) => [segment.dataset['field'], segment.getAttribute('aria-label')]),
+    );
+    expect(names).toEqual(expected);
+    for (const segment of segments()) {
+      expect(segment).toHaveAccessibleName(
+        expected[segment.dataset['field'] as keyof typeof expected],
+      );
+    }
+  });
+});

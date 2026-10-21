@@ -171,7 +171,7 @@ export interface TimeFieldChangeRequest extends ChangeRequest<PlainTime | null> 
               role="spinbutton"
               [attr.data-field]="part.type"
               [attr.data-placeholder]="valueOf(part.type) === null ? '' : null"
-              [attr.aria-label]="part.value"
+              [attr.aria-label]="t(part.type)"
               [attr.aria-valuenow]="valueOf(part.type)"
               [attr.aria-valuemin]="rangeOf(part.type).min"
               [attr.aria-valuemax]="rangeOf(part.type).max"

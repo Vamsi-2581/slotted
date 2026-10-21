@@ -589,4 +589,45 @@ describe('month granularity', () => {
     expect(month(fixture, 'November 2026').hasAttribute('aria-disabled')).toBe(false);
     expect(month(fixture, 'December 2026').getAttribute('aria-disabled')).toBe('true');
   });
+
+  it('names the paging buttons for the year they step, and pages a year back', () => {
+    const fixture = renderTemplate(
+      `<div slDatePicker granularity="month" locale="en-US" [defaultOpen]="true"
+        [defaultValue]="october"></div>`,
+    );
+    const name = (part: string) =>
+      fixture.nativeElement.querySelector(`[data-part="${part}"]`).getAttribute('aria-label');
+    expect(name('previous')).toBe('Previous year');
+    expect(name('next')).toBe('Next year');
+
+    click(fixture, fixture.nativeElement.querySelector('[data-part="previous"]'));
+
+    expect(month(fixture, 'October 2025')).not.toBeNull();
+    expect(month(fixture, 'October 2026')).toBeNull();
+  });
+});
+
+/**
+ * A segment is named for the unit it holds, in the language in force. The
+ * placeholder ("mm", "dd", "yyyy") is drawn and never spoken: "mm, October"
+ * was what a screen reader announced.
+ */
+describe('what each segment is called', () => {
+  it.each([
+    ['en-US', 'day', ['month', 'day', 'year']],
+    ['en-US', 'month', ['month', 'year']],
+    ['pt-BR', 'day', ['dia', 'mês', 'ano']],
+    ['pt-BR', 'month', ['mês', 'ano']],
+  ] as const)('in %s at %s granularity', (locale, granularity, expected) => {
+    const fixture = renderTemplate(
+      granularity === 'month'
+        ? `<div slDatePicker granularity="month" [defaultValue]="october"></div>`
+        : `<div slDatePicker [defaultValue]="ninth"></div>`,
+      [provideSlotted({ locale: signal(locale), catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const names = [...fixture.nativeElement.querySelectorAll('[role="spinbutton"]')].map(
+      (segment: Element) => segment.getAttribute('aria-label'),
+    );
+    expect(names).toEqual(expected);
+  });
 });

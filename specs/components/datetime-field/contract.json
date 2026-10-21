@@ -284,7 +284,17 @@
       "yearPivot"
     ]
   },
-  "messages": ["clear", "duration"],
+  "messages": [
+    "clear",
+    "duration",
+    "day",
+    "month",
+    "year",
+    "hour",
+    "minute",
+    "second",
+    "dayPeriod"
+  ],
   "imperative": ["focus", "clear"],
   "stateAttributes": {
     "disabled": "data-disabled",

@@ -503,7 +503,7 @@ export function DateField({
               onBlur={onSegmentBlur}
               onFocus={() => setActiveField(name)}
               onKeyDown={onSegmentKeyDown(name)}
-              placeholder={part.value}
+              label={t(name)}
               readOnly={resolvedReadOnly === true}
               reference={reference}
               segments={segments}
@@ -618,7 +618,7 @@ function Segment({
   onBlur,
   onFocus,
   onKeyDown,
-  placeholder,
+  label,
   readOnly,
   reference,
   segments,
@@ -630,7 +630,8 @@ function Segment({
   onBlur: () => void;
   onFocus: () => void;
   onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void;
-  placeholder: string;
+  /** The unit's word; the placeholder is drawn, never spoken. */
+  label: string;
   readOnly: boolean;
   reference: PlainDate;
   segments: SegmentState;
@@ -652,7 +653,7 @@ function Segment({
   return (
     <div
       aria-disabled={disabled ? true : undefined}
-      aria-label={placeholder}
+      aria-label={label}
       aria-readonly={readOnly ? true : undefined}
       aria-valuemax={range.max}
       aria-valuemin={range.min}

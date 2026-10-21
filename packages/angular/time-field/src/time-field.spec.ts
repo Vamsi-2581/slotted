@@ -404,3 +404,26 @@ describe('the adornments and the clear control', () => {
     ).toBe('x');
   });
 });
+
+/**
+ * A segment is named for the unit it holds, in the language in force. The
+ * placeholder is drawn and never spoken.
+ */
+describe('what each segment is called', () => {
+  it.each([
+    ['en-US', { hour: 'hour', minute: 'minute', second: 'second', dayPeriod: 'AM/PM' }],
+    ['pt-BR', { hour: 'hora', minute: 'minuto', second: 'segundo', dayPeriod: 'AM/PM' }],
+  ] as const)('in %s', (locale, expected) => {
+    const fixture = renderTemplate(
+      `<div slTimeField granularity="second" [hourCycle]="12" [defaultValue]="control.value"></div>`,
+      [provideSlotted({ locale: signal(locale), catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const names = Object.fromEntries(
+      [...fixture.nativeElement.querySelectorAll('[role="spinbutton"]')].map((segment: Element) => [
+        segment.getAttribute('data-field'),
+        segment.getAttribute('aria-label'),
+      ]),
+    );
+    expect(names).toEqual(expected);
+  });
+});

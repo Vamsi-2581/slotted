@@ -514,4 +514,58 @@ describe('month granularity', () => {
 
     expect(onValueChange.mock.calls[0]?.[0]).toEqual({ year: 2027, month: 3 });
   });
+
+  it('names the paging buttons for the year they step, and pages a year back', () => {
+    render(
+      <DatePicker
+        defaultOpen
+        defaultValue={plainYearMonth(2026, 10)}
+        granularity="month"
+        locale="en-US"
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Previous month' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Next year' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Previous year' }));
+
+    expect(screen.getByRole('button', { name: 'October 2025' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'October 2026' })).toBeNull();
+  });
+});
+
+/**
+ * A segment is named for the unit it holds, in the language in force. The
+ * placeholder ("mm", "dd", "yyyy") is drawn and never spoken: "mm, October"
+ * was what a screen reader announced.
+ */
+describe('what each segment is called', () => {
+  const names = () =>
+    screen.getAllByRole('spinbutton').map((segment) => segment.getAttribute('aria-label'));
+  const inLocale = (locale: string, granularity: 'day' | 'month') => (
+    <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale={locale}>
+      <Field>
+        <FieldLabel>Date</FieldLabel>
+        {granularity === 'month' ? (
+          <DatePicker defaultValue={plainYearMonth(2026, 10)} granularity="month" />
+        ) : (
+          <DatePicker defaultValue={plainDate(2026, 10, 3)} />
+        )}
+      </Field>
+    </SlottedProvider>
+  );
+
+  it.each([
+    ['en-US', 'day', ['month', 'day', 'year']],
+    ['en-US', 'month', ['month', 'year']],
+    ['pt-BR', 'day', ['dia', 'mês', 'ano']],
+    ['pt-BR', 'month', ['mês', 'ano']],
+  ] as const)('in %s at %s granularity', (locale, granularity, expected) => {
+    render(inLocale(locale, granularity));
+
+    expect(names()).toEqual(expected);
+    for (const [index, segment] of screen.getAllByRole('spinbutton').entries()) {
+      expect(segment).toHaveAccessibleName(expected[index]);
+    }
+  });
 });

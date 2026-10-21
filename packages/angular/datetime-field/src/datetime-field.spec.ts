@@ -570,3 +570,48 @@ describe('the contract with the consumer', () => {
     expect(fixture.nativeElement.querySelector('[data-part="end"]')?.textContent).toBe('-3');
   });
 });
+
+/**
+ * A segment is named for the unit it holds, in the language in force. The
+ * placeholder is drawn and never spoken.
+ */
+describe('what each segment is called', () => {
+  it.each([
+    [
+      'en-US',
+      {
+        day: 'day',
+        month: 'month',
+        year: 'year',
+        hour: 'hour',
+        minute: 'minute',
+        second: 'second',
+        dayPeriod: 'AM/PM',
+      },
+    ],
+    [
+      'pt-BR',
+      {
+        day: 'dia',
+        month: 'mês',
+        year: 'ano',
+        hour: 'hora',
+        minute: 'minuto',
+        second: 'segundo',
+        dayPeriod: 'AM/PM',
+      },
+    ],
+  ] as const)('in %s', (locale, expected) => {
+    const fixture = renderTemplate(
+      `<div slDateTimeField granularity="second" [hourCycle]="12" [defaultValue]="tenth"></div>`,
+      [provideSlotted({ locale: signal(locale), catalogs: { 'pt-BR': PT_BR } })],
+    );
+    const names = Object.fromEntries(
+      [...fixture.nativeElement.querySelectorAll('[role="spinbutton"]')].map((segment: Element) => [
+        segment.getAttribute('data-field'),
+        segment.getAttribute('aria-label'),
+      ]),
+    );
+    expect(names).toEqual(expected);
+  });
+});

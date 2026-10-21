@@ -602,7 +602,7 @@ describe('what an application sets once', () => {
 
   it('lays its own messages over the catalog', () => {
     const fixture = renderTemplate(
-      `<div slCalendar [messages]="{ next: 'Seguinte' }" [defaultFocusedDate]="ninth"></div>`,
+      `<div slCalendar [messages]="{ nextMonth: 'Seguinte' }" [defaultFocusedDate]="ninth"></div>`,
     );
     const name = (part: string) =>
       fixture.nativeElement.querySelector(`[data-part="${part}"]`).getAttribute('aria-label');

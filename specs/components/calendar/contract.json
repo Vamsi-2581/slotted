@@ -99,7 +99,14 @@
       "weekNumbers"
     ]
   },
-  "messages": ["next", "previous"],
+  "messages": [
+    "nextMonth",
+    "previousMonth",
+    "nextYear",
+    "previousYear",
+    "nextYears",
+    "previousYears"
+  ],
   "imperative": ["focus", "focusDate"],
   "container": {
     "name": "slotted-calendar",

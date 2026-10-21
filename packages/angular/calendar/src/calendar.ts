@@ -86,7 +86,7 @@ let sequence = 0;
       <button
         data-part="previous"
         type="button"
-        [attr.aria-label]="t('previous')"
+        [attr.aria-label]="pageNames()[0]"
         [disabled]="!editable()"
         (click)="turnPage(-1, $event)"
       >
@@ -112,7 +112,7 @@ let sequence = 0;
       <button
         data-part="next"
         type="button"
-        [attr.aria-label]="t('next')"
+        [attr.aria-label]="pageNames()[1]"
         [disabled]="!editable()"
         (click)="turnPage(1, $event)"
       >
@@ -413,6 +413,13 @@ export class SlCalendar implements OnInit {
   protected readonly weekdayLong = computed(() => this.format().weekdayNames('long'));
   protected readonly weekdayNarrow = computed(() => this.format().weekdayNames('narrow'));
   protected readonly monthNames = computed(() => this.format().monthNames('short'));
+  /** Each paging button is named for the step it takes in the view showing. */
+  protected readonly pageNames = computed(() => {
+    const view = this.currentView();
+    if (view === 'day') return [this.t('previousMonth'), this.t('nextMonth')];
+    if (view === 'month') return [this.t('previousYear'), this.t('nextYear')];
+    return [this.t('previousYears'), this.t('nextYears')];
+  });
   protected readonly years = computed(() => yearPage(this.focused().year, YEAR_PAGE));
   protected readonly shownMonths = computed(() =>
     visibleMonths(this.page(), this.resolvedMonths()),

@@ -544,7 +544,7 @@ describe('what an application sets once', () => {
   });
 
   it('lays its own messages over the catalog', () => {
-    render(<Calendar defaultFocusedDate={NINTH} messages={{ next: 'Seguinte' }} />);
+    render(<Calendar defaultFocusedDate={NINTH} messages={{ nextMonth: 'Seguinte' }} />);
     expect(screen.getByRole('button', { name: 'Seguinte' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Previous month' })).toBeInTheDocument();
   });

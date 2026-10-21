@@ -593,11 +593,19 @@ export function Calendar({
       </div>
     );
 
+  /* Each paging button is named for the step it takes in the view showing. */
+  const [previousName, nextName] =
+    currentView === 'day'
+      ? [t('previousMonth'), t('nextMonth')]
+      : currentView === 'month'
+        ? [t('previousYear'), t('nextYear')]
+        : [t('previousYears'), t('nextYears')];
+
   const children: ReactNode = (
     <>
       <div data-part="header">
         <button
-          aria-label={t('previous')}
+          aria-label={previousName}
           data-part="previous"
           disabled={!editable}
           onClick={turnPage(-1)}
@@ -625,7 +633,7 @@ export function Calendar({
           )}
         </button>
         <button
-          aria-label={t('next')}
+          aria-label={nextName}
           data-part="next"
           disabled={!editable}
           onClick={turnPage(1)}

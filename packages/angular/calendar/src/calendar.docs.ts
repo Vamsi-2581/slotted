@@ -49,7 +49,7 @@ const anatomy: AnatomyRow[] = [
     element: 'button',
     required: true,
     purpose:
-      'One page back, in whichever view is showing: a month in the day view, a year in the month view, twelve years in the year view. Its chevron is the next trigger’s artwork turned, so both follow the document direction from one token.',
+      'One page back, in whichever view is showing: a month in the day view, a year in the month view, twelve years in the year view, and it is named for that step. Its chevron is the next trigger’s artwork turned, so both follow the document direction from one token.',
   },
   {
     part: 'next',

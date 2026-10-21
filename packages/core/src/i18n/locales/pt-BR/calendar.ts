@@ -1,6 +1,10 @@
 import type { CalendarMessages } from '../../messages/calendar';
 
 export const ptBR: CalendarMessages = {
-  next: 'Próximo mês',
-  previous: 'Mês anterior',
+  nextMonth: 'Próximo mês',
+  previousMonth: 'Mês anterior',
+  nextYear: 'Próximo ano',
+  previousYear: 'Ano anterior',
+  nextYears: 'Próximos anos',
+  previousYears: 'Anos anteriores',
 };

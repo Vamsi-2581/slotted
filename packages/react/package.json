@@ -534,9 +534,10 @@
   },
   "scripts": {
     "build": "vite build && tsc -p tsconfig.build.json && node declarations.build.mjs && node layer-order.build.mjs && node ../../tools/agent-docs/bin/build.mjs --binding react --out dist/docs --bin dist/bin/slotted-agent-docs.mjs && node package-boundary.verify.mjs",
-    "test": "vitest run",
+    "test": "vitest run --project unit",
+    "test:browser": "vitest run --project browser && vitest run --config vitest.perf.config.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit --pretty false",
-    "verify": "pnpm test && pnpm typecheck && pnpm build"
+    "verify": "pnpm test && pnpm test:browser && pnpm typecheck && pnpm build"
   },
   "peerDependencies": {
     "@slotted/core": "workspace:*",
@@ -557,9 +558,11 @@
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
     "@vitejs/plugin-react": "6.1.1",
+    "@vitest/browser-playwright": "4.1.11",
     "jsdom": "30.0.1",
     "lucide-react": "1.24.0",
     "marked": "18.0.5",
+    "playwright": "1.63.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "storybook": "10.5.10",

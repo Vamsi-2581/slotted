@@ -36,6 +36,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The React package's `*.browser.test.tsx` run in Chromium.
+      - name: Install Chromium
+        run: pnpm --filter @slotted/react exec playwright install --with-deps chromium
+
       # `pnpm typecheck` reads each package's declarations through `exports`,
       # which a clean checkout has not built yet.
       - name: Build packages

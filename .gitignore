@@ -9,6 +9,8 @@
 .superpowers/
 .worktrees/
 coverage/
+__screenshots__/
+.vitest-attachments/
 dist/
 apps/storybook-angular/documentation.json
 node_modules/

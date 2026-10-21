@@ -1,4 +1,4 @@
-import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
+import { definedProps, keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createPresence } from '@slotted/core/presence';
 import {
   createContext,
@@ -306,7 +306,7 @@ export function NavigationMenuLink({
     ref: (node) => attach(node as HTMLAnchorElement | null, ref),
   });
 
-  if (render !== undefined) return render(rootProps);
+  if (render !== undefined) return render(definedProps(rootProps));
   return <a {...(rootProps as NavigationMenuLinkRootProps & { ref: Ref<HTMLAnchorElement> })} />;
 }
 

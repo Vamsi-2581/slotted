@@ -1,4 +1,5 @@
 export {
+  definedProps,
   hostSelectorKey,
   keyedProps,
   selectorKey,
@@ -8,4 +9,4 @@ export {
   withSelectorKey,
   writeSelectorKey,
 } from './selector-key';
-export type { SelectorKeyKind } from './selector-key';
+export type { DefinedProps, SelectorKeyKind } from './selector-key';

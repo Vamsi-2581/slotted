@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import { createCollapse } from '@slotted/core/overflow';
 import {
   Children,
@@ -266,7 +266,7 @@ export function BreadcrumbLink({ children, ref, render, ...nativeProps }: Breadc
     id: nativeProps.id ?? item?.revealedId,
   });
 
-  return render === undefined ? <a {...rootProps} ref={ref} /> : render(rootProps);
+  return render === undefined ? <a {...rootProps} ref={ref} /> : render(definedProps(rootProps));
 }
 
 /**

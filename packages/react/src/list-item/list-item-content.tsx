@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import type { MouseEvent } from 'react';
 
 import { useListItem } from './list-item';
@@ -92,5 +92,5 @@ export function ListItemLink({ href, onClick, render, ...nativeProps }: ListItem
     },
   });
 
-  return render === undefined ? <a {...rootProps} /> : render(rootProps);
+  return render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps));
 }

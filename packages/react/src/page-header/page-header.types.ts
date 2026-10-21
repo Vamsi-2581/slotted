@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { FamilyTranslator, PageHeaderMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 
@@ -202,7 +203,7 @@ export interface PageHeaderPartComponentProps extends ComponentPropsWithRef<'div
 
 export interface PageHeaderBackProps extends ComponentPropsWithRef<'a'> {
   /** Renders the way back into another element — a router's link, or a button. */
-  render?: ((props: PageHeaderPartProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<PageHeaderPartProps>) => ReactNode) | undefined;
 }
 
 export interface PageHeaderHeadingProps extends ComponentPropsWithRef<'h1'> {

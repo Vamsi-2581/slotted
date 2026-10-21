@@ -1,4 +1,5 @@
 import type { LinkMessages, PartialMessages } from '@slotted/core/i18n';
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 export type LinkUnderline = 'always' | 'hover' | 'none';
@@ -40,7 +41,7 @@ export interface LinkProps extends ComponentPropsWithRef<'a'> {
    */
   messages?: PartialMessages<LinkMessages> | undefined;
   /** Substitutes the rendered element — a router's own link, typically. */
-  render?: (props: LinkRootProps) => ReactNode;
+  render?: (props: DefinedProps<LinkRootProps>) => ReactNode;
   underline?: LinkUnderline;
   variant?: LinkVariant;
   /** Paints a destination the reader has already followed. */

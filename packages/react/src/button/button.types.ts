@@ -1,4 +1,5 @@
 import type { ButtonMessages, PartialMessages } from '@slotted/core/i18n';
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactElement, ReactNode } from 'react';
 
@@ -137,7 +138,7 @@ type AdaptedButtonLinkProps = ButtonLinkSharedProps &
   Omit<ComponentPropsWithRef<'a'>, keyof ButtonLinkSharedProps | 'href'> & {
     href?: never;
     /** Hands the root props to a router's own link component. */
-    render: ButtonRender<ButtonLinkRootProps>;
+    render: ButtonRender<DefinedProps<ButtonLinkRootProps>>;
   };
 
 export type ButtonLinkProps = NativeButtonLinkProps | AdaptedButtonLinkProps;

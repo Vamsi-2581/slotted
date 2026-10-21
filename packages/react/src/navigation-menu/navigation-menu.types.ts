@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { NavigationMenuMessages, PartialMessages } from '@slotted/core/i18n';
 import type {
   NavigationMenuMotion,
@@ -163,7 +164,7 @@ export interface NavigationMenuLinkProps extends Omit<
   current?: boolean | undefined;
   /** The destination is unavailable: the click is refused and the `href` kept. */
   disabled?: boolean | undefined;
-  render?: ((props: NavigationMenuLinkRootProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<NavigationMenuLinkRootProps>) => ReactNode) | undefined;
 }
 
 export interface NavigationMenuLinksProps extends ComponentPropsWithRef<'ul'> {

@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { PartialMessages, TagMessages } from '@slotted/core/i18n';
 import type { ChangeReason } from '@slotted/core/state';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref, SyntheticEvent } from 'react';
@@ -140,7 +141,7 @@ export interface TagButtonProps
 export interface TagLinkProps
   extends TagInteractiveProps, Omit<ComponentPropsWithRef<'a'>, 'children'> {
   /** Renders the destination into a router's own link component. */
-  render?: ((props: TagLinkBodyProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<TagLinkBodyProps>) => ReactNode) | undefined;
 }
 
 export interface TagToggleProps

@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { BreadcrumbMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
@@ -62,7 +63,7 @@ export interface BreadcrumbLinkRootProps extends ComponentPropsWithRef<'a'> {
 
 export interface BreadcrumbLinkProps extends ComponentPropsWithRef<'a'> {
   /** Substitutes the anchor — a router's own link, typically. */
-  render?: ((props: BreadcrumbLinkRootProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<BreadcrumbLinkRootProps>) => ReactNode) | undefined;
 }
 
 export interface BreadcrumbTriggerRootProps extends ComponentPropsWithRef<'button'> {

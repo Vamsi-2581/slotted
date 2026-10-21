@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { PartialMessages, TableOfContentsMessages } from '@slotted/core/i18n';
 import type { OutlineEntry } from '@slotted/core/outline';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -177,7 +178,7 @@ export interface TableOfContentsLinkProps extends Omit<
   /** The fragment. Defaults to `#` plus the item's value. */
   href?: string | undefined;
   ref?: React.Ref<HTMLAnchorElement> | undefined;
-  render?: ((props: TableOfContentsLinkRootProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<TableOfContentsLinkRootProps>) => ReactNode) | undefined;
 }
 
 /** What an item hands its own link. */

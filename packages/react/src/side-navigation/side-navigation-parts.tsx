@@ -1,4 +1,4 @@
-import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
+import { definedProps, keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import { createPortalRoot } from '@slotted/core/portal';
 import { createPositioner } from '@slotted/core/positioner';
@@ -344,7 +344,7 @@ export function SideNavigationLink({
             attach(node, ref as Ref<HTMLElement> | undefined);
           };
           const merged = { ...(hint as SideNavigationLinkRootProps), ref: setNode };
-          if (render !== undefined) return render(merged);
+          if (render !== undefined) return render(definedProps(merged));
           return href === undefined ? (
             <button {...(merged as object)} type="button" />
           ) : (

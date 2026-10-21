@@ -78,8 +78,7 @@
     transition:
       background-color var(--slotted-duration-medium) var(--slotted-easing-standard),
       border-color var(--slotted-duration-medium) var(--slotted-easing-standard),
-      box-shadow var(--slotted-duration-medium) var(--slotted-easing-standard),
-      outline-color var(--slotted-duration-medium) var(--slotted-easing-standard);
+      box-shadow var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
   [data-ui-prompt-composer][data-part-root][data-size='sm'] {

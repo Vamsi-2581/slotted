@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import { useEffect, useState } from 'react';
 import type { ComponentPropsWithRef, MouseEvent, ReactNode } from 'react';
 
@@ -168,7 +168,7 @@ export function PageHeaderBack({
     'data-part': 'back',
     style,
   });
-  if (render !== undefined) return render(rootProps);
+  if (render !== undefined) return render(definedProps(rootProps));
   return <a {...rootProps} ref={ref} />;
 }
 

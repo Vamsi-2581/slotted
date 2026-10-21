@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import { useId } from 'react';
 import type { SyntheticEvent } from 'react';
 
@@ -82,7 +82,7 @@ export function TagLink({
 
   return (
     <TagFrame appearance={appearance} disabled={disabled} removal={removal} rootProps={rootProps}>
-      {render === undefined ? <a {...bodyProps} /> : render(bodyProps)}
+      {render === undefined ? <a {...bodyProps} /> : render(definedProps(bodyProps))}
       {removal.removable ? <TagRemove labelId={labelId} removal={removal} wordId={wordId} /> : null}
     </TagFrame>
   );

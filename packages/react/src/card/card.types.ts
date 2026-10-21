@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
 export type CardOrientation = 'vertical' | 'horizontal';
@@ -88,5 +89,5 @@ export interface CardLinkProps extends ComponentPropsWithRef<'a'> {
    * has to stay one focusable element that navigates: a whole surface that
    * fires a command instead is a misclick nobody can undo.
    */
-  render?: ((props: CardLinkRootProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<CardLinkRootProps>) => ReactNode) | undefined;
 }

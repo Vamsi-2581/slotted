@@ -90,6 +90,16 @@ test('rings the frame for the value, and each button for itself', () => {
 });
 
 /**
+ * The ring is drawn in its own colour from the first frame, as every framed
+ * control draws it. A transition on `outline-color` started from the resting
+ * `currentColor` — the text's ink — and flashed white in a dark scheme.
+ */
+test('draws the frame ring without a transition from the text colour', () => {
+  const transition = rule(root).match(/transition:([^;]*)/)?.[1] ?? '';
+  assert.doesNotMatch(transition, /outline/);
+});
+
+/**
  * The buttons in the bands sit concentric with the frame: the air around them
  * is the air a button has inside a control of this step, and their corner is
  * the frame's less that air.

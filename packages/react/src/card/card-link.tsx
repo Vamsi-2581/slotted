@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import type { CardLinkProps, CardLinkRootProps } from './card.types';
 
 /**
@@ -12,5 +12,5 @@ import type { CardLinkProps, CardLinkRootProps } from './card.types';
 export function CardLink({ render, ...nativeProps }: CardLinkProps) {
   const rootProps: CardLinkRootProps = keyedProps({ ...nativeProps, 'data-part': 'link' });
 
-  return render === undefined ? <a {...rootProps} /> : render(rootProps);
+  return render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps));
 }

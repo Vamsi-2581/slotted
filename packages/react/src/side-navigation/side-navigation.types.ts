@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { PartialMessages, SideNavigationMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
 import type {
@@ -263,7 +264,7 @@ export interface SideNavigationLinkProps extends Omit<
    */
   current?: boolean | undefined;
   /** Renders the row into another element: a router's link, or a `button` for a command. */
-  render?: ((props: SideNavigationLinkRootProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<SideNavigationLinkRootProps>) => ReactNode) | undefined;
 }
 
 export interface SideNavigationTriggerRootProps extends ButtonHTMLAttributes<HTMLElement> {

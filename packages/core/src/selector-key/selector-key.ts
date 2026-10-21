@@ -16,6 +16,34 @@
 
 export type SelectorKeyKind = 'part' | 'ui';
 
+/**
+ * A props object with no member whose value is `undefined`: an absent state is
+ * an absent key. A member that could be `undefined` is optional and does not
+ * admit it, so the object spreads onto a component typed under
+ * `exactOptionalPropertyTypes` — a router's link declares `href?: string`.
+ */
+export type DefinedProps<Props> = {
+  [Name in keyof Props as undefined extends Props[Name] ? never : Name]: Props[Name];
+} & {
+  [Name in keyof Props as undefined extends Props[Name] ? Name : never]?: Exclude<
+    Props[Name],
+    undefined
+  >;
+};
+
+/**
+ * The props a `render` callback receives, without the members whose value is
+ * `undefined`. A link family hands them to a router's link, which spreads them
+ * onto a component that may not admit `undefined` for an optional member.
+ */
+export function definedProps<Props extends object>(props: Props): DefinedProps<Props> {
+  const next: Record<string, unknown> = {};
+  for (const [name, entry] of Object.entries(props)) {
+    if (entry !== undefined) next[name] = entry;
+  }
+  return next as DefinedProps<Props>;
+}
+
 const PREFIX: Record<SelectorKeyKind, string> = { part: 'data-part-', ui: 'data-ui-' };
 const SOURCE: Record<SelectorKeyKind, string> = { part: 'data-part', ui: 'data-ui' };
 

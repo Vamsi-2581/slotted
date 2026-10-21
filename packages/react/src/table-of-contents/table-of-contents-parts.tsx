@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import { useContext, useEffect, useMemo, useRef } from 'react';
 import type { MouseEvent } from 'react';
 
@@ -119,7 +119,7 @@ export function TableOfContentsLink({
     style,
   });
 
-  return render === undefined ? <a {...rootProps} /> : render(rootProps);
+  return render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps));
 }
 
 /** The children of an item, one level deeper. Not shown in the horizontal layout. */

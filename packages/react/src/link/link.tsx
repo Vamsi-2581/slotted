@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/link/link.css';
 import '@slotted/styles/visually-hidden/visually-hidden.css';
 
@@ -156,5 +156,5 @@ export function Link({
     },
   });
 
-  return render === undefined ? <a {...rootProps} /> : render(rootProps);
+  return render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps));
 }

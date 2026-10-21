@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type {
   AnchorHTMLAttributes,
   ButtonHTMLAttributes,
@@ -146,7 +147,7 @@ export interface ListItemButtonProps extends ComponentPropsWithRef<'button'> {
 
 export interface ListItemLinkProps extends ComponentPropsWithRef<'a'> {
   /** Renders the destination into another element — a router link, for one. */
-  render?: ((props: ListItemLinkRootProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<ListItemLinkRootProps>) => ReactNode) | undefined;
 }
 
 export interface ListItemRegionRootProps extends HTMLAttributes<HTMLElement> {

@@ -1,3 +1,4 @@
+import type { DefinedProps } from '@slotted/core/selector-key';
 import type { NavigationMenuValueRequest } from '../navigation-menu/navigation-menu.types';
 import type { FamilyTranslator, PartialMessages, TopNavigationMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
@@ -205,7 +206,10 @@ export interface TopNavigationSpanPartProps extends ComponentPropsWithRef<'span'
 export interface TopNavigationHomeProps extends ComponentPropsWithRef<'a'> {
   /** Renders the mark and the name into another element: a router's link. */
   render?:
-    ((props: AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }) => ReactNode) | undefined;
+    | ((
+        props: DefinedProps<AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }>,
+      ) => ReactNode)
+    | undefined;
 }
 
 /**
@@ -276,7 +280,7 @@ export interface TopNavigationLinkProps extends Omit<
    */
   current?: boolean | undefined;
   /** Renders the row into another element: a router's link. */
-  render?: ((props: TopNavigationLinkRootProps) => ReactNode) | undefined;
+  render?: ((props: DefinedProps<TopNavigationLinkRootProps>) => ReactNode) | undefined;
 }
 
 /**
@@ -305,11 +309,17 @@ export interface TopNavigationControlProps extends ComponentPropsWithRef<'button
 export interface TopNavigationActionProps extends ComponentPropsWithRef<'a'> {
   /** Renders the control into another element: a router's link, a button another family wraps. */
   render?:
-    ((props: AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }) => ReactNode) | undefined;
+    | ((
+        props: DefinedProps<AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }>,
+      ) => ReactNode)
+    | undefined;
 }
 
 export interface TopNavigationHelpProps extends ComponentPropsWithRef<'a'> {
   /** Renders the control into another element: a `button` that opens a panel, a router's link. */
   render?:
-    ((props: AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }) => ReactNode) | undefined;
+    | ((
+        props: DefinedProps<AnchorHTMLAttributes<HTMLElement> & { 'data-part': string }>,
+      ) => ReactNode)
+    | undefined;
 }

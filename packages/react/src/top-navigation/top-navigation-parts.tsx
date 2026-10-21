@@ -1,4 +1,4 @@
-import { keyedProps, withSelectorKey } from '@slotted/core/selector-key';
+import { definedProps, keyedProps, withSelectorKey } from '@slotted/core/selector-key';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { FocusEvent, HTMLAttributes, KeyboardEvent, MouseEvent, ReactNode, Ref } from 'react';
 import { createPortal } from 'react-dom';
@@ -119,7 +119,7 @@ export function TopNavigationHome({
     'data-part': 'home',
     ...(href !== undefined ? { href } : {}),
   });
-  if (render !== undefined) return render(rootProps);
+  if (render !== undefined) return render(definedProps(rootProps));
   return href === undefined ? (
     <span {...(rootProps as HTMLAttributes<HTMLElement>)} ref={ref as Ref<HTMLSpanElement>} />
   ) : (
@@ -447,7 +447,7 @@ export function TopNavigationLink({
     onClick: handleClick,
   });
 
-  if (render !== undefined) return render(rootProps);
+  if (render !== undefined) return render(definedProps(rootProps));
   return <a {...rootProps} ref={ref} />;
 }
 
@@ -744,7 +744,7 @@ export function TopNavigationHelp({
               attach(node as HTMLAnchorElement | null, ref);
             },
           };
-          if (render !== undefined) return render(merged);
+          if (render !== undefined) return render(definedProps(merged));
           return href === undefined ? (
             <button {...(merged as object)} type="button" />
           ) : (
@@ -800,7 +800,7 @@ export function TopNavigationAction({
               attach(node as HTMLAnchorElement | null, ref);
             },
           };
-          if (render !== undefined) return render(merged);
+          if (render !== undefined) return render(definedProps(merged));
           return href === undefined ? (
             <button {...(merged as object)} type="button" />
           ) : (

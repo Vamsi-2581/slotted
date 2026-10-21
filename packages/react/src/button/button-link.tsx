@@ -1,4 +1,4 @@
-import { keyedProps } from '@slotted/core/selector-key';
+import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import type { SyntheticEvent } from 'react';
 
 import { ButtonContent } from './button-content';
@@ -85,5 +85,5 @@ export function ButtonLink({
     },
   });
 
-  return render === undefined ? <a {...rootProps} /> : render(rootProps);
+  return render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps));
 }

@@ -96,7 +96,7 @@ test('writes the identifier a rebuilt family is selected by', () => {
     assert.match(
       source,
       new RegExp(
-        `"data-ui": "${name}"|data-ui=\\\\?"${name}\\\\?"|setAttribute\\('data-ui', '${name}'\\)|\\?\\? '${name}';`,
+        `"data-ui": "${name}"|data-ui=\\\\?"${name}\\\\?"|setAttribute\\('data-ui', '${name}'\\)|SelectorKey\\([^,]+, 'ui', '${name}'\\)|\\?\\? '${name}'\\)?;`,
       ),
       `${name} renders no element carrying its own identifier`,
     );

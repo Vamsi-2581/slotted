@@ -2,6 +2,21 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.9 — 2026-10-21
+
+- test(react): o custo das chaves de seletor é medido contra os mesmos seletores por valor, não em milissegundos do runner
+- test(angular): o bundle nomeia a família pela chave de seletor ou por hostSelectorKey
+- fix(build): verificadores do pacote e hooks do tema na forma chaveada; glifos direcionais pela fonte do tema
+- docs(plans): findings da revisão do dono do equori
+- perf: chave de seletor por parte e família; dialog, data-grid, roving focus e page sem trabalho repetido; correções do equori beta.7
+- docs(guidelines): LP-15 a LP-17, OV-06, AF-08 e CP-10; compose-screen nomeia os valores de domínio antes de escolher a família
+- fix: docs em inglês, data-grid selectRow e commit síncrono, currency-field unit, tags-input suggestions, dialog como form
+
+### Guidelines
+
+- Added: AF-08, LP-15, LP-16, LP-17, OV-06
+- Rewritten: CP-07 → CP-10
+
 ## 0.1.0-beta.8 — 2026-10-21
 
 - fix(drawer): abrir uma folha não força layout

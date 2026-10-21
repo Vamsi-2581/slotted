@@ -19,6 +19,10 @@ export default defineConfig({
   cacheDir: 'node_modules/.vite/perf',
   test: {
     include: ['src/**/*.perf.browser.test.{ts,tsx}'],
+    /* One file at a time: a Chrome trace is one per browser, and two files
+       tracing at once refuse the second; a budget measured beside another
+       file's work measures both. */
+    fileParallelism: false,
     setupFiles: ['./src/test/setup.perf.ts'],
     browser: {
       enabled: true,

@@ -81,6 +81,17 @@ export function Sparkline({
   const width = box?.width || step.width;
   const height = box?.height || step.height;
 
+  /* Only a change of `data` animates the marks. A box that settles after mount
+     — a table cell sizing its column — redraws at once: a path that eased to
+     the new width read as the series growing. The drawing last committed is
+     the reference, so a render React repeats compares against the same one. */
+  const drawn = useRef({ data, width, height });
+  const animate =
+    drawn.current.data !== data && drawn.current.width === width && drawn.current.height === height;
+  useLayoutEffect(() => {
+    drawn.current = { data, width, height };
+  });
+
   const layout = useMemo(
     () =>
       layoutSparkline({
@@ -169,6 +180,7 @@ export function Sparkline({
         ) : null}
       </svg>
     ),
+    ...(animate ? { 'data-animate': '' } : {}),
     'data-curve': resolved.curve,
     'data-part': 'root',
     'data-series': series === undefined ? undefined : String(series),

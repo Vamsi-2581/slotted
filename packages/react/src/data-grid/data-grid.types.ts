@@ -25,6 +25,13 @@ export type DataGridStickyTo = 'scroll' | 'page';
 export type DataGridSelectionMode = 'none' | 'single' | 'multiple' | 'range';
 export type DataGridEditMode = 'cell' | 'row';
 export type DataGridMode = 'client' | 'server';
+/**
+ * Which wait a load is. `initial` has nothing to keep and draws skeleton rows;
+ * `refresh` reads again over an answer the grid already drew — rows, or the
+ * empty state — and keeps it. `true` is `initial` until the grid has drawn an
+ * answer, and `refresh` after.
+ */
+export type DataGridLoading = boolean | 'initial' | 'refresh';
 export type DataGridVirtualize = 'auto' | boolean;
 
 /**
@@ -253,7 +260,13 @@ export interface DataGridProps<Row>
   totalCount?: number | undefined;
   /** Whether a page past this one exists, in `server` mode with an unknown total. */
   hasMore?: boolean | undefined;
-  loading?: boolean | undefined;
+  /**
+   * A load in flight. Zero rows is an answer too: after the grid has drawn
+   * one, `true` keeps it — the empty state stays and no skeleton is drawn —
+   * so a refetch of an empty list does not flicker. `'initial'` asks for the
+   * skeleton anyway, for a grid that stays mounted across two different sets.
+   */
+  loading?: DataGridLoading | undefined;
   /** The message of a failed load; draws the error state. */
   error?: string | null | undefined;
   onRetry?: (() => void) | undefined;

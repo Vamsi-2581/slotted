@@ -65,7 +65,11 @@
     inline-size: 100%;
     /* The box is the drawing; there is no line box to leave room under. */
     line-height: 0;
-    min-inline-size: 0;
+    /* The nominal width of the grid. A percentage of a box sized by its
+       content — an auto table column — is the content's width, and a drawing
+       is no content: the sparkline started at zero and stretched once the
+       column settled. */
+    min-inline-size: var(--slotted-sparkline-min-inline-size, 6rem);
     vertical-align: middle;
   }
 
@@ -170,7 +174,6 @@
     fill-opacity: var(--_area-opacity);
     mask-image: linear-gradient(to bottom, black, transparent);
     stroke: none;
-    transition: d var(--slotted-duration-medium) var(--slotted-easing-standard);
   }
 
   /**
@@ -185,16 +188,13 @@
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: var(--_stroke);
-    transition: d var(--slotted-duration-medium) var(--slotted-easing-standard);
     vector-effect: non-scaling-stroke;
   }
 
   [data-ui-sparkline] [data-part-bar] {
     fill: var(--_bar-dim);
     stroke: none;
-    transition:
-      d var(--slotted-duration-medium) var(--slotted-easing-standard),
-      fill var(--slotted-duration-short) var(--slotted-easing-standard);
+    transition: fill var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 
   /* The current period is the one the value beside the chart is about. */
@@ -230,8 +230,26 @@
   [data-ui-sparkline] [data-part-marker] {
     fill: none;
     stroke-linecap: round;
-    transition: d var(--slotted-duration-medium) var(--slotted-easing-standard);
     vector-effect: non-scaling-stroke;
+  }
+
+  /**
+   * A new series eases into place; a new box does not. The binding writes
+   * `data-animate` for the render whose `data` changed and not for one whose
+   * box changed: a path that eased to a column width settling after mount
+   * read as the series growing from nothing.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    [data-ui-sparkline][data-animate]
+      :is([data-part-area], [data-part-line], [data-part-ring], [data-part-marker]) {
+      transition: d var(--slotted-duration-medium) var(--slotted-easing-standard);
+    }
+
+    [data-ui-sparkline][data-animate] [data-part-bar] {
+      transition:
+        d var(--slotted-duration-medium) var(--slotted-easing-standard),
+        fill var(--slotted-duration-short) var(--slotted-easing-standard);
+    }
   }
 
   [data-ui-sparkline] [data-part-ring] {

@@ -9,6 +9,7 @@ import {
   HostAttributeToken,
   inject,
   input,
+  linkedSignal,
   numberAttribute,
   signal,
   ViewEncapsulation,
@@ -109,6 +110,7 @@ import {
     '[attr.data-curve]': 'resolvedCurve()',
     '[attr.data-tone]': 'tone() ?? null',
     '[attr.data-series]': 'series() ?? null',
+    '[attr.data-animate]': "animate() ? '' : null",
   },
 })
 export class SlSparkline {
@@ -158,6 +160,22 @@ export class SlSparkline {
   readonly width = computed(() => this.box()?.width || SPARKLINE_STEPS[this.size()].width);
   readonly height = computed(() => this.box()?.height || SPARKLINE_STEPS[this.size()].height);
   readonly viewBox = computed(() => `0 0 ${this.width()} ${this.height()}`);
+  /**
+   * Only a change of `data` animates the marks. A box that settles after the
+   * first render — a table cell sizing its column — redraws at once: a path
+   * that eased to the new width read as the series growing.
+   */
+  readonly animate = linkedSignal<
+    { data: readonly SparklineDatum[]; width: number; height: number },
+    boolean
+  >({
+    source: () => ({ data: this.data(), width: this.width(), height: this.height() }),
+    computation: (now, previous) =>
+      previous !== undefined &&
+      previous.source.data !== now.data &&
+      previous.source.width === now.width &&
+      previous.source.height === now.height,
+  });
 
   readonly layout = computed(() =>
     layoutSparkline({

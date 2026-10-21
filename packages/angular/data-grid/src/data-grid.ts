@@ -85,6 +85,7 @@ import {
   inject,
   Injector,
   input,
+  linkedSignal,
   model,
   numberAttribute,
   output,
@@ -149,6 +150,7 @@ import {
   type DataGridExpandedGroups,
   type DataGridGroupContext,
   type DataGridHeaderContext,
+  type DataGridLoading,
   type DataGridMode,
   type DataGridQueryRequest,
   type DataGridReason,
@@ -1454,7 +1456,7 @@ function contentWidth(cell: HTMLElement): number {
     '[attr.aria-colcount]': 'ariaColCount()',
     '[attr.aria-multiselectable]':
       "resolvedSelectionMode() === 'multiple' || resolvedSelectionMode() === 'range' ? 'true' : null",
-    '[attr.aria-busy]': "loading() && rows().length > 0 ? 'true' : null",
+    '[attr.aria-busy]': "loading() && status() !== 'loading' ? 'true' : null",
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-striped]': "resolvedStriped() ? '' : null",
     '[attr.data-sticky-header]': "resolvedStickyHeader() ? '' : null",
@@ -1509,7 +1511,20 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     alias: 'hasMore',
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
-  readonly loadingInput = input(false, { alias: 'loading', transform: booleanAttribute });
+  /**
+   * A load in flight. Zero rows is an answer too: after the grid has drawn
+   * one, `true` keeps it — the empty state stays and no skeleton is drawn —
+   * so a refetch of an empty list does not flicker. `'initial'` asks for the
+   * skeleton anyway, for a grid that stays mounted across two different sets.
+   */
+  readonly loadingInput = input<DataGridLoading, DataGridLoading | string | null | undefined>(
+    false,
+    {
+      alias: 'loading',
+      transform: (value) =>
+        value === 'initial' || value === 'refresh' ? value : booleanAttribute(value),
+    },
+  );
   readonly errorInput = input<string | null | undefined>(undefined, { alias: 'error' });
   /* With a source the grid asks for its rows itself; what the consumer gave
      for rows, total, loading and error is what the source answered. */
@@ -1529,9 +1544,10 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   protected readonly hasMore = computed(() =>
     this.dataSource() ? this.sourced().result?.hasMore : this.hasMoreInput(),
   );
-  protected readonly loading = computed(() =>
+  private readonly loadingGiven = computed<DataGridLoading>(() =>
     this.dataSource() ? this.sourced().loading : this.loadingInput(),
   );
+  protected readonly loading = computed(() => this.loadingGiven() !== false);
   protected readonly error = computed(() =>
     this.dataSource() ? this.sourced().error : this.errorInput(),
   );
@@ -1986,10 +2002,33 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       ? this.columnIds().length + 1
       : Math.min(...aggregated.map((column) => this.indexOf(column.id)));
   });
+  /* The last answer the grid drew. Zero rows is an answer, and a refetch of
+     it keeps the empty state rather than drawing a skeleton over it (AF-02).
+     Rows emptied by the consumer while a load starts are a new set, and wait
+     in the skeleton. */
+  private readonly lastAnswer = linkedSignal<
+    { loading: boolean; error: boolean; empty: boolean },
+    'rows' | 'empty' | null
+  >({
+    source: () => ({
+      loading: this.loading(),
+      error: Boolean(this.error()),
+      empty: this.rows().length === 0,
+    }),
+    computation: (now, previous) =>
+      !now.loading && !now.error ? (now.empty ? 'empty' : 'rows') : (previous?.value ?? null),
+  });
+  /* `lastAnswer` is read on every evaluation: a linked signal computes when it
+     is read, and one skipped while the grid showed its answer would miss it. */
+  private readonly firstLoad = computed(() => {
+    const lastAnswer = this.lastAnswer();
+    const given = this.loadingGiven();
+    return given === 'initial' || (given === true && lastAnswer !== 'empty');
+  });
   protected readonly status = computed<'rows' | 'empty' | 'no-results' | 'error' | 'loading'>(
     () => {
       if (this.error()) return 'error';
-      if (this.loading() && this.rows().length === 0) return 'loading';
+      if (this.firstLoad() && this.rows().length === 0) return 'loading';
       if (this.nodes().length > 0) return 'rows';
       const query = this.query();
       return query.filter || query.search.trim() ? 'no-results' : 'empty';

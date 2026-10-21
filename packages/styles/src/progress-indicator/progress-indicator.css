@@ -23,14 +23,10 @@
 }
 
 /**
- * Where the travelling bar of an indeterminate indicator starts and how long
- * it is, as percentages of the track.
- *
- * The keyframes move these two numbers rather than the bar's own box, because
- * two things read them: the plain bar sets its inset and its length from them,
- * and the wavy bar cuts a window out of its path at the same two numbers. One
- * clock, read twice, is what keeps a wavy bar and a plain one travelling the
- * same journey.
+ * Where the travelling bar of an indeterminate wavy indicator starts and how
+ * long it is, as percentages of the track: the wavy bar cuts a window out of
+ * its path at the two numbers. The plain bar travels the same journey by
+ * `translate` and `scale`, which the compositor runs.
  */
 @property --slotted-progress-indicator-travel-start {
   syntax: '<number>';
@@ -454,10 +450,7 @@
 
   /**
    * Indeterminate: the whole track shows, there is no end to mark, and the
-   * indicator becomes a short bar travelling the length of it. It is absolutely
-   * positioned so the travel is one property — the decision the family this
-   * one replaces recorded, and `inset-inline-start` is why a translation runs
-   * the way the document reads instead of the way the screen does.
+   * indicator becomes a short bar travelling the length of it.
    */
   [data-ui-progress-indicator][data-shape='linear'][data-indeterminate] [data-part-track]::before {
     inset-inline-start: 0;
@@ -467,24 +460,77 @@
     content: none;
   }
 
-  [data-ui-progress-indicator][data-shape='linear'][data-indeterminate] [data-part-indicator] {
-    animation: slotted-progress-indicator-travel var(--slotted-duration-loop-slow)
+  /**
+   * The bar is the whole track, scaled to its length from the inline start
+   * and translated along it. `translate` and `scale` are the only properties
+   * the animation moves, so the compositor runs it: the bar is the sign that
+   * the page is busy, and a bar moved by its inset and its width needed a
+   * layout on the main thread every frame and froze under any long task.
+   * Two properties with keyframes of their own keep the journey the
+   * registered numbers draw for the wavy bar: the travel eases once from end
+   * to end, the length swells and shrinks in two steps.
+   */
+  [data-ui-progress-indicator][data-shape='linear'][data-indeterminate]:not([data-wave])
+    [data-part-indicator] {
+    animation: slotted-progress-indicator-glide var(--slotted-duration-loop-slow)
       var(--slotted-easing-standard) infinite;
-    inline-size: calc(1% * var(--slotted-progress-indicator-travel-size));
+    inline-size: 100%;
     inset-block: 0;
-    inset-inline-start: calc(1% * var(--slotted-progress-indicator-travel-start));
+    inset-inline-start: 0;
     position: absolute;
+    scale: 0.14 1;
+    transform-origin: left;
+    translate: -14% 0;
+  }
+
+  /* Translation and origin are physical: a right-to-left track runs the
+     mirrored journey from its right edge. */
+  [data-ui-progress-indicator][data-shape='linear'][data-indeterminate]:not([data-wave])
+    [data-part-indicator]:dir(rtl) {
+    animation-name: slotted-progress-indicator-glide-rtl;
+    transform-origin: right;
+    translate: 14% 0;
+  }
+
+  @keyframes slotted-progress-indicator-glide {
+    0% {
+      scale: 0.14 1;
+      translate: -14% 0;
+    }
+
+    45% {
+      scale: 0.46 1;
+    }
+
+    100% {
+      scale: 0.14 1;
+      translate: 100% 0;
+    }
+  }
+
+  @keyframes slotted-progress-indicator-glide-rtl {
+    0% {
+      scale: 0.14 1;
+      translate: 14% 0;
+    }
+
+    45% {
+      scale: 0.46 1;
+    }
+
+    100% {
+      scale: 0.14 1;
+      translate: -100% 0;
+    }
   }
 
   /**
-   * A short bar that grows as it crosses and shrinks as it leaves, which is
-   * M3's disjoint indicator drawn with one bar rather than two. The width
-   * changes because a bar of constant length reads as a scrollbar being
-   * dragged; a bar that swells in the middle of its journey reads as
-   * something in progress.
-   *
-   * The keyframes move the two registered numbers rather than the box, so the
-   * wavy bar can cut its window at the same two numbers.
+   * The journey as two registered numbers, for the wavy bar, which cuts a
+   * window out of its path at them: a short bar that grows as it crosses and
+   * shrinks as it leaves, M3's disjoint indicator drawn with one bar rather
+   * than two. The width changes because a bar of constant length reads as a
+   * scrollbar being dragged; a bar that swells in the middle of its journey
+   * reads as something in progress. `glide` draws the same journey.
    */
   @keyframes slotted-progress-indicator-travel {
     0% {
@@ -1482,6 +1528,17 @@
     [data-ui-progress-indicator][data-shape='linear'][data-indeterminate] [data-part-indicator] {
       --slotted-progress-indicator-travel-size: 46;
       --slotted-progress-indicator-travel-start: 27;
+    }
+
+    [data-ui-progress-indicator][data-shape='linear'][data-indeterminate]:not([data-wave])
+      [data-part-indicator] {
+      scale: 0.46 1;
+      translate: 27% 0;
+    }
+
+    [data-ui-progress-indicator][data-shape='linear'][data-indeterminate]:not([data-wave])
+      [data-part-indicator]:dir(rtl) {
+      translate: -27% 0;
     }
 
     /**

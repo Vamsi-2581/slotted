@@ -121,6 +121,7 @@ import type {
   DataGridEditorContext,
   DataGridExpandedGroups,
   DataGridHandle,
+  DataGridLoading,
   DataGridProps,
   DataGridReason,
 } from './data-grid.types';
@@ -383,7 +384,8 @@ export function DataGrid<Row>({
   const rows = dataSource ? sourced.rows : (givenRows ?? EMPTY_ROWS);
   const totalCount = dataSource ? sourced.total : givenTotalCount;
   const hasMore = dataSource ? sourced.hasMore : givenHasMore;
-  const loading = dataSource ? sourced.loading : givenLoading;
+  const loadingGiven: DataGridLoading | undefined = dataSource ? sourced.loading : givenLoading;
+  const loading = loadingGiven === undefined ? false : loadingGiven !== false;
   const error = dataSource ? sourced.error : givenError;
   const onRetry = dataSource ? sourced.retry : givenOnRetry;
   const resolvedMode =
@@ -2694,9 +2696,18 @@ export function DataGrid<Row>({
     return `${bounds.rowEnd - bounds.rowStart + 1} × ${bounds.columnEnd - bounds.columnStart + 1}`;
   }, [bounds]);
 
+  /* The last answer the grid drew. Zero rows is an answer, and a refetch of
+     it keeps the empty state rather than drawing a skeleton over it (AF-02).
+     Rows emptied by the consumer while a load starts are a new set, and wait
+     in the skeleton. */
+  const lastAnswer = useRef<'rows' | 'empty' | null>(null);
+  const firstLoad =
+    loadingGiven === 'initial' || (loadingGiven === true && lastAnswer.current !== 'empty');
+  if (!loading && !error) lastAnswer.current = rows.length > 0 ? 'rows' : 'empty';
+
   const status: 'rows' | 'empty' | 'no-results' | 'error' | 'loading' = error
     ? 'error'
-    : loading && rows.length === 0
+    : firstLoad && rows.length === 0
       ? 'loading'
       : nodes.length > 0
         ? 'rows'
@@ -2985,7 +2996,7 @@ export function DataGrid<Row>({
     if (!hasMore || !onLoadMore) return null;
     const offersControl = resolvedLoadMore !== 'scroll' || loadMoreFailed === true;
     if (!offersControl) {
-      return loading === true ? (
+      return loading ? (
         <span data-loading-more="" role="status">
           {t('loadingMore')}
         </span>
@@ -2994,7 +3005,7 @@ export function DataGrid<Row>({
     return (
       <div>
         <Button
-          disabled={loading === true}
+          disabled={loading}
           onClick={() => onLoadMore()}
           size="sm"
           tone="secondary"
@@ -3050,7 +3061,7 @@ export function DataGrid<Row>({
       <DataGridRowStoreContext.Provider value={rowStore as DataGridRowStore<unknown>}>
         <div
           {...nativeProps}
-          aria-busy={loading && rows.length > 0 ? true : undefined}
+          aria-busy={loading && status !== 'loading' ? true : undefined}
           aria-colcount={ariaColCount}
           aria-label={nativeProps['aria-label'] ?? (labelledBy ? undefined : t('grid'))}
           aria-labelledby={labelledBy}

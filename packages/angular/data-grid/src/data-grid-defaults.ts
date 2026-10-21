@@ -19,6 +19,13 @@ export type DataGridStickyTo = 'scroll' | 'page';
 export type DataGridSelectionMode = 'none' | 'single' | 'multiple' | 'range';
 export type DataGridEditMode = 'cell' | 'row';
 export type DataGridMode = 'client' | 'server';
+/**
+ * Which wait a load is. `initial` has nothing to keep and draws skeleton rows;
+ * `refresh` reads again over an answer the grid already drew — rows, or the
+ * empty state — and keeps it. `true` is `initial` until the grid has drawn an
+ * answer, and `refresh` after.
+ */
+export type DataGridLoading = boolean | 'initial' | 'refresh';
 export type DataGridVirtualize = 'auto' | boolean;
 
 /**

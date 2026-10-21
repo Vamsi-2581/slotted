@@ -861,7 +861,7 @@ class ShipmentsPage {
   {
     id: 'empty-and-loading',
     title: 'Empty, no results, error, loading',
-    note: 'Three states a body can hold instead of rows, each a result-state: nothing at all; nothing after the filter, with Clear filters; and a failed load, with Try again. A first load draws skeleton rows; a refresh over rows already shown dims them and moves nothing.',
+    note: 'Three states a body can hold instead of rows, each a result-state: nothing at all; nothing after the filter, with Clear filters; and a failed load, with Try again. A first load draws skeleton rows; a refresh over rows already shown dims them and moves nothing. Zero rows is an answer too: once the grid has drawn the empty state, loading keeps it and draws no skeleton, and loading="initial" asks for the skeleton anyway.',
     snippet: defineSnippet({
       id: 'data-grid-angular-empty-and-loading',
       language: 'angular',
@@ -1164,10 +1164,10 @@ const api = apiRows([
   ],
   [
     'loading',
-    'boolean',
+    "boolean | 'initial' | 'refresh'",
     'false',
     'sl-data-grid',
-    'Skeleton rows with no rows to keep; aria-busy and a dimmed body over rows already shown.',
+    'Skeleton rows with no answer to keep; aria-busy over an answer already drawn — rows, which dim, or the empty state, which stays. true is initial until the grid has drawn an answer, and refresh after; rows emptied while a load starts wait in the skeleton.',
   ],
   [
     'error',

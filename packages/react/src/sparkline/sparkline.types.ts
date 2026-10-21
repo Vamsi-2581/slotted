@@ -27,6 +27,8 @@ export interface SparklineDefaultsProviderProps extends SparklineDefaults {
 
 export interface SparklineRootProps extends ComponentPropsWithRef<'span'> {
   'aria-label': string;
+  /** Present while the marks ease to a new `data`; a resize redraws at once. */
+  'data-animate'?: '';
   'data-curve': SparklineCurve;
   'data-part': string;
   'data-series': string | undefined;

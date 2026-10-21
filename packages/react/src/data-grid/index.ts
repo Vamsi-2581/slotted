@@ -25,6 +25,7 @@ export type {
   DataGridGroupContext,
   DataGridHandle,
   DataGridHeaderContext,
+  DataGridLoading,
   DataGridMode,
   DataGridPinnedRows,
   DataGridProps,

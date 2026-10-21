@@ -48,6 +48,7 @@ export type {
   DataGridFilterOperandContext,
   DataGridGroupContext,
   DataGridHeaderContext,
+  DataGridLoading,
   DataGridMode,
   DataGridPinnedRows,
   DataGridQueryRequest,

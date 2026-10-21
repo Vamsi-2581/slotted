@@ -26,6 +26,7 @@ import { SELECTION_COLUMN, SlDataGrid } from './data-grid';
 import { provideDataGridDefaults } from './data-grid-defaults';
 import type {
   DataGridLoadMoreTrigger,
+  DataGridLoading,
   DataGridActivateEvent,
   DataGridColumnOverflow,
   DataGridColumnStateRequest,
@@ -170,7 +171,7 @@ class Host {
   readonly selectionMode = signal<DataGridSelectionMode>('none');
   readonly filterRow = signal(false);
   readonly activatable = signal(false);
-  readonly loading = signal(false);
+  readonly loading = signal<DataGridLoading>(false);
   readonly error = signal<string | null | undefined>(undefined);
   readonly totalCount = signal<number | undefined>(undefined);
   readonly hasMore = signal<boolean | undefined>(undefined);
@@ -858,6 +859,27 @@ describe('SlDataGrid', () => {
     fixture.detectChanges();
     const loader = root().querySelector<HTMLElement>('[data-part="loader"]')!;
     expect(loader.style.getPropertyValue('--slotted-data-grid-loader-row-size')).toBe('56px');
+  });
+
+  /**
+   * Zero rows is an answer, and a refetch of it reads again over the empty
+   * state instead of replacing it with placeholders (AF-02). `'initial'` asks
+   * for the skeleton anyway.
+   */
+  it('keeps the empty state it drew while it reads again', () => {
+    host.rows.set([]);
+    fixture.detectChanges();
+    expect(root().querySelector('[data-part="empty"]')).not.toBeNull();
+
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(root().querySelector('[data-part="empty"]')).not.toBeNull();
+    expect(root().querySelector('[data-part="loader"]')).toBeNull();
+    expect(root().getAttribute('aria-busy')).toBe('true');
+
+    host.loading.set('initial');
+    fixture.detectChanges();
+    expect(root().querySelector('[data-part="loader"]')).not.toBeNull();
   });
 
   it('draws the loading, empty and error states', () => {

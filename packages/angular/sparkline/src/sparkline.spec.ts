@@ -53,6 +53,19 @@ function mount(providers: unknown[] = []) {
 }
 
 describe('SlSparkline', () => {
+  it('eases a change of data and nothing else', () => {
+    const { fixture, host, root } = mount();
+    expect(root.hasAttribute('data-animate')).toBe(false);
+
+    host.data.set([30, 14, 12]);
+    fixture.detectChanges();
+    expect(root.hasAttribute('data-animate')).toBe(true);
+
+    host.size.set('lg');
+    fixture.detectChanges();
+    expect(root.hasAttribute('data-animate')).toBe(false);
+  });
+
   it('is an image named by what it shows, with the drawing hidden', () => {
     const { root, part } = mount();
 

@@ -198,14 +198,31 @@ test('mirrors the drawing in a right-to-left document', () => {
   assert.equal(body(`${ui}:dir(rtl) [data-part-plot]`), 'transform:scaleX(-1);');
 });
 
-test('moves a path from the motion scale when its data changes', () => {
-  for (const part of ['line', 'area', 'bar']) {
-    assert.match(
-      body(`${ui} [data-part-${part.toLowerCase()}]`),
-      /transition:d var\(--slotted-duration-medium\) var\(--slotted-easing-standard\)/,
-      part,
-    );
+/**
+ * Only a change of data moves a path, and only when motion is allowed: the
+ * binding writes `data-animate` for that render. A resize redraws at once.
+ */
+test('moves a path from the motion scale when its data changes, and not when its box does', () => {
+  const media = '@media (prefers-reduced-motion:no-preference)';
+  assert.match(
+    body(
+      `${ui}[data-animate]:is([data-part-area],[data-part-line],[data-part-ring],[data-part-marker])`,
+      media,
+    ),
+    /transition:d var\(--slotted-duration-medium\) var\(--slotted-easing-standard\)/,
+  );
+  assert.match(
+    body(`${ui}[data-animate] [data-part-bar]`, media),
+    /transition:d var\(--slotted-duration-medium\)/,
+  );
+  for (const part of ['line', 'area', 'bar', 'ring', 'marker']) {
+    assert.doesNotMatch(body(`${ui} [data-part-${part}]`), /transition:[^;]*\bd\b/, part);
   }
+});
+
+/** An unsized sparkline in a box sized by its content keeps the grid's nominal width. */
+test('holds a nominal width where its container gives it none', () => {
+  assert.match(body(ui), /min-inline-size:var\(--slotted-sparkline-min-inline-size,6rem\)/);
 });
 
 /**

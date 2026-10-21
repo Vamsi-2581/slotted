@@ -31,5 +31,6 @@
   "--slotted-target-min",
   "--slotted-text",
   "--slotted-text-muted",
-  "--slotted-tone-accent-text"
+  "--slotted-tone-accent-text",
+  "--slotted-z-index-sticky"
 ]

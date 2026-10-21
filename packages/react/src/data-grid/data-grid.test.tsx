@@ -1070,6 +1070,35 @@ describe('DataGrid, the rest', () => {
   });
 
   /**
+   * Zero rows is an answer, and a refetch of it reads again over the empty
+   * state instead of replacing it with placeholders (AF-02). `'initial'` asks
+   * for the skeleton anyway.
+   */
+  it('keeps the empty state it drew while it reads again', () => {
+    const { rerender } = render(<Shipments loading={false} rows={[]} />);
+    expect(grid().querySelector('[data-part="empty"]')).not.toBeNull();
+
+    rerender(<Shipments loading rows={[]} />);
+    expect(grid().querySelector('[data-part="empty"]')).not.toBeNull();
+    expect(grid().querySelector('[data-part="loader"]')).toBeNull();
+    expect(grid()).toHaveAttribute('aria-busy', 'true');
+
+    rerender(<Shipments loading="initial" rows={[]} />);
+    expect(grid().querySelector('[data-part="loader"]')).not.toBeNull();
+    expect(grid().querySelector('[data-part="empty"]')).toBeNull();
+  });
+
+  it('draws the skeleton for a first load, and for none after', () => {
+    const { rerender } = render(<Shipments loading rows={[]} />);
+    expect(grid().querySelector('[data-part="loader"]')).not.toBeNull();
+    expect(grid()).not.toHaveAttribute('aria-busy');
+
+    rerender(<Shipments loading={false} rows={[]} />);
+    rerender(<Shipments loading="refresh" rows={[]} />);
+    expect(grid().querySelector('[data-part="loader"]')).toBeNull();
+  });
+
+  /**
    * The gutters hold a chooser, a handle and an expander. An outline of a
    * control nobody can press yet is a control that lies, so the loader
    * reserves their width and draws nothing in them.

@@ -249,7 +249,7 @@
   },
   "loading": {
     "first": "with no rows to keep, the loader part draws skeleton rows the visible columns wide and skeletonRows deep",
-    "refresh": "over rows already shown, aria-busy goes on the root and the body dims; nothing moves",
+    "refresh": "over rows already shown, aria-busy goes on the root and the body dims; nothing moves. Over an empty state already drawn the state stays and aria-busy goes on the root: zero rows is an answer (AF-02). loading accepts true, false, 'initial' and 'refresh'; true is initial until the grid has drawn an answer, refresh after, and initial while the last answer had rows and the rows are now empty",
     "reason": "Carbon draws a skeleton and Ant dims what is there; they are two states, and a family with one answer gets the other wrong"
   },
   "empty": {
@@ -304,7 +304,7 @@
     "aria-colspan": "on a column group, a detail cell and a group row's cell",
     "aria-level": "on a group row",
     "aria-expanded": "on a group row, and on the expander with aria-controls naming the detail row",
-    "aria-busy": "true on the root while loading over rows already shown",
+    "aria-busy": "true on the root while loading over an answer already drawn: rows, or the empty state",
     "aria-invalid": "on a cell whose draft failed, with aria-errormessage naming the message",
     "tabindex": "0 on the current cell or its single widget, -1 on every other mounted cell"
   },

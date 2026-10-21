@@ -35,6 +35,7 @@
   },
   "messages": ["down", "flat", "noData", "up"],
   "stateAttributes": {},
+  "motion": "the marks ease to a new data, written as data-animate on the root for that render and only under prefers-reduced-motion: no-preference; a change of the measured box redraws at once. The root keeps the nominal width as its minimum (--slotted-sparkline-min-inline-size, 6rem) in a box sized by its content",
   "scenarios": {
     "sparkline": [
       "playground",

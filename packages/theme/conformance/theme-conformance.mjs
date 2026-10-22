@@ -30,7 +30,7 @@ const NON_TEXT_RATIO = 3;
 const CONTROL_EDGE_RATIO = 1.5;
 /** The OKLab lightness step a neutral highlight keeps from the ground it is drawn on. */
 const HIGHLIGHT_STEP = 0.02;
-/** The OKLab lightness step a dark scheme's raised layer keeps above the page. */
+/** The OKLab lightness step a dark scheme's raised layer keeps above the page, unless `thresholds.layerStep` says. */
 const LAYER_STEP = 0.04;
 
 /** The collapsed duration is short enough to read as instant, and never zero. */
@@ -207,8 +207,9 @@ function structureCases(contract, theme, css) {
   });
 }
 
-function contrastCases(theme) {
+function contrastCases(theme, thresholds) {
   const label = theme.name;
+  const layerStep = thresholds.layerStep ?? LAYER_STEP;
 
   /**
    * One radius for every control, at every size. Button carried three of its
@@ -281,8 +282,8 @@ function contrastCases(theme) {
           parseSeed(values['--slotted-surface-raised']).l -
           parseSeed(values['--slotted-surface']).l;
         assert.ok(
-          step >= LAYER_STEP,
-          `${scheme} --slotted-surface-raised is ${step.toFixed(3)} above --slotted-surface, below ${LAYER_STEP}`,
+          step >= layerStep,
+          `${scheme} --slotted-surface-raised is ${step.toFixed(3)} above --slotted-surface, below ${layerStep} (thresholds.layerStep)`,
         );
       });
     }
@@ -464,9 +465,13 @@ function glyphCases(contract, theme) {
   });
 }
 
-/** Registers every case a theme has to pass. `theme` is `flattenTheme(theme)`; `css` is `renderTheme(theme)`. */
-export function themeConformance({ contract, theme, css }) {
+/**
+ * Registers every case a theme has to pass. `theme` is `flattenTheme(theme)`;
+ * `css` is `renderTheme(theme)`. `thresholds.layerStep` is the OKLab lightness
+ * a dark scheme's raised layer keeps above the page, 0.04 unless given.
+ */
+export function themeConformance({ contract, theme, css, thresholds = {} }) {
   structureCases(contract, theme, css);
-  contrastCases(theme);
+  contrastCases(theme, thresholds);
   glyphCases(contract, theme);
 }

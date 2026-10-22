@@ -105,6 +105,17 @@ it is written by:
 - `pnpm demo:nexora`: `demo:refresh` followed by `ng serve` of
   `demos/nexora/angular`, from the repository root.
 
+- `pnpm sync:equori`: the same loop for `../equori/web`, an application that
+  installs the published packages. It builds `@slotted/core`,
+  `@slotted/react`, `@slotted/theme` and `@slotted/themes`, repacks them and
+  replaces their files inside the application's `node_modules`
+  (`scripts/sync-consumer.mjs`). Its `package.json` and lockfile are not
+  touched, and a running dev server is restarted. Run it when a fix changes
+  what a consumer receives or answers a finding listed in
+  `equori/docs/slotted-findings.md`; a fix the package tests already cover
+  does not need it. The application returns to the published packages with
+  `pnpm install --frozen-lockfile --force` in `equori/web`.
+
 A demo names the version it consumes in its own `package.json` and moves to a
 newer one deliberately, the way a consumer would. `pnpm test:release` checks
 that the published set and the shared version stay what this section says.

@@ -438,6 +438,7 @@ test('declares the states the stylesheet may paint, and no others', () => {
     'open',
     'loading',
     'dragging',
+    'expanded',
   ]);
   for (const [state, attribute] of Object.entries(contract.stateAttributes)) {
     assert.equal(attribute, STATE_ATTRIBUTES[state], `${state} disagrees with the vocabulary`);

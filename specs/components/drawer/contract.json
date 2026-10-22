@@ -163,7 +163,8 @@
   "stateAttributes": {
     "open": "data-open",
     "loading": "data-loading",
-    "dragging": "data-dragging"
+    "dragging": "data-dragging",
+    "expanded": "data-expanded"
   },
   "stateModel": {
     "open": {
@@ -297,7 +298,16 @@
         "modalUnderInline": false
       },
       "capabilities": ["open", "extent", "size", "placement", "appearance", "loading", "wiring"],
-      "states": ["default", "hover", "active", "focus-visible", "open", "loading", "dragging"],
+      "states": [
+        "default",
+        "hover",
+        "active",
+        "focus-visible",
+        "open",
+        "loading",
+        "dragging",
+        "expanded"
+      ],
       "parts": [
         "root",
         "trigger",
@@ -338,6 +348,7 @@
     ]
   },
   "sheet": {
+    "expanded": "an overlay sheet from the bottom whose extent is the whole layer, or whose size is full, is the screen, Material 3's expanded bottom sheet: the layer carries data-expanded, the top corners take --slotted-drawer-radius-expanded (0px unless set) and the header's block-start padding adds env(safe-area-inset-top). A content sheet held 4rem short of the screen is not expanded",
     "design": "docs/history/designs/2026-09-25-drawer-bottom-sheet-design.md",
     "content": "size=content is block-size: auto with max-block-size: calc(100% - var(--slotted-space-12)), sixty-four pixels of scrim left above the sheet for the press outside; on an inline side it is inline-size: max-content under the same cap. It is the default size on top and bottom and never on start and end",
     "contentStop": "under size=content the height of the content is a stop for the keyboard, the drag and the grabber tap, measured when it is needed as panel.offsetHeight - body.clientHeight + body.scrollHeight. A release that settles on it requests extent undefined rather than the measured fraction, so the sheet follows its content again when the content grows",

@@ -107,6 +107,7 @@ const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
         [attr.data-dragging]="dragging() ? '' : null"
         [attr.data-drag]="sheet() ? resolvedDrag() : null"
         [attr.data-undimmed]="undimmed() ? '' : null"
+        [attr.data-expanded]="expanded() ? '' : null"
         [attr.inert]="interactive() ? null : ''"
         [style.--slotted-drawer-extent]="extentLength()"
       >
@@ -290,6 +291,18 @@ export class SlDrawer implements OnInit {
   );
   /** The measure right now: the hand's while a body drag holds it, the state otherwise. */
   readonly currentExtent = computed(() => this.live() ?? this.extent());
+  /**
+   * A sheet that spans the layer is the screen: the stylesheet squares its top
+   * corners and clears the safe area above its header.
+   */
+  protected readonly expanded = computed(() => {
+    const extent = this.extent();
+    return (
+      this.resolvedMode() === 'overlay' &&
+      this.resolvedSide() === 'bottom' &&
+      (this.resolvedSize() === 'full' || (extent !== undefined && sameStop(extent, 1)))
+    );
+  });
   protected readonly undimmed = computed(
     () =>
       this.resolvedMode() === 'overlay' &&

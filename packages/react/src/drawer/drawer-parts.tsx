@@ -612,6 +612,13 @@ export function DrawerPanel({
     if (overlay) return null;
   } else if (!inHost) return null;
 
+  /* A sheet that spans the layer is the screen: the stylesheet squares its
+     top corners and clears the safe area above its header. */
+  const expanded =
+    overlay &&
+    drawer.side === 'bottom' &&
+    (drawer.size === 'full' || (drawer.extent !== undefined && sameStop(drawer.extent, 1)));
+
   const panelProps: DrawerPanelRootProps = keyedProps({
     ...nativeProps,
     ...(drawer.descriptionId === '' ? {} : { 'aria-describedby': drawer.descriptionId }),
@@ -648,6 +655,7 @@ export function DrawerPanel({
       data-ui-drawer=""
       {...(drawer.dragging ? { 'data-dragging': '' } : {})}
       {...(overlay && drawer.side === 'bottom' ? { 'data-drag': drawer.drag } : {})}
+      {...(expanded ? { 'data-expanded': '' } : {})}
       {...(overlay && (drawer.live ?? drawer.extent ?? drawer.rest ?? 1) < drawer.scrimFrom
         ? { 'data-undimmed': '' }
         : {})}

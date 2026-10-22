@@ -787,6 +787,17 @@ describe('SlDrawer', () => {
     expect(host.extents.at(-1)?.previous).toBeUndefined();
   });
 
+  /** A sheet that spans the layer is the screen, and the layer says so. */
+  it('is expanded at the whole layer and not below it', () => {
+    host.snapPoints.set([0.5, 1]);
+    host.extent.set(1);
+    openSheet();
+    expect(layer()?.hasAttribute('data-expanded')).toBe(true);
+    host.extent.set(0.5);
+    fixture.detectChanges();
+    expect(layer()?.hasAttribute('data-expanded')).toBe(false);
+  });
+
   it('leaves the page undimmed below scrimFrom', () => {
     host.size.set('md');
     host.extent.set(0.3);

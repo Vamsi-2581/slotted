@@ -412,7 +412,9 @@
     transition:
       translate var(--_slide),
       inline-size var(--_move),
-      block-size var(--_move);
+      block-size var(--_move),
+      border-start-start-radius var(--_move),
+      border-start-end-radius var(--_move);
   }
 
   [data-ui-drawer][data-mode='overlay']:not([data-open]) > [data-part-panel] {
@@ -523,6 +525,22 @@
     border-block-start-width: var(--_rule-size);
     border-start-start-radius: var(--slotted-drawer-radius, var(--_radius));
     border-start-end-radius: var(--slotted-drawer-radius, var(--_radius));
+  }
+
+  /**
+   * A sheet that reaches the top of the layer is the screen, Material 3's
+   * expanded bottom sheet: its top corners square — a theme keeps a radius
+   * with `--slotted-drawer-radius-expanded` — and its header clears the safe
+   * area the status bar takes. The binding writes `data-expanded` while the
+   * extent is the whole layer, and under `size="full"`.
+   */
+  [data-ui-drawer][data-side='bottom'][data-expanded] > [data-part-panel] {
+    border-start-start-radius: var(--slotted-drawer-radius-expanded, 0px);
+    border-start-end-radius: var(--slotted-drawer-radius-expanded, 0px);
+  }
+
+  [data-ui-drawer][data-side='bottom'][data-expanded] > [data-part-panel] > [data-part-header] {
+    padding-block-start: calc(var(--_padding-block) + env(safe-area-inset-top, 0px));
   }
 
   /**

@@ -34,7 +34,7 @@ Do not impose a hard time limit on implementation. When work becomes long or cha
 - Toolchain, release, or cross-cutting change: run `pnpm check:full`.
 - Security-sensitive or otherwise high-risk behavior: add independent review.
 
-Use `pnpm check` for the normal fast gate, `pnpm check:affected` for changed packages and dependents, and `pnpm check:full` only when the change surface warrants it.
+Use `pnpm check` for the normal fast gate, `pnpm check:affected` for changed packages and dependents, and `pnpm check:full` only when the change surface warrants it. `pnpm check` runs its gates in parallel and format-checks and lints only the files changed since `origin/main` (`scripts/check-changed.mjs`); `pnpm check:full` checks every file. Prettier, ESLint and the typecheck keep caches in `node_modules/.cache`.
 
 Except for `pnpm format`, verification commands must not modify files.
 

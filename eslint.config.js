@@ -12,6 +12,9 @@ export default tseslint.config(
       '**/node_modules/**',
       'demos/nexora/angular/**',
       'pnpm-lock.yaml',
+      /* Generated, untracked and large: the harness writes ~1 GB of pages. */
+      'tools/harness/out/**',
+      'tmp/**',
     ],
   },
   eslint.configs.recommended,

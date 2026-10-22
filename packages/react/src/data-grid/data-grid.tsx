@@ -2005,34 +2005,33 @@ export function DataGrid<Row>({
     [resolvedRowHeight, measuredRow, autoRows, remeasure],
   );
 
-  /* Load more when the window nears the end, unless only the control asks, or
-     the last page failed and a retry is the reader's to press. */
+  /* Load more when the row `loadMoreThreshold` rows before the end comes into
+     view, unless only the control asks, or the last page failed and a retry is
+     the reader's to press. In view of the page, not of the grid's own box: a
+     grid with no height grows to its rows and an ancestor scrolls, and its own
+     scroller always reached the end, so every page was asked for at mount. An
+     observer with no root counts the clip of every ancestor that scrolls. */
+  const asksForMore =
+    onLoadMore !== undefined &&
+    hasMore === true &&
+    !loading &&
+    resolvedLoadMore !== 'button' &&
+    loadMoreFailed !== true;
+  const loadMoreIndex = Math.max(0, nodes.length - resolvedThreshold);
+  const loadMoreTop = metrics ? metrics.offsetOf(loadMoreIndex) : loadMoreIndex * rowSize;
+  const loadMoreMark = useRef<HTMLDivElement | null>(null);
+  const latestLoadMore = useRef(onLoadMore);
+  latestLoadMore.current = onLoadMore;
   useEffect(() => {
-    if (!onLoadMore || !hasMore || loading) return;
-    if (resolvedLoadMore === 'button' || loadMoreFailed === true) return;
-    const remaining = nodes.length - rowWindow.endIndex;
-    if (
-      windowsRows
-        ? remaining <= resolvedThreshold
-        : scrollTop + viewport.height >=
-          (scroll.current?.scrollHeight ?? 0) - rowSize * resolvedThreshold
-    ) {
-      onLoadMore();
-    }
-  }, [
-    onLoadMore,
-    hasMore,
-    loading,
-    resolvedLoadMore,
-    loadMoreFailed,
-    nodes.length,
-    rowWindow.endIndex,
-    windowsRows,
-    resolvedThreshold,
-    scrollTop,
-    viewport.height,
-    rowSize,
-  ]);
+    const mark = loadMoreMark.current;
+    /* Without the observer (a test document) nothing asks by itself; the footer still can. */
+    if (!asksForMore || mark === null || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) latestLoadMore.current?.();
+    });
+    observer.observe(mark);
+    return () => observer.disconnect();
+  }, [asksForMore, nodes.length, loadMoreTop]);
 
   /* ── Keyboard ───────────────────────────────────────────────────────── */
   const rtl = () => (root.current ? getComputedStyle(root.current).direction === 'rtl' : false);
@@ -3171,6 +3170,7 @@ export function DataGrid<Row>({
                 firstIndex={windowsRows ? rowWindow.startIndex : 0}
                 headerRowCount={headerRowCount + pinned.top.length}
                 measureRow={autoRows || measuredRow === null ? measureRow : undefined}
+                loadMore={asksForMore ? { top: loadMoreTop, ref: loadMoreMark } : undefined}
                 nodes={mountedNodes}
                 heldRows={heldRows}
                 allNodes={nodes}

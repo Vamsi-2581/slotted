@@ -1,4 +1,5 @@
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
+import { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { Button } from '../button';
@@ -186,3 +187,50 @@ describe('DataGrid with a template that fits its frame', () => {
     expect(scroller.scrollWidth - scroller.clientWidth).toBe(0);
   });
 });
+
+/**
+ * A grid without a height grows to its rows and an ancestor scrolls. Its own
+ * scroller was as tall as its content, so the end of the rows was always
+ * "within the threshold" and every page was requested at mount, with no
+ * scroll at all. The next page is asked for when the end nears the visible
+ * area of whatever scrolls.
+ */
+describe('DataGrid loading more inside a scrolling ancestor', () => {
+  it('asks for one page at mount and one more after the ancestor scrolls to the end', async () => {
+    let calls = 0;
+    function Feed() {
+      const [count, setCount] = useState(30);
+      return (
+        <div data-testid="ancestor" style={{ blockSize: 600, overflow: 'auto' }}>
+          <DataGrid<Entry>
+            aria-label="Entries"
+            columns={COLUMNS}
+            hasMore={count < 450}
+            onLoadMore={() => {
+              calls += 1;
+              setCount((current) => current + 30);
+            }}
+            rowHeight={56}
+            rowKey="id"
+            rows={MANY.slice(0, count)}
+          />
+        </div>
+      );
+    }
+    const { getByTestId } = render(<Feed />);
+    for (let index = 0; index < 10; index += 1) await act(frame);
+    expect(calls).toBeLessThanOrEqual(1);
+
+    const before = calls;
+    const ancestor = getByTestId('ancestor');
+    ancestor.scrollTop = ancestor.scrollHeight;
+    for (let index = 0; index < 10; index += 1) await act(frame);
+    expect(calls).toBe(before + 1);
+  });
+});
+
+const MANY: Entry[] = Array.from({ length: 450 }, (_, index) => ({
+  id: `M${String(index)}`,
+  payee: `Payee ${String(index)}`,
+  amount: index,
+}));

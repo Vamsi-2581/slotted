@@ -926,6 +926,36 @@ describe('SlDataGrid', () => {
     );
   });
 
+  /**
+   * The next page is asked for when the rows near the end come into view of
+   * the page, which an observer with no root reports; jsdom has none, so this
+   * one reports the mark in view.
+   */
+  it('asks for the next page when the mark over the last rows comes into view', () => {
+    const observed: Element[] = [];
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(private readonly report: IntersectionObserverCallback) {}
+        observe(target: Element) {
+          observed.push(target);
+          this.report(
+            [{ isIntersecting: true, target } as IntersectionObserverEntry],
+            this as unknown as IntersectionObserver,
+          );
+        }
+        disconnect() {}
+      },
+    );
+    host.hasMore.set(true);
+    host.query.set(emptyQuery({ cursor: null, size: 4 }));
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(observed[0]?.getAttribute('aria-hidden')).toBe('true');
+    expect(host.loads).toBeGreaterThanOrEqual(1);
+    vi.unstubAllGlobals();
+  });
+
   it('offers a retry after a failed page, and asks for it from the control', () => {
     host.hasMore.set(true);
     host.loadMoreFailed.set(true);

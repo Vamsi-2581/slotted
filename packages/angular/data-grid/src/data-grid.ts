@@ -1259,6 +1259,16 @@ function contentWidth(cell: HTMLElement): number {
               />
             }
           }
+          @if (asksForMore()) {
+            <div
+              #loadMoreMark
+              aria-hidden="true"
+              [style.bottom.px]="0"
+              [style.inline-size.px]="1"
+              [style.position]="'absolute'"
+              [style.top.px]="loadMoreTop()"
+            ></div>
+          }
         </div>
       }
 
@@ -1580,6 +1590,18 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   readonly editCancel = output<GridCell>();
   readonly activate = output<DataGridActivateEvent>();
   readonly loadMore = output<void>();
+  protected readonly asksForMore = computed(
+    () =>
+      this.hasMore() === true &&
+      !this.loading() &&
+      this.resolvedLoadMore() !== 'button' &&
+      !this.loadMoreFailed(),
+  );
+  protected readonly loadMoreTop = computed(() => {
+    const index = Math.max(0, this.nodes().length - this.resolvedThreshold());
+    const metrics = this.metrics();
+    return metrics ? metrics.offsetOf(index) : index * this.rowSize();
+  });
   /** A branch `hasChildren` says has children opened and none are in `rows`. */
   readonly loadChildren = output<{ key: string; row: Row }>();
   readonly rowsReorder = output<DataGridRowsReorderEvent>();
@@ -1683,6 +1705,7 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   private readonly footerContent = contentChild(SlDataGridFooter);
 
   private readonly scrollRef = viewChild<ElementRef<HTMLDivElement>>('scroll');
+  private readonly loadMoreMark = viewChild<ElementRef<HTMLDivElement>>('loadMoreMark');
   private readonly columnMenus = viewChildren(SlMenu);
   private readonly defaults = injectDataGridDefaults();
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -3414,18 +3437,24 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       }
     });
 
-    /* Load more when the window nears the end, unless only the control asks, or
-       the last page failed and a retry is the reader's to press. */
-    effect(() => {
-      if (this.hasMore() !== true || this.loading()) return;
-      if (this.resolvedLoadMore() === 'button' || this.loadMoreFailed()) return;
-      const remaining = this.nodes().length - this.rowWindow().endIndex;
-      const scroller = this.scrollRef()?.nativeElement;
-      const near = this.windowsRows()
-        ? remaining <= this.resolvedThreshold()
-        : this.scrollTop() + this.viewport().height >=
-          (scroller?.scrollHeight ?? 0) - this.rowSize() * this.resolvedThreshold();
-      if (near && this.viewport().height > 0) untracked(() => this.loadMore.emit());
+    /* Load more when the row `loadMoreThreshold` rows before the end comes into
+       view, unless only the control asks, or the last page failed and a retry
+       is the reader's to press. In view of the page, not of the grid's own box:
+       a grid with no height grows to its rows and an ancestor scrolls, and its
+       own scroller always reached the end, so every page was asked for at
+       mount. An observer with no root counts the clip of every ancestor that
+       scrolls. Without the observer (a test document) nothing asks by itself. */
+    effect((onCleanup) => {
+      const mark = this.loadMoreMark()?.nativeElement;
+      /* Observed again when rows arrive: a mark still in view asks again. */
+      const rows = this.nodes().length + this.loadMoreTop();
+      if (!this.asksForMore() || mark === undefined || rows < 0) return;
+      if (typeof IntersectionObserver === 'undefined') return;
+      const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) this.loadMore.emit();
+      });
+      observer.observe(mark);
+      onCleanup(() => observer.disconnect());
     });
 
     /* The drag session's state, drawn on the headers. */

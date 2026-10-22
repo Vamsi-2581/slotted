@@ -1187,6 +1187,20 @@ describe('DataGrid, the rest', () => {
    * control appears only to retry a page that failed.
    */
   it('asks for the next page by itself and offers no Load more control by default', () => {
+    /* jsdom has no IntersectionObserver: this one reports the mark in view. */
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(private readonly report: IntersectionObserverCallback) {}
+        observe(target: Element) {
+          this.report(
+            [{ isIntersecting: true, target } as IntersectionObserverEntry],
+            this as unknown as IntersectionObserver,
+          );
+        }
+        disconnect() {}
+      },
+    );
     const onLoadMore = vi.fn();
     const { rerender } = render(
       <Shipments
@@ -1209,6 +1223,7 @@ describe('DataGrid, the rest', () => {
     );
     expect(screen.getByRole('status')).toHaveTextContent('Loading more rows…');
     expect(onLoadMore).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
   });
 
   it('stops asking after a failed page and offers a retry', () => {

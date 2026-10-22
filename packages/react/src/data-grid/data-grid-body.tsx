@@ -7,7 +7,7 @@ import {
   type ResolvedGridColumn,
 } from '@slotted/core/grid';
 import { memo, useCallback } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties, ReactNode, Ref } from 'react';
 
 import { Checkbox } from '../checkbox';
 import { Glyph, Icon } from '../icon';
@@ -31,6 +31,8 @@ interface BodyProps<Row> {
   bodyStyle: CSSProperties | undefined;
   measureRow: ((index: number, node: HTMLElement | null) => void) | undefined;
   heldRows: readonly string[];
+  /** Where the rows that ask for the next page begin, and the mark observed over them to the end. */
+  loadMore?: { top: number; ref: Ref<HTMLDivElement> } | undefined;
 }
 
 export function DataGridBody<Row>({
@@ -41,6 +43,7 @@ export function DataGridBody<Row>({
   measureRow,
   nodes,
   heldRows,
+  loadMore,
 }: BodyProps<Row>) {
   /* A row the cursor stands on is mounted whatever the window says, at its
      own place: with the window's padding on the body it is drawn in flow
@@ -66,6 +69,13 @@ export function DataGridBody<Row>({
           />
         );
       })}
+      {loadMore ? (
+        <div
+          aria-hidden="true"
+          ref={loadMore.ref}
+          style={{ bottom: 0, inlineSize: 1, position: 'absolute', top: loadMore.top }}
+        />
+      ) : null}
     </div>
   );
 }

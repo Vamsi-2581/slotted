@@ -36,6 +36,7 @@
   "--slotted-text",
   "--slotted-text-muted",
   "--slotted-toast-actions-gap",
+  "--slotted-toast-backdrop-filter",
   "--slotted-toast-border-color",
   "--slotted-toast-border-width",
   "--slotted-toast-close-radius",

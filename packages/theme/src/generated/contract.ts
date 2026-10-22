@@ -4778,6 +4778,7 @@ export type ComponentToken =
   | '--slotted-timeline-title-weight'
   | '--slotted-timeline-track-min'
   | '--slotted-toast-actions-gap'
+  | '--slotted-toast-backdrop-filter'
   | '--slotted-toast-border-color'
   | '--slotted-toast-border-width'
   | '--slotted-toast-close-radius'
@@ -7011,6 +7012,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-timeline-title-weight",
   "--slotted-timeline-track-min",
   "--slotted-toast-actions-gap",
+  "--slotted-toast-backdrop-filter",
   "--slotted-toast-border-color",
   "--slotted-toast-border-width",
   "--slotted-toast-close-radius",

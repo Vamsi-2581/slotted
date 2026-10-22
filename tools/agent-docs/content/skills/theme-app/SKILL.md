@@ -71,7 +71,9 @@ has.
    content passes under it with its `material` input, set on the header or on
    its defaults. A theme draws the command palette as one by setting
    `--slotted-command-palette-surface` to the material surface and
-   `--slotted-command-palette-backdrop-filter` to the material backdrop.
+   `--slotted-command-palette-backdrop-filter` to the material backdrop, and a
+   raised toast with `--slotted-toast-surface` and
+   `--slotted-toast-backdrop-filter`.
 
 ## 4. Restyle a control
 

@@ -381,6 +381,25 @@
    * tone is in the mark and in nothing else, which is enough — it is the
    * silhouette that survives forced colours anyway.
    */
+  /**
+   * A theme that paints the raised message with a surface that has alpha blurs
+   * what passes under it: `--slotted-toast-backdrop-filter`, `none` unless set.
+   * Only `raised` floats over content it does not own; `soft` and `solid` are
+   * tone grounds. A reader who asked for less transparency gets no filter, and
+   * under forced colours the ground is the system's.
+   */
+  [data-ui-toast] > [data-part-list] > [data-part-item][data-variant='raised'] {
+    -webkit-backdrop-filter: var(--slotted-toast-backdrop-filter, none);
+    backdrop-filter: var(--slotted-toast-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-toast] > [data-part-list] > [data-part-item][data-variant='raised'] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
   [data-ui-toast] > [data-part-list] > [data-part-item][data-variant='soft'] {
     --_ground: var(--_tone-surface);
     --_edge: var(--_tone-border);

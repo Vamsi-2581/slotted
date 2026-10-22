@@ -34,6 +34,7 @@ import type {
   DataGridEditCommit,
   DataGridPinnedRows,
   DataGridQueryRequest,
+  DataGridResizeMode,
   DataGridRowsReorderEvent,
   DataGridSelection,
   DataGridSelectionMode,
@@ -1658,6 +1659,7 @@ const ACCOUNT_COLUMNS: GridColumn<Account>[] = [
       [columnOverflow]="columnOverflow()"
       [pinnedRows]="pinnedRows()"
       [activatable]="activatable()"
+      [resizeMode]="resizeMode()"
       (columnStateChangeRequest)="stateRequests.push($event)"
       (queryChangeRequest)="queryRequests.push($event)"
       (outOfSpaceChange)="spaced.push($event)"
@@ -1680,6 +1682,7 @@ class Accounts {
   readonly columnOverflow = signal<DataGridColumnOverflow | undefined>('popin');
   readonly pinnedRows = signal<DataGridPinnedRows | undefined>(undefined);
   readonly activatable = signal(false);
+  readonly resizeMode = signal<DataGridResizeMode | undefined>(undefined);
   readonly stateRequests: DataGridColumnStateRequest[] = [];
   readonly queryRequests: DataGridQueryRequest[] = [];
   readonly spaced: GridOutOfSpace[] = [];
@@ -1865,6 +1868,42 @@ describe('SlDataGrid, explaining and arranging columns', () => {
     expect(request.previous.hidden).toEqual([]);
     expect(announce).toHaveBeenCalledWith('Owner hidden');
     announce.mockRestore();
+  });
+
+  /**
+   * Under `resizeMode="deferred"` a drag moves the guide and nothing else; the
+   * width is requested once, on release, and Escape requests nothing.
+   */
+  it('requests the width once on release under resizeMode="deferred"', () => {
+    fixture.componentInstance.resizeMode.set('deferred');
+    fixture.detectChanges();
+    const requests = fixture.componentInstance.stateRequests;
+    const resizer = header('owner').querySelector<HTMLElement>('[data-part="resizer"]')!;
+    resizer.setPointerCapture = () => {};
+    resizer.releasePointerCapture = () => {};
+    const pointer = (type: string, clientX: number) =>
+      resizer.dispatchEvent(new PointerEvent(type, { bubbles: true, button: 0, clientX }));
+
+    const before = requests.length;
+    pointer('pointerdown', 100);
+    fixture.detectChanges();
+    for (let step = 1; step <= 20; step += 1) pointer('pointermove', 100 + step * 2);
+    expect(requests.length).toBe(before);
+    expect(resizer.querySelector('[data-part="resize-guide"]')).not.toBeNull();
+    pointer('pointerup', 140);
+    fixture.detectChanges();
+    expect(requests.length).toBe(before + 1);
+    expect(requests.at(-1)).toMatchObject({ change: 'width', reason: 'pointer' });
+    expect(resizer.querySelector('[data-part="resize-guide"]')).toBeNull();
+
+    pointer('pointerdown', 100);
+    fixture.detectChanges();
+    pointer('pointermove', 130);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    pointer('pointerup', 130);
+    expect(requests.length).toBe(before + 1);
+    expect(resizer.querySelector('[data-part="resize-guide"]')).toBeNull();
   });
 
   it('fits one column or every column, with the reason of the gesture', async () => {

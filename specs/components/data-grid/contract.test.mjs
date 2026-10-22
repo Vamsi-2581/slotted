@@ -61,7 +61,7 @@ test('is the composite widget table declined to be', () => {
   assert.match(contract.roleReason, /2026-09-09-table-design\.md/);
 });
 
-test('names the forty-seven parts a grid is made of, and the element and role of each', () => {
+test('names the forty-eight parts a grid is made of, and the element and role of each', () => {
   assert.deepEqual(grid.parts, [
     'root',
     'scroll',
@@ -76,6 +76,7 @@ test('names the forty-seven parts a grid is made of, and the element and role of
     'column-menu',
     'column-menu-description',
     'resizer',
+    'resize-guide',
     'drop-indicator',
     'filter-row',
     'filter-cell',

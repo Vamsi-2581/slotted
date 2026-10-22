@@ -17,6 +17,7 @@ import {
   emptyQuery,
   FILTER_ROW,
   GROUP_ROW_PREFIX,
+  clampWidth,
   HEADER_ROW,
   isGroupCursorRow,
   moveCursor,
@@ -160,6 +161,7 @@ import {
   type DataGridStickyTo,
   type DataGridVariant,
   type DataGridLoadMoreTrigger,
+  type DataGridResizeMode,
   type DataGridVirtualize,
 } from './data-grid-defaults';
 import {
@@ -685,7 +687,16 @@ function contentWidth(cell: HTMLElement): number {
                       $event.stopPropagation();
                       fit($event.shiftKey ? null : column.id, 'pointer', $event)
                     "
-                  ></div>
+                  >
+                    @if (resizeGuide()?.column === column.id) {
+                      <div
+                        data-part="resize-guide"
+                        data-part-resize-guide=""
+                        aria-hidden="true"
+                        [style.block-size.px]="resizeGuide()!.span"
+                      ></div>
+                    }
+                  </div>
                 }
               </div>
               <ng-template slPopoverLayer>
@@ -1649,6 +1660,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
    * `scroll`.
    */
   readonly loadMoreTrigger = input<DataGridLoadMoreTrigger | undefined>(undefined);
+  /**
+   * `deferred` moves a guide while the resizer is dragged and applies the
+   * width once, on release, so the rows do not reflow under the pointer;
+   * Escape leaves the width. The keyboard and a double press apply at once in
+   * either mode. Default `live`.
+   */
+  readonly resizeMode = input<DataGridResizeMode | undefined>(undefined);
   /** The last page asked for failed: the automatic request stops and the footer offers a retry. */
   readonly loadMoreFailed = input(false, { transform: booleanAttribute });
   readonly skeletonRows = input<number | undefined>(undefined);
@@ -1750,6 +1768,9 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   );
   protected readonly resolvedLoadMore = computed(
     () => this.loadMoreTrigger() ?? this.defaults.loadMoreTrigger,
+  );
+  protected readonly resolvedResizeMode = computed(
+    () => this.resizeMode() ?? this.defaults.resizeMode,
   );
   /**
    * Under `scroll` the request is automatic: a quiet status while the page
@@ -2682,7 +2703,13 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     startX: number;
     startWidth: number;
     rtl: boolean;
+    /** The width a deferred drag stands at, applied on release. */
+    pending: number | null;
+    /** Escape during the drag: restores under `live`, requests nothing under `deferred`. */
+    escape: (event: KeyboardEvent) => void;
   } | null = null;
+  /** Under `resizeMode="deferred"`, the column whose guide is drawn and the scroller height it spans. */
+  protected readonly resizeGuide = signal<{ column: string; span: number } | null>(null);
   protected beginResize(event: PointerEvent, column: ResolvedGridColumn<Row>) {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -2693,25 +2720,65 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
        is as wide as the room left over, and a drag that started from the
        stated width jumped to it on the first move. */
     const header = handle.closest('[data-part="column-header"]');
+    const startWidth = header ? Math.round(header.getBoundingClientRect().width) : column.width;
+    const escape = (key: KeyboardEvent) => {
+      if (key.key !== 'Escape') return;
+      key.preventDefault();
+      key.stopPropagation();
+      if (this.resolvedResizeMode() === 'live') this.resizeTo(column.id, startWidth, 'pointer');
+      this.stopResize();
+    };
+    document.addEventListener('keydown', escape, true);
     this.resizeSession = {
       column: column.id,
       startX: event.clientX,
-      startWidth: header ? Math.round(header.getBoundingClientRect().width) : column.width,
+      startWidth,
       rtl: getComputedStyle(this.host.nativeElement).direction === 'rtl',
+      pending: null,
+      escape,
     };
     this.resizing.set(column.id);
+    if (this.resolvedResizeMode() === 'deferred') {
+      this.resizeGuide.set({
+        column: column.id,
+        span: this.scrollRef()?.nativeElement.clientHeight ?? 0,
+      });
+    }
   }
   protected moveResize(event: PointerEvent, column: ResolvedGridColumn<Row>) {
     const session = this.resizeSession;
     if (!session || session.column !== column.id) return;
     const delta = (event.clientX - session.startX) * (session.rtl ? -1 : 1);
-    this.resizeTo(column.id, session.startWidth + delta, 'pointer', event);
+    if (this.resolvedResizeMode() === 'live') {
+      this.resizeTo(column.id, session.startWidth + delta, 'pointer', event);
+      return;
+    }
+    /* Deferred: the guide slides by `translate`, which lays nothing out. */
+    const width = clampWidth(column.column, session.startWidth + delta);
+    session.pending = width;
+    (event.currentTarget as HTMLElement)
+      .querySelector<HTMLElement>('[data-part="resize-guide"]')
+      ?.style.setProperty(
+        'translate',
+        `${String((width - session.startWidth) * (session.rtl ? -1 : 1))}px 0`,
+      );
   }
   protected endResize(event: PointerEvent) {
-    if (!this.resizeSession) return;
+    const session = this.resizeSession;
+    if (!session) return;
     (event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
+    this.stopResize();
+    if (session.pending !== null && event.type === 'pointerup') {
+      this.resizeTo(session.column, session.pending, 'pointer', event);
+    }
+  }
+  private stopResize() {
+    if (this.resizeSession) {
+      document.removeEventListener('keydown', this.resizeSession.escape, true);
+    }
     this.resizeSession = null;
     this.resizing.set(null);
+    this.resizeGuide.set(null);
   }
 
   /* ── Reordering by drag ─────────────────────────────────────────────── */

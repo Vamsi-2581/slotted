@@ -3245,6 +3245,8 @@ export type ComponentToken =
   | '--slotted-data-grid-pin-shadow-size'
   | '--slotted-data-grid-radius'
   | '--slotted-data-grid-range-surface'
+  | '--slotted-data-grid-resize-guide-color'
+  | '--slotted-data-grid-resize-guide-width'
   | '--slotted-data-grid-row-block-size'
   | '--slotted-data-grid-row-color-selected'
   | '--slotted-data-grid-row-max-block-size'
@@ -5485,6 +5487,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-data-grid-pin-shadow-size",
   "--slotted-data-grid-radius",
   "--slotted-data-grid-range-surface",
+  "--slotted-data-grid-resize-guide-color",
+  "--slotted-data-grid-resize-guide-width",
   "--slotted-data-grid-row-block-size",
   "--slotted-data-grid-row-color-selected",
   "--slotted-data-grid-row-max-block-size",

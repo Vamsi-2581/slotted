@@ -60,4 +60,5 @@ export type {
   DataGridVariant,
   DataGridVirtualize,
   DataGridLoadMoreTrigger,
+  DataGridResizeMode,
 } from './data-grid-defaults';

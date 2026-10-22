@@ -1,5 +1,6 @@
 import { withSelectorKey } from '@slotted/core/selector-key';
 import {
+  clampWidth,
   FILTER_ROW,
   HEADER_ROW,
   POPIN_COLUMN_ID,
@@ -605,6 +606,10 @@ function ColumnMenu<Row>({
  * would be a second tab stop. Escape during a drag restores the width the
  * drag started from; a double press fits the column to its content, and with
  * Shift every resizable column.
+ *
+ * Under `resizeMode="deferred"` a move only slides the guide, by `translate`
+ * written on the element, and the width is requested once on release: the
+ * rows stay still under the pointer. Escape then leaves the width untouched.
  */
 function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
   const grid = useDataGridInternal<Row>();
@@ -612,9 +617,15 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
     startX: number;
     startWidth: number;
     rtl: boolean;
+    /** The scroller's visible height, which the guide spans. */
+    span: number;
   } | null>(null);
   const latest = useRef(session);
   latest.current = session;
+  const guide = useRef<HTMLDivElement | null>(null);
+  /** The width a deferred drag stands at, applied on release. */
+  const pending = useRef<number | null>(null);
+  const deferred = grid.resizeMode === 'deferred';
 
   useEffect(() => {
     if (!session) return;
@@ -622,13 +633,14 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
       if (event.key !== 'Escape') return;
       event.preventDefault();
       event.stopPropagation();
-      grid.resizeTo(column.id, session.startWidth, 'pointer');
+      if (!deferred) grid.resizeTo(column.id, session.startWidth, 'pointer');
+      pending.current = null;
       setSession(null);
       grid.setResizing(null);
     };
     document.addEventListener('keydown', escape, true);
     return () => document.removeEventListener('keydown', escape, true);
-  }, [session, grid, column.id]);
+  }, [session, grid, column.id, deferred]);
 
   const down = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
@@ -640,10 +652,13 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
        is as wide as the room left over, and a drag that started from the
        stated width jumped to it on the first move. */
     const header = event.currentTarget.closest('[data-part="column-header"]');
+    const scroller = event.currentTarget.closest<HTMLElement>('[data-part="scroll"]');
+    pending.current = null;
     setSession({
       startX: event.clientX,
       startWidth: header ? Math.round(header.getBoundingClientRect().width) : column.width,
       rtl,
+      span: scroller?.clientHeight ?? 0,
     });
     grid.setResizing(column.id);
   };
@@ -651,13 +666,27 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
     const state = latest.current;
     if (!state) return;
     const delta = (event.clientX - state.startX) * (state.rtl ? -1 : 1);
-    grid.resizeTo(column.id, state.startWidth + delta, 'pointer', event);
+    if (!deferred) {
+      grid.resizeTo(column.id, state.startWidth + delta, 'pointer', event);
+      return;
+    }
+    const width = clampWidth(column.column, state.startWidth + delta);
+    pending.current = width;
+    guide.current?.style.setProperty(
+      'translate',
+      `${String((width - state.startWidth) * (state.rtl ? -1 : 1))}px 0`,
+    );
   };
   const up = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!latest.current) return;
     event.currentTarget.releasePointerCapture(event.pointerId);
+    const width = pending.current;
+    pending.current = null;
     setSession(null);
     grid.setResizing(null);
+    if (deferred && width !== null && event.type === 'pointerup') {
+      grid.resizeTo(column.id, width, 'pointer', event);
+    }
   };
 
   return (
@@ -678,6 +707,16 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
       onPointerUp={up}
       title={grid.t('resize')}
       {...(session ? { 'data-resizing': '' } : {})}
-    />
+    >
+      {deferred && session ? (
+        <div
+          aria-hidden
+          data-part="resize-guide"
+          data-part-resize-guide=""
+          ref={guide}
+          style={{ blockSize: session.span }}
+        />
+      ) : null}
+    </div>
   );
 }

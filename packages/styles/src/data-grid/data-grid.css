@@ -842,6 +842,30 @@
   }
 
   /**
+   * Under `resizeMode="deferred"` the drag moves this line and nothing else:
+   * it stands on the column's edge, spans the scroller's visible height and
+   * slides by `translate`, which lays nothing out; the width is applied once,
+   * on release.
+   */
+  [data-ui-data-grid] [data-part-resizer] > [data-part-resize-guide] {
+    background-color: var(
+      --slotted-data-grid-resize-guide-color,
+      var(--slotted-focus-ring-color, Highlight)
+    );
+    inline-size: var(
+      --slotted-data-grid-resize-guide-width,
+      var(--slotted-border-width-thick, 2px)
+    );
+    inset-block-start: 0;
+    inset-inline-start: calc(
+      50% - var(--slotted-data-grid-resize-guide-width, var(--slotted-border-width-thick, 2px)) / 2
+    );
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+  }
+
+  /**
    * ── Reordering ─────────────────────────────────────────────────────────
    *
    * The dragged header dims; the drop indicator is a line of the accent
@@ -2415,6 +2439,11 @@
    * ── Scheme and platform ────────────────────────────────────────────────
    */
   @media (forced-colors: active) {
+    [data-ui-data-grid] [data-part-resizer] > [data-part-resize-guide] {
+      background-color: Highlight;
+      forced-color-adjust: none;
+    }
+
     [data-ui-data-grid] [role='gridcell'][data-current],
     [data-ui-data-grid] [role='columnheader'][data-current] {
       box-shadow: inset 0 0 0 var(--_ring-width) Highlight;

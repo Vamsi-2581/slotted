@@ -1,6 +1,7 @@
 import { act, render } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { cdp, userEvent } from 'vitest/browser';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Button } from '../button';
 import { DataGrid } from './data-grid';
@@ -234,3 +235,89 @@ const MANY: Entry[] = Array.from({ length: 450 }, (_, index) => ({
   payee: `Payee ${String(index)}`,
   amount: index,
 }));
+
+/**
+ * Under `resizeMode="deferred"` a drag moves a guide and leaves the column
+ * still: on a grid of rich rows the content lagged behind the pointer while
+ * every move reflowed every cell. The width is applied once, on release, and
+ * Escape leaves it as it was.
+ */
+describe('DataGrid resizing a column with resizeMode="deferred"', () => {
+  async function mouse(
+    type: 'mousePressed' | 'mouseMoved' | 'mouseReleased',
+    x: number,
+    y: number,
+  ) {
+    const frame = window.frameElement?.getBoundingClientRect();
+    await cdp().send('Input.dispatchMouseEvent', {
+      type,
+      x: (frame?.left ?? 0) + x,
+      y: (frame?.top ?? 0) + y,
+      button: 'left',
+      buttons: type === 'mouseReleased' ? 0 : 1,
+      clickCount: 1,
+    });
+  }
+
+  function scene() {
+    const onColumnStateChange = vi.fn();
+    const { container } = render(
+      <div style={{ inlineSize: 400 }}>
+        <DataGrid<Entry>
+          aria-label="Entries"
+          columns={[
+            { id: 'payee', label: 'Payee', rowHeader: true, width: 160 },
+            { id: 'amount', label: 'Amount', kind: 'number', width: 120 },
+          ]}
+          onColumnStateChange={onColumnStateChange}
+          resizeMode="deferred"
+          rowKey="id"
+          rows={ROWS.slice(0, 5)}
+          virtualize={false}
+        />
+      </div>,
+    );
+    const header = container.querySelector(
+      '[data-part="column-header"][data-column="payee"]',
+    ) as HTMLElement;
+    const resizer = header.querySelector('[data-part="resizer"]') as HTMLElement;
+    const grid = container.querySelector('[data-ui="data-grid"]') as HTMLElement;
+    const rect = resizer.getBoundingClientRect();
+    const start = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    const template = () => getComputedStyle(grid).getPropertyValue('--slotted-data-grid-template');
+    return { onColumnStateChange, header, grid, start, template };
+  }
+
+  it('moves only a guide while dragging and applies the width once on release', async () => {
+    const { onColumnStateChange, header, grid, start, template } = scene();
+    const width = header.getBoundingClientRect().width;
+    const before = template();
+    await mouse('mousePressed', start.x, start.y);
+    for (let step = 1; step <= 20; step += 1)
+      await mouse('mouseMoved', start.x + step * 2, start.y);
+    expect(header.getBoundingClientRect().width).toBe(width);
+    expect(template()).toBe(before);
+    expect(onColumnStateChange).not.toHaveBeenCalled();
+    expect(grid.querySelector('[data-part="resize-guide"]')).not.toBeNull();
+
+    await mouse('mouseReleased', start.x + 40, start.y);
+    expect(onColumnStateChange).toHaveBeenCalledTimes(1);
+    const [state, request] = onColumnStateChange.mock.calls[0]!;
+    expect(state.widths.payee).toBe(Math.round(width) + 40);
+    expect(request.reason).toBe('pointer');
+    expect(grid.querySelector('[data-part="resize-guide"]')).toBeNull();
+  });
+
+  it('leaves the width and removes the guide on Escape', async () => {
+    const { onColumnStateChange, header, grid, start } = scene();
+    const width = header.getBoundingClientRect().width;
+    await mouse('mousePressed', start.x, start.y);
+    for (let step = 1; step <= 10; step += 1)
+      await mouse('mouseMoved', start.x + step * 3, start.y);
+    await userEvent.keyboard('{Escape}');
+    expect(grid.querySelector('[data-part="resize-guide"]')).toBeNull();
+    await mouse('mouseReleased', start.x + 30, start.y);
+    expect(header.getBoundingClientRect().width).toBe(width);
+    expect(onColumnStateChange).not.toHaveBeenCalled();
+  });
+});

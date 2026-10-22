@@ -596,9 +596,9 @@ const api = apiRows([
   [
     'size',
     "'sm' | 'md' | 'lg' | 'xl' | 'full' | 'content'",
-    'md',
+    'content on top and bottom, md on start and end',
     '<sl-drawer>, provideDrawerDefaults',
-    'The panel’s measure at rest: one of the steps sm (18rem), md (24rem), lg (30rem), xl (40rem) and full, or content, which fits what the panel holds, up to 4rem short of the screen. When unset, content on top and bottom and md on start and end. A step wider than the screen is held to it.',
+    'The panel’s measure at rest: one of the steps sm (18rem), md (24rem), lg (30rem), xl (40rem) and full, or content, which fits what the panel holds, up to 4rem short of the screen. A step wider than the screen is held to it.',
   ],
   [
     'mount',

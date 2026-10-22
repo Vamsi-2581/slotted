@@ -537,7 +537,7 @@ test('lets the consumer drop the body inset', () => {
  */
 test('measures a sheet by its content and a side panel by its step', () => {
   assert.ok(contract.axes.size.includes('content'));
-  assert.equal(drawer.defaults.size, 'md');
+  assert.equal(drawer.defaults.size, 'content on top and bottom, md on start and end');
   assert.match(contract.sheet.content, /default size on top and bottom and never on start and end/);
   assert.match(contract.sheet.contentStop, /offsetHeight/);
   assert.match(contract.sheet.contentStop, /undefined/);

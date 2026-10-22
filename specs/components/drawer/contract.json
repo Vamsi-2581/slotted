@@ -281,7 +281,7 @@
       "defaults": {
         "mode": "overlay",
         "side": "end",
-        "size": "md",
+        "size": "content on top and bottom, md on start and end",
         "mount": "active",
         "modal": true,
         "escape": "close",

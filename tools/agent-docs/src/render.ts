@@ -181,10 +181,14 @@ function axesSection(input: FamilyInput): string[] {
         .filter((value) => value !== undefined)
         .map((value) => String(value)),
     );
+    const named = values.map((value) => String(value));
     return [
       code(axis),
-      codeList(values.map((value) => String(value))),
-      defaults.length === 0 ? FIXED_TEXT.none : codeList(defaults),
+      codeList(named),
+      /* A default that depends on another axis is a sentence, not a value. */
+      defaults.length === 0
+        ? FIXED_TEXT.none
+        : defaults.map((value) => (named.includes(value) ? code(value) : value)).join(', '),
     ];
   });
   return ['## Axes and defaults', '', ...table(FIXED_TEXT.headers.axes, rows), ''];

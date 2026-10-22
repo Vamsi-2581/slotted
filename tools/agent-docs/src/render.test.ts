@@ -271,3 +271,25 @@ describe('siteExampleErrors', () => {
     ]);
   });
 });
+
+describe('the axes table', () => {
+  it('writes a default that is an axis value as code, and one that depends on another axis as words', () => {
+    const table = (size: string) =>
+      main({
+        ...fieldInput,
+        contract: {
+          ...fieldInput.contract,
+          members: {
+            ...fieldInput.contract.members,
+            field: { ...fieldInput.contract.members.field!, defaults: { size } },
+          },
+        },
+      })
+        .split('## Axes and defaults')[1]!
+        .split('\n## ')[0]!;
+    expect(table('md')).toContain('| `size` | `sm`, `md`, `lg` | `md` |');
+    expect(table('sm on top, md elsewhere')).toContain(
+      '| `size` | `sm`, `md`, `lg` | sm on top, md elsewhere |',
+    );
+  });
+});

@@ -55,7 +55,12 @@ describe('designTokens', () => {
     expect(tokens.color.tokens.find((token) => token.name === 'slotted-scrim')?.value.dark).toBe(
       'rgb(0 0 0 / 0.62)',
     );
-    expect(dropped).toEqual(['--slotted-control-shadow', '--slotted-current-edge']);
+    /* A scheme token that is no colour: the material's filter varies by scheme too. */
+    expect(dropped).toEqual([
+      '--slotted-material-backdrop',
+      '--slotted-control-shadow',
+      '--slotted-current-edge',
+    ]);
     /* A state layer is the text colour at a share over transparency. */
     expect(
       tokens.color.tokens.find((token) => token.name === 'slotted-state-hover')?.value.light,

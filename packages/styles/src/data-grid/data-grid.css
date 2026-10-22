@@ -812,10 +812,11 @@
 
   /* The last column's handle stays inside the row: half a target hanging
      past the last cell was twelve pixels of overflow on a row nothing could
-     scroll to. */
+     scroll to. The last column header, not the row's last child: the pop-in
+     header follows it when columns yield to the frame. */
   [data-ui-data-grid]
     [data-part-header-row]
-    > [data-part-column-header]:last-child
+    > [data-part-column-header]:not(:has(~ [data-part-column-header]))
     > [data-part-resizer] {
     inline-size: calc(var(--slotted-target-min, 24px) / 2);
     inset-inline-end: 0;

@@ -137,3 +137,52 @@ describe('a grid reading its rows again', () => {
     expect(cell.contains(centre())).toBe(false);
   });
 });
+
+/**
+ * A template that fits the frame scrolls nothing. The last column's resizer
+ * is held inside the row, but the rule found it as the row's last child, and
+ * with columns that yield to the frame the pop-in header comes after it: half
+ * a resizer hung past the template, twelve pixels of horizontal scroll.
+ */
+describe('DataGrid with a template that fits its frame', () => {
+  it('has no horizontal overflow', async () => {
+    const { container } = render(
+      <div style={{ inlineSize: 372 }}>
+        <DataGrid<Entry>
+          aria-label="Entries"
+          columns={[
+            { id: 'date', label: 'Date', accessor: () => '2026-10-22', width: 104 },
+            { id: 'payee', label: 'Payee', rowHeader: true, flex: 2, minWidth: 150 },
+            {
+              id: 'category',
+              label: 'Category',
+              accessor: () => 'Food',
+              flex: 1,
+              minWidth: 160,
+              maxWidth: 280,
+              priority: 2,
+            },
+            {
+              id: 'tags',
+              label: 'Tags',
+              accessor: () => 'a, b',
+              width: 160,
+              priority: 5,
+              popin: false,
+            },
+            { id: 'amount', label: 'Amount', kind: 'number', width: 148, priority: 1 },
+          ]}
+          defaultColumnState={{ hidden: ['date'] }}
+          rowKey="id"
+          rows={ROWS.slice(0, 5)}
+          selectionMode="multiple"
+          virtualize={false}
+        />
+      </div>,
+    );
+    await frame();
+    await frame();
+    const scroller = container.querySelector('[data-part="scroll"]') as HTMLElement;
+    expect(scroller.scrollWidth - scroller.clientWidth).toBe(0);
+  });
+});

@@ -67,13 +67,30 @@ function useNode(
   );
 }
 
+/** The consumer's ref as a callback, which an element `render` substitutes attaches whatever its type. */
+function useAttach(ref: Ref<never> | undefined): (node: HTMLElement | null) => void {
+  return useCallback(
+    (node: HTMLElement | null) => {
+      if (typeof ref === 'function') (ref as (value: HTMLElement | null) => void)(node);
+      else if (ref !== null && ref !== undefined) {
+        (ref as { current: HTMLElement | null }).current = node;
+      }
+    },
+    [ref],
+  );
+}
+
 /** A region says it exists, so a skip link is never written to a target nobody rendered. */
 function useRegion(region: 'nav' | 'main' | 'aside') {
   const shell = useAppShell();
   useEffect(() => shell.register(region), [region, shell]);
 }
 
-function part(props: HTMLAttributes<HTMLElement>, render: ((p: never) => ReactNode) | undefined) {
+/** A part rendered into another element: the props carry the ref, which is also how the shell registers the part. */
+function part(
+  props: HTMLAttributes<HTMLElement> & { ref?: unknown },
+  render: ((p: never) => ReactNode) | undefined,
+) {
   return render === undefined ? null : render(props as never);
 }
 
@@ -99,7 +116,7 @@ export function AppShellBanner({
     'data-part': 'banner',
     style,
   });
-  return part(rootProps, render) ?? <header {...rootProps} ref={attach} />;
+  return part({ ...rootProps, ref: attach }, render) ?? <header {...rootProps} ref={attach} />;
 }
 
 /** The start cluster of the banner: the toggle, the mark, the name of the workspace. */
@@ -118,7 +135,8 @@ export function AppShellBrand({
     'data-part': 'brand',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /**
@@ -140,7 +158,8 @@ export function AppShellCentre({
     'data-part': 'centre',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /** The end cluster, pushed there by the space it takes, so an empty one costs nothing. */
@@ -159,7 +178,8 @@ export function AppShellActions({
     'data-part': 'actions',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /**
@@ -193,7 +213,7 @@ export function AppShellNav({
     id: id ?? shell.navId,
     style,
   });
-  return part(rootProps, render) ?? <nav {...rootProps} ref={attach} />;
+  return part({ ...rootProps, ref: attach }, render) ?? <nav {...rootProps} ref={attach} />;
 }
 
 /**
@@ -216,7 +236,8 @@ export function AppShellNavRail({
     'data-part': 'nav-rail',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /** The pinned top of the navigation column. */
@@ -235,7 +256,8 @@ export function AppShellNavHeader({
     'data-part': 'nav-header',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /** The middle, and the only part of the column that scrolls. */
@@ -254,7 +276,8 @@ export function AppShellNavBody({
     'data-part': 'nav-body',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /** The pinned bottom: the account, the collapse control. */
@@ -273,7 +296,8 @@ export function AppShellNavFooter({
     'data-part': 'nav-footer',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /**
@@ -308,7 +332,7 @@ export function AppShellMain({
     id: id ?? shell.mainId,
     style,
   });
-  return part(rootProps, render) ?? <main {...rootProps} ref={attach} />;
+  return part({ ...rootProps, ref: attach }, render) ?? <main {...rootProps} ref={attach} />;
 }
 
 /**
@@ -403,7 +427,7 @@ export function AppShellAside({
             '--slotted-app-shell-aside-extent': `${Math.round(extent * 10000) / 100}cqi`,
           } as CSSProperties),
   });
-  return part(rootProps, render) ?? <aside {...rootProps} ref={attach} />;
+  return part({ ...rootProps, ref: attach }, render) ?? <aside {...rootProps} ref={attach} />;
 }
 
 /** The pinned top of the pane: its title, and the control that closes it. */
@@ -422,7 +446,8 @@ export function AppShellAsideHeader({
     'data-part': 'aside-header',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /**
@@ -446,7 +471,8 @@ export function AppShellAsideBody({
     'data-part': 'aside-body',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 const useIsomorphicLayoutEffect = typeof document === 'undefined' ? useEffect : useLayoutEffect;
@@ -690,7 +716,8 @@ export function AppShellAsideFooter({
     'data-part': 'aside-footer',
     style,
   });
-  return part(rootProps, render) ?? <div {...rootProps} ref={ref as never} />;
+  const attach = useAttach(ref as never);
+  return part({ ...rootProps, ref: attach }, render) ?? <div {...rootProps} ref={attach} />;
 }
 
 /** The `contentinfo` landmark: the application's footer, not the page's action bar. */
@@ -710,7 +737,7 @@ export function AppShellFooter({
     'data-part': 'footer',
     style,
   });
-  return part(rootProps, render) ?? <footer {...rootProps} ref={attach} />;
+  return part({ ...rootProps, ref: attach }, render) ?? <footer {...rootProps} ref={attach} />;
 }
 
 /**
@@ -770,7 +797,7 @@ export function AppShellNavToggle({
     style,
     type: type ?? ('button' as const),
   });
-  return part(rootProps, render) ?? <button {...rootProps} ref={attach} />;
+  return part({ ...rootProps, ref: attach }, render) ?? <button {...rootProps} ref={attach} />;
 }
 
 /**
@@ -822,5 +849,5 @@ export function AppShellAsideToggle({
     style,
     type: type ?? ('button' as const),
   });
-  return part(rootProps, render) ?? <button {...rootProps} ref={attach} />;
+  return part({ ...rootProps, ref: attach }, render) ?? <button {...rootProps} ref={attach} />;
 }

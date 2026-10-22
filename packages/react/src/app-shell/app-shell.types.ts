@@ -1,6 +1,12 @@
 import type { AppShellMessages, FamilyTranslator, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
-import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, RefObject } from 'react';
+import type {
+  ComponentPropsWithRef,
+  HTMLAttributes,
+  ReactNode,
+  RefCallback,
+  RefObject,
+} from 'react';
 
 import type { ProgressBarProps } from '../progress-indicator';
 
@@ -218,7 +224,15 @@ export interface AppShellContextValue {
 }
 
 /** What `render` receives for the root. */
+/** What `render` receives for a part: its attributes, and the ref the shell registers it through. */
+export interface AppShellPartProps<E extends HTMLElement = HTMLElement> extends HTMLAttributes<E> {
+  /** The callback the part reads its element through; a substituted element attaches it. */
+  ref?: RefCallback<E> | undefined;
+}
+
 export interface AppShellRootProps extends HTMLAttributes<HTMLElement> {
+  /** The callback the root reads its element through; a substituted element attaches it. */
+  ref?: RefCallback<HTMLElement> | undefined;
   'data-aside-mode'?: 'inline' | 'overlay' | undefined;
   'data-aside-size': AppShellSize;
   'data-canvas': AppShellCanvas;
@@ -305,22 +319,22 @@ export interface AppShellProps extends Omit<Native<'div'>, 'ref'>, Common {
 }
 
 export interface AppShellBannerProps extends Native<'header'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellBrandProps extends Native<'div'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellActionsProps extends Native<'div'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellCentreProps extends Native<'div'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellNavProps extends Native<'nav'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellNavSectionProps extends Native<'div'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 /**
  * The bar's own props, less the placement the shell decides. `size` defaults
@@ -330,27 +344,27 @@ export interface AppShellNavSectionProps extends Native<'div'>, Common {
 export type AppShellProgressProps = Omit<ProgressBarProps, 'placement'>;
 
 export interface AppShellMainProps extends Native<'main'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellAsideProps extends Native<'aside'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellAsideSectionProps extends Native<'div'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellAsideBodyProps extends AppShellAsideSectionProps {
   /** `none` drops the body's own padding, for content that brings its own inset. */
   inset?: 'none' | undefined;
 }
 export interface AppShellAsideResizerProps extends Native<'div'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellAsideToggleProps extends Native<'button'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellFooterProps extends Native<'footer'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }
 export interface AppShellNavToggleProps extends Native<'button'>, Common {
-  render?: ((props: HTMLAttributes<HTMLElement>) => ReactNode) | undefined;
+  render?: ((props: AppShellPartProps) => ReactNode) | undefined;
 }

@@ -55,6 +55,7 @@ export type {
   AppShellPrimary,
   AppShellProgressProps,
   AppShellProps,
+  AppShellPartProps,
   AppShellRootProps,
   AppShellScroll,
   AppShellSeparation,

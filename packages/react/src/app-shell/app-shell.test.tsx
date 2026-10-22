@@ -1190,3 +1190,33 @@ describe('AppShellProgress', () => {
     expect(screen.getByRole('progressbar')).toHaveAccessibleName('Opening the order');
   });
 });
+
+/**
+ * A part rendered into another element still hands that element to its ref:
+ * the ref is also how the shell registers the part. `render` was called with
+ * props that carried no ref, so a substituted footer was never registered.
+ */
+describe('a part rendered into another element', () => {
+  it('attaches the footer’s ref to the element render returns', () => {
+    const footer = vi.fn();
+    renderBase(
+      <AppShell>
+        <AppShellFooter ref={footer} render={(props) => <div {...props} data-testid="footer" />} />
+      </AppShell>,
+    );
+    expect(footer).toHaveBeenCalledWith(screen.getByTestId('footer'));
+  });
+
+  it('registers the shell’s own root when render substitutes it', () => {
+    let handle: AppShellHandle | null = null;
+    renderBase(
+      <AppShell
+        ref={(value) => {
+          handle = value;
+        }}
+        render={(props) => <section {...props} data-testid="shell" />}
+      />,
+    );
+    expect((handle as AppShellHandle | null)?.root).toBe(screen.getByTestId('shell'));
+  });
+});

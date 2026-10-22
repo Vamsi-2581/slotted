@@ -736,7 +736,11 @@ export function AppShell({
 
   return (
     <AppShellContext.Provider value={context}>
-      {render === undefined ? <div {...rootProps} ref={setRoot} /> : render(rootProps)}
+      {render === undefined ? (
+        <div {...rootProps} ref={setRoot} />
+      ) : (
+        render({ ...rootProps, ref: setRoot })
+      )}
     </AppShellContext.Provider>
   );
 }

@@ -15,8 +15,9 @@
    * the ends of the bar and nowhere else — and states no distance between its
    * controls. A joined bar does not wrap and does not stack: its shape is the
    * whole point of it, and no surveyed implementation flips that shape at a
-   * width the consumer cannot see coming. A label that outgrows the bar wraps
-   * inside its own control, which is `button`'s rule and not this family's.
+   * width the consumer cannot see coming. A label that outgrows the bar ends
+   * in an ellipsis inside its own control, which is `button`'s rule and not
+   * this family's.
    *
    * The children are the consumer's own elements, selected as direct children.
    * Primer wraps each child in a div of its own and pays for it twice: its

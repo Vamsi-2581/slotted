@@ -67,3 +67,28 @@ describe('a control waiting in its glyph slot', () => {
     expect(getComputedStyle(ring).visibility).toBe('visible');
   });
 });
+
+/**
+ * Squeezed in a row, a label broke inside its words — "Corri|gir", "Anul|ar" —
+ * because it could break anywhere, which made a button as narrow as one
+ * letter. A label is one line at its own width: the row overflows, or a
+ * toolbar folds what does not fit.
+ */
+describe('a row of buttons narrower than their labels', () => {
+  it('keeps every label on one line, whole', () => {
+    const labels = ['Corrigir', 'Marcar como transferência', 'Registrar reposição', 'Anular'];
+    render(
+      <div style={{ display: 'flex', inlineSize: 300 }}>
+        {labels.map((label) => (
+          <Button key={label}>{label}</Button>
+        ))}
+      </div>,
+    );
+    for (const label of document.querySelectorAll<HTMLElement>('[data-part="label"]')) {
+      const range = document.createRange();
+      range.selectNodeContents(label);
+      expect(range.getClientRects().length, label.textContent ?? '').toBe(1);
+      expect(label.scrollWidth, label.textContent ?? '').toBeLessThanOrEqual(label.clientWidth);
+    }
+  });
+});

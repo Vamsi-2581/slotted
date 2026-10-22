@@ -676,14 +676,20 @@
   }
 
   /**
-   * The label carries a wrapping line height of its own: the control's line
-   * height is 1, which centres a single line inside the box and crushes the
-   * second one. A token longer than the container breaks instead of escaping.
+   * The label is one line at its own width. It broke anywhere once, which made
+   * a button in a row as narrow as one letter: squeezed, "Corrigir" became
+   * three lines and broke inside the word. A row of buttons now overflows, or
+   * a toolbar folds what does not fit; a control held narrower than its label
+   * by its container — `max-inline-size: 100%` — cuts the label with an
+   * ellipsis rather than spilling it past the border. The line height is the
+   * text step's, which the trim below reads.
    */
   [data-ui-button] [data-part-label] {
     line-height: var(--slotted-line-height-sm, 1.45);
     min-inline-size: 0;
-    overflow-wrap: anywhere;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /**

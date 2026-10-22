@@ -582,11 +582,18 @@ test('insets the side that holds a glyph less than the side that holds a word', 
   }
 });
 
-test('lets the label wrap instead of pushing the control past its container', () => {
+/**
+ * A label is one line at its own width and never breaks inside a word: broken
+ * anywhere, a button in a row shrank to one letter and "Corrigir" took three
+ * lines. Held narrower than its label by its container, it ends in an ellipsis.
+ */
+test('keeps the label on one line, cut by an ellipsis only when the control is held narrower', () => {
   const label = rule(`${ui} [data-part-label]`);
-  assert.ok(label.includes('overflow-wrap:anywhere'));
+  assert.ok(label.includes('white-space:nowrap'));
+  assert.ok(label.includes('text-overflow:ellipsis'));
+  assert.ok(label.includes('overflow:hidden'));
+  assert.doesNotMatch(css, /overflow-wrap:\s*anywhere/);
   assert.ok(label.includes('line-height:var(--slotted-line-height-sm'));
-  assert.doesNotMatch(css, /white-space:nowrap/);
   assert.ok(rule(ui).includes('min-block-size:var(--_height)'), 'the control cannot grow');
   assert.ok(rule(ui).includes('max-inline-size:100%'), 'the control can outgrow its container');
 });

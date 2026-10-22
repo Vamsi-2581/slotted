@@ -565,6 +565,7 @@ describe('SlPageHeader defaults', () => {
       providePageHeaderDefaults({
         collapse: 'manual',
         level: '2',
+        material: true,
         size: 'lg',
         variant: 'floating',
       }),
@@ -585,6 +586,7 @@ describe('SlPageHeader defaults', () => {
     expect(root.getAttribute('data-level')).toBe('2');
     expect(root.getAttribute('data-size')).toBe('sm');
     expect(root.getAttribute('data-variant')).toBe('floating');
+    expect(root.getAttribute('data-material')).toBe('');
     expect(root.querySelector('[data-part="toggle"]')?.getAttribute('aria-label')).toBe('Fechar');
     vi.unstubAllGlobals();
   });

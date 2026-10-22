@@ -5,6 +5,7 @@ import type { PageHeaderDefaults, PageHeaderDefaultsProviderProps } from './page
 const FALLBACK: PageHeaderDefaults = {
   collapse: 'scroll',
   level: '1',
+  material: false,
   size: 'md',
   variant: 'band',
 };
@@ -18,7 +19,7 @@ export function usePageHeaderDefaults(): PageHeaderDefaults {
 
 /**
  * An application decides once how its page headers behave — the size, the
- * rank, whether a scroll collapses the area — rather than repeating them on
+ * rank, whether a scroll collapses the area, whether the chrome is a material — rather than repeating them on
  * every screen. A header that states any of them itself still wins. Its words
  * come from the language in force (`SlottedProvider`).
  */
@@ -33,6 +34,7 @@ export function PageHeaderDefaultsProvider({
       value={{
         collapse: defaults.collapse ?? inherited.collapse,
         level: defaults.level ?? inherited.level,
+        material: defaults.material ?? inherited.material,
         size: defaults.size ?? inherited.size,
         variant: defaults.variant ?? inherited.variant,
       }}

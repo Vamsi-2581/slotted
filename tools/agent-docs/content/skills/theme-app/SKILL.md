@@ -67,7 +67,9 @@ has.
    tab bar, a sticky banner — is a material: its background reads
    `--slotted-surface-material` and its backdrop filter reads
    `--slotted-material-backdrop`. The theme makes both opaque under reduced
-   transparency and forced colours.
+   transparency and forced colours. A page header becomes that material once
+   content passes under it with its `material` input, set on the header or on
+   its defaults.
 
 ## 4. Restyle a control
 

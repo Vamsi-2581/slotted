@@ -254,8 +254,24 @@
    * transparent at rest, filters nothing at rest.
    */
   [data-ui-page-header][data-stuck] {
-    -webkit-backdrop-filter: var(--slotted-page-header-backdrop-filter, none);
-    backdrop-filter: var(--slotted-page-header-backdrop-filter, none);
+    -webkit-backdrop-filter: var(--slotted-page-header-backdrop-filter, var(--_backdrop, none));
+    backdrop-filter: var(--slotted-page-header-backdrop-filter, var(--_backdrop, none));
+  }
+
+  /**
+   * `material`: stuck, the chrome is the theme's material — the ground
+   * `--slotted-surface-material` and the filter `--slotted-material-backdrop`
+   * — in every variant. At rest each variant keeps its own ground. The family
+   * tokens still win, and the pill keeps the opaque surface, because half of
+   * it hangs below the root over content the root's filter does not reach.
+   * The theme makes both material tokens opaque under reduced transparency.
+   */
+  [data-ui-page-header][data-material][data-stuck] {
+    --_ground: var(
+      --slotted-page-header-background,
+      var(--slotted-surface-material, var(--_surface))
+    );
+    --_backdrop: var(--slotted-material-backdrop, none);
   }
 
   /**

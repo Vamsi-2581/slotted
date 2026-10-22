@@ -220,6 +220,7 @@
   },
   "axes": {
     "variant": ["band", "plain", "floating"],
+    "material": [false, true],
     "size": ["sm", "md", "lg"],
     "level": ["1", "2", "3"],
     "collapse": ["scroll", "manual"]
@@ -231,6 +232,11 @@
     "default": "band",
     "reason": "a header nested in a padded pane painted the surface as a strip with one hairline on a sunken page, and read as a slab the padding cut. sap.f.DynamicPage has backgroundDesign Transparent and Ant's PageHeader has ghost for the first answer; the second is a box for a body made of cards, where the header is the first card. Changing the page's ground instead changes every other region on the screen"
   },
+  "material": {
+    "true": "once stuck (data-stuck), the root's ground is --slotted-surface-material and its backdrop filter --slotted-material-backdrop, in every variant; at rest each variant keeps its ground. --slotted-page-header-background and --slotted-page-header-backdrop-filter still win. The pill keeps the opaque surface, because half of it hangs below the root over content the root's filter does not reach",
+    "default": false,
+    "reason": "the theme defines a material for a bar that floats over scrolling content, opaque under prefers-reduced-transparency and forced colours; a header is the bar that does. The choice is per application or per screen, not per theme, so it is a prop and a default rather than a token the theme writes"
+  },
   "collapse": {
     "scroll": "the header area collapses when it scrolls out of the scrollport and expands when it scrolls back in, each with the reason scroll; the toggle and the pin work as well",
     "manual": "scrolling never moves expanded; only the toggle, the pin and the application do. sap.f.preserveHeaderStateOnScroll",
@@ -240,10 +246,11 @@
     "size": ["prop", "defaults", "md"],
     "level": ["prop", "defaults", "1"],
     "collapse": ["prop", "defaults", "scroll"],
-    "variant": ["prop", "defaults", "band"]
+    "variant": ["prop", "defaults", "band"],
+    "material": ["prop", "defaults", false]
   },
   "provides": {
-    "pageHeaderDefaults": ["size", "level", "collapse", "variant"]
+    "pageHeaderDefaults": ["size", "level", "collapse", "variant", "material"]
   },
   "stateAttributes": {
     "expanded": "data-expanded",
@@ -274,6 +281,7 @@
         "level": "1",
         "collapse": "scroll",
         "variant": "band",
+        "material": false,
         "expanded": true,
         "pinned": false,
         "loading": false

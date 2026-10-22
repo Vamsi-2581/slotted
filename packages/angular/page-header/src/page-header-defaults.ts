@@ -31,6 +31,8 @@ export type PageHeaderPinnedReason = 'pointer' | 'keyboard' | 'programmatic';
 export interface PageHeaderDefaults {
   collapse: PageHeaderCollapse;
   level: PageHeaderLevel;
+  /** Stuck, the chrome is the theme's material: a translucent ground over a blurred backdrop. */
+  material: boolean;
   size: PageHeaderSize;
   variant: PageHeaderVariant;
 }
@@ -38,6 +40,7 @@ export interface PageHeaderDefaults {
 const FALLBACK: PageHeaderDefaults = {
   collapse: 'scroll',
   level: '1',
+  material: false,
   size: 'md',
   variant: 'band',
 };
@@ -49,7 +52,7 @@ export const PAGE_HEADER_DEFAULTS = new InjectionToken<PageHeaderDefaults>(
 
 /**
  * An application decides once how its page headers behave — the size, the
- * rank, whether a scroll collapses the area — rather than repeating them on
+ * rank, whether a scroll collapses the area, whether the chrome is a material — rather than repeating them on
  * every screen. A header that states any of them itself still wins. Its words
  * come from the language in force (`provideSlotted`).
  */

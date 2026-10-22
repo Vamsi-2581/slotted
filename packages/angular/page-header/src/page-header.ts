@@ -50,6 +50,10 @@ export type {
 
 type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
 
+/** Absence survives the transform, so the provider's default can apply. */
+const optionalBoolean = (given: boolean | string | undefined) =>
+  given === undefined ? undefined : booleanAttribute(given);
+
 /**
  * The shell of a screen's top: a title area that never leaves, a header area
  * that scrolls away under it and comes back, a pill of controls on the
@@ -95,6 +99,7 @@ type MovedBy = 'control' | 'pin' | 'programmatic' | 'scroll';
     '[attr.data-compact]': "compact() ? '' : null",
     '[attr.data-stuck]': "stuck() ? '' : null",
     '[attr.data-loading]': "loading() ? '' : null",
+    '[attr.data-material]': "resolvedMaterial() ? '' : null",
     '[attr.aria-busy]': "loading() ? 'true' : null",
   },
 })
@@ -107,6 +112,12 @@ export class SlPageHeader {
   readonly size = input<PageHeaderSize | undefined>(undefined);
   readonly level = input<PageHeaderLevel | undefined>(undefined);
   readonly collapse = input<PageHeaderCollapse | undefined>(undefined);
+  /**
+   * Stuck, the chrome is the theme's material — `--slotted-surface-material`
+   * behind `--slotted-material-backdrop` — in every variant; at rest each
+   * variant keeps its ground. Defaults to the provider, then `false`.
+   */
+  readonly material = input(undefined, { transform: optionalBoolean });
   /**
    * Whether the title has not arrived yet. The heading, the subheading and the
    * description render `slSkeletonText` in place of their words; the actions
@@ -131,6 +142,7 @@ export class SlPageHeader {
   private readonly generated = inject(SlPageHeaderIdFactory).next();
 
   readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
+  readonly resolvedMaterial = computed(() => this.material() ?? this.defaults.material);
   readonly resolvedSize = computed(() => this.size() ?? this.defaults.size);
   readonly resolvedLevel = computed(() => this.level() ?? this.defaults.level);
   readonly resolvedCollapse = computed(() => this.collapse() ?? this.defaults.collapse);

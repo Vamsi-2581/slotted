@@ -52,6 +52,8 @@ export type PageHeaderChangeRequest = ChangeRequest<boolean>;
 export interface PageHeaderDefaults {
   collapse: PageHeaderCollapse;
   level: PageHeaderLevel;
+  /** Stuck, the chrome is the theme's material: a translucent ground over a blurred backdrop. */
+  material: boolean;
   size: PageHeaderSize;
   variant: PageHeaderVariant;
 }
@@ -103,6 +105,7 @@ export interface PageHeaderRootProps extends HTMLAttributes<HTMLElement> {
   'data-expanded'?: '' | undefined;
   'data-level': PageHeaderLevel;
   'data-loading'?: '' | undefined;
+  'data-material'?: '' | undefined;
   'data-part': string;
   'data-revealed'?: '' | undefined;
   'data-scrolled'?: '' | undefined;
@@ -172,6 +175,12 @@ export interface PageHeaderProps extends Omit<ComponentPropsWithRef<'header'>, '
    * toggle, the pin and the header area's name. A native `aria-label` on a
    * part still wins.
    */
+  /**
+   * Stuck, the chrome is the theme's material — `--slotted-surface-material`
+   * behind `--slotted-material-backdrop` — in every variant; at rest each
+   * variant keeps its ground. Defaults to the provider, then `false`.
+   */
+  material?: boolean | undefined;
   messages?: PartialMessages<PageHeaderMessages> | undefined;
   /** Called before the header area moves, with the request that carries the reason. */
   onExpandedChange?: ((expanded: boolean, request: PageHeaderChangeRequest) => void) | undefined;

@@ -429,7 +429,7 @@ describe('PageHeader', () => {
 
   it('takes its defaults from the provider, and its own props over them', () => {
     render(
-      <PageHeaderDefaultsProvider collapse="manual" level="2" size="lg" variant="floating">
+      <PageHeaderDefaultsProvider collapse="manual" level="2" material size="lg" variant="floating">
         <Full messages={{ collapse: 'Fechar' }} size="sm" />
       </PageHeaderDefaultsProvider>,
     );
@@ -437,6 +437,7 @@ describe('PageHeader', () => {
     expect(root()).toHaveAttribute('data-level', '2');
     expect(root()).toHaveAttribute('data-size', 'sm');
     expect(root()).toHaveAttribute('data-variant', 'floating');
+    expect(root()).toHaveAttribute('data-material', '');
     expect(screen.getByRole('button', { name: 'Fechar' })).toBeInTheDocument();
   });
 

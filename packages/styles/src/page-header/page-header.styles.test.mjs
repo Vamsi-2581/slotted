@@ -588,7 +588,7 @@ test('paints one ground under a title with nothing to cover, and filters the bac
   );
   assert.match(
     flat,
-    /\[data-ui-page-header\]\[data-stuck\] \{ -webkit-backdrop-filter: var\(--slotted-page-header-backdrop-filter, none\); backdrop-filter: var\(--slotted-page-header-backdrop-filter, none\); \}/,
+    /\[data-ui-page-header\]\[data-stuck\] \{ -webkit-backdrop-filter: var\(--slotted-page-header-backdrop-filter, var\(--_backdrop, none\)\); backdrop-filter: var\(--slotted-page-header-backdrop-filter, var\(--_backdrop, none\)\); \}/,
   );
   assert.match(
     flat,

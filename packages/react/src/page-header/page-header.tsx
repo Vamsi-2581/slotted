@@ -88,6 +88,7 @@ export function PageHeader({
   expanded,
   level,
   loading,
+  material,
   messages,
   onExpandedChange,
   onPinnedChange,
@@ -105,6 +106,7 @@ export function PageHeader({
 
   const resolvedCollapse = collapse ?? defaults.collapse;
   const resolvedLevel = level ?? defaults.level;
+  const resolvedMaterial = material ?? defaults.material;
   const resolvedSize = size ?? defaults.size;
   const resolvedVariant = variant ?? defaults.variant;
   const t = useMessages(pageHeaderMessages, messages);
@@ -301,6 +303,7 @@ export function PageHeader({
     ...(currentExpanded ? { 'data-expanded': '' } : {}),
     'data-level': resolvedLevel,
     ...(loading === true ? { 'data-loading': '' } : {}),
+    ...(resolvedMaterial ? { 'data-material': '' } : {}),
     'data-part': 'root',
     ...(revealed ? { 'data-revealed': '' } : {}),
     ...(scrolled ? { 'data-scrolled': '' } : {}),

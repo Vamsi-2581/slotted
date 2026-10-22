@@ -136,6 +136,9 @@ export class SlDetailPanelSection {
           get level() {
             return panel.resolvedLevel();
           },
+          get material() {
+            return inherited.material;
+          },
           get size() {
             return panel.resolvedSize();
           },

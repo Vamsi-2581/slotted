@@ -280,8 +280,23 @@ test('declares three variants, band by default, and the stuck fact they read', (
   assert.equal(contract.stuck.fact, 'data-stuck');
 });
 
+/** Stuck, the chrome is the theme's material, in any variant; off unless asked. */
+test('declares material, off by default, which reads the theme tokens while stuck', () => {
+  assert.deepEqual(contract.axes.material, [false, true]);
+  assert.deepEqual(contract.resolution.material, ['prop', 'defaults', false]);
+  assert.equal(member.defaults.material, false);
+  assert.match(contract.material.true, /--slotted-surface-material/);
+  assert.match(contract.material.true, /--slotted-material-backdrop/);
+});
+
 test('lets an application set its defaults once', () => {
-  assert.deepEqual(contract.provides.pageHeaderDefaults, ['size', 'level', 'collapse', 'variant']);
+  assert.deepEqual(contract.provides.pageHeaderDefaults, [
+    'size',
+    'level',
+    'collapse',
+    'variant',
+    'material',
+  ]);
   assert.deepEqual(contract.messages, [
     'collapse',
     'expand',

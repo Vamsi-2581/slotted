@@ -127,37 +127,33 @@ if (bundledCommonJs.length > 0) {
 }
 
 /**
- * A family brings its own stylesheet. Each chunk imports the CSS of what it
- * renders, so an application that imports Button, Field and TextField from
- * their subpaths ships their CSS and not the 1.5 MB of every family: a login
+ * A family has its own stylesheet. An application that renders Button, Field
+ * and TextField loads their sheets and not the 1.5 MB of every family: a login
  * page blocked its first paint on all of it, and every element's style was
- * matched against the whole sheet.
+ * matched against the whole sheet. No module imports a stylesheet: Node
+ * cannot load one unbundled.
  */
-const importsOf = (file) => {
-  const source = readFileSync(join(distDirectory, file), 'utf8');
-  return [...source.matchAll(/^import\s+(?:[^'"\n]*\sfrom\s+)?["']\.\/([^"']+)["'];?$/gm)].map(
-    (match) => match[1],
-  );
-};
-const closure = (entries) => {
-  const seen = new Set();
-  const visit = (file) => {
-    if (seen.has(file)) return;
-    seen.add(file);
-    if (file.endsWith('.js')) for (const next of importsOf(file)) visit(next);
-  };
-  for (const entry of entries) visit(entry);
-  return [...seen];
-};
-const loginCss = closure(['button.js', 'field.js', 'text-field.js'])
-  .filter((file) => file.endsWith('.css'))
-  .reduce((total, file) => total + readFileSync(join(distDirectory, file)).length, 0);
+const loginCss = ['button', 'field', 'text-field'].reduce(
+  (total, family) => total + readFileSync(join(distDirectory, 'styles', `${family}.css`)).length,
+  0,
+);
 const LOGIN_BUDGET = 150 * 1024;
 
-if (loginCss === 0 || loginCss > LOGIN_BUDGET) {
+if (loginCss > LOGIN_BUDGET) {
   console.error(
-    `Button, Field and TextField bring ${loginCss} bytes of CSS; the budget is ${LOGIN_BUDGET}, and nought means the chunks import none.`,
+    `Button, Field and TextField bring ${loginCss} bytes of CSS; the budget is ${LOGIN_BUDGET}.`,
   );
+  process.exitCode = 1;
+}
+
+const importsCss = collectTextArtifacts(distDirectory)
+  .filter((path) => path.endsWith('.js'))
+  .filter((path) => /^import\s+["'][^"']+\.css["']/m.test(readFileSync(path, 'utf8')))
+  .map((path) => relative(packageDirectory, path));
+
+if (importsCss.length > 0) {
+  console.error('Modules import a stylesheet, which Node cannot load unbundled:');
+  for (const path of importsCss) console.error(`- ${path}`);
   process.exitCode = 1;
 }
 

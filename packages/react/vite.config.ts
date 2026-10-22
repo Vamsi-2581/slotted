@@ -26,9 +26,9 @@ export default defineConfig({
        `color-scheme` is written at runtime, so the property resolved to its
        initial value. */
     cssTarget: ['chrome123', 'edge123', 'firefox128', 'safari17.5'],
-    /* One stylesheet per chunk, which `css.build.mjs` imports from the chunk's
-       own module: a bundler takes a family's CSS only when the family is
-       imported. `vite.styles.config.ts` writes the all-in-one `styles.css`. */
+    /* One stylesheet per chunk, from which `css.build.mjs` writes one sheet per
+       family: an application loads the CSS of the families it renders.
+       `vite.styles.config.ts` writes the all-in-one `styles.css`. */
     cssCodeSplit: true,
     manifest: true,
     lib: {

@@ -30,7 +30,7 @@
 - Fatia 10: React prompt-composer 23/23 + browser 1/1; Angular prompt-composer 16/16, `ng build` ok; styles 1707/1707; contratos 2181/2181; agent-docs 137/137.
 
 ## Em curso
-- Verificação final: `pnpm check:full`.
+- Verificação final: `pnpm check:full` (terceira execução). Corrigidos: formatação do tsconfig, fixture `info` em recipe.test, artefactos gerados do tema, semente `info` espelhada nos portais (core), export `./*/styles.css` no entry-points.test, módulos React sem import de CSS (item 10 revisto).
 
 ## Problemas conhecidos
 - Nenhum.

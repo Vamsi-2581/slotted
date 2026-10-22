@@ -44,9 +44,9 @@ which is why it belongs at the top of the application's own entry CSS.
 inserted later would reorder what already shipped.
 
 The statement opens every distributed stylesheet — `@slotted/theme/styles.css`,
-`@slotted/themes/default.css`, `@slotted/react/styles.css`, each
-`@slotted/react/<family>/styles.css` and each stylesheet a React component
-imports for itself — so whichever loads first establishes the internal order. Restating it is inert: the order
+`@slotted/themes/default.css`, `@slotted/react/styles.css` and each
+`@slotted/react/<family>/styles.css` — so whichever loads first establishes
+the internal order. Restating it is inert: the order
 is fixed at the first mention.
 
 The library publishes no override layer. A layer named by the library is a

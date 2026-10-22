@@ -11,6 +11,11 @@ const manifestUrl = new URL('.vite/manifest.json', dist);
  * Every stylesheet the package ships opens with the layer order, so the
  * cascade holds whichever loads first: a family's own sheet, the all-in-one
  * `styles.css`, or the theme's.
+ *
+ * The modules import no stylesheet. A module that imports one cannot be
+ * loaded by Node unbundled — server rendering, Jest, Vitest with its
+ * dependencies external — so an application imports the sheets of the
+ * families it renders, or `styles.css`.
  */
 async function withLayerOrder(url) {
   const css = await readFile(url, 'utf8');
@@ -27,19 +32,6 @@ const chunks = Object.values(manifest);
 
 for (const file of await readdir(dist)) {
   if (file.endsWith('.css')) await withLayerOrder(new URL(file, dist));
-}
-
-/**
- * Each chunk imports the stylesheet of what it renders, so a bundler includes
- * a family's CSS exactly when it includes the family. Vite's library mode
- * drops those imports; they are written back here.
- */
-for (const chunk of chunks) {
-  if (!chunk.css?.length) continue;
-  const url = new URL(chunk.file, dist);
-  const source = await readFile(url, 'utf8');
-  const imports = chunk.css.map((css) => `import './${css}';`).join('\n');
-  if (!source.startsWith(imports)) await writeFile(url, `${imports}\n${source}`);
 }
 
 /**
@@ -64,5 +56,9 @@ for (const entry of chunks.filter((chunk) => chunk.isEntry)) {
   await writeFile(new URL(`styles/${entry.name}.css`, dist), `${LAYER_ORDER_STATEMENT}${body}`);
 }
 
+/* The chunks' own sheets were the parts of the family sheets; only those ship. */
+for (const chunk of chunks) {
+  for (const css of chunk.css ?? []) await rm(new URL(css, dist), { force: true });
+}
 await rm(new URL('.vite/', dist), { recursive: true, force: true });
 if (!existsSync(new URL('styles.css', dist))) throw new Error('dist/styles.css was not written');

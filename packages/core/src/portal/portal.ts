@@ -47,6 +47,7 @@ export const MIRRORED_PROPERTIES = [
   '--slotted-seed-accent',
   '--slotted-seed-neutral',
   '--slotted-seed-success',
+  '--slotted-seed-info',
   '--slotted-seed-warning',
   '--slotted-seed-danger',
 ] as const;

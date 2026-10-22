@@ -36,10 +36,12 @@ describe('entry points', () => {
 
   it('publishes every family, and nothing the build does not write', () => {
     const published = Object.keys(exportsField)
-      .filter((key) => key !== '.' && key !== './styles.css')
+      .filter((key) => key !== '.' && key !== './styles.css' && key !== './*/styles.css')
       .map((key) => key.slice(2))
       .sort();
     expect(published).toEqual(families);
+    /* One stylesheet per family, written by `css.build.mjs` into `dist/styles`. */
+    expect(exportsField['./*/styles.css']).toBe('./dist/styles/*.css');
     for (const family of families) {
       expect(exportsField[`./${family}`]).toEqual({
         types: `./dist/types/${family}/index.d.ts`,

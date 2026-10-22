@@ -32,6 +32,7 @@ import { useCascaderState } from './cascader-state';
 import type { CascaderState } from './cascader-state';
 import { CascaderSurfaceBody, useRevealActive } from './cascader-surface';
 import type { CascaderPanelProps, CascaderProps } from './cascader.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 const directionOf = (node: Element | null): 'ltr' | 'rtl' =>
   node !== null && node.ownerDocument.defaultView?.getComputedStyle(node).direction === 'rtl'
@@ -701,7 +702,9 @@ export function Cascader<T>(props: CascaderProps<T>) {
           data-part-busy=""
           data-ui="spinner"
           data-ui-spinner=""
-        />
+        >
+          {SPINNER_RING}
+        </span>
       ) : (
         <span aria-hidden="true" data-part="arrow" data-part-arrow="">
           <Icon>

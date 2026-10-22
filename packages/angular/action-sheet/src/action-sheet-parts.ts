@@ -294,7 +294,10 @@ export class SlActionSheetItemDescription {
   template: `
     @if (loading()) {
       <span data-part="icon" data-part-icon="" aria-hidden="true"
-        ><span data-ui="spinner" data-ui-spinner=""></span
+        ><span data-ui="spinner" data-ui-spinner=""
+          ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="8.875" />
+            <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg></span
       ></span>
     } @else {
       <ng-content select="[slActionSheetItemIcon]" />

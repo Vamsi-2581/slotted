@@ -1583,6 +1583,9 @@ interface PendingRule {
               data-size="sm"
               role="progressbar"
               [attr.aria-label]="t('filters')"
+              ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <circle cx="12" cy="12" r="8.875" />
+                <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
             ></span>
           }
           {{ countText() }}

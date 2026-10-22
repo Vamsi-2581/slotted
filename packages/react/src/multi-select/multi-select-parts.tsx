@@ -28,6 +28,7 @@ import type {
   MultiSelectPositionerProps,
   MultiSelectRootProps,
 } from './multi-select.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 /** The width, in CSS pixels, under which a chip has no room for a word. */
 export const NARROW_WIDTH = 120;
@@ -444,7 +445,9 @@ export function MultiSelectControl({ ref, render, ...nativeProps }: MultiSelectC
           data-part-busy=""
           data-ui="spinner"
           data-ui-spinner=""
-        />
+        >
+          {SPINNER_RING}
+        </span>
       ) : (
         <button
           aria-label={multiSelect.t('trigger')}

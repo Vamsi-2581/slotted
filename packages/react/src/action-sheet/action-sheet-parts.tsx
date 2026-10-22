@@ -37,6 +37,7 @@ import type {
   ActionSheetTriggerProps,
   ActionSheetTriggerRootProps,
 } from './action-sheet.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 export { entryTarget };
 
@@ -339,7 +340,13 @@ export function ActionSheetItem({
       <>
         {icon === undefined && loading !== true ? null : (
           <span aria-hidden="true" data-part="icon" data-part-icon="">
-            {loading === true ? <span data-ui="spinner" data-ui-spinner="" /> : icon}
+            {loading === true ? (
+              <span data-ui="spinner" data-ui-spinner="">
+                {SPINNER_RING}
+              </span>
+            ) : (
+              icon
+            )}
           </span>
         )}
         <span data-part="label" data-part-label="">

@@ -45,6 +45,7 @@ import type {
   CommandPaletteSelectRequest,
   CommandPaletteTriggerProps,
 } from './command-palette.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 /**
  * A search that executes.
@@ -696,7 +697,9 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
               data-part-busy=""
               data-ui="spinner"
               data-ui-spinner=""
-            />
+            >
+              {SPINNER_RING}
+            </span>
           ) : null}
         </>
       ) : (
@@ -853,7 +856,9 @@ export function CommandPalette<Item extends CommandPaletteItem = CommandPaletteI
             data-part-busy=""
             data-ui="spinner"
             data-ui-spinner=""
-          />
+          >
+            {SPINNER_RING}
+          </span>
         ) : (
           <span aria-hidden="true" data-part="search" data-part-search="">
             <Icon>

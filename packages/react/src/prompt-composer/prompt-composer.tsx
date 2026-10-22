@@ -38,6 +38,7 @@ import type {
   PromptComposerSubmitProps,
   PromptComposerSubmitReason,
 } from './prompt-composer.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 interface ComposerContext {
   attach: (
@@ -503,10 +504,14 @@ export function PromptComposerSubmit({
     >
       {children ??
         (submitted ? (
-          <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" key="busy" />
+          <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" key="busy">
+            {SPINNER_RING}
+          </span>
         ) : streaming ? (
           <>
-            <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" key="ring" />
+            <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" key="ring">
+              {SPINNER_RING}
+            </span>
             <Icon key="stop">
               <Glyph name="stop" />
             </Icon>

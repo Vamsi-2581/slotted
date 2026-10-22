@@ -20,6 +20,7 @@ import type {
   TextFieldProps,
   TextFieldRootProps,
 } from './text-field.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 /** How long the check stays in place of the copy mark: `code-block`'s number. */
 const COPIED_FOR = 2000;
@@ -287,7 +288,9 @@ export function TextField({
           data-ui="spinner"
           data-ui-spinner=""
           hidden={!loading}
-        />
+        >
+          {SPINNER_RING}
+        </span>
       )}
       {isPassword ? (
         <span aria-hidden="true" data-part="caps-lock" data-part-caps-lock="" hidden={!capsLock}>

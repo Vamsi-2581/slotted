@@ -175,7 +175,10 @@ export class SlMessageActivity {}
       }
       @case ('current') {
         <span aria-hidden="true"
-          ><span aria-hidden="true" data-ui="spinner" data-ui-spinner=""></span
+          ><span aria-hidden="true" data-ui="spinner" data-ui-spinner=""
+            ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="8.875" />
+              <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg></span
         ></span>
       }
       @default {

@@ -46,6 +46,9 @@ import type { SplitButtonValueReason } from './split-button';
         data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="t('loading')"
+        ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="8.875" />
+          <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
       ></span>
     }`,
   styleUrls: [
@@ -125,6 +128,9 @@ const OPENING_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Enter', ' ']);
         data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="t('loading')"
+        ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="8.875" />
+          <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
       ></span>
     }
   </span>`,

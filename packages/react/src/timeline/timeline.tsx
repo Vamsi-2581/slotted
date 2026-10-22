@@ -22,6 +22,7 @@ import { useTimelineDefaults } from './timeline-defaults';
 import { TimelineContext, TimelineListContext } from './timeline-context';
 import { layoutEvents } from './timeline-parts';
 import type { TimelineContextValue, TimelineProps, TimelineRootProps } from './timeline.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 /**
  * An ordered list of events on one line, each with a marker, a machine
@@ -255,7 +256,9 @@ export function Timeline({
           data-part-root=""
           data-ui="spinner"
           data-ui-spinner=""
-        />
+        >
+          {SPINNER_RING}
+        </span>
         {t('loading')}
       </div>
     ) : resolvedGrowing === 'button' ? (

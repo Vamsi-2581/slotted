@@ -27,6 +27,7 @@ import type {
   ComboboxInputRootProps,
   ComboboxPositionerProps,
 } from './combobox.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 function compose<E extends { defaultPrevented: boolean }>(
   theirs: ((event: E) => void) | undefined,
@@ -368,7 +369,9 @@ export function ComboboxInput({ ref, render, ...nativeProps }: ComboboxInputProp
             data-part-busy=""
             data-ui="spinner"
             data-ui-spinner=""
-          />
+          >
+            {SPINNER_RING}
+          </span>
         ) : (
           <span data-part="arrow" data-part-arrow="">
             <Icon>

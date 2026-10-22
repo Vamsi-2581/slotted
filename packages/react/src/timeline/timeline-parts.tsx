@@ -36,6 +36,7 @@ import type {
   TimelineOpenReason,
   TimelineTimeProps,
 } from './timeline.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
 
@@ -380,7 +381,9 @@ export function TimelineItem({
                 data-part-root=""
                 data-ui="spinner"
                 data-ui-spinner=""
-              />
+              >
+                {SPINNER_RING}
+              </span>
             ) : (
               (marker ?? check)
             )}

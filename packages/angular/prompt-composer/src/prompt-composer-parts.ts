@@ -107,10 +107,18 @@ export class SlPromptComposerAttach {
   template: `<ng-content>
     @switch (composer.status()) {
       @case ('submitted') {
-        <span data-ui="spinner" data-ui-spinner="" aria-hidden="true"></span>
+        <span data-ui="spinner" data-ui-spinner="" aria-hidden="true"
+          ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="8.875" />
+            <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
+        ></span>
       }
       @case ('streaming') {
-        <span data-ui="spinner" data-ui-spinner="" aria-hidden="true"></span>
+        <span data-ui="spinner" data-ui-spinner="" aria-hidden="true"
+          ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="8.875" />
+            <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
+        ></span>
         <span slIcon><svg slGlyph name="stop"></svg></span>
       }
       @case ('error') {

@@ -1,4 +1,5 @@
 import '@slotted/styles/spinner/spinner.css';
+import { SPINNER_RING } from './spinner-ring';
 
 /**
  * The ring, and the only thing that announces the wait. It carries the
@@ -25,6 +26,8 @@ export function ButtonIndicator({ label }: { label: string }) {
       data-ui="spinner"
       data-ui-spinner=""
       role="progressbar"
-    />
+    >
+      {SPINNER_RING}
+    </span>
   );
 }

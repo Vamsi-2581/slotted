@@ -8,6 +8,7 @@ import type {
   TreeNodeRootProps,
   TreePartProps,
 } from './tree.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 /** The selector the root reads its visible rows through, in DOM order. */
 export const NODE_SELECTOR = "[data-part='node']";
@@ -115,7 +116,9 @@ export function TreeNode({
           data-ui="spinner"
           data-ui-spinner=""
           aria-hidden="true"
-        />
+        >
+          {SPINNER_RING}
+        </span>
       ) : (
         <span
           data-part="expander"

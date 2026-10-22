@@ -65,6 +65,9 @@ export type { TextFieldSize, TextFieldType, TextFieldVariant } from './text-fiel
         data-ui-spinner=""
         aria-hidden="true"
         [hidden]="!loading()"
+        ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="8.875" />
+          <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
       ></span>
     }
     @if (control()?.password()) {

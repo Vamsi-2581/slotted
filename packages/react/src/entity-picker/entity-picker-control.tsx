@@ -14,6 +14,7 @@ import { Glyph, Icon } from '../icon';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select';
 import { useEntityPicker } from './entity-picker';
 import type { EntityPickerRootProps } from './entity-picker.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 const CHIP_SELECTOR = "[data-part='chips'] > [data-ui='tag']:not([data-count])";
 
@@ -536,7 +537,9 @@ export function EntityPickerControl() {
               data-part-busy=""
               data-ui="spinner"
               data-ui-spinner=""
-            />
+            >
+              {SPINNER_RING}
+            </span>
           ) : (
             <span data-part="arrow" data-part-arrow="">
               <Icon>

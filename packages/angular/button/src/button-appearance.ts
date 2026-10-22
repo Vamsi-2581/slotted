@@ -168,6 +168,9 @@ export const BUTTON_WAIT = new InjectionToken<ButtonWait>('slotted button wait')
         data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="wait?.t('loading') ?? null"
+        ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="8.875" />
+          <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
       ></span>
     }`,
   styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],
@@ -192,6 +195,9 @@ export class SlButtonStart {
         data-ui-spinner=""
         role="progressbar"
         [attr.aria-label]="wait?.t('loading') ?? null"
+        ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="12" r="8.875" />
+          <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
       ></span>
     }`,
   styleUrls: ['../../../styles/src/button/button.css', '../../../styles/src/spinner/spinner.css'],

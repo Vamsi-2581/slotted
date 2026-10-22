@@ -9,6 +9,7 @@ import { Highlight } from '../highlight';
 import { Glyph, Icon } from '../icon';
 import type { CascaderState } from './cascader-state';
 import type { CascaderDataProps } from './cascader.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 interface SurfaceProps<T> {
   state: CascaderState<T>;
@@ -188,7 +189,9 @@ export function CascaderSurfaceBody<T>({
         {node.branch ? (
           <span aria-hidden="true" data-part="expander" data-part-expander="">
             {node.loading ? (
-              <span data-part="root" data-part-root="" data-ui="spinner" data-ui-spinner="" />
+              <span data-part="root" data-part-root="" data-ui="spinner" data-ui-spinner="">
+                {SPINNER_RING}
+              </span>
             ) : (
               <Icon directional>
                 <Glyph name="chevron-right" />

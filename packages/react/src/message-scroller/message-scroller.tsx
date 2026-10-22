@@ -30,6 +30,7 @@ import type {
   MessageScrollerRootProps,
   MessageScrollerSeparatorProps,
 } from './message-scroller.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 const Context = createContext<MessageScrollerContextValue | null>(null);
 
@@ -286,7 +287,9 @@ export function MessageScrollerLoader({
     ...nativeProps,
     children: (
       <>
-        <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" />
+        <span aria-hidden="true" data-ui="spinner" data-ui-spinner="">
+          {SPINNER_RING}
+        </span>
         <span>{children ?? t('loader')}</span>
       </>
     ),

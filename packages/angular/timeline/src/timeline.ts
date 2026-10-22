@@ -123,6 +123,9 @@ let counter = 0;
             data-part-root=""
             data-ui="spinner"
             data-ui-spinner=""
+            ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="8.875" />
+              <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
           ></span>
           {{ t('loading') }}
         </div>
@@ -610,6 +613,9 @@ export class SlTimelineGroupList {
             data-part-root=""
             data-ui="spinner"
             data-ui-spinner=""
+            ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="8.875" />
+              <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
           ></span>
         } @else {
           <ng-content select="[slTimelineMarker]">

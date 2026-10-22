@@ -34,6 +34,7 @@ import type {
   SelectTriggerRootProps,
   SelectValueProps,
 } from './select.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 /**
  * The family's own handler runs after the consumer's, and only if the consumer
@@ -448,7 +449,9 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
           data-part-busy=""
           data-ui="spinner"
           data-ui-spinner=""
-        />
+        >
+          {SPINNER_RING}
+        </span>
       ) : (
         <span data-part="arrow" data-part-arrow="">
           <Icon>

@@ -568,7 +568,11 @@ export class SlImportExportCenterFooter {}
           <div data-part="status" data-part-status="" [id]="view.ids.status">
             <span data-part="mark" data-part-mark="" aria-hidden="true">
               @if (view.mark === 'spinner') {
-                <span data-ui="spinner" data-ui-spinner=""></span>
+                <span data-ui="spinner" data-ui-spinner=""
+                  ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="8.875" />
+                    <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg
+                ></span>
               } @else {
                 <span slIcon><svg slGlyph [name]="view.mark"></svg></span>
               }

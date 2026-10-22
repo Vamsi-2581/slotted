@@ -8,19 +8,25 @@
    * chases itself around a faint track, growing from its head and closing
    * from its tail, so the eye reads work rather than a wheel.
    *
-   * The drawing is vector. Two SVG images mask the host's ink: the track, the
-   * whole circle at a fifth of the ink's strength, and the arc, a stroke with
-   * round caps whose dash grows and travels by its own animation. The images
-   * are rasterised again on every frame at the box's size, so the stroke is
-   * as sharp at twelve pixels as at twenty-four, its ends are round, and
-   * nothing is cut at a fractional edge.
+   * The drawing is vector and inline: the host writes an `svg` of two circles
+   * inside the box, the track and the arc, stroked in the host's ink. No
+   * image is fetched. The ring was two SVG images used as masks, written as
+   * `data:` URLs, and a page whose policy allows images from its own origin
+   * alone refused both: the ring was absent.
    *
-   * It was gradients before this — a conic arc, two radial caps and a radial
-   * mask, three angles animated as custom properties. A conic gradient's hard
-   * stop has no antialiasing, so the arc stepped from frame to frame like a
-   * GIF; the half-pixel stops of the caps and the mask blurred a ring of
-   * thirteen pixels; and a ring of five sixths of the box sat on a fractional
-   * inset the mask clipped.
+   * The turn is the box's `rotate`, which the compositor runs: the arc used to
+   * turn inside the mask image, which is rasterised again on the main thread
+   * for every frame, and with the main thread busy for two seconds the ring
+   * drew no frame at all (`tools/harness/scenarios/spinner-busy.mjs`). The
+   * dash still opens and travels on the main thread; under load the arc keeps
+   * turning at the length it had.
+   *
+   * It was gradients before the masks — a conic arc, two radial caps and a
+   * radial mask, three angles animated as custom properties. A conic
+   * gradient's hard stop has no antialiasing, so the arc stepped from frame to
+   * frame like a GIF, and the half-pixel stops of the caps and the mask
+   * blurred a ring of thirteen pixels. A stroke has round caps and is
+   * antialiased at every size.
    *
    * The geometry is the icon set's: in a box of twenty-four units the ring is
    * twenty across and the stroke is two and a quarter, so the swap with a
@@ -28,37 +34,76 @@
    */
   [data-ui-spinner] {
     --_size: var(--slotted-spinner-size, var(--slotted-control-icon-size-md, 16px));
-    --_track: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8.875' fill='none' stroke='%23000' stroke-opacity='0.2' stroke-width='2.25'/%3E%3C/svg%3E");
-    /*
-     * The arc: a dash of one to seventy hundredths of the circle that opens
-     * in the first half of the cycle and travels on in the second, while the
-     * whole circle turns under it. Each half eases on its own.
-     */
-    --_arc: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg%3E%3CanimateTransform attributeName='transform' type='rotate' from='0 12 12' to='360 12 12' dur='2s' repeatCount='indefinite'/%3E%3Ccircle cx='12' cy='12' r='8.875' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' pathLength='100' stroke-dasharray='1 150' transform='rotate(-90 12 12)'%3E%3Canimate attributeName='stroke-dasharray' values='1 150;70 150;70 150' keyTimes='0;0.5;1' calcMode='spline' keySplines='0.42 0 0.58 1;0.42 0 0.58 1' dur='1.5s' repeatCount='indefinite'/%3E%3Canimate attributeName='stroke-dashoffset' values='0;-28;-99' keyTimes='0;0.5;1' calcMode='spline' keySplines='0.42 0 0.58 1;0.42 0 0.58 1' dur='1.5s' repeatCount='indefinite'/%3E%3C/circle%3E%3C/g%3E%3C/svg%3E");
 
-    background-color: currentColor;
+    /* A turn and a dash out of step, so the arc never comes back to the same place. */
+    animation: slotted-spinner-turn calc(var(--slotted-duration-loop-slow) * 1.25) linear infinite;
     block-size: var(--_size);
+    color: inherit;
     display: inline-block;
     /* A ring that shrinks is not a ring: it keeps its size in a flex row. */
     flex: none;
     /*
-     * The ring is painted with a background, and forced colours replace a
-     * background that is not one of the system's own: the ring would go and
-     * the box stay. Not adjusting keeps `currentcolor`, the host's ink, which
-     * forced colours have already set.
+     * Not adjusting keeps `currentcolor`, the host's ink, which forced colours
+     * have already set, on a stroke the system would otherwise repaint.
      */
     forced-color-adjust: none;
     inline-size: var(--_size);
-    mask-image: var(--_arc), var(--_track);
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
     opacity: 1;
     scale: 1;
     transition:
       opacity var(--slotted-control-transition-duration) var(--slotted-control-transition-easing),
       scale var(--slotted-control-transition-duration) var(--slotted-control-transition-easing);
     vertical-align: middle;
+  }
+
+  [data-ui-spinner] > svg {
+    block-size: 100%;
+    display: block;
+    fill: none;
+    inline-size: 100%;
+    stroke: currentColor;
+    stroke-width: 2.25;
+  }
+
+  /* The track: the whole circle at a fifth of the ink's strength. */
+  [data-ui-spinner] > svg > circle:first-child {
+    stroke-opacity: 0.2;
+  }
+
+  /*
+   * The arc: a dash of one to seventy hundredths of the circle that opens in
+   * the first half of the cycle and travels on in the second, from the top.
+   * Each half eases on its own.
+   */
+  [data-ui-spinner] > svg > circle:last-child {
+    animation: slotted-spinner-arc var(--slotted-duration-loop-slow) infinite;
+    rotate: -90deg;
+    stroke-dasharray: 1 150;
+    stroke-linecap: round;
+    transform-origin: center;
+  }
+
+  @keyframes slotted-spinner-turn {
+    to {
+      rotate: 360deg;
+    }
+  }
+
+  @keyframes slotted-spinner-arc {
+    0% {
+      animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+      stroke-dasharray: 1 150;
+      stroke-dashoffset: 0;
+    }
+    50% {
+      animation-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+      stroke-dasharray: 70 150;
+      stroke-dashoffset: -28;
+    }
+    100% {
+      stroke-dasharray: 70 150;
+      stroke-dashoffset: -99;
+    }
   }
 
   @starting-style {
@@ -68,14 +113,15 @@
     }
   }
 
-  /**
-   * A frozen ring still communicates waiting: the track, and an arc of three
-   * quarters resting on it. Stopping it entirely is less distracting than
-   * replacing one continuous motion with a slower one.
-   */
+  /* Still: a track with an arc of three quarters resting on it. */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui-spinner] {
-      --_arc: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8.875' fill='none' stroke='%23000' stroke-width='2.25' stroke-linecap='round' pathLength='100' stroke-dasharray='75 150' transform='rotate(-90 12 12)'/%3E%3C/svg%3E");
+    [data-ui-spinner],
+    [data-ui-spinner] > svg > circle:last-child {
+      animation: none;
+    }
+
+    [data-ui-spinner] > svg > circle:last-child {
+      stroke-dasharray: 75 150;
     }
   }
 }

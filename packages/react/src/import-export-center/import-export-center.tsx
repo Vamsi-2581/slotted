@@ -85,6 +85,7 @@ import type {
   ImportExportRequest,
   ImportExportView,
 } from './import-export-center.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 /** The mark of a file's kind, the drawing `upload` puts in the same tile. */
 const KIND_GLYPH: Record<FileKind, GlyphName> = {
@@ -619,7 +620,9 @@ function Job({ context, job }: { context: JobContext; job: ImportExportJob }) {
         <div data-part="status" data-part-status="" id={ids.status}>
           <span aria-hidden="true" data-part="mark" data-part-mark="">
             {mark === 'spinner' ? (
-              <span data-ui="spinner" data-ui-spinner="" />
+              <span data-ui="spinner" data-ui-spinner="">
+                {SPINNER_RING}
+              </span>
             ) : (
               <Icon>
                 <Glyph name={mark} />

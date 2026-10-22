@@ -46,19 +46,22 @@ test('is selected by the identifier the contract declares', () => {
 });
 
 /**
- * The ring is vector: the host's ink under two SVG masks, a track at a fifth
- * of its strength and an arc with round caps. No gradient draws any part of
- * it, because a conic gradient's hard stop steps from frame to frame and a
- * half-pixel radial stop blurs a ring this small.
+ * The ring is vector and inline: the host's ink on the stroke of two circles
+ * the host writes inside the box, a track at a fifth of its strength and an
+ * arc with round caps. No gradient draws any part of it, because a conic
+ * gradient's hard stop steps from frame to frame, and no image is fetched,
+ * because a policy that allows images from the page's own origin alone
+ * refused the `data:` masks it was drawn with.
  */
-test('draws the ring from two vector masks over the ink', () => {
-  const base = rule(ui);
+test('strokes the ring the host writes, with no image and no gradient', () => {
   assert.doesNotMatch(declarations, /gradient\(/, 'a gradient draws the ring');
-  assert.match(base, /background-color:currentColor/);
-  assert.match(base, /mask-image:var\(--_arc\),var\(--_track\)/);
-  assert.match(base, /mask-size:100% 100%/);
-  assert.match(base, /--_track:url\("data:image\/svg\+xml,[^"]*stroke-opacity='0\.2'/);
-  assert.match(base, /--_arc:url\("data:image\/svg\+xml,[^"]*stroke-linecap='round'/);
+  assert.doesNotMatch(declarations, /url\(|mask/, 'an image draws the ring');
+  const svg = rule(`${ui} > svg`);
+  assert.match(svg, /stroke:currentColor/);
+  assert.match(svg, /fill:none/);
+  assert.match(svg, /stroke-width:2\.25/);
+  assert.match(rule(`${ui} > svg > circle:first-child`), /stroke-opacity:0\.2/);
+  assert.match(rule(`${ui} > svg > circle:last-child`), /stroke-linecap:round/);
 });
 
 /**
@@ -66,25 +69,28 @@ test('draws the ring from two vector masks over the ink', () => {
  * a stroke of two and a quarter, so the swap with a glyph keeps one size.
  */
 test('is drawn to the measure of the glyph it stands in for', () => {
-  for (const image of ['--_track', '--_arc']) {
-    const url = rule(ui).split(`${image}:`)[1]?.split('");')[0] ?? '';
-    assert.match(url, /viewBox='0 0 24 24'/, `${image} is not on the icon grid`);
-    assert.match(url, /r='8\.875'/, `${image} is not the glyph's ring`);
-    assert.match(url, /stroke-width='2\.25'/, `${image} has another stroke`);
+  for (const ring of fragment.match(/<svg[^>]*>.*?<\/svg>/g) ?? []) {
+    assert.match(ring, /viewBox="0 0 24 24"/, 'the ring is not on the icon grid');
+    assert.equal(ring.match(/<circle cx="12" cy="12" r="8\.875"/g)?.length, 2);
+    assert.match(ring, /pathLength="100"/);
   }
 });
 
 /**
- * The motion is inside the drawing: the dash opens and travels and the circle
- * turns as SVG animation, so every frame is rasterised as a vector. The box
- * itself is not animated.
+ * The box turns by `rotate`, which the compositor runs while the main thread
+ * is busy; the dash opens and travels on its own cycle, out of step with the
+ * turn. `tools/harness/scenarios/spinner-busy.mjs` counts the frames.
  */
-test('chases its own tail inside the drawing, not by turning the box', () => {
-  const arc = rule(ui).split('--_arc:')[1]?.split('");')[0] ?? '';
-  assert.match(arc, /animate attributeName='stroke-dasharray' values='1 150;70 150;70 150'/);
-  assert.match(arc, /animate attributeName='stroke-dashoffset' values='0;-28;-99'/);
-  assert.match(arc, /animateTransform attributeName='transform' type='rotate'/);
-  assert.doesNotMatch(declarations, /@keyframes|@property|animation:/, 'the box is animated');
+test('turns the box on the compositor and chases its tail on the arc', () => {
+  assert.match(
+    rule(ui),
+    /animation:slotted-spinner-turn calc\(var\(--slotted-duration-loop-slow\) \* 1\.25\) linear infinite/,
+  );
+  assert.match(normalized, /@keyframes slotted-spinner-turn\{to\{rotate:360deg;\}\}/);
+  const arc = normalized.split('@keyframes slotted-spinner-arc{')[1] ?? '';
+  assert.match(arc, /stroke-dasharray:1 150;stroke-dashoffset:0/);
+  assert.match(arc, /stroke-dasharray:70 150;stroke-dashoffset:-28/);
+  assert.match(arc, /stroke-dasharray:70 150;stroke-dashoffset:-99/);
 });
 
 test('arrives on a fade rather than a cut', () => {
@@ -109,12 +115,8 @@ test('is the size its host says, and the medium glyph box otherwise', () => {
 
 test('stands still under reduced motion, as a track with an arc resting on it', () => {
   const reduced = normalized.split('@media (prefers-reduced-motion:reduce){')[1] ?? '';
-  assert.match(reduced, /--_arc:url\("data:image\/svg\+xml,[^"]*stroke-dasharray='75 150'/);
-  assert.doesNotMatch(
-    reduced.split('}}')[0],
-    /animate/,
-    'the ring keeps moving under reduced motion',
-  );
+  assert.match(reduced, /animation:none/);
+  assert.match(reduced, /stroke-dasharray:75 150/);
 });
 
 /** Forced colours keep the ink, which they have already set, instead of erasing the background. */

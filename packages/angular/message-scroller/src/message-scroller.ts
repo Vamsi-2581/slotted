@@ -283,7 +283,10 @@ export class SlMessageScrollerUnread {
 @Component({
   selector: '[slMessageScrollerLoader]',
   standalone: true,
-  template: `<span aria-hidden="true" data-ui="spinner" data-ui-spinner=""></span
+  template: `<span aria-hidden="true" data-ui="spinner" data-ui-spinner=""
+      ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="8.875" />
+        <circle cx="12" cy="12" r="8.875" pathLength="100" /></svg></span
     ><span
       ><ng-content>{{ owner.t('loader') }}</ng-content></span
     >`,

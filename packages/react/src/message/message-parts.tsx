@@ -14,6 +14,7 @@ import type {
   MessageTimeProps,
   MessageVersionsProps,
 } from './message.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 type Part = { render?: ((props: MessageRootProps) => ReactElement) | undefined };
 
@@ -142,7 +143,9 @@ export function MessageActivityStep({
       </Icon>
     ) : status === 'current' ? (
       <span aria-hidden="true">
-        <span aria-hidden="true" data-ui="spinner" data-ui-spinner="" />
+        <span aria-hidden="true" data-ui="spinner" data-ui-spinner="">
+          {SPINNER_RING}
+        </span>
       </span>
     ) : (
       <span aria-hidden="true" />

@@ -95,6 +95,7 @@ import type {
   FilterBarRevealedReason,
   FilterBarValueReason,
 } from './filter-bar.types';
+import { SPINNER_RING } from '../button/spinner-ring';
 
 export const FILTER_BAR_FALLBACK = {
   apply: 'live',
@@ -1335,7 +1336,9 @@ export function FilterBar({
                 data-size="sm"
                 role="progressbar"
                 aria-label={t('filters')}
-              />
+              >
+                {SPINNER_RING}
+              </span>
             ) : null}
             {countText}
           </p>

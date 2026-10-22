@@ -2,6 +2,46 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.11 — 2026-10-22
+
+- chore(progress): checkpoint dos achados do equori v2
+- build: pnpm sync:equori
+- test(agent-docs): acesso por índice no teste da tabela de eixos (equori v2, verificação final)
+- test(agent-docs): --slotted-material-backdrop é token de esquema e não é cor; o export do design system larga-o (equori v2, verificação final)
+- test(styles): resize-guide no fragmento do data-grid e o marcador de tabs como exceção nomeada do R7 (equori v2, verificação final)
+- perf(tabs): o marcador desliza por translate e scale a partir da caixa onde estava (FLIP no createIndicator), no compositor
+- docs(compose-screen): Done mede no build de produção a 375 px (Event Timing ≤ 200 ms, linhas montadas limitadas à janela ou às páginas pedidas); Compose diz que props do data-grid manter estáveis (equori v2)
+- docs(guidelines): LP-12 e LP-14 sem contradição
+- docs(guidelines): LA-03 para todo título e LA-07 (action-bar do rodapé numa linha no telefone); review-screen e compose-screen verificam as duas a 360 px (equori v2)
+- feat(theme): themeConformance aceita thresholds.layerStep (0,04 por omissão) e a falha nomeia a opção (equori v2)
+- fix(toolbar, action-bar): nome do controlo de overflow vem das famílias toolbar e actionBar do catálogo, com plural ICU e pt-BR ("Mais 3 ações"); React e Angular (equori v2)
+- fix(action-bar): abaixo de 24rem só a barra sem overflow empilha; com overflow mantém uma linha e dobra as ações com contrapartida (equori v2)
+- fix(button): rótulo numa linha à sua largura, sem quebra dentro da palavra; reticências só quando o contentor segura o controlo mais estreito que o rótulo (equori v2)
+- fix(app-shell): o render das partes e da raiz recebe o ref, que é também como a shell regista a parte (AppShellFooter com render deixava de se registar) (equori v2)
+- fix(detail-panel): a contagem da secção empilhada vai para SectionTags, fora do heading e do seu nome acessível, no eixo óptico das maiúsculas (React e Angular) (equori v2)
+- feat(drawer): data-expanded no bottom sheet que ocupa o layer (ou size=full)
+- perf(drawer): o arrasto do bottom sheet escreve a posição no layer sem estado por movimento
+- docs(drawer): default de size por lado (content em cima e embaixo, md no início e no fim) no contrato e nas duas tabelas; a tabela de eixos escreve um default que depende de outro eixo como frase (equori v2)
+- feat(data-grid): resizeMode="deferred"
+- fix(data-grid): carregar mais por IntersectionObserver sem root sobre as últimas loadMoreThreshold linhas
+- fix(data-grid): o resizer da última coluna é o do último cabeçalho de coluna, não o do último filho da linha
+- docs(data-grid): regra das props comparadas por identidade (columns, disabledKeys, rowKey função) e das lidas na hora do render; exemplos sem essas props inline, com verificação (equori v2)
+- perf(data-grid): renderers e callbacks do tree lidos na hora do render, linhas respondem só à presença; useMessages compara textos por valor e chama funções pela versão mais recente
+- fix(spinner): anel em SVG inline traçado por CSS, sem imagens data: (aparece sob img-src 'self'); o giro é rotate no compositor e continua com o main thread ocupado; cenário spinner-busy (equori v2)
+- docs(section, detail-panel): região com chão próprio republica --slotted-page-ground; linha sticky, token e exemplo do painel com scroll="self" (equori v2)
+- feat(page-header): sob o passo estreito, um toolbar que dobra fica numa linha própria abaixo de um título rico (visual, marks, subheading); LA-03 e contrato com a mesma divisão (equori v2)
+- feat(page-header): chão da raiz e do title-area com transição de background-color (--slotted-page-header-ground-duration e -easing) (equori v2)
+- feat(theme): --slotted-material-backdrop passa a token de esquema; tema padrão com blur de 6 px no claro, 20 px no escuro e none no alto contraste (equori v2)
+- fix(dialog): painel plain fica opaco e os filhos fazem o fade, para o backdrop-filter de um material interno aparecer desde o primeiro frame; token --slotted-dialog-backdrop-filter (equori v2)
+- feat(page, detail-panel): footers como material
+- feat(toast): token --slotted-toast-backdrop-filter no item raised, desligado sob transparência reduzida e cores forçadas (equori v2)
+- feat(command-palette): token --slotted-command-palette-backdrop-filter na raiz, desligado sob transparência reduzida e cores forçadas (equori v2)
+- feat(page-header): material
+
+### Guidelines
+
+- Added: LA-07
+
 ## 0.1.0-beta.10 — 2026-10-22
 
 - build: Prettier e ESLint repartidos por núcleo com cache estável por fatia (formatação completa 7 s quente, lint 6 s); testes de desempenho fora do verify, com a máquina livre

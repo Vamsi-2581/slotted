@@ -204,7 +204,8 @@ describe('interaction cost', () => {
     expect(section('5. Compose')).toMatch(/CP-09/);
     expect(section('5. Compose')).toMatch(/useDeferredValue|startTransition/);
     expect(section('7. Done')).toMatch(/throttled 4×/);
-    expect(section('7. Done')).toMatch(/long task/);
+    expect(section('7. Done')).toMatch(/Event Timing/);
+    expect(section('7. Done')).toMatch(/production build/);
   });
 });
 

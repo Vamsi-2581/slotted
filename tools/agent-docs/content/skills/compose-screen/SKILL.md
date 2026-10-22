@@ -73,7 +73,7 @@ element stands in that slot.
   own state at once and renders the region from a deferred value (in React,
   useDeferredValue or startTransition) (CP-09). A list longer than a hundred
   rows is a `data-grid`, which windows its rows where it has a height of its
-  own and is served in pages below 600 pixels (LP-12, LP-14).
+  own and is served in pages below 600 pixels (LP-12, LP-14). Its columns, its disabled keys and a function row key are module constants or memoised: a new one on a render of the screen renders every mounted row again. Its renderers, its messages and its tree may be written inline.
 - Where no anatomy answers the problem, the screen writes an element of its
   own instead of bending a family into a shape it does not have (CP-04). That
   element is built with `{{docsDir}}/skills/build-own-element/SKILL.md`.
@@ -89,9 +89,14 @@ Every region filled by a request and every control that starts one follow
 2. Each `SHOULD` rule not followed is listed with its reason.
 3. No CSS of the screen's own targets a family's parts; a family's appearance
    changes through its axes.
-4. In a browser with the CPU throttled 4×, each control that switches a region
-   paints its new state in the next frame, with no long task between the input
-   and that paint.
+4. On the production build, at 375 pixels with a coarse pointer and the CPU
+   throttled 4×, with the list holding at least 200 rows: each control that
+   switches a region, a row's selection, select-all, a sort, a row menu and a
+   scroll of one screen each paint within 200 ms of the input (the Event Timing
+   duration), and no list mounts more rows than its window or than the pages
+   it has requested (LP-12). A development build is not a measurement: a
+   hundred rows of twenty columns measured 93 ms on the production build and
+   160 ms on the development one (LP-14).
 5. For each value named in step 1, the control that edits it was chosen
    against the task, and the reason is written beside it.
 6. At 360 pixels with a coarse pointer, the header's actions and the footer's

@@ -95,7 +95,7 @@ O pedido cita "quatro de Spinner"; o ficheiro tem três blocos de Spinner (10, 1
 - Branch main, HEAD `22a22a75`. Árvore: só o trabalho do usuário e este ficheiro. Árvore: só o trabalho do usuário (ver Problemas conhecidos) e este ficheiro.
 
 ## Em curso
-- Nada. Verificação final interrompida a pedido do usuário (custo de tokens).
+- Nada. Release `v0.1.0-beta.11` publicada (CI `39834123114`, Release `39837434530`); os seis pacotes em `latest` = `0.1.0-beta.11`. `pnpm eval:agent-docs` não corrido, por decisão do usuário.
 
 ## Testes
 - Fatia 1: React page-header unit+detail-panel 54/54, browser page-header 4/4, command-palette 5/5, toast 3/3; Angular page-header+detail-panel 47/47; styles 1707/1707; contratos page-header 70/70; theme vitest 99/99; agent-docs skills+content 70/70; `pnpm check` verde.
@@ -121,7 +121,6 @@ O pedido cita "quatro de Spinner"; o ficheiro tem três blocos de Spinner (10, 1
 - Equori (fatia 1): `make web-check` — web-build e web-static verdes; web-test 735/736: a falha é `src/testing/document.test.ts > manifest.json`, com `web/public/manifest.json` alterado localmente em equori (alheio ao slotted); 7 ficheiros sem worker por timeout, re-executados à parte: 122/122.
 
 ## Problemas conhecidos
-- `pnpm check:full` (5.ª execução, HEAD `b9c4e8fb`): gates, styles, theme, core, agent-docs e storybook-workbench verdes; React 4140/4141 — `select.stories.test.ts > opens on a story of its own` excedeu 5 s com React e Angular a verificar em paralelo, e passa isolado (6/6). Angular verify e `test:perf` sem resultado registado.
 - Fatia 11 sem validação em equori.
 - Equori: 3 testes de `transactions-page.test.tsx` precisam de um stub de `IntersectionObserver` em jsdom (achado 24); `manifest.json` falha por alteração local de equori.
 - O cache incremental do typecheck (`node_modules/.cache/tsc/root.tsbuildinfo`) produziu 207 erros falsos (TS7022/TS2502 nos stories) depois de mudanças em `*.tokens.json`; sem o cache, 0 erros. Contorno: apagar o ficheiro.
@@ -130,4 +129,4 @@ O pedido cita "quatro de Spinner"; o ficheiro tem três blocos de Spinner (10, 1
 - `pnpm check:full` fica para o fim da tarefa: os achados 7 (contrato de tokens, compilador do tema) e 1 (contrato da família) são transversais.
 
 ## Próxima ação exata
-`pnpm exec turbo run verify --filter @slotted/angular` e `pnpm --filter @slotted/react test:perf`, uma vez cada; depois `pnpm sync:equori` e `cd ../equori && make web-check`.
+`cd ../equori/web && pnpm add @slotted/core@0.1.0-beta.11 @slotted/react@0.1.0-beta.11 @slotted/theme@0.1.0-beta.11 @slotted/themes@0.1.0-beta.11` (no equori, pelo usuário) e `make web-check`.

@@ -460,7 +460,13 @@ export function DrawerPanel({
    * compares against, and content that arrives while the sheet is open moves
    * it, so it is observed rather than read once.
    */
-  const { setRest, open: isOpen, extent: extentValue, live: liveValue } = drawer;
+  const {
+    setRest,
+    open: isOpen,
+    extent: extentValue,
+    live: liveValue,
+    dragging: draggingValue,
+  } = drawer;
   useIsomorphicLayoutEffect(() => {
     const box = measuringBox(layer, drawer.mode);
     if (
@@ -468,7 +474,8 @@ export function DrawerPanel({
       box === null ||
       !isOpen ||
       extentValue !== undefined ||
-      liveValue !== null
+      liveValue !== null ||
+      draggingValue
     )
       return;
     const inline = isInlineSide(drawer.side);
@@ -490,7 +497,17 @@ export function DrawerPanel({
     observer.observe(panel);
     observer.observe(box);
     return () => observer.disconnect();
-  }, [layer, drawer.mode, drawer.side, extentValue, isOpen, liveValue, panel, setRest]);
+  }, [
+    layer,
+    drawer.mode,
+    drawer.side,
+    draggingValue,
+    extentValue,
+    isOpen,
+    liveValue,
+    panel,
+    setRest,
+  ]);
 
   /**
    * The virtual keyboard. The layer recedes by what it covers, so the panel
@@ -512,8 +529,11 @@ export function DrawerPanel({
   /**
    * The body of a sheet from the bottom moves it under a touch, and hands the
    * gesture to the scroll of what it holds when that is what it is —
-   * `attachSheetDrag` decides which. The request is made once, on release, and
-   * the hand's position lives in `live` until then.
+   * `attachSheetDrag` decides which. The request is made once, on release.
+   * Until then the hand's position is written on the layer as it moves, in
+   * pixels against the span measured when the drag began: a state per move
+   * rendered the drawer and everything that reads it, and each render measured
+   * the layer again.
    */
   const sheet = overlay && drawer.side === 'bottom' && drawer.drag === 'panel';
   useEffect(() => {
@@ -522,6 +542,13 @@ export function DrawerPanel({
     let start = 0;
     let last = 0;
     let measured: { stops: number[]; rest: number | undefined } = { rest: undefined, stops: [] };
+    /* What the render wrote on the layer before the drag, put back on release. */
+    let held = { extent: '', undimmed: false };
+    const restore = () => {
+      if (held.extent === '') layer.style.removeProperty('--slotted-drawer-extent');
+      else layer.style.setProperty('--slotted-drawer-extent', held.extent);
+      layer.toggleAttribute('data-undimmed', held.undimmed);
+    };
 
     const now = () => {
       span = layer.getBoundingClientRect().height;
@@ -539,14 +566,19 @@ export function DrawerPanel({
         start = now();
         last = start;
         measured = measureStops(current.current, panel, span);
+        held = {
+          extent: layer.style.getPropertyValue('--slotted-drawer-extent'),
+          undimmed: layer.hasAttribute('data-undimmed'),
+        };
         current.current.setDragging(true);
-        current.current.setLive(start);
       },
       onMove: (distance) => {
         if (span <= 0) return;
         last = Math.max(0, start + distance / span);
         const top = measured.stops.at(-1) ?? start;
-        current.current.setLive(dampenExtent(last, top));
+        const at = dampenExtent(last, top);
+        layer.style.setProperty('--slotted-drawer-extent', `${String(Math.round(at * span))}px`);
+        layer.toggleAttribute('data-undimmed', at < current.current.scrimFrom);
       },
       onEnd: (velocity) => {
         const drawerNow = current.current;
@@ -562,11 +594,11 @@ export function DrawerPanel({
              there; a close the consumer refused puts it back. */
           drawerNow.close('pointer', undefined, null);
           requestAnimationFrame(() => {
-            if (current.current.open) current.current.setLive(null);
+            if (current.current.open) restore();
           });
           return;
         }
-        drawerNow.setLive(null);
+        restore();
         drawerNow.requestExtent(asRequest(drawerNow, landed, measured.rest), 'pointer', null);
       },
     });

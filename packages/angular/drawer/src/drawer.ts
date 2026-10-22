@@ -553,7 +553,8 @@ export class SlDrawer implements OnInit {
         panel === undefined ||
         !this.open() ||
         this.extent() !== undefined ||
-        this.live() !== null
+        this.live() !== null ||
+        this.dragging()
       ) {
         return;
       }
@@ -599,8 +600,10 @@ export class SlDrawer implements OnInit {
     /**
      * The body of a sheet from the bottom moves it under a touch, and hands the
      * gesture to the scroll of what it holds when that is what it is —
-     * `attachSheetDrag` decides which. The request is made once, on release,
-     * and the hand's position lives in `live` until then.
+     * `attachSheetDrag` decides which. The request is made once, on release.
+     * Until then the hand's position is written on the layer as it moves, in
+     * pixels against the span measured when the drag began: a signal per move
+     * ran the drawer's change detection and measured the layer again.
      */
     effect((onCleanup) => {
       const node = this.layerRef()?.nativeElement;
@@ -626,6 +629,13 @@ export class SlDrawer implements OnInit {
         span = node.getBoundingClientRect().height;
         return span > 0 ? panel.offsetHeight / span : 0;
       };
+      /* What the template wrote on the layer before the drag, put back on release. */
+      let held = { extent: '', undimmed: false };
+      const restore = () => {
+        if (held.extent === '') node.style.removeProperty('--slotted-drawer-extent');
+        else node.style.setProperty('--slotted-drawer-extent', held.extent);
+        node.toggleAttribute('data-undimmed', held.undimmed);
+      };
 
       onCleanup(
         attachSheetDrag(panel, {
@@ -639,13 +649,18 @@ export class SlDrawer implements OnInit {
             start = now();
             last = start;
             measured = this.measureStops(panel, span);
+            held = {
+              extent: node.style.getPropertyValue('--slotted-drawer-extent'),
+              undimmed: node.hasAttribute('data-undimmed'),
+            };
             this.dragging.set(true);
-            this.live.set(start);
           },
           onMove: (distance) => {
             if (span <= 0) return;
             last = Math.max(0, start + distance / span);
-            this.live.set(dampenExtent(last, measured.stops.at(-1) ?? start));
+            const at = dampenExtent(last, measured.stops.at(-1) ?? start);
+            node.style.setProperty('--slotted-drawer-extent', `${String(Math.round(at * span))}px`);
+            node.toggleAttribute('data-undimmed', at < this.scrimFrom());
           },
           onEnd: (velocity) => {
             this.dragging.set(false);
@@ -659,10 +674,10 @@ export class SlDrawer implements OnInit {
               /* The panel stays where the hand left it, so the exit slides from
                  there; a close the consumer refused puts it back. */
               this.request(false, 'pointer', undefined, null);
-              if (this.open()) this.live.set(null);
+              if (this.open()) restore();
               return;
             }
-            this.live.set(null);
+            restore();
             this.requestExtent(this.asRequest(landed, measured.rest), 'pointer', null);
           },
         }),

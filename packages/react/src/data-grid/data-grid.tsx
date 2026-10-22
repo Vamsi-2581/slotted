@@ -53,6 +53,7 @@ import {
   type GridOutOfSpace,
   type GridQuery,
   type GridRange,
+  type GridTree,
   type ResolvedGridColumn,
   type SortDirection,
 } from '@slotted/core/grid';
@@ -147,6 +148,19 @@ const KEYBOARD_ECHO = 300;
 const TOUCH_ECHO = 500;
 
 /** A rectangle with no size at the point the reader pressed. */
+/** The latest function behind one that stays the same while a function is given. */
+function useLatestOptional<Args extends unknown[], Result>(
+  given: ((...args: Args) => Result) | undefined,
+): ((...args: Args) => Result) | undefined {
+  const latest = useRef(given);
+  latest.current = given;
+  const present = given !== undefined;
+  return useMemo(
+    () => (present ? (...args: Args) => latest.current!(...args) : undefined),
+    [present],
+  );
+}
+
 function pointAnchor(x: number, y: number): PositionerAnchor {
   const rect = new DOMRect(x, y, 0, 0);
   return { getBoundingClientRect: () => rect };
@@ -208,7 +222,7 @@ function contentWidth(cell: HTMLElement): number {
 
 export function DataGrid<Row>({
   activatable,
-  cellRenderers,
+  cellRenderers: givenCellRenderers,
   columnGroups,
   columnOverflow,
   dataSource,
@@ -225,7 +239,7 @@ export function DataGrid<Row>({
   defaultValue,
   disabledKeys,
   editMode,
-  editorRenderers,
+  editorRenderers: givenEditorRenderers,
   error: givenError,
   expandable,
   expanded: expandedProp,
@@ -269,13 +283,13 @@ export function DataGrid<Row>({
   query: queryProp,
   range: rangeProp,
   ref,
-  renderCell,
-  renderDetail,
-  renderEditor,
+  renderCell: givenRenderCell,
+  renderDetail: givenRenderDetail,
+  renderEditor: givenRenderEditor,
   renderEmpty,
   renderFilterOperand,
-  renderGroup,
-  renderHeader,
+  renderGroup: givenRenderGroup,
+  renderHeader: givenRenderHeader,
   rowHeight,
   rowKey,
   rowsReorderable,
@@ -289,7 +303,7 @@ export function DataGrid<Row>({
   style,
   timeZone,
   totalCount: givenTotalCount,
-  tree,
+  tree: givenTree,
   value: valueProp,
   variant,
   virtualize,
@@ -303,6 +317,45 @@ export function DataGrid<Row>({
   void pageSizes;
   const root = useRef<HTMLDivElement | null>(null);
   const scroll = useRef<HTMLDivElement | null>(null);
+
+  /* ── Renderers ──────────────────────────────────────────────────────── */
+  /* A renderer, and the tree's callbacks, are read when a row renders, through
+     the latest props: written inline they were new functions on every render
+     of the parent, and each one re-rendered every mounted row. A row answers
+     to whether each is given, and to the cell renderers' column ids. */
+  const givenLatest = useRef({
+    cellRenderers: givenCellRenderers,
+    editorRenderers: givenEditorRenderers,
+    tree: givenTree,
+  });
+  givenLatest.current = {
+    cellRenderers: givenCellRenderers,
+    editorRenderers: givenEditorRenderers,
+    tree: givenTree,
+  };
+  const renderCell = useLatestOptional(givenRenderCell);
+  const renderDetail = useLatestOptional(givenRenderDetail);
+  const renderEditor = useLatestOptional(givenRenderEditor);
+  const renderGroup = useLatestOptional(givenRenderGroup);
+  const renderHeader = useLatestOptional(givenRenderHeader);
+  const cellRendererIds = givenCellRenderers ? Object.keys(givenCellRenderers).join() : null;
+  const editorRendererIds = givenEditorRenderers ? Object.keys(givenEditorRenderers).join() : null;
+  const givenTreeColumn = givenTree?.column;
+  const treeHasChildren = givenTree?.hasChildren !== undefined;
+  const tree = useMemo(
+    (): GridTree<Row> | undefined =>
+      givenTree === undefined
+        ? undefined
+        : {
+            column: givenTreeColumn,
+            parentKey: (row) => givenLatest.current.tree!.parentKey(row),
+            hasChildren: treeHasChildren
+              ? (row) => givenLatest.current.tree!.hasChildren?.(row) === true
+              : undefined,
+          },
+    /* The given tree is read through `givenLatest`; these say what shape it has. */
+    [givenTree === undefined, givenTreeColumn, treeHasChildren],
+  );
 
   /* ── Resolution ─────────────────────────────────────────────────────── */
   const t = useMessages(dataGridMessages, messages);
@@ -2531,21 +2584,22 @@ export function DataGrid<Row>({
   /* ── Renderers ──────────────────────────────────────────────────────── */
   const renderCellContent = useCallback(
     (context: DataGridCellContext<Row>) => {
-      const own = cellRenderers?.[context.column.id];
+      const own = givenLatest.current.cellRenderers?.[context.column.id];
       if (own) return own(context);
       if (renderCell) return renderCell(context);
       return defaultCellContent(context);
     },
-    [cellRenderers, renderCell],
+    /* The renderers are read through `givenLatest`; their column ids say which apply. */
+    [cellRendererIds, renderCell],
   );
   const renderEditorContent = useCallback(
     (context: DataGridEditorContext<Row>): ReactNode => {
-      const own = editorRenderers?.[context.column.id];
+      const own = givenLatest.current.editorRenderers?.[context.column.id];
       if (own) return own(context);
       if (renderEditor) return renderEditor(context);
       return defaultEditor(context, t, resolvedLocale);
     },
-    [editorRenderers, renderEditor, t, resolvedLocale],
+    [editorRendererIds, renderEditor, t, resolvedLocale],
   );
 
   /* ── Handle ─────────────────────────────────────────────────────────── */

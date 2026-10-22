@@ -114,11 +114,42 @@ export function useTranslator(): Translator<SlottedMessages> {
 /**
  * A family's messages in the language in force, an instance's `messages`
  * prop laid over the catalog key by key.
+ *
+ * The translator answers to what the override says, not to the object it is
+ * written in: `messages` written inline is a new object on every render of
+ * its parent, and a new translator re-rendered every row of a data grid on a
+ * selection change. Its texts are compared by value; a function is called
+ * through the latest override, so a new closure is not a new translator.
  */
 export function useMessages<F extends keyof SlottedMessages & string>(
   family: MessageFamily<F, SlottedMessages[F]>,
   override?: PartialMessages<SlottedMessages[F]>,
 ): FamilyTranslator<SlottedMessages[F]> {
   const translator = useTranslator();
-  return useMemo(() => translator.family(family, override), [translator, family, override]);
+  const latest = useRef(override);
+  latest.current = override;
+  const shape =
+    override === undefined
+      ? ''
+      : JSON.stringify(
+          Object.entries(override).map(([key, value]) => [
+            key,
+            typeof value === 'function' ? null : value,
+          ]),
+        );
+  return useMemo(() => {
+    const current = latest.current;
+    if (current === undefined) return translator.family(family);
+    const calls = Object.fromEntries(
+      Object.entries(current).map(([key, value]) => [
+        key,
+        typeof value === 'function'
+          ? (...args: unknown[]) =>
+              (latest.current as Record<string, (...args: unknown[]) => unknown>)[key]!(...args)
+          : value,
+      ]),
+    ) as PartialMessages<SlottedMessages[F]>;
+    return translator.family(family, calls);
+    /* `shape` stands for the override: the latest one is read through `latest`. */
+  }, [translator, family, shape]);
 }

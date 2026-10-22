@@ -2,6 +2,36 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.10 — 2026-10-22
+
+- build: Prettier e ESLint repartidos por núcleo com cache estável por fatia (formatação completa 7 s quente, lint 6 s); testes de desempenho fora do verify, com a máquina livre
+- build: pnpm check em ~25 s
+- fix: barra de progresso Angular recomeça por ramo de paridade (sem NG0956); teste de lista longa com 150 registos para caber no tempo da suíte
+- build(turbo): agent-docs verify depois de core, theme e themes
+- fix: semente info espelhada nos portais; módulos React sem import de CSS, folhas por família explícitas (equori, verificação final)
+- chore(theme): regenera contrato, hooks e snapshot do proof (tokens e partes da rodada equori)
+- test(theme): semente info na fixture de recipe.test
+- chore(react): formata o tsconfig
+- feat(react): CSS por família importado pelo próprio chunk e folhas por família; receita no theme-app (equori, fatia 11)
+- feat: anel de ênfase do prompt-composer; AF-07, AF-03 e waiting-states com a barra do page-header para o refresh da página (equori, fatia 10)
+- feat: partes de opção do entity-picker, janela de opções em listas longas, espaço entre campos do form (equori, fatia 9)
+- feat: dialog e drawer montados abertos entram animados e avisam o fim (onOpenChangeComplete), ações no inline-message, slot e tom por fatia na pizza (equori, fatia 8)
+- fix: autofill pinta o controle inteiro, avatar carregado sem fundo de tom e prop surface, offsets ópticos de glifos com corpo declarado (equori, fatia 7)
+- feat: tom info em tema e famílias, tinta por slot de dados (--slotted-data-N-on), offset do anel dos campos (--slotted-control-focus-ring-offset); receita volta a ser gerada pelo calibrador (equori, fatia 6)
+- feat(theme): borda e texto dark do accent no matiz do seed, escada de superfícies dark visível, escada de dados derivada do accent e segura para daltonismo (equori, fatia 5)
+- feat: barra indeterminada no compositor, data-grid mantém o vazio ao reler (loading initial/refresh), sparkline só anima mudança de dados e tem largura mínima (equori, fatia 4)
+- fix: busy de data-grid/data-list por véu, progress do page-header na linha de fecho em qualquer ordem, varredura do progress recomeça a cada pintura (equori, fatia 3)
+- fix: props de render das famílias de link sem membros undefined (DefinedProps, definedProps), anel do prompt-composer sem transição da cor do texto (equori, fatia 2)
+- fix: light-dark() nativo no styles.css do React, regressão de foco do dialog coberta, entity-picker sem spellcheck por padrão (equori, fatia 1)
+- fix(spinner): o anel passa a ser desenhado em vetor, sem serrilhado, borrão ou corte
+- feat(section): título em rótulo, parte tags na linha de base e espaço entre sections do próprio componente
+- test(react): os testes de desempenho correm um arquivo de cada vez
+- perf(data-grid): um passo de scroll deixa de refazer o layout e o estilo da grade inteira
+
+### Guidelines
+
+- Added: FM-17
+
 ## 0.1.0-beta.9 — 2026-10-21
 
 - test(react): o custo das chaves de seletor é medido contra os mesmos seletores por valor, não em milissegundos do runner

@@ -93,6 +93,7 @@
     "property": "--_stacked",
     "reason": "Below the breakpoint the run becomes a full-width column with the action that confirms on top, which is the composition change docs/component-features.md §2.7 asks for rather than a size change. The breakpoint is literal because @container (width < var(--x)) is invalid, and it is written once: the stylesheet raises the property inside the query and the binding reads the computed value back instead of comparing widths of its own.",
     "collapse": "does not run while the bar is stacked. A column has room for every action, and a surface holding what did not fit would be a menu for nothing.",
+    "overflow": "a bar that holds an overflow control does not stack: below the breakpoint it keeps one row, the actions without a counterpart stay and the others fold into the menu. Measured on a 358 pixel phone, a stacked bar of three actions with counterparts was 164 pixels tall and hid its control",
     "degradation": "past the stack, flex wrap puts what does not fit on a second row"
   },
   "presence": {

@@ -380,6 +380,11 @@
    * breakpoint is. While it is raised the collapse does not run: a column has
    * room for every action, and a surface holding what did not fit would be a
    * menu for nothing.
+   *
+   * A bar that holds an overflow control does not stack: it keeps one row, the
+   * actions without a counterpart stay and the rest fold into the menu. It
+   * stacked once, hid its control, and three actions with counterparts stood
+   * in a bar 164 pixels tall on a 358 pixel phone.
    */
   @container slotted-action-bar (width < 24rem) {
     /**
@@ -388,7 +393,7 @@
      * the order a form is read in, and only the paint is reversed. `stretch`
      * fills the column, because a column of natural widths is a ragged edge.
      */
-    [data-ui-action-bar] [data-part-actions] {
+    [data-ui-action-bar]:not(:has([data-part-overflow])) [data-part-actions] {
       --_stacked: 1;
 
       align-items: stretch;
@@ -397,26 +402,15 @@
       margin-inline: 0;
     }
 
-    [data-ui-action-bar] [data-part-action] > * {
+    [data-ui-action-bar]:not(:has([data-part-overflow])) [data-part-action] > * {
       inline-size: 100%;
-    }
-
-    /**
-     * While the bar is a column there is no overflow, because a column has room
-     * for every action — the binding stops measuring, and the rule says the same
-     * thing on the side a reader is looking at. Without it the trigger is
-     * painted at the top of the column by the reversal, which is where the
-     * action that confirms belongs.
-     */
-    [data-ui-action-bar] [data-part-overflow] {
-      display: none;
     }
 
     /**
      * A rule that divided two controls in a row divides two rows here, so it
      * turns with them.
      */
-    [data-ui-action-bar] [data-part-separator] {
+    [data-ui-action-bar]:not(:has([data-part-overflow])) [data-part-separator] {
       block-size: var(--slotted-border-width-thin, 1px);
       inline-size: auto;
       margin-block: calc(var(--_gap) / 2);
@@ -424,14 +418,14 @@
       min-block-size: 0;
     }
 
-    [data-ui-action-bar] [data-part-status] {
+    [data-ui-action-bar]:not(:has([data-part-overflow])) [data-part-status] {
       flex: 1 1 100%;
     }
 
     /* What the consumer put in the status, addressed as the part's child and
        never by a class of its own: while the bar is a column the status fills
        the row, as an action does two rules above. */
-    [data-ui-action-bar] [data-part-status] > * {
+    [data-ui-action-bar]:not(:has([data-part-overflow])) [data-part-status] > * {
       align-content: space-between;
       inline-size: 100%;
     }

@@ -127,15 +127,19 @@ test('states the stacking breakpoint once, and publishes the fact', () => {
 });
 
 /**
- * A column has room for every action, so there is no overflow while the bar is
- * stacked. The binding stops measuring and the stylesheet says the same thing,
- * because the reversal would otherwise paint the trigger where the action that
- * confirms belongs — at the top.
+ * Only a bar without an overflow control stacks: one with a control keeps a
+ * row and folds what has a counterpart, which is what the control is for. It
+ * stacked, hid the control, and three actions stood 164 pixels tall.
  */
-test('draws no overflow trigger while the bar is a column', () => {
+test('stacks only a bar that has no overflow control', () => {
   const stacked = css.slice(css.indexOf(`(width < ${contract.stack.breakpoint})`));
-  const trigger = stacked.slice(stacked.indexOf(part('overflow')));
-  assert.match(trigger.slice(0, 120), /display: none/);
+  const rules = stacked.slice(0, stacked.indexOf('Forced colours'));
+  const selectors = [...rules.matchAll(/^ {4}(\[data-ui-action-bar\][^{]*)\{/gm)].map(([, s]) => s);
+  assert.ok(selectors.length > 0);
+  for (const selector of selectors) {
+    assert.match(selector, /^\[data-ui-action-bar\]:not\(:has\(\[data-part-overflow\]\)\)/);
+  }
+  assert.match(contract.stack.overflow, /keeps one row/);
   assert.match(contract.stack.collapse, /does not run/);
 });
 

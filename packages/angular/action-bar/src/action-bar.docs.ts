@@ -51,7 +51,7 @@ const anatomy: AnatomyRow[] = [
     element: 'an element carrying slActionBarActions',
     required: true,
     purpose:
-      'The run that gives way, and the box the collapse measures. It carries margin-inline-start: auto, which anchors it to the bar’s end edge; below 24rem of container it becomes a full-width column with the action that confirms on top.',
+      'The run that gives way, and the box the collapse measures. It carries margin-inline-start: auto, which anchors it to the bar’s end edge; below 24rem of container, with no overflow control in the bar, it becomes a full-width column with the action that confirms on top.',
   },
   {
     part: 'action',
@@ -308,7 +308,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'stacked',
     title: 'The bar on a phone',
-    note: 'Below 24rem of container the run becomes a full-width column with the action that confirms on top, and the collapse stops running — a column has room for everything, so there is no menu. The DOM order does not change, so Tab still reads the form’s order.',
+    note: 'Below 24rem of container a bar with no overflow control becomes a full-width column with the action that confirms on top, and the collapse stops running — a column has room for everything, so there is no menu. A bar with an overflow control keeps one row: the actions without a counterpart stay and the rest fold into the menu. The DOM order does not change, so Tab still reads the form’s order.',
     snippet: defineSnippet({
       id: 'action-bar-angular-stacked',
       language: 'angular',

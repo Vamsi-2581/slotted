@@ -72,7 +72,8 @@ element stands in that slot.
 - A control that switches a region — tabs, a route, a filter — updates its
   own state at once and renders the region from a deferred value (in React,
   useDeferredValue or startTransition) (CP-09). A list longer than a hundred
-  rows is a `data-grid`, which windows its rows (LP-14).
+  rows is a `data-grid`, which windows its rows where it has a height of its
+  own and is served in pages below 600 pixels (LP-12, LP-14).
 - Where no anatomy answers the problem, the screen writes an element of its
   own instead of bending a family into a shape it does not have (CP-04). That
   element is built with `{{docsDir}}/skills/build-own-element/SKILL.md`.

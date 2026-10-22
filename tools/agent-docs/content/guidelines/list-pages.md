@@ -166,12 +166,12 @@ Check: With touch emulation at 390 pixels the filter bar's `end` slot is one lin
 
 Level: MUST
 Applies to: a page whose body is a `data-grid` or a `table` over a store, with a bar or a message above it
-Rule: From 600 pixels of the page's width the listing takes the height the bar and the messages leave and scrolls its own rows while the page does not scroll; below 600 the page's `fill` does not apply, the listing is as tall as its rows and the page scrolls.
+Rule: From 600 pixels of the page's width the listing takes the height the bar and the messages leave and scrolls its own rows while the page does not scroll; below 600 the page's `fill` does not apply, the listing is as tall as its rows and the page scrolls. Below 600 the grid therefore windows nothing, and a store that can pass a hundred rows is served in pages: the grid asks for the next one when its last `loadMoreThreshold` rows come into view of the page's scroller, not of its own box.
 Why: Two scrollers on one screen let the wheel answer whichever is under the pointer; and on a phone a filled page left the rows 155 pixels of a 667-pixel screen under a header, a banner and the tools.
 Do: Write the page with `fill`; make the region a flex column that takes its parent's full height with a zero minimum, and give the listing `flex: 1 1 0` with `min-block-size: 0`, and below 600 pixels a flex basis of auto, so the listing fills a column that has a height and takes its rows' height in one that has none. The page's footer bar (LP-03) stays outside it.
 Don't: Keep the zero basis below 600 pixels, which collapses the listing to nothing once the column loses its height, or give it an `auto` basis above 600, where its rows' height climbs the column and the page scrolls again.
 Seen in: Nexora · Contacts, a grid of sixty-two rows that scrolled the page under the pointer and its own rows over it; Suppliers at 375×667, rows in 23% of the screen (ledger row "page, page-header, data-grid") · corrected
-Check: At 1280 with a full page of rows, the document's scroll height equals its client height and the wheel over a row moves the rows; at 375×667 the document scrolls and the grid is as tall as its rows.
+Check: At 1280 with a full page of rows, the document's scroll height equals its client height and the wheel over a row moves the rows; at 375×667 the document scrolls, the grid is as tall as its rows, opening the page over a store served 30 rows at a time requests pages only until the grid's last `loadMoreThreshold` rows are below the screen's edge, and scrolling to the end requests the next one.
 
 ### LP-13 · A mark in a cell is the small step
 
@@ -188,7 +188,7 @@ Check: On every list, every `badge` and `tag` inside a cell of a `data-grid` or 
 
 Level: MUST
 Applies to: a list of records whose count the reader does not bound — transactions, postings, imports
-Rule: A list that can hold more than a hundred rows, or more than twenty columns, is a `data-grid`, which windows rows and middle columns under its default `virtualize` of `auto`; `table` is for sets the page bounds, such as a statement's lines or a record's related rows.
+Rule: A list that can hold more than a hundred rows, or more than twenty columns, is a `data-grid`, which windows rows and middle columns under its default `virtualize` of `auto` wherever it has a height of its own; below 600 pixels, where it is as tall as its rows (LP-12), the store is served in pages instead. `table` is for sets the page bounds, such as a statement's lines or a record's related rows.
 Why: `table` mounts every cell: a hundred rows of twenty columns measured 93 ms in one task with a production build of React in Chrome and 160 ms with a development build, and the count of rows the store returns sets that cost.
 Do: Give the store's list a `data-grid` with its query, and keep `table` for the bounded sets inside a record or a document.
 Don't: Render an unbounded store into a `table`, or page a `table` to keep it under a hundred rows where the grid's window would have kept the whole set reachable.

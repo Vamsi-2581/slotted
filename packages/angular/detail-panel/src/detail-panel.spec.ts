@@ -198,6 +198,10 @@ describe('SlDetailPanel', () => {
     expect(heading?.textContent).toContain('Linhas');
     expect(heading?.getAttribute('aria-level')).toBe('3');
     expect(stacked[0]?.querySelector('[data-ui="badge"]')?.textContent).toBe('4');
+    /* The count is the section's tag, outside the heading and its name. */
+    const badge = stacked[0]?.querySelector('[data-ui="badge"]');
+    expect(heading?.contains(badge ?? null)).toBe(false);
+    expect(badge?.closest('[data-part="tags"]')).not.toBeNull();
     expect(
       stacked[0]?.querySelector('[data-ui="section"] [data-part="actions"] button'),
     ).not.toBeNull();

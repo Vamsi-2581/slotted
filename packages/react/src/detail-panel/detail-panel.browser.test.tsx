@@ -60,3 +60,39 @@ describe('a detail panel that scrolls itself in a desktop frame', () => {
     );
   });
 });
+
+/**
+ * A stacked section's count sits on the heading's optical axis. Inside the
+ * uppercase heading, middle-aligned on a 1.4 line box, the capitals' centre
+ * stood above the badge's.
+ */
+describe('the count of a stacked section', () => {
+  it('shares its centre with the capitals of the heading', async () => {
+    render(
+      <DetailPanel>
+        <DetailPanelBody>
+          <DetailPanelSection count={3} label="Postings" name="postings">
+            Rows
+          </DetailPanelSection>
+        </DetailPanelBody>
+      </DetailPanel>,
+    );
+    await frame();
+    const heading = document.querySelector('[data-part="heading"]') as HTMLElement;
+    const badge = document.querySelector('[data-ui="badge"]') as HTMLElement;
+    /* The baseline is where a zero-height inline box sits; the capitals rise
+       from it by the font's cap height. */
+    const probe = document.createElement('span');
+    probe.style.cssText = 'display:inline-block;block-size:0;inline-size:0';
+    heading.append(probe);
+    const baseline = probe.getBoundingClientRect().bottom;
+    probe.remove();
+    const style = getComputedStyle(heading);
+    const context = document.createElement('canvas').getContext('2d')!;
+    context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const cap = context.measureText('H').actualBoundingBoxAscent;
+    const capitals = baseline - cap / 2;
+    const rect = badge.getBoundingClientRect();
+    expect(Math.abs(capitals - (rect.top + rect.height / 2))).toBeLessThanOrEqual(0.5);
+  });
+});

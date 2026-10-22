@@ -294,3 +294,26 @@ describe('DetailPanel', () => {
     expect(root().classList.contains('mine')).toBe(true);
   });
 });
+
+/**
+ * A stacked section's count is the section's tag, not part of its name: inside
+ * the heading it joined the heading's accessible name and its tracked small
+ * capitals. It stands in the section's tags, after the heading.
+ */
+describe('a stacked section with a count', () => {
+  it('draws the count beside the heading, outside it and outside its name', () => {
+    render(
+      <DetailPanel>
+        <DetailPanelBody>
+          <DetailPanelSection count={3} label="Postings" name="postings">
+            Rows
+          </DetailPanelSection>
+        </DetailPanelBody>
+      </DetailPanel>,
+    );
+    const heading = screen.getByRole('heading', { name: 'Postings' });
+    const badge = document.querySelector('[data-ui="badge"]') as HTMLElement;
+    expect(heading.contains(badge)).toBe(false);
+    expect(badge.closest('[data-part="tags"]')).not.toBeNull();
+  });
+});

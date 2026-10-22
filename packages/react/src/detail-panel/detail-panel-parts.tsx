@@ -10,6 +10,7 @@ import {
   SectionBody,
   SectionHeader,
   SectionHeading,
+  SectionTags,
   SectionTitle,
 } from '../section';
 import type { SectionLevel } from '../section';
@@ -97,7 +98,8 @@ export function DetailPanelBody({
  * the strip's tab — hidden when not current, in the tab sequence, wired by
  * the ids the strip returns. Under `stacked` it holds a `Section` at the
  * rank below the panel's, with the label as heading and the count as a badge
- * after it.
+ * in the section's tags: outside the heading, so it is not part of its name
+ * and does not take its tracked capitals.
  *
  * While the panel is loading the content is not mounted; three skeleton
  * lines stand in its place.
@@ -165,10 +167,8 @@ export function DetailPanelSection({
       >
         <SectionHeader>
           <SectionTitle>
-            <SectionHeading>
-              {label}
-              {badge === null ? null : <> {badge}</>}
-            </SectionHeading>
+            <SectionHeading>{label}</SectionHeading>
+            {badge === null ? null : <SectionTags>{badge}</SectionTags>}
           </SectionTitle>
           {actions !== undefined && actions !== null && actions !== false ? (
             <SectionActions>{actions}</SectionActions>

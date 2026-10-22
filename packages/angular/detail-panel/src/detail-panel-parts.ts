@@ -9,6 +9,7 @@ import {
   SlSectionBody,
   SlSectionHeader,
   SlSectionHeading,
+  SlSectionTags,
   SlSectionTitle,
 } from '@slotted/angular/section';
 import type { SectionLevel } from '@slotted/angular/section';
@@ -127,6 +128,7 @@ export class SlDetailPanelFooter {
     SlSectionBody,
     SlSectionHeader,
     SlSectionHeading,
+    SlSectionTags,
     SlSectionTitle,
     SlSkeletonText,
   ],
@@ -171,9 +173,9 @@ export class SlDetailPanelFooter {
                 <section slSection [level]="sectionLevel()" [size]="panel.resolvedSize()">
                   <div slSectionHeader>
                     <div slSectionTitle>
-                      <div slSectionHeading>
-                        {{ section.label() }}&ngsp;
-                        @if (section.count() !== undefined) {
+                      <div slSectionHeading>{{ section.label() }}</div>
+                      @if (section.count() !== undefined) {
+                        <div slSectionTags>
                           <span
                             slBadge
                             [count]="section.count()"
@@ -182,8 +184,8 @@ export class SlDetailPanelFooter {
                             tone="secondary"
                             variant="soft"
                           ></span>
-                        }
-                      </div>
+                        </div>
+                      }
                     </div>
                     @if (section.actions(); as actions) {
                       <div slSectionActions>

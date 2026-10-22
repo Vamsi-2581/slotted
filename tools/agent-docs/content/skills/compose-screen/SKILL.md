@@ -93,3 +93,5 @@ Every region filled by a request and every control that starts one follow
    and that paint.
 5. For each value named in step 1, the control that edits it was chosen
    against the task, and the reason is written beside it.
+6. At 360 pixels with a coarse pointer, the header's actions and the footer's
+   actions each occupy one row (LA-03, LA-07).

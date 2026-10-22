@@ -56,16 +56,16 @@ Don't: Write a bare avatar and text into the header, or pad the header by a numb
 Seen in: Nexora · navigation column header, on the overlay card at phone width · ledger rows "nav-header and nav-footer carry block padding only" and "the overlay layer is a card"
 Check: The header's avatar and the first destination's icon share a left edge, in the column, in the rail and in the overlay.
 
-### LA-03 · A phone's header keeps its actions on the title's line
+### LA-03 · A phone's header keeps its actions on one row
 
 Level: SHOULD
-Applies to: what a consumer places in `page-header`'s `actions`, beside a plain title — one heading, no visual, no subheading
-Rule: Below the header's narrow step the actions beside a plain title fit on the title's line: a labelled action becomes its icon-only form, and two or more actions stand in a `toolbar` that folds into its menu.
-Why: The row wraps when the actions cannot share the line with the title, and a wrapped row under a one-line heading puts the title at the start of one line and the actions at the end of the next, aligned with nothing.
-Do: Write the action twice — the labelled control and its icon-only twin with the same accessible name, the same states and the same handler — and show one per side of the header's own container query. Under a rich title (visual, marks, subheading), a `toolbar` that folds into its menu takes a full row of its own under the title and folds only what does not fit; `page-header` places it there.
-Don't: Leave a labelled button that wraps, or shrink the control under the touch target to make it fit.
+Applies to: what a consumer places in `page-header`'s `actions`, under any title
+Rule: Below the header's narrow step the header's actions occupy one row: one action beside a plain title becomes its icon-only form, and two or more stand in a `toolbar` that folds into its menu, each item with its counterpart and the primary one without, so it stays. Beside a plain title that row is the title's line; under a rich title (visual, marks, subheading) `page-header` gives the toolbar a full row of its own.
+Why: Loose actions wrap, and a wrapped row under a heading puts the title at the start of one line and the actions at the end of the next, aligned with nothing; four labelled buttons in an inline row took three rows of a phone's header.
+Do: Write the action twice — the labelled control and its icon-only twin with the same accessible name, the same states and the same handler — and show one per side of the header's own container query; write two or more as `toolbar` items with counterparts.
+Don't: Leave labelled buttons in an inline row that wraps, or shrink a control under the touch target to make it fit.
 Seen in: Nexora · Notifications page on a phone, "Mark all as read" under the title · corrected
-Check: At the narrowest phone width with a coarse pointer, the title and its action share one line; the icon-only control has the labelled control's name.
+Check: At 360 pixels with a coarse pointer, the header's actions occupy one row, and every action is reachable in it or in its menu.
 
 ### LA-04 · A page's views are the header's tabs
 
@@ -100,3 +100,14 @@ Don't: Measure the header in the screen's own code, or hard-code its height: the
 Seen in: Nexora · the workflow editor, its "As it will run" preview stuck under the page header · corrected
 Verified in: tools/look.mjs on the workflow editor at 1440×900, main scrolled to 500 and 700 (208 against 176)
 Check: Scroll the page until the header sticks, at two scroll positions: the sticky element's top stands at or below the bottom of the stuck header's title area each time.
+
+### LA-07 · A page footer's action-bar holds one row on a phone
+
+Level: MUST
+Applies to: an `action-bar` in a page's footer or a detail panel's footer
+Rule: The bar holds one row below its narrow step: the action that confirms declares no counterpart and stays, every other action declares a counterpart, and the bar's overflow control ends the run.
+Why: A bar without an overflow control stacks its actions into a column below 24rem: three actions stood in a footer 164 pixels tall on a 358 pixel phone, a quarter of the screen that the content scrolls under.
+Do: Give each action that is not the confirming one its counterpart, and close the run with the bar's overflow control.
+Don't: Leave the secondary actions without counterparts, or drop the overflow control from a bar of three or more actions.
+Seen in: Equori · a record form's footer with Discard, Save and add another, Save · reported
+Check: At 360 pixels with a coarse pointer, the footer's actions occupy one row and the overflow control holds the actions that folded.

@@ -281,7 +281,7 @@ describe('the axes table', () => {
           ...fieldInput.contract,
           members: {
             ...fieldInput.contract.members,
-            field: { ...fieldInput.contract.members.field!, defaults: { size } },
+            field: { ...fieldInput.contract.members['field']!, defaults: { size } },
           },
         },
       })

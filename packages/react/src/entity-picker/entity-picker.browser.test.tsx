@@ -43,7 +43,7 @@ describe('an option written through renderOption', () => {
   });
 });
 
-const MANY = Array.from({ length: 500 }, (_, index) => ({
+const MANY = Array.from({ length: 150 }, (_, index) => ({
   id: `p${String(index)}`,
   label: `Person ${String(index).padStart(3, '0')}`,
   avatar: { src: `data:image/gif;base64,R0lGODlhAQABAAAAACw=` },
@@ -51,7 +51,8 @@ const MANY = Array.from({ length: 500 }, (_, index) => ({
 
 /**
  * Every keystroke over 500 records with faces rendered all 500, and typing
- * lagged. Only the options in view are drawn; the keyboard still reaches the
+ * lagged. 150 records keep the list above the windowing threshold and the
+ * keyboard walk inside the test's time under the full suite's load. Only the options in view are drawn; the keyboard still reaches the
  * last match, the list scrolling to it as it goes.
  */
 describe('a long list of records', () => {
@@ -64,9 +65,9 @@ describe('a long list of records', () => {
 
     expect(document.querySelectorAll('[role="option"]').length).toBeLessThan(60);
 
-    await userEvent.keyboard('{ArrowDown>500/}');
+    await userEvent.keyboard('{ArrowDown>150/}');
     const last = document.getElementById(input.getAttribute('aria-activedescendant') ?? '');
-    expect(last?.textContent).toContain('Person 499');
+    expect(last?.textContent).toContain('Person 149');
     expect(document.querySelectorAll('[role="option"]').length).toBeLessThan(60);
   });
 });

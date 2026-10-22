@@ -51,7 +51,27 @@ import type { ProgressShape } from './progress-indicator.constants';
         [attr.pathLength]="100"
         r="20"
       />
-      @for (generation of [paint()]; track generation) {
+      <!-- Each paint draws the indicator again, so its sweep starts at the
+           leading edge: the branch changes with the paint's parity. -->
+      @if (paint() % 2 === 0) {
+        @if (wave()) {
+          <svg:path
+            [attr.d]="wavePath"
+            data-part="indicator"
+            data-part-indicator=""
+            [attr.pathLength]="100"
+          />
+        } @else {
+          <svg:circle
+            cx="24"
+            cy="24"
+            data-part="indicator"
+            data-part-indicator=""
+            [attr.pathLength]="100"
+            r="20"
+          />
+        }
+      } @else {
         @if (wave()) {
           <svg:path
             [attr.d]="wavePath"

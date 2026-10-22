@@ -69,7 +69,24 @@ import {
       <span data-part="value" data-part-value="">{{ valueTextValue() }}</span>
     }
     <div data-part="track" data-part-track="">
-      @for (generation of [paint()]; track generation) {
+      <!-- Each paint draws the indicator again, so its sweep starts at the
+           leading edge: the branch changes with the paint's parity. -->
+      @if (paint() % 2 === 0) {
+        @if (wave()) {
+          <svg
+            aria-hidden="true"
+            data-part="indicator"
+            data-part-indicator=""
+            focusable="false"
+            preserveAspectRatio="xMinYMid meet"
+            [attr.viewBox]="waveViewBox"
+          >
+            <svg:path [attr.d]="wavePath()" [attr.pathLength]="waveReach" />
+          </svg>
+        } @else {
+          <div data-part="indicator" data-part-indicator=""></div>
+        }
+      } @else {
         @if (wave()) {
           <svg
             aria-hidden="true"

@@ -228,3 +228,49 @@ describe('renderTheme inlined in an HTML <style>', () => {
     expect(parsed.querySelector('style')!.textContent).toBe(html);
   });
 });
+
+/*
+ * The material's filter reads well in a dark scheme and leaves a flat grey on
+ * a light page, so each scheme states its own, as it states the material's
+ * surface. Reduced transparency resets it in every scope, later in source than
+ * the scheme that set it.
+ */
+describe('the material backdrop', () => {
+  const { ['--slotted-material-backdrop']: _base, ...base } = (values.base ?? {}) as Record<
+    string,
+    string
+  >;
+  const schemes = Object.fromEntries(
+    Object.entries(values.schemes ?? {}).map(([scheme, tokens]) => [
+      scheme,
+      { ...tokens, '--slotted-material-backdrop': scheme === 'light' ? 'blur(6px)' : 'blur(20px)' },
+    ]),
+  );
+  const material = () =>
+    renderTheme(
+      defineTheme({
+        ...values,
+        base,
+        schemes,
+        name: 'material',
+        seeds: theme.seeds,
+        recipe: recipes.standard,
+      } as ThemeDefinition),
+    );
+
+  it('is declared in the scope of the scheme that states it', () => {
+    const output = material();
+    const light = output.indexOf('[data-slotted-scheme="light"]');
+    const declared = output.indexOf('--slotted-material-backdrop: blur(6px);', light);
+    expect(light).toBeGreaterThan(-1);
+    expect(declared).toBeGreaterThan(light);
+  });
+
+  it('resolves to none under reduced transparency, after every scheme value', () => {
+    const output = material();
+    const reduced = output.indexOf('@media (prefers-reduced-transparency: reduce)');
+    expect(reduced).toBeGreaterThan(output.lastIndexOf('--slotted-material-backdrop: blur('));
+    const block = output.slice(reduced, output.indexOf('@media (forced-colors: active)', reduced));
+    expect(block.match(/--slotted-material-backdrop: none;/g)?.length).toBe(5);
+  });
+});

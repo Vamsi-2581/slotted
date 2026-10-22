@@ -637,6 +637,7 @@ by forced colours instead.
 | `--slotted-surface-inverse-hover`    | `#243041`                                                      | `#dee0e4`                                                      | `#020202`                                                   |
 | `--slotted-surface-inverse-active`   | `#323d4e`                                                      | `#c7cacd`                                                      | `#0b0b0b`                                                   |
 | `--slotted-surface-material`         | `color-mix(in oklab, var(--slotted-surface) 72%, transparent)` | `color-mix(in oklab, var(--slotted-surface) 68%, transparent)` | `var(--slotted-surface)`                                    |
+| `--slotted-material-backdrop`        | `saturate(1.8) blur(6px)`                                      | `saturate(1.6) blur(20px)`                                     | `none`                                                      |
 | `--slotted-text-inverse`             | `#f7faff`                                                      | `#16181c`                                                      | `#ffffff`                                                   |
 | `--slotted-border-strong`            | `#7a889c`                                                      | `#6d737a`                                                      | `#000000`                                                   |
 | `--slotted-control-border-color`     | `#bfc7d1`                                                      | `#393d44`                                                      | `#000000`                                                   |
@@ -689,11 +690,14 @@ the family carries the state with `Highlight` and an outline.
 `--slotted-surface-material` is the ground of a bar that floats over scrolling
 content — a phone tab bar, a sticky banner — drawn as a material: the surface
 at a share over transparency, with `backdrop-filter:
-var(--slotted-material-backdrop)` (`saturate(1.6) blur(20px)`, a `base` token)
-behind it. `high-contrast` keeps it opaque. Under
-`prefers-reduced-transparency: reduce` the theme sets it to
+var(--slotted-material-backdrop)` behind it. The filter varies by scheme: a
+light page holds less contrast, and under a 72 per cent surface a 20 pixel blur
+left a flat grey there, so `light` blurs 6 pixels and `dark` 20.
+`high-contrast` keeps the surface opaque and the filter `none`. Under
+`prefers-reduced-transparency: reduce` the theme sets the surface to
 `var(--slotted-surface)` and the backdrop to `none`, from the contract's
-`reducedTransparency` field; under forced colours it is `Canvas`.
+`reducedTransparency` field; under forced colours they are `Canvas` and
+`none`.
 
 `--slotted-current-edge` is the edge of the row the reader is on — the
 destination `side-navigation` and `top-navigation` mark `aria-current` — and it
@@ -886,6 +890,7 @@ that reads a semantic token keeps working without writing a rule of its own.
 | `--slotted-surface-inverse-hover`    | `CanvasText`   |
 | `--slotted-surface-inverse-active`   | `CanvasText`   |
 | `--slotted-surface-material`         | `Canvas`       |
+| `--slotted-material-backdrop`        | `none`         |
 | `--slotted-text-inverse`             | `Canvas`       |
 | `--slotted-border-strong`            | `CanvasText`   |
 | `--slotted-control-border-color`     | `ButtonBorder` |

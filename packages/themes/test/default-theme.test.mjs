@@ -576,7 +576,10 @@ test('ships a translucent surface material and makes it opaque under reduced tra
     const percent = Number(match[1]);
     assert.ok(percent > 0 && percent < 100, `${scheme} material is ${percent}%`);
   }
-  assert.equal(theme.base['--slotted-material-backdrop'], 'saturate(1.6) blur(20px)');
+  /* A light page holds less contrast for a blur to keep, so its blur is shorter. */
+  assert.equal(theme.schemes.light['--slotted-material-backdrop'], 'saturate(1.8) blur(6px)');
+  assert.equal(theme.schemes.dark['--slotted-material-backdrop'], 'saturate(1.6) blur(20px)');
+  assert.equal(theme.schemes['high-contrast']['--slotted-material-backdrop'], 'none');
 
   const css = await readFile(new URL('../dist/default.css', import.meta.url), 'utf8');
   const start = css.indexOf('@media (prefers-reduced-transparency: reduce)');

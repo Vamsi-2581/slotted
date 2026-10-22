@@ -1713,9 +1713,10 @@ export const contract: TokenContract = {
     {
       "name": "--slotted-material-backdrop",
       "layer": "semantic",
-      "axis": "base",
+      "axis": "scheme",
       "type": "filter",
       "literal": "a filter function names no other token",
+      "forcedColor": "none",
       "reducedTransparency": "none"
     },
     {
@@ -2442,8 +2443,7 @@ export type BaseToken =
   | '--slotted-selection-size-md'
   | '--slotted-selection-size-lg'
   | '--slotted-selection-halo-opacity'
-  | '--slotted-highlight-tint-opacity'
-  | '--slotted-material-backdrop';
+  | '--slotted-highlight-tint-opacity';
 
 export type SchemeToken =
   | '--slotted-focus-ring-color'
@@ -2528,6 +2528,7 @@ export type SchemeToken =
   | '--slotted-surface-inverse-hover'
   | '--slotted-surface-inverse-active'
   | '--slotted-surface-material'
+  | '--slotted-material-backdrop'
   | '--slotted-text-inverse'
   | '--slotted-border-strong'
   | '--slotted-control-border-color'

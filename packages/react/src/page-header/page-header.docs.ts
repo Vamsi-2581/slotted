@@ -539,7 +539,7 @@ export const REACT_PAGE_HEADER_DOCS = {
         "'band' | 'plain' | 'floating'",
         'band',
         'PageHeader, PageHeaderDefaultsProvider',
-        'band is a strip of the surface with a hairline under it, the page’s own header; plain paints no ground at rest and takes the surface back once content passes under the chrome (data-stuck), for a header inside a region with a ground of its own; floating is a box with the hairline all round and rounded corners that, once stuck, slides to an inset below the scroller’s edge and lifts by a shadow, for a header that stands inside padding',
+        'band is a strip of the surface with a hairline under it, the page’s own header; plain paints no ground at rest and takes the surface back once content passes under the chrome (data-stuck), for a header inside a region with a ground of its own; floating is a box with the hairline all round and rounded corners that, once stuck, slides to an inset below the scroller’s edge and lifts by a shadow, for a header that stands inside padding. The ground changes over --slotted-page-header-ground-duration (the medium duration) with --slotted-page-header-ground-easing (the standard easing); a duration of 0s makes the change instant',
       ],
       [
         'material',

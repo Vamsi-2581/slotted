@@ -167,3 +167,31 @@ describe('a material header', () => {
     });
   });
 });
+
+/**
+ * A plain header takes its ground back once content passes under it, and the
+ * ground changes over the family's duration rather than in one frame. The
+ * title area paints the same ground over a header area, so it moves with it.
+ */
+describe('the ground of a plain header', () => {
+  /* The theme's motion tokens, which the test document does not load. */
+  afterEach(() => {
+    document.documentElement.removeAttribute('style');
+  });
+
+  it('transitions on the root and on the title area', () => {
+    document.documentElement.style.setProperty('--slotted-duration-medium', '200ms');
+    document.documentElement.style.setProperty('--slotted-easing-standard', 'linear');
+    render(
+      <PageHeader variant="plain">
+        <PageHeaderTitleArea>
+          <PageHeaderHeading>Contracts</PageHeaderHeading>
+        </PageHeaderTitleArea>
+      </PageHeader>,
+    );
+    const root = document.querySelector('[data-ui="page-header"]') as HTMLElement;
+    const title = root.querySelector('[data-part="title-area"]') as HTMLElement;
+    expect(getComputedStyle(root).transitionProperty).toContain('background-color');
+    expect(getComputedStyle(title).transitionProperty).toContain('background-color');
+  });
+});

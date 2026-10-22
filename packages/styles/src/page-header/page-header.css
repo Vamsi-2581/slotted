@@ -77,6 +77,14 @@
     --_rule-size: var(--slotted-border-width-thin, 1px);
     --_duration: var(--slotted-duration-medium);
     --_easing: var(--slotted-easing-standard, cubic-bezier(0.2, 0, 0, 1));
+    /**
+     * How the ground changes when `plain` takes it back, or a material takes
+     * over, as content passes under the chrome. A duration of nought makes the
+     * change instant.
+     */
+    --_ground-transition: background-color
+      var(--slotted-page-header-ground-duration, var(--_duration))
+      var(--slotted-page-header-ground-easing, var(--_easing));
 
     background-color: var(--_ground);
     color: var(--_text);
@@ -98,7 +106,9 @@
      * is the slide of the header area under the title and never a fight with
      * the scroll, during which the offset is constant.
      */
-    transition: inset-block-start var(--_duration) var(--_easing);
+    transition:
+      inset-block-start var(--_duration) var(--_easing),
+      var(--_ground-transition);
     /**
      * Above every other sticky thing on the page — a section's header, a
      * table's column header, a pinned corner — so what a short section pushes
@@ -189,7 +199,9 @@
   [data-ui-page-header][data-variant='floating'] > * > [data-part-title-area] {
     border-start-end-radius: calc(var(--_radius) - var(--_rule-size));
     border-start-start-radius: calc(var(--_radius) - var(--_rule-size));
-    transition: inset-block-start var(--_duration) var(--_easing);
+    transition:
+      inset-block-start var(--_duration) var(--_easing),
+      var(--_ground-transition);
   }
   [data-ui-page-header][data-variant='floating'][data-stuck] {
     --_sticky-inset: var(--slotted-page-header-inset, var(--slotted-space-4, 0.5rem));
@@ -231,6 +243,7 @@
     overflow-anchor: none;
     padding-block: var(--_padding-block) var(--slotted-space-4, 0.5rem);
     position: sticky;
+    transition: var(--_ground-transition);
     z-index: 2;
   }
 

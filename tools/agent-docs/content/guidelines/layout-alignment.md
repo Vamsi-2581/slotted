@@ -62,7 +62,7 @@ Level: SHOULD
 Applies to: what a consumer places in `page-header`'s `actions`, beside a plain title — one heading, no visual, no subheading
 Rule: Below the header's narrow step the actions beside a plain title fit on the title's line: a labelled action becomes its icon-only form, and two or more actions stand in a `toolbar` that folds into its menu.
 Why: The row wraps when the actions cannot share the line with the title, and a wrapped row under a one-line heading puts the title at the start of one line and the actions at the end of the next, aligned with nothing.
-Do: Write the action twice — the labelled control and its icon-only twin with the same accessible name, the same states and the same handler — and show one per side of the header's own container query. Under a rich title (visual, marks, subheading), the actions row below the title reads as a toolbar row of its own and may stay.
+Do: Write the action twice — the labelled control and its icon-only twin with the same accessible name, the same states and the same handler — and show one per side of the header's own container query. Under a rich title (visual, marks, subheading), a `toolbar` that folds into its menu takes a full row of its own under the title and folds only what does not fit; `page-header` places it there.
 Don't: Leave a labelled button that wraps, or shrink the control under the touch target to make it fit.
 Seen in: Nexora · Notifications page on a phone, "Mark all as read" under the title · corrected
 Check: At the narrowest phone width with a coarse pointer, the title and its action share one line; the icon-only control has the labelled control's name.

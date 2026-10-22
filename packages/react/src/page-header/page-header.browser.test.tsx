@@ -3,14 +3,21 @@ import type { ReactNode } from 'react';
 import { cdp, page } from 'vitest/browser';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { Button } from '../button';
+import { MenuItem } from '../menu';
 import { Tab, TabList, Tabs } from '../tabs';
+import { Toolbar, ToolbarItem, ToolbarOverflow } from '../toolbar';
 import { PageHeader } from './page-header';
 import {
+  PageHeaderActions,
   PageHeaderControls,
   PageHeaderHeading,
   PageHeaderProgress,
+  PageHeaderSubheading,
   PageHeaderTabs,
+  PageHeaderTitle,
   PageHeaderTitleArea,
+  PageHeaderTitleRow,
   PageHeaderToggle,
 } from './page-header-parts';
 
@@ -193,5 +200,48 @@ describe('the ground of a plain header', () => {
     const title = root.querySelector('[data-part="title-area"]') as HTMLElement;
     expect(getComputedStyle(root).transitionProperty).toContain('background-color');
     expect(getComputedStyle(title).transitionProperty).toContain('background-color');
+  });
+});
+
+/**
+ * On a phone, a rich title — a subheading under the heading — leaves a whole
+ * row free under it, and a toolbar of actions takes that row and folds only
+ * what does not fit. Beside the title it had the 40 per cent the title left,
+ * and folded every action.
+ */
+describe('a toolbar of actions under a rich title on a narrow header', () => {
+  it('takes a row of its own and shows the actions that fit', async () => {
+    const actions = ['Approve', 'Reject', 'Export', 'Archive'];
+    render(
+      <div style={{ inlineSize: 390 }}>
+        <PageHeader>
+          <PageHeaderTitleArea>
+            <PageHeaderTitleRow>
+              <PageHeaderTitle>
+                <PageHeaderHeading>Order 4021</PageHeaderHeading>
+                <PageHeaderSubheading>Due 12 Nov · R$ 1.240,00 · 3 items</PageHeaderSubheading>
+              </PageHeaderTitle>
+              <PageHeaderActions>
+                <Toolbar aria-label="Order actions" overflow="menu">
+                  {actions.map((label) => (
+                    <ToolbarItem counterpart={<MenuItem>{label}</MenuItem>} key={label}>
+                      <Button size="sm">{label}</Button>
+                    </ToolbarItem>
+                  ))}
+                  <ToolbarOverflow />
+                </Toolbar>
+              </PageHeaderActions>
+            </PageHeaderTitleRow>
+          </PageHeaderTitleArea>
+        </PageHeader>
+      </div>,
+    );
+    for (let i = 0; i < 6; i += 1) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+    const visible = [...document.querySelectorAll('[data-ui="toolbar"] [data-part="item"]')].filter(
+      (item) => !item.hasAttribute('hidden'),
+    );
+    expect(visible.length).toBeGreaterThanOrEqual(2);
   });
 });

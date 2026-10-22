@@ -1167,6 +1167,30 @@
       > [data-part-marks] {
       grid-column: 1 / -1;
     }
+    /* A rich title — a visual, marks or a subheading — leaves a whole row free under it, and a toolbar
+       that folds takes that row: beside the title it had the 40 per cent the title left, and
+       folded every action on a 390 pixel phone. Beside a plain title it stays on the title row. */
+    [data-ui-page-header]
+      > *
+      > [data-part-title-area]
+      > [data-part-title-row]:has(
+        > [data-part-actions] > [data-ui-toolbar][data-overflow='menu']
+      ):has(
+        > [data-part-visual],
+        > [data-part-title] > :is([data-part-subheading], [data-part-marks]:not(:empty))
+      ) {
+      flex-wrap: wrap;
+    }
+    [data-ui-page-header]
+      > *
+      > [data-part-title-area]
+      > [data-part-title-row]:has(
+        > [data-part-visual],
+        > [data-part-title] > :is([data-part-subheading], [data-part-marks]:not(:empty))
+      )
+      > [data-part-actions]:has(> [data-ui-toolbar][data-overflow='menu']) {
+      flex: 1 1 100%;
+    }
     /* One line, as snapped: the phone has no second one to give it. */
     [data-ui-page-header]
       > *

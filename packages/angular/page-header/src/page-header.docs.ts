@@ -402,7 +402,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'narrow',
     title: 'Below 600 pixels',
-    note: 'The family answers its own inline size: the header is not sticky and scrolls away with the page, nothing collapses it on scroll and the toggle still folds the area in place; the breadcrumbs go and the way back stays, the title steps down, the subheading takes one line, and the figure takes a row above the content. Actions written as slToolbar overflow="menu", each item with its counterpart, stay on the title row and fold what does not fit into the menu, where every action is still reachable; loose actions and the navigation take the row under the title.',
+    note: 'The family answers its own inline size: the header is not sticky and scrolls away with the page, nothing collapses it on scroll and the toggle still folds the area in place; the breadcrumbs go and the way back stays, the title steps down, the subheading takes one line, and the figure takes a row above the content. Actions written as slToolbar overflow="menu", each item with its counterpart, stay on the title row beside a plain title, and take a full row of their own under a rich one (a visual, marks or a subheading); either way they fold what does not fit into the menu, where every action is still reachable; loose actions and the navigation take the row under the title.',
     snippet: defineSnippet({
       id: 'page-header-angular-narrow',
       language: 'angular',

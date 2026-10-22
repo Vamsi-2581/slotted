@@ -504,9 +504,21 @@ test('folds a menu toolbar before the title row wraps, at every width', () => {
   assert.match(title, /flex:0 1 auto/);
   const narrow =
     /@container page-header \(width < 600px\)\{([\s\S]*?)\}\}/.exec(normalized)?.[1] ?? '';
-  assert.ok(
-    !narrow.includes(`[data-part-actions]:has(>[data-ui-toolbar][data-overflow='menu']){`),
-    'no phone rule gives the folding cluster another flex',
+  // On a phone the cluster is still the row's: beside a plain title its remainder, under a rich
+  // one the whole of a row of its own. A content-sized cluster is the defect above.
+  const phone = [
+    ...narrow.matchAll(
+      /\[data-part-actions\]:has\(>\[data-ui-toolbar\]\[data-overflow='menu'\]\)\{([^}]*)\}/g,
+    ),
+  ].map(([, body]) => body);
+  assert.deepEqual(
+    phone,
+    ['flex:1 1 100%;'],
+    'no phone rule sizes the folding cluster by its content',
+  );
+  assert.match(
+    narrow,
+    /:has\(>\[data-part-visual\],>\[data-part-title\]>:is\(\[data-part-subheading\],\[data-part-marks\]:not\(:empty\)\)\)>\[data-part-actions\]/,
   );
 });
 

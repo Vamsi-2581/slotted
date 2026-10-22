@@ -183,7 +183,7 @@
   "responsive": {
     "container": "page-header",
     "narrow": "600px",
-    "below": "the header is not sticky and scrolls away with the page, see compact; breadcrumbs hide and back remains; navigation leaves the title row and joins the actions row; the actions row wraps under the title, unless the actions hold a toolbar with overflow=menu, which keeps them on the title row and folds what does not fit; the subheading is one line with an ellipsis; the heading size drops one step"
+    "below": "the header is not sticky and scrolls away with the page, see compact; breadcrumbs hide and back remains; navigation leaves the title row and joins the actions row; the actions row wraps under the title, unless the actions hold a toolbar with overflow=menu: beside a plain title it stays on the title row and folds what does not fit; under a rich title (a visual, marks or a subheading) it takes a full row of its own under the title and folds only what does not fit there; the subheading is one line with an ellipsis; the heading size drops one step"
   },
   "messages": ["collapse", "expand", "headerArea", "pin", "progress", "unpin"],
   "declined": {

@@ -95,6 +95,7 @@ const COLUMNS: GridColumn<Shipment>[] = [
 ];
 
 const ROWS = shipments(12);
+const DISABLED = ['SH-3305'];
 
 export default function DataGridSelection() {
   const [value, setValue] = useState<string | readonly string[] | null>(['SH-3302', 'SH-3303']);
@@ -106,7 +107,7 @@ export default function DataGridSelection() {
       columns={COLUMNS}
       rowKey="id"
       rows={ROWS}
-      disabledKeys={['SH-3305']}
+      disabledKeys={DISABLED}
       footer={
         <Text size="sm" tone="muted">
           {count} selected

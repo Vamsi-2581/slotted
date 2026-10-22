@@ -106,7 +106,8 @@ test('queries its own width from the root and lays the columns out three element
       `${ui}[data-aside='none']>[data-part-body]>[data-ui-container]>[data-part-columns]{grid-template-columns:minmax(0,1fr);}`,
     ),
   );
-  assert.doesNotMatch(normalized, /@media/);
+  /* Width is the container's: no media query reads the viewport's. */
+  assert.doesNotMatch(normalized, /@media[^{]*width/);
 });
 
 /**
@@ -199,7 +200,10 @@ test('sticks the footer at the bottom and paints it, and sticks nothing else', (
   const footer = rule(`${ui}>[data-part-footer]`);
   assert.match(footer, /position:sticky/);
   assert.match(footer, /inset-block-end:var\(--slotted-page-sticky-bottom,0px\)/);
-  assert.match(footer, /background-color:var\(--_ground\)/);
+  assert.match(
+    footer,
+    /background-color:var\(--slotted-detail-panel-footer-background,var\(--_ground\)\)/,
+  );
   assert.match(footer, /margin-block-start:auto/);
   assert.match(footer, /z-index:var\(--slotted-z-index-sticky,100\)/);
   assert.match(rule(ui), /--_ground:var\(--slotted-page-ground,var\(--slotted-surface,Canvas\)\)/);
@@ -222,6 +226,18 @@ test('draws no placeholder of its own while loading', () => {
 
 /** Nothing in the family answers a pointer: it holds content, not a control. */
 test('paints no hover and no active state', () => {
-  assert.doesNotMatch(normalized, /:hover/);
-  assert.doesNotMatch(normalized, /:active/);
+  const selectors = normalized.replace(/@media[^{]*/g, '');
+  assert.doesNotMatch(selectors, /:hover/);
+  assert.doesNotMatch(selectors, /:active/);
+});
+
+/** A theme draws the footer as a material with tokens of its own; reduced transparency drops the filter. */
+test('filters the footer’s backdrop from its own token, except under reduced transparency', () => {
+  const footer = rule(`${ui}>[data-part-footer]`);
+  assert.match(footer, /backdrop-filter:var\(--slotted-detail-panel-footer-backdrop-filter,none\)/);
+  assert.ok(
+    normalized.includes(
+      `@media (prefers-reduced-transparency:reduce),(forced-colors:active){${ui}>[data-part-footer]{-webkit-backdrop-filter:none;backdrop-filter:none;}}`,
+    ),
+  );
 });

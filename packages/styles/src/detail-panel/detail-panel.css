@@ -318,12 +318,27 @@
    * column above.
    */
   [data-ui-detail-panel] > [data-part-footer] {
-    background-color: var(--_ground);
+    -webkit-backdrop-filter: var(--slotted-detail-panel-footer-backdrop-filter, none);
+    backdrop-filter: var(--slotted-detail-panel-footer-backdrop-filter, none);
+    background-color: var(--slotted-detail-panel-footer-background, var(--_ground));
     border-block-start: var(--_rule-size) solid var(--_rule);
     inset-block-end: var(--slotted-page-sticky-bottom, 0px);
     margin-block-start: auto;
     padding-block: var(--slotted-space-4, 0.5rem);
     position: sticky;
     z-index: var(--slotted-z-index-sticky, 100);
+  }
+
+  /**
+   * A theme draws the footer as a material with its own ground and filter,
+   * apart from the ground a sticky section header reads. A reader who asked
+   * for less transparency gets no filter, and under forced colours the ground
+   * is the system's.
+   */
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-detail-panel] > [data-part-footer] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 }

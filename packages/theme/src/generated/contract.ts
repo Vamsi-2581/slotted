@@ -3494,6 +3494,8 @@ export type ComponentToken =
   | '--slotted-detail-panel-aside-size-md'
   | '--slotted-detail-panel-aside-size-sm'
   | '--slotted-detail-panel-border'
+  | '--slotted-detail-panel-footer-backdrop-filter'
+  | '--slotted-detail-panel-footer-background'
   | '--slotted-detail-panel-gap-lg'
   | '--slotted-detail-panel-gap-md'
   | '--slotted-detail-panel-gap-sm'
@@ -3985,6 +3987,7 @@ export type ComponentToken =
   | '--slotted-otp-input-subtle-hover-background'
   | '--slotted-page-background-sunken'
   | '--slotted-page-background-surface'
+  | '--slotted-page-footer-backdrop-filter'
   | '--slotted-page-footer-background'
   | '--slotted-page-footer-border'
   | '--slotted-page-footer-padding-block'
@@ -5728,6 +5731,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-detail-panel-aside-size-md",
   "--slotted-detail-panel-aside-size-sm",
   "--slotted-detail-panel-border",
+  "--slotted-detail-panel-footer-backdrop-filter",
+  "--slotted-detail-panel-footer-background",
   "--slotted-detail-panel-gap-lg",
   "--slotted-detail-panel-gap-md",
   "--slotted-detail-panel-gap-sm",
@@ -6219,6 +6224,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-otp-input-subtle-hover-background",
   "--slotted-page-background-sunken",
   "--slotted-page-background-surface",
+  "--slotted-page-footer-backdrop-filter",
   "--slotted-page-footer-background",
   "--slotted-page-footer-border",
   "--slotted-page-footer-padding-block",

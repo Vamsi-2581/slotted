@@ -147,6 +147,22 @@
     translate: 0 100%;
   }
 
+  /**
+   * A theme draws the footer as a material with a ground that has alpha and
+   * `--slotted-page-footer-backdrop-filter`, `none` unless set. The footer's
+   * own fade keeps the filter drawn: only an ancestor's opacity removes it.
+   */
+  [data-ui-page] > [data-part-footer] {
+    -webkit-backdrop-filter: var(--slotted-page-footer-backdrop-filter, none);
+    backdrop-filter: var(--slotted-page-footer-backdrop-filter, none);
+  }
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-page] > [data-part-footer] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
   [data-ui-page] > [data-part-footer] > * > [data-part-actions] {
     align-items: center;
     display: flex;

@@ -73,7 +73,11 @@ has.
    `--slotted-command-palette-surface` to the material surface and
    `--slotted-command-palette-backdrop-filter` to the material backdrop, and a
    raised toast with `--slotted-toast-surface` and
-   `--slotted-toast-backdrop-filter`.
+   `--slotted-toast-backdrop-filter`. The bars at the bottom edge take
+   `--slotted-page-footer-background` with
+   `--slotted-page-footer-backdrop-filter`, and
+   `--slotted-detail-panel-footer-background` with
+   `--slotted-detail-panel-footer-backdrop-filter`.
 
 ## 4. Restyle a control
 

@@ -6,6 +6,8 @@
   "--slotted-detail-panel-aside-size-md",
   "--slotted-detail-panel-aside-size-sm",
   "--slotted-detail-panel-border",
+  "--slotted-detail-panel-footer-backdrop-filter",
+  "--slotted-detail-panel-footer-background",
   "--slotted-detail-panel-gap-lg",
   "--slotted-detail-panel-gap-md",
   "--slotted-detail-panel-gap-sm",

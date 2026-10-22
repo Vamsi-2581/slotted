@@ -99,14 +99,35 @@ export function createIndicator(
     if (Math.abs(nextStart - start) < 0.5 && Math.abs(nextLength - length) < 0.5) return;
 
     const moving = placed !== null && target !== placed;
-    if (moving !== element.hasAttribute('data-moving')) {
-      element.toggleAttribute('data-moving', moving);
-    }
+    /* Where the mark is drawn now, mid-slide included, before it is moved. */
+    const before = moving && !element.hidden ? element.getBoundingClientRect() : null;
+    element.removeAttribute('data-moving');
     placed = target;
     start = nextStart;
     length = nextLength;
     element.style.setProperty('--_indicator-start', `${start}px`);
     element.style.setProperty('--_indicator-length', `${length}px`);
+    if (before === null) return;
+    /* The mark stands on its new tab at once, and is drawn from where it was:
+       the shift and the scale between the two boxes, which the stylesheet
+       animates back to nought on the compositor. Sliding by its position and
+       length was layout, and a panel rendered on the same thread lost every
+       frame of it. */
+    const after = element.getBoundingClientRect();
+    if (after.width > 0 && after.height > 0) {
+      element.style.setProperty(
+        '--_indicator-shift',
+        `${before.left - after.left}px ${before.top - after.top}px`,
+      );
+      element.style.setProperty(
+        '--_indicator-scale',
+        `${before.width / after.width} ${before.height / after.height}`,
+      );
+    } else {
+      element.style.removeProperty('--_indicator-shift');
+      element.style.removeProperty('--_indicator-scale');
+    }
+    element.setAttribute('data-moving', '');
   }
 
   const mutations = new MutationObserver((records) => {

@@ -8,8 +8,8 @@ import { captureUrl, launch } from '../shoot.mjs';
  * The tabs marker, read in Chrome: one bar per list, the thickness and the
  * rounding its tokens set, spanning the selected tab's content box — the icon
  * and the label, never the padding or the closing control — and standing
- * `--slotted-tabs-marker-offset` (1px) above the list's edge, over the track. A second selection slides the same bar by
- * `translate`, with no scale.
+ * `--slotted-tabs-marker-offset` (1px) above the list's edge, over the track. A second selection moves the same bar,
+ * which stands with no transform once the slide has ended.
  *
  * The request came from an application that found the marker thin and
  * unfinished: two pixels tied to the thick border width, the item's full width
@@ -150,11 +150,11 @@ for (const [index, first] of reading.before.entries()) {
     assert.equal(state.transform, 'none', `${state.probe}: no scale`);
   }
   assert.notEqual(
-    first.translate,
-    second.translate,
+    first.mark.start,
+    second.mark.start,
     `${first.probe}: the selection moves the marker`,
   );
 }
 console.log(
-  'ok — one marker on the content box, its offset above the list edge, slid by translate',
+  'ok — one marker on the content box, its offset above the list edge, at rest with no transform',
 );

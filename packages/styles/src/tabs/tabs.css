@@ -464,10 +464,12 @@
    * label it keeps a minimum length, centred on the content. It stands
    * `--slotted-tabs-marker-offset` above the list's edge, over the track, and the axes are physical in this one rule
    * because the measurement is: the position is from the list's left edge.
-   * Position and length are both layout properties, so one thread advances
-   * both edges in the same frame: a composited `translate` beside a
-   * main-thread `inline-size` drifted apart while the panel rendered, and the
-   * bar grew and shrank on its way between tabs of unequal widths.
+   * At rest the bar is laid out by `left` and `inline-size`, so its ends keep
+   * their radius; it slides by `translate` and `scale` together, both on the
+   * compositor, so both edges advance in the same frame. A composited
+   * `translate` beside a main-thread `inline-size` drifted apart while the
+   * panel rendered, and a slide of `left` and `inline-size` lost every frame
+   * to a panel rendering on the same thread.
    */
   [data-ui-tabs] > :where([data-part-list]) > [data-part-marker] {
     --_start-inset: var(--_marker-inset);
@@ -503,28 +505,33 @@
   }
 
   /**
-   * It slides only when the selection moves: `data-moving` arrives with a
-   * position whose tab changed, and leaves with a re-measurement of the same
-   * tab, so the first position, a font arriving and a resized list place the
-   * bar without motion. The slide takes the medium duration on a curve that
-   * starts and ends slowly, `--slotted-tabs-marker-easing`: the control
-   * duration on the theme's decelerating curve covered a third of the
-   * distance in its first frame and read as a jump. Under reduced motion it
-   * jumps.
+   * It slides only when the selection moves: `createIndicator` places the bar
+   * on the new tab, writes the shift and the scale from the box it was drawn
+   * in, and raises `data-moving`, which starts the slide from there back to
+   * nought; a re-measurement of the same tab drops it, so the first position,
+   * a font arriving and a resized list place the bar without motion. The slide
+   * takes the medium duration on a curve that starts and ends slowly,
+   * `--slotted-tabs-marker-easing`: the control duration on the theme's
+   * decelerating curve covered a third of the distance in its first frame and
+   * read as a jump. Under reduced motion it jumps.
    */
   [data-ui-tabs] > :where([data-part-list]) > [data-part-marker][data-moving] {
     --_marker-easing: var(--slotted-tabs-marker-easing, cubic-bezier(0.4, 0, 0.2, 1));
 
-    transition:
-      left var(--slotted-duration-medium) var(--_marker-easing),
-      top var(--slotted-duration-medium) var(--_marker-easing),
-      inline-size var(--slotted-duration-medium) var(--_marker-easing),
-      block-size var(--slotted-duration-medium) var(--_marker-easing);
+    animation: slotted-tabs-marker-slide var(--slotted-duration-medium) var(--_marker-easing);
+    transform-origin: 0 0;
+  }
+
+  @keyframes slotted-tabs-marker-slide {
+    from {
+      translate: var(--_indicator-shift, 0px 0px);
+      scale: var(--_indicator-scale, 1 1);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     [data-ui-tabs] > :where([data-part-list]) > [data-part-marker][data-moving] {
-      transition: none;
+      animation: none;
     }
   }
 

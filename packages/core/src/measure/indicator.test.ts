@@ -69,6 +69,34 @@ describe('createIndicator', () => {
     expect(handle.element.hasAttribute('data-moving')).toBe(true);
   });
 
+  /**
+   * The mark stands on its new tab at once and is drawn from the box it was
+   * in: the shift and the scale between the two boxes, which the stylesheet
+   * animates back to nought on the compositor.
+   */
+  it('writes the shift and the scale from the box the mark was drawn in', async () => {
+    const { list } = row();
+    const handle = createIndicator(list, {
+      orientation: () => 'horizontal',
+      target: () => list.querySelector('[data-selected] > button'),
+    });
+    handles.push(handle);
+    const boxes = [
+      { left: 110, top: 50, width: 60, height: 2 },
+      { left: 180, top: 50, width: 90, height: 2 },
+    ];
+    handle.element.getBoundingClientRect = () => ({ ...boxes.shift()! }) as DOMRect;
+
+    const [first, second] = list.querySelectorAll('[data-part="item"]');
+    first!.removeAttribute('data-selected');
+    second!.setAttribute('data-selected', '');
+    await settled();
+
+    expect(handle.element.style.getPropertyValue('--_indicator-shift')).toBe('-70px 0px');
+    expect(handle.element.style.getPropertyValue('--_indicator-scale')).toBe(`${60 / 90} 1`);
+    expect(handle.element.hasAttribute('data-moving')).toBe(true);
+  });
+
   it('places the same target measured again without motion', async () => {
     const { list, a } = row();
     const handle = createIndicator(list, {

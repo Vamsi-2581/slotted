@@ -406,13 +406,19 @@ test('hides a panel with the attribute the platform already understands', () => 
 });
 
 test('transitions what the eye has to follow, and takes every duration from the scale', () => {
+  /* The slide is translate and scale from the box the mark was drawn in, on the compositor. */
   assert.match(
     rule(`${marker}[data-moving]`),
-    /transition:left var\(--slotted-duration-medium\) var\(--_marker-easing\),top var\(--slotted-duration-medium\) var\(--_marker-easing\)/,
+    /animation:slotted-tabs-marker-slide var\(--slotted-duration-medium\) var\(--_marker-easing\)/,
   );
   assert.match(
+    normalized,
+    /@keyframes slotted-tabs-marker-slide\{from\{translate:var\(--_indicator-shift,0px 0px\);scale:var\(--_indicator-scale,1 1\);\}\}/,
+  );
+  assert.doesNotMatch(rule(`${marker}[data-moving]`), /transition:/);
+  assert.match(
     css,
-    /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\[data-part-marker\]\[data-moving\] \{\s*transition: none;/,
+    /@media \(prefers-reduced-motion: reduce\)[\s\S]*?\[data-part-marker\]\[data-moving\] \{\s*animation: none;/,
   );
   assert.match(rule(part('tab')), /transition:/);
   assert.match(

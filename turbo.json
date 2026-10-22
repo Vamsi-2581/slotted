@@ -44,6 +44,15 @@
       "dependsOn": ["^verify"],
       "outputs": ["dist/**", "coverage/**"]
     },
+    "@slotted/agent-docs#verify": {
+      "dependsOn": [
+        "^verify",
+        "@slotted/core#verify",
+        "@slotted/theme#verify",
+        "@slotted/themes#verify"
+      ],
+      "outputs": ["dist/**", "coverage/**"]
+    },
     "@slotted/theme#verify": {
       "dependsOn": ["^verify"],
       "outputs": ["dist/**", "coverage/**"],

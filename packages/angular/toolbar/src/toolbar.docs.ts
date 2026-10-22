@@ -316,7 +316,7 @@ export const ANGULAR_TOOLBAR_DOCS = {
         'string | ((hidden: number) => string)',
         'counted',
         'sl-toolbar-overflow',
-        'The accessible name of the control that holds what did not fit. The default counts — "3 more actions" — because three dots say nothing about how much is behind them; a bar in another language replaces the sentence rather than translating the mark, and an aria-label written on the host wins over both',
+        'The accessible name of the control that holds what did not fit. The default counts — "3 more actions" — because three dots say nothing about how much is behind them. It is a sentence of the language in force, with its plural ("Mais 3 ações" in pt-BR), and label replaces it, and an aria-label written on the host wins over both',
       ],
       [
         'align, side, size',

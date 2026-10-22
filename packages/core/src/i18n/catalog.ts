@@ -4,6 +4,7 @@
  * below; the type of `SlottedMessages` then requires every locale to name it.
  */
 
+import * as actionBarModule from './messages/action-bar';
 import * as actionSheetModule from './messages/action-sheet';
 import * as alertModule from './messages/alert';
 import * as appShellModule from './messages/app-shell';
@@ -78,12 +79,14 @@ import * as timePickerModule from './messages/time-picker';
 import * as timeRangePickerModule from './messages/time-range-picker';
 import * as timelineModule from './messages/timeline';
 import * as toastModule from './messages/toast';
+import * as toolbarModule from './messages/toolbar';
 import * as topNavigationModule from './messages/top-navigation';
 import * as tourModule from './messages/tour';
 import * as transferModule from './messages/transfer';
 import * as uploadModule from './messages/upload';
 import * as wizardModule from './messages/wizard';
 
+export type { ActionBarMessages } from './messages/action-bar';
 export type { ActionSheetMessages } from './messages/action-sheet';
 export type { AlertMessages } from './messages/alert';
 export type { AppShellMessages } from './messages/app-shell';
@@ -158,12 +161,14 @@ export type { TimePickerMessages } from './messages/time-picker';
 export type { TimeRangePickerMessages } from './messages/time-range-picker';
 export type { TimelineMessages } from './messages/timeline';
 export type { ToastMessages } from './messages/toast';
+export type { ToolbarMessages } from './messages/toolbar';
 export type { TopNavigationMessages } from './messages/top-navigation';
 export type { TourMessages } from './messages/tour';
 export type { TransferMessages } from './messages/transfer';
 export type { UploadMessages } from './messages/upload';
 export type { WizardMessages } from './messages/wizard';
 
+export { actionBarMessages } from './messages/action-bar';
 export { actionSheetMessages } from './messages/action-sheet';
 export { alertMessages } from './messages/alert';
 export { appShellMessages } from './messages/app-shell';
@@ -238,6 +243,7 @@ export { timePickerMessages } from './messages/time-picker';
 export { timeRangePickerMessages } from './messages/time-range-picker';
 export { timelineMessages } from './messages/timeline';
 export { toastMessages } from './messages/toast';
+export { toolbarMessages } from './messages/toolbar';
 export { topNavigationMessages } from './messages/top-navigation';
 export { tourMessages } from './messages/tour';
 export { transferMessages } from './messages/transfer';
@@ -246,6 +252,7 @@ export { wizardMessages } from './messages/wizard';
 
 /** Every family's messages, by catalog name. */
 export interface SlottedMessages {
+  readonly actionBar: actionBarModule.ActionBarMessages;
   readonly actionSheet: actionSheetModule.ActionSheetMessages;
   readonly alert: alertModule.AlertMessages;
   readonly appShell: appShellModule.AppShellMessages;
@@ -320,6 +327,7 @@ export interface SlottedMessages {
   readonly timeRangePicker: timeRangePickerModule.TimeRangePickerMessages;
   readonly timeline: timelineModule.TimelineMessages;
   readonly toast: toastModule.ToastMessages;
+  readonly toolbar: toolbarModule.ToolbarMessages;
   readonly topNavigation: topNavigationModule.TopNavigationMessages;
   readonly tour: tourModule.TourMessages;
   readonly transfer: transferModule.TransferMessages;
@@ -329,6 +337,7 @@ export interface SlottedMessages {
 
 /** The base catalog, American English: complete by construction, and where every lookup ends. */
 export const EN_US: SlottedMessages = {
+  actionBar: actionBarModule.en,
   actionSheet: actionSheetModule.en,
   alert: alertModule.en,
   appShell: appShellModule.en,
@@ -403,6 +412,7 @@ export const EN_US: SlottedMessages = {
   timeRangePicker: timeRangePickerModule.en,
   timeline: timelineModule.en,
   toast: toastModule.en,
+  toolbar: toolbarModule.en,
   topNavigation: topNavigationModule.en,
   tour: tourModule.en,
   transfer: transferModule.en,

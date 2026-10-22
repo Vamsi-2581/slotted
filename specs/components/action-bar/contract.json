@@ -21,6 +21,8 @@
   },
   "rovingFocus": false,
   "escapeBound": false,
+  "messages": ["more"],
+  "pluralMessages": ["more"],
   "stateAttributes": {
     "open": "data-open"
   },

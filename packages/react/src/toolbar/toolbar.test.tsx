@@ -1,7 +1,9 @@
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/toolbar/contract.json';
+import { SlottedProvider } from '../i18n';
 import { MenuItem } from '../menu';
 import { Toolbar } from './toolbar';
 import { ToolbarDefaultsProvider } from './toolbar-defaults';
@@ -389,6 +391,17 @@ describe('Toolbar under overflow="menu"', () => {
     expect(unit('Duplicar')).toHaveAttribute('hidden');
     expect(unit('Arquivar')).toHaveAttribute('hidden');
     expect(trigger()).toHaveAccessibleName('2 more actions');
+  });
+
+  /** The control's default name is a sentence of the language in force, with its plural. */
+  it('names the overflow control in the language in force', () => {
+    withLayout();
+    render(
+      <SlottedProvider catalogs={{ 'pt-BR': PT_BR }} locale="pt-BR">
+        <Overflowing room={30} />
+      </SlottedProvider>,
+    );
+    expect(trigger()).toHaveAccessibleName('Mais 2 ações');
   });
 
   /** A rule that divides nothing is a stray line. */

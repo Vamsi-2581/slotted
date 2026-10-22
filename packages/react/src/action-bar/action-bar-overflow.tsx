@@ -1,7 +1,9 @@
+import { actionBarMessages } from '@slotted/core/i18n';
 import { keyedProps } from '@slotted/core/selector-key';
 import { Fragment, useCallback, useRef } from 'react';
 import type { Ref } from 'react';
 
+import { useMessages } from '../i18n';
 import { Glyph, Icon } from '../icon';
 import { Menu, MenuContent, MenuSeparator, MenuTrigger } from '../menu';
 import { useActionBarOverflow } from './action-bar-context';
@@ -15,10 +17,11 @@ function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
   }
 }
 
-function nameFor(label: ActionBarOverflowLabel | undefined, hidden: number) {
+/** The `label` the consumer gave, or the count in the language in force. */
+function nameFor(label: ActionBarOverflowLabel | undefined, hidden: number, more: string) {
   if (typeof label === 'function') return label(hidden);
   if (label !== undefined) return label;
-  return `${hidden} more ${hidden === 1 ? 'action' : 'actions'}`;
+  return more;
 }
 
 /**
@@ -55,6 +58,7 @@ export function ActionBarOverflow({
   ...nativeProps
 }: ActionBarOverflowProps) {
   const bar = useActionBarOverflow();
+  const t = useMessages(actionBarMessages);
   const surface = bar.surface;
   const { registerTrigger } = bar;
 
@@ -88,7 +92,7 @@ export function ActionBarOverflow({
           const rootProps = keyedProps({
             ...props,
             ...nativeProps,
-            'aria-label': nameFor(label, surface.length),
+            'aria-label': nameFor(label, surface.length, t('more', { count: surface.length })),
             children: (
               <Icon>
                 <Glyph name="ellipsis" />

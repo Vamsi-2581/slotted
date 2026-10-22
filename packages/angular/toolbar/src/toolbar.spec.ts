@@ -1,7 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
+import { provideSlotted } from '@slotted/angular/i18n';
 import { SlMenuItem } from '@slotted/angular/menu';
+import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
@@ -286,8 +288,8 @@ describe('SlToolbar under overflow="menu"', () => {
     Reflect.deleteProperty(HTMLElement.prototype, 'clientWidth');
   });
 
-  async function mount(room: number) {
-    TestBed.configureTestingModule({ imports: [OverflowHost] });
+  async function mount(room: number, providers: unknown[] = []) {
+    TestBed.configureTestingModule({ imports: [OverflowHost], providers: providers as never });
     fixture = TestBed.createComponent(OverflowHost);
     fixture.componentInstance.room.set(room);
     fixture.autoDetectChanges();
@@ -333,6 +335,13 @@ describe('SlToolbar under overflow="menu"', () => {
     expect(unit('Publicar').hasAttribute('hidden')).toBe(false);
     expect(unit('Duplicar').hasAttribute('hidden')).toBe(true);
     expect(trigger().getAttribute('aria-label')).toBe('2 more actions');
+  });
+
+  /** The counted default is a sentence of the language in force, with its plural. */
+  it('names the trigger in the language in force', async () => {
+    await mount(30, [provideSlotted({ locale: 'pt-BR', catalogs: { 'pt-BR': PT_BR } })]);
+
+    expect(trigger().getAttribute('aria-label')).toBe('Mais 2 ações');
   });
 
   /** A rule that divides nothing is a stray line. */

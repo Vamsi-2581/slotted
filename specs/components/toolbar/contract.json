@@ -12,6 +12,8 @@
     "group": "group",
     "separator": "separator"
   },
+  "messages": ["more"],
+  "pluralMessages": ["more"],
   "stateAttributes": {
     "open": "data-open"
   },

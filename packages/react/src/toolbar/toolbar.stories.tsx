@@ -405,7 +405,7 @@ export const OverflowMenu: Story = {
       </Scene>
       <Scene
         label="The name says how much, not what the mark is"
-        note="The trigger announces the count in the page’s own words rather than three dots. A bar in another language replaces the sentence through label; a glyph cannot be translated."
+        note="The trigger announces the count in the page’s own words rather than three dots. The sentence is the language in force’s, with its plural; label replaces it, and a glyph cannot be translated."
       >
         <Measure>
           <Toolbar aria-label="Relatório" overflow="menu" size="sm" variant="outline">

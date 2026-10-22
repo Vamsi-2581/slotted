@@ -6,6 +6,7 @@
 
 import type { SlottedMessages } from '../catalog';
 
+import { ptBR as actionBar } from './pt-BR/action-bar';
 import { ptBR as actionSheet } from './pt-BR/action-sheet';
 import { ptBR as alert } from './pt-BR/alert';
 import { ptBR as appShell } from './pt-BR/app-shell';
@@ -80,6 +81,7 @@ import { ptBR as timePicker } from './pt-BR/time-picker';
 import { ptBR as timeRangePicker } from './pt-BR/time-range-picker';
 import { ptBR as timeline } from './pt-BR/timeline';
 import { ptBR as toast } from './pt-BR/toast';
+import { ptBR as toolbar } from './pt-BR/toolbar';
 import { ptBR as topNavigation } from './pt-BR/top-navigation';
 import { ptBR as tour } from './pt-BR/tour';
 import { ptBR as transfer } from './pt-BR/transfer';
@@ -87,6 +89,7 @@ import { ptBR as upload } from './pt-BR/upload';
 import { ptBR as wizard } from './pt-BR/wizard';
 
 export const PT_BR: SlottedMessages = {
+  actionBar,
   actionSheet,
   alert,
   appShell,
@@ -161,6 +164,7 @@ export const PT_BR: SlottedMessages = {
   timeRangePicker,
   timeline,
   toast,
+  toolbar,
   topNavigation,
   tour,
   transfer,

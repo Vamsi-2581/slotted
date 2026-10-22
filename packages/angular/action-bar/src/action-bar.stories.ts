@@ -222,7 +222,7 @@ export const OverflowMenu: Story = {
         ) +
           scene(
             'A sentence instead of a count',
-            'The default name counts in English; an application in another language replaces the whole sentence rather than translating three dots.',
+            'The default name counts in the language in force, with its plural; label replaces the whole sentence.',
             `<footer slActionBar aria-label="Ações do pedido" variant="raised">
             <div slActionBarActions>
               <div slActionBarAction="always" [slActionBarActionCounterpart]="history">

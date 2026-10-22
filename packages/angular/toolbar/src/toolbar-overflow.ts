@@ -1,3 +1,4 @@
+import { toolbarMessages } from '@slotted/core/i18n';
 import { writeSelectorKey } from '@slotted/core/selector-key';
 import { NgTemplateOutlet } from '@angular/common';
 import {
@@ -14,6 +15,7 @@ import {
   ViewEncapsulation,
   viewChild,
 } from '@angular/core';
+import { injectMessages } from '@slotted/angular/i18n';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { SlMenu, SlMenuSeparator, SlMenuTrigger } from '@slotted/angular/menu';
 import type { MenuAlign, MenuSide, MenuSize } from '@slotted/angular/menu';
@@ -98,6 +100,8 @@ export class SlToolbarOverflow {
 
   protected readonly toolbar = inject(SlToolbar);
 
+  /** The counted default, in the language in force. */
+  private readonly t = injectMessages(toolbarMessages);
   /** A name the consumer wrote on the host survives the counted default. */
   private readonly stated = inject(new HostAttributeToken('aria-label'), { optional: true });
 
@@ -107,7 +111,7 @@ export class SlToolbarOverflow {
     const hidden = this.toolbar.collapsedUnits().length;
     if (typeof given === 'function') return given(hidden);
     if (given !== undefined) return given;
-    return `${hidden} more ${hidden === 1 ? 'action' : 'actions'}`;
+    return this.t('more', { count: hidden });
   });
 
   private readonly trigger = viewChild.required<ElementRef<HTMLElement>>('trigger');

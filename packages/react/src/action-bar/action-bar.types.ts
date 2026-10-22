@@ -141,8 +141,8 @@ export interface ActionBarOverflowProps extends Omit<
   align?: MenuAlign | undefined;
   /**
    * The accessible name. Defaults to a count — "3 more actions" — because the
-   * mark says nothing about how much is behind it. A bar in another language
-   * replaces the sentence rather than translating three dots.
+   * mark says nothing about how much is behind it — in the language in force,
+   * with its plural. `label` replaces the sentence.
    */
   label?: ActionBarOverflowLabel | undefined;
   /** Reaches the surface's imperative actions: `open`, `close`, `focus`. */

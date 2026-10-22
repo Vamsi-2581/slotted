@@ -416,7 +416,7 @@ export const OverflowMenu: Story = {
           ) +
           scene(
             'The name says how much, not what the mark is',
-            'The trigger announces “2 more actions” rather than three dots, and a bar in another language replaces the sentence through label rather than translating a glyph.',
+            'The trigger announces “2 more actions” rather than three dots, in the language in force, and label replaces the sentence rather than translating a glyph.',
             `<div class="slotted-demo-measure">
   <div slToolbar aria-label="Relatório" overflow="menu" size="sm" variant="outline">
     <div slToolbarItem>

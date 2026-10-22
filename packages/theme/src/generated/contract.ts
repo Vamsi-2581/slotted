@@ -3139,6 +3139,7 @@ export type ComponentToken =
   | '--slotted-combobox-subtle-hover-background'
   | '--slotted-combobox-surface'
   | '--slotted-command-palette-active'
+  | '--slotted-command-palette-backdrop-filter'
   | '--slotted-command-palette-border-color'
   | '--slotted-command-palette-footer-surface'
   | '--slotted-command-palette-highlight'
@@ -5371,6 +5372,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-combobox-subtle-hover-background",
   "--slotted-combobox-surface",
   "--slotted-command-palette-active",
+  "--slotted-command-palette-backdrop-filter",
   "--slotted-command-palette-border-color",
   "--slotted-command-palette-footer-surface",
   "--slotted-command-palette-highlight",

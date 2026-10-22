@@ -69,7 +69,9 @@ has.
    `--slotted-material-backdrop`. The theme makes both opaque under reduced
    transparency and forced colours. A page header becomes that material once
    content passes under it with its `material` input, set on the header or on
-   its defaults.
+   its defaults. A theme draws the command palette as one by setting
+   `--slotted-command-palette-surface` to the material surface and
+   `--slotted-command-palette-backdrop-filter` to the material backdrop.
 
 ## 4. Restyle a control
 

@@ -2,6 +2,7 @@
   "--slotted-border-subtle",
   "--slotted-border-width-thin",
   "--slotted-command-palette-active",
+  "--slotted-command-palette-backdrop-filter",
   "--slotted-command-palette-border-color",
   "--slotted-command-palette-footer-surface",
   "--slotted-command-palette-highlight",

@@ -135,6 +135,25 @@
     overflow: clip;
   }
 
+  /**
+   * A theme draws the panel as a material with this filter beside a surface
+   * with alpha: `--slotted-command-palette-backdrop-filter`, `none` unless set.
+   * The root is the one layer that paints a ground under either presentation.
+   * A reader who asked for less transparency gets no filter, and under forced
+   * colours the ground is the system's.
+   */
+  [data-ui-command-palette] {
+    -webkit-backdrop-filter: var(--slotted-command-palette-backdrop-filter, none);
+    backdrop-filter: var(--slotted-command-palette-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-command-palette] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
   /* ── Size ─────────────────────────────────────────────────────────────── */
 
   [data-ui-command-palette][data-size='sm'] {

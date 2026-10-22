@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cdp } from 'vitest/browser';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { press } from '../test/press';
 import { CommandPalette } from './command-palette';
@@ -42,5 +43,47 @@ describe('a press inside the open palette', () => {
     expect(document.elementFromPoint(point.x, point.y)).toBe(list);
     await press(list, pointer, point);
     expect(document.activeElement).toBe(input);
+  });
+});
+
+/**
+ * A theme draws the palette as a material through the family's filter token;
+ * unset, the panel filters nothing, and a reader who asked for less
+ * transparency gets no filter whatever the theme set.
+ */
+describe('the backdrop filter', () => {
+  afterEach(async () => {
+    await cdp().send('Emulation.setEmulatedMedia', { features: [] });
+  });
+
+  function filter(token?: string) {
+    render(
+      <div
+        style={
+          token === undefined
+            ? {}
+            : { ['--slotted-command-palette-backdrop-filter' as string]: token }
+        }
+      >
+        <CommandPalette groups={GROUPS} items={ITEMS} presentation="inline" />
+      </div>,
+    );
+    const root = document.querySelector('[data-ui="command-palette"]') as HTMLElement;
+    return getComputedStyle(root).backdropFilter;
+  }
+
+  it('is the theme’s token', () => {
+    expect(filter('blur(9px)')).toBe('blur(9px)');
+  });
+
+  it('is none by default', () => {
+    expect(filter()).toBe('none');
+  });
+
+  it('is none under reduced transparency', async () => {
+    await cdp().send('Emulation.setEmulatedMedia', {
+      features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],
+    });
+    expect(filter('blur(9px)')).toBe('none');
   });
 });

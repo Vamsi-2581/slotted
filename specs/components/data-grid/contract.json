@@ -152,7 +152,7 @@
     "change": "the request carries change: order | width | hidden | pinned beside the reason",
     "normalizes": "a state naming a column that no longer exists is normalised silently, because a saved view survives a removed column; a column the state does not name takes the model's own order and width",
     "rowWidth": "a row is as wide as the frame, or as the template's minimum — the fixed widths and the flexible columns' floors — when that is wider, and then the frame scrolls. A flexible column never widens the row past the frame for a long value: the value truncates in its cell, which is what text: truncate promises. A column with flex takes every pixel the frame has left; the filler track after the template stretches only where no column flexes.",
-    "resize": "the resizer on every resizable column's trailing edge, by pointer; Ctrl+Shift+ArrowLeft/Right by a step of --slotted-data-grid-resize-step with the cursor on the header, announced as the column and its width; Escape during a pointer drag restores. Bounded by minWidth and maxWidth. Under resizeMode=deferred a pointer drag moves the resize-guide by translate and nothing else, and the width is requested once on release with the reason pointer; Escape removes the guide and requests nothing. The keyboard step and autofit apply at once in either mode. A double press on the resizer and Ctrl+Shift+Enter autofit the column to the cells in the DOM; Shift with the double press, and the menu's Fit all columns, fit every resizable column in one request with change: width. The reason is pointer for a double press and for a menu item chosen by pointer, keyboard for Ctrl+Shift+Enter and for a menu item chosen by keyboard, programmatic for autofit() on the handle.",
+    "resize": "the resizer on every resizable column's trailing edge, by pointer; Ctrl+Shift+ArrowLeft/Right by a step of --slotted-data-grid-resize-step with the cursor on the header, announced as the column and its width; Escape during a pointer drag restores. Bounded by minWidth and maxWidth. A pointer drag moves the resize-guide by translate and nothing else, and the width is requested once on release with the reason pointer: applied on every move it reflowed every rendered cell under the hand. Escape during the drag removes the guide and requests nothing. The keyboard step and autofit apply at once in either mode. A double press on the resizer and Ctrl+Shift+Enter autofit the column to the cells in the DOM; Shift with the double press, and the menu's Fit all columns, fit every resizable column in one request with change: width. The reason is pointer for a double press and for a menu item chosen by pointer, keyboard for Ctrl+Shift+Enter and for a menu item chosen by keyboard, programmatic for autofit() on the handle.",
     "reorder": "@slotted/core/drag: one horizontal container per pin zone, between targets, the header as the draggable and the handle; Alt+ArrowLeft/Right on the header is moveBy. A column never leaves its zone by dragging, because the zone is a fact of the state and a drop that changed two things would carry two reasons.",
     "pin": "by the column menu, and by the state. A pinned column is position: sticky with the summed width of the pinned columns before it as its inset; a header cell that is also pinned takes both offsets and the highest stacking step.",
     "hide": "by the column menu, and by the state. A hidden column leaves the DOM and the track; aria-colcount counts the visible columns of the model, so the numbers a reader hears are the columns they can reach. The menu's hide announces messages.columnHidden; the undo is the application's: a toast whose action restores the previous of the change: hidden request.",
@@ -756,7 +756,6 @@
     "filterRow": [true, false],
     "virtualize": ["auto", true, false],
     "columnOverflow": ["auto", "popin", "scroll"],
-    "resizeMode": ["live", "deferred"],
     "activatable": [true, false],
     "align": ["start", "center", "end"],
     "numeric": [true, false],
@@ -779,8 +778,7 @@
     "numeric": ["column", "kind", false],
     "text": ["column", "defaults", "truncate"],
     "density": ["prop", "page", null],
-    "loadMoreTrigger": ["prop", "defaults", "scroll"],
-    "resizeMode": ["prop", "defaults", "live"]
+    "loadMoreTrigger": ["prop", "defaults", "scroll"]
   },
   "provides": {
     "dataGridDefaults": [
@@ -798,7 +796,6 @@
       "filterDebounce",
       "loadMoreThreshold",
       "loadMoreTrigger",
-      "resizeMode",
       "skeletonRows"
     ]
   },
@@ -894,7 +891,6 @@
         "filterDebounce": 300,
         "loadMoreThreshold": 20,
         "loadMoreTrigger": "scroll",
-        "resizeMode": "live",
         "pageSizes": [25, 50, 100]
       },
       "capabilities": [

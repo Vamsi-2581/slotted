@@ -41,12 +41,6 @@ export type DataGridVirtualize = 'auto' | boolean;
  * control; `both` does the two. Default `scroll`.
  */
 export type DataGridLoadMoreTrigger = 'scroll' | 'button' | 'both';
-
-/**
- * How a pointer drag of a column's resizer applies the width: on every move
- * (`live`), or once on release while a guide follows the pointer (`deferred`).
- */
-export type DataGridResizeMode = 'live' | 'deferred';
 export type DataGridRowHeight = number | 'auto';
 /**
  * What a frame too narrow for the template does: moves columns into the row's
@@ -101,13 +95,6 @@ export interface DataGridDefaults {
   filterDebounce?: number | undefined;
   loadMoreThreshold?: number | undefined;
   loadMoreTrigger?: DataGridLoadMoreTrigger | undefined;
-  /**
-   * `deferred` moves a guide while the resizer is dragged and applies the
-   * width once, on release, so the rows do not reflow under the pointer;
-   * Escape leaves the width. The keyboard and a double press apply at once in
-   * either mode. Default `live`.
-   */
-  resizeMode?: DataGridResizeMode | undefined;
   skeletonRows?: number | undefined;
 }
 

@@ -161,7 +161,6 @@ import {
   type DataGridStickyTo,
   type DataGridVariant,
   type DataGridLoadMoreTrigger,
-  type DataGridResizeMode,
   type DataGridVirtualize,
 } from './data-grid-defaults';
 import {
@@ -1660,13 +1659,6 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
    * `scroll`.
    */
   readonly loadMoreTrigger = input<DataGridLoadMoreTrigger | undefined>(undefined);
-  /**
-   * `deferred` moves a guide while the resizer is dragged and applies the
-   * width once, on release, so the rows do not reflow under the pointer;
-   * Escape leaves the width. The keyboard and a double press apply at once in
-   * either mode. Default `live`.
-   */
-  readonly resizeMode = input<DataGridResizeMode | undefined>(undefined);
   /** The last page asked for failed: the automatic request stops and the footer offers a retry. */
   readonly loadMoreFailed = input(false, { transform: booleanAttribute });
   readonly skeletonRows = input<number | undefined>(undefined);
@@ -1768,9 +1760,6 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
   );
   protected readonly resolvedLoadMore = computed(
     () => this.loadMoreTrigger() ?? this.defaults.loadMoreTrigger,
-  );
-  protected readonly resolvedResizeMode = computed(
-    () => this.resizeMode() ?? this.defaults.resizeMode,
   );
   /**
    * Under `scroll` the request is automatic: a quiet status while the page
@@ -2703,12 +2692,16 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
     startX: number;
     startWidth: number;
     rtl: boolean;
-    /** The width a deferred drag stands at, applied on release. */
+    /** The width the drag stands at, applied on release. */
     pending: number | null;
-    /** Escape during the drag: restores under `live`, requests nothing under `deferred`. */
+    /** Escape during the drag, which requests nothing. */
     escape: (event: KeyboardEvent) => void;
   } | null = null;
-  /** Under `resizeMode="deferred"`, the column whose guide is drawn and the scroller height it spans. */
+  /**
+   * The column whose guide is drawn and the scroller height it spans. A drag
+   * moves only the guide and requests the width once on release: applied on
+   * every move, it reflowed every rendered cell under the hand.
+   */
   protected readonly resizeGuide = signal<{ column: string; span: number } | null>(null);
   protected beginResize(event: PointerEvent, column: ResolvedGridColumn<Row>) {
     if (event.button !== 0) return;
@@ -2725,7 +2718,6 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       if (key.key !== 'Escape') return;
       key.preventDefault();
       key.stopPropagation();
-      if (this.resolvedResizeMode() === 'live') this.resizeTo(column.id, startWidth, 'pointer');
       this.stopResize();
     };
     document.addEventListener('keydown', escape, true);
@@ -2738,22 +2730,16 @@ export class SlDataGrid<Row = unknown> implements ControlValueAccessor {
       escape,
     };
     this.resizing.set(column.id);
-    if (this.resolvedResizeMode() === 'deferred') {
-      this.resizeGuide.set({
-        column: column.id,
-        span: this.scrollRef()?.nativeElement.clientHeight ?? 0,
-      });
-    }
+    this.resizeGuide.set({
+      column: column.id,
+      span: this.scrollRef()?.nativeElement.clientHeight ?? 0,
+    });
   }
   protected moveResize(event: PointerEvent, column: ResolvedGridColumn<Row>) {
     const session = this.resizeSession;
     if (!session || session.column !== column.id) return;
     const delta = (event.clientX - session.startX) * (session.rtl ? -1 : 1);
-    if (this.resolvedResizeMode() === 'live') {
-      this.resizeTo(column.id, session.startWidth + delta, 'pointer', event);
-      return;
-    }
-    /* Deferred: the guide slides by `translate`, which lays nothing out. */
+    /* The guide slides by `translate`, which lays nothing out. */
     const width = clampWidth(column.column, session.startWidth + delta);
     session.pending = width;
     (event.currentTarget as HTMLElement)

@@ -607,9 +607,10 @@ function ColumnMenu<Row>({
  * drag started from; a double press fits the column to its content, and with
  * Shift every resizable column.
  *
- * Under `resizeMode="deferred"` a move only slides the guide, by `translate`
- * written on the element, and the width is requested once on release: the
- * rows stay still under the pointer. Escape then leaves the width untouched.
+ * A move only slides the guide, by `translate` written on the element, and the
+ * width is requested once on release: the rows stay still under the pointer.
+ * Applied on every move, the width reflowed every rendered cell and the
+ * content lagged behind the hand. Escape leaves the width untouched.
  */
 function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
   const grid = useDataGridInternal<Row>();
@@ -623,9 +624,8 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
   const latest = useRef(session);
   latest.current = session;
   const guide = useRef<HTMLDivElement | null>(null);
-  /** The width a deferred drag stands at, applied on release. */
+  /** The width the drag stands at, applied on release. */
   const pending = useRef<number | null>(null);
-  const deferred = grid.resizeMode === 'deferred';
 
   useEffect(() => {
     if (!session) return;
@@ -633,14 +633,13 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
       if (event.key !== 'Escape') return;
       event.preventDefault();
       event.stopPropagation();
-      if (!deferred) grid.resizeTo(column.id, session.startWidth, 'pointer');
       pending.current = null;
       setSession(null);
       grid.setResizing(null);
     };
     document.addEventListener('keydown', escape, true);
     return () => document.removeEventListener('keydown', escape, true);
-  }, [session, grid, column.id, deferred]);
+  }, [session, grid, column.id]);
 
   const down = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
@@ -666,10 +665,6 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
     const state = latest.current;
     if (!state) return;
     const delta = (event.clientX - state.startX) * (state.rtl ? -1 : 1);
-    if (!deferred) {
-      grid.resizeTo(column.id, state.startWidth + delta, 'pointer', event);
-      return;
-    }
     const width = clampWidth(column.column, state.startWidth + delta);
     pending.current = width;
     guide.current?.style.setProperty(
@@ -684,7 +679,7 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
     pending.current = null;
     setSession(null);
     grid.setResizing(null);
-    if (deferred && width !== null && event.type === 'pointerup') {
+    if (width !== null && event.type === 'pointerup') {
       grid.resizeTo(column.id, width, 'pointer', event);
     }
   };
@@ -708,7 +703,7 @@ function Resizer<Row>({ column }: { column: ResolvedGridColumn<Row> }) {
       title={grid.t('resize')}
       {...(session ? { 'data-resizing': '' } : {})}
     >
-      {deferred && session ? (
+      {session ? (
         <div
           aria-hidden
           data-part="resize-guide"

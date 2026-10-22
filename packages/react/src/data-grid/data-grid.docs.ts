@@ -120,7 +120,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div[aria-hidden]',
     required: false,
     purpose:
-      'Under resizeMode="deferred", the line a drag moves by translate across the scroller’s height; the width is applied on release.',
+      'The line a drag of the resizer moves by translate across the scroller’s height; the width is applied on release.',
   },
   {
     part: 'drop-indicator',
@@ -1403,13 +1403,6 @@ const api = apiRows([
   ],
   ['onLoadMore', '() => void', '—', 'DataGrid', 'Asked for the next page when hasMore is true.'],
   [
-    'resizeMode',
-    "'live' | 'deferred'",
-    'live',
-    'DataGrid',
-    'How a pointer drag of a resizer applies the width: on every move, or once on release while a guide (the resize-guide part) follows the pointer and the rows stay still. Escape during a deferred drag leaves the width. The keyboard step and autofit apply at once in either mode.',
-  ],
-  [
     'loadMoreTrigger',
     "'scroll' | 'button' | 'both'",
     'scroll',
@@ -1628,7 +1621,7 @@ const composition = apiRows([
     'component',
     '—',
     'Application',
-    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, loadMoreTrigger, resizeMode and skeletonRows once for a subtree. A grid that states one itself still wins. Its words and its locale come from the language in force (SlottedProvider).',
+    'Sets variant, striped, stickyHeader, stickyTo, selectionMode, editMode, filterRow, virtualize, rowHeight, columnOverflow, overscan, pageSizes, filterDebounce, loadMoreThreshold, loadMoreTrigger and skeletonRows once for a subtree. A grid that states one itself still wins. Its words and its locale come from the language in force (SlottedProvider).',
   ],
   [
     '@slotted/core/grid',

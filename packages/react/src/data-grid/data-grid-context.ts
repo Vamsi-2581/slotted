@@ -20,7 +20,6 @@ import type {
   DataGridGroupContext,
   DataGridHeaderContext,
   DataGridReason,
-  DataGridResizeMode,
   DataGridSelectionMode,
 } from './data-grid.types';
 
@@ -169,7 +168,6 @@ export interface DataGridInternal<Row> {
   readonly moveColumn: (id: string, direction: -1 | 1, source?: unknown) => void;
   readonly resizing: string | null;
   readonly setResizing: (id: string | null) => void;
-  readonly resizeMode: DataGridResizeMode;
   readonly dragging: string | null;
   readonly dropTarget: string | null;
   readonly draggingRow: string | null;

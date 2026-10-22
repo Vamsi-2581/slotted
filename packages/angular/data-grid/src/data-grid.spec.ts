@@ -34,7 +34,6 @@ import type {
   DataGridEditCommit,
   DataGridPinnedRows,
   DataGridQueryRequest,
-  DataGridResizeMode,
   DataGridRowsReorderEvent,
   DataGridSelection,
   DataGridSelectionMode,
@@ -1659,7 +1658,6 @@ const ACCOUNT_COLUMNS: GridColumn<Account>[] = [
       [columnOverflow]="columnOverflow()"
       [pinnedRows]="pinnedRows()"
       [activatable]="activatable()"
-      [resizeMode]="resizeMode()"
       (columnStateChangeRequest)="stateRequests.push($event)"
       (queryChangeRequest)="queryRequests.push($event)"
       (outOfSpaceChange)="spaced.push($event)"
@@ -1682,7 +1680,6 @@ class Accounts {
   readonly columnOverflow = signal<DataGridColumnOverflow | undefined>('popin');
   readonly pinnedRows = signal<DataGridPinnedRows | undefined>(undefined);
   readonly activatable = signal(false);
-  readonly resizeMode = signal<DataGridResizeMode | undefined>(undefined);
   readonly stateRequests: DataGridColumnStateRequest[] = [];
   readonly queryRequests: DataGridQueryRequest[] = [];
   readonly spaced: GridOutOfSpace[] = [];
@@ -1871,12 +1868,10 @@ describe('SlDataGrid, explaining and arranging columns', () => {
   });
 
   /**
-   * Under `resizeMode="deferred"` a drag moves the guide and nothing else; the
+   * A drag moves the guide and nothing else; the
    * width is requested once, on release, and Escape requests nothing.
    */
-  it('requests the width once on release under resizeMode="deferred"', () => {
-    fixture.componentInstance.resizeMode.set('deferred');
-    fixture.detectChanges();
+  it('requests the width once on release and nothing on Escape', () => {
     const requests = fixture.componentInstance.stateRequests;
     const resizer = header('owner').querySelector<HTMLElement>('[data-part="resizer"]')!;
     resizer.setPointerCapture = () => {};

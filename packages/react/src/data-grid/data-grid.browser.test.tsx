@@ -237,12 +237,12 @@ const MANY: Entry[] = Array.from({ length: 450 }, (_, index) => ({
 }));
 
 /**
- * Under `resizeMode="deferred"` a drag moves a guide and leaves the column
+ * A drag moves a guide and leaves the column
  * still: on a grid of rich rows the content lagged behind the pointer while
  * every move reflowed every cell. The width is applied once, on release, and
  * Escape leaves it as it was.
  */
-describe('DataGrid resizing a column with resizeMode="deferred"', () => {
+describe('DataGrid resizing a column by its resizer', () => {
   async function mouse(
     type: 'mousePressed' | 'mouseMoved' | 'mouseReleased',
     x: number,
@@ -270,7 +270,6 @@ describe('DataGrid resizing a column with resizeMode="deferred"', () => {
             { id: 'amount', label: 'Amount', kind: 'number', width: 120 },
           ]}
           onColumnStateChange={onColumnStateChange}
-          resizeMode="deferred"
           rowKey="id"
           rows={ROWS.slice(0, 5)}
           virtualize={false}

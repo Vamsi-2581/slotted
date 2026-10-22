@@ -842,7 +842,7 @@
   }
 
   /**
-   * Under `resizeMode="deferred"` the drag moves this line and nothing else:
+   * A drag of the resizer moves this line and nothing else:
    * it stands on the column's edge, spans the scroller's visible height and
    * slides by `translate`, which lays nothing out; the width is applied once,
    * on release.

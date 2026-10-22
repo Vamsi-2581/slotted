@@ -283,7 +283,6 @@ export function DataGrid<Row>({
   query: queryProp,
   range: rangeProp,
   ref,
-  resizeMode,
   renderCell: givenRenderCell,
   renderDetail: givenRenderDetail,
   renderEditor: givenRenderEditor,
@@ -376,7 +375,6 @@ export function DataGrid<Row>({
   const resolvedDebounce = filterDebounce ?? defaults.filterDebounce ?? 300;
   const resolvedThreshold = loadMoreThreshold ?? defaults.loadMoreThreshold ?? 20;
   const resolvedLoadMore = loadMoreTrigger ?? defaults.loadMoreTrigger ?? 'scroll';
-  const resolvedResizeMode = resizeMode ?? defaults.resizeMode ?? 'live';
   const resolvedSkeleton = skeletonRows ?? defaults.skeletonRows ?? 8;
   const resolvedLocale = locale ?? providedLocale;
   const resolvedActivatable = activatable ?? false;
@@ -2867,7 +2865,6 @@ export function DataGrid<Row>({
       moveColumn,
       resizing,
       setResizing,
-      resizeMode: resolvedResizeMode,
       dragging: dragState.dragging,
       dropTarget: dragState.target,
       draggingRow: rowDragState.dragging,
@@ -2971,7 +2968,6 @@ export function DataGrid<Row>({
       autofit,
       moveColumn,
       resizing,
-      resolvedResizeMode,
       dragState,
       rowDragState.dragging,
       attachDraggable,

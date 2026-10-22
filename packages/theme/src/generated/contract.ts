@@ -3503,6 +3503,7 @@ export type ComponentToken =
   | '--slotted-detail-panel-inset-block-md'
   | '--slotted-detail-panel-inset-block-sm'
   | '--slotted-detail-panel-rhythm'
+  | '--slotted-dialog-backdrop-filter'
   | '--slotted-dialog-body-color'
   | '--slotted-dialog-border-color'
   | '--slotted-dialog-close-active-background'
@@ -5740,6 +5741,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-detail-panel-inset-block-md",
   "--slotted-detail-panel-inset-block-sm",
   "--slotted-detail-panel-rhythm",
+  "--slotted-dialog-backdrop-filter",
   "--slotted-dialog-body-color",
   "--slotted-dialog-border-color",
   "--slotted-dialog-close-active-background",

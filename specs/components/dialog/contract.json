@@ -326,7 +326,7 @@
   },
   "surface": {
     "panel": "the family paints the panel: surface, border, radius, shadow, and the three rows that keep the footer on screen",
-    "plain": "the family paints nothing at all — no background, no border, no radius, no shadow, no rows and no padding — and the consumer supplies the box",
+    "plain": "the family paints nothing at all — no background, no border, no radius, no shadow, no rows and no padding — and the consumer supplies the box. The panel stays at full opacity and its children fade in its place, because in Chromium an ancestor below full opacity draws no backdrop filter inside it: a material the consumer draws blurs from the first frame of the entrance to the last of the exit",
     "keeps": "plain keeps the whole mechanism: the portal, the scrim, presence, focus containment and restoration, the dismissal policy and the single z-index stack",
     "default": "panel",
     "reason": "render substitutes the element the panel is drawn on and not the drawing, so a consumer who wanted the layer without the picture — a media viewer, an image at its own aspect ratio, a card of their own — had no way to say so. It is an axis rather than a second family because everything but the paint is identical, and it is the one place this library differs from a headless one: Radix and Base UI ship no panel at all, so plain is what their Content already is."

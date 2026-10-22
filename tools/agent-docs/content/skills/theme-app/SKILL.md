@@ -77,7 +77,8 @@ has.
    `--slotted-page-footer-background` with
    `--slotted-page-footer-backdrop-filter`, and
    `--slotted-detail-panel-footer-background` with
-   `--slotted-detail-panel-footer-backdrop-filter`.
+   `--slotted-detail-panel-footer-backdrop-filter`, and a dialog's panel
+   `--slotted-dialog-surface` with `--slotted-dialog-backdrop-filter`.
 
 ## 4. Restyle a control
 

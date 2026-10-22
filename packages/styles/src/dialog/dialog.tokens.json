@@ -8,6 +8,7 @@
   "--slotted-control-radius",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",
+  "--slotted-dialog-backdrop-filter",
   "--slotted-dialog-body-color",
   "--slotted-dialog-border-color",
   "--slotted-dialog-close-active-background",

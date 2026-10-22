@@ -356,6 +356,21 @@
      */
     opacity: 0;
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+
+    /**
+     * A theme draws the panel as a material with a surface that has alpha and
+     * this filter, `none` unless set. The panel's own fade keeps the filter
+     * drawn; an ancestor's opacity below one is what removes it.
+     */
+    -webkit-backdrop-filter: var(--slotted-dialog-backdrop-filter, none);
+    backdrop-filter: var(--slotted-dialog-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-dialog] > [data-part-viewport] > [data-part-content] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /**
@@ -1043,6 +1058,29 @@
     border-radius: 0;
     box-shadow: none;
     overflow: visible;
+  }
+
+  /**
+   * The children fade in the panel's place, at the panel's durations. A plain
+   * panel paints nothing, so the picture is the same; what changes is that no
+   * ancestor of a child's material is below full opacity, which in Chromium
+   * would draw no backdrop filter until the fade ended — a command palette
+   * drawn as a material showed the page sharp behind it for the whole fade.
+   */
+  [data-ui-dialog][data-surface='plain'] > [data-part-viewport] > [data-part-content] {
+    opacity: 1;
+    transition: none;
+  }
+  [data-ui-dialog][data-surface='plain'] > [data-part-viewport] > [data-part-content] > * {
+    opacity: 0;
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+  [data-ui-dialog][data-surface='plain'][data-open]
+    > [data-part-viewport]
+    > [data-part-content]
+    > * {
+    opacity: 1;
+    transition: opacity var(--slotted-duration-long) var(--slotted-easing-standard);
   }
 
   [data-ui-dialog][data-surface='plain']

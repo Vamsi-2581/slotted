@@ -67,3 +67,59 @@ describe('a layer mounted open', () => {
     await expect.poll(() => settled.mock.calls).toEqual([[true], [false]]);
   });
 });
+
+/**
+ * Chromium draws no backdrop filter inside an element whose opacity is below
+ * one, so a material drawn inside a fading panel showed the page sharp until
+ * the fade ended. A plain panel paints nothing, and its children fade in its
+ * place; a painted panel filters its own backdrop through its token, and its
+ * own fade keeps the filter drawn.
+ */
+describe('a material inside a dialog', () => {
+  beforeEach(() => {
+    document.documentElement.style.setProperty('--slotted-duration-long', '4000ms');
+  });
+
+  it('keeps every ancestor of a plain panel’s material opaque while it enters', async () => {
+    render(
+      <Dialog open surface="plain">
+        <DialogContent aria-label="Palette">
+          <div data-testid="material" style={{ backdropFilter: 'blur(10px)' }}>
+            Search
+          </div>
+        </DialogContent>
+      </Dialog>,
+    );
+    const layer = document.querySelector('[data-ui="dialog"][data-part="root"]') as HTMLElement;
+    await expect.poll(() => layer.hasAttribute('data-open')).toBe(true);
+    await frame();
+    await frame();
+
+    const material = document.querySelector('[data-testid="material"]') as HTMLElement;
+    const own = Number(getComputedStyle(material).opacity);
+    expect(own).toBeGreaterThan(0);
+    expect(own).toBeLessThan(1);
+    expect(getComputedStyle(material).backdropFilter).toBe('blur(10px)');
+    for (let node = material.parentElement; node !== null; node = node.parentElement) {
+      expect(getComputedStyle(node).opacity, node.getAttribute('data-part') ?? node.tagName).toBe(
+        '1',
+      );
+    }
+  });
+
+  it('filters a painted panel’s backdrop through the family token', async () => {
+    document.documentElement.style.setProperty('--slotted-dialog-backdrop-filter', 'blur(9px)');
+    render(
+      <Dialog open>
+        <DialogContent>
+          <DialogTitle>T</DialogTitle>
+          <DialogBody>B</DialogBody>
+        </DialogContent>
+      </Dialog>,
+    );
+    const content = document.querySelector(
+      '[data-ui="dialog"] [data-part="content"]',
+    ) as HTMLElement;
+    expect(getComputedStyle(content).backdropFilter).toBe('blur(9px)');
+  });
+});

@@ -6711,7 +6711,15 @@
                 aria-hidden="true"
                 ><svg data-part="glyph" data-part-glyph="" data-glyph="chevron-down"></svg></span
             ></span>
-            <div data-part="resizer" data-part-resizer="" aria-hidden="true" data-resizing></div>
+            <!-- resizeMode="deferred": the guide stands where the edge will land, 24px on. -->
+            <div data-part="resizer" data-part-resizer="" aria-hidden="true" data-resizing>
+              <div
+                data-part="resize-guide"
+                data-part-resize-guide=""
+                aria-hidden="true"
+                style="block-size: 160px; translate: 24px 0"
+              ></div>
+            </div>
           </div>
           <div
             data-part="column-header"

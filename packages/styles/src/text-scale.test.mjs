@@ -37,6 +37,10 @@ const DECORATIVE = new Map([
   ],
   ['slider/thumb', 'the thumb: an empty control the press grows under the finger'],
   [
+    'tabs/marker',
+    'the bar under the selected tab: an empty aria-hidden box, never text, slid by translate and scale from the box it was drawn in so the compositor runs it while the panel renders — 0 frames by left and inline-size against 13 with the main thread busy 300 ms',
+  ],
+  [
     'progress-indicator/indicator',
     'the travelling bar of an indeterminate linear indicator: an empty box, never text, scaled along the track so the compositor runs it while the main thread is busy',
   ],

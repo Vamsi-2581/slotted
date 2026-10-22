@@ -173,7 +173,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'hosts',
     title: 'Three hosts, one anatomy',
-    note: 'The same panel as a page’s content at level 1, as a drawer’s body with the drawer’s own close in the header actions, and as a split’s pane scrolling itself. Nothing in the panel names its host: scroll="self" is the one difference a pane makes.',
+    note: 'The same panel as a page’s content at level 1, as a drawer’s body with the drawer’s own close in the header actions, and as a split’s pane scrolling itself. Nothing in the panel names its host: scroll="self" is the one difference a pane makes. A pane that paints a ground of its own declares --slotted-page-ground with that ground, so a sticky section header inside the panel matches the pane and not the page.',
     snippet: defineSnippet({
       id: 'detail-panel-react-hosts',
       language: 'tsx',
@@ -188,9 +188,19 @@ const scenes: ReferenceSceneMeta[] = [
   </DrawerPanel>
 </Drawer>;
 
-<DetailPanel recordKey={order.id} scroll="self">
-  …
-</DetailPanel>;`,
+<div
+  className="pane"
+  style={
+    {
+      background: 'var(--slotted-surface)',
+      '--slotted-page-ground': 'var(--slotted-surface)',
+    } as CSSProperties
+  }
+>
+  <DetailPanel recordKey={order.id} scroll="self">
+    …
+  </DetailPanel>
+</div>;`,
     }),
   },
   {

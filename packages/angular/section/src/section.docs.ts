@@ -20,7 +20,10 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
 
 export const ANGULAR_SECTION_TOKENS = sectionTokens.map((name) => ({
   name,
-  purpose: 'Theme-owned Section decision',
+  purpose:
+    name === '--slotted-page-ground'
+      ? 'The ground a sticky header paints, published by the page. A region inside a page that paints a ground of its own declares it with that ground, so a sticky header under it matches the region.'
+      : 'Theme-owned Section decision',
 }));
 
 const imports: ReferenceImport = {
@@ -300,7 +303,7 @@ export const ANGULAR_SECTION_DOCS = {
         'boolean',
         'false',
         'slSection, provideSectionDefaults',
-        'The header stays under the page chrome while the body scrolls, painted in the page’s ground. Without a page it sticks to the top of whatever scrolls',
+        'The header stays under the page chrome while the body scrolls, painted in the page’s ground. Without a page it sticks to the top of whatever scrolls. A region inside a page that paints a ground of its own declares --slotted-page-ground with that ground, so a sticky header under it matches the region.',
       ],
       [
         'id',

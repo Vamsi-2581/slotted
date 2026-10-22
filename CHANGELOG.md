@@ -2,6 +2,11 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.12 — 2026-10-22
+
+- perf(data-grid): o arrasto do resizer move só a guia e aplica a largura ao soltar, sempre
+- chore(progress): release v0.1.0-beta.11
+
 ## 0.1.0-beta.11 — 2026-10-22
 
 - chore(progress): checkpoint dos achados do equori v2

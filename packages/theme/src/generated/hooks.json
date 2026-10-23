@@ -1393,6 +1393,7 @@
     ],
     "status-indicator": [
       "announcement",
+      "detail",
       "label",
       "mark",
       "root"

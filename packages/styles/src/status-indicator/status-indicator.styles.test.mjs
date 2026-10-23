@@ -76,9 +76,9 @@ test('is selected by the identifier the contract declares', () => {
  * clipped by `visually-hidden`, which is the family that owns hiding text, and
  * a second copy of the clip here would be a second answer that goes stale.
  *
- * It is still named once, in a `:has()` that takes the gap back when the label
- * holds nothing else — which is a measurement rather than a paint, and the
- * reason this test asks about declarations instead of about the string.
+ * It is still named once, in a `:has()` that takes the mark's gap back when
+ * the label holds nothing else — which is a measurement rather than a paint,
+ * and the reason this test asks about declarations instead of about the string.
  */
 test('styles every part it paints, and leaves the announcement to the family that clips it', () => {
   for (const part of parts) {
@@ -92,7 +92,7 @@ test('styles every part it paints, and leaves the announcement to the family tha
     selector.includes(`[data-part-announcement]`),
   );
   assert.equal(announcementRules.length, 1, 'the announcement is painted rather than measured');
-  assert.equal(announcementRules[0]?.body, 'margin-inline-start:0;');
+  assert.equal(announcementRules[0]?.body, 'margin-inline-end:0;');
 });
 
 /**
@@ -178,7 +178,10 @@ test('leaves the announcement policy to the accessibility tree', () => {
 test('sizes the disc on the space scale and rims it in its own fill', () => {
   assert.ok(rule(root).includes('--_dot-size:var(--slotted-space-4'));
   assert.ok(rule(`${root}[data-size='sm']`).includes('--_dot-size:var(--slotted-space-3'));
-  assert.ok(!/\dcap\b/.test(normalized), 'a cap-sized disc lands on a fractional pixel');
+  assert.ok(
+    !/--_dot-size:[^;]*cap\b/.test(normalized),
+    'a cap-sized disc lands on a fractional pixel',
+  );
   assert.ok(
     rule(root).includes(
       '--_rim:var(--slotted-status-indicator-mark-border-color,var(--_edge,var(--_solid)))',
@@ -196,15 +199,27 @@ test('sizes the disc on the space scale and rims it in its own fill', () => {
 });
 
 /**
- * The mark sits on the first line rather than in the middle of a wrapped
- * label, and `1lh` is what says so without a number: the unit resolves against
- * the indicator's own line box, so it answers every type size and every
- * density.
+ * The mark is inside the first line, centred on the capitals — `0.5cap` above
+ * the baseline, rounded to the device pixel — and its own bottom edge is its
+ * baseline whatever it holds. The label beside it is an `inline-block`, so its
+ * lines after the first hang under the first word, and it lends its first
+ * baseline to a table row. Only an inline root becomes an `inline-block`: a
+ * cell keeps its own display and padding.
  */
 test('puts the mark on the first line, however far the label runs', () => {
-  assert.ok(rule(root).includes('align-items:flex-start'));
-  assert.ok(rule(root).includes('--_pulse-inset:round(nearest,(1lh - var(--_mark-size)) / 2,1px)'));
-  assert.ok(rule(`${ui} [data-part-mark]`).includes('margin-block-start:var(--_pulse-inset)'));
+  const mark = rule(`${ui} [data-part-mark]`);
+  assert.ok(mark.includes('contain:layout'));
+  assert.ok(mark.includes('display:inline-flex'));
+  assert.ok(mark.includes('margin-inline-end:var(--_gap)'));
+  assert.ok(
+    mark.includes('vertical-align:round(nearest,calc(0.5cap - var(--_mark-size) / 2),0.5px)'),
+  );
+  assert.ok(rule(root).includes('white-space:nowrap'));
+  assert.ok(rule(`${root}:not(td,th,li,div,p)`).includes('display:inline-block'));
+  assert.ok(
+    rule(root).includes('line-height:round(up,1em * var(--slotted-line-height-md,1.5),2px)'),
+  );
+  assert.ok(!/align-items|1lh/.test(normalized), 'the mark is placed by the line, not by a box');
 });
 
 /**
@@ -219,55 +234,61 @@ test('puts the mark on the first line, however far the label runs', () => {
  */
 test('wraps the label and breaks the token nothing else can', () => {
   const label = rule(`${ui} [data-part-label]`);
+  assert.ok(label.includes('display:inline-block'));
+  assert.ok(label.includes('baseline-source:first'));
+  assert.ok(label.includes('max-inline-size:calc(100% - var(--_mark-size) - var(--_gap))'));
+  assert.ok(label.includes('white-space:normal'));
   assert.ok(label.includes('overflow-wrap:break-word'));
   assert.ok(!/overflow-wrap:anywhere/.test(normalized), 'anywhere collapses an auto-sized column');
-  assert.ok(label.includes('min-inline-size:0'));
   assert.ok(
     rule(root).includes('min-inline-size:0'),
     'a long token would size the container’s track instead of breaking',
   );
-  assert.ok(!/text-overflow|white-space:nowrap/.test(label), 'a status label is never clipped');
+  assert.ok(!/text-overflow/.test(label), 'a status label is never clipped');
+});
+
+/** A second, quieter line in the label's own column. */
+test('sets the detail on its own muted line under the words', () => {
+  const detail = rule(`${ui} [data-part-detail]`);
+  assert.ok(detail.includes('display:block'));
+  assert.ok(detail.includes('color:var(--slotted-text-muted'));
 });
 
 /**
  * A mark with no visible words still carries its own word, out of flow — so a
- * gap in front of an empty label puts a bare dot off the centre of the cell it
- * was meant to sit in.
+ * gap after the mark puts a bare dot off the centre of the cell it was meant
+ * to sit in.
  */
 test('takes the gap back when the label holds nothing a reader can see', () => {
   assert.ok(
     normalized.includes(
-      `${ui} [data-part-label]:has(> [data-part-announcement]){margin-inline-start:0`,
+      `${ui}:has(> [data-part-label] > [data-part-announcement]:only-child) > [data-part-mark]{margin-inline-end:0`,
     ),
   );
 });
 
 /**
- * The ring hangs off the root rather than off the mark, and the reason is a
- * defect that was photographed: when the icon mark was a `mask-image`, the mask
- * clipped the element's pseudo-elements with it, and the ring was cut into the
- * shape of the triangle it was supposed to leave.
- */
-test('draws the pulse on the root, whatever draws the mark', () => {
-  assert.ok(rule(`${ui}[data-pulse]::after`).includes('animation:slotted-status-indicator-pulse'));
-  assert.ok(!normalized.includes(`[data-pulse] [data-part-mark]::after`));
-  assert.ok(!rule(`${ui}[data-mark='icon'] [data-part-mark]`).includes('mask'));
-});
-
-/**
  * The wave is a filled disc in the dot's rim colour, under the mark, and each
- * beat ends in a rest. An icon mark does not pulse: a disc behind a glyph
- * fills its counters and blurs the silhouette the icon mark exists to keep.
+ * beat ends in a rest. It is the mark's own pseudo-element: no mark is a mask
+ * any more, so nothing clips it. An icon mark does not pulse: a disc behind a
+ * glyph fills its counters and blurs the silhouette the icon mark exists to
+ * keep.
  */
 test('pulses a filled wave behind a dot, and none behind a glyph', () => {
-  const wave = rule(`${ui}[data-pulse]::after`);
+  const wave = rule(`${ui}[data-pulse] [data-part-mark]::after`);
+  assert.ok(wave.includes('animation:slotted-status-indicator-pulse'));
   assert.ok(wave.includes('background-color:var(--_rim)'));
+  assert.ok(wave.includes('inset:0'));
   assert.ok(wave.includes('z-index:-1'));
   assert.ok(!wave.includes('border:'), 'a hairline ring reads as a grey circle');
   assert.ok(wave.includes('var(--slotted-easing-enter)'));
   assert.ok(rule(`${ui}[data-pulse]`).includes('isolation:isolate'));
   assert.ok(normalized.includes('70%,to{opacity:0;scale:3;}'));
-  assert.equal(rule(`${ui}[data-mark='icon'][data-pulse]::after`), 'content:none;');
+  assert.equal(
+    rule(`${ui}[data-mark='icon'][data-pulse] [data-part-mark]::after`),
+    'content:none;',
+  );
+  assert.ok(!rule(`${ui}[data-mark='icon'] [data-part-mark]`).includes('mask'));
 });
 
 /** A band of the disc's own colour outside it, and none around the hollow ring. */
@@ -293,7 +314,11 @@ test('takes its duration from the motion scale rather than stating one', () => {
  */
 test('withdraws the endless ring under reduced motion rather than shortening it', () => {
   const query = normalized.slice(normalized.indexOf('@media (prefers-reduced-motion:reduce)'));
-  assert.ok(query.startsWith(`@media (prefers-reduced-motion:reduce){${ui}[data-pulse]::after{`));
+  assert.ok(
+    query.startsWith(
+      `@media (prefers-reduced-motion:reduce){${ui}[data-pulse] [data-part-mark]::after{`,
+    ),
+  );
   assert.ok(query.includes('animation:none'));
   assert.ok(query.includes('content:none'));
 });
@@ -312,7 +337,7 @@ test('keeps the mark visible under forced colours and withdraws the ring', () =>
       `${ui}[data-mark='dot'][data-status='unknown'] [data-part-mark]{background-color:Canvas`,
     ),
   );
-  assert.ok(query.includes(`${ui}[data-pulse]::after{content:none`));
+  assert.ok(query.includes(`${ui}[data-pulse] [data-part-mark]::after{content:none`));
 });
 
 /**

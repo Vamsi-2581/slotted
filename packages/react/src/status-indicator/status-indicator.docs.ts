@@ -39,14 +39,21 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'The disc or the glyph. A box one line tall, so the mark sits on the first line however far the label wraps. Hidden from assistive technology: it says nothing the label does not.',
+      'The disc or the glyph, inside the first line and centred on its capitals, so the mark stays on that line however far the label wraps. Hidden from assistive technology: it says nothing the label does not.',
   },
   {
     part: 'label',
     element: 'span',
     required: true,
     purpose:
-      'The words. It wraps rather than truncating, and breaks an unbroken token, so a deployment id does not widen the column it sits in.',
+      'The words. It wraps rather than truncating, with the lines after the first under the first word, and breaks an unbroken token, so a deployment id does not widen the column it sits in. A table row aligns on its first line.',
+  },
+  {
+    part: 'detail',
+    element: 'span',
+    required: false,
+    purpose:
+      'A second, quieter line under the words — a progress, a time — set in the muted text colour and hanging under the first word. Rendered from the detail prop, inside the label, so it is read with the words.',
   },
   {
     part: 'announcement',
@@ -243,6 +250,13 @@ export const REACT_STATUS_INDICATOR_DOCS = {
         '—',
         'StatusIndicator',
         'The visible words, which are also the accessible name — a status that shows its words needs no second copy of them',
+      ],
+      [
+        'detail',
+        'ReactNode',
+        '—',
+        'StatusIndicator',
+        'A second, quieter line under the words, rendered inside the label as the detail part',
       ],
       [
         'render',

@@ -10,7 +10,7 @@ import { SlHeading, SlText } from '@slotted/angular/typography';
 import { SlVisuallyHidden } from '@slotted/angular/visually-hidden';
 
 import { provideStatusIndicatorDefaults } from './status-indicator-defaults';
-import { SlStatusIndicator } from './status-indicator';
+import { SlStatusIndicator, SlStatusIndicatorDetail } from './status-indicator';
 import {
   ANGULAR_STATUS_INDICATOR_DOCS,
   ANGULAR_STATUS_INDICATOR_TOKENS,
@@ -66,6 +66,7 @@ const meta: Meta<StatusIndicatorStoryArgs> = {
         SlBadgeAnchor,
         SlHeading,
         SlStatusIndicator,
+        SlStatusIndicatorDetail,
         SlText,
         SlVisuallyHidden,
       ],
@@ -291,7 +292,7 @@ export const Context: Story = {
           ) +
           row(
             'search-index',
-            `<span slStatusIndicator status="info" size="sm" pulse>Reindexing</span>`,
+            `<span slStatusIndicator status="info" size="sm" pulse>Reindexing<span slStatusIndicatorDetail>62% · 4 min left</span></span>`,
           ) +
           row(
             'legacy-billing',

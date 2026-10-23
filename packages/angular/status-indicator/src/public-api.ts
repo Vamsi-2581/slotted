@@ -1,4 +1,4 @@
-export { SlStatusIndicator } from './status-indicator';
+export { SlStatusIndicator, SlStatusIndicatorDetail } from './status-indicator';
 export {
   injectStatusIndicatorDefaults,
   provideStatusIndicatorDefaults,

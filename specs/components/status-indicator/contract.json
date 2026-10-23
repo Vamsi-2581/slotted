@@ -21,12 +21,12 @@
     "unknown": "secondary"
   },
   "statusGlyphs": {
-    "neutral": "circle",
-    "info": "circle-info",
-    "success": "circle-check",
-    "warning": "circle-alert",
-    "danger": "circle-x",
-    "unknown": "circle-question"
+    "neutral": "status-neutral",
+    "info": "status-info",
+    "success": "status-success",
+    "warning": "status-warning",
+    "danger": "status-failed",
+    "unknown": "status-unknown"
   },
   "messages": ["danger", "info", "neutral", "success", "unknown", "warning"],
   "members": {
@@ -41,7 +41,7 @@
       },
       "capabilities": ["appearance", "size", "status", "live"],
       "states": ["default", "focus-visible"],
-      "parts": ["root", "mark", "label", "announcement"]
+      "parts": ["root", "mark", "label", "detail", "announcement"]
     }
   },
   "scenarios": {

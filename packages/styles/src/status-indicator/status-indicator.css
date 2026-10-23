@@ -8,12 +8,19 @@
    * link, and it holds no state of its own — a component that moved its own
    * status would be describing a system it cannot see.
    *
-   * `align-items: flex-start` rather than `center`, and that is the decision
-   * the whole box is built around. A status is often a sentence — “Waiting for
-   * approval from the security team” — and this family lets it wrap where
-   * `badge` clips its own label to one line. A centred mark beside four lines
-   * of text floats in the middle of a paragraph; the mark is given a box one
-   * line tall instead, so it sits on the first line however far the words run.
+   * The mark is inside the first line, not in a column beside it, and that is
+   * the decision the whole box is built around. A status is often a sentence —
+   * “Waiting for approval from the security team” — and this family lets it
+   * wrap where `badge` clips its own label to one line. The mark is an inline
+   * box before the label, centred on the capitals, and the label is an
+   * `inline-block` beside it: the words wrap inside that block, so every line
+   * after the first starts under the first word rather than under the mark,
+   * and the block lends its first baseline to whatever aligns the root — a
+   * table row aligns on the label, never on a second line under it.
+   *
+   * The root is the consumer's element: `span`, `a`, `td`. Only an inline root
+   * becomes an `inline-block`; a cell or a block keeps its own display and its
+   * own padding.
    *
    * The words take the page's own colour. The tone is on the mark, which is
    * what keeps a column of statuses in a table as readable as the column
@@ -28,9 +35,13 @@
      * small would be sub-pixel, and density already moves the type.
      */
     --_font-size: var(--slotted-control-font-size-md, 13px);
-    --_glyph-size: var(--slotted-control-icon-size-md, 16px);
+    /**
+     * The glyph is the words' own size rounded to an even pixel, as
+     * `inline-message` draws its mark (R5): 12 pixels at `sm`, 14 at `md` and
+     * `lg`, the two grids the status glyphs are drawn on.
+     */
+    --_glyph-size: round(nearest, 1em, 2px);
     --_gap: var(--slotted-space-4, 0.5rem);
-    --_line-height: var(--slotted-line-height-md, 1.5);
 
     /**
      * The disc is a whole number of pixels from the space scale: 8 at `md` and
@@ -70,30 +81,20 @@
     --_halo-width: calc(var(--slotted-space-1, 0.125rem) * 1.5);
 
     /**
-     * What the ring is drawn against. The pulse hangs off the root rather
-     * than off the mark: when the icon mark was a `mask-image`, the mask
-     * clipped the element's pseudo-elements with it, and a ring behind a
-     * triangle was cut into the shape of that triangle and then disappeared.
-     * Photographed at 300% before it was moved here, and kept here so the
-     * ring never depends on how a mark is drawn. Rounded to a whole pixel, the
-     * rule `alert` applies to its own mark, so the disc never straddles one.
-     */
-    --_pulse-inset: round(nearest, (1lh - var(--_mark-size)) / 2, 1px);
-
-    align-items: flex-start;
-    /**
      * The words keep the page's colour when `render` makes the root an `<a>`;
      * without this the user agent paints the label in its link blue.
      */
     color: inherit;
-    display: inline-flex;
     font-family: var(
       --slotted-status-indicator-font-family,
       var(--slotted-control-font-family, sans-serif)
     );
     font-size: var(--_font-size);
-    line-height: var(--_line-height);
-    max-inline-size: 100%;
+    /**
+     * The leading, rounded up to an even pixel: 13 × 1.5 is 19.5 and lands the
+     * line, and the mark centred on it, across two device pixels.
+     */
+    line-height: round(up, 1em * var(--slotted-line-height-md, 1.5), 2px);
     /**
      * The indicator never widens the box that holds it. Its own minimum is the
      * longest word of a label it did not choose, and a grid or flex parent
@@ -103,15 +104,21 @@
      * label breaks the token at whatever width it is given.
      */
     min-inline-size: 0;
-    position: relative;
     /**
      * `render` can make the root an `<a>`, and the rule a browser writes on
      * every anchor would put a line under a status at rest. The linked root
      * below draws its own underline, hidden until the pointer arrives.
      */
     text-decoration: none;
-    /* Written inside a sentence, the indicator sits on the text's centre. */
-    vertical-align: middle;
+    /* The mark and the label never part; the label wraps inside its own box. */
+    white-space: nowrap;
+  }
+
+  /* Written inside a sentence, the indicator sits on the sentence's baseline. */
+  [data-ui-status-indicator][data-part-root]:not(td, th, li, div, p) {
+    display: inline-block;
+    max-inline-size: 100%;
+    vertical-align: baseline;
   }
 
   /* ── Status: the tone each state speaks in ────────────────────────────
@@ -201,30 +208,37 @@
   [data-ui-status-indicator][data-part-root][data-size='sm'] {
     --_dot-size: var(--slotted-space-3, 0.375rem);
     --_font-size: var(--slotted-control-font-size-sm, 12px);
-    --_glyph-size: var(--slotted-control-icon-size-sm, 14px);
     --_gap: var(--slotted-space-3, 0.375rem);
     --_halo-width: var(--slotted-space-1, 0.125rem);
   }
 
   [data-ui-status-indicator][data-part-root][data-size='lg'] {
     --_font-size: var(--slotted-control-font-size-lg, 14px);
-    --_glyph-size: var(--slotted-control-icon-size-lg, 18px);
   }
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * One box, painted two ways. `1lh` is what puts it on the first line: the
-   * unit resolves against the indicator's own line box, so the mark stays
-   * centred on the words at every type size and every density without a
-   * number saying how. It is the rule `skeleton` uses to sit an inline bar on
-   * a line of type, applied to a box rather than to a baseline.
+   * One box, painted two ways, inside the first line. Its centre is the
+   * centre of the capitals, `0.5cap` above the baseline — the axis
+   * `[data-ui-icon]` aligns every icon on — rounded to the device pixel: half
+   * a pixel at 2×, a whole one below 1.5×. Layout containment makes the box's
+   * own bottom edge its baseline, whatever it holds.
    */
   [data-ui-status-indicator] [data-part-mark] {
     block-size: var(--_mark-size);
     box-sizing: border-box;
-    flex: none;
+    contain: layout;
+    display: inline-flex;
     inline-size: var(--_mark-size);
-    margin-block-start: var(--_pulse-inset);
+    margin-inline-end: var(--_gap);
+    position: relative;
+    vertical-align: round(nearest, calc(0.5cap - var(--_mark-size) / 2), 0.5px);
+  }
+
+  @media (max-resolution: 1.49dppx) {
+    [data-ui-status-indicator] [data-part-mark] {
+      vertical-align: round(nearest, calc(0.5cap - var(--_mark-size) / 2), 1px);
+    }
   }
 
   [data-ui-status-indicator][data-mark='dot'] [data-part-mark] {
@@ -241,7 +255,6 @@
    */
   [data-ui-status-indicator][data-mark='dot'][data-status='unknown'] [data-part-mark] {
     border: 0;
-    position: relative;
   }
 
   /**
@@ -275,24 +288,25 @@
    *
    * The mark is the icon box's container: it hands the box its own size
    * through `--slotted-icon-size` and its colour through `color`, and the
-   * binding puts the status's glyph inside. `flex` rather than a line box, so
-   * no strut of the root's line-height pushes the glyph off the box.
+   * binding puts the status's glyph inside, drawn on the grid of that size.
    */
   [data-ui-status-indicator][data-mark='icon'] [data-part-mark] {
     --slotted-icon-size: var(--_mark-size);
 
     color: var(--_text, CanvasText);
-    display: flex;
   }
 
   /* ── The words ────────────────────────────────────────────────────────
    *
-   * `min-inline-size: 0` is what lets the label shrink below its content
-   * inside the flex root, and `overflow-wrap` is what breaks the one string a
-   * status is likeliest to hold that no language can break — a deployment id,
-   * a container digest, a hostname without a hyphen. Nothing is ever removed:
-   * the whole string stays in the DOM, in the accessibility tree and findable
-   * by a page search.
+   * An `inline-block` on the first line, as wide as the root less the mark:
+   * the words wrap inside it, so the lines after the first hang under the
+   * first word. `baseline-source: first` is what a table row reads — a label
+   * with a detail under it aligns the row on its first line, not its last.
+   *
+   * `overflow-wrap` breaks the one string a status is likeliest to hold that
+   * no language can break — a deployment id, a container digest, a hostname
+   * without a hyphen. Nothing is ever removed: the whole string stays in the
+   * DOM, in the accessibility tree and findable by a page search.
    *
    * `break-word` rather than `anywhere`, and the difference is the one this
    * family was caught by. Both break the token; only `anywhere` also reports a
@@ -303,20 +317,34 @@
    * minimum and breaks only what still does not fit.
    */
   [data-ui-status-indicator] [data-part-label] {
-    margin-inline-start: var(--_gap);
-    min-inline-size: 0;
+    baseline-source: first;
+    display: inline-block;
+    max-inline-size: calc(100% - var(--_mark-size) - var(--_gap));
     overflow-wrap: break-word;
+    /* No `vertical-align`: the shorthand resets `baseline-source` to `auto`,
+       the last line, and the root then aligned on the detail. */
+    white-space: normal;
+  }
+
+  /**
+   * A second, quieter line under the words — “62% · build”, “4 minutes ago” —
+   * in the label's own column, so it hangs under the first word as well.
+   */
+  [data-ui-status-indicator] [data-part-detail] {
+    color: var(--slotted-text-muted, GrayText);
+    display: block;
   }
 
   /**
    * The gap taken back when the label holds nothing a reader can see. A mark
    * with no visible words still carries its own word, clipped by
    * `visually-hidden`, and that word is out of flow — so the label box is
-   * empty, and a gap in front of an empty box puts a bare dot off the centre
-   * of the cell it was meant to sit in.
+   * empty, and a gap after the mark puts a bare dot off the centre of the
+   * cell it was meant to sit in.
    */
-  [data-ui-status-indicator] [data-part-label]:has(> [data-part-announcement]) {
-    margin-inline-start: 0;
+  [data-ui-status-indicator]:has(> [data-part-label] > [data-part-announcement]:only-child)
+    > [data-part-mark] {
+    margin-inline-end: 0;
   }
 
   /* ── Focus ────────────────────────────────────────────────────────────
@@ -406,16 +434,13 @@
     isolation: isolate;
   }
 
-  [data-ui-status-indicator][data-pulse]::after {
+  [data-ui-status-indicator][data-pulse] [data-part-mark]::after {
     animation: slotted-status-indicator-pulse var(--slotted-duration-loop-slow)
       var(--slotted-easing-enter) infinite;
     background-color: var(--_rim);
-    block-size: var(--_mark-size);
     border-radius: var(--slotted-radius-full, 9999px);
     content: '';
-    inline-size: var(--_mark-size);
-    inset-block-start: var(--_pulse-inset);
-    inset-inline-start: 0;
+    inset: 0;
     pointer-events: none;
     position: absolute;
     z-index: -1;
@@ -429,7 +454,7 @@
    * carried by the tone, the glyph and the word, as it is under reduced
    * motion.
    */
-  [data-ui-status-indicator][data-mark='icon'][data-pulse]::after {
+  [data-ui-status-indicator][data-mark='icon'][data-pulse] [data-part-mark]::after {
     content: none;
   }
 
@@ -440,7 +465,7 @@
    * and the status is left to the parts that were always carrying it.
    */
   @media (prefers-reduced-motion: reduce) {
-    [data-ui-status-indicator][data-pulse]::after {
+    [data-ui-status-indicator][data-pulse] [data-part-mark]::after {
       animation: none;
       content: none;
     }
@@ -474,7 +499,7 @@
       background-color: Canvas;
     }
 
-    [data-ui-status-indicator][data-pulse]::after {
+    [data-ui-status-indicator][data-pulse] [data-part-mark]::after {
       content: none;
     }
   }

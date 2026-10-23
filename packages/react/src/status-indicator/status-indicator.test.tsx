@@ -110,6 +110,19 @@ describe('StatusIndicator', () => {
     expect(root().textContent).toBe('Healthy');
   });
 
+  it('sets the detail inside the label, after the words', () => {
+    render(
+      <StatusIndicator detail="62% · build" status="info">
+        Deploying
+      </StatusIndicator>,
+    );
+
+    const detail = label().querySelector(':scope > [data-part="detail"]');
+    expect(detail).toHaveTextContent('62% · build');
+    expect(label().lastElementChild).toBe(detail);
+    expect(label().firstChild?.textContent).toBe('Deploying');
+  });
+
   it('takes the word a consumer wrote over the status’s own', () => {
     render(<StatusIndicator label="Deploy failed" status="danger" />);
 

@@ -9,10 +9,10 @@ export const STATUS_INDICATOR_DEFAULT_STATUS: StatusIndicatorStatus = 'neutral';
  * family's non-chromatic answer, and `neutral` and `unknown` share a tone.
  */
 export const STATUS_INDICATOR_GLYPHS: Record<StatusIndicatorStatus, GlyphName> = {
-  neutral: 'circle',
-  info: 'circle-info',
-  success: 'circle-check',
-  warning: 'circle-alert',
-  danger: 'circle-x',
-  unknown: 'circle-question',
+  neutral: 'status-neutral',
+  info: 'status-info',
+  success: 'status-success',
+  warning: 'status-warning',
+  danger: 'status-failed',
+  unknown: 'status-unknown',
 };

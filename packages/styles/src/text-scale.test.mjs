@@ -96,7 +96,7 @@ const DECORATIVE = new Map([
     'spinner/(root)',
     'the ring: an empty box painted with a mask, named by aria-label and never holding text, grown in from 0.6 on the frame the wait begins',
   ],
-  ['status-indicator/(root)::after', 'the pulse ring: an empty pseudo-element leaving the mark'],
+  ['status-indicator/mark::after', 'the pulse ring: an empty pseudo-element leaving the mark'],
 ]);
 
 /** Values that turn a box around instead of resizing it. */

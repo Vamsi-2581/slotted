@@ -42,14 +42,21 @@ const anatomy: AnatomyRow[] = [
     element: 'span',
     required: true,
     purpose:
-      'The disc or the glyph. A box one line tall, so the mark sits on the first line however far the label wraps. Hidden from assistive technology: it says nothing the label does not.',
+      'The disc or the glyph, inside the first line and centred on its capitals, so the mark stays on that line however far the label wraps. Hidden from assistive technology: it says nothing the label does not.',
   },
   {
     part: 'label',
     element: 'span',
     required: true,
     purpose:
-      'The projected content. It wraps rather than truncating, and breaks an unbroken token, so a deployment id does not widen the column it sits in.',
+      'The projected content. It wraps rather than truncating, with the lines after the first under the first word, and breaks an unbroken token, so a deployment id does not widen the column it sits in. A table row aligns on its first line.',
+  },
+  {
+    part: 'detail',
+    element: 'the consumer’s element with slStatusIndicatorDetail',
+    required: false,
+    purpose:
+      'A second, quieter line under the words — a progress, a time — set in the muted text colour and hanging under the first word. Projected inside the label, so it is read with the words.',
   },
   {
     part: 'announcement',
@@ -246,6 +253,13 @@ export const ANGULAR_STATUS_INDICATOR_DOCS = {
         '—',
         'SlStatusIndicator',
         'The visible words, which are also the accessible name. Its fallback content is the clipped word, so the template itself decides which of the two a reader gets',
+      ],
+      [
+        '[slStatusIndicatorDetail]',
+        'projected content',
+        '—',
+        'SlStatusIndicatorDetail',
+        'A second, quieter line under the words, projected inside the label as the detail part',
       ],
       [
         'host element',

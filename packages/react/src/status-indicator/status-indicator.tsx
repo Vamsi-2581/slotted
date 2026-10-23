@@ -38,6 +38,7 @@ const ROLE = { off: undefined, polite: 'status', assertive: 'alert' } as const;
  */
 export function StatusIndicator({
   children,
+  detail,
   label,
   live,
   mark,
@@ -90,6 +91,11 @@ export function StatusIndicator({
               data-ui-visually-hidden=""
             >
               {name}
+            </span>
+          )}
+          {detail === undefined ? null : (
+            <span data-part="detail" data-part-detail="">
+              {detail}
             </span>
           )}
         </span>

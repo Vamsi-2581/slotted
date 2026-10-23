@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  Directive,
   HostAttributeToken,
   inject,
   input,
@@ -50,6 +51,18 @@ import {
  * is, and wrapping it in a second element would change their layout to carry
  * an attribute.
  */
+/**
+ * A second, quieter line under the words — “62% · build”, “4 minutes ago” —
+ * hanging under the first word. It is projected into the label, so it is read
+ * with the words and belongs to their accessible name.
+ */
+@Directive({
+  selector: '[slStatusIndicatorDetail]',
+  standalone: true,
+  host: { 'data-part': 'detail', 'data-part-detail': '' },
+})
+export class SlStatusIndicatorDetail {}
+
 @Component({
   selector: '[slStatusIndicator]',
   standalone: true,
@@ -68,8 +81,8 @@ import {
           data-ui-visually-hidden=""
           >{{ name() }}</span
         ></ng-content
-      ></span
-    >`,
+      ><ng-content select="[slStatusIndicatorDetail]"
+    /></span>`,
   styleUrls: [
     '../../../styles/src/status-indicator/status-indicator.css',
     '../../../styles/src/visually-hidden/visually-hidden.css',

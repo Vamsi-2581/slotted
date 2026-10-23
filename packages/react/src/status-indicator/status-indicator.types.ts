@@ -54,6 +54,12 @@ export interface StatusIndicatorProps extends ComponentPropsWithRef<'span'> {
    */
   children?: ReactNode;
   /**
+   * A second, quieter line under the words — “62% · build”, “4 minutes ago” —
+   * hanging under the first word. It is part of the label, so it is read
+   * with the words and belongs to their accessible name.
+   */
+  detail?: ReactNode;
+  /**
    * What a reader hears when there are no visible words. Ignored when there
    * are, because naming an element twice is how a screen reader comes to read
    * “Success Healthy”. Falls back to the status's word in the catalog.

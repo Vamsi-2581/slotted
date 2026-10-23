@@ -324,7 +324,7 @@ export const Context: Story = {
             </StatusIndicator>
           </Row>
           <Row service="search-index">
-            <StatusIndicator pulse size="sm" status="info">
+            <StatusIndicator detail="62% · 4 min left" pulse size="sm" status="info">
               Reindexing
             </StatusIndicator>
           </Row>

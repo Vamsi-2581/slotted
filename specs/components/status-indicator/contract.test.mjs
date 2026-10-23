@@ -2,16 +2,11 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
+import { STATUS_GLYPHS } from '../../../packages/core/src/glyph/status-glyphs.ts';
 import { assertContractShape, MUTABLE_CAPABILITIES, TONES } from '../../contract.schema.mjs';
 
 const contract = JSON.parse(await readFile(new URL('./contract.json', import.meta.url), 'utf8'));
 const statusIndicator = contract.members.statusIndicator;
-const glyphs = JSON.parse(
-  await readFile(
-    new URL('../../../packages/themes/src/default/glyphs.json', import.meta.url),
-    'utf8',
-  ),
-);
 
 /**
  * Read rather than recalled, because the claim below about the dot is a claim
@@ -27,11 +22,11 @@ test('satisfies the shared contract schema', () => {
   assertContractShape(contract);
 });
 
-test('is one family with one member and four parts', () => {
+test('is one family with one member and five parts', () => {
   assert.equal(contract.family, 'status-indicator');
   assert.equal(contract.ui, 'status-indicator');
   assert.deepEqual(Object.keys(contract.members), ['statusIndicator']);
-  assert.deepEqual(statusIndicator.parts, ['root', 'mark', 'label', 'announcement']);
+  assert.deepEqual(statusIndicator.parts, ['root', 'mark', 'label', 'detail', 'announcement']);
 });
 
 /**
@@ -82,26 +77,23 @@ test('maps every status onto a tone the theme already paints', () => {
  * A name is the glyph token without `--slotted-icon-`, which is the name the
  * `Glyph` element takes.
  */
-test('gives every status its own glyph from the foundation scale', () => {
+test('gives every status its own glyph from the status set', () => {
   assert.deepEqual(Object.keys(contract.statusGlyphs), contract.axes.status);
   const drawn = Object.values(contract.statusGlyphs);
   assert.equal(new Set(drawn).size, drawn.length, 'two statuses draw the same glyph');
   for (const [status, name] of Object.entries(contract.statusGlyphs)) {
-    assert.ok(`--slotted-icon-${name}` in glyphs, `${status} names no glyph: ${name}`);
+    assert.ok(name in STATUS_GLYPHS, `${status} names no status glyph: ${name}`);
   }
 });
 
 /**
- * `docs/build-briefing.md` › No triangle glyph: every mark is drawn in a
- * circle, and the warning and danger marks are the ones `alert` and `toast`
- * draw for the same tones.
+ * `docs/build-briefing.md` › No triangle glyph: every mark is a hand-drawn
+ * status glyph, and the warning and danger marks are the ones `alert` and
+ * `toast` draw for the same tones.
  */
-test('draws every status in a circle, never a triangle', () => {
-  for (const [status, name] of Object.entries(contract.statusGlyphs)) {
-    assert.ok(name.startsWith('circle'), `${status} draws ${name}`);
-  }
-  assert.equal(contract.statusGlyphs.warning, 'circle-alert');
-  assert.equal(contract.statusGlyphs.danger, 'circle-x');
+test('draws every status from the status set, never a triangle', () => {
+  assert.equal(contract.statusGlyphs.warning, 'status-warning');
+  assert.equal(contract.statusGlyphs.danger, 'status-failed');
 });
 
 /**

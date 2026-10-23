@@ -8,13 +8,13 @@ import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
 import contract from '../../../../specs/components/status-indicator/contract.json';
 import { provideStatusIndicatorDefaults } from './status-indicator-defaults';
-import { SlStatusIndicator } from './status-indicator';
+import { SlStatusIndicator, SlStatusIndicatorDetail } from './status-indicator';
 import type { StatusIndicatorStatus } from './status-indicator.constants';
 
 /** The declared template names the directive, so the compiler sees it used. */
 @Component({
   standalone: true,
-  imports: [SlStatusIndicator],
+  imports: [SlStatusIndicator, SlStatusIndicatorDetail],
   template: `<span slStatusIndicator></span>`,
 })
 class Host {}
@@ -116,6 +116,17 @@ describe('SlStatusIndicator', () => {
 
     expect(part(fixture, 'announcement')).toBeNull();
     expect(root(fixture).textContent?.trim()).toBe('Healthy');
+  });
+
+  it('projects the detail inside the label, after the words', () => {
+    const fixture = renderTemplate(
+      `<span slStatusIndicator status="info">Deploying<span slStatusIndicatorDetail>62% · build</span></span>`,
+    );
+    const label = part(fixture, 'label')!;
+    const detail = label.querySelector(':scope > [data-part="detail"]');
+    expect(detail?.textContent).toBe('62% · build');
+    expect(label.lastElementChild).toBe(detail);
+    expect(part(fixture, 'announcement')).toBeNull();
   });
 
   it('takes the word a consumer wrote over the status’s own', () => {

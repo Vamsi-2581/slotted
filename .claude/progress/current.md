@@ -35,12 +35,13 @@
 - Fatia 2: achados 10, 2, 13 (`14ad85e1`).
 - Fatia 3: achados 4 (`a4461867`), 3 (`ce5be390`), 7 (`4fce1eca`).
 - Fatia 4: achados 6 (`f018c5ff`), 9 (`684dd781`), 8 (`acb3c96b`).
+- Fatia 5: achado 1 (`c28f5020`).
 
 ## Estado git
 - Branch main, HEAD: ver `git log -1`. Árvore: só este ficheiro.
 
 ## Em curso
-- Fatia 5, achado 1.
+- `pnpm check:full` em execução (log em `/tmp/claude-1000/-home-dreco-dev-slotted/3b8ae6ba-6ff5-4812-9432-b4236cc8782d/scratchpad/check-full.log`).
 
 ## Testes
 - Fatia 1: core sticky-header 48/48; React section unit+browser 20+3; Angular section 14/14; styles section 18/18; agent-docs 215/215; `pnpm check` verde.
@@ -49,8 +50,10 @@
 - Fatia 3: React browser backdrop-filter 18/18; unit splitter+scroll-area+action-sheet+data-grid docs 97/97; Angular das mesmas famílias 160/160; styles 1710/1710; agent-docs 217/217; theme 101 vitest + 111 node; themes 92/92; `pnpm check` verde.
 - Fatia 4: core dismissable-layer 46/46; React drawer browser 3/3 (o novo falha sem a correção); theme vitest 105 + node 111; themes 92/92; React theme browser 1/1 e unit 4/4; Angular theme 2/2; core portal 24/24; agent-docs references+content+skills 117/117; `pnpm check` verde.
 - Fatia 4 (achado 8): core extent+presence 97/97 (sheet-motion 8 testes); React drawer unit 61/61, browser drawer+dialog 14/14 (o teste do fling usa os tokens de duração, que o documento de teste não carrega); Angular drawer 51/51; `pnpm check` verde.
+- Fatia 5 (achado 1): React roving-focus 11 + entry-points; `pnpm check` verde.
 
 ## Problemas conhecidos
+- Achado 1: o menu não foi reescrito sobre o hook (usa `createArrowNavigation` do core, com submenu, typeahead e menubar); o hook segue as mesmas regras de anel e ganhou `reverse` para o dial que sobe do gatilho (ArrowDown no primeiro item devolve ao gatilho). Só React.
 - Achado 8: o `presence` espera a duração de transição declarada pela camada (raiz), por isso a saída por fling usa essa duração com uma curva bezier de inclinação inicial igual à velocidade da mão; sem tokens de movimento carregados a camada declara 0 e o painel desmonta de imediato (comportamento anterior). O separador só usa o movimento por translate em `side="bottom"` e `mode="overlay"`.
 - Achado 6: a correção compara `location.href` com o da entrada; uma troca de localização com a camada aberta (replace de search param) deixa a entrada no histórico, sem passo atrás.
 - Achado 9: `standard` é sempre emitido a partir de `base`; corners dependentes reescrevem tokens de `base`/`components` que contêm `var(--slotted-radius-`.
@@ -64,4 +67,4 @@
 - O cache incremental do typecheck (`node_modules/.cache/tsc/root.tsbuildinfo`) produz erros falsos depois de mudanças em `*.tokens.json`; contorno: apagar o ficheiro.
 
 ## Próxima ação exata
-Achado 1: `useRovingFocus` (React) a partir do modelo de teclado da família menu (`packages/react/src/menu/`); depois, validação em equori (pede confirmação do usuário) e relatório final.
+Ler o resultado de `pnpm check:full` no log acima; se verde, relatar. Validação em equori (`pnpm sync:equori`) só com confirmação do usuário. Sem release nem publish (decisão do usuário).

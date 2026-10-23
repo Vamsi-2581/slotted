@@ -4,6 +4,7 @@ import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import {
   attachSheetDrag,
+  createSheetMotion,
   dampenExtent,
   extentBounds,
   isInlineSide,
@@ -12,6 +13,7 @@ import {
   settleExtent,
   stopAsExtent,
 } from '@slotted/core/extent';
+import type { SheetMotion } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
 import type { FocusScopeHandle } from '@slotted/core/focus';
 import { drawerMessages, type DrawerMessages, type PartialMessages } from '@slotted/core/i18n';
@@ -22,6 +24,7 @@ import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
 import {
+  ApplicationRef,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -62,6 +65,23 @@ const NO_SNAP_POINTS: readonly number[] = [];
 
 /** What the stylesheet leaves above a content sheet, for the press outside. */
 const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
+
+/**
+ * How long the layer says it takes to leave, in milliseconds: what presence
+ * waits for before it unmounts, so a panel sent out by hand has to be gone in
+ * that time.
+ */
+export function exitDuration(layer: HTMLElement): number | undefined {
+  const durations = layer.ownerDocument
+    .defaultView!.getComputedStyle(layer)
+    .transitionDuration.split(',')
+    .map((value) =>
+      value.trim().endsWith('ms') ? Number.parseFloat(value) : Number.parseFloat(value) * 1000,
+    )
+    .filter(Number.isFinite);
+  const longest = Math.max(0, ...durations);
+  return longest > 0 ? longest : undefined;
+}
 
 /**
  * A panel that comes in from an edge, and either covers the page or stands
@@ -211,6 +231,9 @@ export class SlDrawer implements OnInit {
   /** The server lays nothing out, and its DOM cannot be measured. */
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly destroyRef = inject(DestroyRef);
+  private readonly appRef = inject(ApplicationRef);
+  /** The sheet's gesture, kept until the panel is gone: a close ends the drag and not the exit. */
+  private sheetMotion: SheetMotion | null = null;
   private readonly baseId = inject(SlDrawerIdFactory).next();
 
   /** The element the consumer wrote us beside, recorded before anything moves. */
@@ -613,10 +636,11 @@ export class SlDrawer implements OnInit {
     /**
      * The body of a sheet from the bottom moves it under a touch, and hands the
      * gesture to the scroll of what it holds when that is what it is —
-     * `attachSheetDrag` decides which. The request is made once, on release.
-     * Until then the hand's position is written on the layer as it moves, in
-     * pixels against the span measured when the drag began: a signal per move
-     * ran the drawer's change detection and measured the layer again.
+     * `attachSheetDrag` decides which. The panel is laid out once, at the
+     * highest extent the hand may take it to, and the hand moves it by
+     * `translate` alone: no signal and no measure per move. The release
+     * animates from where the hand left the panel at the speed it had
+     * (`createSheetMotion`), and the extent is requested once, on arrival.
      */
     effect((onCleanup) => {
       const node = this.layerRef()?.nativeElement;
@@ -638,16 +662,18 @@ export class SlDrawer implements OnInit {
         rest: undefined,
         stops: [],
       };
+      const motion = createSheetMotion(panel);
+      this.sheetMotion?.end();
+      this.sheetMotion = motion;
       const now = () => {
         span = node.getBoundingClientRect().height;
         return span > 0 ? panel.offsetHeight / span : 0;
       };
       /* What the template wrote on the layer before the drag, put back on release. */
-      let held = { extent: '', undimmed: false };
-      const restore = () => {
-        if (held.extent === '') node.style.removeProperty('--slotted-drawer-extent');
-        else node.style.setProperty('--slotted-drawer-extent', held.extent);
-        node.toggleAttribute('data-undimmed', held.undimmed);
+      let undimmed = false;
+      const finish = () => {
+        motion.end();
+        node.toggleAttribute('data-undimmed', undimmed);
       };
 
       onCleanup(
@@ -662,17 +688,15 @@ export class SlDrawer implements OnInit {
             start = now();
             last = start;
             measured = this.measureStops(panel, span);
-            held = {
-              extent: node.style.getPropertyValue('--slotted-drawer-extent'),
-              undimmed: node.hasAttribute('data-undimmed'),
-            };
+            undimmed = node.hasAttribute('data-undimmed');
+            motion.begin(start * span, Math.max(measured.stops.at(-1) ?? start, start) * span);
             this.dragging.set(true);
           },
           onMove: (distance) => {
             if (span <= 0) return;
             last = Math.max(0, start + distance / span);
             const at = dampenExtent(last, measured.stops.at(-1) ?? start);
-            node.style.setProperty('--slotted-drawer-extent', `${String(Math.round(at * span))}px`);
+            motion.follow(at * span);
             node.toggleAttribute('data-undimmed', at < this.scrimFrom());
           },
           onEnd: (velocity) => {
@@ -684,25 +708,38 @@ export class SlDrawer implements OnInit {
               velocity: span > 0 ? velocity / span : 0,
             });
             if (landed === 'close') {
-              /* The panel stays where the hand left it, so the exit slides from
-                 there; a close the consumer refused puts it back. */
+              /* The panel leaves from where the hand let go, at the hand's speed;
+                 a close the consumer refused brings it back. */
+              void motion.settle(0, velocity, exitDuration(node));
               this.request(false, 'pointer', undefined, null);
-              if (this.open()) restore();
+              requestAnimationFrame(() => {
+                if (this.open()) void motion.settle(start * span, 0).then(finish);
+              });
               return;
             }
-            restore();
-            this.requestExtent(this.asRequest(landed, measured.rest), 'pointer', null);
+            void motion.settle(landed * span, velocity).then(() => {
+              this.requestExtent(this.asRequest(landed, measured.rest), 'pointer', null);
+              /* The new measure is in the DOM before the gesture lets go of the old one. */
+              this.flush();
+              finish();
+            });
           },
         }),
       );
     });
 
     this.destroyRef.onDestroy(() => {
+      this.sheetMotion?.end();
       this.scope?.destroy();
       this.layer?.destroy();
       this.presence.destroy();
       this.releasePortal();
     });
+  }
+
+  /** Renders what the signals hold now, so a gesture can let go of the panel it laid out. */
+  flush() {
+    this.appRef.tick();
   }
 
   /** The stops a sheet rests on and the rest among them, measured now. */

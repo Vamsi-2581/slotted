@@ -8,6 +8,8 @@ export {
 } from './gesture';
 export { attachSheetDrag } from './sheet';
 export type { SheetDragOptions } from './sheet';
+export { createSheetMotion } from './sheet-motion';
+export type { SheetMotion } from './sheet-motion';
 export type { ResizeCursor } from './gesture';
 export {
   anchorsAtStart,

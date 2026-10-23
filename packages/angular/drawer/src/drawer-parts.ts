@@ -1,5 +1,6 @@
 import { hostSelectorKey } from '@slotted/core/selector-key';
 import {
+  createSheetMotion,
   EXTENT_LARGE_STEP_PX,
   EXTENT_STEP_PX,
   anchorsAtStart,
@@ -13,7 +14,7 @@ import {
   stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
-import type { ExtentSample } from '@slotted/core/extent';
+import type { ExtentSample, SheetMotion } from '@slotted/core/extent';
 import { clamp } from '@slotted/core/measure';
 import {
   ChangeDetectionStrategy,
@@ -30,7 +31,7 @@ import {
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 
-import { SlDrawer } from './drawer';
+import { exitDuration, SlDrawer } from './drawer';
 import type { DrawerOpenReason } from './drawer-defaults';
 
 /**
@@ -318,6 +319,14 @@ export class SlDrawerResizer {
   private collapsed: number | null = null;
   /** What the document looked like before the drag, and how to put it back. */
   private gesture: (() => void) | null = null;
+  /**
+   * A bottom sheet's separator moves the panel by `translate`, as its body does,
+   * and asks for the extent once, when the panel has arrived. The other sides
+   * have no sheet to lay out once, and keep asking as the pointer moves.
+   */
+  private motion: SheetMotion | null = null;
+  /** The stops measured before the panel was laid out for the drag, which would change a content stop. */
+  private stopsAtStart: { stops: number[]; rest: number | undefined } | null = null;
 
   protected readonly orientation = computed(() =>
     isInlineSide(this.drawer.resolvedSide()) ? 'vertical' : 'horizontal',
@@ -416,6 +425,20 @@ export class SlDrawerResizer {
         isInlineSide(this.drawer.resolvedSide()) ? 'col-resize' : 'row-resize',
       );
       this.drawer.dragging.set(true);
+      const panel = this.native.parentElement;
+      const span = this.span();
+      if (
+        this.drawer.resolvedSide() === 'bottom' &&
+        this.drawer.resolvedMode() === 'overlay' &&
+        panel !== null &&
+        span > 0
+      ) {
+        this.stopsAtStart = this.stopsNow();
+        const top = this.stopsAtStart.stops.at(-1) ?? this.drawer.bounds().max;
+        const current = this.current();
+        this.motion = createSheetMotion(panel);
+        this.motion.begin(current * span, Math.max(top, current) * span);
+      }
     }
 
     const fraction = clamp(at + held.offset, 0, 1);
@@ -423,7 +446,8 @@ export class SlDrawerResizer {
     /* Three samples is what `extentVelocity` reads; keeping more would only let
        an older, slower stretch of the same drag dilute the flick. */
     this.samples = [...this.samples, { at: event.timeStamp, fraction }].slice(-3);
-    this.drawer.requestExtent(fraction, 'pointer', event);
+    if (this.motion === null) this.drawer.requestExtent(fraction, 'pointer', event);
+    else this.motion.follow(fraction * this.span());
   }
 
   /**
@@ -471,24 +495,40 @@ export class SlDrawerResizer {
     this.dragged = null;
     this.samples = [];
 
-    const { rest, stops } = this.stopsNow();
-    if (stops.length > 0) {
-      const landed = settleExtent({ fraction: last, span, stops, velocity });
-      if (landed === 'close') {
-        this.drawer.request(false, 'pointer', undefined, event);
-        this.drawer.requestExtent(stops[0], 'pointer', event);
-        return;
-      }
-      this.drawer.requestExtent(this.drawer.asRequest(landed, rest), 'pointer', event);
-      return;
-    }
+    const sheet = this.motion;
+    this.motion = null;
+    const { rest, stops } = (sheet && this.stopsAtStart) || this.stopsNow();
+    this.stopsAtStart = null;
+    /* Where the release lands: a stop, the floor, or out. */
+    const landed: number | 'close' =
+      stops.length > 0
+        ? settleExtent({ fraction: last, span, stops, velocity })
+        : last < bounds.min || velocity * span <= -SHEET_FLING_PX_PER_S
+          ? 'close'
+          : clamp(last, bounds.min, bounds.max);
+    const request = (value: number) =>
+      this.drawer.requestExtent(
+        stops.length > 0 ? this.drawer.asRequest(value, rest) : value,
+        'pointer',
+        event,
+      );
 
-    if (last < bounds.min || velocity * span <= -SHEET_FLING_PX_PER_S) {
+    if (landed === 'close') {
+      const layer = this.drawer.measuringBox();
+      void sheet?.settle(0, velocity * span, layer === null ? undefined : exitDuration(layer));
       this.drawer.request(false, 'pointer', undefined, event);
-      this.drawer.requestExtent(bounds.min, 'pointer', event);
+      this.drawer.requestExtent(stops.length > 0 ? stops[0] : bounds.min, 'pointer', event);
       return;
     }
-    this.drawer.requestExtent(clamp(last, bounds.min, bounds.max), 'pointer', event);
+    if (sheet === null) {
+      request(landed);
+      return;
+    }
+    void sheet.settle(landed * span, velocity * span).then(() => {
+      request(landed);
+      this.drawer.flush();
+      sheet.end();
+    });
   }
 
   /**

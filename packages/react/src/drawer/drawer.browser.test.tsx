@@ -150,3 +150,92 @@ describe('a bottom sheet closed for a navigation', () => {
     history.replaceState(null, '', location.pathname + start);
   });
 });
+
+/**
+ * A bottom sheet is laid out once for a drag and moved by `translate` alone;
+ * a fling leaves from where the hand let go, at the hand's speed, in one
+ * motion: the panel's position never goes back, and it ends out of sight.
+ */
+describe('a bottom sheet dragged and flung', () => {
+  function Sheet() {
+    return (
+      <Drawer defaultOpen side="bottom">
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Filters</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>
+            <ul>
+              {Array.from({ length: 8 }, (_, index) => (
+                <li key={index}>Row {index + 1}</li>
+              ))}
+            </ul>
+          </DrawerBody>
+        </DrawerPanel>
+      </Drawer>
+    );
+  }
+
+  it('moves by translate over 60 pointer moves and never resizes the panel', async () => {
+    render(<Sheet />);
+    for (let index = 0; index < 10; index += 1) await frame();
+    const panel = document.querySelector('[data-part="panel"]') as HTMLElement;
+    const header = panel.querySelector('[data-part="header"]') as HTMLElement;
+    const box = header.getBoundingClientRect();
+    const x = box.left + box.width / 2;
+    const y = box.top + box.height / 2;
+    const rest = panel.offsetHeight;
+
+    await touch('touchStart', x, y);
+    await touch('touchMove', x, y + 20);
+    const sizes = new Set<string>();
+    const shifts = new Set<string>();
+    for (let step = 1; step <= 60; step += 1) {
+      await touch('touchMove', x, y + 20 + step);
+      await frame();
+      sizes.add(panel.style.blockSize);
+      shifts.add(panel.style.translate);
+    }
+    expect(sizes.size).toBe(1);
+    expect(shifts.size).toBeGreaterThan(30);
+    expect(panel.offsetHeight).toBe(rest);
+    await touch('touchEnd', x, y + 80);
+  });
+
+  it('leaves in one motion from the release position when flung down', async () => {
+    /* The theme's motion tokens, which the test document does not load. */
+    document.documentElement.style.setProperty('--slotted-duration-medium', '240ms');
+    document.documentElement.style.setProperty('--slotted-duration-long', '320ms');
+    render(<Sheet />);
+    for (let index = 0; index < 10; index += 1) await frame();
+    const panel = document.querySelector('[data-part="panel"]') as HTMLElement;
+    const header = panel.querySelector('[data-part="header"]') as HTMLElement;
+    const box = header.getBoundingClientRect();
+    const x = box.left + box.width / 2;
+    const y = box.top + box.height / 2;
+
+    await touch('touchStart', x, y);
+    for (let step = 1; step <= 6; step += 1) {
+      await touch('touchMove', x, y + step * 25);
+      await frame();
+    }
+    const released = panel.getBoundingClientRect().top;
+    await touch('touchEnd', x, y + 150);
+
+    const tops: number[] = [released];
+    for (let index = 0; index < 60; index += 1) {
+      await frame();
+      const current = document.querySelector('[data-part="panel"]');
+      if (current === null) break;
+      tops.push(current.getBoundingClientRect().top);
+    }
+    document.documentElement.removeAttribute('style');
+    for (let index = 1; index < tops.length; index += 1) {
+      expect(tops[index]!).toBeGreaterThanOrEqual(tops[index - 1]! - 0.5);
+    }
+    expect(tops.length).toBeGreaterThan(4);
+    /* The last frame it was seen at is the edge of the screen or past it. */
+    expect(tops.at(-1)!).toBeGreaterThan(window.innerHeight - 40);
+    expect(document.querySelector('[data-ui="drawer"][data-open]')).toBeNull();
+  });
+});

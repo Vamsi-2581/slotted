@@ -555,6 +555,8 @@ test('drags a sheet by its body and hands the gesture to the scroll', () => {
   assert.equal(drawer.defaults.drag, 'panel');
   assert.match(contract.sheet.drag, /touch/);
   assert.match(contract.sheet.drag, /side=bottom/);
+  assert.match(contract.sheet.gesture, /translate alone/);
+  assert.match(contract.sheet.gesture, /once, when the panel has arrived/);
   assert.match(contract.sheet.handoff, /scrollTop/);
   assert.match(contract.sheet.handoff, /highest stop/);
   assert.match(contract.sheet.exclusions, /touch-action/);

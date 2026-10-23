@@ -77,6 +77,7 @@ export * from './page-header';
 export * from './pagination';
 export * from './popover';
 export * from './press-selection';
+export * from './roving-focus';
 export * from './progress-indicator';
 export * from './prompt-composer';
 export * from './prose';

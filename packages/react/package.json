@@ -366,6 +366,10 @@
       "types": "./dist/types/result-state/index.d.ts",
       "import": "./dist/result-state.js"
     },
+    "./roving-focus": {
+      "types": "./dist/types/roving-focus/index.d.ts",
+      "import": "./dist/roving-focus.js"
+    },
     "./saved-views": {
       "types": "./dist/types/saved-views/index.d.ts",
       "import": "./dist/saved-views.js"

@@ -2746,6 +2746,7 @@ export type ComponentToken =
   | '--slotted-accordion-radius'
   | '--slotted-accordion-rule-color'
   | '--slotted-accordion-surface'
+  | '--slotted-action-bar-backdrop-filter'
   | '--slotted-action-bar-background'
   | '--slotted-action-bar-border-color'
   | '--slotted-action-bar-gap'
@@ -3107,6 +3108,7 @@ export type ComponentToken =
   | '--slotted-combobox-color'
   | '--slotted-combobox-completion-background'
   | '--slotted-combobox-completion-color'
+  | '--slotted-combobox-content-backdrop-filter'
   | '--slotted-combobox-content-border-color'
   | '--slotted-combobox-content-padding-block'
   | '--slotted-combobox-content-padding-inline'
@@ -3288,6 +3290,7 @@ export type ComponentToken =
   | '--slotted-date-field-subtle-background'
   | '--slotted-date-field-subtle-border-color'
   | '--slotted-date-field-subtle-hover-background'
+  | '--slotted-date-picker-content-backdrop-filter'
   | '--slotted-date-picker-content-border-color'
   | '--slotted-date-picker-content-color'
   | '--slotted-date-picker-content-padding'
@@ -3532,6 +3535,7 @@ export type ComponentToken =
   | '--slotted-divider-label-color'
   | '--slotted-divider-min-length'
   | '--slotted-divider-thickness'
+  | '--slotted-drawer-backdrop-filter'
   | '--slotted-drawer-body-color'
   | '--slotted-drawer-border-color'
   | '--slotted-drawer-close-active-background'
@@ -3563,6 +3567,7 @@ export type ComponentToken =
   | '--slotted-entity-picker-background'
   | '--slotted-entity-picker-border-color'
   | '--slotted-entity-picker-color'
+  | '--slotted-entity-picker-content-backdrop-filter'
   | '--slotted-entity-picker-content-border-color'
   | '--slotted-entity-picker-content-radius'
   | '--slotted-entity-picker-content-shadow'
@@ -3714,10 +3719,13 @@ export type ComponentToken =
   | '--slotted-inline-message-font-family'
   | '--slotted-inline-message-line-height'
   | '--slotted-kbd-base-width'
+  | '--slotted-kbd-border-color'
   | '--slotted-kbd-border-width'
+  | '--slotted-kbd-color'
   | '--slotted-kbd-font-family'
   | '--slotted-kbd-font-weight'
   | '--slotted-kbd-radius'
+  | '--slotted-kbd-surface'
   | '--slotted-kbd-symbol-font-family'
   | '--slotted-letter-spacing-wide'
   | '--slotted-link-color'
@@ -3818,6 +3826,7 @@ export type ComponentToken =
   | '--slotted-loading-overlay-surface'
   | '--slotted-markdown-backref-size'
   | '--slotted-markdown-task-gap'
+  | '--slotted-menu-backdrop-filter'
   | '--slotted-menu-border-color'
   | '--slotted-menu-gap'
   | '--slotted-menu-highlight'
@@ -4041,6 +4050,7 @@ export type ComponentToken =
   | '--slotted-pagination-text-gap'
   | '--slotted-popover-arrow-size'
   | '--slotted-popover-arrow-tip-radius'
+  | '--slotted-popover-backdrop-filter'
   | '--slotted-popover-border-color'
   | '--slotted-popover-gap'
   | '--slotted-popover-measure'
@@ -4221,6 +4231,7 @@ export type ComponentToken =
   | '--slotted-section-border'
   | '--slotted-section-description-measure'
   | '--slotted-section-gap'
+  | '--slotted-section-header-background'
   | '--slotted-section-heading-size-lg'
   | '--slotted-section-heading-size-md'
   | '--slotted-section-heading-size-sm'
@@ -4264,6 +4275,7 @@ export type ComponentToken =
   | '--slotted-select-background'
   | '--slotted-select-border-color'
   | '--slotted-select-color'
+  | '--slotted-select-content-backdrop-filter'
   | '--slotted-select-content-border-color'
   | '--slotted-select-content-padding-block'
   | '--slotted-select-content-padding-inline'
@@ -4521,6 +4533,7 @@ export type ComponentToken =
   | '--slotted-table-of-contents-color-hover'
   | '--slotted-table-of-contents-indent'
   | '--slotted-table-of-contents-marker-color'
+  | '--slotted-table-of-contents-sticky-inset'
   | '--slotted-table-of-contents-track-color'
   | '--slotted-table-of-contents-track-width'
   | '--slotted-table-radius'
@@ -4860,6 +4873,7 @@ export type ComponentToken =
   | '--slotted-toolbar-separator-color'
   | '--slotted-tooltip-arrow-size'
   | '--slotted-tooltip-arrow-tip-radius'
+  | '--slotted-tooltip-backdrop-filter'
   | '--slotted-tooltip-border-color'
   | '--slotted-tooltip-gap'
   | '--slotted-tooltip-measure'
@@ -4989,6 +5003,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-accordion-radius",
   "--slotted-accordion-rule-color",
   "--slotted-accordion-surface",
+  "--slotted-action-bar-backdrop-filter",
   "--slotted-action-bar-background",
   "--slotted-action-bar-border-color",
   "--slotted-action-bar-gap",
@@ -5350,6 +5365,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-combobox-color",
   "--slotted-combobox-completion-background",
   "--slotted-combobox-completion-color",
+  "--slotted-combobox-content-backdrop-filter",
   "--slotted-combobox-content-border-color",
   "--slotted-combobox-content-padding-block",
   "--slotted-combobox-content-padding-inline",
@@ -5531,6 +5547,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-date-field-subtle-background",
   "--slotted-date-field-subtle-border-color",
   "--slotted-date-field-subtle-hover-background",
+  "--slotted-date-picker-content-backdrop-filter",
   "--slotted-date-picker-content-border-color",
   "--slotted-date-picker-content-color",
   "--slotted-date-picker-content-padding",
@@ -5775,6 +5792,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-divider-label-color",
   "--slotted-divider-min-length",
   "--slotted-divider-thickness",
+  "--slotted-drawer-backdrop-filter",
   "--slotted-drawer-body-color",
   "--slotted-drawer-border-color",
   "--slotted-drawer-close-active-background",
@@ -5806,6 +5824,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-entity-picker-background",
   "--slotted-entity-picker-border-color",
   "--slotted-entity-picker-color",
+  "--slotted-entity-picker-content-backdrop-filter",
   "--slotted-entity-picker-content-border-color",
   "--slotted-entity-picker-content-radius",
   "--slotted-entity-picker-content-shadow",
@@ -5957,10 +5976,13 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-inline-message-font-family",
   "--slotted-inline-message-line-height",
   "--slotted-kbd-base-width",
+  "--slotted-kbd-border-color",
   "--slotted-kbd-border-width",
+  "--slotted-kbd-color",
   "--slotted-kbd-font-family",
   "--slotted-kbd-font-weight",
   "--slotted-kbd-radius",
+  "--slotted-kbd-surface",
   "--slotted-kbd-symbol-font-family",
   "--slotted-letter-spacing-wide",
   "--slotted-link-color",
@@ -6061,6 +6083,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-loading-overlay-surface",
   "--slotted-markdown-backref-size",
   "--slotted-markdown-task-gap",
+  "--slotted-menu-backdrop-filter",
   "--slotted-menu-border-color",
   "--slotted-menu-gap",
   "--slotted-menu-highlight",
@@ -6284,6 +6307,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-pagination-text-gap",
   "--slotted-popover-arrow-size",
   "--slotted-popover-arrow-tip-radius",
+  "--slotted-popover-backdrop-filter",
   "--slotted-popover-border-color",
   "--slotted-popover-gap",
   "--slotted-popover-measure",
@@ -6464,6 +6488,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-section-border",
   "--slotted-section-description-measure",
   "--slotted-section-gap",
+  "--slotted-section-header-background",
   "--slotted-section-heading-size-lg",
   "--slotted-section-heading-size-md",
   "--slotted-section-heading-size-sm",
@@ -6507,6 +6532,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-select-background",
   "--slotted-select-border-color",
   "--slotted-select-color",
+  "--slotted-select-content-backdrop-filter",
   "--slotted-select-content-border-color",
   "--slotted-select-content-padding-block",
   "--slotted-select-content-padding-inline",
@@ -6764,6 +6790,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-table-of-contents-color-hover",
   "--slotted-table-of-contents-indent",
   "--slotted-table-of-contents-marker-color",
+  "--slotted-table-of-contents-sticky-inset",
   "--slotted-table-of-contents-track-color",
   "--slotted-table-of-contents-track-width",
   "--slotted-table-radius",
@@ -7103,6 +7130,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-toolbar-separator-color",
   "--slotted-tooltip-arrow-size",
   "--slotted-tooltip-arrow-tip-radius",
+  "--slotted-tooltip-backdrop-filter",
   "--slotted-tooltip-border-color",
   "--slotted-tooltip-gap",
   "--slotted-tooltip-measure",

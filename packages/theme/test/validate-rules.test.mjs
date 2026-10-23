@@ -33,7 +33,7 @@ test('accepts public hooks, theme axes and tokens', () => {
     `[data-ui='button'][data-variant='solid'] [data-part='label'] { font-weight: var(--slotted-font-weight-semibold); }`,
   );
   ok(
-    `[data-slotted-scheme='dark'] [data-ui='text-field'] { border-radius: var(--slotted-text-field-radius, 0); }`,
+    `&[data-slotted-scheme='dark'] [data-ui='text-field'] { border-radius: var(--slotted-text-field-radius, 0); }`,
   );
   ok(`[data-ui='card']:is(:hover, [data-disabled]) { color: var(--slotted-seed-accent); }`);
 });
@@ -301,6 +301,21 @@ test('accepts & outside a style rule as the theme root in a scheme or a density,
     `[data-ui='card'] &[data-slotted-scheme='dark'] [data-ui='button'] { color: red; }`,
     "&[data-slotted-scheme='dark']: outside a style rule the nesting selector is the theme root, which begins a selector",
   );
+});
+
+test('refuses a scheme ahead of a public hook, which a descendant selector never reaches, and names &', () => {
+  // The element that carries the scheme is the scope root, which is not its own descendant.
+  fails(
+    `[data-slotted-scheme='dark'] [data-ui='card'] { --x: 1; }`,
+    "[data-slotted-scheme='dark']: ahead of a public hook the scheme sits on the theme root, which a descendant selector never reaches; write &[data-slotted-scheme='dark'] …",
+  );
+  fails(
+    `[data-slotted-scheme='dark'] > [data-part='content'] { --x: 1; }`,
+    "[data-slotted-scheme='dark']: ahead of a public hook the scheme sits on the theme root, which a descendant selector never reaches; write &[data-slotted-scheme='dark'] …",
+  );
+  ok(`&[data-slotted-scheme='dark'] [data-ui='card'] { --x: 1; }`);
+  // A scheme that narrows a hook on the same element is a compound, not a root.
+  ok(`[data-ui='card'][data-slotted-scheme='dark'] { --x: 1; }`);
 });
 
 const runtimeErrors = (css) => {

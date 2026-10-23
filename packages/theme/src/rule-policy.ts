@@ -471,6 +471,22 @@ function compoundErrors(
       hooked = true;
     }
   }
+  // The element that carries the scheme is the compiled `@scope` root, which is not its own
+  // descendant, and the scope limit stops at any other scheme: `[data-slotted-scheme] x` matches nothing.
+  if (
+    !nested &&
+    place.top &&
+    place.first &&
+    !place.subject &&
+    compound.every(
+      (component) => component.type === 'attribute' && component.name === 'data-slotted-scheme',
+    )
+  ) {
+    const raw = compound.map((component) => component.raw).join('');
+    report(
+      `${raw}: ahead of a public hook the scheme sits on the theme root, which a descendant selector never reaches; write &${raw} …`,
+    );
+  }
   if (ui !== undefined && part !== undefined && !(UI[ui] ?? []).includes(part))
     report(`[data-part='${part}'] is not a part of ${ui}`);
   // `:is()` and `:where()` match the element itself: a compound with no hook of its own is

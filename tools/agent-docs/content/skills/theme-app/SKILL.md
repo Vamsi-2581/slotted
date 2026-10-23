@@ -88,7 +88,19 @@ has.
 3. Else a theme rule. It lives in `slotted.theme-rules`, selects only
    `data-ui`, `data-part`, the attributes a family writes and the theme's
    attributes, and reads only tokens; the compiler names the file, the line
-   and the selector of a rule it refuses.
+   and the selector of a rule it refuses. A rule for one scheme begins with
+   the nesting selector, which names the theme root that carries the scheme.
+   The same selector without it asks for a descendant of the root and is
+   refused:
+
+   ```css
+   &[data-slotted-scheme='dark'] [data-ui='card'] {
+     /* accepted */
+   }
+   [data-slotted-scheme='dark'] [data-ui='card'] {
+     /* refused */
+   }
+   ```
 
 ## 5. Done
 

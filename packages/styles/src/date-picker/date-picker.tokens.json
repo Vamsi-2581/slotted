@@ -11,6 +11,7 @@
   "--slotted-control-radius",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",
+  "--slotted-date-picker-content-backdrop-filter",
   "--slotted-date-picker-content-border-color",
   "--slotted-date-picker-content-color",
   "--slotted-date-picker-content-padding",

@@ -32,6 +32,7 @@
   "--slotted-font-weight-semibold",
   "--slotted-line-height-md",
   "--slotted-line-height-sm",
+  "--slotted-menu-backdrop-filter",
   "--slotted-menu-border-color",
   "--slotted-menu-gap",
   "--slotted-menu-highlight",

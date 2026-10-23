@@ -12,6 +12,7 @@
   "--slotted-combobox-color",
   "--slotted-combobox-completion-background",
   "--slotted-combobox-completion-color",
+  "--slotted-combobox-content-backdrop-filter",
   "--slotted-combobox-content-border-color",
   "--slotted-combobox-content-padding-block",
   "--slotted-combobox-content-padding-inline",

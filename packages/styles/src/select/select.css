@@ -996,6 +996,16 @@
     );
     outline: none;
     pointer-events: auto;
+    /* A theme that paints this surface as a translucent material blurs what moves behind it. */
+    -webkit-backdrop-filter: var(--slotted-select-content-backdrop-filter, none);
+    backdrop-filter: var(--slotted-select-content-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-select] > [data-part-content] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /**

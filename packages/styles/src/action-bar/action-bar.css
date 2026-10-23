@@ -103,6 +103,16 @@
     background-color: var(--slotted-action-bar-background, var(--slotted-surface, Canvas));
     border-block-start: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-action-bar-border-color, var(--slotted-border-subtle, ButtonBorder));
+    /* A theme that paints this surface as a translucent material blurs what moves behind it. */
+    -webkit-backdrop-filter: var(--slotted-action-bar-backdrop-filter, none);
+    backdrop-filter: var(--slotted-action-bar-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-action-bar][data-variant='raised'] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /* ── Sticky ───────────────────────────────────────────────────────────── */

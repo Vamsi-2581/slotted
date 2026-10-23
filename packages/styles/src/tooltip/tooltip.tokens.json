@@ -25,6 +25,7 @@
   "--slotted-text-inverse",
   "--slotted-tooltip-arrow-size",
   "--slotted-tooltip-arrow-tip-radius",
+  "--slotted-tooltip-backdrop-filter",
   "--slotted-tooltip-border-color",
   "--slotted-tooltip-gap",
   "--slotted-tooltip-measure",

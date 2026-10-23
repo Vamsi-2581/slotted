@@ -934,6 +934,16 @@
     padding-block: var(--_inset-block);
     padding-inline: var(--_inset-inline);
     pointer-events: auto;
+    /* A theme that paints this surface as a translucent material blurs what moves behind it. */
+    -webkit-backdrop-filter: var(--slotted-entity-picker-content-backdrop-filter, none);
+    backdrop-filter: var(--slotted-entity-picker-content-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-entity-picker] > [data-part-content] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /**

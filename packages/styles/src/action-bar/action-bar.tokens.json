@@ -1,4 +1,5 @@
 [
+  "--slotted-action-bar-backdrop-filter",
   "--slotted-action-bar-background",
   "--slotted-action-bar-border-color",
   "--slotted-action-bar-gap",

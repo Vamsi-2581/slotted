@@ -393,6 +393,16 @@
     border-width: 0;
     /* So the leading corners clip the row that scrolls under them. */
     overflow: hidden;
+    /* A theme that paints this surface as a translucent material blurs what moves behind it. */
+    -webkit-backdrop-filter: var(--slotted-drawer-backdrop-filter, none);
+    backdrop-filter: var(--slotted-drawer-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-drawer] > [data-part-panel] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /**

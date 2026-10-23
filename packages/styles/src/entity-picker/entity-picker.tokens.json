@@ -49,6 +49,7 @@
   "--slotted-entity-picker-background",
   "--slotted-entity-picker-border-color",
   "--slotted-entity-picker-color",
+  "--slotted-entity-picker-content-backdrop-filter",
   "--slotted-entity-picker-content-border-color",
   "--slotted-entity-picker-content-radius",
   "--slotted-entity-picker-content-shadow",

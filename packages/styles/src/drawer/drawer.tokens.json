@@ -9,6 +9,7 @@
   "--slotted-control-radius",
   "--slotted-control-transition-duration",
   "--slotted-control-transition-easing",
+  "--slotted-drawer-backdrop-filter",
   "--slotted-drawer-body-color",
   "--slotted-drawer-border-color",
   "--slotted-drawer-close-active-background",

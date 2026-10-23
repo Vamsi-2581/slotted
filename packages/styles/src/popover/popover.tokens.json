@@ -26,6 +26,7 @@
   "--slotted-line-height-sm",
   "--slotted-popover-arrow-size",
   "--slotted-popover-arrow-tip-radius",
+  "--slotted-popover-backdrop-filter",
   "--slotted-popover-border-color",
   "--slotted-popover-gap",
   "--slotted-popover-measure",

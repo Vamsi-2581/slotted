@@ -259,6 +259,16 @@
     pointer-events: auto;
     /* The panel takes focus on open and is not a tab stop of its own. */
     outline: none;
+    /* A theme that paints this surface as a translucent material blurs what moves behind it. */
+    -webkit-backdrop-filter: var(--slotted-popover-backdrop-filter, none);
+    backdrop-filter: var(--slotted-popover-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-popover] > [data-part-content] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /**

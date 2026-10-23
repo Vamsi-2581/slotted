@@ -324,6 +324,16 @@
     padding: var(--slotted-date-picker-content-padding, var(--slotted-space-5, 0.75rem));
     /* The layer above gave up the pointer; the surface takes it back. */
     pointer-events: auto;
+    /* A theme that paints this surface as a translucent material blurs what moves behind it. */
+    -webkit-backdrop-filter: var(--slotted-date-picker-content-backdrop-filter, none);
+    backdrop-filter: var(--slotted-date-picker-content-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-date-picker] [data-part-content] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /* The shortcuts take a column of their own only when there are any. */

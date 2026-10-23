@@ -291,6 +291,16 @@
      */
     overflow-wrap: anywhere;
     unicode-bidi: plaintext;
+    /* A theme that paints this surface as a translucent material blurs what moves behind it. */
+    -webkit-backdrop-filter: var(--slotted-tooltip-backdrop-filter, none);
+    backdrop-filter: var(--slotted-tooltip-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-tooltip] > [data-part-content] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /**

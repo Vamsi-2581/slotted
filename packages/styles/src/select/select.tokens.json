@@ -58,6 +58,7 @@
   "--slotted-select-background",
   "--slotted-select-border-color",
   "--slotted-select-color",
+  "--slotted-select-content-backdrop-filter",
   "--slotted-select-content-border-color",
   "--slotted-select-content-padding-block",
   "--slotted-select-content-padding-inline",

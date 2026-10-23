@@ -1,4 +1,5 @@
 import { render } from '@testing-library/react';
+import { useState } from 'react';
 import { cdp } from 'vitest/browser';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -105,5 +106,47 @@ describe('a bottom sheet at its last stop', () => {
 
     expect(root.hasAttribute('data-expanded')).toBe(true);
     expect(getComputedStyle(panel).borderTopLeftRadius).toBe('0px');
+  });
+});
+
+/**
+ * A link inside a sheet closes it and navigates in one turn. A router keeps
+ * the state it finds when it pushes, so the sheet's history token survives the
+ * push, and the sheet's own step back — taken once it has left — undid the
+ * navigation. The destination stays.
+ */
+describe('a bottom sheet closed for a navigation', () => {
+  it('keeps the destination a router pushed in the same turn', async () => {
+    const start = location.search;
+    function Host() {
+      const [open, setOpen] = useState(true);
+      return (
+        <Drawer onOpenChange={setOpen} open={open} side="bottom">
+          <DrawerPanel>
+            <DrawerHeader>
+              <DrawerTitle>Filters</DrawerTitle>
+            </DrawerHeader>
+            <DrawerBody>
+              <a
+                href="?route=b"
+                onClick={(event) => {
+                  event.preventDefault();
+                  setOpen(false);
+                  history.pushState({ ...history.state, key: 'b' }, '', '?route=b');
+                }}
+              >
+                Go to b
+              </a>
+            </DrawerBody>
+          </DrawerPanel>
+        </Drawer>
+      );
+    }
+    render(<Host />);
+    for (let index = 0; index < 10; index += 1) await frame();
+    (document.querySelector('a[href="?route=b"]') as HTMLElement).click();
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    expect(location.search).toBe('?route=b');
+    history.replaceState(null, '', location.pathname + start);
   });
 });

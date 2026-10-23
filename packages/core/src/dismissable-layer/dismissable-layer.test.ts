@@ -107,6 +107,18 @@ describe('createDismissableLayer', () => {
       expect(log.reasons).toEqual([]);
     });
 
+    it('leaves a navigation made while it stood alone: the entry is not stepped back over a push that kept its state', async () => {
+      const log = recorder();
+      const handle = createDismissableLayer(element('layer'), { ...log, back: true });
+      /* A router pushes its destination over the state it finds, token included. */
+      history.pushState({ ...history.state, key: 'b' }, '', '#/b');
+      handle.destroy();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(location.hash).toBe('#/b');
+      expect(log.reasons).toEqual([]);
+      history.replaceState(null, '', location.pathname + location.search);
+    });
+
     it('opens after a closed layer’s traversal lands, and reads no gesture in it', async () => {
       const first = recorder();
       const second = recorder();

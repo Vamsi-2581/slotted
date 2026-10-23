@@ -130,6 +130,8 @@ interface HistoryEntry {
   token: string;
   /** The state the entry was pushed over, restated when a refusal puts it back. */
   state: Record<string, unknown>;
+  /** The location the entry was pushed at, which a navigation made while the layer stood changes. */
+  href: string;
 }
 
 /** The key the layer's token stands under, beside whatever the router keeps. */
@@ -327,7 +329,7 @@ function pushEntry(doc: Document, layer: Layer) {
   /* Over the state that was there: a router keeps its own bookkeeping in it. */
   const state = { ...(isRecord(previous) ? previous : {}), [ENTRY_KEY]: token };
   history.pushState(state, '');
-  layer.entry = { token, state };
+  layer.entry = { token, state, href: doc.location.href };
 }
 
 /**
@@ -354,13 +356,20 @@ function handlePopState(doc: Document, state: DocumentStack, event: Event) {
   }
 }
 
-/** Takes a closed layer's entry away, when it is still the current one. */
+/**
+ * Takes a closed layer's entry away, when it is still the current one. A
+ * router that pushes a destination keeps the entry's state — the token with
+ * it — so the token alone says the entry is current after the push, and the
+ * `history.back()` that lands later would undo the navigation. A location
+ * that is no longer the one the entry was pushed at says the page moved on:
+ * the entry stays in the history as a step the reader's Back crosses unread.
+ */
 function releaseEntry(doc: Document, state: DocumentStack, layer: Layer) {
   const entry = layer.entry;
   layer.entry = null;
   if (entry === null) return;
   const history = doc.defaultView?.history;
-  if (!history || currentToken(doc) !== entry.token) return;
+  if (!history || currentToken(doc) !== entry.token || doc.location.href !== entry.href) return;
   state.ownPops += 1;
   void awaitTraversal(doc);
   history.back();

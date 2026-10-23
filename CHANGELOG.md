@@ -2,6 +2,29 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.13 — 2026-10-23
+
+- fix(drawer): o bottom sheet segue o dedo em gestos rápidos sem saltos
+- feat(alert, toast, dialog): marcas de tom do conjunto status-*, o mesmo mapa do inline-message (perigo é círculo com !, aviso é o losango); a caixa do ícone de alert e toast é o tamanho da marca, porque o glifo enche a caixa de ponta a ponta; checkpoint do plano das marcas de status
+- feat(status-indicator): a marca fica na primeira linha, centrada nas maiúsculas, e o rótulo é um inline-block com baseline-source: first, de modo que quebra com recuo pendurado e alinha a linha da tabela pela primeira linha; raiz td/th mantém o próprio display; parte detail nova (prop detail em React, slStatusIndicatorDetail em Angular); glifos status-* para os seis status; o pulso passa a ser pseudo-elemento da marca
+- feat(inline-message): a marca é uma caixa inline na primeira linha, centrada nas maiúsculas (0.5cap, arredondado ao pixel do dispositivo), e as linhas seguintes pendem sob o texto; marca de round(1em, 2px), entrelinha arredondada para cima a 2px e caixa aparada às maiúsculas e à linha de base (text-box); glifos status-*; R5 ganha a forma de âncora inline
+- feat(glyph): marcas de status desenhadas à mão em grades de 12, 14 e 16, cada corte em unidade inteira da própria grade; o aviso é um losango, simétrico nos dois eixos; o Glyph de React e Angular desenha as três grades e icon.css mostra a do tamanho da caixa por container query (12 abaixo de 1dppx); o harness desenha o mesmo; a regra "No triangle glyph" do briefing aponta para status-*
+- chore(progress): checkpoint após o achado 14
+- fix(styles): a camada dos popups só se move e o esmaecer passa ao conteúdo, para o backdrop-filter do conteúdo borrar em todo quadro da entrada e da saída
+- chore(progress): checkpoint dos achados do equori v3 após a fatia 5
+- feat(react): useRovingFocus, o modelo de teclado do menu para uma lista própria
+- chore(progress): checkpoint dos achados do equori v3 após a fatia 4
+- perf(drawer): o arrasto do bottom sheet, pelo corpo e pelo separador, dimensiona o painel uma vez e o move só por translate; a soltura anima a partir da posição viva com a velocidade da mão e o fling sai em um movimento contínuo no tempo que a camada declara; extent pedido uma vez, ao chegar (equori v3)
+- chore(progress): checkpoint dos achados do equori v3 após os achados 6 e 9
+- feat(theme): eixo data-slotted-corners (square, soft, standard, round) compilado do mapa corners do tema; cada entrada é uma escala de raio parcial e os tokens do tema que a leem são declarados de novo no escopo; ThemeScope ganha corners em React e Angular, o portal carrega o atributo e o tema padrão traz as quatro escalas (equori v3)
+- fix(dismissable-layer): fechar a camada para navegar mantém o destino: o passo atrás da entrada não é dado quando a localização já não é a em que a entrada foi posta (equori v3)
+- chore(progress): checkpoint dos achados do equori v3 após a fatia 3
+- fix(theme): a regra que começa pelo esquema e segue para um hook público passa a ser recusada com a forma &[data-slotted-scheme] …, porque o elemento do esquema é a raiz do @scope e nunca descendente de si; contract.ts regenerado com os tokens novos; theme-app mostra a forma que casa (equori v3)
+- fix(docs): splitter, scroll-area e action-sheet exportavam as docs fora da chave do membro e saíam com api vazia; data-grid usava dataGrid em vez de data-grid; a verificação compara as chaves com os membros do contrato; o splitter diz que não tem nome acessível por omissão (equori v3)
+- feat(styles): --slotted-<família>-backdrop-filter em menu, popover, tooltip, drawer, action-bar, select, combobox, entity-picker e date-picker; none sob prefers-reduced-transparency e forced-colors (equori v3)
+- feat(table-of-contents,chart,kbd): a coluna sticky do sumário fica --slotted-table-of-contents-sticky-inset longe do cabeçalho; actions e toolbar do Chart partilham a margem que os centra na linha do título; kbd ganha --slotted-kbd-surface, --slotted-kbd-border-color e --slotted-kbd-color (equori v3)
+- feat(section): o header preso escreve data-stuck e lê --slotted-section-header-background; o divider de ground=surface vai de ponta a ponta; a anatomia ganha a coluna Parent e a descrição fora do título avisa em desenvolvimento (equori v3)
+
 ## 0.1.0-beta.12 — 2026-10-22
 
 - perf(data-grid): o arrasto do resizer move só a guia e aplica a largura ao soltar, sempre

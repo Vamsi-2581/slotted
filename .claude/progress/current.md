@@ -36,6 +36,7 @@
 - Fatia 3: achados 4 (`a4461867`), 3 (`ce5be390`), 7 (`4fce1eca`).
 - Fatia 4: achados 6 (`f018c5ff`), 9 (`684dd781`), 8 (`acb3c96b`).
 - Fatia 5: achado 1 (`c28f5020`).
+- Achado 14 (popups, Backdrop Root): `367e14d4`.
 
 ## Estado git
 - Branch main, HEAD: ver `git log -1`. Árvore: só este ficheiro.
@@ -53,6 +54,8 @@
 - Fatia 5 (achado 1): React roving-focus 11 + entry-points; `pnpm check` verde.
 
 ## Problemas conhecidos
+- Achado 14: o flyout do side-navigation segue com o fade na camada (fora da lista do achado); o teste compartilhado `overlay-motion.test.mjs` o marca com `content: false`.
+- Árvore com alterações do usuário fora desta tarefa (glyph/icon, inline-message, status-indicator, `docs/build-briefing.md`): não commitadas aqui.
 - Achado 1: o menu não foi reescrito sobre o hook (usa `createArrowNavigation` do core, com submenu, typeahead e menubar); o hook segue as mesmas regras de anel e ganhou `reverse` para o dial que sobe do gatilho (ArrowDown no primeiro item devolve ao gatilho). Só React.
 - Achado 8: o `presence` espera a duração de transição declarada pela camada (raiz), por isso a saída por fling usa essa duração com uma curva bezier de inclinação inicial igual à velocidade da mão; sem tokens de movimento carregados a camada declara 0 e o painel desmonta de imediato (comportamento anterior). O separador só usa o movimento por translate em `side="bottom"` e `mode="overlay"`.
 - Achado 6: a correção compara `location.href` com o da entrada; uma troca de localização com a camada aberta (replace de search param) deixa a entrada no histórico, sem passo atrás.

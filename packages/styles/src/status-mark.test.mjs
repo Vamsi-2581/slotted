@@ -25,7 +25,10 @@ const source = new URL('.', import.meta.url).pathname;
  *    relative offset of half the mark less one `cap`, rounded to a whole
  *    pixel, which ties the mark to the glyphs' own pixel snapping — the
  *    fractional margin of the first form lands the mark a pixel above or
- *    below the capitals depending on where the box falls on the page;
+ *    below the capitals depending on where the box falls on the page; or
+ *    (`anchor: 'inline'`) an inline box inside the first line whose
+ *    `vertical-align` puts its centre `0.5cap` above the baseline, rounded
+ *    to the device pixel;
  * 3. the distance from the mark to the words is `--slotted-space-4` (8px), and
  *    every restatement of it — a reach, a size — keeps that step;
  * 4. nothing is drawn behind it: no radius, no border, no shadow, no padding,
@@ -60,8 +63,9 @@ const MARKS = [
   {
     family: 'inline-message',
     part: 'icon',
+    anchor: 'inline',
     size: /^var\(--_mark-size\)$/,
-    sizeValue: /^1em$/,
+    sizeValue: /^round\(nearest,\s*1em,\s*2px\)$/,
     gap: '--_column-gap',
   },
   {
@@ -186,7 +190,22 @@ function audit({ family, part, rest = /./, size, sizeValue, gap, solid, anchor =
   if (privates.get(sizeName) === undefined) findings.push(`${sizeName} is never defined`);
 
   /* 2. On the first line. */
-  if (anchor === 'baseline') {
+  if (anchor === 'inline') {
+    if (!declared('display').some((value) => /^inline-(?:flex|block)$/.test(value))) {
+      findings.push('is not an inline box on the first line');
+    }
+    const offsets = declared('vertical-align');
+    if (offsets.length === 0) findings.push('has no offset from the baseline');
+    for (const value of offsets) {
+      if (
+        !/^round\(nearest,\s*calc\(0\.5cap - var\(--_[a-z-]+\) \/ 2\),\s*(?:0\.5|1)px\)$/.test(
+          value,
+        )
+      ) {
+        findings.push(`vertical-align "${value}" does not centre the mark on the capitals`);
+      }
+    }
+  } else if (anchor === 'baseline') {
     if (!declared('align-self').includes('baseline')) findings.push('is not on the baseline');
     if (!declared('position').includes('relative')) findings.push('is not offset relatively');
     const offsets = declared('inset-block-start');

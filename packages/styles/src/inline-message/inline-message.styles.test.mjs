@@ -63,32 +63,59 @@ test('styles every part the contract declares', () => {
 });
 
 /**
- * Both columns are placed by hand. Auto-placement puts the sentence in the
- * first track whenever the message has no mark, and the sentence is then sized
- * by a track that shrinks to its content with an empty `1fr` beside it — the
- * defect a two-column grid has exactly once, on the tone that is the default.
+ * The mark is inside the first line rather than in a column beside it, and the
+ * lines after the first hang: the root is padded by the mark and its gap, and
+ * its first line indented back by the same. A wrapped sentence continues under
+ * its own first word, and every box inside takes the inherited indent back.
  */
-test('places the mark and the sentence rather than letting the grid guess', () => {
-  assert.match(rule(root), /grid-template-columns:auto minmax\(0,1fr\)/);
-  assert.match(rule(`${ui}>[data-part-icon]`), /grid-column:1/);
-  assert.match(rule(`${ui}>[data-part-text]`), /grid-column:2/);
-  assert.match(rule(`${ui}>[data-part-text]`), /grid-row:1/);
+test('hangs the lines after the first under the sentence, not under the mark', () => {
+  const declarations = rule(root);
+  assert.match(declarations, /display:block/);
+  assert.match(declarations, /--_indent:calc\(var\(--_mark-size\) \+ var\(--_column-gap\)\)/);
+  assert.match(declarations, /padding-inline-start:var\(--_indent\)/);
+  assert.match(declarations, /text-indent:calc\(-1 \* var\(--_indent\)\)/);
+  assert.doesNotMatch(normalized, /grid-/);
+  for (const part of ['icon', 'text', 'actions']) {
+    assert.match(rule(`${ui}>[data-part-${part}]`), /text-indent:0/, `${part} keeps the indent`);
+  }
+  assert.ok(
+    normalized.includes(`${root}:has([data-part-text]:empty){--_indent:0px;}`),
+    'a withdrawn mark keeps its indent',
+  );
 });
 
 /**
- * The mark is the sentence's own size on its first line (R5), drawn with the
- * rule `alert` draws its own: a square of `1em`, pushed down by half the
- * difference between one line and the mark, so it stays on the first line when
- * the sentence wraps to three. `packages/styles/src/status-mark.test.mjs` holds
- * the same rule for every family that draws one.
+ * The mark is the sentence's own size rounded to an even pixel (R5), and its
+ * centre is the centre of the capitals, `0.5cap` above the baseline, rounded
+ * to the device pixel. `packages/styles/src/status-mark.test.mjs` holds the
+ * same rule for every family that draws one.
  */
-test('keeps the mark on the message’s first line however far it runs', () => {
-  assert.match(rule(root), /--_mark-size:1em/);
+test('centres the mark on the capitals of the first line', () => {
+  assert.match(rule(root), /--_mark-size:round\(nearest,1em,2px\)/);
   const icon = rule(`${ui}>[data-part-icon]`);
-  assert.match(icon, /align-self:start/);
+  assert.match(icon, /display:inline-flex/);
+  assert.match(icon, /contain:layout/);
   assert.match(icon, /block-size:var\(--_mark-size\)/);
   assert.match(icon, /inline-size:var\(--_mark-size\)/);
-  assert.match(icon, /margin-block-start:calc\(\(1lh - var\(--_mark-size\)\) \/ 2\)/);
+  assert.match(
+    icon,
+    /vertical-align:round\(nearest,calc\(0\.5cap - var\(--_mark-size\) \/ 2\),0\.5px\)/,
+  );
+});
+
+/**
+ * The leading is rounded up to an even pixel, so every line and the mark on it
+ * start on a whole one; the box is trimmed to the capitals and the baseline,
+ * so whatever placed the message measures its distance to the type.
+ */
+test('rounds its leading to whole pixels and trims its box to the type', () => {
+  const declarations = rule(root);
+  assert.match(
+    declarations,
+    /line-height:round\(up,1em \* var\(--slotted-inline-message-line-height/,
+  );
+  assert.match(declarations, /,2px\)/);
+  assert.match(declarations, /text-box:trim-both cap alphabetic/);
 });
 
 /**
@@ -139,7 +166,7 @@ test('withdraws the mark for the tone that has none', () => {
 test('draws one neutral bullet for every tone when the mark is a dot', () => {
   assert.deepEqual(contract.axes.mark, ['glyph', 'dot', 'none']);
   const dot = rule(`${root}[data-mark='dot']`);
-  assert.match(dot, /--_dot-size:calc\(var\(--_mark-size\) \/ 3\)/);
+  assert.match(dot, /--_dot-size:round\(nearest,var\(--_mark-size\) \/ 3,2px\)/);
 
   const bullet = rule(
     `${ui}[data-mark='dot']>[data-part-icon]:has(>[data-ui-icon]>[data-glyph='dot'])`,
@@ -180,6 +207,10 @@ test('gives the wait a round ring even when the mark is a dot', () => {
  */
 test('draws nothing at all when there is nothing to say', () => {
   assert.match(rule(`${root}[data-reserve]`), /min-block-size:1lh/);
+  assert.match(
+    normalized,
+    /@supports \(text-box:trim-both cap alphabetic\)\{[^}]*\[data-reserve\]\{min-block-size:1cap;\}/,
+  );
   assert.ok(normalized.includes(`${ui}:has([data-part-text]:empty)>[data-part-icon]`));
   assert.ok(normalized.includes(`${ui}:has([data-part-text]:empty)>[data-part-prefix]`));
 });

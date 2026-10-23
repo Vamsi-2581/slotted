@@ -12,7 +12,7 @@ export type InlineMessageSize = 'sm' | 'md';
 
 /**
  * Which mark the message draws. `glyph` is the tone's own silhouette — the
- * circled information, check, triangle and circled exclamation. `dot` is a
+ * circled information, check, diamond and circled exclamation. `dot` is a
  * neutral bullet in the tone's ink, the same shape for every tone including
  * the help tone that draws no silhouette at all, so a column of messages under
  * one field starts on one left edge. `none` draws nothing, and the tone is

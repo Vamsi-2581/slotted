@@ -11,14 +11,18 @@
    * message with nothing around it, so it inherits the rhythm of whatever
    * placed it — a field, a `Stack`, a table cell.
    *
-   * Two facts the layout rests on:
+   * Three facts the layout rests on:
    *
-   * - The mark is one line box tall rather than centred on the whole message,
-   *   so it stays on the first line when the sentence wraps to three.
+   * - The mark is inside the first line, not in a column beside it: an
+   *   `inline-flex` box before the sentence, so it is on that line at every
+   *   wrap, font, zoom and baseline a parent aligns to.
+   * - The lines after the first hang: the root is padded by the mark and its
+   *   gap and the first line indented back by the same, so a sentence that
+   *   wraps continues under its own first word, never under the mark.
    * - The severity word is out of flow. It is a real element with real text,
    *   clipped by the WCAG 2.2 technique C7 rule set and placed first in the
    *   DOM so it is read first; `position: absolute` is what keeps it from
-   *   taking a grid cell or adding a line.
+   *   adding a line.
    */
   [data-ui-inline-message][data-part-root] {
     /**
@@ -39,13 +43,15 @@
      * line, and this box holds a sentence.
      *
      * The mark is the sentence's own size (R5), the rule `alert` draws its
-     * mark with: `1em` resolves against this box, so the mark steps with the
-     * size and the density through the type rather than through a second
-     * scale. A fourteen-pixel glyph beside twelve-pixel type was two pixels
-     * taller than the capitals it stood next to.
+     * mark with, rounded to an even pixel so its centre lands on a whole one:
+     * 12 pixels beside 12-pixel type, 14 beside 13. The status glyphs are
+     * drawn on those two grids (`@slotted/core/glyph`), so every cut of the
+     * symbol is on a device pixel. A fourteen-pixel Lucide glyph reduced to
+     * twelve-pixel type was two pixels taller than the capitals it stood
+     * next to; a drawing made for the size has no such reduction.
      */
     --_font-size: var(--slotted-control-font-size-sm, 12px);
-    --_mark-size: 1em;
+    --_mark-size: round(nearest, 1em, 2px);
     /**
      * The distance from the mark to its own sentence: eight pixels, the step
      * `alert` uses (R5). It does not step with the size — the mark already
@@ -53,27 +59,43 @@
      * the two apart twice.
      */
     --_column-gap: var(--slotted-inline-message-column-gap, var(--slotted-space-4, 0.5rem));
+    /* What the first line gives back to the mark. Zero wherever no mark is drawn. */
+    --_indent: calc(var(--_mark-size) + var(--_column-gap));
 
     color: var(--_text);
-    /**
-     * Two columns, both placed explicitly. Auto-placement would drop the
-     * sentence into the first column whenever the message has no mark, and the
-     * sentence would then be sized by a track that shrinks to its content
-     * with an empty `1fr` beside it.
-     */
-    display: grid;
+    display: block;
     font-family: var(
       --slotted-inline-message-font-family,
       var(--slotted-control-font-family, sans-serif)
     );
     font-size: var(--_font-size);
-    grid-template-columns: auto minmax(0, 1fr);
-    line-height: var(--slotted-inline-message-line-height, var(--slotted-line-height-md, 1.5));
+    /**
+     * The leading, rounded up to an even pixel: 13 × 1.5 is 19.5 and lands
+     * every line, and the mark centred on it, across two device pixels. 20
+     * and 18 leave a whole pixel of half-leading on each side.
+     */
+    line-height: round(
+      up,
+      1em * var(--slotted-inline-message-line-height, var(--slotted-line-height-md, 1.5)),
+      2px
+    );
     /* A `p` arrives with the user agent's block margins; the distance between a
        control and its message belongs to whatever placed the two. */
     margin: 0;
+    /* A sentence longer than this is two sentences. */
+    max-inline-size: 68ch;
+    padding-inline-start: var(--_indent);
     /* The containing block for the clipped severity word. */
     position: relative;
+    text-indent: calc(-1 * var(--_indent));
+    /**
+     * The box runs from the capitals of the first line to the baseline of the
+     * last, so whatever placed the message measures its distance to the type
+     * rather than to the half-leading around it: the field's six-pixel row gap
+     * is six pixels from the control to the capitals.
+     */
+    text-box: trim-both cap alphabetic;
+    text-wrap: pretty;
   }
 
   /* ── Tone: what the message is about ──────────────────────────────────
@@ -132,10 +154,11 @@
   }
 
   /**
-   * The line held open for a message that has not arrived. `1lh` is one line
-   * box of the family's own leading, so it follows the size step and the
-   * density rather than a number — and an application renders the message
-   * unconditionally without the field below it moving when the error appears.
+   * The line held open for a message that has not arrived: one line of the
+   * family's own type, so it follows the size step and the density rather than
+   * a number — and an application renders the message unconditionally without
+   * the field below it moving when the error appears. Where the box is trimmed
+   * to the capitals, one line of it is `1cap` tall, and so is the reserve.
    *
    * Material UI reserves the same line by asking the consumer to pass a space
    * character as the message. A space is content: it defeats `:empty` below, so
@@ -143,6 +166,12 @@
    */
   [data-ui-inline-message][data-part-root][data-reserve] {
     min-block-size: 1lh;
+  }
+
+  @supports (text-box: trim-both cap alphabetic) {
+    [data-ui-inline-message][data-part-root][data-reserve] {
+      min-block-size: 1cap;
+    }
   }
 
   /* ── The severity, in words ───────────────────────────────────────────
@@ -174,33 +203,41 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * A square the sentence's own size, on its first line (R5), and the rule
-   * `alert` draws its mark with. The box is exactly the glyph — no line box
-   * around it, no ground behind it — pushed down from the start of the row by
-   * half the difference between one line and the mark. `1lh` and `1em` both
-   * resolve against the root, so the mark's centre is the first line's centre
-   * at every size, every density and every type step without a number saying
-   * how, and it stays there when the sentence wraps to three.
+   * A square the sentence's own size, on its first line (R5). Its centre is
+   * the centre of the capitals, `0.5cap` above the baseline — the axis
+   * `[data-ui-icon]` aligns every icon on — so the mark sits on the words
+   * rather than on the line box around them, and stays there when the
+   * sentence wraps to three. The offset is rounded to the device pixel: half
+   * a pixel at 2×, a whole one below 1.5×.
    *
    * The glyph is the binding's `Glyph` in an `icon` box, chosen from the tone
-   * and stroked in `currentcolor`; the slot sizes it through the icon token.
-   * A mark the page supplies instead takes the same box and its place on the
-   * first line, centred in it.
+   * and filled in `currentcolor`; the slot sizes it through the icon token.
+   * A mark the page supplies instead takes the same box, centred in it.
+   *
+   * `text-indent` is inherited, and the root's is negative: every box the
+   * message holds takes it back.
    */
   [data-ui-inline-message] > [data-part-icon] {
     --slotted-icon-size: var(--_mark-size);
 
     align-items: center;
-    align-self: start;
     block-size: var(--_mark-size);
     box-sizing: border-box;
-    display: flex;
-    grid-column: 1;
-    grid-row: 1;
+    /* The box's baseline is its own bottom edge, never the baseline of what it
+       holds: a dot glyph shorter than the box lowered the box by the difference. */
+    contain: layout;
+    display: inline-flex;
     inline-size: var(--_mark-size);
     justify-content: center;
-    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
     margin-inline-end: var(--_column-gap);
+    text-indent: 0;
+    vertical-align: round(nearest, calc(0.5cap - var(--_mark-size) / 2), 0.5px);
+  }
+
+  @media (max-resolution: 1.49dppx) {
+    [data-ui-inline-message] > [data-part-icon] {
+      vertical-align: round(nearest, calc(0.5cap - var(--_mark-size) / 2), 1px);
+    }
   }
 
   /**
@@ -213,8 +250,8 @@
    * changes between them. `field` asked for it once and no longer does (F1):
    * help under a field draws no mark, and an error draws the tone's own.
    *
-   * The disc is a third of the mark — 4 pixels under 12-pixel type — so it
-   * steps with the size step and with the density like every other mark. The
+   * The disc is a third of the mark rounded to an even pixel — 4 pixels at
+   * both steps — so its centre is on a whole pixel like every other mark. The
    * slot is the disc's own width and the glyph's box is twice that, because
    * the `dot` glyph draws a circle half the width of its own viewBox: at twice
    * the slot the disc fills the slot exactly, the box overhanging it equally
@@ -226,7 +263,13 @@
    * measured for.
    */
   [data-ui-inline-message][data-part-root][data-mark='dot'] {
-    --_dot-size: calc(var(--_mark-size) / 3);
+    --_dot-size: round(nearest, var(--_mark-size) / 3, 2px);
+  }
+
+  [data-ui-inline-message][data-part-root][data-mark='dot']:has(
+      > [data-part-icon] > [data-ui-icon] > [data-glyph='dot']
+    ) {
+    --_indent: calc(var(--_dot-size) + var(--_column-gap));
   }
 
   [data-ui-inline-message][data-mark='dot']
@@ -252,6 +295,22 @@
   }
 
   /**
+   * A withdrawn mark gives its indent back, under every condition that
+   * withdraws it: none drawn, help's empty box, `mark='none'`, and nothing to
+   * say.
+   */
+  [data-ui-inline-message][data-part-root]:not(:has(> [data-part-icon])),
+  [data-ui-inline-message][data-part-root][data-tone='secondary']:not([data-loading]):not(
+      [data-mark='dot']
+    ):has(> [data-part-icon]:empty),
+  [data-ui-inline-message][data-part-root][data-mark='none']:not([data-loading]):has(
+      > [data-part-icon]:empty
+    ),
+  [data-ui-inline-message][data-part-root]:has([data-part-text]:empty) {
+    --_indent: 0px;
+  }
+
+  /**
    * ── No mark at all ────────────────────────────────────────────────────
    *
    * `mark='none'` is the third value, and the one a form asks for. A
@@ -274,9 +333,8 @@
   /* ── The sentence ─────────────────────────────────────────────────────
    *
    * Written by the family around the consumer's content rather than by the
-   * consumer. Two things follow from that, and both are why the part exists:
-   * a message holding a link is one grid item instead of two, and `:empty`
-   * below is an exact question in both bindings.
+   * consumer, so `:empty` below is an exact question in both bindings. It is
+   * inline: a link inside it wraps with the words around it.
    *
    * `overflow-wrap: anywhere` breaks the one string a field message is likeliest
    * to carry that no language can break — a token, a container digest, a host
@@ -284,15 +342,13 @@
    * DOM, in the accessibility tree, and findable by a page search.
    */
   [data-ui-inline-message] > [data-part-text] {
-    grid-column: 2;
-    grid-row: 1;
-    min-inline-size: 0;
     overflow-wrap: anywhere;
+    text-indent: 0;
   }
 
   /**
    * The answers the message offers — "R$ 2,00 · R$ 15,00" under an amount that
-   * could be either. They wrap under the sentence, in its column, at the gap
+   * could be either. They wrap under the sentence, on its indent, at the gap
    * the family puts between its mark and its sentence; the root is then a
    * group named by the sentence, so a reader hears what the buttons answer.
    */
@@ -301,13 +357,11 @@
     display: flex;
     flex-wrap: wrap;
     gap: var(--slotted-inline-message-actions-gap, var(--_column-gap));
-    grid-column: 2;
-    grid-row: 2;
     margin-block-start: var(
       --slotted-inline-message-actions-offset,
       var(--slotted-space-2, 0.25rem)
     );
-    min-inline-size: 0;
+    text-indent: 0;
   }
 
   /**
@@ -342,13 +396,11 @@
        directions. */
     border-inline-end-color: transparent;
     border-radius: var(--slotted-radius-full, 9999px);
-    display: block;
-    /* Restated for the bullet: a ring drawn in a column sized for a 4-pixel
+    /* Restated for the bullet: a ring drawn in a box sized for a 4-pixel
        dot is an ellipse. The text moves by the difference for as long as the
        message is waiting, which is the cost of a bullet that starts at the
        message's own left edge. */
     inline-size: var(--_mark-size);
-    margin-block-start: calc((1lh - var(--_mark-size)) / 2);
   }
 
   /* The page's own artwork withdraws for the ring rather than sitting inside

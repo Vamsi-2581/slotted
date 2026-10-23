@@ -38,12 +38,12 @@ export function InlineMessageActions({ children, ...nativeProps }: InlineMessage
  * holds the map. Help is not a severity and draws none.
  */
 const TONE_GLYPH: Record<InlineMessageTone, GlyphName | null> = {
-  accent: 'circle-info',
+  accent: 'status-info',
   secondary: null,
-  info: 'circle-info',
-  success: 'circle-check',
-  warning: 'triangle-alert',
-  danger: 'circle-alert',
+  info: 'status-info',
+  success: 'status-success',
+  warning: 'status-warning',
+  danger: 'status-danger',
 };
 
 /**

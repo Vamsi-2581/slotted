@@ -26,7 +26,7 @@ export const PORTAL_ROOT_ATTRIBUTE = 'data-slotted-portal';
 
 /**
  * What a layer inherits from the region that opened it. `dir` is the platform's;
- * the other three are this library's theme axes, and every one of them is
+ * the other four are this library's theme axes, and every one of them is
  * inherited in CSS, which is exactly why moving the node loses them.
  */
 export const MIRRORED_ATTRIBUTES = [
@@ -34,6 +34,7 @@ export const MIRRORED_ATTRIBUTES = [
   'data-slotted-theme',
   'data-slotted-scheme',
   'data-slotted-density',
+  'data-slotted-corners',
 ] as const;
 
 /**

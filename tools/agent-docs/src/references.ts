@@ -138,7 +138,7 @@ function constArray(source: string, name: string): string[] {
  * exports of `@slotted/theme` and its conformance module, its command, the
  * subpaths of both packages, the keys of a theme definition, the attributes
  * that select a theme, the seed properties, the cascade layers, and the scheme
- * and density values.
+ * density and corner values.
  */
 function addThemeApi(root: string, add: (name: string, kind: string) => void): void {
   const theme = join(root, 'packages/theme');
@@ -181,6 +181,7 @@ function addThemeApi(root: string, add: (name: string, kind: string) => void): v
     ...constArray(read('src/recipe.ts'), 'SCHEMES'),
     ...(/'system'/.test(read('src/render.ts')) ? ['system'] : []),
     ...constArray(read('src/define.ts'), 'DENSITIES'),
+    ...constArray(read('src/define.ts'), 'CORNERS'),
   ])
     add(value, 'theme-axis-value');
 }

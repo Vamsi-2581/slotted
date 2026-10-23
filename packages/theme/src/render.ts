@@ -1,4 +1,11 @@
-import { assertTheme, DENSITIES, type FontFaceDefinition, type Theme } from './define';
+import {
+  assertTheme,
+  CORNERS,
+  DENSITIES,
+  type Corner,
+  type FontFaceDefinition,
+  type Theme,
+} from './define';
 import { contract } from './generated/contract';
 import { LAYER_ORDER_STATEMENT } from './layer-order';
 import { derivationCss, SCHEMES, SEED_NAMES, type Scheme } from './recipe';
@@ -54,6 +61,31 @@ function densitySelectors(theme: string, density: string): string[] {
   const t = themeSelector(theme);
   const d = `[data-slotted-density="${density}"]`;
   return [`${t}${d}`, `${t} ${d}`];
+}
+
+function cornerSelectors(theme: string, corner: string): string[] {
+  const t = themeSelector(theme);
+  const c = `[data-slotted-corners="${corner}"]`;
+  return [`${t}${c}`, `${t} ${c}`];
+}
+
+/**
+ * What a corner scope declares: the radius steps it writes, and the theme's own
+ * tokens that read the scale through `var()`. A custom property holds the value
+ * it had where it was declared, so `--slotted-control-radius` set at the theme
+ * root would stay at the root's radius inside the scope unless it is declared
+ * again there. `standard` is the base scale unless the theme writes it.
+ */
+function cornerValues(theme: Theme, corner: Corner): Record<string, string> {
+  const own = theme.corners?.[corner];
+  if (own === undefined && corner !== 'standard') return {};
+  const declared = { ...(theme.base ?? {}), ...(theme.components ?? {}) } as Record<string, string>;
+  const values: Record<string, string> = {};
+  for (const [name, value] of Object.entries(declared)) {
+    if (/^--slotted-radius-(xs|sm|md|lg)$/.test(name) || value.includes('var(--slotted-radius-'))
+      values[name] = value;
+  }
+  return { ...values, ...(own ?? {}) };
 }
 
 const propertyRule = (seed: string) =>
@@ -143,6 +175,12 @@ export function renderTheme(theme: Theme): string {
     blocks.push(
       block(densitySelectors(name, density), declarations(theme.densities?.[density] ?? {})),
     );
+  }
+
+  for (const corner of CORNERS) {
+    const values = cornerValues(theme, corner);
+    if (Object.keys(values).length > 0)
+      blocks.push(block(cornerSelectors(name, corner), declarations(values)));
   }
 
   /* A coarse pointer cannot hit what a mouse can: controls grow to the comfortable target. */

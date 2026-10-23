@@ -17,6 +17,7 @@ Take the first row that reaches the change.
 | The brand colour, or the colour of one intent                                   | a seed: `--slotted-seed-accent` or another name of `SEED_NAMES` | the theme's `seeds`, or a scope                                                                              |
 | Light, dark, high contrast, or the system's preference                          | the scheme: `light`, `dark`, `high-contrast`, `system`          | `data-slotted-scheme`, or the scheme of {{themeScope}}                                                       |
 | How tight controls and rows are                                                 | the density: `comfortable`, `compact`, `dense`                  | `data-slotted-density`, or the density of {{themeScope}}                                                     |
+| How round corners are, chosen by the reader                                     | the corners: `square`, `soft`, `standard`, `round`              | `data-slotted-corners`, or the corners of {{themeScope}}; the theme's `corners` holds each radius scale      |
 | How deep a scheme's grounds sit, or how far each layer steps from the one below | the recipe: one derivation per token per scheme                 | the theme's `recipe`, spread from the base theme's, as below; `themeConformance` still checks every contrast |
 | Spacing, corners, type, lines, shadows or motion                                | a token of a group in `{{docsDir}}/tokens.md`                   | the theme's `base`; `schemes` for a value per scheme; `densities` per density                                |
 | One family's look                                                               | a token the family's page lists under Tokens                    | the theme's `components`                                                                                     |
@@ -54,9 +55,10 @@ has.
 
 ## 3. One region
 
-1. A scheme or a density for a subtree: {{themeScope}}, which carries both to
-   an overlay opened inside it, or the `data-slotted-scheme` and
-   `data-slotted-density` attributes on the subtree's root.
+1. A scheme, a density or corners for a subtree: {{themeScope}}, which carries
+   them to an overlay opened inside it, or the `data-slotted-scheme`,
+   `data-slotted-density` and `data-slotted-corners` attributes on the
+   subtree's root.
 2. A seed for a subtree: the seed property on an element that also carries
    `data-slotted-seeds`, or the seeds of {{themeScope}}. Every colour under it
    derives again from that seed.

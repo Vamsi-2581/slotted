@@ -998,6 +998,46 @@
     --slotted-avatar-size-xl: 48px;
   }
 
+  [data-slotted-theme="proof"][data-slotted-corners="square"],
+  [data-slotted-theme="proof"] [data-slotted-corners="square"] {
+    --slotted-radius-xs: 0px;
+    --slotted-radius-sm: 0px;
+    --slotted-radius-md: 0px;
+    --slotted-radius-lg: 0px;
+    --slotted-control-radius: var(--slotted-radius-sm);
+    --slotted-card-radius: var(--slotted-radius-lg);
+  }
+
+  [data-slotted-theme="proof"][data-slotted-corners="soft"],
+  [data-slotted-theme="proof"] [data-slotted-corners="soft"] {
+    --slotted-radius-xs: 1px;
+    --slotted-radius-sm: 2px;
+    --slotted-radius-md: 3px;
+    --slotted-radius-lg: 4px;
+    --slotted-control-radius: var(--slotted-radius-sm);
+    --slotted-card-radius: var(--slotted-radius-lg);
+  }
+
+  [data-slotted-theme="proof"][data-slotted-corners="standard"],
+  [data-slotted-theme="proof"] [data-slotted-corners="standard"] {
+    --slotted-radius-xs: 2px;
+    --slotted-radius-sm: 4px;
+    --slotted-radius-md: 6px;
+    --slotted-radius-lg: 8px;
+    --slotted-control-radius: var(--slotted-radius-sm);
+    --slotted-card-radius: var(--slotted-radius-lg);
+  }
+
+  [data-slotted-theme="proof"][data-slotted-corners="round"],
+  [data-slotted-theme="proof"] [data-slotted-corners="round"] {
+    --slotted-radius-xs: 4px;
+    --slotted-radius-sm: 8px;
+    --slotted-radius-md: 12px;
+    --slotted-radius-lg: 16px;
+    --slotted-control-radius: var(--slotted-radius-sm);
+    --slotted-card-radius: var(--slotted-radius-lg);
+  }
+
   @media (pointer: coarse) {
     [data-slotted-theme="proof"][data-slotted-density="comfortable"],
     [data-slotted-theme="proof"] [data-slotted-density="comfortable"] {

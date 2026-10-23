@@ -26,8 +26,15 @@ export type {
 export { checkScheme, CONTRAST_REQUIREMENT, seedGrid } from './recipe-checks';
 export { recipes } from './recipes';
 export type { TokenContract, TokenDefinition } from './contract-types';
-export { DENSITIES, defineTheme, extendTheme, flattenTheme } from './define';
-export type { Density, FontFaceDefinition, Theme, ThemeDefinition, ThemeOverrides } from './define';
+export { CORNERS, DENSITIES, defineTheme, extendTheme, flattenTheme } from './define';
+export type {
+  Corner,
+  Density,
+  FontFaceDefinition,
+  Theme,
+  ThemeDefinition,
+  ThemeOverrides,
+} from './define';
 export { COMPONENT_TOKENS, contract } from './generated/contract';
 export type {
   BaseToken,

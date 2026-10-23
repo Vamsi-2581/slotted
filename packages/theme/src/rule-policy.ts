@@ -30,6 +30,7 @@ const ATTRIBUTES = new Set<string>([
   'data-slotted-theme',
   'data-slotted-scheme',
   'data-slotted-density',
+  'data-slotted-corners',
   'data-slotted-seeds',
 ]);
 const TOKENS = new Set<string>([
@@ -44,7 +45,12 @@ const TOKENS = new Set<string>([
  * theme's own scheme, which `[data-slotted-scheme] …` cannot reach, since that
  * asks for a descendant of the root.
  */
-const ROOT_AXES = new Set(['data-slotted-scheme', 'data-slotted-density', 'data-slotted-seeds']);
+const ROOT_AXES = new Set([
+  'data-slotted-scheme',
+  'data-slotted-density',
+  'data-slotted-corners',
+  'data-slotted-seeds',
+]);
 /** Pseudo-classes that select by place in the document instead of by a public hook. */
 const ROOTS = new Set(['root', 'scope', 'host', 'host-context']);
 /** Pseudo-classes whose argument is a selector list matching the same element. */

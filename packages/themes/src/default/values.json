@@ -348,6 +348,26 @@
       "--slotted-avatar-size-xl": "48px"
     }
   },
+  "corners": {
+    "square": {
+      "--slotted-radius-xs": "0px",
+      "--slotted-radius-sm": "0px",
+      "--slotted-radius-md": "0px",
+      "--slotted-radius-lg": "0px"
+    },
+    "soft": {
+      "--slotted-radius-xs": "1px",
+      "--slotted-radius-sm": "2px",
+      "--slotted-radius-md": "3px",
+      "--slotted-radius-lg": "4px"
+    },
+    "round": {
+      "--slotted-radius-xs": "4px",
+      "--slotted-radius-sm": "8px",
+      "--slotted-radius-md": "12px",
+      "--slotted-radius-lg": "16px"
+    }
+  },
   "reducedMotion": {
     "--slotted-duration-instant": "1ms",
     "--slotted-duration-short": "1ms",

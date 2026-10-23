@@ -151,7 +151,7 @@ describe('createPortalRoot', () => {
   describe('the theme of the region the layer came from', () => {
     it('mirrors every declared attribute onto the layer element', () => {
       document.body.innerHTML = `
-        <div dir="rtl" data-slotted-scheme="dark" data-slotted-density="dense">
+        <div dir="rtl" data-slotted-scheme="dark" data-slotted-density="dense" data-slotted-corners="round">
           <button id="trigger">open</button>
         </div>`;
       const trigger = document.getElementById('trigger') as HTMLElement;
@@ -161,6 +161,7 @@ describe('createPortalRoot', () => {
       expect(portal.container?.getAttribute('dir')).toBe('rtl');
       expect(portal.container?.getAttribute('data-slotted-scheme')).toBe('dark');
       expect(portal.container?.getAttribute('data-slotted-density')).toBe('dense');
+      expect(portal.container?.getAttribute('data-slotted-corners')).toBe('round');
       portal.release();
     });
 

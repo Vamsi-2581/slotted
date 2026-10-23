@@ -1,5 +1,6 @@
 export { ThemeScope } from './theme-scope';
 export type {
+  ThemeCornersName,
   ThemeDensityName,
   ThemeSchemeName,
   ThemeScopeProps,

@@ -11,6 +11,7 @@ describe('ThemeScope', () => {
         theme="default"
         scheme="system"
         density="compact"
+        corners="round"
         seeds={{ accent: '#e11d48' }}
       >
         content
@@ -21,6 +22,7 @@ describe('ThemeScope', () => {
     expect(scope.getAttribute('data-slotted-theme')).toBe('default');
     expect(scope.getAttribute('data-slotted-scheme')).toBe('system');
     expect(scope.getAttribute('data-slotted-density')).toBe('compact');
+    expect(scope.getAttribute('data-slotted-corners')).toBe('round');
     expect(scope.hasAttribute('data-slotted-seeds')).toBe(true);
     expect(scope.style.getPropertyValue('--slotted-seed-accent')).toBe('#e11d48');
   });

@@ -274,3 +274,49 @@ describe('the material backdrop', () => {
     expect(block.match(/--slotted-material-backdrop: none;/g)?.length).toBe(5);
   });
 });
+
+/**
+ * An application lets the reader choose how round the corners are, as it
+ * chooses density: a scope per corner, each a partial radius scale, and the
+ * theme's own tokens that read the scale declared again inside it.
+ */
+describe('corners', () => {
+  const scope = (corner: string) =>
+    new RegExp(
+      `\\[data-slotted-theme="test"\\]\\[data-slotted-corners="${corner}"\\],\\n\\s*\\[data-slotted-theme="test"\\] \\[data-slotted-corners="${corner}"\\] \\{([^}]*)\\}`,
+    ).exec(css)?.[1];
+
+  it('writes a scope per corner the theme gives, and the standard one from the base scale', () => {
+    expect(scope('round')).toContain('--slotted-radius-lg: 16px;');
+    expect(scope('square')).toContain('--slotted-radius-lg: 0px;');
+    expect(scope('standard')).toContain('--slotted-radius-lg: 8px;');
+    expect(scope('standard')).toContain('--slotted-radius-xs: 2px;');
+  });
+
+  it('declares again what reads the scale, so it follows inside the scope', () => {
+    expect(scope('round')).toContain('--slotted-control-radius: var(--slotted-radius-sm);');
+  });
+
+  it('never writes the full radius', () => {
+    for (const corner of ['square', 'soft', 'standard', 'round'])
+      expect(scope(corner)).not.toContain('--slotted-radius-full');
+  });
+
+  it('refuses a corner that writes anything but a step of the scale', () => {
+    const define = (corners: unknown) =>
+      defineTheme({
+        ...values,
+        name: 'bad',
+        seeds: theme.seeds,
+        recipe: recipes.standard,
+        corners: corners as never,
+      });
+    expect(() => define({ round: { '--slotted-radius-full': '4px' } })).toThrow(
+      /corners round writes --slotted-radius-full, which is not a step of the radius scale/,
+    );
+    expect(() => define({ pointy: {} })).toThrow(/corners contains pointy/);
+    expect(() => define({ round: { '--slotted-radius-lg': '4px; color: red' } })).toThrow(
+      /corners round --slotted-radius-lg/,
+    );
+  });
+});

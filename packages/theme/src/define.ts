@@ -24,6 +24,18 @@ import { hasUnsafeStructuralChar, validateTheme, type FlatTheme } from './valida
 export const DENSITIES = ['comfortable', 'compact', 'dense'] as const;
 export type Density = (typeof DENSITIES)[number];
 
+/** How round the corners are, chosen at runtime like the density. */
+export const CORNERS = ['square', 'soft', 'standard', 'round'] as const;
+export type Corner = (typeof CORNERS)[number];
+/** The radius scale a corner entry may write; `--slotted-radius-full` is never changed by it. */
+export const CORNER_TOKENS = [
+  '--slotted-radius-xs',
+  '--slotted-radius-sm',
+  '--slotted-radius-md',
+  '--slotted-radius-lg',
+] as const;
+export type CornerToken = (typeof CORNER_TOKENS)[number];
+
 type Values<T extends string> = Readonly<Partial<Record<T, string>>>;
 
 export interface FontFaceDefinition {
@@ -42,6 +54,8 @@ export interface ThemeDefinition {
   readonly base?: Values<BaseToken>;
   readonly schemes?: Readonly<Partial<Record<Scheme, Values<SchemeToken>>>>;
   readonly densities?: Readonly<Partial<Record<Density, Values<DensityToken>>>>;
+  /** A partial radius scale per corner; `standard` is the base scale unless it is written here. */
+  readonly corners?: Readonly<Partial<Record<Corner, Values<CornerToken>>>>;
   readonly reducedMotion?: Values<MotionToken>;
   readonly components?: Values<ComponentToken>;
   readonly fonts?: readonly FontFaceDefinition[];
@@ -128,6 +142,22 @@ function themeErrors(definition: ThemeDefinition): string[] {
       errors.push(
         `components ${name} is ${JSON.stringify(value)}, which contains an unquoted ;, { or }, or leaves a string, a comment or an escape open`,
       );
+    }
+  }
+  const cornerTokens = new Set<string>(CORNER_TOKENS);
+  for (const [corner, values] of Object.entries(definition.corners ?? {})) {
+    if (!(CORNERS as readonly string[]).includes(corner)) {
+      errors.push(`corners contains ${corner}, which is none of ${CORNERS.join(', ')}`);
+      continue;
+    }
+    for (const [name, value] of Object.entries(values ?? {})) {
+      if (!cornerTokens.has(name)) {
+        errors.push(`corners ${corner} writes ${name}, which is not a step of the radius scale`);
+      } else if (typeof value !== 'string' || hasUnsafeStructuralChar(value)) {
+        errors.push(
+          `corners ${corner} ${name} is ${JSON.stringify(value)}, which is not a length or contains an unquoted ;, { or }, or leaves a string, a comment or an escape open`,
+        );
+      }
     }
   }
   const schemeTokens = new Set(
@@ -224,7 +254,7 @@ function mergeNested<K extends string, V extends object>(
 
 /**
  * A theme built on another: `base`, `reducedMotion` and `components` merged
- * key by key; `schemes` and `densities` merged per scheme/density; `seeds`
+ * key by key; `schemes`, `densities` and `corners` merged per scheme/density/corner; `seeds`
  * merged per seed name; `recipe` replaced whole when `overrides` carries one;
  * `fonts` and `rules` appended after `base`'s own.
  */
@@ -242,6 +272,7 @@ export function extendTheme(
     base: { ...(parent.base ?? {}), ...(overrides.base ?? {}) },
     schemes: mergeNested(parent.schemes, overrides.schemes),
     densities: mergeNested(parent.densities, overrides.densities),
+    corners: mergeNested(parent.corners, overrides.corners),
     reducedMotion: { ...(parent.reducedMotion ?? {}), ...(overrides.reducedMotion ?? {}) },
     components: { ...(parent.components ?? {}), ...(overrides.components ?? {}) },
     fonts: [...(parent.fonts ?? []), ...(overrides.fonts ?? [])],

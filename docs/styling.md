@@ -163,8 +163,9 @@ element sees:
 
 `ThemeScope` (`@slotted/react/theme`) and the `slThemeScope` directive
 (`@slotted/angular/theme`) write the same attributes on one element: `theme`,
-`scheme` and `density` become `data-slotted-theme`, `data-slotted-scheme` and
-`data-slotted-density`, and `seeds` becomes the seed custom properties plus
+`scheme`, `density` and `corners` become `data-slotted-theme`,
+`data-slotted-scheme`, `data-slotted-density` and `data-slotted-corners`, and
+`seeds` becomes the seed custom properties plus
 `data-slotted-seeds`. An overlay opened inside the element carries all of them
 to the end of the body.
 
@@ -284,11 +285,11 @@ A theme rule selects by these hooks:
   there (`data-toggle-placement`), from the hook index
   `packages/theme/src/generated/hooks.json`;
 - the theme axes: `data-slotted-theme`, `data-slotted-scheme`,
-  `data-slotted-density` and `data-slotted-seeds`;
+  `data-slotted-density`, `data-slotted-corners` and `data-slotted-seeds`;
 - `&`, inside a style rule;
 - `&` outside a style rule, which is the theme's root, as the first compound
   of a selector that goes on to a hook, carrying only `data-slotted-scheme`,
-  `data-slotted-density` or `data-slotted-seeds`:
+  `data-slotted-density`, `data-slotted-corners` or `data-slotted-seeds`:
   `&[data-slotted-scheme='high-contrast'] [data-ui='text-field']`. The root
   holds the theme's own scheme, and `[data-slotted-scheme='high-contrast'] …`
   asks for a descendant of the root, so only this form reaches a theme's own

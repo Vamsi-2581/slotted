@@ -33,21 +33,25 @@
 ## Concluído
 - Fatia 1: achados 5, 11, 12 (`c07fc36c`).
 - Fatia 2: achados 10, 2, 13 (`14ad85e1`).
-- Fatia 3: achados 4 (`a4461867`), 3 (`ce5be390`), 7 (ver `git log -1`).
+- Fatia 3: achados 4 (`a4461867`), 3 (`ce5be390`), 7 (`4fce1eca`).
+- Fatia 4 em parte: achados 6 (`f018c5ff`), 9 (`684dd781`).
 
 ## Estado git
 - Branch main, HEAD: ver `git log -1`. Árvore: só este ficheiro.
 
 ## Em curso
-- Fatia 4, achado 9.
+- Fatia 4, achado 8.
 
 ## Testes
 - Fatia 1: core sticky-header 48/48; React section unit+browser 20+3; Angular section 14/14; styles section 18/18; agent-docs 215/215; `pnpm check` verde.
 - Fatia 2: React browser toc 2/2, chart 1/1, kbd 3/3; unit chart+toc+kbd+section 101/101; styles chart+toc+kbd 38/38; `pnpm check` verde após corrigir o tipo do teste do toc.
 
 - Fatia 3: React browser backdrop-filter 18/18; unit splitter+scroll-area+action-sheet+data-grid docs 97/97; Angular das mesmas famílias 160/160; styles 1710/1710; agent-docs 217/217; theme 101 vitest + 111 node; themes 92/92; `pnpm check` verde.
+- Fatia 4: core dismissable-layer 46/46; React drawer browser 3/3 (o novo falha sem a correção); theme vitest 105 + node 111; themes 92/92; React theme browser 1/1 e unit 4/4; Angular theme 2/2; core portal 24/24; agent-docs references+content+skills 117/117; `pnpm check` verde.
 
 ## Problemas conhecidos
+- Achado 6: a correção compara `location.href` com o da entrada; uma troca de localização com a camada aberta (replace de search param) deixa a entrada no histórico, sem passo atrás.
+- Achado 9: `standard` é sempre emitido a partir de `base`; corners dependentes reescrevem tokens de `base`/`components` que contêm `var(--slotted-radius-`.
 - Achado 3: causa medida = quatro módulos `*.docs.ts` (splitter, scroll-area, action-sheet em React e Angular; data-grid com a chave `dataGrid`) fora da chave do membro do contrato; a verificação nova está em `tools/agent-docs/src/build.test.ts`.
 - Achado 7: recusa em vez de compilar para `&`; `data-slotted-density` e `data-slotted-seeds` à frente de um hook seguem aceites.
 - `packages/theme/src/generated/contract.ts` está versionado e fica obsoleto quando um `*.tokens.json` ganha token; `pnpm --filter @slotted/theme generate` o atualiza (o gate `pnpm check` não o apanha).
@@ -58,4 +62,4 @@
 - O cache incremental do typecheck (`node_modules/.cache/tsc/root.tsbuildinfo`) produz erros falsos depois de mudanças em `*.tokens.json`; contorno: apagar o ficheiro.
 
 ## Próxima ação exata
-Achado 9: eixo `data-slotted-corners` (tema: `corners`, `ThemeScope`, skill theme-app §1); ler `packages/theme/src/render.ts` (densidades) como modelo.
+Achado 8: Drawer `side="bottom"`, arrasto por transform e fling (ler `packages/react/src/drawer/drawer.tsx`, `drawer.browser.test.tsx` do arrasto atual e `--slotted-drawer-extent` em `packages/styles/src/drawer/drawer.css`). Depois achado 1 (`useRovingFocus`).

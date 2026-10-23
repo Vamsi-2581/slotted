@@ -693,6 +693,27 @@ describe('Drawer', () => {
     vi.restoreAllMocks();
   });
 
+  /**
+   * The separator resizes as it moves, so a close by it left the measure where
+   * the hand let go, under the floor, and the next open started there.
+   */
+  it('gives back the measure it had when a drag closes it, so it reopens at its own', () => {
+    measureLayerAs(1000, 800);
+    const onExtentChange = vi.fn();
+    render(<Basic defaultExtent={0.3} defaultOpen onExtentChange={onExtentChange} side="end" />);
+
+    const bar = separator();
+    fireEvent.pointerDown(bar, { button: 0, clientX: 700, clientY: 0, pointerId: 1 });
+    fireEvent.pointerMove(bar, { clientX: 950, clientY: 0, pointerId: 1 });
+    fireEvent.pointerUp(bar, { pointerId: 1 });
+
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      0.3,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+    vi.restoreAllMocks();
+  });
+
   /* --------------------------------------------------------------- state - */
 
   it('reads a controlled value and never moves it itself', () => {
@@ -876,9 +897,15 @@ function stamped(
  * movement back.
  */
 describe('a sheet dismissed by velocity', () => {
-  function sheet(onOpenChange = vi.fn()) {
+  function sheet(onOpenChange = vi.fn(), onExtentChange = vi.fn()) {
     render(
-      <Drawer defaultExtent={0.5} defaultOpen onOpenChange={onOpenChange} side="bottom">
+      <Drawer
+        defaultExtent={0.5}
+        defaultOpen
+        onExtentChange={onExtentChange}
+        onOpenChange={onOpenChange}
+        side="bottom"
+      >
         <DrawerPanel>
           <DrawerResizer />
           <DrawerHeader>
@@ -956,6 +983,36 @@ describe('a sheet dismissed by velocity', () => {
     ]);
     expect(onOpenChange).toHaveBeenCalled();
     expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  /**
+   * A close by the hand asked for the floor as well, and the next open started
+   * there: a sheet opened at 50% came back at 20% after one flick.
+   */
+  it('asks for no measure when a flick closes it, so it reopens at its own', async () => {
+    const onExtentChange = vi.fn();
+    const { drag } = sheet(vi.fn(), onExtentChange);
+    drag([
+      [420, 20],
+      [440, 40],
+    ]);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(onExtentChange).not.toHaveBeenCalled();
+  });
+
+  it('puts a refused flick on the floor, a frame later', async () => {
+    const onExtentChange = vi.fn();
+    const onOpenChange = vi.fn((_next: boolean, request: { cancel(): void }) => request.cancel());
+    const { drag } = sheet(onOpenChange as never, onExtentChange);
+    drag([
+      [420, 20],
+      [440, 40],
+    ]);
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(onExtentChange).toHaveBeenCalledWith(
+      0.2,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
   });
 });
 

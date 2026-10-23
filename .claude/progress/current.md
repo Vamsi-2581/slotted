@@ -20,5 +20,14 @@
 - Não verificado em dispositivo real nem `pnpm check`.
 - Teste de browser do fling usa passos de 35 px (o primeiro movimento só reconhece o gesto).
 
+## Release
+- Correções em `1abb14e9` (CI 40015966779 verde). Release `v0.1.0-beta.13` (`49de3662`), workflow 40017979351 verde; os seis pacotes com `latest` = 0.1.0-beta.13 no npm.
+- `pnpm eval:agent-docs` não corrido (decisão do usuário registada antes); `theme-app/SKILL.md` mudou desde a beta.12.
+
+## Ronda 3 (não commitada, sem sync no equori por pedido do usuário)
+- Saída por arraste: `settle(0, …)` vai ao ritmo da mão (mínimo 900 px/s, 120 ms) numa curva `cubic-bezier(0.2, y, 1, 1)` que só acelera; a duração da camada é teto.
+- Fecho por arraste não pede o piso: o resizer devolve a medida de antes do gesto (lados que redimensionam ao vivo) e só pede o piso, um frame depois, quando o consumidor recusa o fecho. React e Angular.
+- Testes: core extent 74/74; React drawer unit 64/64, browser 5/5; Angular drawer 52/52; format, lint e typecheck verdes.
+
 ## Próxima ação exata
-Aguardar o resultado do teste do usuário no equori; se aprovado, `pnpm check` e commit `fix(drawer): ...`.
+Commit `fix(drawer): …` destas alterações quando o usuário pedir; release só a pedido.

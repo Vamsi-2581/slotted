@@ -25,6 +25,8 @@ const SETTLE_REST_PX_PER_S = 900;
 const EXIT_MARGIN_PX = 32;
 /** How much steeper than its average a flung settle starts: it decelerates from the hand's speed. */
 const FLING_SLOPE = 2;
+/** The shortest exit: a faster hand still leaves over a few frames. */
+const EXIT_MIN_MS = 120;
 /** The x of the curve's first control point; its y sets the slope the motion starts at. */
 const CURVE_X1 = 0.2;
 
@@ -54,8 +56,10 @@ export interface SheetMotion {
    * at `velocity` pixels per second, positive toward a taller sheet. Resolves
    * when the panel has arrived, or at once when the motion is reduced; never
    * when a new gesture or `end` takes the panel first.
-   * `duration` fixes the time it takes, in milliseconds, for a panel leaving
-   * that something else waits on; the curve is then drawn to leave at `velocity`.
+   * A panel leaving (`0`) keeps the hand's speed, or the rest pace when the hand
+   * was slower, and speeds up out of sight: it never slows down near the edge.
+   * `duration` caps that exit, in milliseconds, at the time something else
+   * waits on it — presence unmounts the panel when the layer's exit ends.
    */
   settle(extent: number, velocity: number, duration?: number): Promise<void>;
   /** Gives the panel back to its stylesheet, in one frame and without easing. */
@@ -145,23 +149,31 @@ export function createSheetMotion(panel: HTMLElement): SheetMotion {
       }
       /* The hand's speed toward the target; against it, it counts as none. */
       const toward = Math.max(0, to > offset ? -velocity : velocity);
+      const leaving = extent <= 0;
       const flung = toward >= SETTLE_REST_PX_PER_S;
-      const duration =
-        fixed !== undefined && fixed > 0
-          ? fixed
-          : Math.min(
-              SETTLE_MAX_MS,
-              Math.max(
-                SETTLE_MIN_MS,
-                flung
-                  ? ((FLING_SLOPE * distance) / toward) * 1000
-                  : (distance / SETTLE_REST_PX_PER_S) * 1000,
-              ),
-            );
+      const cap = fixed !== undefined && fixed > 0 ? fixed : SETTLE_MAX_MS;
+      const duration = leaving
+        ? Math.min(
+            cap,
+            Math.max(EXIT_MIN_MS, (distance / Math.max(toward, SETTLE_REST_PX_PER_S)) * 1000),
+          )
+        : Math.min(
+            cap,
+            Math.max(
+              SETTLE_MIN_MS,
+              flung
+                ? ((FLING_SLOPE * distance) / toward) * 1000
+                : (distance / SETTLE_REST_PX_PER_S) * 1000,
+            ),
+          );
       /* The curve's first stretch is as steep as the hand was, so the panel
-         leaves at the speed it was let go and decelerates onto the target. */
+         goes on at the speed it was let go. Onto a stop it then decelerates;
+         out of sight its last control point is (1, 1), so it only speeds up. */
       const slope = (toward * duration) / 1000 / distance;
-      const easing = `cubic-bezier(${String(CURVE_X1)}, ${Math.min(1, slope * CURVE_X1).toFixed(3)}, 0, 1)`;
+      const y1 = Math.min(1, slope * CURVE_X1).toFixed(3);
+      const easing = leaving
+        ? `cubic-bezier(${String(CURVE_X1)}, ${y1}, 1, 1)`
+        : `cubic-bezier(${String(CURVE_X1)}, ${y1}, 0, 1)`;
       /* A transition and not an animation object: presence waits for the leaving
          panel by the transition the node declares, and this is the one it
          declares. Reading the value commits the start the transition leaves. */

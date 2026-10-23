@@ -630,6 +630,42 @@ describe('SlDrawer', () => {
     expect(host.requests.at(-1)?.reason).toBe('pointer');
   });
 
+  /**
+   * A close by the hand asked for the floor as well, and the next open started
+   * there: a drawer opened at 30% came back at the 20% floor.
+   */
+  it('asks for no measure when a drag closes it, so it reopens at its own', async () => {
+    measureAs(1000, 800);
+    host.open.set(true);
+    host.side.set('end');
+    host.extent.set(0.3);
+    fixture.detectChanges();
+
+    const bar = separator() as HTMLElement;
+    bar.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        bubbles: true,
+        button: 0,
+        cancelable: true,
+        clientX: 700,
+        clientY: 0,
+        pointerId: 1,
+      }),
+    );
+    bar.dispatchEvent(
+      new PointerEvent('pointermove', { bubbles: true, clientX: 950, clientY: 0, pointerId: 1 }),
+    );
+    fixture.detectChanges();
+    bar.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerId: 1 }));
+    fixture.detectChanges();
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+
+    /* The separator resized as it moved; the close gives the measure back. */
+    expect(host.open()).toBe(false);
+    expect(host.extents.at(-1)?.value).toBe(0.3);
+    expect(host.extent()).toBe(0.3);
+  });
+
   /* --------------------------------------------------------------- state - */
 
   /**

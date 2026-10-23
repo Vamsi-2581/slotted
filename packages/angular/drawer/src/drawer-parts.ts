@@ -315,7 +315,15 @@ export class SlDrawerResizer {
    * then. The panel follows the pointer from that offset rather than jumping
    * its edge under it, so a press that does not move is a tap and moves nothing.
    */
-  private press: { x: number; y: number; at: number; offset: number; moved: boolean } | null = null;
+  private press: {
+    x: number;
+    y: number;
+    at: number;
+    offset: number;
+    moved: boolean;
+    /** The measure before the gesture, which a close by the gesture gives back. */
+    before: number | undefined;
+  } | null = null;
   /** What `Enter` restores to once it has collapsed the panel. */
   private collapsed: number | null = null;
   /** What the document looked like before the drag, and how to put it back. */
@@ -405,6 +413,7 @@ export class SlDrawerResizer {
     this.native.focus();
     this.press = {
       at: fraction,
+      before: this.drawer.currentExtent(),
       moved: false,
       offset: this.current() - fraction,
       x: event.clientX,
@@ -558,13 +567,15 @@ export class SlDrawerResizer {
       const floor = stops.length > 0 ? (stops[0] as number) : bounds.min;
       void sheet?.settle(0, velocity * span, layer === null ? undefined : exitDuration(layer));
       this.drawer.request(false, 'pointer', undefined, event);
-      this.drawer.requestExtent(floor, 'pointer', event);
-      /* A close the consumer refused leaves the panel open: it comes back to the floor. */
-      if (sheet !== null) {
-        requestAnimationFrame(() => {
-          if (this.drawer.open()) void sheet.settle(floor * span, 0).then(sheet.end);
-        });
-      }
+      /* The next open starts at the measure the drawer had before the gesture,
+         which a separator resizing as it moved has to ask back. A close the
+         consumer refused leaves the panel open, at the floor. */
+      if (sheet === null) this.drawer.requestExtent(held.before, 'pointer', event);
+      requestAnimationFrame(() => {
+        if (!this.drawer.open()) return;
+        this.drawer.requestExtent(floor, 'pointer', event);
+        if (sheet !== null) void sheet.settle(floor * span, 0).then(sheet.end);
+      });
       return;
     }
     if (sheet === null) {

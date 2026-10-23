@@ -778,7 +778,14 @@ export function DrawerResizer({
    * then. The panel follows the pointer from that offset rather than jumping
    * its edge under it, so a press that does not move is a tap and moves nothing.
    */
-  const press = useRef<{ x: number; y: number; offset: number; moved: boolean } | null>(null);
+  const press = useRef<{
+    x: number;
+    y: number;
+    offset: number;
+    moved: boolean;
+    /** The measure before the gesture, which a close by the gesture gives back. */
+    before: number | undefined;
+  } | null>(null);
   /** What `Enter` restores to once it has collapsed the panel. */
   const restore = useRef<number | null>(null);
   /** What the document looked like before the drag, and how to put it back. */
@@ -796,6 +803,10 @@ export function DrawerResizer({
   /** The layer as the gesture began: the sheet's drag reads no layout per move. */
   const sheetRect = useRef<DOMRect | null>(null);
   useEffect(() => () => motion.current?.end(), []);
+
+  /** The drawer as the last render saw it, for what a frame after the release reads. */
+  const latest = useRef(drawer);
+  latest.current = drawer;
 
   const inline = isInlineSide(drawer.side);
   const current = drawer.live ?? drawer.extent ?? drawer.rest ?? drawer.minExtent;
@@ -844,6 +855,7 @@ export function DrawerResizer({
     event.currentTarget.setPointerCapture(event.pointerId);
     event.currentTarget.focus();
     press.current = {
+      before: drawer.extent,
       moved: false,
       offset: current - pointAt(event, rect),
       x: event.clientX,
@@ -992,13 +1004,15 @@ export function DrawerResizer({
       const floor = stops.length > 0 ? (stops[0] as number) : drawer.minExtent;
       void sheet?.settle(0, velocity * span, layer ? exitDuration(layer) : undefined);
       drawer.close('pointer', undefined, event);
-      drawer.requestExtent(floor, 'pointer', event);
-      /* A close the consumer refused leaves the panel open: it comes back to the floor. */
-      if (sheet !== null && layer !== null) {
-        requestAnimationFrame(() => {
-          if (layer.hasAttribute('data-open')) void sheet.settle(floor * span, 0).then(sheet.end);
-        });
-      }
+      /* The next open starts at the measure the drawer had before the gesture,
+         which a separator resizing as it moved has to ask back. A close the
+         consumer refused leaves the panel open, at the floor. */
+      if (sheet === null) drawer.requestExtent(held.before, 'pointer', event);
+      requestAnimationFrame(() => {
+        if (!latest.current.open) return;
+        latest.current.requestExtent(floor, 'pointer', event);
+        if (sheet !== null) void sheet.settle(floor * span, 0).then(sheet.end);
+      });
       return;
     }
     if (sheet === null) {

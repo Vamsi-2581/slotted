@@ -49,24 +49,25 @@ describe('createSheetMotion', () => {
     motion.begin(300, 300);
     motion.follow(240);
     const done = motion.settle(0, -1500);
-    /* 272 px from 1500 px/s, decelerating: it starts at twice its average pace. */
-    expect(panel.style.transition).toBe('translate 363ms cubic-bezier(0.2, 0.400, 0, 1)');
+    /* 272 px at 1500 px/s, at the hand's pace the whole way: it never slows near the edge. */
+    expect(panel.style.transition).toBe('translate 181ms cubic-bezier(0.2, 0.200, 1, 1)');
     expect(panel.style.translate).toBe('0 332px');
     panel.dispatchEvent(Object.assign(new Event('transitionend'), { propertyName: 'translate' }));
     await done;
   });
 
-  it('leaves in the time it is given, on a curve that starts as steep as the hand was', () => {
+  it('leaves within the time it is given, on a curve that starts as steep as the hand was and only speeds up', () => {
     const motion = createSheetMotion(panel);
     motion.begin(300, 300);
     motion.follow(240);
     void motion.settle(0, -1500, 200);
-    /* 272 px in 200 ms; the hand's 1500 px/s over that is a first stretch 1.1 times the average slope. */
-    expect(panel.style.transition).toBe('translate 200ms cubic-bezier(0.2, 0.221, 0, 1)');
+    /* 272 px at 1500 px/s is 181 ms, inside the 200 ms the layer allows. */
+    expect(panel.style.transition).toBe('translate 181ms cubic-bezier(0.2, 0.200, 1, 1)');
     motion.end();
     motion.begin(300, 300);
     void motion.settle(0, 0, 200);
-    expect(panel.style.transition).toBe('translate 200ms cubic-bezier(0.2, 0.000, 0, 1)');
+    /* No hand speed: the rest pace would take 369 ms, the layer allows 200, and it accelerates from still. */
+    expect(panel.style.transition).toBe('translate 200ms cubic-bezier(0.2, 0.000, 1, 1)');
   });
 
   it('settles at a pace of its own when the release was slow, within a frame or two and a blink', () => {
@@ -89,8 +90,8 @@ describe('createSheetMotion', () => {
     });
     await vi.advanceTimersByTimeAsync(100);
     expect(arrived).toBe(false);
-    /* 332 px from 1500 px/s takes 443 ms, and the timer allows 60 more. */
-    await vi.advanceTimersByTimeAsync(450);
+    /* 332 px at 1500 px/s takes 221 ms, and the timer allows 60 more. */
+    await vi.advanceTimersByTimeAsync(200);
     expect(arrived).toBe(true);
   });
 

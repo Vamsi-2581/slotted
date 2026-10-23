@@ -24,28 +24,53 @@ const source = new URL('.', import.meta.url).pathname;
  *
  * The distance is one step of the space scale, so a theme retunes it where it
  * retunes every other gap.
+ *
+ * The layer only moves; the fade belongs to the content, the part that paints
+ * the surface. In Chromium an ancestor with `opacity` below one is the Backdrop
+ * Root of what it holds, so a `backdrop-filter` on the content blurred nothing
+ * until the layer was opaque and then appeared at once. A flyout with no
+ * content part of its own (`content: false`) still fades its layer.
  */
 const LAYERS = [
-  { family: 'select', layer: '[data-ui-select][data-part-positioner]', lateral: 'fade' },
-  { family: 'combobox', layer: '[data-ui-combobox][data-part-positioner]', lateral: 'fade' },
+  {
+    family: 'select',
+    layer: '[data-ui-select][data-part-positioner]',
+    lateral: 'fade',
+    content: true,
+  },
+  {
+    family: 'combobox',
+    layer: '[data-ui-combobox][data-part-positioner]',
+    lateral: 'fade',
+    content: true,
+  },
+  {
+    family: 'date-picker',
+    layer: '[data-ui-date-picker][data-part-positioner]',
+    lateral: 'fade',
+    content: true,
+  },
   {
     family: 'multi-select',
     layer: '[data-ui-multi-select][data-part-positioner]',
     lateral: 'fade',
+    content: true,
   },
   {
     family: 'entity-picker',
     layer: '[data-ui-entity-picker][data-part-positioner]',
     lateral: 'fade',
+    content: true,
   },
-  { family: 'menu', layer: '[data-ui-menu]', lateral: 'slide' },
-  { family: 'popover', layer: '[data-ui-popover]', lateral: 'fade' },
-  { family: 'tooltip', layer: '[data-ui-tooltip]', lateral: 'fade' },
+  { family: 'menu', layer: '[data-ui-menu]', lateral: 'slide', content: true },
+  { family: 'popover', layer: '[data-ui-popover]', lateral: 'fade', content: true },
+  { family: 'tooltip', layer: '[data-ui-tooltip]', lateral: 'fade', content: true },
   /** The flyout beside a rail is placed at the row's inline end, so it slides like a submenu. */
   {
     family: 'side-navigation',
     layer: '[data-ui-side-navigation][data-part-flyout]',
     lateral: 'slide',
+    content: false,
   },
 ];
 
@@ -117,14 +142,14 @@ function keyframe(all, name, step) {
   return rule;
 }
 
-for (const { family, layer, lateral } of LAYERS) {
+for (const { family, layer, lateral, content } of LAYERS) {
   const css = readFileSync(`${source}${family}/${family}.css`, 'utf8');
   const all = rules(css);
   const name = `slotted-${family}`;
 
   test(`${family}: the closed layer rests one step from its place along the axis it opens on`, () => {
     const closed = find(all, layer);
-    assert.equal(declaration(closed.body, 'opacity'), '0');
+    assert.equal(declaration(closed.body, 'opacity'), content ? undefined : '0');
     assert.equal(declaration(closed.body, 'scale'), undefined, `${family} scales its layer`);
     assert.equal(declaration(closed.body, 'translate'), `0 calc(-1 * ${DISTANCE})`);
     assert.equal(
@@ -153,10 +178,27 @@ for (const { family, layer, lateral } of LAYERS) {
 
   test(`${family}: the layer leaves on the exit duration, from wherever it is`, () => {
     const transition = declaration(find(all, layer).body, 'transition');
-    assert.match(
-      transition,
-      /opacity var\(--slotted-duration-short\) var\(--slotted-easing-exit\)/,
-    );
+    if (content) {
+      assert.doesNotMatch(transition, /opacity/, `${family} fades its layer`);
+      /* The surface rule of the content states the look; the fade is its own rule. */
+      const surface = all.find(
+        (rule) =>
+          !rule.media &&
+          selectors(rule.selector).includes(`${layer} > [data-part-content]`) &&
+          declaration(rule.body, 'opacity') !== undefined,
+      );
+      assert.ok(surface, `${family} gives its content no fade`);
+      assert.equal(declaration(surface.body, 'opacity'), '0');
+      assert.equal(
+        declaration(surface.body, 'transition'),
+        'opacity var(--slotted-duration-short) var(--slotted-easing-exit)',
+      );
+    } else {
+      assert.match(
+        transition,
+        /opacity var\(--slotted-duration-short\) var\(--slotted-easing-exit\)/,
+      );
+    }
     assert.match(
       transition,
       /translate var\(--slotted-duration-short\) var\(--slotted-easing-exit\)/,
@@ -166,7 +208,7 @@ for (const { family, layer, lateral } of LAYERS) {
 
   test(`${family}: the layer arrives by a keyframe that states where it starts`, () => {
     const open = find(all, `${layer}[data-open]`);
-    assert.equal(declaration(open.body, 'opacity'), '1');
+    assert.equal(declaration(open.body, 'opacity'), content ? undefined : '1');
     assert.equal(declaration(open.body, 'translate'), '0 0');
     assert.equal(declaration(open.body, 'scale'), undefined);
     assert.equal(declaration(open.body, 'transition'), 'none');
@@ -188,10 +230,22 @@ for (const { family, layer, lateral } of LAYERS) {
     );
 
     const down = keyframe(all, `${name}-enter-down`, 'from');
-    assert.equal(declaration(down.body, 'opacity'), '0');
+    assert.equal(declaration(down.body, 'opacity'), content ? undefined : '0');
     assert.equal(declaration(down.body, 'translate'), `0 calc(-1 * ${DISTANCE})`);
     const up = keyframe(all, `${name}-enter-up`, 'from');
-    assert.equal(declaration(up.body, 'opacity'), '0');
+    assert.equal(declaration(up.body, 'opacity'), content ? undefined : '0');
+    if (content) {
+      const shown = find(all, `${layer}[data-open] > [data-part-content]`);
+      assert.equal(declaration(shown.body, 'opacity'), '1');
+      assert.equal(declaration(shown.body, 'transition'), 'none');
+      assert.equal(
+        declaration(
+          find(all, `${layer}[data-open][data-positioned] > [data-part-content]`).body,
+          'animation',
+        ),
+        `${name}-fade var(--slotted-duration-medium) var(--slotted-easing-enter)`,
+      );
+    }
     assert.equal(declaration(up.body, 'translate'), `0 ${DISTANCE}`);
   });
 
@@ -215,6 +269,17 @@ for (const { family, layer, lateral } of LAYERS) {
       assert.equal(declaration(start.body, 'translate'), `calc(-1 * ${DISTANCE}) 0`);
       const end = keyframe(all, `${name}-enter-from-end`, 'from');
       assert.equal(declaration(end.body, 'translate'), `${DISTANCE} 0`);
+    } else if (content) {
+      /* The layer has no animation of its own on a lateral side: it does not move. */
+      assert.ok(
+        !all.some(
+          (rule) =>
+            !rule.media &&
+            rule.selector.includes(`${layer}[data-open][data-positioned]:is(`) &&
+            declaration(rule.body, 'animation-name') !== undefined,
+        ),
+        `${family} animates its layer on a lateral side`,
+      );
     } else {
       assert.equal(
         declaration(
@@ -243,7 +308,7 @@ for (const { family, layer, lateral } of LAYERS) {
       assert.equal(declaration(still.body, 'translate'), '0 0');
       assert.equal(
         declaration(still.body, 'transition'),
-        'opacity var(--slotted-duration-short) var(--slotted-easing-exit)',
+        `${content ? 'translate' : 'opacity'} var(--slotted-duration-short) var(--slotted-easing-exit)`,
       );
     }
     for (const selector of [
@@ -254,7 +319,7 @@ for (const { family, layer, lateral } of LAYERS) {
     ]) {
       assert.equal(
         declaration(find(all, selector, REDUCED).body, 'animation-name'),
-        `${name}-fade`,
+        content ? 'none' : `${name}-fade`,
       );
     }
   });

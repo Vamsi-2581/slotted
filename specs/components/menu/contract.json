@@ -209,6 +209,7 @@
   "motion": {
     "property": "scale",
     "companion": "opacity",
+    "companionPart": "content",
     "origin": "--slotted-positioner-transform-origin",
     "measured": false,
     "reason": "The panel grows from the control that opened it, which is what says where it came from. The same grammar tooltip and popover use, so three anchored layers do not open three different ways."

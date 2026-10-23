@@ -396,6 +396,7 @@
   "motion": {
     "property": "scale",
     "companion": "opacity",
+    "companionPart": "content",
     "origin": "--slotted-positioner-transform-origin",
     "measured": false,
     "chips": "none. A chip that faded in would delay the row's reflow behind it, and the reader has just pressed a key; the announcement carries the change instead",

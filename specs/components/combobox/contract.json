@@ -277,6 +277,7 @@
   "motion": {
     "property": "scale",
     "companion": "opacity",
+    "companionPart": "content",
     "origin": "--slotted-positioner-transform-origin",
     "measured": false,
     "reason": "The same grammar every anchored layer in this library uses."

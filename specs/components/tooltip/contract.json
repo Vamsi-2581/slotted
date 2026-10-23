@@ -166,6 +166,7 @@
   "motion": {
     "property": "scale",
     "companion": "opacity",
+    "companionPart": "content",
     "origin": "--slotted-positioner-transform-origin",
     "measured": false,
     "reason": "The layer grows from the anchor rather than appearing whole, which is what says where it came from. scale rather than transform: scale() so the animation does not take the property the positioner was told to leave alone, and so a consumer animating translate of their own does not fight it. Every duration is a motion token, so the theme's one reduced-motion query collapses all of them."

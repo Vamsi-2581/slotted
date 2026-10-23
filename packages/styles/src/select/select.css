@@ -834,7 +834,6 @@
        pointer, and the frame must not swallow a press meant for the page. */
     pointer-events: none;
 
-    opacity: 0;
     /**
      * R7: the layer arrives along the axis it opens on — from one space step
      * above its place when it opens downward, from one step below when it
@@ -844,9 +843,7 @@
      */
     --_enter-distance: var(--slotted-space-2, 0.25rem);
     translate: 0 calc(-1 * var(--_enter-distance));
-    transition:
-      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      translate var(--slotted-duration-short) var(--slotted-easing-exit);
+    transition: translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
   [data-ui-select][data-part-positioner][data-side='top'] {
@@ -868,7 +865,6 @@
    * leaves from wherever the layer is, on the closed rule's durations.
    */
   [data-ui-select][data-part-positioner][data-open] {
-    opacity: 1;
     translate: 0 0;
     transition: none;
   }
@@ -886,23 +882,14 @@
     animation-name: slotted-select-enter-up;
   }
 
-  [data-ui-select][data-part-positioner][data-open][data-positioned]:is(
-      [data-side='left'],
-      [data-side='right']
-    ) {
-    animation-name: slotted-select-fade;
-  }
-
   @keyframes slotted-select-enter-down {
     from {
-      opacity: 0;
       translate: 0 calc(-1 * var(--_enter-distance));
     }
   }
 
   @keyframes slotted-select-enter-up {
     from {
-      opacity: 0;
       translate: 0 var(--_enter-distance);
     }
   }
@@ -913,6 +900,27 @@
     }
   }
 
+  /**
+   * The fade belongs to the part that paints the surface, and the layer only
+   * moves. In Chromium an ancestor with `opacity` below one is the Backdrop Root
+   * of what it holds, so a `backdrop-filter` on the content blurs nothing until
+   * the layer is opaque and then appears at once. The content's own opacity
+   * leaves its own filter drawn on every frame of the motion.
+   */
+  [data-ui-select][data-part-positioner] > [data-part-content] {
+    opacity: 0;
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui-select][data-part-positioner][data-open] > [data-part-content] {
+    opacity: 1;
+    transition: none;
+  }
+
+  [data-ui-select][data-part-positioner][data-open][data-positioned] > [data-part-content] {
+    animation: slotted-select-fade var(--slotted-duration-medium) var(--slotted-easing-enter);
+  }
+
   /* Stillness keeps the fade and drops the movement (R7). */
   @media (prefers-reduced-motion: reduce) {
     [data-ui-select][data-part-positioner],
@@ -920,14 +928,14 @@
     [data-ui-select][data-part-positioner][data-side='left'],
     [data-ui-select][data-part-positioner][data-side='right'] {
       translate: 0 0;
-      transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+      transition: translate var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
     [data-ui-select][data-part-positioner][data-open][data-positioned],
     [data-ui-select][data-part-positioner][data-open][data-positioned][data-side='top'],
     [data-ui-select][data-part-positioner][data-open][data-positioned][data-side='left'],
     [data-ui-select][data-part-positioner][data-open][data-positioned][data-side='right'] {
-      animation-name: slotted-select-fade;
+      animation-name: none;
     }
   }
 

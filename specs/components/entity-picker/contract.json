@@ -358,6 +358,7 @@
   "motion": {
     "property": "scale",
     "companion": "opacity",
+    "companionPart": "content",
     "origin": "--slotted-positioner-transform-origin",
     "reason": "The grammar every anchored layer in this library uses."
   },

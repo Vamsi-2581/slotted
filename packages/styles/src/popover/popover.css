@@ -84,7 +84,6 @@
     /* The layer is only a frame around the panel; the panel takes the pointer. */
     pointer-events: none;
 
-    opacity: 0;
     /**
      * R7: the layer arrives along the axis it opens on — from one space step
      * above its place when it opens downward, from one step below when it
@@ -94,9 +93,7 @@
      */
     --_enter-distance: var(--slotted-space-2, 0.25rem);
     translate: 0 calc(-1 * var(--_enter-distance));
-    transition:
-      opacity var(--slotted-duration-short) var(--slotted-easing-exit),
-      translate var(--slotted-duration-short) var(--slotted-easing-exit);
+    transition: translate var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
   [data-ui-popover][data-side='top'] {
@@ -118,7 +115,6 @@
    * leaves from wherever the layer is, on the closed rule's durations.
    */
   [data-ui-popover][data-open] {
-    opacity: 1;
     translate: 0 0;
     transition: none;
   }
@@ -136,20 +132,14 @@
     animation-name: slotted-popover-enter-up;
   }
 
-  [data-ui-popover][data-open][data-positioned]:is([data-side='left'], [data-side='right']) {
-    animation-name: slotted-popover-fade;
-  }
-
   @keyframes slotted-popover-enter-down {
     from {
-      opacity: 0;
       translate: 0 calc(-1 * var(--_enter-distance));
     }
   }
 
   @keyframes slotted-popover-enter-up {
     from {
-      opacity: 0;
       translate: 0 var(--_enter-distance);
     }
   }
@@ -167,14 +157,14 @@
     [data-ui-popover][data-side='left'],
     [data-ui-popover][data-side='right'] {
       translate: 0 0;
-      transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+      transition: translate var(--slotted-duration-short) var(--slotted-easing-exit);
     }
 
     [data-ui-popover][data-open][data-positioned],
     [data-ui-popover][data-open][data-positioned][data-side='top'],
     [data-ui-popover][data-open][data-positioned][data-side='left'],
     [data-ui-popover][data-open][data-positioned][data-side='right'] {
-      animation-name: slotted-popover-fade;
+      animation-name: none;
     }
   }
 
@@ -262,6 +252,27 @@
     /* A theme that paints this surface as a translucent material blurs what moves behind it. */
     -webkit-backdrop-filter: var(--slotted-popover-backdrop-filter, none);
     backdrop-filter: var(--slotted-popover-backdrop-filter, none);
+  }
+
+  /**
+   * The fade belongs to the part that paints the surface, and the layer only
+   * moves. In Chromium an ancestor with `opacity` below one is the Backdrop Root
+   * of what it holds, so a `backdrop-filter` on the content blurs nothing until
+   * the layer is opaque and then appears at once. The content's own opacity
+   * leaves its own filter drawn on every frame of the motion.
+   */
+  [data-ui-popover] > [data-part-content] {
+    opacity: 0;
+    transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
+  }
+
+  [data-ui-popover][data-open] > [data-part-content] {
+    opacity: 1;
+    transition: none;
+  }
+
+  [data-ui-popover][data-open][data-positioned] > [data-part-content] {
+    animation: slotted-popover-fade var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 
   @media (prefers-reduced-transparency: reduce), (forced-colors: active) {

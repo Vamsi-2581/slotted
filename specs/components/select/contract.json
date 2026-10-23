@@ -323,6 +323,7 @@
   "motion": {
     "property": "scale",
     "companion": "opacity",
+    "companionPart": "content",
     "origin": "--slotted-positioner-transform-origin",
     "measured": false,
     "reason": "The popup grows from the control that opened it, which is what says where it came from. The same grammar tooltip, popover and menu use, so four anchored layers do not open four different ways."

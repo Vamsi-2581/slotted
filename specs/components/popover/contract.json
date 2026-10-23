@@ -113,6 +113,7 @@
   "motion": {
     "property": "scale",
     "companion": "opacity",
+    "companionPart": "content",
     "origin": "--slotted-positioner-transform-origin",
     "measured": false,
     "reason": "As tooltip's. The panel grows from the anchor, which is what says which control opened it."

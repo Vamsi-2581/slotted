@@ -1,6 +1,12 @@
 import { withSelectorKey } from '@slotted/core/selector-key';
-import { GLYPH_VIEW_BOX, GLYPHS } from '@slotted/core/glyph';
-import type { GlyphDrawing } from '@slotted/core/glyph';
+import {
+  GLYPH_VIEW_BOX,
+  GLYPHS,
+  isStatusGlyph,
+  STATUS_GLYPH_GRIDS,
+  STATUS_GLYPHS,
+} from '@slotted/core/glyph';
+import type { GlyphDrawing, StatusGlyphName } from '@slotted/core/glyph';
 import { useId } from 'react';
 
 import type { GlyphProps } from './icon.types';
@@ -17,12 +23,18 @@ import type { GlyphProps } from './icon.types';
  * shape — the circle of `circle-alert`, the triangle of `triangle-alert` —
  * filled, and the symbol inside it cut out of the fill by an SVG `<mask>`, so
  * whatever lies behind shows through the symbol on any ground.
+ *
+ * A status mark (`status-*`) is always solid, and is drawn once per grid it
+ * was drawn on; `icon.css` shows the grid the icon box is sized for.
  */
 export function Glyph({ name, solid = false, ...nativeProps }: GlyphProps) {
-  const drawing: GlyphDrawing = GLYPHS[name];
-  const [dx, dy] = drawing.offset;
   /* An id a `url()` can carry: React's own holds characters it cannot. */
   const maskId = `sl-glyph-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  if (isStatusGlyph(name)) {
+    return <StatusGlyph maskId={maskId} name={name} nativeProps={nativeProps} />;
+  }
+  const drawing: GlyphDrawing = GLYPHS[name];
+  const [dx, dy] = drawing.offset;
   const stroke = {
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
@@ -69,6 +81,67 @@ export function Glyph({ name, solid = false, ...nativeProps }: GlyphProps) {
           drawing.paths.map((d, index) => <path d={d} key={index} />)
         )}
       </g>
+    </svg>
+  );
+}
+
+function StatusGlyph({
+  maskId,
+  name,
+  nativeProps,
+}: {
+  maskId: string;
+  name: StatusGlyphName;
+  nativeProps: Omit<GlyphProps, 'name' | 'solid'>;
+}) {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      viewBox="0 0 16 16"
+      {...withSelectorKey(nativeProps, 'part', 'glyph')}
+      data-glyph={name}
+      data-solid=""
+    >
+      {STATUS_GLYPH_GRIDS.map((grid) => {
+        const drawing = STATUS_GLYPHS[name][grid];
+        const id = `${maskId}-${String(grid)}`;
+        return (
+          <svg data-grid={grid} key={grid} viewBox={`0 0 ${String(grid)} ${String(grid)}`}>
+            <defs>
+              <mask height={grid} id={id} maskUnits="userSpaceOnUse" width={grid} x="0" y="0">
+                <rect fill="#fff" height={grid} width={grid} />
+                {drawing.holes.map((d, index) => (
+                  <path d={d} fill="#000" key={index} />
+                ))}
+                {drawing.strokes.map((d, index) => (
+                  <path
+                    d={d}
+                    fill="none"
+                    key={index}
+                    stroke="#000"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                  />
+                ))}
+              </mask>
+            </defs>
+            <path
+              d={drawing.shape}
+              fill="currentColor"
+              mask={`url(#${id})`}
+              {...(drawing.shapeStroke === 0
+                ? {}
+                : {
+                    stroke: 'currentColor',
+                    strokeLinejoin: 'round' as const,
+                    strokeWidth: drawing.shapeStroke,
+                  })}
+            />
+          </svg>
+        );
+      })}
     </svg>
   );
 }

@@ -130,9 +130,10 @@ other families stand on. Justify it at the gate before writing it.
   writes no `forced-colors` rule unless it paints something the theme cannot
   reach.
 - **No triangle glyph.** A triangle is asymmetric and reads as foreign beside
-  the circles and squares every other glyph is drawn in; a family that needs a
-  warning mark draws `circle-alert`. `alert`'s `triangle-alert` is a debt that
-  family owns.
+  the circles and squares every other glyph is drawn in. A status mark is one
+  of the hand-drawn `status-*` glyphs of `@slotted/core/glyph`, drawn on the
+  grid it is shown at; the warning mark is `status-warning`, the diamond of a
+  warning sign, symmetric on both axes.
 - **Overlay behaviour is composed from `packages/core`, never rewritten in a
   family.** `presence`, `portal`, `positioner`, `dismissable-layer`, `focus` and
   `live-announcer` each own one question and none imports another. An overlay

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { GLYPHS } from '@slotted/core/glyph';
+import { GLYPHS, STATUS_GLYPH_GRIDS, STATUS_GLYPHS } from '@slotted/core/glyph';
 import { describe, expect, it } from 'vitest';
 
 import { SlGlyph } from './glyph';
@@ -13,6 +13,7 @@ import { SlIcon } from './icon';
     <svg slGlyph name="check" id="check"></svg>
     <svg slGlyph name="dot" id="dot"></svg>
     <svg slGlyph name="circle-alert" solid id="solid"></svg>
+    <svg slGlyph name="status-success" id="status"></svg>
   `,
 })
 class GlyphHost {}
@@ -67,5 +68,30 @@ describe('SlGlyph', () => {
     expect(
       [...(mask?.querySelectorAll('path') ?? [])].map((path) => path.getAttribute('d')),
     ).toEqual(GLYPHS['circle-alert'].paths.slice(1));
+  });
+
+  it('draws a status mark once per grid, each with its own mask', () => {
+    const query = host();
+    const svg = query('#status');
+    expect(svg.hasAttribute('data-solid')).toBe(true);
+    expect(svg.hasAttribute('fill')).toBe(false);
+    const grids = [...svg.querySelectorAll(':scope > svg[data-grid]')];
+    expect(grids.map((grid) => Number(grid.getAttribute('data-grid')))).toEqual([
+      ...STATUS_GLYPH_GRIDS,
+    ]);
+    for (const grid of grids) {
+      const size = Number(grid.getAttribute('data-grid')) as 12 | 14 | 16;
+      const drawing = STATUS_GLYPHS['status-success'][size];
+      const shape = grid.querySelector(':scope > path');
+      expect(grid.namespaceURI).toBe('http://www.w3.org/2000/svg');
+      expect(shape?.getAttribute('d')).toBe(drawing.shape);
+      expect(shape?.hasAttribute('stroke')).toBe(false);
+      expect(
+        [...(grid.querySelectorAll('mask path[stroke]') ?? [])].map((path) =>
+          path.getAttribute('d'),
+        ),
+      ).toEqual(drawing.strokes);
+      expect(shape?.getAttribute('mask')).toBe(`url(#${grid.querySelector('mask')?.id ?? ''})`);
+    }
   });
 });

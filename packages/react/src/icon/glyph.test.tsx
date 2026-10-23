@@ -1,4 +1,4 @@
-import { GLYPHS } from '@slotted/core/glyph';
+import { GLYPHS, STATUS_GLYPH_GRIDS, STATUS_GLYPHS } from '@slotted/core/glyph';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -58,6 +58,27 @@ describe('Glyph', () => {
       [...(mask?.querySelectorAll('path') ?? [])].map((path) => path.getAttribute('d')),
     ).toEqual(GLYPHS['circle-alert'].paths.slice(1));
   });
+  it('draws a status mark once per grid, each with its own mask', () => {
+    const { container } = render(<Glyph name="status-warning" />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('data-solid');
+    expect(svg).not.toHaveAttribute('fill');
+    const grids = [...(svg?.querySelectorAll(':scope > svg[data-grid]') ?? [])];
+    expect(grids.map((grid) => Number(grid.getAttribute('data-grid')))).toEqual([
+      ...STATUS_GLYPH_GRIDS,
+    ]);
+    for (const grid of grids) {
+      const size = Number(grid.getAttribute('data-grid')) as 12 | 14 | 16;
+      const drawing = STATUS_GLYPHS['status-warning'][size];
+      const shape = grid.querySelector(':scope > path');
+      expect(grid).toHaveAttribute('viewBox', `0 0 ${String(size)} ${String(size)}`);
+      expect(shape).toHaveAttribute('d', drawing.shape);
+      expect(shape).toHaveAttribute('stroke-width', String(drawing.shapeStroke));
+      expect(shape?.getAttribute('mask')).toBe(`url(#${grid.querySelector('mask')?.id ?? ''})`);
+    }
+    expect(new Set(grids.map((grid) => grid.querySelector('mask')?.id)).size).toBe(3);
+  });
+
   /**
    * A previous and next pair — a month, a period, a page — is drawn from one
    * set: every chevron and every arrow exists in all four directions, at the

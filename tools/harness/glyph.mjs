@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 
+import { STATUS_GLYPH_GRIDS, STATUS_GLYPHS } from '../../packages/core/src/glyph/status-glyphs.ts';
 import { drawGlyph, GLYPH_PREFIX } from '../../scripts/generate-icon-glyphs.mjs';
 
 /**
@@ -55,11 +56,39 @@ export function solidGlyphSvg(name, attributes) {
   );
 }
 
+/** A hand-drawn status mark, once per grid, as the bindings' `Glyph` draws it. */
+export function statusGlyphSvg(name, attributes) {
+  const grids = STATUS_GLYPH_GRIDS.map((grid) => {
+    const { shape, shapeStroke, holes, strokes } = STATUS_GLYPHS[name][grid];
+    const id = `sl-glyph-harness-${String((masks += 1))}`;
+    const rounded =
+      shapeStroke === 0
+        ? ''
+        : ` stroke="currentColor" stroke-linejoin="round" stroke-width="${shapeStroke}"`;
+    return (
+      `<svg data-grid="${grid}" viewBox="0 0 ${grid} ${grid}">` +
+      `<defs><mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${grid}" height="${grid}">` +
+      `<rect width="${grid}" height="${grid}" fill="#fff"/>` +
+      holes.map((d) => `<path d="${d}" fill="#000"/>`).join('') +
+      strokes
+        .map(
+          (d) =>
+            `<path d="${d}" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>`,
+        )
+        .join('') +
+      `</mask></defs><path d="${shape}" fill="currentColor"${rounded} mask="url(#${id})"/></svg>`
+    );
+  });
+  return `<svg${attributes} aria-hidden="true" focusable="false" viewBox="0 0 16 16" data-solid="">${grids.join('')}</svg>`;
+}
+
 /** Every empty `<svg data-glyph>` of a fragment, drawn; `data-solid` draws the solid form. */
 export function drawGlyphs(fragment) {
   return fragment.replace(EMPTY_GLYPH, (_, attributes, name) =>
-    /\bdata-solid\b/.test(attributes)
-      ? solidGlyphSvg(name, ` ${attributes.trim()}`)
-      : glyphSvg(name, ` ${attributes.trim()}`),
+    Object.hasOwn(STATUS_GLYPHS, name)
+      ? statusGlyphSvg(name, ` ${attributes.trim()}`)
+      : /\bdata-solid\b/.test(attributes)
+        ? solidGlyphSvg(name, ` ${attributes.trim()}`)
+        : glyphSvg(name, ` ${attributes.trim()}`),
   );
 }

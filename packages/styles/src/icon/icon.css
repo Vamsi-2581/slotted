@@ -72,6 +72,49 @@
    * the type it sits in, because sixteen pixels inside a display heading is
    * not an icon.
    */
+  /**
+   * A status mark is drawn on three grids (`@slotted/core/glyph`), and the box
+   * shows the one it is sized for, so every cut lands on whole pixels. The box
+   * is a size container for that question alone: its size is its own and never
+   * its content's. Under 1dppx — a page zoomed out — the 12-unit drawing is
+   * the heaviest per pixel, and the one that stays legible.
+   */
+  [data-ui-icon]:has(> svg > svg[data-grid]) {
+    container-type: size;
+  }
+
+  [data-ui-icon] svg[data-grid] {
+    display: none;
+  }
+
+  @container (width < 13px) {
+    [data-ui-icon] svg[data-grid='12'] {
+      display: block;
+    }
+  }
+
+  @container (13px <= width < 15px) {
+    [data-ui-icon] svg[data-grid='14'] {
+      display: block;
+    }
+  }
+
+  @container (width >= 15px) {
+    [data-ui-icon] svg[data-grid='16'] {
+      display: block;
+    }
+  }
+
+  @media (max-resolution: 0.99dppx) {
+    [data-ui-icon] svg[data-grid] {
+      display: none;
+    }
+
+    [data-ui-icon] svg[data-grid='12'] {
+      display: block;
+    }
+  }
+
   [data-ui-icon][data-size='text'] {
     --slotted-icon-size: 1em;
   }

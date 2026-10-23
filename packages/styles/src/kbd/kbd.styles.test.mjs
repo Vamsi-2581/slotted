@@ -196,10 +196,12 @@ test('raises the key with an edge that survives forced colours', () => {
  */
 test('draws the base with the one border the theme holds to a ratio', () => {
   const base = rule(ui);
-  assert.ok(base.includes('--_border:var(--slotted-control-border-color'));
+  assert.ok(base.includes('var(--slotted-control-border-color'));
   assert.ok(base.includes('--_base:var(--slotted-border-strong'));
   assert.ok(
-    rule(`${ui}[data-variant='outline']`).includes('--_border:var(--slotted-border-strong'),
+    rule(`${ui}[data-variant='outline']`).includes(
+      '--_border:var(--slotted-kbd-border-color,var(--slotted-border-strong',
+    ),
   );
 });
 
@@ -218,6 +220,29 @@ test('shades the raised face toward its base, and only while it is available', (
 });
 
 /**
+ * A theme that re-tints the tone tokens in a region keeps a key cap opaque
+ * through the family's own tokens. Each is read ahead of the token the variant
+ * used before; `outline` and `plain` own no ground, so the surface token
+ * reaches `raised` and `soft` alone.
+ */
+test('reads its own surface, rim and ink ahead of the tokens each variant used', () => {
+  const base = rule(ui);
+  assert.ok(base.includes('--_background:var(--slotted-kbd-surface,var(--slotted-surface-raised'));
+  assert.ok(base.includes('--_border:var(--slotted-kbd-border-color,'));
+  assert.ok(base.includes('--_color:var(--slotted-kbd-color,var(--slotted-text'));
+  const soft = rule(`${ui}[data-variant='soft']`);
+  assert.ok(soft.includes('--_background:var(--slotted-kbd-surface,var(--slotted-tone-secondary'));
+  assert.ok(soft.includes('--_border:var(--slotted-kbd-border-color,var(--slotted-tone-secondary'));
+  assert.ok(soft.includes('--_color:var(--slotted-kbd-color,var(--slotted-tone-secondary-text'));
+  assert.ok(
+    rule(`${ui}[data-variant='outline']`).includes('--_color:var(--slotted-kbd-color,inherit)'),
+  );
+  const plain = rule(`${ui}[data-variant='plain']`);
+  assert.ok(plain.includes('--_color:var(--slotted-kbd-color,inherit)'));
+  assert.ok(plain.includes('--_background:transparent'));
+});
+
+/**
  * `--slotted-surface-sunken` is the page's own colour on a sunken panel, where
  * a key painted with it would disappear. The neutral tone's surface is the step
  * `badge` calibrated to read on both.
@@ -228,9 +253,9 @@ test('shades the raised face toward its base, and only while it is available', (
  */
 test('paints the tinted key from the neutral tone, and gives it the tone’s edge', () => {
   const soft = rule(`${ui}[data-variant='soft']`);
-  assert.ok(soft.includes('--_background:var(--slotted-tone-secondary-surface)'));
-  assert.ok(soft.includes('--_border:var(--slotted-tone-secondary-border)'));
-  assert.ok(soft.includes('--_color:var(--slotted-tone-secondary-text)'));
+  assert.ok(soft.includes('var(--slotted-tone-secondary-surface)'));
+  assert.ok(soft.includes('var(--slotted-tone-secondary-border)'));
+  assert.ok(soft.includes('var(--slotted-tone-secondary-text)'));
   assert.ok(!declarations.includes('--slotted-surface-sunken'));
 });
 
@@ -252,8 +277,12 @@ test('writes no forced-colours rule, because it paints nothing the theme cannot 
  */
 test('lets the bare key inherit, and never fills the two that own no ground', () => {
   /* Read on an inverse surface, an outlined key was near-black on near-black. */
-  assert.ok(rule(`${ui}[data-variant='outline']`).includes('--_color:inherit'));
-  assert.ok(rule(`${ui}[data-variant='plain']`).includes('--_color:inherit'));
+  assert.ok(
+    rule(`${ui}[data-variant='outline']`).includes('--_color:var(--slotted-kbd-color,inherit)'),
+  );
+  assert.ok(
+    rule(`${ui}[data-variant='plain']`).includes('--_color:var(--slotted-kbd-color,inherit)'),
+  );
   const bare = rule(
     `${ui}[data-variant='outline'][data-disabled],${ui}[data-variant='plain'][data-disabled]`,
   );

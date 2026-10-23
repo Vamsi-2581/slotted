@@ -88,7 +88,8 @@
   },
   "sticky": {
     "top": "var(--slotted-page-sticky-top, 0px)",
-    "height": "the rest of the viewport under the chrome; the panel scrolls",
+    "inset": "--slotted-table-of-contents-sticky-inset, default var(--slotted-space-5): the gap between the chrome and the column, added to the top and subtracted from the height",
+    "height": "the rest of the viewport under the chrome and the inset; the panel scrolls",
     "reason": "Ant's affix, Docusaurus and Starlight pin the column. A hundred links scroll inside it, and the current one is kept in view with block: nearest so the page does not move"
   },
   "loading": {

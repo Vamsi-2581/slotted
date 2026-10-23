@@ -112,10 +112,17 @@ test('pins the sticky column under the page chrome by the published property', (
   const sticky = rules(bare).find(
     ({ selector }) => selector === '[data-ui-table-of-contents][data-sticky]',
   );
-  assert.match(sticky.body, /inset-block-start: var\(--slotted-page-sticky-top, 0px\)/);
   assert.match(
     sticky.body,
-    /max-block-size: calc\(100dvh - var\(--slotted-page-sticky-top, 0px\)\)/,
+    /--_sticky-inset: var\(--slotted-table-of-contents-sticky-inset, var\(--slotted-space-5, 0.75rem\)\)/,
+  );
+  assert.match(
+    sticky.body,
+    /inset-block-start: calc\(var\(--slotted-page-sticky-top, 0px\) \+ var\(--_sticky-inset\)\)/,
+  );
+  assert.match(
+    sticky.body,
+    /max-block-size: calc\(100dvh - var\(--slotted-page-sticky-top, 0px\) - var\(--_sticky-inset\)\)/,
   );
   assert.match(sticky.body, /position: sticky/);
 });

@@ -437,7 +437,7 @@ export const ANGULAR_TABLE_OF_CONTENTS_DOCS = {
         'boolean',
         'false',
         'slTableOfContents',
-        'Pins the column under the page’s chrome and gives it the rest of the viewport; the panel scrolls. Ignored in the collapsed layout',
+        'Pins the column under the page’s chrome, clear of it by --slotted-table-of-contents-sticky-inset, and gives it the rest of the viewport; the panel scrolls. Ignored in the collapsed layout',
       ],
       [
         'history',

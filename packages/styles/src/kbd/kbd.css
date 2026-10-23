@@ -59,6 +59,13 @@
     --_block-size: var(--slotted-control-inner-size, var(--_size));
 
     /**
+     * `--slotted-kbd-surface`, `--slotted-kbd-border-color` and
+     * `--slotted-kbd-color` are the family's own handle on its ground, rim and
+     * ink: a theme that re-tints the tone tokens inside a region (a translucent
+     * glass scope) sets them to keep a key cap opaque, while the tone tokens
+     * keep driving buttons and the other families. `outline` and `plain` own
+     * no ground, so they read the rim and the ink, and `plain` only the ink.
+     *
      * The ground, the rim and the ink. `raised` is the default: the rim a
      * control draws on three sides, and `--slotted-border-strong` below, the
      * one border token the theme holds to 3:1 against the surface. The strong
@@ -66,11 +73,11 @@
      * it is the shadow a key casts, and it is still the signal that says the
      * word inside is a key.
      */
-    --_background: var(--slotted-surface-raised, Canvas);
+    --_background: var(--slotted-kbd-surface, var(--slotted-surface-raised, Canvas));
     --_face: none;
-    --_border: var(--slotted-control-border-color, ButtonBorder);
+    --_border: var(--slotted-kbd-border-color, var(--slotted-control-border-color, ButtonBorder));
     --_base: var(--slotted-border-strong, ButtonBorder);
-    --_color: var(--slotted-text, CanvasText);
+    --_color: var(--slotted-kbd-color, var(--slotted-text, CanvasText));
   }
 
   [data-ui-kbd][data-part-root] {
@@ -397,8 +404,9 @@
   [data-ui-kbd][data-variant='outline'] {
     --_background: transparent;
     /* The edge is all this variant draws, so it is the strong one all round. */
-    --_border: var(--slotted-border-strong, ButtonBorder);
-    --_color: inherit;
+    --_border: var(--slotted-kbd-border-color, var(--slotted-border-strong, ButtonBorder));
+    --_base: var(--_border);
+    --_color: var(--slotted-kbd-color, inherit);
   }
 
   /**
@@ -408,7 +416,7 @@
    * surface is the step `badge` calibrated to read on both.
    */
   [data-ui-kbd][data-variant='soft'] {
-    --_background: var(--slotted-tone-secondary-surface);
+    --_background: var(--slotted-kbd-surface, var(--slotted-tone-secondary-surface));
     /**
      * The tinted key draws the tone's own edge, as every `badge` variant does,
      * and it is not decoration here either. In the `high-contrast` scheme the
@@ -417,9 +425,9 @@
      * edge is also what carries it through forced colours, where the ground
      * flattens to `Canvas` for the same reason.
      */
-    --_border: var(--slotted-tone-secondary-border);
-    --_base: var(--slotted-tone-secondary-border);
-    --_color: var(--slotted-tone-secondary-text);
+    --_border: var(--slotted-kbd-border-color, var(--slotted-tone-secondary-border));
+    --_base: var(--_border);
+    --_color: var(--slotted-kbd-color, var(--slotted-tone-secondary-text));
   }
 
   /**
@@ -439,7 +447,7 @@
     --_background: transparent;
     --_border: transparent;
     --_base: transparent;
-    --_color: inherit;
+    --_color: var(--slotted-kbd-color, inherit);
   }
 
   [data-ui-kbd][data-part-root][data-variant='plain'] {

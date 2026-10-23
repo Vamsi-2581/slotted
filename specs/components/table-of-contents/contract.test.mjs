@@ -116,6 +116,7 @@ test('reads the sticky-top property page publishes, under the name section uses'
   assert.match(section.anchors.scrollMargin, /--slotted-page-sticky-top/);
   assert.match(contract.current.readingLine, /--slotted-page-sticky-top/);
   assert.match(contract.sticky.top, /--slotted-page-sticky-top/);
+  assert.match(contract.sticky.inset, /--slotted-table-of-contents-sticky-inset/);
 });
 
 /**

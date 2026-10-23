@@ -169,6 +169,17 @@
      composes — `result-state` in an empty or failed plot — and a bare
      descendant selector restyled theirs. */
   [data-ui-chart] > [data-part-header] {
+    /* The controls sit on the title's first line and hang past their box by
+       the difference, so the row does not grow the header. The actions and
+       the toolbar share it, which is what puts them on one centre. */
+    --_control-bleed: calc(
+      (
+          var(--slotted-font-size-lg, 1rem) * var(--slotted-line-height-lg, 1.5) -
+            var(--slotted-control-height-sm, 1.75rem)
+        ) /
+        2
+    );
+
     align-items: start;
     display: flex;
     gap: var(--slotted-space-4, 0.5rem);
@@ -242,6 +253,7 @@
     display: flex;
     flex: none;
     gap: var(--slotted-space-2, 0.25rem);
+    margin-block: var(--_control-bleed);
   }
 
   /**
@@ -258,15 +270,7 @@
     display: flex;
     flex: none;
     gap: var(--slotted-space-1, 0.125rem);
-    /* The buttons sit on the title's first line and hang past their box by
-       the difference, so the row does not grow the header. */
-    margin-block: calc(
-      (
-          var(--slotted-font-size-lg, 1rem) * var(--slotted-line-height-lg, 1.5) -
-            var(--slotted-control-height-sm, 1.75rem)
-        ) /
-        2
-    );
+    margin-block: var(--_control-bleed);
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-standard);
   }
 

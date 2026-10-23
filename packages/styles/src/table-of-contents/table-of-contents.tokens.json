@@ -43,6 +43,7 @@
   "--slotted-table-of-contents-color-hover",
   "--slotted-table-of-contents-indent",
   "--slotted-table-of-contents-marker-color",
+  "--slotted-table-of-contents-sticky-inset",
   "--slotted-table-of-contents-track-color",
   "--slotted-table-of-contents-track-width",
   "--slotted-text",

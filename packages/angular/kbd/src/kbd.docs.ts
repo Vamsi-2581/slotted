@@ -17,9 +17,17 @@ const apiRows = (rows: readonly ApiTuple[]): ApiRow[] =>
     description,
   }));
 
+const KBD_TOKEN_PURPOSES: Record<string, string> = {
+  '--slotted-kbd-surface':
+    'The ground of a raised or soft key cap. A theme sets it to keep key caps opaque inside a region that re-tints the tone tokens; absent, the variant’s own ground.',
+  '--slotted-kbd-border-color':
+    'The rim of a key cap in every variant but plain. Absent, the variant’s own edge.',
+  '--slotted-kbd-color': 'The ink of a key cap in every variant. Absent, the variant’s own ink.',
+};
+
 export const ANGULAR_KBD_TOKENS = kbdTokens.map((name) => ({
   name,
-  purpose: 'Theme-owned Kbd decision',
+  purpose: KBD_TOKEN_PURPOSES[name] ?? 'Theme-owned Kbd decision',
 }));
 
 const imports: ReferenceImport = {

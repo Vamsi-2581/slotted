@@ -253,12 +253,16 @@
    * viewport; the panel scrolls, the label stays. `100dvh` because a phone's
    * toolbar comes and goes; the panel's own scrollbar is hidden, because a
    * column of a dozen links with a scrollbar beside it reads as a control.
+   * The column stops a step clear of the chrome, as the content beside it
+   * stands clear of the header, instead of touching it.
    */
   [data-ui-table-of-contents][data-sticky] {
+    --_sticky-inset: var(--slotted-table-of-contents-sticky-inset, var(--slotted-space-5, 0.75rem));
+
     display: flex;
     flex-direction: column;
-    inset-block-start: var(--slotted-page-sticky-top, 0px);
-    max-block-size: calc(100dvh - var(--slotted-page-sticky-top, 0px));
+    inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + var(--_sticky-inset));
+    max-block-size: calc(100dvh - var(--slotted-page-sticky-top, 0px) - var(--_sticky-inset));
     position: sticky;
   }
 

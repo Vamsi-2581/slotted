@@ -160,9 +160,9 @@ test('places the mark on the title’s first line, as alert does', () => {
   assert.match(mark, /inset-block-start:round\(nearest,\(var\(--_mark-size\) - 1cap\) \/ 2,1px\)/);
   assert.match(mark, /margin-block-start:calc\(-1 \* var\(--_mark-size\)\)/);
   assert.match(rule(`${item}>[data-part-content]`), /align-self:baseline/);
-  /* The glyph is the binding's solid `Glyph`, whose ring reaches radius 11 of
-     24, so the icon box is 12/11 of the disc; the sheet paints no mark. */
-  assert.match(mark, /--slotted-icon-size:calc\(var\(--_mark-size\) \* 12 \/ 11\)/);
+  /* The glyph is a hand-drawn status mark whose silhouette fills its box, so
+     the icon box is the disc; the sheet paints no mark. */
+  assert.match(mark, /--slotted-icon-size:var\(--_mark-size\)/);
   assert.doesNotMatch(normalized, /mask-image/);
   assert.ok(!normalized.includes(`[data-part-icon]::before`), 'the mark is a pseudo-element');
   for (const [, glyph] of fragment.matchAll(

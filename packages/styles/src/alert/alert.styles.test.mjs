@@ -106,9 +106,8 @@ test('gives every tone its own colour and leaves the glyph to the binding', () =
 
 /**
  * The mark is a filled disc with the tone's symbol cut out of it, on the
- * title's first line: the binding's `Glyph` in its `solid` form, in a box
- * 12/11 of the mark so the glyph's filled ring (radius 11 of 24) is the mark's
- * own size. The size is rounded to an even number of pixels, the
+ * title's first line: the binding's `Glyph` drawing a hand-drawn status mark,
+ * whose silhouette fills its box, so the box is the mark. The size is rounded to an even number of pixels, the
  * disc is hung from the first line's baseline and lowered by a whole number of
  * pixels so its centre is the capitals' centre and it is snapped by the same
  * amount as the glyphs, and its own height is cancelled so the words sit where
@@ -127,7 +126,7 @@ test('draws the mark as a disc with the symbol cut out, on the title’s first l
     /inset-block-start:round\(nearest,\s*\(var\(--_mark-size\) - 1cap\) \/ 2,\s*1px\)/,
   );
   assert.match(icon, /margin-block-start:calc\(-1 \* var\(--_mark-size\)\)/);
-  assert.match(icon, /--slotted-icon-size:calc\(var\(--_mark-size\) \* 12 \/ 11\)/);
+  assert.match(icon, /--slotted-icon-size:var\(--_mark-size\)/);
   assert.ok(!/content:'[^']/.test(icon), 'the mark is drawn with a character');
   assert.match(rule(`${ui}>[data-part-content]`), /align-self:baseline/);
   assert.match(icon, /contain:layout/);

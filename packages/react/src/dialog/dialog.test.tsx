@@ -733,11 +733,11 @@ describe('AlertDialog', () => {
   });
 
   it.each([
-    ['accent', 'circle-info'],
-    ['secondary', 'circle-info'],
-    ['success', 'circle-check'],
-    ['warning', 'triangle-alert'],
-    ['danger', 'circle-alert'],
+    ['accent', 'status-info'],
+    ['secondary', 'status-info'],
+    ['success', 'status-success'],
+    ['warning', 'status-warning'],
+    ['danger', 'status-danger'],
   ] as const)('draws the %s mark as the %s glyph', (tone, glyph) => {
     render(<Confirm defaultOpen tone={tone} />);
 

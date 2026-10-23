@@ -537,17 +537,17 @@ export function DialogClose({
 }
 
 /**
- * The glyph each tone draws, and a triangle where no tone was resolved. Warning
+ * The glyph each tone draws, and the warning diamond where no tone was resolved. Warning
  * and danger differ in silhouette as well as colour, because under forced
  * colours the silhouette is all that is left.
  */
 const TONE_GLYPH: Record<DialogTone, GlyphName> = {
-  accent: 'circle-info',
-  secondary: 'circle-info',
-  info: 'circle-info',
-  success: 'circle-check',
-  warning: 'triangle-alert',
-  danger: 'circle-alert',
+  accent: 'status-info',
+  secondary: 'status-info',
+  info: 'status-info',
+  success: 'status-success',
+  warning: 'status-warning',
+  danger: 'status-danger',
 };
 
 /**
@@ -568,7 +568,7 @@ export function AlertDialogIcon({
     ...rest,
     children: children ?? (
       <Icon>
-        <Glyph name={dialog.tone === undefined ? 'triangle-alert' : TONE_GLYPH[dialog.tone]} />
+        <Glyph name={dialog.tone === undefined ? 'status-warning' : TONE_GLYPH[dialog.tone]} />
       </Icon>
     ),
     className,

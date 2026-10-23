@@ -44,12 +44,12 @@ import type {
  * map, and the binding draws it because a stylesheet paints no icon.
  */
 const TONE_GLYPH: Record<ToastTone, GlyphName | null> = {
-  accent: 'circle-info',
+  accent: 'status-info',
   secondary: null,
-  info: 'circle-info',
-  success: 'circle-check',
-  warning: 'circle-alert',
-  danger: 'circle-x',
+  info: 'status-info',
+  success: 'status-success',
+  warning: 'status-warning',
+  danger: 'status-danger',
 };
 
 /** Which way a message is dragged away, given the edge its region sits at. */

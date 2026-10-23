@@ -252,7 +252,7 @@
    *
    * The mark is what satisfies WCAG 2.2 1.4.1. Under forced colours every tone
    * ground becomes one system colour and the five boxes are identical; the
-   * circle, the triangle and the crossed circle are what is left.
+   * circle, the diamond and the symbols cut out of them are what is left.
    */
 
   [data-ui-alert][data-part-root][data-tone='accent'] {
@@ -411,18 +411,16 @@
 
   /* ── The mark ─────────────────────────────────────────────────────────
    *
-   * A filled disc on the title's first line, with the tone's symbol cut out
-   * of it: the binding's `Glyph` in its `solid` form, which fills the glyph's
-   * ring and cuts the symbol out of the fill with an SVG mask, so the ground
-   * shows through the symbol on every variant. Every tone's glyph is a
-   * circle, so every mark is the same round silhouette on the same centre;
+   * A filled silhouette on the title's first line, with the tone's symbol cut
+   * out of it: the binding's `Glyph` drawing a hand-drawn status mark, the
+   * symbol cut out of the fill with an SVG mask, so the ground shows through
+   * the symbol on every variant. Every silhouette — the circle, the warning's
+   * diamond — is symmetric on both axes, so every mark has the same centre;
    * the symbol inside is what tells the five apart when colour is gone. A
    * triangle was the one mark whose visual centre is not its box's centre,
-   * and it did not sit on the line the way the four circles did.
+   * and it did not sit on the line the way the circles did.
    *
-   * The glyph's filled ring reaches radius 11 of its 24-unit box, so the box
-   * is 12/11 of the mark and the disc is the mark's own size; the box
-   * overhangs the slot by half a unit on each side, centred.
+   * The silhouette fills its box edge to edge, so the box is the mark.
    *
    * The disc is painted in `currentcolor`: the tone's text role on `soft` and
    * `outline`, which the theme measures against those grounds, and `on-solid`
@@ -446,7 +444,7 @@
    * place on the first line, centred in it.
    */
   [data-ui-alert] > [data-part-icon] {
-    --slotted-icon-size: calc(var(--_mark-size) * 12 / 11);
+    --slotted-icon-size: var(--_mark-size);
 
     align-items: center;
     align-self: baseline;
@@ -736,8 +734,8 @@
    *
    * The mark needs no rule: its glyph fills with `currentcolor`, which the
    * system has already forced, and it keeps its silhouette, which is the whole
-   * reason a glyph is drawn per tone — a triangle and a crossed circle are
-   * still different from each other when neither of them is coloured.
+   * reason a glyph is drawn per tone — a diamond and a circle are still
+   * different from each other when neither of them is coloured.
    */
   @media (forced-colors: active) {
     /**

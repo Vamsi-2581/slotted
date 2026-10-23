@@ -38,7 +38,7 @@ export class SlToastIcon {
   private readonly item = inject(SlToastItem, { optional: true });
 
   /* Outside an item there is no tone, and the default tone's glyph stands. */
-  protected readonly mark = computed(() => (this.item === null ? 'circle-info' : this.item.mark()));
+  protected readonly mark = computed(() => (this.item === null ? 'status-info' : this.item.mark()));
   protected readonly loading = computed(() => this.item?.message().loading ?? false);
   protected readonly tone = computed(() => this.item?.tone() ?? 'accent');
 }

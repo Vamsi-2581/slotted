@@ -223,7 +223,7 @@ export const REACT_ALERT_DOCS = {
         "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'",
         'accent',
         'Alert',
-        'Which of the five semantic colours the message speaks in, and which mark it draws: circle-info, none for secondary, circle-check, circle-alert, circle-x',
+        'Which of the five semantic colours the message speaks in, and which mark it draws: status-info, none for secondary, status-success, status-warning, status-danger',
       ],
       [
         'variant',

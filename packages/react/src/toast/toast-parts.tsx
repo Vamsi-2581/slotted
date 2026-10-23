@@ -24,12 +24,12 @@ import type {
  * `secondary` draws none: a neutral message has no severity to state.
  */
 const TONE_GLYPH: Record<ToastTone, GlyphName | null> = {
-  accent: 'circle-info',
+  accent: 'status-info',
   secondary: null,
-  info: 'circle-info',
-  success: 'circle-check',
-  warning: 'circle-alert',
-  danger: 'circle-x',
+  info: 'status-info',
+  success: 'status-success',
+  warning: 'status-warning',
+  danger: 'status-danger',
 };
 
 /**

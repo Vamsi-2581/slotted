@@ -35,12 +35,12 @@ export type { AlertLive, AlertReach, AlertTone, AlertVariant } from './alert-def
  * nothing. Its absence is itself the difference under forced colours.
  */
 const TONE_GLYPH: Record<AlertTone, GlyphName | null> = {
-  accent: 'circle-info',
+  accent: 'status-info',
   secondary: null,
-  info: 'circle-info',
-  success: 'circle-check',
-  warning: 'circle-alert',
-  danger: 'circle-x',
+  info: 'status-info',
+  success: 'status-success',
+  warning: 'status-warning',
+  danger: 'status-danger',
 };
 
 /**

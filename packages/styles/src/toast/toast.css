@@ -421,14 +421,13 @@
   /* ── The mark ─────────────────────────────────────────────────────────
    *
    * `alert`'s mark, rule for rule: a filled disc on the title's first line,
-   * the binding's `Glyph` in its `solid` form, which fills the glyph's ring
-   * and cuts the tone's symbol out of the fill, so the ground shows through
-   * the symbol on every variant. Every tone's glyph is a circle, so every
-   * mark is the same round silhouette on the same centre, and the symbol
-   * inside is what tells the five apart when colour is gone.
+   * the binding's `Glyph` drawing a hand-drawn status mark, the silhouette
+   * filled and the tone's symbol cut out of it, so the ground shows through
+   * the symbol on every variant. Every silhouette — the circle, the warning's
+   * diamond — is symmetric on both axes, so every mark has the same centre,
+   * and the symbol inside is what tells the five apart when colour is gone.
    *
-   * The glyph's filled ring reaches radius 11 of its 24-unit box, so the box
-   * is 12/11 of the mark and the disc is the mark's own size.
+   * The silhouette fills its box edge to edge, so the box is the mark.
    *
    * The mark hangs from the first line's baseline. Grid baseline alignment
    * puts the mark's bottom edge on the words' baseline, and a relative offset
@@ -454,7 +453,7 @@
    * box stays, so the layout does not jump when the spinner becomes a tick.
    */
   [data-ui-toast] > [data-part-list] > [data-part-item] > [data-part-icon] {
-    --slotted-icon-size: calc(var(--_mark-size) * 12 / 11);
+    --slotted-icon-size: var(--_mark-size);
     /**
      * The loading mark is `progress-indicator`'s contained loader, and these
      * three are the whole of what this family says to it: the disc is the

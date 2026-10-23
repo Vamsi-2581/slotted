@@ -681,11 +681,11 @@ describe('SlAlertDialog', () => {
 
   it('draws each tone’s own glyph as the mark', () => {
     const glyphs = {
-      accent: 'circle-info',
-      secondary: 'circle-info',
-      success: 'circle-check',
-      warning: 'triangle-alert',
-      danger: 'circle-alert',
+      accent: 'status-info',
+      secondary: 'status-info',
+      success: 'status-success',
+      warning: 'status-warning',
+      danger: 'status-danger',
     } as const;
     for (const [tone, glyph] of Object.entries(glyphs)) {
       fixture.componentInstance.tone.set(tone as keyof typeof glyphs);

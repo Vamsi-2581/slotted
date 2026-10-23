@@ -11,60 +11,123 @@
  * Lengths are pixels and extents are the visible height of the panel, from the
  * bottom edge of its layer. Nothing here knows about fractions, stops or state:
  * the family decides where the release lands and asks for it.
+ *
+ * One panel has one motion: the body and the separator of a sheet share it, so
+ * a hand that takes the panel again mid-settle takes it from where it is drawn.
  */
 
 /** The fastest a settle may be, and the slowest. */
-const SETTLE_MIN_MS = 140;
-const SETTLE_MAX_MS = 420;
+const SETTLE_MIN_MS = 160;
+const SETTLE_MAX_MS = 480;
 /** The speed a settle with no fling in it is paced by, in pixels per second. */
-const SETTLE_REST_PX_PER_S = 700;
+const SETTLE_REST_PX_PER_S = 900;
 /** Past the panel's own height, so a shadow leaves with it. */
 const EXIT_MARGIN_PX = 32;
+/** How much steeper than its average a flung settle starts: it decelerates from the hand's speed. */
+const FLING_SLOPE = 2;
+/** The x of the curve's first control point; its y sets the slope the motion starts at. */
+const CURVE_X1 = 0.2;
 
 export interface SheetMotion {
   /**
    * Starts a gesture. `rest` is the visible height now and `top` the highest the
-   * hand may take it; the panel is sized to `top` when that is taller.
+   * hand may take it; the panel is sized to `top` when that is taller. When a
+   * settle is in flight the panel is taken from where it is drawn instead of
+   * `rest`, and the settle never resolves. Returns the visible height the
+   * gesture starts from.
    */
-  begin(rest: number, top: number): void;
-  /** Puts the visible height under the hand. Writes `translate`, reads nothing. */
+  begin(rest: number, top: number): number;
+  /**
+   * The visible height while the motion holds the panel — under the hand, or
+   * where a settle in flight has it now — and `null` when the stylesheet does.
+   */
+  visible(): number | null;
+  /** Whether the motion holds the panel: its measure is then the gesture's, not the stylesheet's. */
+  holds(): boolean;
+  /**
+   * Puts the visible height under the hand. Writes `translate`, reads nothing;
+   * past the height the panel was laid out at, the panel grows to it.
+   */
   follow(extent: number): void;
   /**
    * Animates from where the panel is to a visible height — `0` is out of sight —
    * at `velocity` pixels per second, positive toward a taller sheet. Resolves
-   * when the panel has arrived, or at once when the motion is reduced.
+   * when the panel has arrived, or at once when the motion is reduced; never
+   * when a new gesture or `end` takes the panel first.
    * `duration` fixes the time it takes, in milliseconds, for a panel leaving
    * that something else waits on; the curve is then drawn to leave at `velocity`.
    */
   settle(extent: number, velocity: number, duration?: number): Promise<void>;
-  /** Gives the panel back to its stylesheet. The panel stays where it is drawn until then. */
+  /** Gives the panel back to its stylesheet, in one frame and without easing. */
   end(): void;
 }
 
+const motions = new WeakMap<HTMLElement, SheetMotion>();
+
+/**
+ * Whether a gesture or its settle holds the panel. What measures the panel at
+ * rest skips while it does: the height it would read is the gesture's.
+ */
+export function sheetMotionHolds(panel: HTMLElement): boolean {
+  return motions.get(panel)?.holds() ?? false;
+}
+
+/** The vertical length of a computed `translate`: `none`, `x` or `x y [z]`. */
+function translatedY(value: string): number {
+  const y = Number.parseFloat(value.split(' ')[1] ?? '');
+  return Number.isFinite(y) ? y : 0;
+}
+
 export function createSheetMotion(panel: HTMLElement): SheetMotion {
+  const existing = motions.get(panel);
+  if (existing !== undefined) return existing;
+
   const view = panel.ownerDocument.defaultView;
   /** The height the panel is laid out at, and how far down it is moved. */
   let box = 0;
   let offset = 0;
-  /** Ends the settle in flight, as if it had arrived. */
+  /** Whether the inline styles are the motion's, and the settle in flight. */
+  let held = false;
   let cancelSettle: (() => void) | null = null;
 
   const write = (next: number) => {
     offset = next;
     panel.style.translate = `0 ${String(next)}px`;
   };
+  const layOut = (height: number) => {
+    box = height;
+    panel.style.blockSize = `${String(height)}px`;
+  };
 
-  return {
+  const motion: SheetMotion = {
     begin(rest, top) {
+      const from = motion.visible() ?? rest;
       cancelSettle?.();
-      box = Math.max(rest, top);
-      /* The stylesheet eases the measure and the slide; a gesture is neither. */
+      /* The stylesheet eases the measure and the slide and caps the height; a
+         gesture is none of those. */
       panel.style.transition = 'none';
-      panel.style.blockSize = `${String(box)}px`;
-      write(box - rest);
+      panel.style.maxBlockSize = 'none';
+      held = true;
+      /* `box` is 0 unless a gesture already laid the panel out. */
+      layOut(Math.max(from, top, box));
+      write(box - from);
+      return from;
+    },
+
+    holds() {
+      return held;
+    },
+
+    visible() {
+      if (!held) return null;
+      /* A settle in flight is a transition: its value now is the computed one. */
+      if (cancelSettle !== null && view !== null)
+        return Math.max(0, box - translatedY(view.getComputedStyle(panel).translate));
+      return Math.max(0, box - offset);
     },
 
     follow(extent) {
+      if (extent > box) layOut(extent);
       write(box - extent);
     },
 
@@ -76,60 +139,74 @@ export function createSheetMotion(panel: HTMLElement): SheetMotion {
         typeof view?.matchMedia === 'function' &&
         view.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (distance < 1 || reduced || view === null) {
+        panel.style.transition = 'none';
         write(to);
         return Promise.resolve();
       }
-      /* Toward the target the hand's own speed paces the motion; against it, or
-         slow, the rest speed does. */
-      const toward = to > offset ? -velocity : velocity;
+      /* The hand's speed toward the target; against it, it counts as none. */
+      const toward = Math.max(0, to > offset ? -velocity : velocity);
       const flung = toward >= SETTLE_REST_PX_PER_S;
-      const speed = flung ? toward : SETTLE_REST_PX_PER_S;
       const duration =
         fixed !== undefined && fixed > 0
           ? fixed
-          : Math.min(SETTLE_MAX_MS, Math.max(SETTLE_MIN_MS, (distance / speed) * 1000));
-      /* A fixed time with a hand's speed: the curve's first stretch is as steep
-         as the hand was, so the panel leaves at the speed it was let go. */
-      const easing =
-        fixed !== undefined && fixed > 0
-          ? `cubic-bezier(0.3, ${String(Math.min(1, Math.max(0, (toward * duration) / 1000 / distance) * 0.3).toFixed(3))}, 0.2, 1)`
-          : flung
-            ? 'linear'
-            : 'cubic-bezier(0.2, 0, 0, 1)';
+          : Math.min(
+              SETTLE_MAX_MS,
+              Math.max(
+                SETTLE_MIN_MS,
+                flung
+                  ? ((FLING_SLOPE * distance) / toward) * 1000
+                  : (distance / SETTLE_REST_PX_PER_S) * 1000,
+              ),
+            );
+      /* The curve's first stretch is as steep as the hand was, so the panel
+         leaves at the speed it was let go and decelerates onto the target. */
+      const slope = (toward * duration) / 1000 / distance;
+      const easing = `cubic-bezier(${String(CURVE_X1)}, ${Math.min(1, slope * CURVE_X1).toFixed(3)}, 0, 1)`;
       /* A transition and not an animation object: presence waits for the leaving
          panel by the transition the node declares, and this is the one it
          declares. Reading the value commits the start the transition leaves. */
       void view.getComputedStyle(panel).translate;
-      panel.style.transition = `translate ${String(duration)}ms ${easing}`;
+      panel.style.transition = `translate ${String(Math.round(duration))}ms ${easing}`;
       write(to);
       return new Promise<void>((resolve) => {
         const arrived = (event: Event) => {
           if (event.target === panel && (event as TransitionEvent).propertyName === 'translate')
-            done();
+            settled(true);
         };
-        const timer = setTimeout(done, duration + 60);
-        function done() {
+        const timer = setTimeout(() => settled(true), duration + 60);
+        function settled(reached: boolean) {
           clearTimeout(timer);
           panel.removeEventListener('transitionend', arrived);
           panel.removeEventListener('transitioncancel', arrived);
-          if (cancelSettle === done) cancelSettle = null;
-          resolve();
+          if (cancelSettle === cancel) cancelSettle = null;
+          if (reached) resolve();
         }
+        const cancel = () => settled(false);
         panel.addEventListener('transitionend', arrived);
         panel.addEventListener('transitioncancel', arrived);
-        cancelSettle = done;
+        cancelSettle = cancel;
       });
     },
 
     end() {
       cancelSettle?.();
+      if (!held) return;
+      held = false;
+      /* Nothing eases while the stylesheet takes the measure back: the panel is
+         drawn at the extent the family has just requested, in the same frame. */
+      panel.style.transition = 'none';
       panel.style.removeProperty('block-size');
+      panel.style.removeProperty('max-block-size');
       panel.style.removeProperty('translate');
-      /* The measure and the slide may ease again only once the stylesheet has
-         the new measure, or the panel eases from the old one to it. */
-      const release = () => panel.style.removeProperty('transition');
+      box = 0;
+      offset = 0;
+      const release = () => {
+        if (!held) panel.style.removeProperty('transition');
+      };
       if (view === null) release();
       else view.requestAnimationFrame(release);
     },
   };
+  motions.set(panel, motion);
+  return motion;
 }

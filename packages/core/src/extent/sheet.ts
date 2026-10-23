@@ -17,7 +17,8 @@
  * Nothing here knows about fractions or stops. It reports a distance and a
  * speed, both positive while the sheet grows, and the family decides.
  */
-import { SHEET_DRAG_SLOP_PX } from './extent';
+import { addExtentSample, extentVelocity, SHEET_DRAG_SLOP_PX } from './extent';
+import type { ExtentSample } from './extent';
 
 export interface SheetDragOptions {
   /** Read at the start of every gesture: the family may have turned it off. */
@@ -71,16 +72,12 @@ function hasSelection(panel: HTMLElement): boolean {
   return selection !== null && !selection.isCollapsed && selection.toString() !== '';
 }
 
-interface Sample {
-  readonly y: number;
-  readonly at: number;
-}
-
 /** Listens on the panel and returns the function that stops listening. */
 export function attachSheetDrag(panel: HTMLElement, options: SheetDragOptions): () => void {
   let origin: { x: number; y: number; target: Element } | null = null;
   let owner: 'pending' | 'sheet' | 'other' = 'other';
-  let samples: Sample[] = [];
+  /** Upward is positive: the `fraction` of a sample here is the negated `clientY`. */
+  let samples: ExtentSample[] = [];
 
   const reset = () => {
     origin = null;
@@ -120,25 +117,21 @@ export function attachSheetDrag(panel: HTMLElement, options: SheetDragOptions): 
           ? 'sheet'
           : 'other';
       if (owner === 'other') return;
+      /* The distance counts from here: counted from the touch, the slop the
+         decision waited for would arrive as one step under the hand. */
+      origin = { ...origin, y: touch.clientY };
       options.onStart();
     }
 
     if (event.cancelable) event.preventDefault();
-    samples = [...samples, { at: event.timeStamp, y: touch.clientY }].slice(-3);
-    options.onMove(-dy);
+    samples = addExtentSample(samples, { at: event.timeStamp, fraction: -touch.clientY });
+    options.onMove(origin.y - touch.clientY);
   };
 
-  const end = () => {
-    if (owner === 'sheet') {
-      const first = samples[0];
-      const last = samples.at(-1);
-      const elapsed = first === undefined || last === undefined ? 0 : last.at - first.at;
-      const velocity =
-        first === undefined || last === undefined || elapsed <= 0
-          ? 0
-          : (-(last.y - first.y) / elapsed) * 1000;
-      options.onEnd(velocity);
-    }
+  const end = (event: TouchEvent) => {
+    /* A cancelled touch was not let go: it has no speed to carry on. */
+    if (owner === 'sheet')
+      options.onEnd(event.type === 'touchcancel' ? 0 : extentVelocity(samples, event.timeStamp));
     reset();
   };
 

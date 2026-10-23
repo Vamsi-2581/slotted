@@ -5,6 +5,7 @@ import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import {
   attachSheetDrag,
   createSheetMotion,
+  sheetMotionHolds,
   dampenExtent,
   extentBounds,
   isInlineSide,
@@ -596,6 +597,8 @@ export class SlDrawer implements OnInit {
       }
       const inline = isInlineSide(this.resolvedSide());
       const read = () => {
+        /* A gesture or its settle has the panel at the gesture's height. */
+        if (sheetMotionHolds(panel)) return;
         const rect = box.getBoundingClientRect();
         const span = inline ? rect.width : rect.height;
         if (span <= 0) return;
@@ -665,9 +668,10 @@ export class SlDrawer implements OnInit {
       const motion = createSheetMotion(panel);
       this.sheetMotion?.end();
       this.sheetMotion = motion;
+      /* Where the panel is drawn: under a settle still in flight it is not its height. */
       const now = () => {
         span = node.getBoundingClientRect().height;
-        return span > 0 ? panel.offsetHeight / span : 0;
+        return span > 0 ? (motion.visible() ?? panel.offsetHeight) / span : 0;
       };
       /* What the template wrote on the layer before the drag, put back on release. */
       let undimmed = false;
@@ -675,22 +679,31 @@ export class SlDrawer implements OnInit {
         motion.end();
         node.toggleAttribute('data-undimmed', undimmed);
       };
+      /* The stops, measured while the stylesheet has the panel. A panel the
+         motion holds measures the gesture's height, so the stops of the gesture
+         that took it stand. */
+      const stopsNow = () =>
+        motion.holds() && measured.stops.length > 0 ? measured : this.measureStops(panel, span);
 
       onCleanup(
         attachSheetDrag(panel, {
           enabled: () => this.open(),
           canGrow: () => {
             const at = now();
-            const top = this.measureStops(panel, span).stops.at(-1);
+            const top = stopsNow().stops.at(-1);
             return top !== undefined && at < top && !sameStop(at, top);
           },
           onStart: () => {
-            start = now();
+            const taken = motion.holds();
+            const resting = now();
+            measured = stopsNow();
+            /* A hand that takes the panel mid-settle keeps the scrim the first one found. */
+            if (!taken) undimmed = node.hasAttribute('data-undimmed');
+            start = motion.begin(resting * span, (measured.stops.at(-1) ?? 0) * span) / span;
             last = start;
-            measured = this.measureStops(panel, span);
-            undimmed = node.hasAttribute('data-undimmed');
-            motion.begin(start * span, Math.max(measured.stops.at(-1) ?? start, start) * span);
-            this.dragging.set(true);
+            /* The attribute and not the signal: a change detection here is a
+               frame the hand would wait for. */
+            node.toggleAttribute('data-dragging', true);
           },
           onMove: (distance) => {
             if (span <= 0) return;
@@ -700,7 +713,7 @@ export class SlDrawer implements OnInit {
             node.toggleAttribute('data-undimmed', at < this.scrimFrom());
           },
           onEnd: (velocity) => {
-            this.dragging.set(false);
+            node.toggleAttribute('data-dragging', false);
             const landed = settleExtent({
               fraction: Math.min(last, measured.stops.at(-1) ?? last),
               span,

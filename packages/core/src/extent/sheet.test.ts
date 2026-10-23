@@ -93,7 +93,7 @@ describe('attachSheetDrag', () => {
     return calls;
   };
 
-  it('claims a downward gesture past the slop and cancels its move', () => {
+  it('claims a downward gesture past the slop, cancels its move and counts from the claim', () => {
     const calls = listen();
     body.dispatchEvent(touch(body, 'touchstart', 100));
     body.dispatchEvent(touch(body, 'touchmove', 104, 0, 10));
@@ -102,9 +102,36 @@ describe('attachSheetDrag', () => {
     body.dispatchEvent(move);
     expect(calls.start).toBe(1);
     expect(move.defaultPrevented).toBe(true);
-    expect(calls.moves.at(-1)).toBe(-40);
-    body.dispatchEvent(touch(body, 'touchend', 140, 0, 30));
+    /* The distance counts from the claim, so the slop does not arrive as one step. */
+    expect(calls.moves.at(-1)).toBe(0);
+    body.dispatchEvent(touch(body, 'touchmove', 160, 0, 25));
+    expect(calls.moves.at(-1)).toBe(-20);
+    body.dispatchEvent(touch(body, 'touchend', 160, 0, 30));
     expect(calls.end).toHaveLength(1);
+  });
+
+  /** 200 px in 100 ms, upward, let go at once: 2000 px/s toward a taller sheet. */
+  it('carries the speed of a hand let go while it moves', () => {
+    const calls = listen(true);
+    body.dispatchEvent(touch(body, 'touchstart', 500, 0, 0));
+    body.dispatchEvent(touch(body, 'touchmove', 480, 0, 10));
+    for (let step = 1; step <= 10; step += 1) {
+      body.dispatchEvent(touch(body, 'touchmove', 480 - step * 20, 0, 10 + step * 10));
+    }
+    body.dispatchEvent(touch(body, 'touchend', 280, 0, 110));
+    expect(calls.end[0]).toBeCloseTo(2000, -1);
+  });
+
+  /** The same flick held still for longer than the window before lifting is not a fling. */
+  it('reads no speed from a hand that stopped before it lifted', () => {
+    const calls = listen(true);
+    body.dispatchEvent(touch(body, 'touchstart', 500, 0, 0));
+    body.dispatchEvent(touch(body, 'touchmove', 480, 0, 10));
+    for (let step = 1; step <= 10; step += 1) {
+      body.dispatchEvent(touch(body, 'touchmove', 480 - step * 20, 0, 10 + step * 10));
+    }
+    body.dispatchEvent(touch(body, 'touchend', 280, 0, 260));
+    expect(calls.end).toEqual([0]);
   });
 
   it('leaves a sideways gesture and a field alone', () => {

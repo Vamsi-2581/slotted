@@ -214,13 +214,15 @@ describe('a bottom sheet dragged and flung', () => {
     const x = box.left + box.width / 2;
     const y = box.top + box.height / 2;
 
+    /* The first move only claims the gesture; the five after it carry the panel
+       35 px a frame, a fling at any frame rate the test document runs at. */
     await touch('touchStart', x, y);
     for (let step = 1; step <= 6; step += 1) {
-      await touch('touchMove', x, y + step * 25);
+      await touch('touchMove', x, y + step * 35);
       await frame();
     }
     const released = panel.getBoundingClientRect().top;
-    await touch('touchEnd', x, y + 150);
+    await touch('touchEnd', x, y + 210);
 
     const tops: number[] = [released];
     for (let index = 0; index < 60; index += 1) {

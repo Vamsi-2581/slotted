@@ -5,6 +5,7 @@ import {
   EXTENT_STEP_PX,
   anchorsAtStart,
   extentAtPoint,
+  addExtentSample,
   extentVelocity,
   holdResizeGesture,
   isInlineSide,
@@ -314,7 +315,7 @@ export class SlDrawerResizer {
    * then. The panel follows the pointer from that offset rather than jumping
    * its edge under it, so a press that does not move is a tap and moves nothing.
    */
-  private press: { x: number; y: number; offset: number; moved: boolean } | null = null;
+  private press: { x: number; y: number; at: number; offset: number; moved: boolean } | null = null;
   /** What `Enter` restores to once it has collapsed the panel. */
   private collapsed: number | null = null;
   /** What the document looked like before the drag, and how to put it back. */
@@ -327,6 +328,10 @@ export class SlDrawerResizer {
   private motion: SheetMotion | null = null;
   /** The stops measured before the panel was laid out for the drag, which would change a content stop. */
   private stopsAtStart: { stops: number[]; rest: number | undefined } | null = null;
+  /** The stops of the last gesture, which stand while its settle holds the panel. */
+  private lastStops: { stops: number[]; rest: number | undefined } | null = null;
+  /** The layer as the gesture began: the sheet's drag reads no layout per move. */
+  private sheetRect: DOMRect | null = null;
 
   protected readonly orientation = computed(() =>
     isInlineSide(this.drawer.resolvedSide()) ? 'vertical' : 'horizontal',
@@ -399,6 +404,7 @@ export class SlDrawerResizer {
     this.native.setPointerCapture(event.pointerId);
     this.native.focus();
     this.press = {
+      at: fraction,
       moved: false,
       offset: this.current() - fraction,
       x: event.clientX,
@@ -410,6 +416,19 @@ export class SlDrawerResizer {
   protected pointerMove(event: PointerEvent) {
     const held = this.press;
     if (held === null) return;
+    /* Under the hand, a sheet is one division and one write per move. */
+    const sheetBox = this.sheetRect;
+    if (this.motion !== null && sheetBox !== null) {
+      const fraction = clamp(
+        (sheetBox.bottom - event.clientY) / sheetBox.height + held.offset,
+        0,
+        1,
+      );
+      this.dragged = fraction;
+      this.samples = addExtentSample(this.samples, { at: event.timeStamp, fraction });
+      this.motion.follow(fraction * sheetBox.height);
+      return;
+    }
     const at = this.fractionAt(event);
     if (at === null) return;
 
@@ -424,30 +443,46 @@ export class SlDrawerResizer {
         this.native.ownerDocument,
         isInlineSide(this.drawer.resolvedSide()) ? 'col-resize' : 'row-resize',
       );
-      this.drawer.dragging.set(true);
       const panel = this.native.parentElement;
-      const span = this.span();
+      const layer = this.drawer.measuringBox();
+      const rect = layer?.getBoundingClientRect();
       if (
         this.drawer.resolvedSide() === 'bottom' &&
         this.drawer.resolvedMode() === 'overlay' &&
         panel !== null &&
-        span > 0
+        layer !== null &&
+        rect !== undefined &&
+        rect.height > 0
       ) {
-        this.stopsAtStart = this.stopsNow();
+        const span = rect.height;
+        const sheet = createSheetMotion(panel);
+        const taken = sheet.holds();
+        /* A panel the motion holds measures the gesture's height: the stops of
+           the gesture that took it stand. */
+        this.stopsAtStart = (taken && this.lastStops) || this.stopsNow();
+        this.lastStops = this.stopsAtStart;
         const top = this.stopsAtStart.stops.at(-1) ?? this.drawer.bounds().max;
-        const current = this.current();
-        this.motion = createSheetMotion(panel);
-        this.motion.begin(current * span, Math.max(top, current) * span);
+        /* A panel with no layout yet (none drawn) is where the state says. */
+        const drawn = sheet.visible() ?? (panel.offsetHeight || this.current() * span);
+        const from = sheet.begin(drawn, top * span);
+        this.motion = sheet;
+        this.sheetRect = rect;
+        /* The attribute and not the signal: a change detection here is a frame
+           the hand would wait for. */
+        panel.parentElement?.toggleAttribute('data-dragging', true);
+        /* The panel follows from where it is drawn, which the extent in state
+           is not under a content cap or a settle in flight. */
+        held.offset = from / span - (rect.bottom - held.y) / span;
+        this.pointerMove(event);
+        return;
       }
+      this.drawer.dragging.set(true);
     }
 
     const fraction = clamp(at + held.offset, 0, 1);
     this.dragged = fraction;
-    /* Three samples is what `extentVelocity` reads; keeping more would only let
-       an older, slower stretch of the same drag dilute the flick. */
-    this.samples = [...this.samples, { at: event.timeStamp, fraction }].slice(-3);
-    if (this.motion === null) this.drawer.requestExtent(fraction, 'pointer', event);
-    else this.motion.follow(fraction * this.span());
+    this.samples = addExtentSample(this.samples, { at: event.timeStamp, fraction });
+    this.drawer.requestExtent(fraction, 'pointer', event);
   }
 
   /**
@@ -486,17 +521,22 @@ export class SlDrawerResizer {
 
     this.gesture?.();
     this.gesture = null;
-    this.drawer.dragging.set(false);
+    const sheet = this.motion;
+    this.motion = null;
+    const rect = this.sheetRect;
+    this.sheetRect = null;
+    if (sheet === null) this.drawer.dragging.set(false);
+    else this.native.parentElement?.parentElement?.toggleAttribute('data-dragging', false);
 
     const bounds = this.drawer.bounds();
-    const span = this.span();
+    const span = rect?.height ?? this.span();
     const last = this.dragged ?? this.current();
-    const velocity = extentVelocity(this.samples);
+    /* A cancelled pointer was not let go: it has no speed to carry on. */
+    const velocity =
+      event.type === 'pointercancel' ? 0 : extentVelocity(this.samples, event.timeStamp);
     this.dragged = null;
     this.samples = [];
 
-    const sheet = this.motion;
-    this.motion = null;
     const { rest, stops } = (sheet && this.stopsAtStart) || this.stopsNow();
     this.stopsAtStart = null;
     /* Where the release lands: a stop, the floor, or out. */
@@ -515,9 +555,16 @@ export class SlDrawerResizer {
 
     if (landed === 'close') {
       const layer = this.drawer.measuringBox();
+      const floor = stops.length > 0 ? (stops[0] as number) : bounds.min;
       void sheet?.settle(0, velocity * span, layer === null ? undefined : exitDuration(layer));
       this.drawer.request(false, 'pointer', undefined, event);
-      this.drawer.requestExtent(stops.length > 0 ? stops[0] : bounds.min, 'pointer', event);
+      this.drawer.requestExtent(floor, 'pointer', event);
+      /* A close the consumer refused leaves the panel open: it comes back to the floor. */
+      if (sheet !== null) {
+        requestAnimationFrame(() => {
+          if (this.drawer.open()) void sheet.settle(floor * span, 0).then(sheet.end);
+        });
+      }
       return;
     }
     if (sheet === null) {

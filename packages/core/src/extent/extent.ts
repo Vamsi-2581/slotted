@@ -247,28 +247,46 @@ export function projectExtent({
 /**
  * A sample of where the pointer was and when, for the velocity a release reads.
  *
- * Three samples rather than two: one stalled frame before the hand lifts reads
- * as a stop, and a gesture that ended in a pause is exactly the gesture a
- * reader means to end where it is. Averaging over the last three keeps the
- * pause honest without letting it erase the flick before it.
+ * The velocity is read over the last `EXTENT_VELOCITY_WINDOW_MS` of movement,
+ * not over a count of samples: a stream at 120 Hz delivers three samples in
+ * 17 ms, which is noise. A hand that held still for `EXTENT_STOPPED_MS` before
+ * lifting meant to end where it is, and reads as none. Both are the horizon and
+ * the stop time of Android's `VelocityTracker`, with the stop time widened for
+ * a main thread that delivers a move late.
  */
 export interface ExtentSample {
   readonly fraction: number;
   readonly at: number;
 }
 
+/** How far back from the last move a velocity looks, in milliseconds. */
+export const EXTENT_VELOCITY_WINDOW_MS = 100;
+/** How long a hand may rest before lifting and still carry its speed, in milliseconds. */
+export const EXTENT_STOPPED_MS = 60;
+
+/** The samples a drag keeps: the new one and those inside the window before it. */
+export function addExtentSample(
+  samples: readonly ExtentSample[],
+  sample: ExtentSample,
+): ExtentSample[] {
+  return [...samples.filter((kept) => kept.at >= sample.at - EXTENT_VELOCITY_WINDOW_MS), sample];
+}
+
 /**
  * Fractions per second, from the samples a drag collected.
  *
- * An empty or single-sample history has no velocity to report and answers
- * nought, which falls the caller back on distance alone — the behaviour a
- * pointer stream that delivered one event before release has to have.
+ * `releasedAt` is when the hand lifted; a release later than `EXTENT_STOPPED_MS`
+ * after the last move answers nought. An empty or single-sample window has no
+ * velocity to report and answers nought too, which falls the caller back on
+ * distance alone.
  */
-export function extentVelocity(samples: readonly ExtentSample[]): number {
-  if (samples.length < 2) return 0;
-
-  const last = samples[samples.length - 1] as ExtentSample;
-  const first = samples[Math.max(0, samples.length - 3)] as ExtentSample;
+export function extentVelocity(samples: readonly ExtentSample[], releasedAt?: number): number {
+  const last = samples.at(-1);
+  if (last === undefined) return 0;
+  if (releasedAt !== undefined && releasedAt - last.at > EXTENT_STOPPED_MS) return 0;
+  const recent = samples.filter((sample) => sample.at >= last.at - EXTENT_VELOCITY_WINDOW_MS);
+  const first = recent[0];
+  if (recent.length < 2 || first === undefined) return 0;
   const elapsed = last.at - first.at;
   if (elapsed <= 0) return 0;
 

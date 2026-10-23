@@ -5,6 +5,7 @@ import {
   attachSheetDrag,
   createSheetMotion,
   dampenExtent,
+  addExtentSample,
   extentVelocity,
   EXTENT_LARGE_STEP_PX,
   EXTENT_STEP_PX,
@@ -15,6 +16,7 @@ import {
   sameStop,
   settleExtent,
   SHEET_FLING_PX_PER_S,
+  sheetMotionHolds,
   stopAsExtent,
   stepAmountFromPixels,
   stepExtent,
@@ -497,6 +499,8 @@ export function DrawerPanel({
       return;
     const inline = isInlineSide(drawer.side);
     const read = () => {
+      /* A gesture or its settle has the panel at the gesture's height. */
+      if (sheetMotionHolds(panel)) return;
       const rect = box.getBoundingClientRect();
       const span = inline ? rect.width : rect.height;
       if (span <= 0) return;
@@ -565,29 +569,41 @@ export function DrawerPanel({
     const motion = createSheetMotion(panel);
     sheetMotion.current = motion;
 
+    /* Where the panel is drawn: under a settle still in flight it is not its height. */
     const now = () => {
       span = layer.getBoundingClientRect().height;
-      return span > 0 ? panel.offsetHeight / span : 0;
+      return span > 0 ? (motion.visible() ?? panel.offsetHeight) / span : 0;
     };
     const finish = () => {
       motion.end();
       layer.toggleAttribute('data-undimmed', undimmed);
     };
+    /* The stops, measured while the stylesheet has the panel. A panel the
+       motion holds measures the gesture's height, so the stops of the gesture
+       that took it stand. */
+    const stopsNow = () =>
+      motion.holds() && measured.stops.length > 0
+        ? measured
+        : measureStops(current.current, panel, span);
 
     const detach = attachSheetDrag(panel, {
       enabled: () => current.current.open,
       canGrow: () => {
         const at = now();
-        const top = measureStops(current.current, panel, span).stops.at(-1);
+        const top = stopsNow().stops.at(-1);
         return top !== undefined && at < top && !sameStop(at, top);
       },
       onStart: () => {
-        start = now();
+        const taken = motion.holds();
+        const resting = now();
+        measured = stopsNow();
+        /* A hand that takes the panel mid-settle keeps the scrim the first one found. */
+        if (!taken) undimmed = layer.hasAttribute('data-undimmed');
+        start = motion.begin(resting * span, (measured.stops.at(-1) ?? 0) * span) / span;
         last = start;
-        measured = measureStops(current.current, panel, span);
-        undimmed = layer.hasAttribute('data-undimmed');
-        motion.begin(start * span, Math.max(measured.stops.at(-1) ?? start, start) * span);
-        current.current.setDragging(true);
+        /* The attribute and not the state: a render here, for the whole drawer,
+           is a frame the hand would wait for. */
+        layer.toggleAttribute('data-dragging', true);
       },
       onMove: (distance) => {
         if (span <= 0) return;
@@ -599,7 +615,7 @@ export function DrawerPanel({
       },
       onEnd: (velocity) => {
         const drawerNow = current.current;
-        drawerNow.setDragging(false);
+        layer.toggleAttribute('data-dragging', false);
         const landed = settleExtent({
           fraction: Math.min(last, measured.stops.at(-1) ?? last),
           span,
@@ -775,6 +791,10 @@ export function DrawerResizer({
   const motion = useRef<SheetMotion | null>(null);
   /** The stops measured before the panel was laid out for the drag, which would change a content stop. */
   const stopsAtStart = useRef<{ stops: number[]; rest: number | undefined } | null>(null);
+  /** The stops of the last gesture, which stand while its settle holds the panel. */
+  const lastStops = useRef<{ stops: number[]; rest: number | undefined } | null>(null);
+  /** The layer as the gesture began: the sheet's drag reads no layout per move. */
+  const sheetRect = useRef<DOMRect | null>(null);
   useEffect(() => () => motion.current?.end(), []);
 
   const inline = isInlineSide(drawer.side);
@@ -805,7 +825,7 @@ export function DrawerResizer({
     drawer.requestExtent(fraction, 'pointer', source);
   };
 
-  const pointAt = (event: PointerEvent<HTMLDivElement>, rect: DOMRect) =>
+  const pointAt = (event: { clientX: number; clientY: number }, rect: DOMRect) =>
     extentAtPoint({
       point: { x: event.clientX, y: event.clientY },
       rect,
@@ -835,6 +855,19 @@ export function DrawerResizer({
   const pointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const held = press.current;
     if (held === null) return;
+    /* Under the hand, a sheet is one division and one write per move. */
+    const sheetBox = sheetRect.current;
+    if (motion.current !== null && sheetBox !== null) {
+      const fraction = clamp(
+        (sheetBox.bottom - event.clientY) / sheetBox.height + held.offset,
+        0,
+        1,
+      );
+      samples.current = addExtentSample(samples.current, { at: event.timeStamp, fraction });
+      dragged.current = fraction;
+      motion.current.follow(fraction * sheetBox.height);
+      return;
+    }
     const rect = layerRect();
     if (rect === null) return;
 
@@ -849,25 +882,41 @@ export function DrawerResizer({
         node.current?.ownerDocument,
         inline ? 'col-resize' : 'row-resize',
       );
-      drawer.setDragging(true);
       const panel = drawer.nodes.panel;
-      if (drawer.side === 'bottom' && drawer.mode === 'overlay' && panel !== null) {
-        stopsAtStart.current = stopsNow();
+      const layer = drawer.nodes.layer;
+      if (
+        drawer.side === 'bottom' &&
+        drawer.mode === 'overlay' &&
+        panel !== null &&
+        layer !== null
+      ) {
+        const sheet = createSheetMotion(panel);
+        const taken = sheet.holds();
+        /* A panel with no layout yet (none drawn) is where the state says. */
+        const drawn = sheet.visible() ?? (panel.offsetHeight || current * rect.height);
+        /* A panel the motion holds measures the gesture's height: the stops of
+           the gesture that took it stand. */
+        stopsAtStart.current = (taken && lastStops.current) || stopsNow();
+        lastStops.current = stopsAtStart.current;
         const top = stopsAtStart.current.stops.at(-1) ?? drawer.maxExtent;
-        motion.current = createSheetMotion(panel);
-        motion.current.begin(current * rect.height, Math.max(top, current) * rect.height);
+        const from = sheet.begin(drawn, top * rect.height);
+        motion.current = sheet;
+        sheetRect.current = rect;
+        /* The attribute and not the state: a render here, for the whole drawer,
+           is a frame the hand would wait for. */
+        layer.toggleAttribute('data-dragging', true);
+        /* The panel follows from where it is drawn, which the extent in state
+           is not under a content cap or a settle in flight. */
+        held.offset = from / rect.height - (rect.bottom - held.y) / rect.height;
+        pointerMove(event);
+        return;
       }
+      drawer.setDragging(true);
     }
 
     const fraction = clamp(pointAt(event, rect) + held.offset, 0, 1);
-    /* Three samples is what `extentVelocity` reads; keeping more would only
-       let an older, slower stretch of the same drag dilute the flick. */
-    samples.current = [...samples.current, { at: event.timeStamp, fraction }].slice(-3);
-    if (motion.current === null) move(fraction, event);
-    else {
-      dragged.current = fraction;
-      motion.current.follow(fraction * rect.height);
-    }
+    samples.current = addExtentSample(samples.current, { at: event.timeStamp, fraction });
+    move(fraction, event);
   };
 
   /**
@@ -906,17 +955,22 @@ export function DrawerResizer({
 
     gesture.current?.();
     gesture.current = null;
-    drawer.setDragging(false);
-
-    const rect = layerRect();
-    const span = rect === null ? 0 : inline ? rect.width : rect.height;
-    const last = dragged.current ?? current;
-    const velocity = extentVelocity(samples.current);
-    dragged.current = null;
-    samples.current = [];
 
     const sheet = motion.current;
     motion.current = null;
+    const rect = sheetRect.current ?? layerRect();
+    sheetRect.current = null;
+    if (sheet === null) drawer.setDragging(false);
+    else drawer.nodes.layer?.toggleAttribute('data-dragging', false);
+
+    const span = rect === null ? 0 : inline ? rect.width : rect.height;
+    const last = dragged.current ?? current;
+    /* A cancelled pointer was not let go: it has no speed to carry on. */
+    const velocity =
+      event.type === 'pointercancel' ? 0 : extentVelocity(samples.current, event.timeStamp);
+    dragged.current = null;
+    samples.current = [];
+
     const { rest: measuredRest, stops } = (sheet && stopsAtStart.current) || stopsNow();
     stopsAtStart.current = null;
     /* Where the release lands: a stop, the floor, or out. */
@@ -934,13 +988,17 @@ export function DrawerResizer({
       );
 
     if (landed === 'close') {
-      void sheet?.settle(
-        0,
-        velocity * span,
-        drawer.nodes.layer ? exitDuration(drawer.nodes.layer) : undefined,
-      );
+      const layer = drawer.nodes.layer;
+      const floor = stops.length > 0 ? (stops[0] as number) : drawer.minExtent;
+      void sheet?.settle(0, velocity * span, layer ? exitDuration(layer) : undefined);
       drawer.close('pointer', undefined, event);
-      drawer.requestExtent(stops.length > 0 ? stops[0] : drawer.minExtent, 'pointer', event);
+      drawer.requestExtent(floor, 'pointer', event);
+      /* A close the consumer refused leaves the panel open: it comes back to the floor. */
+      if (sheet !== null && layer !== null) {
+        requestAnimationFrame(() => {
+          if (layer.hasAttribute('data-open')) void sheet.settle(floor * span, 0).then(sheet.end);
+        });
+      }
       return;
     }
     if (sheet === null) {

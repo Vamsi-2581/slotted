@@ -14,7 +14,7 @@ import { SlScrollArea, SlScrollAreaContent } from './scroll-area';
 import { ANGULAR_SCROLL_AREA_DOCS, ANGULAR_SCROLL_AREA_TOKENS } from './scroll-area.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(ANGULAR_SCROLL_AREA_DOCS.scenes, {
+  bindScenes(ANGULAR_SCROLL_AREA_DOCS.scrollArea.scenes, {
     playground: Playground,
     axis: Axis,
     scrollbars: Scrollbars,
@@ -45,7 +45,7 @@ const meta: Meta<Record<string, never>> = {
         description:
           'A scrollport and the box that frames it. The scrollbar is the platform’s, themed through scrollbar-color; the keyboard is the platform’s too. What the family adds is the measurement of whether the content overflows — published on the frame in logical names and painted as a veil that needs no ink — and the tab stop and name a scrolling region owes, written only while there is something to scroll.',
         framework: 'Angular',
-        ...ANGULAR_SCROLL_AREA_DOCS,
+        ...ANGULAR_SCROLL_AREA_DOCS.scrollArea,
         tokens: ANGULAR_SCROLL_AREA_TOKENS,
         scenes: referenceScenes,
       }),

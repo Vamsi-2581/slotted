@@ -1762,7 +1762,7 @@ const theming = defineSnippet({
 });
 
 export const REACT_DATA_GRID_DOCS = {
-  dataGrid: {
+  'data-grid': {
     accessibility,
     anatomy,
     api,

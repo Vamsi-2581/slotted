@@ -17,7 +17,7 @@ describe('ActionSheet stories', () => {
     expect(
       apiMetadataErrors(
         contract.members['action-sheet'],
-        REACT_ACTION_SHEET_DOCS.api,
+        REACT_ACTION_SHEET_DOCS['action-sheet'].api,
         contract.stateModel,
       ),
     ).toEqual([]);
@@ -26,7 +26,7 @@ describe('ActionSheet stories', () => {
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: REACT_ACTION_SHEET_DOCS,
+        docs: REACT_ACTION_SHEET_DOCS['action-sheet'],
         framework: 'React',
         member: contract.members['action-sheet'],
         scenarioIds: contract.scenarios['action-sheet'],
@@ -37,8 +37,8 @@ describe('ActionSheet stories', () => {
 
   it('keeps curated snippets formatted', async () => {
     const snippets = [
-      ...REACT_ACTION_SHEET_DOCS.snippets,
-      ...REACT_ACTION_SHEET_DOCS.scenes.map((scene) => scene.snippet),
+      ...REACT_ACTION_SHEET_DOCS['action-sheet'].snippets,
+      ...REACT_ACTION_SHEET_DOCS['action-sheet'].scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

@@ -26,7 +26,7 @@ import { SL_ACTION_SHEET } from './action-sheet-parts';
 import { ANGULAR_ACTION_SHEET_DOCS, ANGULAR_ACTION_SHEET_TOKENS } from './action-sheet.docs';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(ANGULAR_ACTION_SHEET_DOCS.scenes, {
+  bindScenes(ANGULAR_ACTION_SHEET_DOCS['action-sheet'].scenes, {
     playground: Playground,
     destructive: Destructive,
     groups: Groups,
@@ -79,7 +79,7 @@ const meta: Meta = {
         description:
           'A short list of actions that rises from the bottom edge, and the explicit way out beneath it. A dialog holding a menu: the keyboard of a menu, the modality of a dialog, the item vocabulary of menu, and a close request that says which action was chosen.',
         framework: 'Angular',
-        ...ANGULAR_ACTION_SHEET_DOCS,
+        ...ANGULAR_ACTION_SHEET_DOCS['action-sheet'],
         tokens: ANGULAR_ACTION_SHEET_TOKENS,
         scenes: referenceScenes,
       }),

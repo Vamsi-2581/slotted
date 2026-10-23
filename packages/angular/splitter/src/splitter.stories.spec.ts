@@ -13,14 +13,18 @@ describe('Angular Splitter stories', () => {
 
   it('documents each public component API', () => {
     expect(
-      apiMetadataErrors(contract.members.splitter, ANGULAR_SPLITTER_DOCS.api, contract.stateModel),
+      apiMetadataErrors(
+        contract.members.splitter,
+        ANGULAR_SPLITTER_DOCS.splitter.api,
+        contract.stateModel,
+      ),
     ).toEqual([]);
   });
 
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: ANGULAR_SPLITTER_DOCS,
+        docs: ANGULAR_SPLITTER_DOCS.splitter,
         framework: 'Angular',
         member: contract.members.splitter,
         scenarioIds: contract.scenarios.splitter,
@@ -31,8 +35,8 @@ describe('Angular Splitter stories', () => {
 
   it('keeps curated Angular snippets formatted', async () => {
     const snippets = [
-      ...ANGULAR_SPLITTER_DOCS.snippets,
-      ...ANGULAR_SPLITTER_DOCS.scenes.map((scene) => scene.snippet),
+      ...ANGULAR_SPLITTER_DOCS.splitter.snippets,
+      ...ANGULAR_SPLITTER_DOCS.splitter.scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

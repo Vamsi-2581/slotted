@@ -296,7 +296,7 @@ interface DataGridStoryArgs {
 }
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(ANGULAR_DATA_GRID_DOCS.dataGrid.scenes, {
+  bindScenes(ANGULAR_DATA_GRID_DOCS['data-grid'].scenes, {
     accessibility: Accessibility,
     activation: Activation,
     'column-groups': ColumnGroups,
@@ -532,7 +532,7 @@ const meta: Meta<DataGridStoryArgs> = {
         description:
           'The composite widget for large, interactive tabular data: one cursor over every cell, a query the grid applies or a server answers, columns the reader arranges, and editing in place.',
         framework: 'Angular',
-        ...ANGULAR_DATA_GRID_DOCS.dataGrid,
+        ...ANGULAR_DATA_GRID_DOCS['data-grid'],
         tokens: ANGULAR_DATA_GRID_TOKENS,
         scenes: referenceScenes,
       }),

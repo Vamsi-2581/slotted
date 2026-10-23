@@ -250,7 +250,7 @@ const Shipments = (props: Partial<DataGridProps<Shipment>>) => (
 /* ── Stories ───────────────────────────────────────────────────────────── */
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(REACT_DATA_GRID_DOCS.dataGrid.scenes, {
+  bindScenes(REACT_DATA_GRID_DOCS['data-grid'].scenes, {
     accessibility: Accessibility,
     activation: Activation,
     'column-groups': ColumnGroups,
@@ -301,7 +301,7 @@ const meta = {
         description:
           'The composite widget for large, interactive tabular data: one cursor over every cell, a query the grid applies or a server answers, columns the reader arranges, and editing in place.',
         framework: 'React',
-        ...REACT_DATA_GRID_DOCS.dataGrid,
+        ...REACT_DATA_GRID_DOCS['data-grid'],
         tokens: REACT_DATA_GRID_TOKENS,
         scenes: referenceScenes,
       }),

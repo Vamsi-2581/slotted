@@ -13,14 +13,18 @@ describe('ScrollArea stories', () => {
 
   it('documents each public component API', () => {
     expect(
-      apiMetadataErrors(contract.members.scrollArea, REACT_SCROLL_AREA_DOCS.api, undefined),
+      apiMetadataErrors(
+        contract.members.scrollArea,
+        REACT_SCROLL_AREA_DOCS.scrollArea.api,
+        undefined,
+      ),
     ).toEqual([]);
   });
 
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: REACT_SCROLL_AREA_DOCS,
+        docs: REACT_SCROLL_AREA_DOCS.scrollArea,
         framework: 'React',
         member: contract.members.scrollArea,
         scenarioIds: contract.scenarios.scrollArea,
@@ -31,8 +35,8 @@ describe('ScrollArea stories', () => {
 
   it('keeps curated snippets formatted', async () => {
     const snippets = [
-      ...REACT_SCROLL_AREA_DOCS.snippets,
-      ...REACT_SCROLL_AREA_DOCS.scenes.map((scene) => scene.snippet),
+      ...REACT_SCROLL_AREA_DOCS.scrollArea.snippets,
+      ...REACT_SCROLL_AREA_DOCS.scrollArea.scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

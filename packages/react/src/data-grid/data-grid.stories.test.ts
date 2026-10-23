@@ -16,7 +16,7 @@ describe('Data grid stories', () => {
     expect(
       apiMetadataErrors(
         contract.members['data-grid'],
-        REACT_DATA_GRID_DOCS.dataGrid.api,
+        REACT_DATA_GRID_DOCS['data-grid'].api,
         contract.stateModel,
       ),
     ).toEqual([]);
@@ -25,7 +25,7 @@ describe('Data grid stories', () => {
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: REACT_DATA_GRID_DOCS.dataGrid,
+        docs: REACT_DATA_GRID_DOCS['data-grid'],
         framework: 'React',
         member: contract.members['data-grid'],
         scenarioIds: contract.scenarios['data-grid'],

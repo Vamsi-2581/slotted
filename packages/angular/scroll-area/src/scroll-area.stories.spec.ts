@@ -13,14 +13,18 @@ describe('Angular ScrollArea stories', () => {
 
   it('documents each public component API', () => {
     expect(
-      apiMetadataErrors(contract.members.scrollArea, ANGULAR_SCROLL_AREA_DOCS.api, undefined),
+      apiMetadataErrors(
+        contract.members.scrollArea,
+        ANGULAR_SCROLL_AREA_DOCS.scrollArea.api,
+        undefined,
+      ),
     ).toEqual([]);
   });
 
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: ANGULAR_SCROLL_AREA_DOCS,
+        docs: ANGULAR_SCROLL_AREA_DOCS.scrollArea,
         framework: 'Angular',
         member: contract.members.scrollArea,
         scenarioIds: contract.scenarios.scrollArea,
@@ -31,8 +35,8 @@ describe('Angular ScrollArea stories', () => {
 
   it('keeps curated Angular snippets formatted', async () => {
     const snippets = [
-      ...ANGULAR_SCROLL_AREA_DOCS.snippets,
-      ...ANGULAR_SCROLL_AREA_DOCS.scenes.map((scene) => scene.snippet),
+      ...ANGULAR_SCROLL_AREA_DOCS.scrollArea.snippets,
+      ...ANGULAR_SCROLL_AREA_DOCS.scrollArea.scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

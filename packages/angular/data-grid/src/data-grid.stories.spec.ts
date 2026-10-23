@@ -64,7 +64,7 @@ describe('Data grid stories', () => {
     expect(
       apiMetadataErrors(
         contract.members['data-grid'],
-        ANGULAR_DATA_GRID_DOCS.dataGrid.api,
+        ANGULAR_DATA_GRID_DOCS['data-grid'].api,
         contract.stateModel,
       ),
     ).toEqual([]);
@@ -78,7 +78,7 @@ describe('Data grid stories', () => {
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: ANGULAR_DATA_GRID_DOCS.dataGrid,
+        docs: ANGULAR_DATA_GRID_DOCS['data-grid'],
         framework: 'Angular',
         member: contract.members['data-grid'],
         scenarioIds: contract.scenarios['data-grid'],
@@ -130,8 +130,8 @@ describe('Data grid stories', () => {
 
   it('keeps curated Angular snippets formatted', async () => {
     const snippets = [
-      ...ANGULAR_DATA_GRID_DOCS.dataGrid.snippets,
-      ...ANGULAR_DATA_GRID_DOCS.dataGrid.scenes.map((scene) => scene.snippet),
+      ...ANGULAR_DATA_GRID_DOCS['data-grid'].snippets,
+      ...ANGULAR_DATA_GRID_DOCS['data-grid'].scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

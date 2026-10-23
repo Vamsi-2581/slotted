@@ -185,3 +185,24 @@ describe('buildDocs', () => {
     for (const name of content.skills.keys()) expect(skillsIndex).toContain(`./${name}/SKILL.md`);
   });
 });
+
+/**
+ * The reference modules are untyped object literals, so a module that writes
+ * its docs flat instead of under the member's key loads without error and
+ * renders an empty `api`. Each docs key is a member of the family's contract.
+ */
+describe('the reference docs of every family', () => {
+  it.each(['react', 'angular'] as const)(
+    '%s: keyed by the members of the contract',
+    async (binding) => {
+      const families = await loadFamilies(binding, root);
+      const mismatched = families
+        .map((family) => ({
+          family: family.contract.family,
+          unknown: Object.keys(family.docs).filter((key) => !(key in family.contract.members)),
+        }))
+        .filter((entry) => entry.unknown.length > 0);
+      expect(mismatched).toEqual([]);
+    },
+  );
+});

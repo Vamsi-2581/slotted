@@ -39,7 +39,7 @@ import { REACT_ACTION_SHEET_DOCS, REACT_ACTION_SHEET_TOKENS } from './action-she
 import type { ActionSheetProps, ActionSheetTone } from './action-sheet.types';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(REACT_ACTION_SHEET_DOCS.scenes, {
+  bindScenes(REACT_ACTION_SHEET_DOCS['action-sheet'].scenes, {
     playground: Playground,
     destructive: Destructive,
     groups: Groups,
@@ -65,7 +65,7 @@ const meta = {
         description:
           'A short list of actions that rises from the bottom edge, and the explicit way out beneath it. A dialog holding a menu: the keyboard of a menu, the modality of a dialog, the item vocabulary of menu, and a close request that says which action was chosen.',
         framework: 'React',
-        ...REACT_ACTION_SHEET_DOCS,
+        ...REACT_ACTION_SHEET_DOCS['action-sheet'],
         tokens: REACT_ACTION_SHEET_TOKENS,
         scenes: referenceScenes,
       }),

@@ -21,14 +21,17 @@ describe('SlActionSheet stories', () => {
    */
   it('documents each public component API', () => {
     expect(
-      apiMetadataErrors(contract.members['action-sheet'], ANGULAR_ACTION_SHEET_DOCS.api),
+      apiMetadataErrors(
+        contract.members['action-sheet'],
+        ANGULAR_ACTION_SHEET_DOCS['action-sheet'].api,
+      ),
     ).toEqual([]);
   });
 
   it('answers the reference-page contract', () => {
     expect(
       referencePageErrors({
-        docs: ANGULAR_ACTION_SHEET_DOCS,
+        docs: ANGULAR_ACTION_SHEET_DOCS['action-sheet'],
         framework: 'Angular',
         member: contract.members['action-sheet'],
         scenarioIds: contract.scenarios['action-sheet'],
@@ -39,8 +42,8 @@ describe('SlActionSheet stories', () => {
 
   it('keeps curated snippets formatted', async () => {
     const snippets = [
-      ...ANGULAR_ACTION_SHEET_DOCS.snippets,
-      ...ANGULAR_ACTION_SHEET_DOCS.scenes.map((scene) => scene.snippet),
+      ...ANGULAR_ACTION_SHEET_DOCS['action-sheet'].snippets,
+      ...ANGULAR_ACTION_SHEET_DOCS['action-sheet'].scenes.map((scene) => scene.snippet),
     ];
     expect(await snippetFormatErrors(snippets)).toEqual([]);
   });

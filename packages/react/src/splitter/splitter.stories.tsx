@@ -15,7 +15,7 @@ import { REACT_SPLITTER_DOCS, REACT_SPLITTER_TOKENS } from './splitter.docs';
 import type { SplitterHandle } from './splitter.types';
 
 const referenceScenes: ReferencePageConfig['scenes'] = () =>
-  bindScenes(REACT_SPLITTER_DOCS.scenes, {
+  bindScenes(REACT_SPLITTER_DOCS.splitter.scenes, {
     playground: Playground,
     orientation: Orientation,
     value: Value,
@@ -43,7 +43,7 @@ const meta = {
         description:
           'A focusable bar between two regions, and nothing else. It holds the position, the limits, the stops and the whole Window Splitter keyboard; it holds no layout, so the fraction is published as a custom property and one CSS rule turns it into a measure. Its limits take a fraction or a CSS length, which is the one thing none of the surveyed implementations can state.',
         framework: 'React',
-        ...REACT_SPLITTER_DOCS,
+        ...REACT_SPLITTER_DOCS.splitter,
         tokens: REACT_SPLITTER_TOKENS,
         scenes: referenceScenes,
       }),

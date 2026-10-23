@@ -18,7 +18,7 @@ const examples = join(import.meta.dirname, '../../../../apps/docs/examples/react
 describe('the data-grid examples', () => {
   it('declare the props compared by identity outside the render', () => {
     const sources = [
-      ...REACT_DATA_GRID_DOCS.dataGrid.scenes.flatMap((scene) =>
+      ...REACT_DATA_GRID_DOCS['data-grid'].scenes.flatMap((scene) =>
         scene.snippet ? [[scene.id, scene.snippet.source] as const] : [],
       ),
       ...readdirSync(examples).map(
@@ -29,7 +29,7 @@ describe('the data-grid examples', () => {
   });
 
   it('say which props are compared by identity and which are read when a row renders', () => {
-    const rule = REACT_DATA_GRID_DOCS.dataGrid.accessibility.find((entry) =>
+    const rule = REACT_DATA_GRID_DOCS['data-grid'].accessibility.find((entry) =>
       entry.includes('compared by identity'),
     );
     for (const name of ['columns', 'disabledKeys', 'rowKey', 'cellRenderers', 'messages', 'tree']) {

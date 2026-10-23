@@ -1745,7 +1745,7 @@ const theming = defineSnippet({
 });
 
 export const ANGULAR_DATA_GRID_DOCS = {
-  dataGrid: {
+  'data-grid': {
     accessibility,
     anatomy,
     api,

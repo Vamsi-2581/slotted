@@ -33,6 +33,7 @@ export const FIXED_TEXT = {
   ],
   headers: {
     anatomy: ['Part', 'Element', 'Required'],
+    anatomyWithParent: ['Part', 'Parent', 'Element', 'Required'],
     props: ['Name', 'Type', 'Default', 'Applies to', 'Description'],
     events: ['Name', 'Payload', 'When'],
     axes: ['Axis', 'Values', 'Default'],
@@ -275,14 +276,24 @@ export function renderFamily(input: FamilyInput): RenderedFamily {
       perMember(input, 'Anatomy', (docs) =>
         (docs.anatomy ?? []).length === 0
           ? []
-          : table(
-              FIXED_TEXT.headers.anatomy,
-              docs.anatomy!.map((row) => [
-                code(row.part),
-                row.element,
-                FIXED_TEXT.required[`${row.required}`],
-              ]),
-            ),
+          : docs.anatomy!.some((row) => row.parent !== undefined)
+            ? table(
+                FIXED_TEXT.headers.anatomyWithParent,
+                docs.anatomy!.map((row) => [
+                  code(row.part),
+                  row.parent === undefined ? FIXED_TEXT.none : code(row.parent),
+                  row.element,
+                  FIXED_TEXT.required[`${row.required}`],
+                ]),
+              )
+            : table(
+                FIXED_TEXT.headers.anatomy,
+                docs.anatomy!.map((row) => [
+                  code(row.part),
+                  row.element,
+                  FIXED_TEXT.required[`${row.required}`],
+                ]),
+              ),
       ),
     ),
     sectionOf(

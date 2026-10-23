@@ -18,6 +18,7 @@
   "--slotted-section-border",
   "--slotted-section-description-measure",
   "--slotted-section-gap",
+  "--slotted-section-header-background",
   "--slotted-section-heading-size-lg",
   "--slotted-section-heading-size-md",
   "--slotted-section-heading-size-sm",

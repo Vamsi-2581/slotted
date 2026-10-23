@@ -156,6 +156,10 @@ describe('Section', () => {
   });
 });
 
+/** Every observer reports: the size one and the one that watches for the header being stuck. */
+const fire = () =>
+  FakeResizeObserver.callbacks.forEach((callback) => callback([], {} as ResizeObserver));
+
 /**
  * A sticky header is chrome for what is under it: its measured height goes on
  * the root, and the stylesheet adds it to the page's sticky top for the body.
@@ -175,14 +179,42 @@ describe('Section sticky header measurement', () => {
     Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 48 });
     rerender(<Items sticky />);
     /* The observer's first report, as a browser delivers it after observe(). */
-    FakeResizeObserver.callbacks.at(-1)?.([], {} as ResizeObserver);
+    fire();
     expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('48px');
 
     Object.defineProperty(header, 'offsetHeight', { configurable: true, value: 72 });
-    FakeResizeObserver.callbacks.at(-1)?.([], {} as ResizeObserver);
+    fire();
     expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('72px');
 
     rerender(<Items />);
     expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('');
+  });
+});
+
+/**
+ * The stylesheet reaches the description as a child of the title; anywhere
+ * else it is unstyled, and development says so.
+ */
+describe('SectionDescription outside SectionTitle', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('warns in development when written in the header and not in the title', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(
+      <Section>
+        <SectionHeader>
+          <SectionDescription>Fora do título</SectionDescription>
+        </SectionHeader>
+      </Section>,
+    );
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('outside SectionTitle'));
+  });
+
+  it('is silent inside the title', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    render(<Items />);
+    expect(warn).not.toHaveBeenCalled();
   });
 });

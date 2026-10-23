@@ -26,6 +26,8 @@ export interface EventRow {
  */
 export interface AnatomyRow {
   part: string;
+  /** The part this one is written inside; absent for the root. */
+  parent?: string;
   element: string;
   required: boolean;
   purpose: string;

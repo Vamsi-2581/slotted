@@ -116,13 +116,20 @@ const tokenTables: { heading: string; label: string; rows: TokenRow[] }[] = [
           <h4>Parts</h4>
           <Table
             label={`${member.name} parts`}
-            columns={['Part', 'Element', 'Required', 'Purpose']}
+            columns={
+              member.anatomy.some((row) => row.parent !== undefined)
+                ? ['Part', 'Parent', 'Element', 'Required', 'Purpose']
+                : ['Part', 'Element', 'Required', 'Purpose']
+            }
           >
             {member.anatomy.map((row) => (
               <tr>
                 <td>
                   <code>{row.part}</code>
                 </td>
+                {member.anatomy!.some((other) => other.parent !== undefined) && (
+                  <td>{row.parent === undefined ? '—' : <code>{row.parent}</code>}</td>
+                )}
                 <td>{row.element}</td>
                 <td>{row.required ? 'Yes' : 'No'}</td>
                 <td>{row.purpose}</td>

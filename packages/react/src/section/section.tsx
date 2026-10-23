@@ -1,4 +1,5 @@
 import { keyedProps } from '@slotted/core/selector-key';
+import { observeStuck } from '@slotted/core/sticky-header';
 import '@slotted/styles/section/section.css';
 
 import { createContext, useContext, useEffect, useId, useState } from 'react';
@@ -103,6 +104,23 @@ export function Section({
     return () => {
       sizes.disconnect();
       root.style.removeProperty(HEADER_SIZE_PROPERTY);
+    };
+  }, [header, resolvedSticky]);
+
+  /**
+   * `data-stuck` on the header while content passes under it, so a theme
+   * can paint the header's ground only then. Written on the element, as the
+   * size is, so a scroll costs no render.
+   */
+  useEffect(() => {
+    if (!resolvedSticky || !header) return undefined;
+    const stop = observeStuck(header, (stuck) => {
+      if (stuck) header.setAttribute('data-stuck', '');
+      else header.removeAttribute('data-stuck');
+    });
+    return () => {
+      stop();
+      header.removeAttribute('data-stuck');
     };
   }, [header, resolvedSticky]);
 

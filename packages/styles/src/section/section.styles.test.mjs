@@ -92,7 +92,10 @@ test('sticks its header under the page chrome and paints it', () => {
   const header = rule(`${ui}[data-sticky]>[data-part-header]`);
   assert.match(header, /position:sticky/);
   assert.match(header, /inset-block-start:var\(--slotted-page-sticky-top,0px\)/);
-  assert.match(header, /background-color:var\(--_ground\)/);
+  assert.match(
+    header,
+    /background-color:var\(--slotted-section-header-background,var\(--_ground\)\)/,
+  );
   assert.match(rule(ui), /--_ground:var\(--slotted-page-ground,var\(--slotted-surface,Canvas\)\)/);
 });
 
@@ -111,6 +114,16 @@ test('rules under the header when asked', () => {
     divided,
     /border-block-end:var\(--slotted-border-width-thin,1px\) solid var\(--_rule\)/,
   );
+});
+
+/** On a surface the rule runs edge to edge: the header takes the inset back as margin and keeps it as padding. */
+test('runs the rule edge to edge on a surface', () => {
+  const surfaceRule = rule(`${ui}[data-ground='surface'][data-divider]>[data-part-header]`);
+  assert.match(
+    surfaceRule,
+    /margin-inline:calc\(-1 \* var\(--slotted-section-inset,var\(--slotted-space-6,1rem\)\)\)/,
+  );
+  assert.match(surfaceRule, /padding-inline:var\(--slotted-section-inset,/);
 });
 
 /**

@@ -1,5 +1,5 @@
 import { keyedProps } from '@slotted/core/selector-key';
-import { useEffect } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 
 import { HeadingLevel } from '../typography';
 import { useSection } from './section';
@@ -11,6 +11,11 @@ import type {
   SectionPartComponentProps,
   SectionPartProps,
 } from './section.types';
+
+const isDevelopment = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
+
+/** Whether a part is written inside `SectionTitle`, where the stylesheet looks for the description. */
+const TitleContext = createContext(false);
 
 function part(name: string, displayName: string) {
   function Part({
@@ -64,8 +69,16 @@ export function SectionHeader({
   if (render !== undefined) return render({ ...rootProps, ref: setRef });
   return <div {...rootProps} ref={setRef} />;
 }
+const TitlePart = part('title', 'SectionTitle');
+
 /** Eyebrow, heading, tags, description, in that order. */
-export const SectionTitle = part('title', 'SectionTitle');
+export function SectionTitle(props: SectionPartComponentProps) {
+  return (
+    <TitleContext.Provider value>
+      <TitlePart {...props} />
+    </TitleContext.Provider>
+  );
+}
 /**
  * Badges or tags beside the heading — a count, a status — on its baseline.
  * Outside the heading, so they are not read into the region's name.
@@ -137,6 +150,12 @@ export function SectionDescription({
   style,
   ...nativeProps
 }: SectionDescriptionProps) {
+  const inTitle = useContext(TitleContext);
+  if (isDevelopment && !inTitle) {
+    console.warn(
+      'SectionDescription is written outside SectionTitle, so the stylesheet does not reach it and it renders unstyled. Move it inside SectionTitle.',
+    );
+  }
   const rootProps: SectionPartProps = keyedProps({
     ...nativeProps,
     children,

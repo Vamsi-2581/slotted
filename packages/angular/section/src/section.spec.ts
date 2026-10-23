@@ -92,6 +92,10 @@ class FakeResizeObserver {
   disconnect() {}
 }
 
+/** Every observer reports: the size one and the one that watches for the header being stuck. */
+const fire = () =>
+  FakeResizeObserver.callbacks.forEach((callback) => callback([], {} as ResizeObserver));
+
 describe('SlSection', () => {
   let fixture: ComponentFixture<Host>;
   let host: Host;
@@ -124,7 +128,7 @@ describe('SlSection', () => {
       expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('48px');
 
       bounds.mockReturnValue({ height: 72 } as DOMRect);
-      FakeResizeObserver.callbacks.at(-1)?.([], {} as ResizeObserver);
+      fire();
       expect(root().style.getPropertyValue('--slotted-section-header-size')).toBe('72px');
 
       host.sticky.set(false);
@@ -228,5 +232,42 @@ describe('SlSection defaults', () => {
     /* No heading, no name, and a generated id. */
     expect(root.hasAttribute('aria-labelledby')).toBe(false);
     expect(root.id).toMatch(/^slotted-section-/);
+  });
+});
+
+/** The stylesheet reaches the description as a child of the title; anywhere else development says so. */
+describe('SlSectionDescription outside slSectionTitle', () => {
+  @Component({
+    imports: PARTS,
+    template: `<section slSection>
+      <div slSectionHeader><p slSectionDescription>Fora do título</p></div>
+    </section>`,
+  })
+  class Misplaced {}
+
+  @Component({
+    imports: PARTS,
+    template: `<section slSection>
+      <div slSectionHeader>
+        <div slSectionTitle><p slSectionDescription>No título</p></div>
+      </div>
+    </section>`,
+  })
+  class Placed {}
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('warns in development when written in the header and not in the title', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    TestBed.createComponent(Misplaced).detectChanges();
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('outside slSectionTitle'));
+  });
+
+  it('is silent inside the title', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    TestBed.createComponent(Placed).detectChanges();
+    expect(warn).not.toHaveBeenCalled();
   });
 });

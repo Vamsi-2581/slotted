@@ -1,4 +1,5 @@
 import { SlHeadingLevel } from '@slotted/angular/typography';
+import { observeStuck } from '@slotted/core/sticky-header';
 import type { HeadingLevelValue } from '@slotted/angular/typography';
 import {
   booleanAttribute,
@@ -121,6 +122,24 @@ export class SlSection {
       onCleanup(() => {
         sizes?.disconnect();
         this.native.style.removeProperty(HEADER_SIZE_PROPERTY);
+      });
+    });
+
+    /**
+     * `data-stuck` on the header while content passes under it, so a theme
+     * can paint the header's ground only then. Written on the element, so a
+     * scroll costs no change detection.
+     */
+    effect((onCleanup) => {
+      const header = this.header();
+      if (!this.resolvedSticky() || header === null) return;
+      const stop = observeStuck(header, (stuck) => {
+        if (stuck) header.setAttribute('data-stuck', '');
+        else header.removeAttribute('data-stuck');
+      });
+      onCleanup(() => {
+        stop();
+        header.removeAttribute('data-stuck');
       });
     });
   }

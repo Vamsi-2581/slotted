@@ -131,12 +131,24 @@
   }
 
   /**
+   * On a surface the rule runs from edge to edge of the surface, not of its
+   * padding: the header takes the inset back as margin and keeps it as
+   * padding, so its contents stay where they were.
+   */
+  [data-ui-section][data-ground='surface'][data-divider] > [data-part-header] {
+    margin-inline: calc(-1 * var(--slotted-section-inset, var(--slotted-space-6, 1rem)));
+    padding-inline: var(--slotted-section-inset, var(--slotted-space-6, 1rem));
+  }
+
+  /**
    * Under the page chrome, and painted, so what scrolls under it is covered.
-   * The inset a surface section gives its header is kept by sticking the
+   * The header writes `data-stuck` while content passes under it, so a theme
+   * whose page ground is translucent can fill it only then, through
+   * `--slotted-section-header-background`. The inset a surface section gives its header is kept by sticking the
    * header at the same distance the surface's padding put it at.
    */
   [data-ui-section][data-sticky] > [data-part-header] {
-    background-color: var(--_ground);
+    background-color: var(--slotted-section-header-background, var(--_ground));
     inset-block-start: var(--slotted-page-sticky-top, 0px);
     /* Stuck, the header's text and buttons met the chrome's edge with no
        air. The padding gives it, and the negative margin takes the same

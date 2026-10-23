@@ -44,13 +44,15 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'header',
+    parent: 'root',
     element: 'the element carrying slSectionHeader',
     required: false,
     purpose:
-      'The row above the body: the heading, its tags and the actions on one baseline, the eyebrow above and the description below on rows of their own. Sticky under the page chrome when sticky is set, painted in the page’s ground so what scrolls under it is covered; its height is measured and added to the sticky top the body publishes, so a table’s column header or a nested section inside stops under it, not under the page.',
+      'The row above the body: the heading, its tags and the actions on one baseline, the eyebrow above and the description below on rows of their own. Sticky under the page chrome when sticky is set, painted in the page’s ground so what scrolls under it is covered; it carries data-stuck while content passes under it, and its ground is --slotted-section-header-background, which defaults to the page’s; its height is measured and added to the sticky top the body publishes, so a table’s column header or a nested section inside stops under it, not under the page.',
   },
   {
     part: 'title',
+    parent: 'header',
     element: 'the element carrying slSectionTitle',
     required: false,
     purpose:
@@ -58,6 +60,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'eyebrow',
+    parent: 'title',
     element: 'the element carrying slSectionEyebrow',
     required: false,
     purpose:
@@ -65,6 +68,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'heading',
+    parent: 'title',
     element:
       'the h1 to h6 carrying slSectionHeading, or any element, which then gets role="heading"',
     required: false,
@@ -73,6 +77,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'tags',
+    parent: 'title',
     element: 'the element carrying slSectionTags',
     required: false,
     purpose:
@@ -80,6 +85,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'description',
+    parent: 'title',
     element: 'the p carrying slSectionDescription',
     required: false,
     purpose:
@@ -87,6 +93,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'actions',
+    parent: 'header',
     element: 'the element carrying slSectionActions',
     required: false,
     purpose:
@@ -94,6 +101,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'body',
+    parent: 'root',
     element: 'the element carrying slSectionBody',
     required: true,
     purpose:
@@ -351,6 +359,7 @@ export const ANGULAR_SECTION_DOCS = {
       ],
     ]),
     accessibility: [
+      'A description outside slSectionTitle is not styled: the stylesheet reaches it as a child of the title, so slSectionDescription is written inside slSectionTitle and nowhere else.',
       'The practice is the WAI-ARIA APG’s Landmark Regions (w3.org/WAI/ARIA/apg/practices/landmark-regions/): a section element with an accessible name is a region landmark. The root is aria-labelledby its heading once one is rendered, so a section with a heading appears in the landmark list under the heading’s words, and one without a heading is a plain section that clutters nothing.',
       'The rank is real and the element is the consumer’s. Write h2 and the directive adds nothing; write a div or a link and it gets role="heading" and aria-level from the outline typography keeps — 2 directly in a page body, one deeper inside another section’s body — or from level.',
       'The body carries slHeadingLevel as a host directive, which is what keeps a nested section, a collapsible or a table caption at the right rank without either family reading the other. The HTML Standard requires each heading to be at most one deeper than the one before, and stepping by exactly one is the only way to hold that in a tree assembled from components.',

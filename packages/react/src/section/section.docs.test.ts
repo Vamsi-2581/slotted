@@ -23,3 +23,32 @@ describe('the ground a sticky section header paints', () => {
     expect(pane?.snippet?.source).toContain('--slotted-page-ground');
   });
 });
+
+/** The anatomy table names the part each row is written inside, as the stylesheet's child combinators need. */
+describe('the anatomy of the section', () => {
+  it('names the parent of every part but the root', () => {
+    const parents = Object.fromEntries(
+      REACT_SECTION_DOCS.section.anatomy.map((row) => [
+        row.part,
+        (row as { parent?: string }).parent,
+      ]),
+    );
+    expect(parents).toEqual({
+      root: undefined,
+      header: 'root',
+      title: 'header',
+      eyebrow: 'title',
+      heading: 'title',
+      tags: 'title',
+      description: 'title',
+      actions: 'header',
+      body: 'root',
+    });
+  });
+
+  it('states that a description outside the title is not styled', () => {
+    expect(REACT_SECTION_DOCS.section.accessibility.join(' ')).toContain(
+      'A description outside SectionTitle is not styled',
+    );
+  });
+});

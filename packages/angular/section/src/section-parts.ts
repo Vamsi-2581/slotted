@@ -1,5 +1,5 @@
 import { SlHeadingLevel } from '@slotted/angular/typography';
-import { computed, Directive, ElementRef, inject } from '@angular/core';
+import { computed, Directive, ElementRef, inject, isDevMode } from '@angular/core';
 import type { OnDestroy, OnInit } from '@angular/core';
 
 import { SlSection } from './section';
@@ -61,7 +61,17 @@ export class SlSectionTags {}
   standalone: true,
   host: { 'data-part': 'description', 'data-part-description': '' },
 })
-export class SlSectionDescription {}
+export class SlSectionDescription implements OnInit {
+  private readonly native: HTMLElement = inject(ElementRef).nativeElement;
+
+  ngOnInit() {
+    if (isDevMode() && this.native.parentElement?.getAttribute('data-part') !== 'title') {
+      console.warn(
+        'slSectionDescription is written outside slSectionTitle, so the stylesheet does not reach it and it renders unstyled. Move it inside slSectionTitle.',
+      );
+    }
+  }
+}
 
 /** The end of the heading's row, on its baseline: a button, a toolbar, a link. */
 @Directive({

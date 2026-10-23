@@ -62,6 +62,8 @@ test('sticks its header under the page chrome', () => {
   assert.deepEqual(contract.axes.sticky, [false, true]);
   assert.equal(contract.sticky.offset, 'var(--slotted-page-sticky-top, 0px)');
   assert.equal(contract.sticky.part, 'header');
+  assert.match(contract.sticky.stuck, /data-stuck/);
+  assert.match(contract.sticky.stuck, /--slotted-section-header-background/);
 });
 
 /** The hooks anchor navigation needs, and the family that owns the rest. */

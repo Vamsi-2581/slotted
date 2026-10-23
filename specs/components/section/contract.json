@@ -37,7 +37,8 @@
   "sticky": {
     "part": "header",
     "offset": "var(--slotted-page-sticky-top, 0px)",
-    "reason": "The header of a long section stays in view under the page chrome, which is what Sirius solved with a separate directive and PatternFly with stickyOnBreakpoint. Without a page the property is absent and the header sticks to the top of whatever scrolls"
+    "reason": "The header of a long section stays in view under the page chrome, which is what Sirius solved with a separate directive and PatternFly with stickyOnBreakpoint. Without a page the property is absent and the header sticks to the top of whatever scrolls",
+    "stuck": "The header carries data-stuck while content passes under it, written by the binding on the element and not through state. Its background reads --slotted-section-header-background, which defaults to the page ground, so a theme whose page ground is translucent fills it only while stuck"
   },
   "ground": {
     "none": "transparent. Separation comes from the space between sections, which is the family's own (--slotted-section-spacing after a section, --slotted-section-subsection-spacing before a subsection that follows content), from the heading's form, or from the divider",

@@ -2,9 +2,7 @@ import { keyedProps } from '@slotted/core/selector-key';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import {
   anchorsAtStart,
-  attachSheetDrag,
-  createSheetMotion,
-  dampenExtent,
+  attachSheetScroll,
   addExtentSample,
   extentVelocity,
   EXTENT_LARGE_STEP_PX,
@@ -15,13 +13,13 @@ import {
   measureSheetStops,
   sameStop,
   settleExtent,
+  SHEET_DRAG_SLOP_PX,
   SHEET_FLING_PX_PER_S,
-  sheetMotionHolds,
   stopAsExtent,
   stepAmountFromPixels,
   stepExtent,
 } from '@slotted/core/extent';
-import type { ExtentSample, SheetMotion } from '@slotted/core/extent';
+import type { ExtentSample, SheetScroll } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
 import { clamp, observeKeyboardInset } from '@slotted/core/measure';
 import { createPortalRoot } from '@slotted/core/portal';
@@ -34,7 +32,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent, ReactNode } from 'react';
-import { createPortal, flushSync } from 'react-dom';
+import { createPortal } from 'react-dom';
 
 import { Glyph, Icon } from '../icon';
 import { useDrawer } from './drawer';
@@ -236,22 +234,6 @@ function useExtentLength(
   return length;
 }
 
-/**
- * How long the layer says it takes to leave, in milliseconds: what presence
- * waits for before it unmounts, so a panel sent out by hand has to be gone in
- * that time.
- */
-function exitDuration(layer: HTMLElement): number | undefined {
-  const durations = getComputedStyle(layer)
-    .transitionDuration.split(',')
-    .map((value) =>
-      value.trim().endsWith('ms') ? Number.parseFloat(value) : Number.parseFloat(value) * 1000,
-    )
-    .filter(Number.isFinite);
-  const longest = Math.max(0, ...durations);
-  return longest > 0 ? longest : undefined;
-}
-
 /** What the stylesheet leaves above a content sheet, for the press outside. */
 const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
 
@@ -267,6 +249,12 @@ function measureStops(drawer: DrawerContextValue, panel: HTMLElement, span: numb
     span,
   });
 }
+
+/** How long a close by the hand waits before it reads the consumer's refusal. */
+const REFUSED_CLOSE_MS = 300;
+
+/** The scroll of each open sheet, for the separator inside it. */
+const sheetScrolls = new WeakMap<HTMLElement, SheetScroll>();
 
 function asRequest(drawer: DrawerContextValue, fraction: number, rest: number | undefined) {
   return stopAsExtent(fraction, rest, drawer.size === 'content');
@@ -499,8 +487,8 @@ export function DrawerPanel({
       return;
     const inline = isInlineSide(drawer.side);
     const read = () => {
-      /* A gesture or its settle has the panel at the gesture's height. */
-      if (sheetMotionHolds(panel)) return;
+      /* A sheet's panel is as tall as its content; its rest is the scroll's. */
+      if (sheetScrolls.has(panel)) return;
       const rect = box.getBoundingClientRect();
       const span = inline ? rect.width : rect.height;
       if (span <= 0) return;
@@ -548,109 +536,79 @@ export function DrawerPanel({
   }, [isOpen, layer, overlay]);
 
   /**
-   * The body of a sheet from the bottom moves it under a touch, and hands the
-   * gesture to the scroll of what it holds when that is what it is —
-   * `attachSheetDrag` decides which. The panel is laid out once, at the
-   * highest extent the hand may take it to, and the hand moves it by
-   * `translate` alone: nothing renders and nothing is measured per move. The
-   * release animates from where the hand left the panel at the speed it had
-   * (`createSheetMotion`), and the extent is requested once, when it arrives.
+   * A sheet from the bottom is moved by the platform's own scroll: the layer
+   * scrolls, and its `scrollTop` is how much of the panel is in sight
+   * (`attachSheetScroll`). The finger, the fling and the landing are the
+   * compositor's; the family reads where the scroll came to rest and asks for
+   * that extent, or for the close.
    */
-  const sheet = overlay && drawer.side === 'bottom' && drawer.drag === 'panel';
-  const sheetMotion = useRef<SheetMotion | null>(null);
-  useEffect(() => {
-    if (!sheet || panel === null || layer === null || !isOpen) return;
-    let span = 0;
-    let start = 0;
-    let last = 0;
-    let measured: { stops: number[]; rest: number | undefined } = { rest: undefined, stops: [] };
-    /* What the render wrote on the layer before the drag, put back on release. */
-    let undimmed = false;
-    const motion = createSheetMotion(panel);
-    sheetMotion.current = motion;
-
-    /* Where the panel is drawn: under a settle still in flight it is not its height. */
-    const now = () => {
-      span = layer.getBoundingClientRect().height;
-      return span > 0 ? (motion.visible() ?? panel.offsetHeight) / span : 0;
-    };
-    const finish = () => {
-      motion.end();
-      layer.toggleAttribute('data-undimmed', undimmed);
-    };
-    /* The stops, measured while the stylesheet has the panel. A panel the
-       motion holds measures the gesture's height, so the stops of the gesture
-       that took it stand. */
-    const stopsNow = () =>
-      motion.holds() && measured.stops.length > 0
-        ? measured
-        : measureStops(current.current, panel, span);
-
-    const detach = attachSheetDrag(panel, {
-      enabled: () => current.current.open,
-      canGrow: () => {
-        const at = now();
-        const top = stopsNow().stops.at(-1);
-        return top !== undefined && at < top && !sameStop(at, top);
-      },
-      onStart: () => {
-        const taken = motion.holds();
-        const resting = now();
-        measured = stopsNow();
-        /* A hand that takes the panel mid-settle keeps the scrim the first one found. */
-        if (!taken) undimmed = layer.hasAttribute('data-undimmed');
-        start = motion.begin(resting * span, (measured.stops.at(-1) ?? 0) * span) / span;
-        last = start;
-        /* The attribute and not the state: a render here, for the whole drawer,
-           is a frame the hand would wait for. */
-        layer.toggleAttribute('data-dragging', true);
-      },
-      onMove: (distance) => {
-        if (span <= 0) return;
-        last = Math.max(0, start + distance / span);
-        const top = measured.stops.at(-1) ?? start;
-        const at = dampenExtent(last, top);
-        motion.follow(at * span);
-        layer.toggleAttribute('data-undimmed', at < current.current.scrimFrom);
-      },
-      onEnd: (velocity) => {
+  const sheet = overlay && drawer.side === 'bottom';
+  const sheetScroll = useRef<SheetScroll | null>(null);
+  useIsomorphicLayoutEffect(() => {
+    if (!sheet || panel === null || layer === null) return;
+    const scroll = attachSheetScroll(layer, panel, {
+      content: () => current.current.size === 'content',
+      dismissible: () => true,
+      onScroll: (at) => {
         const drawerNow = current.current;
-        layer.toggleAttribute('data-dragging', false);
-        const landed = settleExtent({
-          fraction: Math.min(last, measured.stops.at(-1) ?? last),
-          span,
-          stops: measured.stops,
-          velocity: span > 0 ? velocity / span : 0,
-        });
-        if (landed === 'close') {
-          /* The panel leaves from where the hand let go, at the hand's speed; a
-             close the consumer refused brings it back. */
-          void motion.settle(0, velocity, exitDuration(layer));
+        if (drawerNow.scrimFrom > 0)
+          layer.toggleAttribute('data-undimmed', at < drawerNow.scrimFrom);
+      },
+      onSettle: (at) => {
+        const drawerNow = current.current;
+        if (!drawerNow.open) return;
+        if (at === 'close') {
           drawerNow.close('pointer', undefined, null);
-          requestAnimationFrame(() => {
-            if (current.current.open) void motion.settle(start * span, 0).then(finish);
-          });
+          /* A close the consumer refused puts the sheet back where it rests. The
+             answer is read once a render has had time to land: a frame later
+             the state of an accepted close is not there yet, and reading it
+             then brought a closing sheet back up. */
+          setTimeout(() => {
+            if (current.current.open && scroll.at() === 0) scroll.scrollTo(scroll.rest(), true);
+          }, REFUSED_CLOSE_MS);
           return;
         }
-        void motion.settle(landed * span, velocity).then(() => {
-          flushSync(() => {
-            drawerNow.requestExtent(asRequest(drawerNow, landed, measured.rest), 'pointer', null);
-          });
-          finish();
-        });
+        drawerNow.requestExtent(asRequest(drawerNow, at, scroll.rest()), 'pointer', null);
       },
+      reserve: CONTENT_RESERVE,
+      snapPoints: () => current.current.snapPoints,
+      step: 'var(--_step)',
     });
-    return detach;
-  }, [isOpen, layer, panel, sheet]);
-  /* The panel keeps what the gesture wrote for as long as it is there: a close
-     ends the gesture, and the panel is still on its way out. */
-  useEffect(
-    () => () => {
-      sheetMotion.current?.end();
-      sheetMotion.current = null;
-    },
-    [panel],
-  );
+    sheetScroll.current = scroll;
+    sheetScrolls.set(panel, scroll);
+    return () => {
+      scroll.destroy();
+      sheetScroll.current = null;
+      sheetScrolls.delete(panel);
+    };
+  }, [layer, panel, sheet]);
+
+  /**
+   * Opening scrolls the sheet up from out of sight to its resting stop, and
+   * closing other than by the hand scrolls it back down: the platform's smooth
+   * scroll both ways, the motion a released drag ends with.
+   */
+  const interactive = drawer.interactive;
+  const wasOpen = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    const scroll = sheetScroll.current;
+    if (scroll === null || panel === null || layer === null) return;
+    if (isOpen && interactive && !wasOpen.current) {
+      wasOpen.current = true;
+      scroll.enter(current.current.extent ?? scroll.rest());
+    } else if (!isOpen && wasOpen.current) {
+      wasOpen.current = false;
+      if (scroll.at() > 0) scroll.scrollTo(0, true);
+    }
+  }, [interactive, isOpen, layer, panel]);
+
+  /* A measure asked for by the keyboard, the grabber or the consumer is scrolled to. */
+  useEffect(() => {
+    const scroll = sheetScroll.current;
+    if (scroll === null || panel === null || layer === null || !isOpen) return;
+    const wanted = extentValue ?? scroll.rest();
+    if (Math.abs(scroll.at() - wanted) * layer.clientHeight > 2) scroll.scrollTo(wanted, true);
+  }, [extentValue, isOpen, layer, panel]);
 
   if (!drawer.mounted) return null;
   /* The server, and the hydration of what it wrote, cannot portal: an overlay
@@ -790,19 +748,14 @@ export function DrawerResizer({
   const restore = useRef<number | null>(null);
   /** What the document looked like before the drag, and how to put it back. */
   const gesture = useRef<(() => void) | null>(null);
-  /**
-   * A bottom sheet's separator moves the panel by `translate`, as its body does,
-   * and asks for the extent once, when the panel has arrived. The other sides
-   * have no sheet to lay out once, and keep asking as the pointer moves.
-   */
-  const motion = useRef<SheetMotion | null>(null);
-  /** The stops measured before the panel was laid out for the drag, which would change a content stop. */
-  const stopsAtStart = useRef<{ stops: number[]; rest: number | undefined } | null>(null);
-  /** The stops of the last gesture, which stand while its settle holds the panel. */
-  const lastStops = useRef<{ stops: number[]; rest: number | undefined } | null>(null);
-  /** The layer as the gesture began: the sheet's drag reads no layout per move. */
-  const sheetRect = useRef<DOMRect | null>(null);
-  useEffect(() => () => motion.current?.end(), []);
+  /** A press on a sheet's separator: a tap, or a mouse dragging the sheet's scroll. */
+  const sheetPress = useRef<{
+    x: number;
+    y: number;
+    mouse: boolean;
+    scroll: SheetScroll;
+    drag: ReturnType<SheetScroll['drag']> | null;
+  } | null>(null);
 
   /** The drawer as the last render saw it, for what a frame after the release reads. */
   const latest = useRef(drawer);
@@ -824,6 +777,9 @@ export function DrawerResizer({
    */
   const stopsNow = (): { stops: number[]; rest: number | undefined } => {
     const panel = drawer.nodes.panel;
+    /* A sheet's stops are the scroll's, laid out with its snap points. */
+    const scroll = panel === null ? undefined : sheetScrolls.get(panel);
+    if (scroll !== undefined) return { rest: scroll.rest(), stops: [...scroll.stops()] };
     const rect = layerRect();
     if (panel === null || rect === null || drawer.snapPoints.length === 0) {
       return { rest: drawer.rest, stops: [] };
@@ -848,6 +804,20 @@ export function DrawerResizer({
     onPointerDown?.(event);
     if (event.defaultPrevented || event.button !== 0) return;
 
+    /* A sheet's separator: a touch that moves is the scroll's, one that does
+       not is a tap; a mouse, which no scroll follows, drags the scroll. */
+    const scroll = drawer.nodes.panel === null ? undefined : sheetScrolls.get(drawer.nodes.panel);
+    if (scroll !== undefined) {
+      const mouse = event.pointerType === 'mouse';
+      if (mouse) {
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }
+      event.currentTarget.focus();
+      sheetPress.current = { drag: null, mouse, scroll, x: event.clientX, y: event.clientY };
+      return;
+    }
+
     const rect = layerRect();
     if (rect === null) return;
 
@@ -865,21 +835,21 @@ export function DrawerResizer({
   };
 
   const pointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    const held = press.current;
-    if (held === null) return;
-    /* Under the hand, a sheet is one division and one write per move. */
-    const sheetBox = sheetRect.current;
-    if (motion.current !== null && sheetBox !== null) {
-      const fraction = clamp(
-        (sheetBox.bottom - event.clientY) / sheetBox.height + held.offset,
-        0,
-        1,
-      );
-      samples.current = addExtentSample(samples.current, { at: event.timeStamp, fraction });
-      dragged.current = fraction;
-      motion.current.follow(fraction * sheetBox.height);
+    const tapped = sheetPress.current;
+    if (tapped !== null) {
+      const travel = Math.hypot(event.clientX - tapped.x, event.clientY - tapped.y);
+      if (tapped.drag === null && travel < (tapped.mouse ? TAP_SLOP_PX : SHEET_DRAG_SLOP_PX))
+        return;
+      if (!tapped.mouse) {
+        sheetPress.current = null;
+        return;
+      }
+      tapped.drag ??= tapped.scroll.drag();
+      tapped.drag.move(tapped.y - event.clientY);
       return;
     }
+    const held = press.current;
+    if (held === null) return;
     const rect = layerRect();
     if (rect === null) return;
 
@@ -894,35 +864,6 @@ export function DrawerResizer({
         node.current?.ownerDocument,
         inline ? 'col-resize' : 'row-resize',
       );
-      const panel = drawer.nodes.panel;
-      const layer = drawer.nodes.layer;
-      if (
-        drawer.side === 'bottom' &&
-        drawer.mode === 'overlay' &&
-        panel !== null &&
-        layer !== null
-      ) {
-        const sheet = createSheetMotion(panel);
-        const taken = sheet.holds();
-        /* A panel with no layout yet (none drawn) is where the state says. */
-        const drawn = sheet.visible() ?? (panel.offsetHeight || current * rect.height);
-        /* A panel the motion holds measures the gesture's height: the stops of
-           the gesture that took it stand. */
-        stopsAtStart.current = (taken && lastStops.current) || stopsNow();
-        lastStops.current = stopsAtStart.current;
-        const top = stopsAtStart.current.stops.at(-1) ?? drawer.maxExtent;
-        const from = sheet.begin(drawn, top * rect.height);
-        motion.current = sheet;
-        sheetRect.current = rect;
-        /* The attribute and not the state: a render here, for the whole drawer,
-           is a frame the hand would wait for. */
-        layer.toggleAttribute('data-dragging', true);
-        /* The panel follows from where it is drawn, which the extent in state
-           is not under a content cap or a settle in flight. */
-        held.offset = from / rect.height - (rect.bottom - held.y) / rect.height;
-        pointerMove(event);
-        return;
-      }
       drawer.setDragging(true);
     }
 
@@ -940,7 +881,8 @@ export function DrawerResizer({
     const { rest: measuredRest, stops } = stopsNow();
     if (stops.length < 2) return;
     /* Where the panel is, read with the stops rather than from state a frame old. */
-    const at = drawer.live ?? drawer.extent ?? measuredRest ?? current;
+    const scroll = drawer.nodes.panel === null ? undefined : sheetScrolls.get(drawer.nodes.panel);
+    const at = scroll?.at() ?? drawer.live ?? drawer.extent ?? measuredRest ?? current;
     const next = stops.find((stop) => stop > at && !sameStop(stop, at)) ?? (stops[0] as number);
     drawer.requestExtent(asRequest(drawer, next, measuredRest), 'pointer', event);
   };
@@ -954,6 +896,13 @@ export function DrawerResizer({
    * to close. A close the consumer cancels leaves the panel at the floor.
    */
   const endDrag = (event: PointerEvent<HTMLDivElement>) => {
+    const tapped = sheetPress.current;
+    if (tapped !== null) {
+      sheetPress.current = null;
+      if (tapped.drag !== null) tapped.drag.end();
+      else if (event.type === 'pointerup') cycle(event);
+      return;
+    }
     const held = press.current;
     if (held === null) return;
     press.current = null;
@@ -967,14 +916,9 @@ export function DrawerResizer({
 
     gesture.current?.();
     gesture.current = null;
+    drawer.setDragging(false);
 
-    const sheet = motion.current;
-    motion.current = null;
-    const rect = sheetRect.current ?? layerRect();
-    sheetRect.current = null;
-    if (sheet === null) drawer.setDragging(false);
-    else drawer.nodes.layer?.toggleAttribute('data-dragging', false);
-
+    const rect = layerRect();
     const span = rect === null ? 0 : inline ? rect.width : rect.height;
     const last = dragged.current ?? current;
     /* A cancelled pointer was not let go: it has no speed to carry on. */
@@ -983,8 +927,7 @@ export function DrawerResizer({
     dragged.current = null;
     samples.current = [];
 
-    const { rest: measuredRest, stops } = (sheet && stopsAtStart.current) || stopsNow();
-    stopsAtStart.current = null;
+    const { rest: measuredRest, stops } = stopsNow();
     /* Where the release lands: a stop, the floor, or out. */
     const landed: number | 'close' =
       stops.length > 0
@@ -992,37 +935,24 @@ export function DrawerResizer({
         : last < drawer.minExtent || velocity * span <= -SHEET_FLING_PX_PER_S
           ? 'close'
           : clamp(last, drawer.minExtent, drawer.maxExtent);
-    const request = (value: number) =>
-      drawer.requestExtent(
-        stops.length > 0 ? asRequest(drawer, value, measuredRest) : value,
-        'pointer',
-        event,
-      );
 
     if (landed === 'close') {
-      const layer = drawer.nodes.layer;
       const floor = stops.length > 0 ? (stops[0] as number) : drawer.minExtent;
-      void sheet?.settle(0, velocity * span, layer ? exitDuration(layer) : undefined);
       drawer.close('pointer', undefined, event);
       /* The next open starts at the measure the drawer had before the gesture,
          which a separator resizing as it moved has to ask back. A close the
          consumer refused leaves the panel open, at the floor. */
-      if (sheet === null) drawer.requestExtent(held.before, 'pointer', event);
+      drawer.requestExtent(held.before, 'pointer', event);
       requestAnimationFrame(() => {
-        if (!latest.current.open) return;
-        latest.current.requestExtent(floor, 'pointer', event);
-        if (sheet !== null) void sheet.settle(floor * span, 0).then(sheet.end);
+        if (latest.current.open) latest.current.requestExtent(floor, 'pointer', event);
       });
       return;
     }
-    if (sheet === null) {
-      request(landed);
-      return;
-    }
-    void sheet.settle(landed * span, velocity * span).then(() => {
-      flushSync(() => request(landed));
-      sheet.end();
-    });
+    drawer.requestExtent(
+      stops.length > 0 ? asRequest(drawer, landed, measuredRest) : landed,
+      'pointer',
+      event,
+    );
   };
 
   const keyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -1132,6 +1062,9 @@ export function DrawerResizer({
     onDoubleClick: doubleClick,
     onKeyDown: keyDown,
     onLostPointerCapture: endDrag,
+    onPointerCancel: () => {
+      sheetPress.current = null;
+    },
     onPointerDown: pointerDown,
     onPointerMove: pointerMove,
     onPointerUp: endDrag,

@@ -1,7 +1,7 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, createEvent, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/drawer/contract.json';
 import { SlottedProvider } from '../i18n';
@@ -904,7 +904,7 @@ describe('a sheet dismissed by velocity', () => {
         defaultOpen
         onExtentChange={onExtentChange}
         onOpenChange={onOpenChange}
-        side="bottom"
+        side="top"
       >
         <DrawerPanel>
           <DrawerResizer />
@@ -933,11 +933,13 @@ describe('a sheet dismissed by velocity', () => {
 
     const drag = (moves: readonly (readonly [number, number])[]) => {
       stamped('pointerDown', resizer, { clientY: 400, pointerId: 1 }, 0);
+      /* Written for a panel on the bottom edge and mirrored onto the top one:
+         a bottom sheet is moved by the layer's scroll, not by its separator. */
       for (const [clientY, at] of moves) {
-        stamped('pointerMove', resizer, { clientY, pointerId: 1 }, at);
+        stamped('pointerMove', resizer, { clientY: 800 - clientY, pointerId: 1 }, at);
       }
       const [lastY, lastAt] = moves[moves.length - 1] as readonly [number, number];
-      stamped('pointerUp', resizer, { clientY: lastY, pointerId: 1 }, lastAt);
+      stamped('pointerUp', resizer, { clientY: 800 - lastY, pointerId: 1 }, lastAt);
     };
 
     return { drag, onOpenChange, resizer };
@@ -989,7 +991,7 @@ describe('a sheet dismissed by velocity', () => {
    * A close by the hand asked for the floor as well, and the next open started
    * there: a sheet opened at 50% came back at 20% after one flick.
    */
-  it('asks for no measure when a flick closes it, so it reopens at its own', async () => {
+  it('gives back the measure it had when a flick closes it, so it reopens at its own', async () => {
     const onExtentChange = vi.fn();
     const { drag } = sheet(vi.fn(), onExtentChange);
     drag([
@@ -997,7 +999,10 @@ describe('a sheet dismissed by velocity', () => {
       [440, 40],
     ]);
     await new Promise((resolve) => requestAnimationFrame(resolve));
-    expect(onExtentChange).not.toHaveBeenCalled();
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      0.5,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
   });
 
   it('puts a refused flick on the floor, a frame later', async () => {
@@ -1022,19 +1027,30 @@ describe('a sheet dismissed by velocity', () => {
  * leaves the page undimmed below `scrimFrom`.
  */
 describe('a bottom sheet', () => {
-  function touchAt(target: Element, type: string, y: number, at: number) {
-    const event = new Event(type, { bubbles: true, cancelable: true });
-    Object.defineProperty(event, 'touches', {
-      value: type === 'touchend' ? [] : [{ clientX: 0, clientY: y, identifier: 1, target }],
-    });
-    Object.defineProperty(event, 'timeStamp', { value: at });
-    act(() => {
-      target.dispatchEvent(event);
-    });
-    return event;
-  }
+  /**
+   * A sheet is moved by the layer's own scroll, which jsdom neither lays out
+   * nor scrolls: the layer is 800 pixels tall and the panel 400, and a gesture
+   * is where the scroll comes to rest, a `scroll` and then a `scrollend`.
+   */
+  const sizes = {
+    clientHeight: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight'),
+    offsetHeight: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight'),
+  };
+  afterEach(() => {
+    for (const [name, descriptor] of Object.entries(sizes)) {
+      if (descriptor !== undefined) Object.defineProperty(HTMLElement.prototype, name, descriptor);
+    }
+  });
 
   function sheet(props: Partial<DrawerProps> = {}) {
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+      configurable: true,
+      get: () => 800,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      get: () => 400,
+    });
     const onOpenChange = vi.fn();
     const onExtentChange = vi.fn();
     render(
@@ -1056,19 +1072,16 @@ describe('a bottom sheet', () => {
     );
     const layer = document.querySelector("[data-ui='drawer']") as HTMLElement;
     const panel = layer.querySelector("[data-part='panel']") as HTMLElement;
-    layer.getBoundingClientRect = () =>
-      ({
-        x: 0,
-        y: 0,
-        width: 400,
-        height: 800,
-        top: 0,
-        left: 0,
-        right: 400,
-        bottom: 800,
-      }) as DOMRect;
-    Object.defineProperty(panel, 'offsetHeight', { configurable: true, value: 400 });
     return { layer, onExtentChange, onOpenChange, panel };
+  }
+
+  async function settleAt(layer: HTMLElement, top: number) {
+    await act(async () => {
+      layer.scrollTop = top;
+      layer.dispatchEvent(new Event('scroll'));
+      layer.dispatchEvent(new Event('scrollend'));
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    });
   }
 
   it('measures its content on a block side and takes a step on an inline one', () => {
@@ -1077,39 +1090,41 @@ describe('a bottom sheet', () => {
     expect(layer()?.dataset['drag']).toBe('panel');
   });
 
-  it('closes on a fast downward drag of its body', () => {
-    const { onOpenChange, panel } = sheet();
-    const body = panel.querySelector("[data-part='body']") as HTMLElement;
-    touchAt(body, 'touchstart', 300, 0);
-    const move = touchAt(body, 'touchmove', 340, 20);
-    expect(move.defaultPrevented).toBe(true);
-    touchAt(body, 'touchmove', 420, 40);
-    touchAt(body, 'touchend', 420, 50);
+  it('lays its stops out as snap points, the close among them', () => {
+    const { layer } = sheet({ size: 'md', snapPoints: [0.5, 0.9] });
+    const stops = [...layer.querySelectorAll<HTMLElement>("[data-part='stop']")];
+    expect(stops.map((stop) => stop.style.insetBlockStart)).toEqual(['0px', '400px', '720px']);
+  });
+
+  it('closes when its scroll comes to rest out of sight', async () => {
+    const { layer, onOpenChange } = sheet();
+    await settleAt(layer, 0);
     expect(onOpenChange).toHaveBeenCalledWith(
       false,
       expect.objectContaining({ reason: 'pointer' }),
     );
   });
 
-  it('goes back to its rest on a slow short drag, asking for nothing', () => {
-    const { onExtentChange, onOpenChange, panel } = sheet();
-    const body = panel.querySelector("[data-part='body']") as HTMLElement;
-    touchAt(body, 'touchstart', 300, 0);
-    touchAt(body, 'touchmove', 320, 400);
-    touchAt(body, 'touchmove', 340, 800);
-    touchAt(body, 'touchend', 340, 900);
+  it('asks for nothing when its scroll comes back to rest on its content', async () => {
+    const { layer, onExtentChange, onOpenChange } = sheet();
+    await settleAt(layer, 400);
     expect(onOpenChange).not.toHaveBeenCalled();
-    expect(onExtentChange).not.toHaveBeenCalledWith(expect.any(Number), expect.anything());
+    expect(onExtentChange).not.toHaveBeenCalled();
+  });
+
+  it('asks for the stop its scroll comes to rest on', async () => {
+    const { layer, onExtentChange } = sheet({ size: 'md', snapPoints: [0.5, 0.9] });
+    await settleAt(layer, 720);
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      0.9,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
   });
 
   it('leaves the body alone when it is told to', () => {
-    const { onOpenChange, panel } = sheet({ drag: 'resizer' });
-    const body = panel.querySelector("[data-part='body']") as HTMLElement;
-    touchAt(body, 'touchstart', 300, 0);
-    const move = touchAt(body, 'touchmove', 420, 20);
-    touchAt(body, 'touchend', 420, 30);
-    expect(move.defaultPrevented).toBe(false);
-    expect(onOpenChange).not.toHaveBeenCalled();
+    const { layer } = sheet({ drag: 'resizer' });
+    /* The stylesheet keys the body's own scroll and the panel's touch-action on it. */
+    expect(layer.dataset['drag']).toBe('resizer');
   });
 
   it('walks its stops on a tap of the grabber', () => {
@@ -1128,11 +1143,8 @@ describe('a bottom sheet', () => {
 
   /** From the content stop, `extent` is `undefined`, and the lowest stop is still a move. */
   it('walks from the content stop back to the lowest snap point', () => {
-    const { onExtentChange, panel } = sheet({ snapPoints: [0.5] });
-    Object.defineProperty(panel.querySelector("[data-part='body']"), 'scrollHeight', {
-      configurable: true,
-      value: 2000,
-    });
+    /* The content stop is the panel's 400 of the layer's 800. */
+    const { onExtentChange } = sheet({ snapPoints: [0.3] });
     const bar = screen.getByRole('separator');
     bar.setPointerCapture = () => {};
     bar.hasPointerCapture = () => true;
@@ -1140,7 +1152,7 @@ describe('a bottom sheet', () => {
     fireEvent.pointerDown(bar, { button: 0, clientY: 100, pointerId: 1 });
     fireEvent.pointerUp(bar, { clientY: 100, pointerId: 1 });
     expect(onExtentChange).toHaveBeenLastCalledWith(
-      0.5,
+      0.3,
       expect.objectContaining({ previous: undefined, reason: 'pointer' }),
     );
   });

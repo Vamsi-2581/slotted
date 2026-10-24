@@ -540,7 +540,7 @@ test('measures a sheet by its content and a side panel by its step', () => {
   assert.ok(contract.axes.size.includes('content'));
   assert.equal(drawer.defaults.size, 'content on top and bottom, md on start and end');
   assert.match(contract.sheet.content, /default size on top and bottom and never on start and end/);
-  assert.match(contract.sheet.contentStop, /offsetHeight/);
+  assert.match(contract.sheet.contentStop, /minimum height lifted/);
   assert.match(contract.sheet.contentStop, /undefined/);
 });
 
@@ -555,20 +555,22 @@ test('drags a sheet by its body and hands the gesture to the scroll', () => {
   assert.equal(drawer.defaults.drag, 'panel');
   assert.match(contract.sheet.drag, /touch/);
   assert.match(contract.sheet.drag, /side=bottom/);
-  assert.match(contract.sheet.gesture, /translate alone/);
-  assert.match(contract.sheet.gesture, /once, when the panel has arrived/);
+  assert.match(contract.sheet.drag, /scroll-snap-type: y mandatory/);
+  assert.match(contract.sheet.gesture, /nothing renders and nothing is measured/);
+  assert.match(contract.sheet.gesture, /scrollend/);
   assert.match(contract.sheet.handoff, /scrollTop/);
-  assert.match(contract.sheet.handoff, /highest stop/);
+  assert.match(contract.sheet.handoff, /same gesture/);
   assert.match(contract.sheet.exclusions, /touch-action/);
   assert.match(contract.sheet.exclusions, /data-drawer-drag="none"/);
 });
 
-/** One rule for every release, the resizer's and the body's. */
-test('settles a release by fling first and by projected distance second', () => {
-  assert.match(contract.sheet.settle, /500 px\/s/);
-  assert.match(contract.sheet.settle, /projectExtent/);
+/** A sheet's release is the platform's fling and snap; the other sides' separators keep settleExtent. */
+test('settles a sheet on the snap points and the other sides by settleExtent', () => {
+  assert.match(contract.sheet.settle, /snap points decide/);
+  assert.match(contract.sheet.settle, /settleExtent/);
   assert.match(contract.sheet.settle, /close/);
-  assert.match(contract.sheet.overdrag, /dampenExtent/);
+  assert.match(contract.sheet.overdrag, /overscroll/);
+  assert.match(contract.sheet.motion, /smooth scroll/);
 });
 
 test('leaves the page undimmed below a stop the consumer names', () => {

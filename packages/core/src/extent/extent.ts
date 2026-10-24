@@ -372,17 +372,6 @@ export function settleExtent({
 }
 
 /**
- * Where a panel pulled past its highest stop is drawn: it follows the hand with
- * friction that grows with the distance, and the release puts it back. Compose,
- * Vaul, Ionic and gorhom all resist rather than stop dead, because a sheet that
- * ignores the hand reads as a sheet that has stopped responding.
- */
-export function dampenExtent(fraction: number, max: number): number {
-  if (fraction <= max) return fraction;
-  return Math.min(1, max + Math.log1p((fraction - max) * 8) / 20);
-}
-
-/**
  * The stops a sheet rests on: the consumer's snap points, and the height of
  * its content when the size step is `content` — the stop gorhom's dynamic
  * sizing adds. With neither, the rest the panel is at is the only stop, so a

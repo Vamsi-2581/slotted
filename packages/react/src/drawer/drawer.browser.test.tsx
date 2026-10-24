@@ -1,9 +1,10 @@
 import { render } from '@testing-library/react';
 import { useState } from 'react';
 import { cdp } from 'vitest/browser';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Drawer, DrawerBody, DrawerHeader, DrawerPanel, DrawerTitle } from './index';
+import type { DrawerProps } from './drawer.types';
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
@@ -88,7 +89,8 @@ describe('a bottom sheet at its last stop', () => {
         </DrawerPanel>
       </Drawer>,
     );
-    for (let index = 0; index < 10; index += 1) await frame();
+    /* The opening is the platform's smooth scroll, a little under half a second. */
+    for (let index = 0; index < 45; index += 1) await frame();
     const root = document.querySelector('[data-ui="drawer"]') as HTMLElement;
     const panel = root.querySelector('[data-part="panel"]') as HTMLElement;
     const header = root.querySelector('[data-part="header"]') as HTMLElement;
@@ -102,7 +104,7 @@ describe('a bottom sheet at its last stop', () => {
       await frame();
     }
     await touch('touchEnd', x, y - 600);
-    for (let index = 0; index < 30; index += 1) await frame();
+    for (let index = 0; index < 60; index += 1) await frame();
 
     expect(root.hasAttribute('data-expanded')).toBe(true);
     expect(getComputedStyle(panel).borderTopLeftRadius).toBe('0px');
@@ -156,88 +158,194 @@ describe('a bottom sheet closed for a navigation', () => {
  * a fling leaves from where the hand let go, at the hand's speed, in one
  * motion: the panel's position never goes back, and it ends out of sight.
  */
-describe('a bottom sheet dragged and flung', () => {
-  function Sheet() {
-    return (
-      <Drawer defaultOpen side="bottom">
-        <DrawerPanel>
-          <DrawerHeader>
-            <DrawerTitle>Filters</DrawerTitle>
-          </DrawerHeader>
-          <DrawerBody>
-            <ul>
-              {Array.from({ length: 8 }, (_, index) => (
-                <li key={index}>Row {index + 1}</li>
-              ))}
-            </ul>
-          </DrawerBody>
-        </DrawerPanel>
-      </Drawer>
-    );
-  }
-
-  it('moves by translate over 60 pointer moves and never resizes the panel', async () => {
-    render(<Sheet />);
-    for (let index = 0; index < 10; index += 1) await frame();
-    const panel = document.querySelector('[data-part="panel"]') as HTMLElement;
-    const header = panel.querySelector('[data-part="header"]') as HTMLElement;
-    const box = header.getBoundingClientRect();
-    const x = box.left + box.width / 2;
-    const y = box.top + box.height / 2;
-    const rest = panel.offsetHeight;
-
-    await touch('touchStart', x, y);
-    await touch('touchMove', x, y + 20);
-    const sizes = new Set<string>();
-    const shifts = new Set<string>();
-    for (let step = 1; step <= 60; step += 1) {
-      await touch('touchMove', x, y + 20 + step);
-      await frame();
-      sizes.add(panel.style.blockSize);
-      shifts.add(panel.style.translate);
-    }
-    expect(sizes.size).toBe(1);
-    expect(shifts.size).toBeGreaterThan(30);
-    expect(panel.offsetHeight).toBe(rest);
-    await touch('touchEnd', x, y + 80);
+/**
+ * The sheet on the platform's scroll (docs/history/designs/
+ * 2026-10-23-drawer-sheet-native-scroll-design.md §3): the finger, the fling
+ * and the landing are the compositor's, the family reads where they end.
+ */
+describe('a bottom sheet on the platform scroll', () => {
+  /* The theme's motion tokens, which the test document does not load: the
+     layer is kept for as long as they say the scroll takes. */
+  beforeEach(() => {
+    document.documentElement.style.setProperty('--slotted-duration-short', '120ms');
+    document.documentElement.style.setProperty('--slotted-duration-medium', '200ms');
+    document.documentElement.style.setProperty('--slotted-duration-long', '320ms');
+  });
+  afterEach(() => {
+    document.documentElement.removeAttribute('style');
   });
 
-  it('leaves in one motion from the release position when flung down', async () => {
-    /* The theme's motion tokens, which the test document does not load. */
-    document.documentElement.style.setProperty('--slotted-duration-medium', '240ms');
-    document.documentElement.style.setProperty('--slotted-duration-long', '320ms');
-    render(<Sheet />);
-    for (let index = 0; index < 10; index += 1) await frame();
-    const panel = document.querySelector('[data-part="panel"]') as HTMLElement;
-    const header = panel.querySelector('[data-part="header"]') as HTMLElement;
+  const rows = Array.from({ length: 40 }, (_, index) => (
+    <p key={index} style={{ blockSize: 48, margin: 0 }}>
+      Row {index + 1}
+    </p>
+  ));
+
+  async function open({ onOpenChange: alsoOnOpenChange, ...props }: Partial<DrawerProps> = {}) {
+    const onOpenChange = vi.fn();
+    const onExtentChange = vi.fn();
+    render(
+      <Drawer
+        defaultOpen
+        onExtentChange={onExtentChange}
+        onOpenChange={(next, request) => {
+          onOpenChange(next, request);
+          alsoOnOpenChange?.(next, request);
+        }}
+        side="bottom"
+        {...props}
+      >
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Transactions</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>{props.children ?? rows}</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    for (let index = 0; index < 45; index += 1) await frame();
+    const layer = document.querySelector('[data-ui="drawer"]') as HTMLElement;
+    const panel = layer.querySelector('[data-part="panel"]') as HTMLElement;
+    const header = layer.querySelector('[data-part="header"]') as HTMLElement;
     const box = header.getBoundingClientRect();
-    const x = box.left + box.width / 2;
-    const y = box.top + box.height / 2;
+    return {
+      header: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
+      layer,
+      onExtentChange,
+      onOpenChange,
+      panel,
+    };
+  }
 
-    /* The first move only claims the gesture; the five after it carry the panel
-       35 px a frame, a fling at any frame rate the test document runs at. */
-    await touch('touchStart', x, y);
-    for (let step = 1; step <= 6; step += 1) {
-      await touch('touchMove', x, y + step * 35);
+  /** The visible height of the panel, whatever the layer's own coordinates are. */
+  const shown = (layer: HTMLElement, panel: HTMLElement) =>
+    Math.round(layer.getBoundingClientRect().bottom - panel.getBoundingClientRect().top);
+
+  async function drag(from: { x: number; y: number }, by: number, steps: number) {
+    await touch('touchStart', from.x, from.y);
+    for (let step = 1; step <= steps; step += 1) {
+      await touch('touchMove', from.x, from.y + (by * step) / steps);
       await frame();
     }
-    const released = panel.getBoundingClientRect().top;
-    await touch('touchEnd', x, y + 210);
+    await touch('touchEnd', from.x, from.y + by);
+  }
 
-    const tops: number[] = [released];
-    for (let index = 0; index < 60; index += 1) {
+  async function trace(layer: HTMLElement, panel: HTMLElement, frames = 60) {
+    const tops: number[] = [];
+    for (let index = 0; index < frames; index += 1) {
       await frame();
-      const current = document.querySelector('[data-part="panel"]');
-      if (current === null) break;
-      tops.push(current.getBoundingClientRect().top);
+      if (!panel.isConnected) break;
+      tops.push(Math.round(panel.getBoundingClientRect().top));
     }
-    document.documentElement.removeAttribute('style');
+    return tops;
+  }
+
+  it('closes on a fling down, and the panel never comes back up on its way out', async () => {
+    const { header, layer, onOpenChange, panel } = await open({
+      snapPoints: [0.4, 1],
+      defaultExtent: 0.4,
+    });
+    await drag(header, 300, 5);
+    const tops = await trace(layer, panel);
     for (let index = 1; index < tops.length; index += 1) {
       expect(tops[index]!).toBeGreaterThanOrEqual(tops[index - 1]! - 0.5);
     }
-    expect(tops.length).toBeGreaterThan(4);
-    /* The last frame it was seen at is the edge of the screen or past it. */
-    expect(tops.at(-1)!).toBeGreaterThan(window.innerHeight - 40);
-    expect(document.querySelector('[data-ui="drawer"][data-open]')).toBeNull();
+    expect(onOpenChange).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('lands a slow drag on the nearest stop and asks for it', async () => {
+    const { header, layer, onExtentChange, panel } = await open({
+      snapPoints: [0.4, 0.8],
+      defaultExtent: 0.4,
+    });
+    const span = layer.clientHeight;
+    /* Up by a third of the layer, slowly: nearer to 0.8 than to 0.4. */
+    await drag(header, -Math.round(span * 0.3), 30);
+    await trace(layer, panel, 45);
+    expect(Math.abs(shown(layer, panel) - span * 0.8)).toBeLessThanOrEqual(2);
+    expect(onExtentChange).toHaveBeenLastCalledWith(
+      0.8,
+      expect.objectContaining({ reason: 'pointer' }),
+    );
+  });
+
+  it('goes on into the content in the same gesture, and stays where it is let go', async () => {
+    const { header, layer, panel } = await open({ snapPoints: [0.4, 1], defaultExtent: 0.4 });
+    const span = layer.clientHeight;
+    await drag(header, -Math.round(span * 0.9), 40);
+    await trace(layer, panel, 45);
+    /* The panel's top went past the top of the screen: the content scrolled under the header. */
+    expect(panel.getBoundingClientRect().top).toBeLessThan(-span * 0.2);
+    expect(layer.hasAttribute('data-sheet-content')).toBe(true);
+  });
+
+  it('stops a fling out of the content at the top of the content, and stays open', async () => {
+    const { header, layer, onOpenChange, panel } = await open({
+      snapPoints: [0.4, 1],
+      defaultExtent: 0.4,
+    });
+    const span = layer.clientHeight;
+    await drag(header, -Math.round(span * 0.9), 40);
+    await trace(layer, panel, 45);
+    /* A fling down from inside the content, the hand lifting before the top. */
+    const body = layer.querySelector('[data-part="body"]') as HTMLElement;
+    const at = body.getBoundingClientRect();
+    /* The content is 0.3 of the layer past its top; the hand travels 0.2 and lets the fling carry on. */
+    await drag({ x: at.left + at.width / 2, y: span * 0.2 }, Math.round(span * 0.2), 2);
+    /* However hard the fling, the panel's top never comes below the top of the
+       screen: the content stops at its own top, and the sheet stays where it is. */
+    const tops = await trace(layer, panel, 90);
+    expect(Math.max(...tops)).toBeLessThanOrEqual(0.5);
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('closes on a press outside along the same scroll, over many frames', async () => {
+    const { layer, onOpenChange, panel } = await open({
+      children: 'Short',
+      snapPoints: [0.4],
+      defaultExtent: 0.4,
+    });
+    const backdrop = layer.querySelector('[data-part="backdrop"]') as HTMLElement;
+    backdrop.click();
+    const tops = await trace(layer, panel);
+    expect(onOpenChange).toHaveBeenCalledWith(
+      false,
+      expect.objectContaining({ reason: 'outsidePress' }),
+    );
+    /* A slide of one or two frames read as a cut; the scroll takes a dozen or more. */
+    expect(new Set(tops).size).toBeGreaterThan(10);
+    for (let index = 1; index < tops.length; index += 1) {
+      expect(tops[index]!).toBeGreaterThanOrEqual(tops[index - 1]! - 0.5);
+    }
+  });
+
+  it('closes on the same fling with a busy main thread', async () => {
+    await cdp().send('Emulation.setCPUThrottlingRate', { rate: 6 });
+    try {
+      const busy = () => {
+        const until = performance.now() + 40;
+        while (performance.now() < until) {
+          /* an application rendering as the sheet closes */
+        }
+      };
+      const { header, layer, onOpenChange } = await open({
+        defaultExtent: 0.4,
+        onOpenChange: busy,
+        snapPoints: [0.4, 1],
+      });
+      /* Slower frames: the opening is given time to arrive before the hand. */
+      for (let index = 0; index < 45; index += 1) await frame();
+      await drag(header, Math.round(layer.clientHeight * 0.35), 5);
+      for (let index = 0; index < 90; index += 1) await frame();
+      expect(onOpenChange).toHaveBeenCalledWith(
+        false,
+        expect.objectContaining({ reason: 'pointer' }),
+      );
+    } finally {
+      await cdp().send('Emulation.setCPUThrottlingRate', { rate: 1 });
+    }
   });
 });

@@ -6,15 +6,12 @@ export {
   sameStop,
   stopAsExtent,
 } from './gesture';
-export { attachSheetDrag } from './sheet';
-export type { SheetDragOptions } from './sheet';
-export { createSheetMotion, sheetMotionHolds } from './sheet-motion';
-export type { SheetMotion } from './sheet-motion';
+export { attachSheetScroll } from './sheet-scroll';
+export type { SheetScroll, SheetScrollOptions } from './sheet-scroll';
 export type { ResizeCursor } from './gesture';
 export {
   addExtentSample,
   anchorsAtStart,
-  dampenExtent,
   EXTENT_LARGE_STEP_PX,
   EXTENT_STEP_PX,
   EXTENT_STOPPED_MS,

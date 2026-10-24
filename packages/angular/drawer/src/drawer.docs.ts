@@ -224,7 +224,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sheet',
     title: 'A bottom sheet as a phone draws one',
-    note: 'The sheet measures what it holds — the default size on top and bottom — stops at forty rems on a wide layer, and moves under a touch anywhere on its body. A downward drag with the list at its top moves the sheet; an upward one grows it to the next stop — the height of its content among them — before the list scrolls; a fling faster than 500 px/s goes to the next stop or closes. A tap on the grabber walks the stops.',
+    note: 'The sheet measures what it holds — the default size on top and bottom — stops at forty rems on a wide layer, and is moved by the platform’s own scroll, so the finger, the fling and the landing on a stop run on the compositor. The sheet and its content are one scroll: pushing up lifts the sheet to the top of the screen and, without letting go, goes on through the list under the header, which sticks there; pulling down from the top of the list brings the sheet down. A fling out of the list stops at its top and never closes the sheet. A tap on the grabber walks the stops.',
     snippet: defineSnippet({
       id: 'drawer-angular-sheet',
       language: 'angular',
@@ -433,7 +433,7 @@ const events: EventRow[] = [
   {
     name: 'extentChangeRequest',
     payload: 'DrawerExtentRequest',
-    when: 'Before the panel’s measure changes, with the reason pointer for a drag or a tap on the grip, keyboard for an arrow key, Home, End or Enter, and programmatic for a change from code. A drag of the separator fires on every pointer move and can report a value below minExtent; a drag of a sheet’s body fires once, on release, with the stop it landed on. undefined means the panel is back on its size step, or on the height of its content under size="content".',
+    when: 'Before the panel’s measure changes, with the reason pointer for a drag or a tap on the grip, keyboard for an arrow key, Home, End or Enter, and programmatic for a change from code. A drag of the separator fires on every pointer move and can report a value below minExtent; a bottom sheet fires once its scroll comes to rest, with the stop it rests on. undefined means the panel is back on its size step, or on the height of its content under size="content".',
   },
   {
     name: 'closed',
@@ -485,7 +485,7 @@ const accessibility = [
   'Under mode="inline" the panel has no role, because a navigation drawer is a navigation landmark and a filter panel is complementary; write the landmark yourself, such as <nav slDrawerBody>. The trigger has no aria-haspopup there, because an inline drawer is a disclosure, not a popup.',
   'aria-modal="true" is written only while the drawer is modal, which is the only state in which the page behind is inert. modal is always false under mode="inline". An aria-label written on <sl-drawer> is moved to the panel, which is the element the role is on.',
   'The separator follows the WAI-ARIA window splitter pattern. The arrow keys move it in the direction they point, Home and End go to the limits, and Enter collapses the panel to its minimum and then restores it. Enter never closes the drawer; Escape does. The values are percentages, and there is no aria-valuetext, so a screen reader announces 40 rather than 40 per cent.',
-  'A bottom sheet moves under a touch on its body as well as on its separator, and every stop a finger reaches, the height of the content among them, is also reachable with the arrow keys on the separator. A touch drag never starts on a field, on selected text, or on an element whose touch-action already takes vertical movement.',
+  'A bottom sheet moves under a touch on its body as well as on its separator, and every stop a finger reaches, the height of the content among them, is also reachable with the arrow keys on the separator. It is moved by the page’s own scroll, so a control whose touch-action takes vertical movement keeps its gesture, and a region inside data-drawer-drag="none" keeps its scroll from passing on to the sheet.',
   'A closed panel is inert in both modes, so its controls are in neither the tab order nor the accessibility tree.',
   'Focus moves into an overlay panel when it opens, to the first focusable element unless initialFocus names another, and returns on close to the element that had it before; if that element has left the document, focus goes to its nearest ancestor still in it. An inline drawer moves no focus when it opens, and on close restores focus only when focus is inside the panel or on the page body.',
   'The ✕ button and the separator are each at least --slotted-target-min across, so both meet the WCAG 2.2 minimum target size of 24 by 24 pixels.',
@@ -640,7 +640,7 @@ const api = apiRows([
     "'panel' | 'resizer'",
     'panel',
     '<sl-drawer>, provideDrawerDefaults',
-    'What a touch moves a bottom sheet by: panel, anywhere on the panel, or resizer, the separator only. With panel, a drag that starts in a list scrolled away from its top scrolls the list. A mouse or a pen always drags the separator.',
+    'What a touch moves a bottom sheet by: panel, anywhere on the panel, the sheet and its content scrolling as one; or resizer, the separator only, the body scrolling on its own at the highest stop. A mouse drags the separator, and the sheet settles on the nearest stop.',
   ],
   [
     'scrimFrom',

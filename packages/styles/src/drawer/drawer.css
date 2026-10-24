@@ -1305,4 +1305,249 @@
       border-color: CanvasText;
     }
   }
+
+  /* ── The sheet on the platform's scroll ─────────────────────────────── */
+
+  /**
+   * An overlay sheet from the bottom that a hand moves (`data-drag`) is moved by
+   * the platform's own scroll: the layer scrolls, a spacer the height of the
+   * layer comes before the panel, and `scrollTop` is how much of the panel is
+   * in sight. The stops are snap points that `attachSheetScroll` in
+   * `@slotted/core/extent` lays out, so the finger, the fling and the landing
+   * are the compositor's. The layer takes no press of its own: the scrim and
+   * the panel do, and a touch on the panel scrolls the layer.
+   */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag] {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scroll-snap-type: y mandatory;
+    scroll-padding-block-end: var(--slotted-keyboard-inset, 0px);
+    scrollbar-width: none;
+    scroll-timeline: --slotted-drawer-sheet block;
+    pointer-events: none;
+  }
+
+  /**
+   * Opening and closing are the same scroll a hand ends with: the binding
+   * scrolls the layer to the resting stop or to nothing on the platform's
+   * smooth scroll, so a sheet sent away by a press outside leaves the way a
+   * dragged one does. The panel does not slide on its own, and the layer is
+   * kept for as long as that scroll takes (Chrome: about 440 ms across a
+   * phone's height). Leaving, nothing re-snaps: a re-snap would lift the panel
+   * back into view on its way out.
+   */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag] {
+    --_reveal: content-visibility
+      calc(var(--slotted-duration-long) + var(--slotted-duration-medium)) allow-discrete;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]:not([data-open]) {
+    scroll-snap-type: none;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]:not([data-open])
+    > [data-part-panel] {
+    translate: 0 0;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]::-webkit-scrollbar {
+    display: none;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]::before {
+    content: '';
+    display: block;
+    block-size: 100%;
+  }
+
+  /* Fixed, so a touch on it scrolls nothing and a press on it is a press outside. */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag] > [data-part-backdrop] {
+    position: fixed;
+    inset: 0;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]:not([data-undimmed])
+    > [data-part-backdrop] {
+    pointer-events: auto;
+  }
+
+  /**
+   * The panel clips its corners without being a scroll container, so what
+   * sticks inside it sticks to the layer's scrollport: the screen. The measure
+   * does not ease; nothing animates it, the scroll moves the panel. The second
+   * shadow is the panel's surface below its edge, which a rubber band past the
+   * highest stop shows instead of a gap.
+   */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag] > [data-part-panel] {
+    pointer-events: auto;
+    scroll-snap-align: end;
+    margin-inline: auto;
+    overflow: clip;
+    max-block-size: none;
+    box-shadow:
+      var(--slotted-shadow-lg),
+      0 50vh 0 0 var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
+    transition:
+      translate var(--_slide),
+      border-start-start-radius var(--_move),
+      border-start-end-radius var(--_move);
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]
+    > [data-part-panel]
+    > [data-part-footer] {
+    position: sticky;
+    inset-block-end: var(--slotted-keyboard-inset, 0px);
+    z-index: 1;
+    background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
+  }
+
+  /**
+   * `drag="panel"`: one scroll for the sheet and what it holds, Android's
+   * nested scrolling in a single scroller. The panel is as tall as its content;
+   * the body does not scroll on its own. A hand pushing up from a lower stop
+   * lifts the sheet to the top of the screen and, without letting go, goes on
+   * scrolling the content under the header that sticks there; pulling down
+   * from the top of the content brings the sheet down. A panel taller than the
+   * layer is a snap area larger than the snapport, so every position inside it
+   * is a resting one. Content at rest past the top is read with the snap off
+   * (`data-sheet-content`); going back below the top turns it on, and that
+   * re-snap stops a fling out of the content at the top.
+   */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'] > [data-part-panel] {
+    block-size: auto;
+    min-block-size: var(--slotted-drawer-sheet-height, 0px);
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'][data-sheet-scrolls]
+    > [data-part-panel] {
+    scroll-snap-align: start;
+  }
+
+  /* Content at rest past the top: the snap is off so a layout does not re-snap it to the top. */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'][data-sheet-content] {
+    scroll-snap-type: none;
+  }
+
+  /* No finger on content at rest: the spacer folds, and the top of the content is an edge. */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'][data-sheet-anchored]::before {
+    block-size: 0;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
+    > [data-part-panel]
+    > [data-part-body] {
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
+    > [data-part-panel]
+    > [data-part-resizer] {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 2;
+    background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
+    > [data-part-panel]
+    > [data-part-header] {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
+    > [data-part-panel]:has(> [data-part-resizer])
+    > [data-part-header] {
+    inset-block-start: var(--_resizer-thickness);
+  }
+
+  /**
+   * `drag="resizer"`: only the grabber moves the sheet. The panel is laid out at
+   * the highest stop and the body scrolls inside it, at the highest stop only.
+   */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='resizer']
+    > [data-part-panel] {
+    block-size: var(--slotted-drawer-sheet-height, auto);
+    touch-action: none;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='resizer']
+    > [data-part-panel]
+    > [data-part-body] {
+    touch-action: pan-y;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='resizer']:not(
+      [data-top-stop]
+    )
+    > [data-part-panel]
+    > [data-part-body] {
+    overflow: hidden;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]
+    > [data-part-panel]
+    > [data-part-resizer] {
+    touch-action: pan-y;
+  }
+
+  /* A region the consumer keeps from the sheet: its own scroll never passes on to it. */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag] [data-drawer-drag='none'] {
+    overscroll-behavior: contain;
+  }
+
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]
+    > [data-part-stops]
+    > [data-part-stop] {
+    position: absolute;
+    inset-inline: 0;
+    block-size: 0;
+    scroll-snap-align: start;
+    pointer-events: none;
+  }
+
+  /**
+   * The scrim dims with the sheet: out of sight it is clear, at the lowest stop
+   * it is whole. The element keeps the fade it opens and closes with; the
+   * scroll drives a layer inside it, and the two multiply.
+   */
+  @supports (animation-timeline: scroll()) {
+    [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag] > [data-part-backdrop] {
+      background: none;
+    }
+
+    [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]
+      > [data-part-backdrop]::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      /* A decoration: unthemed, it is not painted rather than painted in a system colour. */
+      background: var(--slotted-drawer-scrim, var(--slotted-scrim));
+      animation: slotted-drawer-sheet-dim linear both;
+      animation-timeline: --slotted-drawer-sheet;
+      animation-range: 0px var(--slotted-drawer-sheet-floor, 100%);
+    }
+
+    /* Reading content, the sheet is at the top: the scrim is whole, wherever the scroll is. */
+    [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag][data-sheet-content]
+      > [data-part-backdrop]::before {
+      animation: none;
+    }
+  }
+
+  @keyframes slotted-drawer-sheet-dim {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
 }

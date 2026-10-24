@@ -1,7 +1,7 @@
 import { Component, PLATFORM_ID, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SlButton } from '@slotted/angular/button';
 import { provideSlotted } from '@slotted/angular/i18n';
@@ -722,27 +722,44 @@ describe('SlDrawer', () => {
 
   /* ---------------------------------------------------------- the sheet - */
 
-  const touchAt = (target: Element, type: string, y: number, at: number) => {
-    const event = new Event(type, { bubbles: true, cancelable: true });
-    Object.defineProperty(event, 'touches', {
-      value: type === 'touchend' ? [] : [{ clientX: 0, clientY: y, identifier: 1, target }],
-    });
-    Object.defineProperty(event, 'timeStamp', { value: at });
-    target.dispatchEvent(event);
-    fixture.detectChanges();
-    return event;
+  /**
+   * A sheet is moved by the layer's own scroll, which jsdom neither lays out
+   * nor scrolls: the layer is 800 pixels tall and the panel 400, and a gesture
+   * is where the scroll comes to rest, a `scroll` and then a `scrollend` (or
+   * 150 ms of quiet where the document has no `scrollend`).
+   */
+  const sizes = {
+    clientHeight: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight'),
+    offsetHeight: Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight'),
   };
+  afterEach(() => {
+    for (const [name, descriptor] of Object.entries(sizes)) {
+      if (descriptor !== undefined) Object.defineProperty(HTMLElement.prototype, name, descriptor);
+    }
+  });
 
   const openSheet = () => {
     measureAs(400, 800);
+    Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+      configurable: true,
+      get: () => 800,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      get: () => 400,
+    });
     host.side.set('bottom');
     host.open.set(true);
     fixture.detectChanges();
-    Object.defineProperty(panel() as HTMLElement, 'offsetHeight', {
-      configurable: true,
-      value: 400,
-    });
-    return document.querySelector('[data-part="body"]') as HTMLElement;
+    return layer() as HTMLElement;
+  };
+
+  const settleAt = async (sheet: HTMLElement, top: number) => {
+    sheet.scrollTop = top;
+    sheet.dispatchEvent(new Event('scroll'));
+    sheet.dispatchEvent(new Event('scrollend'));
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    fixture.detectChanges();
   };
 
   it('measures its content on a block side and takes a step on an inline one', () => {
@@ -757,35 +774,36 @@ describe('SlDrawer', () => {
     expect(layer()?.dataset['size']).toBe('md');
   });
 
-  it('closes on a fast downward drag of its body', () => {
-    const body = openSheet();
-    touchAt(body, 'touchstart', 300, 0);
-    const move = touchAt(body, 'touchmove', 340, 20);
-    expect(move.defaultPrevented).toBe(true);
-    touchAt(body, 'touchmove', 420, 40);
-    touchAt(body, 'touchend', 420, 50);
+  it('lays its stops out as snap points, the close among them', () => {
+    host.size.set('md');
+    host.snapPoints.set([0.5, 0.9]);
+    const sheet = openSheet();
+    const stops = [...sheet.querySelectorAll<HTMLElement>('[data-part="stop"]')];
+    expect(stops.map((stop) => stop.style.insetBlockStart)).toEqual(['0px', '400px', '720px']);
+  });
+
+  it('closes when its scroll comes to rest out of sight', async () => {
+    const sheet = openSheet();
+    await settleAt(sheet, 0);
     expect(host.open()).toBe(false);
     expect(host.requests.at(-1)?.reason).toBe('pointer');
   });
 
-  it('goes back to its rest on a slow short drag, asking for nothing', () => {
-    const body = openSheet();
-    touchAt(body, 'touchstart', 300, 0);
-    touchAt(body, 'touchmove', 320, 400);
-    touchAt(body, 'touchmove', 340, 800);
-    touchAt(body, 'touchend', 340, 900);
+  it('asks for nothing when its scroll comes back to rest on its content', async () => {
+    const sheet = openSheet();
+    /* The content stop: 400 pixels of panel, capped 400 short of the layer. */
+    await settleAt(sheet, 400);
     expect(host.open()).toBe(true);
     expect(host.extent()).toBeUndefined();
   });
 
-  it('leaves the body alone when it is told to', () => {
-    host.drag.set('resizer');
-    const body = openSheet();
-    touchAt(body, 'touchstart', 300, 0);
-    const move = touchAt(body, 'touchmove', 420, 20);
-    touchAt(body, 'touchend', 420, 30);
-    expect(move.defaultPrevented).toBe(false);
-    expect(host.open()).toBe(true);
+  it('asks for the stop its scroll comes to rest on', async () => {
+    host.size.set('md');
+    host.snapPoints.set([0.5, 0.9]);
+    const sheet = openSheet();
+    await settleAt(sheet, 720);
+    expect(host.extent()).toBe(0.9);
+    expect(host.extents.at(-1)?.reason).toBe('pointer');
   });
 
   it('walks its stops on a tap of the grabber', () => {

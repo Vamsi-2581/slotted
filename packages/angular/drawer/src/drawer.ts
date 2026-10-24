@@ -3,18 +3,14 @@ import { injectMessages } from '@slotted/angular/i18n';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import {
-  attachSheetDrag,
-  createSheetMotion,
-  sheetMotionHolds,
-  dampenExtent,
+  attachSheetScroll,
   extentBounds,
   isInlineSide,
   measureSheetStops,
   sameStop,
-  settleExtent,
   stopAsExtent,
 } from '@slotted/core/extent';
-import type { SheetMotion } from '@slotted/core/extent';
+import type { SheetScroll } from '@slotted/core/extent';
 import { createFocusScope } from '@slotted/core/focus';
 import type { FocusScopeHandle } from '@slotted/core/focus';
 import { drawerMessages, type DrawerMessages, type PartialMessages } from '@slotted/core/i18n';
@@ -25,6 +21,7 @@ import { createPresence } from '@slotted/core/presence';
 import type { PresenceHandle, PresenceStatus } from '@slotted/core/presence';
 import { createControllable } from '@slotted/core/state';
 import {
+  afterRenderEffect,
   ApplicationRef,
   booleanAttribute,
   ChangeDetectionStrategy,
@@ -67,22 +64,8 @@ const NO_SNAP_POINTS: readonly number[] = [];
 /** What the stylesheet leaves above a content sheet, for the press outside. */
 const CONTENT_RESERVE = 'var(--slotted-space-12, 4rem)';
 
-/**
- * How long the layer says it takes to leave, in milliseconds: what presence
- * waits for before it unmounts, so a panel sent out by hand has to be gone in
- * that time.
- */
-export function exitDuration(layer: HTMLElement): number | undefined {
-  const durations = layer.ownerDocument
-    .defaultView!.getComputedStyle(layer)
-    .transitionDuration.split(',')
-    .map((value) =>
-      value.trim().endsWith('ms') ? Number.parseFloat(value) : Number.parseFloat(value) * 1000,
-    )
-    .filter(Number.isFinite);
-  const longest = Math.max(0, ...durations);
-  return longest > 0 ? longest : undefined;
-}
+/** How long a close by the hand waits before it reads the consumer's refusal. */
+const REFUSED_CLOSE_MS = 300;
 
 /**
  * A panel that comes in from an edge, and either covers the page or stands
@@ -233,8 +216,10 @@ export class SlDrawer implements OnInit {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly destroyRef = inject(DestroyRef);
   private readonly appRef = inject(ApplicationRef);
-  /** The sheet's gesture, kept until the panel is gone: a close ends the drag and not the exit. */
-  private sheetMotion: SheetMotion | null = null;
+  /** The scroll that moves a sheet from the bottom, while its panel is there. */
+  sheetScroll: SheetScroll | null = null;
+  /** Whether the sheet was open when its opening and closing were last answered. */
+  private sheetWasOpen = false;
   private readonly baseId = inject(SlDrawerIdFactory).next();
 
   /** The element the consumer wrote us beside, recorded before anything moves. */
@@ -597,8 +582,8 @@ export class SlDrawer implements OnInit {
       }
       const inline = isInlineSide(this.resolvedSide());
       const read = () => {
-        /* A gesture or its settle has the panel at the gesture's height. */
-        if (sheetMotionHolds(panel)) return;
+        /* A sheet's panel is as tall as its content; its rest is the scroll's. */
+        if (this.sheetScroll !== null) return;
         const rect = box.getBoundingClientRect();
         const span = inline ? rect.width : rect.height;
         if (span <= 0) return;
@@ -637,112 +622,87 @@ export class SlDrawer implements OnInit {
     });
 
     /**
-     * The body of a sheet from the bottom moves it under a touch, and hands the
-     * gesture to the scroll of what it holds when that is what it is —
-     * `attachSheetDrag` decides which. The panel is laid out once, at the
-     * highest extent the hand may take it to, and the hand moves it by
-     * `translate` alone: no signal and no measure per move. The release
-     * animates from where the hand left the panel at the speed it had
-     * (`createSheetMotion`), and the extent is requested once, on arrival.
+     * A sheet from the bottom is moved by the platform's own scroll: the layer
+     * scrolls, and its `scrollTop` is how much of the panel is in sight
+     * (`attachSheetScroll`). The finger, the fling and the landing are the
+     * compositor's; the family reads where the scroll came to rest and asks
+     * for that extent, or for the close.
      */
     effect((onCleanup) => {
       const node = this.layerRef()?.nativeElement;
       const panel = this.panelRef()?.nativeElement;
-      if (
-        node === undefined ||
-        panel === undefined ||
-        !this.open() ||
-        !this.sheet() ||
-        this.resolvedDrag() !== 'panel'
-      ) {
-        return;
-      }
-
-      let span = 0;
-      let start = 0;
-      let last = 0;
-      let measured: { stops: number[]; rest: number | undefined } = {
-        rest: undefined,
-        stops: [],
-      };
-      const motion = createSheetMotion(panel);
-      this.sheetMotion?.end();
-      this.sheetMotion = motion;
-      /* Where the panel is drawn: under a settle still in flight it is not its height. */
-      const now = () => {
-        span = node.getBoundingClientRect().height;
-        return span > 0 ? (motion.visible() ?? panel.offsetHeight) / span : 0;
-      };
-      /* What the template wrote on the layer before the drag, put back on release. */
-      let undimmed = false;
-      const finish = () => {
-        motion.end();
-        node.toggleAttribute('data-undimmed', undimmed);
-      };
-      /* The stops, measured while the stylesheet has the panel. A panel the
-         motion holds measures the gesture's height, so the stops of the gesture
-         that took it stand. */
-      const stopsNow = () =>
-        motion.holds() && measured.stops.length > 0 ? measured : this.measureStops(panel, span);
-
-      onCleanup(
-        attachSheetDrag(panel, {
-          enabled: () => this.open(),
-          canGrow: () => {
-            const at = now();
-            const top = stopsNow().stops.at(-1);
-            return top !== undefined && at < top && !sameStop(at, top);
+      if (!this.browser || node === undefined || panel === undefined || !this.sheet()) return;
+      const scroll = untracked(() =>
+        attachSheetScroll(node, panel, {
+          content: () => this.resolvedSize() === 'content',
+          dismissible: () => true,
+          onScroll: (at) => {
+            const from = this.scrimFrom();
+            if (from > 0) node.toggleAttribute('data-undimmed', at < from);
           },
-          onStart: () => {
-            const taken = motion.holds();
-            const resting = now();
-            measured = stopsNow();
-            /* A hand that takes the panel mid-settle keeps the scrim the first one found. */
-            if (!taken) undimmed = node.hasAttribute('data-undimmed');
-            start = motion.begin(resting * span, (measured.stops.at(-1) ?? 0) * span) / span;
-            last = start;
-            /* The attribute and not the signal: a change detection here is a
-               frame the hand would wait for. */
-            node.toggleAttribute('data-dragging', true);
-          },
-          onMove: (distance) => {
-            if (span <= 0) return;
-            last = Math.max(0, start + distance / span);
-            const at = dampenExtent(last, measured.stops.at(-1) ?? start);
-            motion.follow(at * span);
-            node.toggleAttribute('data-undimmed', at < this.scrimFrom());
-          },
-          onEnd: (velocity) => {
-            node.toggleAttribute('data-dragging', false);
-            const landed = settleExtent({
-              fraction: Math.min(last, measured.stops.at(-1) ?? last),
-              span,
-              stops: measured.stops,
-              velocity: span > 0 ? velocity / span : 0,
-            });
-            if (landed === 'close') {
-              /* The panel leaves from where the hand let go, at the hand's speed;
-                 a close the consumer refused brings it back. */
-              void motion.settle(0, velocity, exitDuration(node));
+          onSettle: (at) => {
+            if (!this.open()) return;
+            if (at === 'close') {
               this.request(false, 'pointer', undefined, null);
-              requestAnimationFrame(() => {
-                if (this.open()) void motion.settle(start * span, 0).then(finish);
-              });
+              /* A close the consumer refused puts the sheet back where it rests,
+                 read once a change detection has had time to land. */
+              setTimeout(() => {
+                if (this.open() && scroll.at() === 0) scroll.scrollTo(scroll.rest(), true);
+              }, REFUSED_CLOSE_MS);
               return;
             }
-            void motion.settle(landed * span, velocity).then(() => {
-              this.requestExtent(this.asRequest(landed, measured.rest), 'pointer', null);
-              /* The new measure is in the DOM before the gesture lets go of the old one. */
-              this.flush();
-              finish();
-            });
+            this.requestExtent(this.asRequest(at, scroll.rest()), 'pointer', null);
           },
+          reserve: CONTENT_RESERVE,
+          snapPoints: () => this.snapPoints(),
+          step: 'var(--_step)',
         }),
       );
+      this.sheetScroll = scroll;
+      onCleanup(() => {
+        scroll.destroy();
+        this.sheetScroll = null;
+        this.sheetWasOpen = false;
+      });
+    });
+
+    /**
+     * Opening scrolls the sheet up from out of sight to its resting stop, and
+     * closing other than by the hand scrolls it back down: the platform's
+     * smooth scroll both ways, the motion a released drag ends with. After the
+     * render, when the layer is laid out.
+     */
+    afterRenderEffect(() => {
+      const open = this.open();
+      const interactive = this.interactive();
+      this.panelRef();
+      untracked(() => {
+        const scroll = this.sheetScroll;
+        if (scroll === null) return;
+        if (open && interactive && !this.sheetWasOpen) {
+          this.sheetWasOpen = true;
+          scroll.enter(this.extent() ?? scroll.rest());
+        } else if (!open && this.sheetWasOpen) {
+          this.sheetWasOpen = false;
+          if (scroll.at() > 0) scroll.scrollTo(0, true);
+        }
+      });
+    });
+
+    /* A measure asked for by the keyboard, the grabber or the consumer is scrolled to. */
+    afterRenderEffect(() => {
+      const extent = this.extent();
+      const open = this.open();
+      untracked(() => {
+        const scroll = this.sheetScroll;
+        const node = this.layerRef()?.nativeElement;
+        if (scroll === null || node === undefined || !open || !this.sheetWasOpen) return;
+        const wanted = extent ?? scroll.rest();
+        if (Math.abs(scroll.at() - wanted) * node.clientHeight > 2) scroll.scrollTo(wanted, true);
+      });
     });
 
     this.destroyRef.onDestroy(() => {
-      this.sheetMotion?.end();
       this.scope?.destroy();
       this.layer?.destroy();
       this.presence.destroy();

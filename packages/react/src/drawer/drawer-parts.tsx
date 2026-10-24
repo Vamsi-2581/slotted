@@ -595,7 +595,7 @@ export function DrawerPanel({
     if (scroll === null || panel === null || layer === null) return;
     if (isOpen && interactive && !wasOpen.current) {
       wasOpen.current = true;
-      scroll.enter(current.current.extent ?? scroll.rest());
+      scroll.enter(current.current.extent);
     } else if (!isOpen && wasOpen.current) {
       wasOpen.current = false;
       if (scroll.at() > 0) scroll.scrollTo(0, true);
@@ -605,7 +605,8 @@ export function DrawerPanel({
   /* A measure asked for by the keyboard, the grabber or the consumer is scrolled to. */
   useEffect(() => {
     const scroll = sheetScroll.current;
-    if (scroll === null || panel === null || layer === null || !isOpen) return;
+    /* An opening reads and writes in frames of its own; it scrolls to the extent itself. */
+    if (scroll === null || panel === null || layer === null || !isOpen || scroll.busy()) return;
     const wanted = extentValue ?? scroll.rest();
     if (Math.abs(scroll.at() - wanted) * layer.clientHeight > 2) scroll.scrollTo(wanted, true);
   }, [extentValue, isOpen, layer, panel]);

@@ -681,7 +681,7 @@ export class SlDrawer implements OnInit {
         if (scroll === null) return;
         if (open && interactive && !this.sheetWasOpen) {
           this.sheetWasOpen = true;
-          scroll.enter(this.extent() ?? scroll.rest());
+          scroll.enter(this.extent());
         } else if (!open && this.sheetWasOpen) {
           this.sheetWasOpen = false;
           if (scroll.at() > 0) scroll.scrollTo(0, true);
@@ -696,7 +696,10 @@ export class SlDrawer implements OnInit {
       untracked(() => {
         const scroll = this.sheetScroll;
         const node = this.layerRef()?.nativeElement;
-        if (scroll === null || node === undefined || !open || !this.sheetWasOpen) return;
+        /* An opening reads and writes in frames of its own; it scrolls to the extent itself. */
+        if (scroll === null || node === undefined || !open || !this.sheetWasOpen || scroll.busy()) {
+          return;
+        }
         const wanted = extent ?? scroll.rest();
         if (Math.abs(scroll.at() - wanted) * node.clientHeight > 2) scroll.scrollTo(wanted, true);
       });

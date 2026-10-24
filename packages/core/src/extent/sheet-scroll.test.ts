@@ -5,7 +5,7 @@ import type { SheetScroll, SheetScrollOptions } from './sheet-scroll';
 
 /**
  * jsdom lays nothing out and scrolls nothing: the layer is given 800 pixels of
- * height and the panel its own, and a scroll that comes to rest is a
+ * height and the panel's content its own, and a scroll that comes to rest is a
  * `scroll` followed by a `scrollend`.
  */
 describe('attachSheetScroll', () => {
@@ -17,10 +17,13 @@ describe('attachSheetScroll', () => {
   beforeEach(() => {
     layer = document.createElement('div');
     panel = document.createElement('div');
+    /* The content's end is read off the panel's parts: one part, as tall as the content. */
+    const part = document.createElement('div');
+    panel.append(part);
     layer.append(panel);
     document.body.append(layer);
     Object.defineProperty(layer, 'clientHeight', { configurable: true, get: () => 800 });
-    Object.defineProperty(panel, 'offsetHeight', { configurable: true, get: () => panelHeight });
+    Object.defineProperty(part, 'offsetHeight', { configurable: true, get: () => panelHeight });
     panelHeight = 400;
   });
 

@@ -724,7 +724,7 @@ describe('SlDrawer', () => {
 
   /**
    * A sheet is moved by the layer's own scroll, which jsdom neither lays out
-   * nor scrolls: the layer is 800 pixels tall and the panel 400, and a gesture
+   * nor scrolls: the layer is 800 pixels tall and the panel's body 400, and a gesture
    * is where the scroll comes to rest, a `scroll` and then a `scrollend` (or
    * 150 ms of quiet where the document has no `scrollend`).
    */
@@ -744,9 +744,12 @@ describe('SlDrawer', () => {
       configurable: true,
       get: () => 800,
     });
+    /* The panel's content is its body, 400 pixels of it. */
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
       configurable: true,
-      get: () => 400,
+      get(this: HTMLElement) {
+        return this.dataset['part'] === 'body' ? 400 : 0;
+      },
     });
     host.side.set('bottom');
     host.open.set(true);

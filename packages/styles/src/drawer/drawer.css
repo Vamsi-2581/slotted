@@ -1347,6 +1347,11 @@
     scroll-snap-type: none;
   }
 
+  /* Nor before the stops are laid out: the opening scrolls up from out of sight, not from the panel's end. */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]:not([data-sheet-ready]) {
+    scroll-snap-type: none;
+  }
+
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]:not([data-open])
     > [data-part-panel] {
     translate: 0 0;
@@ -1416,9 +1421,11 @@
    * (`data-sheet-content`); going back below the top turns it on, and that
    * re-snap stops a fling out of the content at the top.
    */
+  /* The rows take their content and a last one what is left, so the content's end is read off its parts. */
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'] > [data-part-panel] {
     block-size: auto;
     min-block-size: var(--slotted-drawer-sheet-height, 0px);
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
   }
 
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'][data-sheet-scrolls]
@@ -1504,7 +1511,7 @@
 
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag]
     > [data-part-stops]
-    > [data-part-stop] {
+    [data-part-stop] {
     position: absolute;
     inset-inline: 0;
     block-size: 0;

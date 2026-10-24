@@ -46,5 +46,7 @@
 
 - Verificação final: `pnpm check` verde (typecheck só com cache limpo); `turbo verify --affected`: theme (generated regenerado), styles, core, angular, agent-docs verdes; React unit 4163/4163, browser 99/100 — a falha da segunda corrida é `entity-picker.browser.test.tsx` (15,8 s, timeout sob carga; isolado passa 2/2); na primeira corrida falhou `dialog-presence.browser.test.tsx` (isolado 4/4 ×3). Nenhum dos dois toca o que mudou.
 
+- CI de `affafaf5` falhou em `test:perf` (drawer.perf: abrir a folha forçava 8 layouts). Corrigido: `enter` lê em `afterLayout`, escreve num rAF e começa o scroll no layout seguinte; altura natural pela soma das partes (o rodapé sticky desloca o offsetTop); sondas permanentes para reserva e passo; snap desligado até `data-sheet-ready`; `busy()` nos bindings. Perf 4/4, drawer suites e `pnpm check` verdes; laboratório com os mesmos números aprovados.
+
 ## Próxima ação exata
-Aguardar o pedido do usuário para commit/push/release. Não versionar `apps/storybook-react/phone-lab/` (excluído localmente).
+Commit `fix(drawer): …`, push, CI, `pnpm release` (0.1.0-beta.15), verificar npm.

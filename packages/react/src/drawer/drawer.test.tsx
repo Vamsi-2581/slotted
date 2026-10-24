@@ -1029,7 +1029,7 @@ describe('a sheet dismissed by velocity', () => {
 describe('a bottom sheet', () => {
   /**
    * A sheet is moved by the layer's own scroll, which jsdom neither lays out
-   * nor scrolls: the layer is 800 pixels tall and the panel 400, and a gesture
+   * nor scrolls: the layer is 800 pixels tall and the panel's body 400, and a gesture
    * is where the scroll comes to rest, a `scroll` and then a `scrollend`.
    */
   const sizes = {
@@ -1047,9 +1047,12 @@ describe('a bottom sheet', () => {
       configurable: true,
       get: () => 800,
     });
+    /* The panel's content is its body, 400 pixels of it. */
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
       configurable: true,
-      get: () => 400,
+      get(this: HTMLElement) {
+        return this.dataset['part'] === 'body' ? 400 : 0;
+      },
     });
     const onOpenChange = vi.fn();
     const onExtentChange = vi.fn();

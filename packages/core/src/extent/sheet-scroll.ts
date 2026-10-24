@@ -11,10 +11,16 @@
  * the scroll came to rest and lays the stops out.
  *
  * Lengths are pixels and extents are fractions of the layer's height.
+ *
+ * Opening forces no layout: the stops are read once the browser has laid the
+ * layer out (`afterLayout`), written in the next frame, and the scroll up
+ * begins after the layout that follows. A forced layout in the commit that
+ * opens a layer costs hundreds of milliseconds on a throttled phone.
  */
 
+import { afterLayout } from '../measure';
 import { orderSnapPoints } from './extent';
-import { measureLength } from './gesture';
+import { contentLength } from './gesture';
 
 /** How long a scroll with no event is taken as ended where `scrollend` is missing. */
 const SCROLL_IDLE_MS = 150;
@@ -49,15 +55,24 @@ export interface SheetScrollOptions {
 export interface SheetScroll {
   /**
    * Measures the stops, lays the markers and the panel out, and puts the sheet
-   * at `extent` at once. Called on opening and when what it measures changes.
+   * at `extent` at once. It reads layout where it stands: outside an opening.
    */
   layout(extent: number): void;
-  /** Where the sheet rests with no extent asked for: the content's height or the size step. */
+  /**
+   * Where the sheet rests with no extent asked for: the content's height or
+   * the size step, or with snap points the stop nearest to it. As last laid out.
+   */
   rest(): number;
   /** The stops, lowest first, as last laid out. */
   stops(): readonly number[];
-  /** Lays out, then scrolls the sheet up from out of sight to `extent`: the opening. */
-  enter(extent: number): void;
+  /**
+   * The opening: lays out, then scrolls the sheet up from out of sight to
+   * `extent`, or to its rest when it is `undefined`. Reads after layout and
+   * writes in a frame of its own, so nothing is laid out early.
+   */
+  enter(extent: number | undefined): void;
+  /** Whether an opening is still under way: the stops may not be laid out yet. */
+  busy(): boolean;
   /** Moves the sheet to `extent` on the platform's smooth scroll, or at once. */
   scrollTo(extent: number, smooth: boolean): void;
   /** The visible fraction now; `1` while the content scrolls under a sheet at the top. */
@@ -80,12 +95,29 @@ export function attachSheetScroll(
   const markers = document.createElement('div');
   markers.setAttribute('data-part', 'stops');
   markers.setAttribute('data-part-stops', '');
+  /**
+   * Two lengths the stylesheet resolves — the reserve above a content sheet
+   * and the size step — held by probes that stay in the layer, so the layout
+   * that places the panel measures them too and reading them lays nothing out.
+   */
+  const probe = (length: string) => {
+    const element = document.createElement('div');
+    element.style.cssText = `position:absolute;inset-inline-start:0;inset-block-start:0;inline-size:0;block-size:${length};visibility:hidden;pointer-events:none`;
+    markers.append(element);
+    return element;
+  };
+  const reserve = probe(options.reserve);
+  const step = probe(options.step);
+  const stopsBox = document.createElement('div');
+  stopsBox.style.display = 'contents';
+  markers.append(stopsBox);
   layer.append(markers);
 
   let stops: number[] = [];
   let span = 0;
+  /** Whether the stops have been laid out since this sheet last opened. */
+  let laidOut = false;
 
-  const height = () => layer.clientHeight;
   /**
    * How far the panel's top is from the top of what scrolls: the layer's
    * height, or nothing while the spacer is folded away (see `anchor`).
@@ -96,53 +128,81 @@ export function attachSheetScroll(
   const at = () => (span > 0 ? Math.min(position(), span) / span : 0);
 
   /**
-   * The panel's own height, which the minimum the stops write would hide:
-   * content shorter than the highest stop is laid out at that stop.
+   * The panel's content height. Under `drag="panel"` the rows take their
+   * content and a last row takes what is left, so the parts' heights add up
+   * to the content's; under `drag="resizer"` the body scrolls inside a
+   * panel of fixed height, and its scroll height is what it holds.
    */
   const natural = () => {
-    panel.style.minBlockSize = '0px';
-    const measured = panel.offsetHeight;
-    panel.style.removeProperty('min-block-size');
-    return measured;
+    if (layer.getAttribute('data-drag') === 'resizer') {
+      return contentLength(panel, panel.querySelector<HTMLElement>(':scope > [data-part="body"]'));
+    }
+    /* Heights and not positions: a sticky part is drawn away from where it stands. */
+    let total = 0;
+    let parts = 0;
+    for (const child of panel.children) {
+      if (!(child instanceof HTMLElement) || child.offsetHeight === 0) continue;
+      total += child.offsetHeight;
+      parts += 1;
+    }
+    const gap = Number.parseFloat(view?.getComputedStyle(panel).rowGap ?? '') || 0;
+    return panel.clientTop + total + Math.max(0, parts - 1) * gap;
   };
 
   /** The rest, as a fraction: the content's height capped short of the layer, or the size step. */
   let restAt = 1;
-  const measureRest = (own: number) => {
-    restAt = options.content()
-      ? Math.min(own, span - measureLength(options.reserve, panel)) / span
-      : Math.min(measureLength(options.step, panel, span), span) / span;
-  };
 
-  const lay = () => {
-    span = height();
-    if (shift > 0) shift = span;
+  /** Everything the stops need, read and nothing written. */
+  const measure = () => {
+    const height = layer.clientHeight;
     const own = natural();
-    const scrolls = own > span + SAME_PX;
-    layer.toggleAttribute('data-sheet-scrolls', scrolls);
-    measureRest(own);
+    const scrolls = own > height + SAME_PX;
+    const rest =
+      height <= 0
+        ? 1
+        : options.content()
+          ? Math.min(own, height - reserve.offsetHeight) / height
+          : Math.min(step.offsetHeight, height) / height;
     const snaps = orderSnapPoints(options.snapPoints());
     /* Past the top of a panel taller than the layer the content scrolls: it is no stop, the top is. */
     const candidates =
-      snaps.length === 0 ? [restAt] : options.content() && !scrolls ? [...snaps, restAt] : snaps;
-    stops = [...new Set(candidates)].filter((stop) => stop > 0).sort((a, b) => a - b);
-    if (scrolls && (stops.at(-1) ?? 0) < 1) stops.push(1);
-    const top = stops.at(-1) ?? 1;
-    panel.style.setProperty('--slotted-drawer-sheet-height', `${String(Math.round(top * span))}px`);
-    layer.style.setProperty(
-      '--slotted-drawer-sheet-floor',
-      `${String(Math.round((stops[0] ?? top) * span))}px`,
+      snaps.length === 0 ? [rest] : options.content() && !scrolls ? [...snaps, rest] : snaps;
+    const laid = [...new Set(candidates)].filter((stop) => stop > 0).sort((a, b) => a - b);
+    if (scrolls && (laid.at(-1) ?? 0) < 1) laid.push(1);
+    return { height, rest, scrolls, stops: laid };
+  };
+
+  /** The signature of what was last written, so a layout that changed nothing writes nothing. */
+  let written = '';
+  const apply = (measured: ReturnType<typeof measure>) => {
+    span = measured.height;
+    if (shift > 0) shift = span;
+    restAt = measured.rest;
+    stops = measured.stops;
+    const positions = [...(options.dismissible() ? [0] : []), ...stops].map((stop) =>
+      Math.round(stop * span),
     );
-    const positions = [...(options.dismissible() ? [0] : []), ...stops];
-    markers.replaceChildren(
-      ...positions.map((stop) => {
+    const top = Math.round((stops.at(-1) ?? 1) * span);
+    const floor = Math.round((stops[0] ?? 1) * span);
+    const signature = `${String(measured.scrolls)} ${String(top)} ${String(floor)} ${positions.join(',')}`;
+    if (signature === written) return;
+    written = signature;
+    layer.toggleAttribute('data-sheet-scrolls', measured.scrolls);
+    panel.style.setProperty('--slotted-drawer-sheet-height', `${String(top)}px`);
+    layer.style.setProperty('--slotted-drawer-sheet-floor', `${String(floor)}px`);
+    stopsBox.replaceChildren(
+      ...positions.map((offset) => {
         const marker = document.createElement('div');
         marker.setAttribute('data-part', 'stop');
         marker.setAttribute('data-part-stop', '');
-        marker.style.insetBlockStart = `${String(Math.round(stop * span))}px`;
+        marker.style.insetBlockStart = `${String(offset)}px`;
         return marker;
       }),
     );
+  };
+
+  const lay = () => {
+    apply(measure());
   };
 
   /** The fraction a resting scroll is at: the stop it sits on, exactly. */
@@ -200,7 +260,8 @@ export function attachSheetScroll(
   let entering = false;
   const settle = () => {
     moving = false;
-    if (dragging) return;
+    /* Nothing is laid out to settle on yet: the stops come with the opening's frame. */
+    if (dragging || !laidOut) return;
     if (entering) {
       if (position() <= SAME_PX) return;
       entering = false;
@@ -243,56 +304,107 @@ export function attachSheetScroll(
     typeof ResizeObserver === 'undefined'
       ? null
       : new ResizeObserver(() => {
+          /* The first report, and any before the opening has laid out, is the opening's. */
+          if (!laidOut) return;
           /* Content scrolled past the top keeps its place; a sheet on a stop keeps its stop. */
           const raw = position();
           const scrolled = raw > span + SAME_PX;
           const extent = at();
+          const before = written;
           lay();
           /* A scroll in flight — an opening, a close, a fling — keeps going. */
-          if (entering || moving) return;
-          layer.scrollTop = (scrolled ? raw : extent * span) - shift;
+          if (entering || moving || written === before) return;
+          const wanted = (scrolled ? raw : extent * span) - shift;
+          if (Math.abs(layer.scrollTop - wanted) > 1) layer.scrollTop = wanted;
         });
   observer?.observe(layer);
   observer?.observe(panel);
 
+  /** The opening in flight, and how to call it off. */
+  let pending: (() => void) | null = null;
+  /** A document with no layout engine reads and writes at once, as `afterLayout` does there. */
+  const deferred = view !== null && typeof view.ResizeObserver === 'function';
+  const nextFrame = (work: () => void) => {
+    if (!deferred) {
+      work();
+      return () => undefined;
+    }
+    const id = view.requestAnimationFrame(work);
+    return () => view.cancelAnimationFrame(id);
+  };
+
+  const nearestRest = () =>
+    stops.reduce(
+      (best, stop) => (Math.abs(stop - restAt) < Math.abs(best - restAt) ? stop : best),
+      stops[0] ?? restAt,
+    );
+
+  const scrollToExtent = (extent: number, smooth: boolean) => {
+    anchor(false);
+    const reduced =
+      typeof view?.matchMedia === 'function' &&
+      view.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    scrollLayer(layer, extent * span, smooth && !reduced ? 'smooth' : 'instant');
+  };
+
   return {
     layout(extent) {
+      pending?.();
+      pending = null;
       anchor(false);
       read(false);
       lay();
+      laidOut = true;
+      layer.setAttribute('data-sheet-ready', '');
       layer.scrollTop = extent * span;
       markTop();
     },
 
-    rest() {
-      if (span === 0) lay();
-      /* With snap points the rest is the stop nearest to it, so an opening lands on one. */
-      return stops.reduce(
-        (best, stop) => (Math.abs(stop - restAt) < Math.abs(best - restAt) ? stop : best),
-        stops[0] ?? restAt,
-      );
-    },
+    rest: nearestRest,
 
     stops: () => stops,
 
+    busy: () => entering || !laidOut,
+
     enter(extent) {
+      pending?.();
       anchor(false);
       read(false);
-      lay();
-      layer.scrollTop = 0;
       entering = true;
-      this.scrollTo(extent, true);
-      /* An opening that arrived at once — reduced motion, no smooth scroll — is over. */
-      if (Math.abs(position() - extent * span) <= SAME_PX) entering = false;
+      laidOut = false;
+      layer.removeAttribute('data-sheet-ready');
+      let measured: ReturnType<typeof measure> | null = null;
+      let cancelFrame: () => void = () => undefined;
+      let cancelStart: () => void = () => undefined;
+      const cancelRead = afterLayout(
+        document,
+        () => {
+          measured = measure();
+        },
+        () => {
+          cancelFrame = nextFrame(() => {
+            if (measured === null) return;
+            apply(measured);
+            laidOut = true;
+            /* The snap comes on with the stops it snaps to; before, it snapped the panel's end. */
+            layer.setAttribute('data-sheet-ready', '');
+            cancelStart = afterLayout(document, () => {
+              const target = extent ?? nearestRest();
+              scrollToExtent(target, true);
+              /* An opening that arrived at once — reduced motion, no smooth scroll — is over. */
+              if (Math.abs(position() - target * span) <= SAME_PX) entering = false;
+            });
+          });
+        },
+      );
+      pending = () => {
+        cancelRead();
+        cancelFrame();
+        cancelStart();
+      };
     },
 
-    scrollTo(extent, smooth) {
-      anchor(false);
-      const reduced =
-        typeof view?.matchMedia === 'function' &&
-        view.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      scrollLayer(layer, extent * span, smooth && !reduced ? 'smooth' : 'instant');
-    },
+    scrollTo: scrollToExtent,
 
     at,
 
@@ -328,6 +440,7 @@ export function attachSheetScroll(
     },
 
     destroy() {
+      pending?.();
       observer?.disconnect();
       clearTimeout(idle);
       layer.removeEventListener('scroll', scrolled);
@@ -342,6 +455,7 @@ export function attachSheetScroll(
       layer.removeAttribute('data-sheet-scrolls');
       layer.removeAttribute('data-sheet-content');
       layer.removeAttribute('data-sheet-anchored');
+      layer.removeAttribute('data-sheet-ready');
     },
   };
 }

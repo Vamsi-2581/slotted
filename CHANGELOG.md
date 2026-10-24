@@ -2,6 +2,12 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.15 — 2026-10-24
+
+- chore(theme): hooks.json regenerado com o atributo data-sheet-ready do drawer
+- fix(drawer): abrir a folha não força layout
+- feat(drawer): o bottom sheet move-se pelo scroll da plataforma
+
 ## 0.1.0-beta.14 — 2026-10-23
 
 - fix(drawer): fechar arrastando é fluido e não encolhe a próxima abertura

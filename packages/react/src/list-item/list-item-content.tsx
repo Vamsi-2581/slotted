@@ -2,6 +2,7 @@ import { definedProps, keyedProps } from '@slotted/core/selector-key';
 import type { MouseEvent } from 'react';
 
 import { useListItem } from './list-item';
+import { ListItemBoxContext, useOutsideBody } from './list-item-nesting';
 import type {
   ListItemButtonProps,
   ListItemButtonRootProps,
@@ -32,7 +33,12 @@ export function ListItemContent({ render, ...nativeProps }: ListItemContentProps
     'data-part': 'content',
   });
 
-  return render === undefined ? <div {...rootProps} /> : render(rootProps);
+  useOutsideBody('ListItemContent');
+  return (
+    <ListItemBoxContext.Provider value>
+      {render === undefined ? <div {...rootProps} /> : render(rootProps)}
+    </ListItemBoxContext.Provider>
+  );
 }
 
 /**
@@ -53,7 +59,12 @@ export function ListItemButton({ render, type = 'button', ...nativeProps }: List
     type,
   });
 
-  return render === undefined ? <button {...rootProps} /> : render(rootProps);
+  useOutsideBody('ListItemButton');
+  return (
+    <ListItemBoxContext.Provider value>
+      {render === undefined ? <button {...rootProps} /> : render(rootProps)}
+    </ListItemBoxContext.Provider>
+  );
 }
 
 /**
@@ -92,5 +103,10 @@ export function ListItemLink({ href, onClick, render, ...nativeProps }: ListItem
     },
   });
 
-  return render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps));
+  useOutsideBody('ListItemLink');
+  return (
+    <ListItemBoxContext.Provider value>
+      {render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps))}
+    </ListItemBoxContext.Provider>
+  );
 }

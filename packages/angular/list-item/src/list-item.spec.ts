@@ -231,3 +231,72 @@ describe('SlListItem', () => {
     expect(el(fixture, 'row').getAttribute('data-tone')).toBe('accent');
   });
 });
+
+/**
+ * A body written around the box drew as unstyled text and said nothing. In
+ * development the text parts name the parent they expect, once per part, and
+ * the box says when it sits inside a body.
+ */
+describe('a row composed in the wrong nesting', () => {
+  @Component({
+    imports: [SlListItem, SlListItemBody, SlListItemContent, SlListItemLabel],
+    template: `
+      <li slListItem>
+        <span slListItemBody><div slListItemContent></div></span>
+      </li>
+      <li slListItem>
+        <span slListItemBody><span slListItemLabel>Again</span></span>
+      </li>
+    `,
+  })
+  class Reversed {}
+
+  @Component({
+    imports: [
+      SlListItem,
+      SlListItemBody,
+      SlListItemContent,
+      SlListItemDescription,
+      SlListItemLabel,
+    ],
+    template: `
+      <li slListItem>
+        <button slListItemContent>
+          <span slListItemBody>
+            <span slListItemLabel>Title</span>
+            <span slListItemDescription>Line</span>
+          </span>
+        </button>
+      </li>
+    `,
+  })
+  class Intended {}
+
+  it('names the parent the body expects, once', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      TestBed.createComponent(Reversed).detectChanges();
+      const messages = error.mock.calls.map((call) => String(call[0]));
+      expect(
+        messages.filter((message) => message === 'slListItemBody must be inside slListItemContent'),
+      ).toHaveLength(1);
+      expect(
+        messages.filter((message) => message.startsWith('slListItemContent must not be inside')),
+      ).toHaveLength(1);
+    } finally {
+      error.mockRestore();
+    }
+  });
+
+  it('says nothing about a row nested as intended', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      TestBed.createComponent(Intended).detectChanges();
+      expect(error.mock.calls.filter((call) => String(call[0]).startsWith('slListItem'))).toEqual(
+        [],
+      );
+    } finally {
+      error.mockRestore();
+    }
+  });
+});

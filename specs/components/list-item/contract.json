@@ -35,6 +35,11 @@
     "sibling": "content",
     "reason": "Interactive content may not nest inside `a` or `button`. A row that navigates and also carries a delete control has to place the two side by side, and every surveyed implementation lets a consumer nest them instead. It is the decision `tag` took for `remove`, stated once for every member."
   },
+  "nesting": {
+    "tree": "root > [marker] content (div, button or a) > [start] body > label, description; [end] inside content; actions beside content, inside root",
+    "endOrActions": "end takes metadata, inside the box and part of its name; actions takes controls, beside the box",
+    "check": "in development, body, label and description outside a content part, and a content part inside a body, call console.error once per part, naming the expected parent. React reads a context the content part sets and Angular its injector, so the check holds under render; a production build drops it"
+  },
   "labelPart": {
     "part": "label",
     "reason": "The title gets a box of its own, as it does in `tag`, `tabs` and `collapsible`: it is what `text-overflow` needs to clip a title the row cannot grow for, what `unicode-bidi: plaintext` needs to keep a title in another script from reordering the row around it, and what `overflow-wrap: anywhere` needs so a single unbroken token — a URL, a hash — breaks instead of pushing the trailing metadata out of the row."

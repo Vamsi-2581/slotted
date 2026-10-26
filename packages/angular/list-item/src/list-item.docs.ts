@@ -41,6 +41,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'marker',
+    parent: 'root',
     element: 'span',
     required: false,
     purpose:
@@ -48,6 +49,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'content',
+    parent: 'root',
     element: 'div, button or a',
     required: true,
     purpose:
@@ -55,6 +57,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'start',
+    parent: 'content',
     element: 'div',
     required: false,
     purpose:
@@ -62,6 +65,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'body',
+    parent: 'content',
     element: 'div',
     required: false,
     purpose:
@@ -69,6 +73,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'label',
+    parent: 'body',
     element: 'div',
     required: false,
     purpose:
@@ -76,12 +81,14 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'description',
+    parent: 'body',
     element: 'div',
     required: false,
     purpose: 'The lines under the title. They clip with it, never instead of it.',
   },
   {
     part: 'end',
+    parent: 'content',
     element: 'div',
     required: false,
     purpose:
@@ -89,6 +96,7 @@ const anatomy: AnatomyRow[] = [
   },
   {
     part: 'actions',
+    parent: 'root',
     element: 'div',
     required: false,
     purpose:
@@ -129,7 +137,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'anatomy',
     title: 'Every part, and a row with almost none',
-    note: 'Every part but the box is optional, and an absent one leaves no column behind: each gap is a margin on the part rather than a track on the grid.',
+    note: 'Every part but the box is optional, and an absent one leaves no column behind: each gap is a margin on the part rather than a track on the grid. slListItemEnd takes metadata, inside the box; slListItemActions takes controls, beside it.',
     snippet: defineSnippet({
       id: 'list-item-angular-anatomy-scene',
       language: 'angular',
@@ -143,7 +151,10 @@ const scenes: ReferenceSceneMeta[] = [
     </span>
     <span slListItemEnd>Yesterday</span>
   </div>
-  <span slListItemActions></span>
+  <span slListItemActions>
+    <button slButton size="sm" variant="ghost" (click)="rename()">Rename</button>
+    <button slButton size="sm" variant="ghost" (click)="remove()">Remove</button>
+  </span>
 </li>`,
     }),
   },

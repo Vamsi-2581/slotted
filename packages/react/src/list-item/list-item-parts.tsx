@@ -1,4 +1,5 @@
 import { withSelectorKey } from '@slotted/core/selector-key';
+import { ListItemBodyContext, useInsideBox } from './list-item-nesting';
 import type { ListItemRegionProps, ListItemRegionRootProps } from './list-item.types';
 
 function region(part: string) {
@@ -10,6 +11,21 @@ function region(part: string) {
     );
 
     return render === undefined ? <div {...rootProps} /> : render(rootProps);
+  };
+}
+
+/** A text part, which the stylesheet lays out only inside the box. */
+function textRegion(part: string, name: string) {
+  const Region = region(part);
+  return function TextRegion(props: ListItemRegionProps) {
+    useInsideBox(name);
+    return part === 'body' ? (
+      <ListItemBodyContext.Provider value>
+        <Region {...props} />
+      </ListItemBodyContext.Provider>
+    ) : (
+      <Region {...props} />
+    );
   };
 }
 
@@ -25,17 +41,17 @@ function region(part: string) {
 export const ListItemStart = region('start');
 
 /** The text column, and the one box in the row that may shrink. */
-export const ListItemBody = region('body');
+export const ListItemBody = textRegion('body', 'ListItemBody');
 
 /**
  * The title. It clips under `truncate`, isolates its own direction so a title
  * in another script leaves the row around it alone, and breaks a single
  * unbroken token — a URL, a commit hash — rather than pushing the metadata out.
  */
-export const ListItemLabel = region('label');
+export const ListItemLabel = textRegion('label', 'ListItemLabel');
 
 /** The lines under the title. They clip with it, never instead of it. */
-export const ListItemDescription = region('description');
+export const ListItemDescription = textRegion('description', 'ListItemDescription');
 
 /**
  * Trailing metadata that is part of what the row says — a timestamp, a count, a

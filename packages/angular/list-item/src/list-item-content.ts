@@ -1,6 +1,7 @@
-import { computed, Directive, ElementRef, inject } from '@angular/core';
+import { computed, Directive, ElementRef, forwardRef, inject } from '@angular/core';
 
 import { SlListItem } from './list-item';
+import { SlListItemBodyScope, SlListItemBox, warnNesting } from './list-item-nesting';
 
 /**
  * The box that is read, and sometimes activated. One directive on the element
@@ -30,6 +31,7 @@ import { SlListItem } from './list-item';
   selector: '[slListItemContent]',
   standalone: true,
   exportAs: 'slListItemContent',
+  providers: [{ provide: SlListItemBox, useExisting: forwardRef(() => SlListItemContent) }],
   host: {
     'data-part': 'content',
     'data-part-content': '',
@@ -41,6 +43,14 @@ import { SlListItem } from './list-item';
 export class SlListItemContent {
   private readonly row = inject(SlListItem, { optional: true });
   private readonly tag = inject<ElementRef<HTMLElement>>(ElementRef).nativeElement.tagName;
+
+  constructor() {
+    warnNesting(
+      'slListItemContent',
+      inject(SlListItemBodyScope, { optional: true, skipSelf: true }) !== null,
+      'slListItemContent must not be inside slListItemBody; slListItemBody goes inside slListItemContent',
+    );
+  }
 
   readonly loading = computed(() => this.row?.loading() ?? false);
 

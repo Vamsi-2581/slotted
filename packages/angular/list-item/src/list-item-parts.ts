@@ -1,4 +1,15 @@
-import { Directive } from '@angular/core';
+import { Directive, forwardRef, inject } from '@angular/core';
+
+import { SlListItemBodyScope, SlListItemBox, warnNesting } from './list-item-nesting';
+
+/** A text part outside the box, which the stylesheet does not lay out. */
+function checkInsideBox(part: string): void {
+  warnNesting(
+    part,
+    inject(SlListItemBox, { optional: true }) === null,
+    `${part} must be inside slListItemContent`,
+  );
+}
 
 /**
  * The leading column: an icon, an avatar, a `slCheckbox`. The column is the
@@ -22,9 +33,14 @@ export class SlListItemStart {}
   selector: '[slListItemBody]',
   standalone: true,
   exportAs: 'slListItemBody',
+  providers: [{ provide: SlListItemBodyScope, useExisting: forwardRef(() => SlListItemBody) }],
   host: { 'data-part': 'body', 'data-part-body': '' },
 })
-export class SlListItemBody {}
+export class SlListItemBody {
+  constructor() {
+    checkInsideBox('slListItemBody');
+  }
+}
 
 /**
  * The title. It clips under `truncate`, isolates its own direction so a title
@@ -37,7 +53,11 @@ export class SlListItemBody {}
   exportAs: 'slListItemLabel',
   host: { 'data-part': 'label', 'data-part-label': '' },
 })
-export class SlListItemLabel {}
+export class SlListItemLabel {
+  constructor() {
+    checkInsideBox('slListItemLabel');
+  }
+}
 
 /** The lines under the title. They clip with it, never instead of it. */
 @Directive({
@@ -46,7 +66,11 @@ export class SlListItemLabel {}
   exportAs: 'slListItemDescription',
   host: { 'data-part': 'description', 'data-part-description': '' },
 })
-export class SlListItemDescription {}
+export class SlListItemDescription {
+  constructor() {
+    checkInsideBox('slListItemDescription');
+  }
+}
 
 /**
  * Trailing metadata that is part of what the row says — a timestamp, a count, a

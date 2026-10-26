@@ -286,3 +286,63 @@ describe('ListItem', () => {
     expect(contract.roleFacts.deprecated).toContain('aria-disabled');
   });
 });
+
+/**
+ * A body written around the box instead of inside it drew as unstyled text
+ * and said nothing, so the mistake survived every test that read text. In
+ * development the text parts name the parent they expect, once per part, and
+ * the box says when it sits inside a body.
+ */
+describe('a row composed in the wrong nesting', () => {
+  it('names the parent the body expects, once', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      render(
+        <ListItem>
+          <ListItemBody>
+            <ListItemContent />
+          </ListItemBody>
+        </ListItem>,
+      );
+      render(
+        <ListItem>
+          <ListItemBody>
+            <ListItemLabel>Again</ListItemLabel>
+          </ListItemBody>
+        </ListItem>,
+      );
+      const messages = error.mock.calls.map((call) => String(call[0]));
+      expect(
+        messages.filter(
+          (message) =>
+            message ===
+            'ListItemBody must be inside ListItemContent, ListItemLink or ListItemButton',
+        ),
+      ).toHaveLength(1);
+      expect(
+        messages.filter((message) => message.startsWith('ListItemContent must not be inside')),
+      ).toHaveLength(1);
+    } finally {
+      error.mockRestore();
+    }
+  });
+
+  it('says nothing about a row nested as intended', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      render(
+        <ListItem>
+          <ListItemButton>
+            <ListItemBody>
+              <ListItemLabel>Title</ListItemLabel>
+              <ListItemDescription>Line</ListItemDescription>
+            </ListItemBody>
+          </ListItemButton>
+        </ListItem>,
+      );
+      expect(error.mock.calls.filter((call) => String(call[0]).startsWith('ListItem'))).toEqual([]);
+    } finally {
+      error.mockRestore();
+    }
+  });
+});

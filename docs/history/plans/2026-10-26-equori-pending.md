@@ -41,6 +41,8 @@ e Angular recebem a mesma mudança de contrato.
 | 18  | A calendar day cannot carry a mark of what falls on it                                                 | v4       | feature  | `calendar.tsx` não tem `renderDay` nem `marks`.                                                                                                        |
 | 19  | Attachment preview thumbnail is not lazy-loaded                                                        | registo  | defeito  | `attachment-parts.tsx:50` tem `<img>` sem `loading="lazy"`.                                                                                           |
 | 20  | a dialog or drawer mounted open plays no enter transition, and one unmounted on close plays no exit     | registo  | a decidir | A entrada foi corrigida em `9269f4a2`. Continua sem saída o overlay que o consumidor desmonta ao fechar. Falta decidir se é defeito do pacote ou uso; o workaround está em `../equori/web/src/ui/presence.tsx`. |
+| 21  | — (pedido de 2026-10-26)                                                                               | pedido   | melhoria | `list-item.md` lista as partes sem pai e o único exemplo põe `ListItemBody` dentro de `ListItemLink`.                                                     |
+| 22  | — (pedido de 2026-10-26)                                                                               | pedido   | melhoria | `ListItemBody` à volta de `ListItemContent` desenha texto sem layout e sem aviso.                                                                         |
 
 A descrição dos itens de origem "registo" está no comentário de workaround que cita o título, no equori:
 
@@ -59,6 +61,7 @@ A descrição dos itens de origem "registo" está no comentário de workaround q
 5. dashboard-grid: 12, 13, 14.
 6. dashboard-grid, link e table: 15, 16, 17.
 7. calendar, attachment e presence: 18, 19, 20.
+8. list-item: 21, 22.
 
 ## Resultado
 
@@ -86,6 +89,8 @@ O commit de cada fatia é registado na fatia seguinte, porque o hash só existe 
 | 18  | implementado | `7516d6ef` | `calendar.test.tsx` › "a day that carries a mark" (React) e `calendar.spec.ts` › "a day that carries a mark" (Angular) | Das duas propostas, `marks` (`ReadonlyMap<string, CalendarMark>` por data ISO, `count` e `tone`) e não `renderDay`. A marca é um ponto na linha que o ponto de hoje já reserva; a contagem entra no nome acessível ("12, 2 items") por texto visualmente oculto (`markCount`, `marked`). |
 | 19  | corrigido | `7516d6ef` | `attachment.test.tsx` › "shows a thumbnail, and returns to the tile when it fails to load" (React, sem `loading`) e o espelho em `attachment.spec.ts` (Angular) | Também `decoding="async"`. |
 | 20  | uso | — | — | Não é defeito do pacote. Com `mount="active"`, `@slotted/core/presence` mantém a camada até ao fim da saída enquanto o componente segue montado com `open={false}` (`specs/components/dialog/contract.json` › `mount.active`, idem drawer); `onOpenChangeComplete(false)` está documentado como o momento de remover uma camada renderizada condicionalmente (`dialog.docs.ts`, `drawer.docs.ts`); a entrada montada aberta está em `9269f4a2`, coberta por `dialog-presence.browser.test.tsx`. Um componente que o pai desmonta não pode animar a saída. Do lado do equori, `web/src/ui/presence.tsx` pode reduzir-se a manter o overlay montado até `onOpenChangeComplete(false)`; a mudança fica no equori, fora deste plano. |
+| 21  | melhorado | fatia 8 | `tools/agent-docs/src/list-item-docs.test.ts` (React e Angular; a página não tinha a coluna Parent) | A árvore é a coluna `Parent` que a anatomia já suporta (`AnatomyRow.parent`). Desvio da proposta: `ListItemEnd` fica **dentro** da parte de conteúdo, não ao lado, porque o CSS só o desenha em `[data-part-content] > [data-part-end]` e a docstring diz que faz parte do nome da linha; `ListItemActions` é que é irmão. O exemplo com duas ações é a cena `anatomy` (a página tira os exemplos das cenas), com a frase sobre End e Actions na nota. |
+| 22  | melhorado | fatia 8 | `list-item.test.tsx` › "a row composed in the wrong nesting" (React) e `list-item.spec.ts` (Angular) | Como proposto, com as mensagens `ListItemBody must be inside ListItemContent, ListItemLink or ListItemButton` (React) e `slListItemBody must be inside slListItemContent` (Angular, uma só diretiva de conteúdo). O aviso é um por parte por sessão. |
 
 ### Verificação final
 

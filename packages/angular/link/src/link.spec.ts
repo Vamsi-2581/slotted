@@ -131,6 +131,23 @@ describe('SlLink', () => {
    * `external` was never given: an anchor already pointed at a new tab owes
    * the reader the same warning.
    */
+  /** A link states its own text size; unset, it takes the one its action slot states. */
+  describe('size', () => {
+    @Component({
+      imports: [SlLink],
+      template: `<a slLink href="#a" size="sm">Details</a><a slLink href="#b">More</a>`,
+    })
+    class Sized {}
+
+    it('writes the size it states, and none when unset', () => {
+      const fixture = TestBed.createComponent(Sized);
+      fixture.detectChanges();
+      const [sized, plain] = fixture.nativeElement.querySelectorAll('a') as NodeListOf<HTMLElement>;
+      expect(sized?.getAttribute('data-size')).toBe('sm');
+      expect(plain?.hasAttribute('data-size')).toBe(false);
+    });
+  });
+
   describe('attributes the consumer wrote', () => {
     @Component({
       imports: [SlLink],

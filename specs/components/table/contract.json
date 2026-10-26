@@ -81,6 +81,7 @@
       "offsetEnd": "--slotted-table-sticky-offset-end, which is where the summary stops. It answers stickyTo page the way the offset answers it at the top: a page with a bar of its own across the bottom sets it once, and every summary under it stops above the bar."
     },
     "columns": "a cell whose sticky axis names start or end, resolved through inset-inline-start and inset-inline-end so a right-to-left document mirrors it",
+    "ground": "a pinned cell paints its row's ground — the surface, the stripe, hover, selection, current, published by the row as --_row-ground — or its own (a column header's and a summary cell's head surface, published as --_pinned-ground), over --slotted-surface, so a row on a transparent table surface still covers the cells that scroll under it",
     "corner": "A column header that is also a sticky column is both at once: it takes both offsets and the highest stacking step, stated once. With one step the header slides under the pinned column or the pinned column over the header.",
     "print": "Under @media print the scroll part releases its height and every sticky offset, so the platform's own rule — a thead repeats on each printed page — applies instead of being fought."
   },

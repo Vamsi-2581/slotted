@@ -8,6 +8,7 @@ export { DashboardWidget } from './dashboard-widget';
 export { usePersistedDashboardLayout } from './use-persisted-dashboard-layout';
 export type {
   DashboardColumnsInput,
+  DashboardDetailProps,
   DashboardEditingReason,
   DashboardEditingRequest,
   DashboardGridDefaults,

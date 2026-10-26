@@ -5,7 +5,14 @@ import type {
 } from '@slotted/core/dashboard-grid';
 import type { DashboardGridMessages, PartialMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
-import type { ComponentPropsWithRef, MouseEvent, ReactElement, ReactNode, Ref } from 'react';
+import type {
+  AnchorHTMLAttributes,
+  ComponentPropsWithRef,
+  MouseEvent,
+  ReactElement,
+  ReactNode,
+  Ref,
+} from 'react';
 
 import type { CardFill, CardSize } from '../card';
 
@@ -103,6 +110,9 @@ export type DashboardWidgetRootProps = ComponentPropsWithRef<'li'> & {
 
 export type DashboardWidgetStatus = 'ready' | 'empty' | 'error';
 
+/** What the detail link carries: its `href`, its name, its part and the button's look. */
+export type DashboardDetailProps = AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
+
 export interface DashboardWidgetProps extends Omit<
   ComponentPropsWithRef<'li'>,
   'children' | 'title' | 'value'
@@ -150,6 +160,11 @@ export interface DashboardWidgetProps extends Omit<
   onRetry?: (event: MouseEvent) => void;
   /** The widget's own page. */
   detailHref?: string;
+  /**
+   * Renders the detail link — a router's link — from the props the family gives it, `href`
+   * included; spread them all on the element returned.
+   */
+  renderDetail?: ((props: DashboardDetailProps) => ReactElement) | undefined;
   /** The widget's own view, when it is not a page. */
   onDetail?: (event: MouseEvent) => void;
   /** The consumer's controls in the header's corner, before the detail action. */

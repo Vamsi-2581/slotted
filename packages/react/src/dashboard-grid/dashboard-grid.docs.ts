@@ -568,6 +568,13 @@ export const REACT_DASHBOARD_GRID_DOCS = {
         'The widget’s own page, as a link in the corner',
       ],
       [
+        'renderDetail',
+        '(props: DashboardDetailProps) => ReactElement',
+        '—',
+        'DashboardWidget',
+        'Renders the detail link — a router’s link — from the props the family gives it, href included; spread them all on the element returned',
+      ],
+      [
         'actions',
         'ReactNode',
         '—',

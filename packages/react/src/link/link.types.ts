@@ -4,6 +4,7 @@ import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 export type LinkUnderline = 'always' | 'hover' | 'none';
 export type LinkVariant = 'accent' | 'neutral' | 'inverse';
+export type LinkSize = 'xs' | 'sm' | 'md';
 
 /** What every link on the page looks like before it states anything of its own. */
 export interface LinkDefaults {
@@ -20,6 +21,7 @@ export interface LinkRootProps extends ComponentPropsWithRef<'a'> {
   children: ReactNode;
   'data-disabled': true | undefined;
   'data-part': string;
+  'data-size': LinkSize | undefined;
   'data-ui': string;
   'data-underline': LinkUnderline;
   'data-variant': LinkVariant;
@@ -42,6 +44,11 @@ export interface LinkProps extends ComponentPropsWithRef<'a'> {
   messages?: PartialMessages<LinkMessages> | undefined;
   /** Substitutes the rendered element — a router's own link, typically. */
   render?: (props: DefinedProps<LinkRootProps>) => ReactNode;
+  /**
+   * The text size. Unset, the link takes the size its action slot states — a stat card's, a
+   * section's or a chart's actions — or else its parent's.
+   */
+  size?: LinkSize | undefined;
   underline?: LinkUnderline;
   variant?: LinkVariant;
   /** Paints a destination the reader has already followed. */

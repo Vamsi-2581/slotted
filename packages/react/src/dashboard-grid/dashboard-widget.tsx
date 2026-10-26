@@ -5,6 +5,7 @@ import {
   useCallback,
   useId,
   useRef,
+  type AnchorHTMLAttributes,
   type ComponentPropsWithRef,
   type CSSProperties,
   type Ref,
@@ -40,6 +41,7 @@ import {
   type DashboardSlot,
 } from './dashboard-grid-context';
 import type {
+  DashboardDetailProps,
   DashboardHeadingLevel,
   DashboardLayoutReason,
   DashboardWidgetProps,
@@ -228,6 +230,7 @@ const WidgetView = memo(function WidgetView({
   errorDescription,
   onRetry,
   detailHref,
+  renderDetail,
   onDetail,
   actions,
   footer,
@@ -265,13 +268,18 @@ const WidgetView = memo(function WidgetView({
         size="sm"
         tone="secondary"
         variant="ghost"
-        render={({ type: _type, disabled: _disabled, ...props }) => (
-          <a
-            {...withSelectorKey(props as object, 'part', 'detail')}
-            href={detailHref}
-            onClick={onDetail}
-          />
-        )}
+        render={({ type: _type, disabled: _disabled, ...props }) => {
+          const linkProps = {
+            ...(withSelectorKey(
+              props as object,
+              'part',
+              'detail',
+            ) as AnchorHTMLAttributes<HTMLAnchorElement>),
+            href: detailHref,
+            onClick: onDetail,
+          } as DashboardDetailProps;
+          return renderDetail === undefined ? <a {...linkProps} /> : renderDetail(linkProps);
+        }}
       >
         {/* The arrow points out of the widget, to the inline end: it turns with the writing direction. */}
         <Icon directional>

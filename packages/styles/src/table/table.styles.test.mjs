@@ -234,9 +234,7 @@ test('paints the current row with a ground and the group band with tabular figur
     .split('}')
     .filter((rule) => rule.includes('[data-current]') && !rule.includes('@media'));
   assert.ok(
-    current.some((rule) =>
-      rule.includes('background-color:var(--slotted-table-row-surface-current'),
-    ),
+    current.some((rule) => rule.includes('--_row-ground:var(--slotted-table-row-surface-current')),
   );
   for (const rule of current) {
     assert.doesNotMatch(rule, /border-inline-start|box-shadow|::before|::after/, rule);

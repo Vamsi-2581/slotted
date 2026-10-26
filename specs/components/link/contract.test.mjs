@@ -36,7 +36,16 @@ test('names three variants and no tone scale', () => {
   assert.deepEqual(contract.axes.variant, ['accent', 'neutral', 'inverse']);
   assert.equal(link.defaults.variant, 'accent');
   assert.ok(!('tone' in contract.axes));
-  assert.ok(!('size' in contract.axes));
+});
+
+/**
+ * A size on the type scale, unset by default: an unset link takes the size an
+ * action slot states for the controls it holds, or its parent's. The same
+ * link in a stat card's, a section's and a chart's actions drew at three sizes.
+ */
+test('names a size axis that is unset unless stated', () => {
+  assert.deepEqual(contract.axes.size, ['xs', 'sm', 'md']);
+  assert.ok(!('size' in link.defaults));
 });
 
 test('carries the two parts an external link owes the reader', () => {

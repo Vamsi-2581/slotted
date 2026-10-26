@@ -17,6 +17,7 @@ import {
 import {
   SlDashboardWidget,
   SlDashboardWidgetActions,
+  SlDashboardWidgetDetail,
   SlDashboardWidgetEmptyAction,
 } from './dashboard-widget';
 import { persistedDashboardLayout } from './persisted-dashboard-layout';
@@ -491,6 +492,44 @@ describe('SlDashboardGrid heading outline', () => {
     expect(
       (fixture.nativeElement as HTMLElement).querySelector('h2[data-part="title"]'),
     ).not.toBeNull();
+  });
+});
+
+/** The corner link the application writes — a router's link — takes the family's place. */
+@Component({
+  standalone: true,
+  imports: [SlDashboardGrid, SlDashboardWidget, SlDashboardWidgetDetail],
+  template: `
+    <div slDashboardGrid aria-label="Sales">
+      <sl-dashboard-widget value="revenue" title="Revenue">
+        <a slDashboardWidgetDetail href="/revenue" data-router-link (click)="go($event)"></a>
+      </sl-dashboard-widget>
+    </div>
+  `,
+})
+class DetailHost {
+  readonly visits: string[] = [];
+  go(event: MouseEvent) {
+    event.preventDefault();
+    this.visits.push('/revenue');
+  }
+}
+
+describe('slDashboardWidgetDetail', () => {
+  it('draws the application’s link as the detail action, named and styled by the family', async () => {
+    const fixture = TestBed.createComponent(DetailHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const link = (fixture.nativeElement as HTMLElement).querySelector<HTMLAnchorElement>(
+      'a[data-router-link]',
+    )!;
+    expect(link.getAttribute('data-part')).toBe('detail');
+    expect(link.getAttribute('aria-label')).toContain('Revenue');
+    expect(link.querySelector('[data-glyph="external"]')).not.toBeNull();
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    link.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(fixture.componentInstance.visits).toEqual(['/revenue']);
   });
 });
 

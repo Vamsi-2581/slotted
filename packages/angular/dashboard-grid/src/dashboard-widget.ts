@@ -9,6 +9,8 @@ import {
   Directive,
   effect,
   ElementRef,
+  forwardRef,
+  HostAttributeToken,
   inject,
   input,
   numberAttribute,
@@ -20,10 +22,12 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import type { CardFill, CardSize } from '@slotted/angular/card';
+import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { injectSkeletonDefaults } from '@slotted/angular/skeleton';
 import type { DashboardWidgetSpec } from '@slotted/core/dashboard-grid';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
 
+import { SlDashboardGridWords } from './dashboard-grid-defaults';
 import type { DashboardHeadingLevel, DashboardWidgetStatus } from './dashboard-grid-defaults';
 
 const optionalNumber = (given: number | string | undefined) =>
@@ -34,6 +38,38 @@ const optionalBoolean = (given: boolean | string | undefined) =>
 /** Controls in the header's corner, before the detail action: `<button slDashboardWidgetActions>`. */
 @Directive({ selector: '[slDashboardWidgetActions]', standalone: true })
 export class SlDashboardWidgetActions {}
+
+/**
+ * The detail link the application writes — a router's link — in place of the
+ * family's own: `<a slDashboardWidgetDetail routerLink="/revenue">`. It takes
+ * the family's part, look, mark and name.
+ */
+@Component({
+  selector: 'a[slDashboardWidgetDetail]',
+  standalone: true,
+  imports: [SlGlyph, SlIcon],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
+  host: {
+    'data-ui': 'button',
+    'data-ui-button': '',
+    'data-part': 'detail',
+    'data-part-detail': '',
+    'data-tone': 'secondary',
+    'data-variant': 'ghost',
+    'data-size': 'sm',
+    'data-shape': 'square',
+    '[attr.aria-label]': 'label ?? words.detailLabel(widget.title())',
+  },
+  template: `<span data-part="icon" data-part-icon="" aria-hidden="true"
+    ><span slIcon directional><svg slGlyph name="external"></svg></span
+  ></span>`,
+})
+export class SlDashboardWidgetDetail {
+  protected readonly widget = inject(SlDashboardWidget);
+  protected readonly words = inject(SlDashboardGridWords);
+  protected readonly label = inject(new HostAttributeToken('aria-label'), { optional: true });
+}
 
 /** The skeleton of the body's own anatomy, shown while the widget loads. */
 @Directive({ selector: '[slDashboardWidgetSkeleton]', standalone: true })
@@ -81,6 +117,7 @@ export class SlDashboardPart {
   template: `
     <ng-template #body><ng-content /></ng-template>
     <ng-template #actions><ng-content select="[slDashboardWidgetActions]" /></ng-template>
+    <ng-template #detailLink><ng-content select="[slDashboardWidgetDetail]" /></ng-template>
     <ng-template #skeleton><ng-content select="[slDashboardWidgetSkeleton]" /></ng-template>
     <ng-template #emptyAction><ng-content select="[slDashboardWidgetEmptyAction]" /></ng-template>
     <ng-template #footer><ng-content select="[slDashboardWidgetFooter]" /></ng-template>
@@ -156,6 +193,9 @@ export class SlDashboardWidget {
   readonly footerTemplate = viewChild.required<TemplateRef<unknown>>('footer');
 
   readonly hasActions = contentChild(SlDashboardWidgetActions);
+  readonly hasDetail = contentChild(forwardRef(() => SlDashboardWidgetDetail));
+  readonly detailTemplate = viewChild.required<TemplateRef<unknown>>('detailLink');
+
   readonly hasSkeleton = contentChild(SlDashboardWidgetSkeleton);
   readonly hasEmptyAction = contentChild(SlDashboardWidgetEmptyAction);
   readonly hasFooter = contentChild(SlDashboardWidgetFooter);

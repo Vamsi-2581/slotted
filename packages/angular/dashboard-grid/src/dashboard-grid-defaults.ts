@@ -81,3 +81,9 @@ export class SlDashboardGridIdFactory {
     return `slotted-dashboard-grid-${this.count}`;
   }
 }
+
+/** The grid's words, for a part the consumer writes inside a widget. */
+export abstract class SlDashboardGridWords {
+  /** The detail link's name for a widget of this title. */
+  abstract detailLabel(title: string): string;
+}

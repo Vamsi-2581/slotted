@@ -66,6 +66,43 @@ describe('DashboardGrid heading outline', () => {
   });
 });
 
+/**
+ * The corner link of a widget navigates through the application's router.
+ * The family drew a plain anchor, so every press loaded the document again.
+ */
+describe('DashboardWidget renderDetail', () => {
+  it('renders the detail link the application gives, with every attribute', () => {
+    const navigate = vi.fn();
+    render(
+      <DashboardGrid aria-label="Sales">
+        <DashboardWidget
+          value="revenue"
+          title="Revenue"
+          detailHref="/revenue"
+          renderDetail={(props) => (
+            <a
+              {...props}
+              data-router-link=""
+              onClick={(event) => {
+                event.preventDefault();
+                navigate(props.href);
+              }}
+            />
+          )}
+        />
+      </DashboardGrid>,
+    );
+    const link = screen.getByRole('link', { name: /Revenue/ });
+    expect(link).toHaveAttribute('data-router-link');
+    expect(link).toHaveAttribute('data-part', 'detail');
+    expect(link).toHaveAttribute('href', '/revenue');
+    const click = new MouseEvent('click', { bubbles: true, cancelable: true });
+    link.dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(true);
+    expect(navigate).toHaveBeenCalledWith('/revenue');
+  });
+});
+
 function widgets() {
   return [
     <DashboardWidget

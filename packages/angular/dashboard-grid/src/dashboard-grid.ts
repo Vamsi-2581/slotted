@@ -10,6 +10,7 @@ import {
   contentChildren,
   DestroyRef,
   ElementRef,
+  forwardRef,
   inject,
   input,
   model,
@@ -88,6 +89,7 @@ import type { ChangeReason } from '@slotted/core/state';
 import {
   injectDashboardGridDefaults,
   SlDashboardGridIdFactory,
+  SlDashboardGridWords,
   type DashboardEditingReason,
   type DashboardEditingRequest,
   type DashboardHeadingLevel,
@@ -251,6 +253,7 @@ interface Slot {
   selector: '[slDashboardGrid]',
   standalone: true,
   exportAs: 'slDashboardGrid',
+  providers: [{ provide: SlDashboardGridWords, useExisting: forwardRef(() => SlDashboardGrid) }],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrls: [
@@ -441,12 +444,15 @@ interface Slot {
               }
               @if (
                 slot.widget.hasActions() ||
+                slot.widget.hasDetail() ||
                 slot.widget.detailHref() !== undefined ||
                 slot.widget.detailable()
               ) {
                 <div slCardActions>
                   <ng-container [ngTemplateOutlet]="slot.widget.actionsTemplate()" />
-                  @if (slot.widget.detailHref(); as href) {
+                  @if (slot.widget.hasDetail()) {
+                    <ng-container [ngTemplateOutlet]="slot.widget.detailTemplate()" />
+                  } @else if (slot.widget.detailHref(); as href) {
                     <a
                       data-ui="button"
                       data-ui-button=""
@@ -703,7 +709,7 @@ interface Slot {
     }
   `,
 })
-export class SlDashboardGrid {
+export class SlDashboardGrid implements SlDashboardGridWords {
   /**
    * Where each widget stands and how big it is: `[{ key, x, y, w, h, hidden? }]`
    * in cells of the expanded class. Bound at all, it is the value; unbound,
@@ -914,6 +920,10 @@ export class SlDashboardGrid {
 
   protected titleId(key: string) {
     return `${this.base}-${key}-title`;
+  }
+
+  detailLabel(title: string): string {
+    return this.t('detail', { title });
   }
 
   protected titleOf(key: string) {

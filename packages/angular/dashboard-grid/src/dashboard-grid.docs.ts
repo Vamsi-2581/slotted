@@ -576,6 +576,13 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
         'The widget’s own page, as a link in the corner',
       ],
       [
+        'a[slDashboardWidgetDetail]',
+        'element',
+        '—',
+        'sl-dashboard-widget',
+        'The application’s own detail link — routerLink on it — drawn in place of the family’s, with the family’s part, look, mark and name',
+      ],
+      [
         '[slDashboardWidgetActions]',
         'projected content',
         '—',

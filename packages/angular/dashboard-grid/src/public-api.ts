@@ -3,6 +3,7 @@ export {
   SlDashboardPart,
   SlDashboardWidget,
   SlDashboardWidgetActions,
+  SlDashboardWidgetDetail,
   SlDashboardWidgetEmptyAction,
   SlDashboardWidgetFooter,
   SlDashboardWidgetSkeleton,
@@ -12,6 +13,7 @@ export {
   injectDashboardGridDefaults,
   provideDashboardGridDefaults,
   SlDashboardGridIdFactory,
+  SlDashboardGridWords,
 } from './dashboard-grid-defaults';
 export type {
   DashboardColumnsInput,

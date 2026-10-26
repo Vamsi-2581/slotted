@@ -276,6 +276,9 @@
 
   /* An implicit column: a header with no actions has one column and no gap. */
   [data-ui-section] > [data-part-header] > [data-part-actions] {
+    /* An action slot states one size for the links it holds. */
+    --slotted-link-font-size: var(--slotted-font-size-sm, 0.8125rem);
+
     align-items: center;
     display: flex;
     gap: var(--slotted-control-gap-md, 8px);

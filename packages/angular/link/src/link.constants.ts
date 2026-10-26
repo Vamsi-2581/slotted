@@ -1,5 +1,6 @@
 export type LinkUnderline = 'always' | 'hover' | 'none';
 export type LinkVariant = 'accent' | 'neutral' | 'inverse';
+export type LinkSize = 'xs' | 'sm' | 'md';
 
 /**
  * The zero-width character whose only job is to forbid a line break. It keeps

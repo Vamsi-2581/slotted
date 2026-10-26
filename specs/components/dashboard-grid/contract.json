@@ -35,7 +35,7 @@
     "widget": "an li at its cell: grid-column --_dg-x / span --_dg-w and grid-row --_dg-y / span --_dg-h in the expanded class, span --_dg-span-medium in the medium class, one column in the compact class; data-key, data-status, data-loading, data-movable, data-resizable, data-dragging, data-resizing",
     "title": "the card's heading, h2 to h6 by headingLevel; auto is one rank under the heading outline around the grid (HeadingLevel / slHeadingLevel, as section reads it), never above h2; two lines, then an ellipsis, with the whole title in the accessible name",
     "description": "the line under the title, when the consumer gives one",
-    "detail": "an a with href, or a button when only onDetail is given: the external glyph and messages.detail; the widget's way to its own page",
+    "detail": "an a with href, or a button when only onDetail is given: the external glyph and messages.detail; the widget's way to its own page. A router's link takes its place: renderDetail (React) receives every attribute, href included, and a[slDashboardWidgetDetail] (Angular) is the application's anchor with the family's part, look, mark and name",
     "handle": "a button of the family's own, a pill of six dots standing on the card's top edge while editing: the menu trigger, the Alt+Arrow and Shift+Arrow shortcuts, aria-describedby edit-status, and where a finger picks the widget up",
     "skeleton": "a block of the skeleton family filling the card's body while loading and the consumer gave no skeleton of its own",
     "message": "a div around the result-state family, reach=section and centred, for status empty or error",

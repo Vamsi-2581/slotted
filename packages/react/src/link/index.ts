@@ -6,5 +6,6 @@ export type {
   LinkProps,
   LinkRootProps,
   LinkUnderline,
+  LinkSize,
   LinkVariant,
 } from './link.types';

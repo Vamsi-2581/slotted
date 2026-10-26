@@ -182,6 +182,13 @@ export const ANGULAR_LINK_DOCS = {
         'slLink',
         'Accent, the colour of the surrounding text, or a solid surface',
       ],
+      [
+        'size',
+        "'xs' | 'sm' | 'md'",
+        '—',
+        'slLink',
+        'The text size: 12, 13 or 14 pixels on the type scale. Unset, the link takes the size its action slot states — a stat card’s action, a section’s or a chart’s actions state sm — or else its parent’s',
+      ],
       ['external', 'boolean', 'false', 'slLink', 'Opens a new tab and warns that it does'],
       [
         'messages',

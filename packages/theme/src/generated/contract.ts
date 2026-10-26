@@ -3749,6 +3749,7 @@ export type ComponentToken =
   | '--slotted-link-external-icon-gap'
   | '--slotted-link-external-icon-size'
   | '--slotted-link-focus-ring-offset'
+  | '--slotted-link-font-size'
   | '--slotted-link-radius'
   | '--slotted-link-underline-color'
   | '--slotted-link-underline-offset'
@@ -6010,6 +6011,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-link-external-icon-gap",
   "--slotted-link-external-icon-size",
   "--slotted-link-focus-ring-offset",
+  "--slotted-link-font-size",
   "--slotted-link-radius",
   "--slotted-link-underline-color",
   "--slotted-link-underline-offset",

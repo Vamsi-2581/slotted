@@ -20,6 +20,7 @@ import { injectLinkDefaults } from './link-defaults';
 import {
   LINK_DEFAULT_UNDERLINE,
   LINK_DEFAULT_VARIANT,
+  type LinkSize,
   type LinkUnderline,
   type LinkVariant,
 } from './link.constants';
@@ -70,6 +71,7 @@ import {
     'data-part-root': '',
     '[attr.data-underline]': 'underlineValue()',
     '[attr.data-variant]': 'variantValue()',
+    '[attr.data-size]': 'size() ?? null',
     '[attr.data-visited]': 'visitedValue() ? "" : null',
     '[attr.data-disabled]': 'disabled() ? "" : null',
     '[attr.aria-disabled]': 'disabled() ? "true" : null',
@@ -85,6 +87,11 @@ export class SlLink {
    * to a new tab announces (`externalHint`).
    */
   readonly messages = input<PartialMessages<LinkMessages> | undefined>(undefined);
+  /**
+   * The text size. Unset, the link takes the size its action slot states — a stat card's, a
+   * section's or a chart's actions — or else its parent's.
+   */
+  readonly size = input<LinkSize | undefined>(undefined);
   readonly underline = input<LinkUnderline | undefined>(undefined);
   readonly variant = input<LinkVariant | undefined>(undefined);
   readonly visited = input<boolean | undefined, boolean | string | undefined>(undefined, {

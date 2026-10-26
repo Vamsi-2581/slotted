@@ -80,6 +80,27 @@
    * pointer. Fluent calls it `subtle`, Primer `muted`, Polaris `monochrome`,
    * and all three describe the same two colours.
    */
+  /**
+   * The text size. Unset, a link takes the size an action slot states for the
+   * controls it holds (`--slotted-link-font-size`), or else its parent's; a
+   * `size` states its own.
+   */
+  [data-ui-link] {
+    font-size: var(--slotted-link-font-size, inherit);
+  }
+
+  [data-ui-link][data-size='xs'] {
+    font-size: var(--slotted-font-size-xs, 0.75rem);
+  }
+
+  [data-ui-link][data-size='sm'] {
+    font-size: var(--slotted-font-size-sm, 0.8125rem);
+  }
+
+  [data-ui-link][data-size='md'] {
+    font-size: var(--slotted-font-size-md, 0.875rem);
+  }
+
   [data-ui-link][data-variant='neutral'] {
     --_rest: var(--slotted-link-color, currentColor);
     --_hover: var(--slotted-link-color-hover, var(--slotted-tone-accent-text, LinkText));

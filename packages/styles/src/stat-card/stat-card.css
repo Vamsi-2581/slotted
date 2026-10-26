@@ -406,6 +406,9 @@
      and a corner is where a control is looked for. */
   @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
     :scope [data-part-action] {
+      /* An action slot states one size for the links it holds. */
+      --slotted-link-font-size: var(--slotted-font-size-sm, 0.8125rem);
+
       flex: none;
       /* The label's line, so a link here is as tall in the fallback face as in
          the web face and the header does not grow when the font arrives. */

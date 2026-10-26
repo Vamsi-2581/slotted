@@ -259,6 +259,9 @@
      column's digits ended at one edge and their name at the other. */
   [data-ui-table] [data-part-column-header],
   [data-ui-table] [data-part-head] [data-part-selection] {
+    /* What a pinned header cell paints, in place of its row's ground. */
+    --_pinned-ground: var(--_head-surface);
+
     background-color: var(--_head-surface);
     border-block-end: var(--_rule-width) solid var(--_rule-strong);
     color: var(--_text);
@@ -279,6 +282,8 @@
   }
 
   [data-ui-table][data-variant='plain'] [data-part-column-header] {
+    --_pinned-ground: transparent;
+
     background-color: transparent;
   }
 
@@ -286,7 +291,10 @@
    * ── Rows and cells ─────────────────────────────────────────────────────
    */
   [data-ui-table] [data-part-row] {
-    background-color: var(--_surface);
+    /* Published for a pinned cell, which paints it over an opaque ground. */
+    --_row-ground: var(--_surface);
+
+    background-color: var(--_row-ground);
   }
 
   /**
@@ -470,7 +478,7 @@
      the same body, so the stripe follows the record it belongs to rather than
      alternating around it — see the detail rule below. */
   [data-ui-table][data-striped] [data-part-body] > [data-part-row]:nth-child(even) {
-    background-color: var(--_stripe);
+    --_row-ground: var(--_stripe);
   }
 
   /**
@@ -482,7 +490,7 @@
    * disabled does not answer the pointer at all.
    */
   [data-ui-table] [data-part-body] > [data-part-row]:not([data-disabled]):hover {
-    background-color: var(--_hover);
+    --_row-ground: var(--_hover);
   }
 
   /**
@@ -498,12 +506,12 @@
    * requirement anyway.
    */
   [data-ui-table] [data-part-body] > [data-part-row][data-selected] {
-    background-color: var(--_selected);
+    --_row-ground: var(--_selected);
     color: var(--_selected-text);
   }
 
   [data-ui-table] [data-part-body] > [data-part-row][data-selected]:not([data-disabled]):hover {
-    background-color: var(--_selected-hover);
+    --_row-ground: var(--_selected-hover);
   }
 
   [data-ui-table] [data-part-row][data-disabled] {
@@ -518,7 +526,7 @@
    * scrolled cells through it. Selection is stronger and paints over it.
    */
   [data-ui-table] [data-part-body] > [data-part-row][data-current]:not([data-selected]) {
-    background-color: var(
+    --_row-ground: var(
       --slotted-table-row-surface-current,
       var(--slotted-tone-secondary-subtle-active, ButtonFace)
     );
@@ -729,11 +737,20 @@
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
   }
 
+  /* The ground the row is painted with, whatever state it is in, so a
+     hovered, striped or selected row keeps one colour across the seam — over
+     the page's own surface, so a row on a transparent table surface still
+     covers what scrolls under it. `inherit` copied a transparent row as is. */
+  [data-ui-table] [data-sticky] {
+    background:
+      linear-gradient(
+        var(--_pinned-ground, var(--_row-ground)),
+        var(--_pinned-ground, var(--_row-ground))
+      ),
+      var(--slotted-surface, Canvas);
+  }
+
   [data-ui-table] [data-sticky='start'] {
-    /* The ground the row is painted with, whatever state it is in: `inherit`
-       takes the row's own computed value, so a hovered, striped or selected row
-       keeps one colour across the seam. */
-    background-color: inherit;
     /**
      * Where the column stops, and it is stated rather than measured. Two
      * columns pinned to the same edge both resolve against the scroller, so
@@ -748,7 +765,6 @@
   }
 
   [data-ui-table] [data-sticky='end'] {
-    background-color: inherit;
     inset-inline-end: var(--slotted-table-sticky-inset, 0);
     position: sticky;
     z-index: var(--slotted-z-index-sticky, 100);
@@ -1550,6 +1566,8 @@
    * table holding the consumer's own controls.
    */
   [data-ui-table] [data-part-summary] > [data-part-row] > * {
+    --_pinned-ground: var(--_head-surface);
+
     background-color: var(--_head-surface);
     border-block-start: var(--_rule-width) solid var(--_rule-strong);
     font-weight: var(--slotted-font-weight-medium, 500);
@@ -1558,6 +1576,8 @@
   }
 
   [data-ui-table][data-variant='plain'] [data-part-summary] > [data-part-row] > * {
+    --_pinned-ground: transparent;
+
     background-color: transparent;
   }
 

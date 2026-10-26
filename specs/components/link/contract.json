@@ -7,6 +7,7 @@
     "summary": "Text link to another page or resource."
   },
   "axes": {
+    "size": ["xs", "sm", "md"],
     "underline": ["always", "hover", "none"],
     "variant": ["accent", "neutral", "inverse"]
   },

@@ -193,6 +193,8 @@ let sequence = 0;
                         [attr.data-preview]="drawn(day) && proposed(day.date) ? '' : null"
                       >
                         @if (drawn(day)) {
+                          <!-- The mark's words follow the number with no space, so the name reads "12, 2 items". -->
+                          <!-- prettier-ignore -->
                           <span
                             data-part="day"
                             data-part-day=""
@@ -204,19 +206,11 @@ let sequence = 0;
                             (click)="!refused(day) && select(day.date, 'pointer', $event)"
                             (pointerenter)="hovered.set(day.date)"
                             (pointerleave)="hovered.set(null)"
-                          >
-                            {{ day.date.day }}
-                            @if (markOf(day.date); as mark) {
-                              <span
+                          >{{ day.date.day }}@if (markOf(day.date); as mark) {<span
                                 data-part="mark"
                                 data-part-mark=""
                                 [attr.data-tone]="mark.tone ?? null"
-                                ><span data-ui="visually-hidden" data-ui-visually-hidden=""
-                                  >, {{ markName(mark) }}</span
-                                ></span
-                              >
-                            }
-                          </span>
+                              ><span data-ui="visually-hidden" data-ui-visually-hidden="">, {{ markName(mark) }}</span></span>}</span>
                         }
                       </td>
                     }

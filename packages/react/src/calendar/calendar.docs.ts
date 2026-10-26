@@ -119,6 +119,13 @@ const anatomy: AnatomyRow[] = [
       'The number the reader presses. It holds the roving tabindex, data-today, aria-selected and aria-disabled. It is the cell’s child rather than the cell itself because the range band runs edge to edge while the day stays a rounded box inside it.',
   },
   {
+    part: 'mark',
+    element: 'span',
+    required: false,
+    purpose:
+      'What falls on the day, drawn from marks: a dot in the row today’s dot reserves, in the mark’s tone, holding the visually hidden count that the day’s accessible name ends with.',
+  },
+  {
     part: 'months',
     element: 'div',
     required: false,
@@ -398,6 +405,13 @@ const api: ApiRow[] = apiRows([
     'shown',
     'Calendar',
     'What a day of the month either side does: drawn and not pressable, drawn and pressable, or not drawn.',
+  ],
+  [
+    'marks',
+    'ReadonlyMap<string, CalendarMark>',
+    '—',
+    'Calendar',
+    'What falls on each day, keyed by its ISO date: a dot under the number in the mark’s tone, and its count in the day’s accessible name (“12, 2 items”). Composes with every selection mode, min, max and outsideDays.',
   ],
   [
     'locale',

@@ -12,6 +12,9 @@ export interface CalendarMessages {
   /** The paging buttons over the year grid, which step a page of years. */
   readonly nextYears: Message;
   readonly previousYears: Message;
+  /** A day's mark, said after its number: with a count, and without one. */
+  readonly markCount: Message;
+  readonly marked: Message;
 }
 
 export const en: CalendarMessages = {
@@ -21,6 +24,8 @@ export const en: CalendarMessages = {
   previousYear: 'Previous year',
   nextYears: 'Next years',
   previousYears: 'Previous years',
+  markCount: '{count, plural, one {# item} other {# items}}',
+  marked: 'has items',
 };
 
 export const calendarMessages: MessageFamily<'calendar', CalendarMessages> = {

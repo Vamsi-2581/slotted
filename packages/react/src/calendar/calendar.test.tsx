@@ -130,6 +130,29 @@ describe('the keyboard the grid pattern lists', () => {
   });
 });
 
+/**
+ * An agenda beside the calendar marks the days that hold items, without
+ * faking it with selection. A mark is a part of the day it falls on, and its
+ * count is in the day's accessible name.
+ */
+describe('a day that carries a mark', () => {
+  it('draws the mark in that cell alone and names its count', () => {
+    const { container } = render(
+      <Calendar
+        defaultFocusedDate={NINTH}
+        locale="en-US"
+        marks={new Map([['2026-09-12', { count: 2, tone: 'info' as const }]])}
+      />,
+    );
+    const marks = container.querySelectorAll('[data-part="mark"]');
+    expect(marks).toHaveLength(1);
+    const day = marks[0]?.closest('[data-part="day"]') as HTMLElement;
+    expect(day.firstChild?.textContent).toBe('12');
+    expect(marks[0]).toHaveAttribute('data-tone', 'info');
+    expect(screen.getByRole('button', { name: '12, 2 items' })).toBe(day);
+  });
+});
+
 describe('what a cell says', () => {
   it('marks today apart from the selection', () => {
     const { container } = render(

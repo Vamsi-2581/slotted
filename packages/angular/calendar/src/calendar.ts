@@ -11,6 +11,7 @@ import {
   stepMonth,
   stepYear,
   todayIn,
+  toISODate,
   visibleMonths,
   yearPage,
 } from '@slotted/core/date';
@@ -42,6 +43,7 @@ import { injectCalendarDefaults } from './calendar-defaults';
 import type {
   CalendarCalendar,
   CalendarGranularity,
+  CalendarMark,
   CalendarOutsideDays,
   CalendarSelectionMode,
   CalendarValue,
@@ -204,6 +206,16 @@ let sequence = 0;
                             (pointerleave)="hovered.set(null)"
                           >
                             {{ day.date.day }}
+                            @if (markOf(day.date); as mark) {
+                              <span
+                                data-part="mark"
+                                data-part-mark=""
+                                [attr.data-tone]="mark.tone ?? null"
+                                ><span data-ui="visually-hidden" data-ui-visually-hidden=""
+                                  >, {{ markName(mark) }}</span
+                                ></span
+                              >
+                            }
                           </span>
                         }
                       </td>
@@ -270,7 +282,10 @@ let sequence = 0;
         </div>
       }
     }`,
-  styleUrl: '../../../styles/src/calendar/calendar.css',
+  styleUrls: [
+    '../../../styles/src/calendar/calendar.css',
+    '../../../styles/src/visually-hidden/visually-hidden.css',
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   host: {
@@ -318,6 +333,12 @@ export class SlCalendar implements OnInit {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
   readonly outsideDays = input<CalendarOutsideDays | undefined>(undefined);
+  /**
+   * What falls on a day, keyed by its ISO date (`2026-09-12`): a `mark` part under the number,
+   * in the given tone, and its count in the day's accessible name ("12, 2 items"). It composes
+   * with every selection mode, `min`, `max` and `outsideDays`.
+   */
+  readonly marks = input<ReadonlyMap<string, CalendarMark> | undefined>(undefined);
 
   /** The locale that writes months and days. Unset, the language in force decides. */
   readonly locale = input<string | undefined>(undefined);
@@ -362,6 +383,14 @@ export class SlCalendar implements OnInit {
   private readonly appLocale = injectLocale();
   /** The family's words in the language in force, with this calendar's `messages` laid over them. */
   readonly t = injectMessages(calendarMessages, this.messages);
+
+  protected markOf(date: PlainDate): CalendarMark | undefined {
+    return this.marks()?.get(toISODate(date));
+  }
+
+  protected markName(mark: CalendarMark): string {
+    return mark.count === undefined ? this.t('marked') : this.t('markCount', { count: mark.count });
+  }
 
   protected readonly headingId = `sl-calendar-${String((sequence += 1))}`;
 

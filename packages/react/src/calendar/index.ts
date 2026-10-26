@@ -13,6 +13,7 @@ export type {
   CalendarDefaults,
   CalendarDefaultsProviderProps,
   CalendarHandle,
+  CalendarMark,
   CalendarOutsideDays,
   CalendarProps,
   CalendarRootProps,

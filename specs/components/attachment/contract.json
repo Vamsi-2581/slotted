@@ -56,7 +56,7 @@
   "kindsForeground": "--slotted-upload-kind-foreground",
   "kindsReason": "The scale is `upload`'s, read under its own name. A shared name (`--slotted-file-kind-*`) would move twelve files across three families and the theme; it is a reopening if a third family needs the scale.",
   "preview": {
-    "image": "an `img` with `alt=\"\"` when the page gives a source; the file name is already the attachment's name",
+    "image": "an `img` with `alt=\"\"`, `loading=\"lazy\"` and `decoding=\"async\"` when the page gives a source; the file name is already the attachment's name, and a list of many attachments fetches only the thumbnails in sight",
     "fallback": "the kind's tile with the kind's mark knocked out of it",
     "error": "an image that fails to load returns to the tile; the failure is internal state, not a state of the contract"
   },

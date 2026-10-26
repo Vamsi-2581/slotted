@@ -505,6 +505,46 @@
   }
 
   /**
+   * What falls on the day (`marks`): a dot in the row today's dot reserves, in
+   * the mark's tone. A marked day draws its mark there instead, and today
+   * keeps its colour and weight; on a chosen day the dot takes the day's ink.
+   */
+  [data-ui-calendar] [data-part-day]:has(> [data-part-mark])::before {
+    display: none;
+  }
+
+  [data-ui-calendar] [data-part-mark] {
+    --_mark: var(--slotted-tone-accent-solid, currentcolor);
+
+    background-color: var(--_mark);
+    block-size: var(--slotted-space-2, 0.25rem);
+    border-radius: var(--slotted-radius-full, 9999px);
+    flex: 0 0 auto;
+    inline-size: var(--slotted-space-2, 0.25rem);
+    order: 1;
+  }
+
+  [data-ui-calendar] [data-part-mark][data-tone='info'] {
+    --_mark: var(--slotted-tone-info-solid, currentcolor);
+  }
+
+  [data-ui-calendar] [data-part-mark][data-tone='success'] {
+    --_mark: var(--slotted-tone-success-solid, currentcolor);
+  }
+
+  [data-ui-calendar] [data-part-mark][data-tone='warning'] {
+    --_mark: var(--slotted-tone-warning-solid, currentcolor);
+  }
+
+  [data-ui-calendar] [data-part-mark][data-tone='danger'] {
+    --_mark: var(--slotted-tone-danger-solid, currentcolor);
+  }
+
+  [data-ui-calendar] [data-part-cell][data-selected] [data-part-mark] {
+    --_mark: currentcolor;
+  }
+
+  /**
    * A day of the month either side. Quiet enough to read as context and legible
    * enough to press, because a reader who wants 1 October while looking at
    * September should be able to.

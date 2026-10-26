@@ -31,6 +31,7 @@ class Host {
   readonly openRun: DateRange = { start: plainDate(2026, 9, 7), end: null };
   readonly openFromEleventh: DateRange = { start: plainDate(2026, 9, 11), end: null };
   readonly refuseTenth = (date: PlainDate) => date.day === 10;
+  readonly marks = new Map([['2026-09-12', { count: 2, tone: 'info' as const }]]);
   readonly values: CalendarValue[] = [];
   readonly previews: (PlainDate | null)[] = [];
   readonly onPreview = vi.fn((date: PlainDate | null) => {
@@ -191,6 +192,20 @@ describe('the keyboard the grid pattern lists', () => {
 
     press(fixture, 'Enter');
     expect(fixture.componentInstance.values.at(-1)).toEqual(NINTH);
+  });
+});
+
+/** A day that holds items carries a mark, and its count is in the day's name. */
+describe('a day that carries a mark', () => {
+  it('draws the mark in that cell alone and names its count', () => {
+    const fixture = renderTemplate(
+      `<div slCalendar locale="en-US" [defaultFocusedDate]="ninth" [marks]="marks"></div>`,
+    );
+    const marks = fixture.nativeElement.querySelectorAll('[data-part="mark"]');
+    expect(marks).toHaveLength(1);
+    const day = marks[0].closest('[data-part="day"]') as HTMLElement;
+    expect(day.textContent?.trim()).toBe('12, 2 items');
+    expect(marks[0].getAttribute('data-tone')).toBe('info');
   });
 });
 

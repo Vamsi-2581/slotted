@@ -62,6 +62,10 @@
   "--slotted-tone-accent-subtle-active",
   "--slotted-tone-accent-subtle-hover",
   "--slotted-tone-accent-text",
+  "--slotted-tone-danger-solid",
+  "--slotted-tone-info-solid",
   "--slotted-tone-secondary-subtle-active",
-  "--slotted-tone-secondary-subtle-hover"
+  "--slotted-tone-secondary-subtle-hover",
+  "--slotted-tone-success-solid",
+  "--slotted-tone-warning-solid"
 ]

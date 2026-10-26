@@ -7,4 +7,6 @@ export const ptBR: CalendarMessages = {
   previousYear: 'Ano anterior',
   nextYears: 'Próximos anos',
   previousYears: 'Anos anteriores',
+  markCount: '{count, plural, one {# item} other {# itens}}',
+  marked: 'com itens',
 };

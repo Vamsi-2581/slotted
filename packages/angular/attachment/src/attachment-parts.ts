@@ -48,7 +48,7 @@ function describes(part: 'detail' | 'message') {
   exportAs: 'slAttachmentPreview',
   imports: [SlGlyph, SlIcon],
   template: `@if (picture()) {
-      <img alt="" [src]="src()" (error)="failed.set(src())" />
+      <img alt="" decoding="async" loading="lazy" [src]="src()" (error)="failed.set(src())" />
     } @else {
       <span slIcon><svg slGlyph [name]="glyph()"></svg></span>
     }`,

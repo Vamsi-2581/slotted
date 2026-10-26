@@ -105,8 +105,11 @@
     "nextYear",
     "previousYear",
     "nextYears",
-    "previousYears"
+    "previousYears",
+    "markCount",
+    "marked"
   ],
+  "marks": "marks, keyed by ISO date, draws a mark part inside that day: a dot in the row today's dot reserves, in the mark's tone (accent, info, success, warning, danger; the day's ink when chosen), and a visually hidden ', N items' (markCount) or ', has items' (marked) after the number, so the day's accessible name says it. It composes with every selection mode, min, max and outsideDays; a hidden outside day draws none",
   "imperative": ["focus", "focusDate"],
   "container": {
     "name": "slotted-calendar",
@@ -204,6 +207,7 @@
         "week-number",
         "cell",
         "day",
+        "mark",
         "months",
         "years",
         "period"

@@ -30,6 +30,12 @@ export type CalendarGranularity = 'day' | 'month';
 /** What happens to a day belonging to the month either side. */
 export type CalendarOutsideDays = 'shown' | 'selectable' | 'hidden';
 
+/** What falls on a day. */
+export interface CalendarMark {
+  count?: number;
+  tone?: 'accent' | 'info' | 'success' | 'warning' | 'danger';
+}
+
 /**
  * The calendar system the value is written in. One value today, and an axis
  * rather than a silence: a second calendar system is a second arithmetic, and

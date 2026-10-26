@@ -7,6 +7,7 @@ export {
 export type {
   CalendarCalendar,
   CalendarDefaults,
+  CalendarMark,
   CalendarOutsideDays,
   CalendarSelectionMode,
   CalendarValue,

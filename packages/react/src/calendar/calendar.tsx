@@ -1,5 +1,6 @@
 import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/calendar/calendar.css';
+import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import {
   addDays,
@@ -14,6 +15,7 @@ import {
   stepMonth,
   stepYear,
   todayIn,
+  toISODate,
   visibleMonths,
   yearPage,
 } from '@slotted/core/date';
@@ -43,6 +45,7 @@ import {
   rangeStateOf,
 } from './calendar-selection';
 import type {
+  CalendarMark,
   CalendarProps,
   CalendarRootProps,
   CalendarValue,
@@ -101,6 +104,7 @@ export function Calendar({
   onPreviewChange,
   onValueChange,
   onViewChange,
+  marks,
   outsideDays,
   readOnly,
   ref,
@@ -525,6 +529,10 @@ export function Calendar({
             key={`${String(month.year)}-${String(month.month)}`}
             month={month}
             onHover={setHovered}
+            marks={marks}
+            markName={(mark) =>
+              mark.count === undefined ? t('marked') : t('markCount', { count: mark.count })
+            }
             onSelect={select}
             outsideDays={resolvedOutsideDays}
             pending={pending}
@@ -689,6 +697,8 @@ function MonthTable({
   focused,
   format,
   headingId,
+  markName,
+  marks,
   month,
   onHover,
   onSelect,
@@ -699,6 +709,8 @@ function MonthTable({
   value,
   weekNumbers,
 }: {
+  markName: (mark: CalendarMark) => string;
+  marks: ReadonlyMap<string, CalendarMark> | undefined;
   editable: boolean;
   firstDayOfWeek: number;
   fixedWeeks: boolean;
@@ -765,6 +777,7 @@ function MonthTable({
                  the reader already chose. */
               const proposed = pending !== null && run !== null && !chosen;
               const roving = isSameDate(day.date, focused);
+              const mark = hidden ? undefined : marks?.get(toISODate(day.date));
 
               return (
                 /* A hidden day is an empty cell and nothing else. It carried
@@ -800,6 +813,17 @@ function MonthTable({
                       tabIndex={roving && editable ? 0 : -1}
                     >
                       {day.date.day}
+                      {mark === undefined ? null : (
+                        <span
+                          data-part="mark"
+                          data-part-mark=""
+                          {...(mark.tone === undefined ? {} : { 'data-tone': mark.tone })}
+                        >
+                          <span data-ui="visually-hidden" data-ui-visually-hidden="">
+                            {`, ${markName(mark)}`}
+                          </span>
+                        </span>
+                      )}
                     </span>
                   )}
                 </td>

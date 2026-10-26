@@ -88,6 +88,12 @@ export interface CalendarHandle {
   focusDate(date: PlainDate): void;
 }
 
+/** What falls on a day. */
+export interface CalendarMark {
+  count?: number | undefined;
+  tone?: 'accent' | 'info' | 'success' | 'warning' | 'danger' | undefined;
+}
+
 export interface CalendarProps extends Omit<
   ComponentPropsWithRef<'div'>,
   'defaultValue' | 'onChange' | 'ref'
@@ -128,6 +134,12 @@ export interface CalendarProps extends Omit<
   weekNumbers?: boolean | undefined;
   fixedWeeks?: boolean | undefined;
   outsideDays?: CalendarOutsideDays | undefined;
+  /**
+   * What falls on a day, keyed by its ISO date (`2026-09-12`): a `mark` part under the number,
+   * in the given tone, and its count in the day's accessible name ("12, 2 items"). It composes
+   * with every selection mode, `min`, `max` and `outsideDays`.
+   */
+  marks?: ReadonlyMap<string, CalendarMark> | undefined;
 
   /** The locale that writes months and days. Unset, the language in force decides. */
   locale?: string | undefined;

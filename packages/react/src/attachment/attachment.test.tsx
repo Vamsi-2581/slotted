@@ -104,6 +104,9 @@ describe('Attachment', () => {
     );
     const image = screen.getByTestId('preview').querySelector('img') as HTMLImageElement;
     expect(image).toHaveAttribute('alt', '');
+    /* A list of a hundred receipts fetched every thumbnail at once. */
+    expect(image).toHaveAttribute('loading', 'lazy');
+    expect(image).toHaveAttribute('decoding', 'async');
     fireEvent.error(image);
     expect(screen.getByTestId('preview').querySelector('img')).toBeNull();
     expect(screen.getByTestId('preview').querySelector('svg')).toHaveAttribute(

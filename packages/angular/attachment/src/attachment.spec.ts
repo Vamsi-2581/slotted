@@ -125,6 +125,9 @@ describe('SlAttachment', () => {
     fixture.detectChanges();
     const image = q('#preview img');
     expect(image.getAttribute('alt')).toBe('');
+    /* A list of a hundred receipts fetched every thumbnail at once. */
+    expect(image.getAttribute('loading')).toBe('lazy');
+    expect(image.getAttribute('decoding')).toBe('async');
     image.dispatchEvent(new Event('error'));
     fixture.detectChanges();
     expect(q('#preview img')).toBeNull();

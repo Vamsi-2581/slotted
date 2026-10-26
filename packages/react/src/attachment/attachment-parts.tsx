@@ -47,7 +47,7 @@ export function AttachmentPreview({
     children:
       children ??
       (picture ? (
-        <img alt="" onError={() => setFailed(src)} src={src} />
+        <img alt="" decoding="async" loading="lazy" onError={() => setFailed(src)} src={src} />
       ) : (
         <Icon>
           <Glyph name={ATTACHMENT_KIND_GLYPH[attachment.kind]} />

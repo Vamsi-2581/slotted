@@ -2,6 +2,18 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.16 — 2026-10-26
+
+- docs(list-item): a anatomia diz o pai de cada parte e a cena anatomy mostra uma linha lida com duas ações e quando usar end ou actions; feat(list-item): em desenvolvimento, body, label e description fora da caixa, e a caixa dentro de um body, avisam uma vez por parte (itens 21, 22)
+- fix(calendar): o nome de um dia marcado lê-se '12, 2 items' também no Angular (template protegido do Prettier); fecho do plano equori-pending com o resultado de check:full
+- feat(calendar): marks marca os dias com itens (parte mark, tom, contagem no nome acessível); fix(attachment): a miniatura carrega com loading=lazy e decoding=async; item 20 registado como uso (achados equori 18, 19, 20)
+- feat(dashboard-grid): renderDetail (React) e slDashboardWidgetDetail (Angular) põem o link do router no canto do widget; feat(link): eixo size, e as ações de stat-card, section e chart fixam sm para os links; fix(table): a célula fixa pinta o fundo da linha sobre a superfície da página (achados equori 15, 16, 17)
+- feat(dashboard-grid): expandedFrom move o limiar da classe expandida (a raiz escreve data-size-class e o CSS segue-o); rows="auto" desenha o widget com as linhas que o conteúdo mede, sem as guardar; headingLevel por omissão 'auto', um nível abaixo do contorno (achados equori 12, 13, 14)
+- feat(prompt-composer): PromptComposerDictate dita pelo SpeechRecognition da plataforma (@slotted/core/dictation, glifo mic, razão dictation); fix(prompt-composer): o brilho do anel é a tinta do blur sobre a caixa do compositor, sem máscara e sem overflow no contentor (achados equori 10, 11)
+- feat(markdown): source lê um subconjunto de CommonMark por parseMarkdown em @slotted/core/markdown, só a sintaxe dos tipos em allow; fix(message): uma bolha com Markdown mede o texto (prose deixa de ser contentor de tamanho dentro dela); fix(dialog): o corpo e o rodapé fixam as suas linhas, e um diálogo de ecrã inteiro sem corpo assenta o rodapé no fundo (achados equori 7, 8, 9)
+- feat(drawer): --slotted-drawer-slide-duration e --slotted-drawer-slide-exit-duration regem o deslize por transição (o sheet com drag continua no scroll suave da plataforma); sob drag=panel toda a região dentro do painel passa o overscroll vertical ao sheet; fix(message-scroller): conteúdo sem itens não fica pendente (achados equori 4, 5, 6)
+- feat(drawer): DrawerActions põe ações ao lado do título, na linha dele; um bottom sheet size="full" com drag=panel assenta o rodapé no fundo do ecrã; um sheet overlay só desenha as bordas laterais quando é mais estreito que a viewport, e size="full" não desenha nenhuma (achados equori 1, 2, 3)
+
 ## 0.1.0-beta.15 — 2026-10-24
 
 - chore(theme): hooks.json regenerado com o atributo data-sheet-ready do drawer

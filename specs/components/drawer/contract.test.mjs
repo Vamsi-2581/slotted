@@ -265,6 +265,7 @@ test('declares the anatomy the family renders', () => {
     'grip',
     'header',
     'title',
+    'actions',
     'description',
     'body',
     'footer',

@@ -25,7 +25,7 @@ export const ANGULAR_DRAWER_TOKENS = drawerTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import { SlDrawer, SlDrawerBody, SlDrawerClose, SlDrawerDescription, SlDrawerFooter, SlDrawerHeader, SlDrawerResizer, SlDrawerTitle, SlDrawerTrigger, provideDrawerDefaults } from '@slotted/angular/drawer';",
+    "import { SlDrawer, SlDrawerActions, SlDrawerBody, SlDrawerClose, SlDrawerDescription, SlDrawerFooter, SlDrawerHeader, SlDrawerResizer, SlDrawerTitle, SlDrawerTrigger, provideDrawerDefaults } from '@slotted/angular/drawer';",
   selector: '<sl-drawer>, exportAs slDrawer',
 };
 
@@ -84,7 +84,14 @@ const anatomy: AnatomyRow[] = [
     element: 'your own element, with slDrawerHeader on it',
     required: false,
     purpose:
-      'Lays out the title and the description in one column and the close button in another, so a title that wraps grows the row instead of moving the button.',
+      'Lays out the title and the description in one column, the actions in a second when they are rendered, and the close button in the last, so a title that wraps grows the row instead of moving the buttons.',
+  },
+  {
+    part: 'actions',
+    element: 'your own element, with slDrawerActions on it',
+    required: false,
+    purpose:
+      'One or two actions beside the title, such as icon buttons for history and a new conversation, on the title’s row between the title and the close button. The buttons keep the size you give them.',
   },
   {
     part: 'title',
@@ -598,7 +605,7 @@ const api = apiRows([
     "'sm' | 'md' | 'lg' | 'xl' | 'full' | 'content'",
     'content on top and bottom, md on start and end',
     '<sl-drawer>, provideDrawerDefaults',
-    'The panel’s measure at rest: one of the steps sm (18rem), md (24rem), lg (30rem), xl (40rem) and full, or content, which fits what the panel holds, up to 4rem short of the screen. A step wider than the screen is held to it.',
+    'The panel’s measure at rest: one of the steps sm (18rem), md (24rem), lg (30rem), xl (40rem) and full, or content, which fits what the panel holds, up to 4rem short of the screen. A step wider than the screen is held to it. On a bottom sheet, full is the screen’s height and the footer rests at its bottom.',
   ],
   [
     'mount',

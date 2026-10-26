@@ -37,6 +37,7 @@ import { createPortal } from 'react-dom';
 import { Glyph, Icon } from '../icon';
 import { useDrawer } from './drawer';
 import type {
+  DrawerActionsProps,
   DrawerBodyProps,
   DrawerCloseProps,
   DrawerContextValue,
@@ -1148,6 +1149,26 @@ export function DrawerTitle({
   });
   if (render !== undefined) return render(rootProps);
   return <h2 {...rootProps} ref={ref} />;
+}
+
+/** The actions beside the title, on its row: one or two icon buttons, such as "history" and "new". */
+export function DrawerActions({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...rest
+}: DrawerActionsProps) {
+  const rootProps = keyedProps({
+    ...rest,
+    children,
+    className,
+    'data-part': 'actions' as const,
+    style,
+  });
+  if (render !== undefined) return render(rootProps);
+  return <div {...rootProps} ref={ref} />;
 }
 
 /** The sentence that says what the drawer is about. */

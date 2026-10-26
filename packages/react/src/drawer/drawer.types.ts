@@ -313,6 +313,9 @@ export interface DrawerHeaderProps
 export interface DrawerTitleProps
   extends ComponentPropsWithRef<'h2'>, WithRender<PartProps<HTMLHeadingElement>> {}
 
+export interface DrawerActionsProps
+  extends ComponentPropsWithRef<'div'>, WithRender<PartProps<HTMLDivElement>> {}
+
 export interface DrawerDescriptionProps
   extends ComponentPropsWithRef<'p'>, WithRender<PartProps<HTMLParagraphElement>> {}
 

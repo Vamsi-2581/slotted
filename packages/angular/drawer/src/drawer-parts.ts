@@ -147,6 +147,15 @@ export class SlDrawerTitle implements OnInit, OnDestroy {
   }
 }
 
+/** The actions beside the title, on its row: one or two icon buttons, such as "history" and "new". */
+@Directive({
+  selector: '[slDrawerActions]',
+  standalone: true,
+  exportAs: 'slDrawerActions',
+  host: { 'data-part': 'actions', 'data-part-actions': '' },
+})
+export class SlDrawerActions {}
+
 /** The sentence that says what the drawer is about. */
 @Directive({
   selector: '[slDrawerDescription]',

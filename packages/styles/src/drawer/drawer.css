@@ -575,8 +575,9 @@
   /**
    * A sheet on a wide layer is a card over the page, not a strip across it:
    * forty rems, Material 3's 640 dp, centred, with the scrim on both sides. The
-   * edge then shows on three sides, so the panel draws it on three; on a phone
-   * the two side edges sit on the screen's own and read as nothing.
+   * edge then shows on three sides, so the panel draws it on three. An overlay
+   * layer is the viewport, so at the sheet's measure or under it — a phone —
+   * the side edges would sit on the screen's own and are not drawn.
    */
   [data-ui-drawer][data-mode='overlay'][data-side='top'] > [data-part-panel],
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'] > [data-part-panel] {
@@ -585,7 +586,12 @@
       100%,
       var(--slotted-drawer-sheet-inline-size, var(--slotted-drawer-extent-xl, 40rem))
     );
-    border-inline-width: var(--_rule-size);
+    border-inline-width: clamp(
+      0px,
+      (100vw - var(--slotted-drawer-sheet-inline-size, var(--slotted-drawer-extent-xl, 40rem))) *
+        1000,
+      var(--_rule-size)
+    );
   }
 
   /**
@@ -689,7 +695,7 @@
    * step, because a container condition cannot hold a custom property — buy one
    * hairline at the extreme edge of the viewport.
    */
-  [data-ui-drawer][data-size='full'] > [data-part-panel] {
+  [data-ui-drawer][data-mode][data-size='full'] > [data-part-panel] {
     border-width: 0;
     border-radius: 0;
   }
@@ -1112,6 +1118,20 @@
     color: var(--slotted-drawer-title-color, var(--slotted-text, CanvasText));
   }
 
+  /* Actions take a column between the words and the close button, on the title's row. */
+  [data-ui-drawer] > [data-part-panel] > [data-part-header]:has(> [data-part-actions]) {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  [data-ui-drawer] > [data-part-panel] > [data-part-header] > [data-part-actions] {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    gap: var(--slotted-space-2, 0.25rem);
+  }
+
   [data-ui-drawer] > [data-part-panel] > [data-part-header] > [data-part-description] {
     grid-column: 1;
     grid-row: 2;
@@ -1136,7 +1156,8 @@
   [data-ui-drawer] > [data-part-panel] > [data-part-header] > [data-part-close] {
     --slotted-icon-size: var(--_icon-size);
 
-    grid-column: 2;
+    /* The last column, beside the actions when there are any. */
+    grid-column: -2;
     grid-row: 1 / span 2;
     align-self: start;
     display: inline-grid;
@@ -1426,6 +1447,14 @@
     block-size: auto;
     min-block-size: var(--slotted-drawer-sheet-height, 0px);
     grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  }
+
+  /* `size="full"` is the screen: the footer rests at its bottom, in the row that takes what is left. */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'][data-size='full']
+    > [data-part-panel]
+    > [data-part-footer] {
+    grid-row: 5;
+    align-self: end;
   }
 
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel'][data-sheet-scrolls]

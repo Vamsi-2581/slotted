@@ -21,6 +21,7 @@ export type {
   DrawerSize,
 } from './drawer-defaults';
 export {
+  SlDrawerActions,
   SlDrawerBody,
   SlDrawerClose,
   SlDrawerDescription,

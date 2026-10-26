@@ -12,6 +12,7 @@ import { SlDrawer } from './drawer';
 import { provideDrawerDefaults } from './drawer-defaults';
 import type { DrawerChangeRequest, DrawerExtentRequest } from './drawer-defaults';
 import {
+  SlDrawerActions,
   SlDrawerBody,
   SlDrawerClose,
   SlDrawerDescription,
@@ -29,6 +30,7 @@ import {
     SlDrawerTrigger,
     SlDrawerHeader,
     SlDrawerTitle,
+    SlDrawerActions,
     SlDrawerDescription,
     SlDrawerBody,
     SlDrawerFooter,
@@ -56,6 +58,7 @@ import {
     >
       <header slDrawerHeader>
         <h2 slDrawerTitle>Invoice 4471</h2>
+        <div slDrawerActions></div>
         @if (described()) {
           <p slDrawerDescription>Issued on 12 August.</p>
         }

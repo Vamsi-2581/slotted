@@ -8,6 +8,7 @@ import { SlottedProvider } from '../i18n';
 import { Drawer } from './drawer';
 import { DrawerDefaultsProvider } from './drawer-defaults';
 import {
+  DrawerActions,
   DrawerBody,
   DrawerClose,
   DrawerDescription,
@@ -27,6 +28,7 @@ function Basic({ children, ...props }: Partial<DrawerProps>) {
       <DrawerPanel>
         <DrawerHeader>
           <DrawerTitle>Invoice 4471</DrawerTitle>
+          <DrawerActions />
           <DrawerDescription>Issued on 12 August.</DrawerDescription>
           <DrawerClose />
         </DrawerHeader>

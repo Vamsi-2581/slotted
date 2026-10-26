@@ -318,6 +318,7 @@
         "grip",
         "header",
         "title",
+        "actions",
         "description",
         "body",
         "footer",
@@ -363,7 +364,8 @@
       "meaning": "while the extent is below scrimFrom the root carries data-undimmed: the backdrop takes opacity: 0 and pointer-events: none with the opacity transition it already had, and the root, which is fixed over the viewport, takes pointer-events: none while the panel keeps them, so a press reaches the page",
       "reason": "UIKit's largestUndimmedDetentIdentifier, Vaul's fadeFromIndex, Ionic's backdropBreakpoint and gorhom's appearsOnIndex. It asks for modal=false and outsidePress=none, because a missing scrim over an inert page promises a page that does not answer"
     },
-    "width": "on top and bottom the panel is min(100%, var(--slotted-drawer-sheet-inline-size)), centred; the token resolves to --slotted-drawer-extent-xl, 40rem, Material 3's 640 dp",
+    "width": "on top and bottom the panel is min(100%, var(--slotted-drawer-sheet-inline-size)), centred; the token resolves to --slotted-drawer-extent-xl, 40rem, Material 3's 640 dp. An overlay sheet draws its side edges only while the viewport is wider than that token; at the token or under it the side edges are 0. size=full draws no edge on any side",
+    "full": "under size=full and drag=panel the panel is the layer's height and the footer rests at its bottom: the footer takes the grid's last row, the one that holds the free space, aligned to its end",
     "keyboard": "observeKeyboardInset from @slotted/core/measure reads innerHeight - (visualViewport.height + visualViewport.offsetTop) on the visualViewport's resize and scroll, and the open overlay layer writes it as --slotted-keyboard-inset, read as the root's padding-block-end on every side, and as the sheet's scroll-padding-block-end and the sticky footer's inset, so a sheet's stops and its footer stand above the keyboard. navigator.virtualKeyboard.overlaysContent is never set: it is page-wide state and the API is not Baseline",
     "grabberTap": "a click on the resizer that no drag preceded moves to the next stop up, and from the highest back to the lowest. With no stop beyond the rest it does nothing. Enter keeps the Window Splitter reading",
     "motion": "opening scrolls the sheet up from out of sight to its resting stop and closing other than by the hand scrolls it down to nothing, on the platform's smooth scroll, the motion a released drag ends with: the panel does not slide on its own, and the root is kept for --slotted-duration-long plus --slotted-duration-medium so presence outlasts the scroll (Chrome: about 440 ms across a phone's height). Under prefers-reduced-motion the scroll is instant. While closing the snap is off, so nothing re-snaps the panel back into view",

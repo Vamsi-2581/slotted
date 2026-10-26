@@ -1,9 +1,19 @@
 import { render } from '@testing-library/react';
 import { useState } from 'react';
-import { cdp } from 'vitest/browser';
+import { cdp, page } from 'vitest/browser';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Drawer, DrawerBody, DrawerHeader, DrawerPanel, DrawerTitle } from './index';
+import { IconButton } from '../button';
+import {
+  Drawer,
+  DrawerActions,
+  DrawerBody,
+  DrawerClose,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerTitle,
+} from './index';
 import type { DrawerProps } from './drawer.types';
 
 const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -347,5 +357,110 @@ describe('a bottom sheet on the platform scroll', () => {
     } finally {
       await cdp().send('Emulation.setCPUThrottlingRate', { rate: 1 });
     }
+  });
+});
+
+/**
+ * A side panel carries one or two actions beside its title. The header had a
+ * column for the words and one for the close button, so a third child wrapped
+ * to a second row.
+ */
+describe('a drawer header with actions', () => {
+  it('lays the title, the actions and the close button on one row', async () => {
+    render(
+      <Drawer defaultOpen side="end">
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Assistant</DrawerTitle>
+            <DrawerActions>
+              <IconButton aria-label="History">H</IconButton>
+              <IconButton aria-label="New">N</IconButton>
+            </DrawerActions>
+            <DrawerClose />
+          </DrawerHeader>
+          <DrawerBody>Body</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    for (let index = 0; index < 10; index += 1) await frame();
+    const header = document.querySelector('[data-ui="drawer"] [data-part="header"]') as HTMLElement;
+    const tops = [
+      header.querySelector('[data-part="title"]'),
+      ...header.querySelectorAll('[data-part="actions"] > button'),
+      header.querySelector('[data-part="close"]'),
+    ].map((element) => Math.round((element as HTMLElement).getBoundingClientRect().top));
+
+    expect(tops).toHaveLength(4);
+    expect(new Set(tops).size).toBe(1);
+  });
+});
+
+/**
+ * `size="full"` on a bottom sheet is the screen. The panel was as tall as its
+ * content, so a short body left the footer in the middle of the screen.
+ */
+describe('a full bottom sheet with a short body', () => {
+  afterEach(async () => {
+    await page.viewport(412, 915);
+  });
+
+  it('rests its footer on the bottom of the viewport', async () => {
+    await page.viewport(390, 844);
+    render(
+      <Drawer defaultOpen side="bottom" size="full">
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Filters</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>One paragraph.</DrawerBody>
+          <DrawerFooter>Apply</DrawerFooter>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    for (let index = 0; index < 45; index += 1) await frame();
+    const footer = document.querySelector('[data-ui="drawer"] [data-part="footer"]') as HTMLElement;
+
+    expect(Math.round(footer.getBoundingClientRect().bottom)).toBe(window.innerHeight);
+  });
+});
+
+/**
+ * An overlay sheet draws its side edges where it is narrower than the screen.
+ * At the screen's width the two edges sat on the screen's own, and under
+ * `size="full"` the sheet's rule outweighed the one that drops every edge.
+ */
+describe('an overlay sheet as wide as the screen', () => {
+  afterEach(async () => {
+    await page.viewport(412, 915);
+  });
+
+  const sheet = (props: Partial<DrawerProps>) => {
+    render(
+      <Drawer defaultOpen side="bottom" {...props}>
+        <DrawerPanel>
+          <DrawerBody>Body</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    return document.querySelector('[data-ui="drawer"] [data-part="panel"]') as HTMLElement;
+  };
+
+  it('draws no side edge on a phone', () => {
+    const panel = sheet({});
+    expect(getComputedStyle(panel).borderLeftWidth).toBe('0px');
+    expect(getComputedStyle(panel).borderRightWidth).toBe('0px');
+  });
+
+  it('draws its side edges on a wide screen', async () => {
+    await page.viewport(1440, 900);
+    const panel = sheet({});
+    expect(getComputedStyle(panel).borderLeftWidth).toBe('1px');
+  });
+
+  it('draws no edge under size="full" on a wide screen', async () => {
+    await page.viewport(1440, 900);
+    const panel = sheet({ size: 'full' });
+    expect(getComputedStyle(panel).borderLeftWidth).toBe('0px');
+    expect(getComputedStyle(panel).borderTopWidth).toBe('0px');
   });
 });

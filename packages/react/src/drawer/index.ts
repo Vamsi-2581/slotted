@@ -1,6 +1,7 @@
 export { Drawer, useDrawer } from './drawer';
 export { DrawerDefaultsProvider, useDrawerDefaults } from './drawer-defaults';
 export {
+  DrawerActions,
   DrawerBody,
   DrawerClose,
   DrawerDescription,
@@ -12,6 +13,7 @@ export {
   DrawerTrigger,
 } from './drawer-parts';
 export type {
+  DrawerActionsProps,
   DrawerBodyProps,
   DrawerChangeRequest,
   DrawerCloseProps,

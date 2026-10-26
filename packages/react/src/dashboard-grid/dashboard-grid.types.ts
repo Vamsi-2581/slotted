@@ -16,7 +16,8 @@ export type {
   DashboardLayoutItem,
 } from '@slotted/core/dashboard-grid';
 
-export type DashboardHeadingLevel = 2 | 3 | 4 | 5 | 6;
+/** `auto` follows the heading outline, as `Section` does, and is never above 2. */
+export type DashboardHeadingLevel = 'auto' | 2 | 3 | 4 | 5 | 6;
 
 export type DashboardLayoutReason = 'pointer' | 'keyboard' | 'remove' | 'dismiss' | 'programmatic';
 
@@ -75,7 +76,12 @@ export interface DashboardGridProps extends Omit<
   columns?: DashboardColumnsInput | undefined;
   /** Whether the family draws its edit bar while editing. Default true. */
   editBar?: boolean | undefined;
-  /** The level of every widget's title. Default 3. */
+  /**
+   * The grid's own width, in pixels, from which the expanded class applies. Default 1024. A grid
+   * beside a navigation rail is narrower than its page, so a lower threshold keeps its layout.
+   */
+  expandedFrom?: number | undefined;
+  /** The level of every widget's title. Default `auto`: one rank under the heading around the grid. */
   headingLevel?: DashboardHeadingLevel | undefined;
   /** Words laid over the catalog of the language in force, key by key. */
   messages?: PartialMessages<DashboardGridMessages> | undefined;
@@ -112,6 +118,11 @@ export interface DashboardWidgetProps extends Omit<
   defaultColumns?: number;
   /** Default 2. */
   defaultRows?: number;
+  /**
+   * `auto` draws the widget as many rows as its content measures, within `minRows` and `maxRows`,
+   * and the widgets below make room. The stored rows, which a resize sets, stay the minimum.
+   */
+  rows?: 'auto' | undefined;
   minColumns?: number;
   maxColumns?: number;
   minRows?: number;

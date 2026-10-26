@@ -68,35 +68,67 @@
    * The medium class flows the same order, each widget a half or the whole
    * of the row; its height stays in rows. The compact class is one
    * column whose widgets are as tall as their content, the way a phone reads a
-   * dashboard. The thresholds are the size classes of §2.7, literal because
-   * CSS refuses a custom property in a container condition.
+   * dashboard. Once the binding has measured the grid it writes the class on
+   * the root (`data-size-class`, from `expandedFrom`), and the rules follow
+   * the attribute. Before that the container queries draw the classes at the
+   * thresholds of §2.7, literal because CSS refuses a custom property in a
+   * container condition.
    */
   @container dashboard-grid (width < 1024px) {
-    [data-ui-dashboard-grid] > [data-part-grid] {
+    [data-ui-dashboard-grid]:not([data-size-class]) > [data-part-grid] {
       --_cols: var(--_dg-columns-medium, 6);
     }
 
-    [data-ui-dashboard-grid] :is([data-part-widget], [data-part-placeholder]) {
+    [data-ui-dashboard-grid]:not([data-size-class])
+      :is([data-part-widget], [data-part-placeholder]) {
       grid-column: auto / span var(--_dg-span-medium, 3);
       grid-row: auto / span var(--_dg-h, 2);
     }
   }
 
+  [data-ui-dashboard-grid]:is([data-size-class='medium'], [data-size-class='compact'])
+    > [data-part-grid] {
+    --_cols: var(--_dg-columns-medium, 6);
+  }
+
+  [data-ui-dashboard-grid]:is([data-size-class='medium'], [data-size-class='compact'])
+    :is([data-part-widget], [data-part-placeholder]) {
+    grid-column: auto / span var(--_dg-span-medium, 3);
+    grid-row: auto / span var(--_dg-h, 2);
+  }
+
   @container dashboard-grid (width < 600px) {
-    [data-ui-dashboard-grid] > [data-part-grid] {
+    [data-ui-dashboard-grid]:not([data-size-class]) > [data-part-grid] {
       --_cols: var(--_dg-columns-compact, 1);
 
       grid-auto-rows: auto;
     }
 
-    [data-ui-dashboard-grid] :is([data-part-widget], [data-part-placeholder]) {
+    [data-ui-dashboard-grid]:not([data-size-class])
+      :is([data-part-widget], [data-part-placeholder]) {
       grid-column: 1 / -1;
       grid-row: auto;
     }
 
-    [data-ui-dashboard-grid] [data-part-placeholder] {
+    [data-ui-dashboard-grid]:not([data-size-class]) [data-part-placeholder] {
       min-block-size: calc(var(--_row) * 2);
     }
+  }
+
+  [data-ui-dashboard-grid][data-size-class='compact'] > [data-part-grid] {
+    --_cols: var(--_dg-columns-compact, 1);
+
+    grid-auto-rows: auto;
+  }
+
+  [data-ui-dashboard-grid][data-size-class='compact']
+    :is([data-part-widget], [data-part-placeholder]) {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  [data-ui-dashboard-grid][data-size-class='compact'] [data-part-placeholder] {
+    min-block-size: calc(var(--_row) * 2);
   }
 
   /* ── The widget ──────────────────────────────────────────────────────── */
@@ -361,9 +393,14 @@
   /* Below the expanded class the widgets flow, so no cell is a place to drop
      on and the lattice would be specks in the gaps. */
   @container dashboard-grid (width < 1024px) {
-    [data-ui-dashboard-grid] > [data-part-grid]::before {
+    [data-ui-dashboard-grid]:not([data-size-class]) > [data-part-grid]::before {
       display: none;
     }
+  }
+
+  [data-ui-dashboard-grid]:is([data-size-class='medium'], [data-size-class='compact'])
+    > [data-part-grid]::before {
+    display: none;
   }
 
   /* ── Editing: the widget ─────────────────────────────────────────────── */
@@ -638,19 +675,31 @@
   /* The medium class flows the widgets, so a widget's start is where the one
      before it ends: there is no start edge to pull. */
   @container dashboard-grid (width < 1024px) {
-    [data-ui-dashboard-grid]
+    [data-ui-dashboard-grid]:not([data-size-class])
       [data-part-widget]
       > [data-part-resize-handle]:is([data-edge='start'], [data-edge='bottom-start']) {
       display: none;
     }
   }
 
+  [data-ui-dashboard-grid]:is([data-size-class='medium'], [data-size-class='compact'])
+    [data-part-widget]
+    > [data-part-resize-handle]:is([data-edge='start'], [data-edge='bottom-start']) {
+    display: none;
+  }
+
   /* A phone reads a dashboard as one column as tall as its content: there is
      no size to pull, only an order to change. */
   @container dashboard-grid (width < 600px) {
-    [data-ui-dashboard-grid] [data-part-widget] > [data-part-resize-handle] {
+    [data-ui-dashboard-grid]:not([data-size-class]) [data-part-widget] > [data-part-resize-handle] {
       display: none;
     }
+  }
+
+  [data-ui-dashboard-grid][data-size-class='compact']
+    [data-part-widget]
+    > [data-part-resize-handle] {
+    display: none;
   }
 
   /* ── Editing: a widget in hand ───────────────────────────────────────── */

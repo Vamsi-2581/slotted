@@ -13,7 +13,8 @@ export type {
   DashboardLayoutItem,
 } from '@slotted/core/dashboard-grid';
 
-export type DashboardHeadingLevel = 2 | 3 | 4 | 5 | 6;
+/** `auto` follows the heading outline, as `slSection` does, and is never above 2. */
+export type DashboardHeadingLevel = 'auto' | 2 | 3 | 4 | 5 | 6;
 
 export type DashboardLayoutReason = Extract<
   ChangeReason,
@@ -46,7 +47,7 @@ export interface DashboardGridDefaults {
 const FALLBACK: DashboardGridDefaults = {
   columns: 12,
   editBar: true,
-  headingLevel: 3,
+  headingLevel: 'auto',
 };
 
 export const DASHBOARD_GRID_DEFAULTS = new InjectionToken<DashboardGridDefaults>(

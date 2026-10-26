@@ -36,6 +36,7 @@ export type {
   GridBox,
   GridGeometry,
 } from './dashboard-grid';
+export { contentRowsOf, observeContentRows } from './content-rows';
 export { measureTiles, parseDuration, playFlip, playResize } from './flip';
 export type { MeasuredTile, PlayFlipOptions } from './flip';
 export { dashboardKeyIntent, handleShortcuts } from './keys';

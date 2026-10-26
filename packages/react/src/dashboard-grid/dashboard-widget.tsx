@@ -32,6 +32,7 @@ import {
 } from '../result-state';
 import { Skeleton, useSkeletonDefaults } from '../skeleton';
 import { useLoadingVisibility } from '../skeleton/use-loading-visibility';
+import { useHeadingLevel } from '../typography';
 import {
   useDashboardGrid,
   type DashboardEdge,
@@ -103,6 +104,7 @@ export function DashboardWidget({
   maxColumns: _maxColumns,
   minRows: _minRows,
   maxRows: _maxRows,
+  rows: _rows,
   movable: _movable,
   resizable: _resizable,
   removable: _removable,
@@ -112,6 +114,7 @@ export function DashboardWidget({
 }: DashboardWidgetProps) {
   const { value } = props;
   const grid = useDashboardGrid('DashboardWidget');
+  const ambientLevel = useHeadingLevel();
   const slot = grid.slots.get(value);
   const titleId = `${useId()}-title`;
   const descriptionId = `${titleId}-description`;
@@ -139,11 +142,14 @@ export function DashboardWidget({
     [registerHandle, value],
   );
 
+  const level = headingLevel ?? grid.headingLevel;
+  const resolvedLevel = level === 'auto' ? (Math.max(2, ambientLevel) as 2) : level;
+
   if (slot === undefined) return null;
   return (
     <WidgetView
       {...props}
-      headingLevel={headingLevel ?? grid.headingLevel}
+      headingLevel={resolvedLevel}
       drawnSlot={slot}
       painted={painted}
       titleId={titleId}
@@ -191,7 +197,7 @@ type WidgetViewProps = Omit<
     | 'onHandleKeyDown'
     | 'onResizePointerDown'
   > & {
-    headingLevel: DashboardHeadingLevel;
+    headingLevel: Exclude<DashboardHeadingLevel, 'auto'>;
     drawnSlot: DashboardSlot;
     painted: boolean;
     titleId: string;

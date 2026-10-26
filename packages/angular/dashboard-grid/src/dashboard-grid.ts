@@ -2,6 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import {
   afterEveryRender,
   afterNextRender,
+  afterRenderEffect,
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
@@ -42,6 +43,7 @@ import {
   SlResultStateTitle,
 } from '@slotted/angular/result-state';
 import { SlSkeleton } from '@slotted/angular/skeleton';
+import { SlHeadingLevel } from '@slotted/angular/typography';
 import {
   cellAt,
   dashboardKeyIntent,
@@ -51,6 +53,7 @@ import {
   measureTiles,
   moveTile,
   moveTileBy,
+  observeContentRows,
   parseDuration,
   playFlip,
   playResize,
@@ -113,8 +116,8 @@ function directionOf(element: Element): 'ltr' | 'rtl' {
 }
 
 /** A grid not laid out yet — hidden, or in a test — is drawn in its stored class. */
-function classOf(root: HTMLElement): DashboardSizeClass {
-  return root.clientWidth > 0 ? sizeClassOf(root.clientWidth) : 'expanded';
+function classOf(root: HTMLElement, expandedFrom?: number): DashboardSizeClass {
+  return root.clientWidth > 0 ? sizeClassOf(root.clientWidth, expandedFrom) : 'expanded';
 }
 
 function makeRequest<T, Extra extends object>(
@@ -284,6 +287,7 @@ interface Slot {
     'data-part': 'root',
     'data-part-root': '',
     '[attr.data-editing]': 'isEditing() ? "" : null',
+    '[attr.data-size-class]': 'measuredClass()',
     '[attr.aria-label]': 'null',
     '[attr.aria-labelledby]': 'null',
     '[style.--_dg-columns-expanded]': 'grid().expanded',
@@ -715,6 +719,11 @@ export class SlDashboardGrid {
   readonly editBar = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (given) => (given === undefined ? undefined : booleanAttribute(given)),
   });
+  /**
+   * The grid's own width, in pixels, from which the expanded class applies. Default 1024. A grid
+   * beside a navigation rail is narrower than its page, so a lower threshold keeps its layout.
+   */
+  readonly expandedFrom = input<number | undefined>(undefined);
   readonly headingLevel = input<DashboardHeadingLevel | undefined>(undefined);
   /** Words laid over the catalog of the language in force, key by key. */
   readonly messages = input<PartialMessages<DashboardGridMessages> | undefined>(undefined);
@@ -759,9 +768,16 @@ export class SlDashboardGrid {
   protected readonly hiddenTiles = computed(() => this.tiles().filter((tile) => tile.hidden));
 
   protected readonly gesture = signal<Gesture | null>(null);
-  /* The class the grid is drawn in, observed after the first render, so a
-     server render and the first client render agree on `expanded`. */
-  private readonly drawnClass = signal<DashboardSizeClass>('expanded');
+  /* The class the grid is drawn in, from its width observed after the first
+     render, so a server render and the first client render agree on
+     `expanded`. Once measured it is written on the root, and the stylesheet
+     follows it. */
+  private readonly outline = inject(SlHeadingLevel, { optional: true });
+  private readonly width = signal(0);
+  protected readonly measuredClass = computed(() =>
+    this.width() > 0 ? sizeClassOf(this.width(), this.expandedFrom()) : null,
+  );
+  private readonly drawnClass = computed(() => this.measuredClass() ?? 'expanded');
   protected readonly flows = computed(() => this.drawnClass() !== 'expanded');
 
   /** What is drawn: the committed layout, or the one a gesture previews. */
@@ -853,14 +869,32 @@ export class SlDashboardGrid {
   private dragKeys = '';
 
   constructor() {
+    /* Each widget sized by its content is measured once its card is drawn. */
+    afterRenderEffect((onCleanup) => {
+      const list = this.list()?.nativeElement;
+      const auto = this.widgets().filter((widget) => widget.rows() === 'auto');
+      if (list === undefined || auto.length === 0) return;
+      const nodes = this.widgetNodes();
+      const stops = auto.map((widget) => {
+        const card = nodes
+          .get(widget.value())
+          ?.querySelector<HTMLElement>(':scope > [data-ui="card"]');
+        return card
+          ? observeContentRows(card, list, (rows) => widget.contentRows.set(rows))
+          : () => {};
+      });
+      onCleanup(() => {
+        for (const stop of stops) stop();
+      });
+    });
     const onKeyDown = (event: KeyboardEvent) => this.onHandleKeyDown(event);
     afterNextRender(() => {
       this.host.nativeElement.addEventListener('keydown', onKeyDown, true);
       if (typeof ResizeObserver === 'undefined') return;
       const root = this.host.nativeElement;
-      const observer = new ResizeObserver(() => this.drawnClass.set(classOf(root)));
+      const observer = new ResizeObserver(() => this.width.set(root.clientWidth));
       observer.observe(root);
-      this.drawnClass.set(classOf(root));
+      this.width.set(root.clientWidth);
       this.destroyRef.onDestroy(() => observer.disconnect());
     });
     this.destroyRef.onDestroy(() => {
@@ -886,8 +920,9 @@ export class SlDashboardGrid {
     return this.byKey().get(key)?.title() ?? key;
   }
 
-  protected levelOf(widget: SlDashboardWidget): DashboardHeadingLevel {
-    return widget.headingLevel() ?? this.headingLevel() ?? this.defaults.headingLevel;
+  protected levelOf(widget: SlDashboardWidget): Exclude<DashboardHeadingLevel, 'auto'> {
+    const level = widget.headingLevel() ?? this.headingLevel() ?? this.defaults.headingLevel;
+    return level === 'auto' ? (Math.max(2, this.outline?.level ?? 1) as 2) : level;
   }
 
   protected reasonOf(event: MenuSelectEvent): DashboardLayoutReason {
@@ -895,7 +930,7 @@ export class SlDashboardGrid {
   }
 
   private sizeClass(): DashboardSizeClass {
-    return classOf(this.host.nativeElement);
+    return classOf(this.host.nativeElement, this.expandedFrom());
   }
 
   private widgetNodes() {

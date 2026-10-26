@@ -8,7 +8,7 @@ import type {
 export const DASHBOARD_GRID_FALLBACK: DashboardGridDefaults = {
   columns: 12,
   editBar: true,
-  headingLevel: 3,
+  headingLevel: 'auto',
 };
 
 const DashboardGridDefaultsContext = createContext<DashboardGridDefaults>(DASHBOARD_GRID_FALLBACK);

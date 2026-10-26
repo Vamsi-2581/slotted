@@ -285,11 +285,49 @@ describe('spanFromTravel', () => {
   });
 });
 
+/**
+ * A widget sized by its content draws as many rows as its content measures,
+ * within its limits, and the widgets below make room. The stored height stays
+ * the minimum the reader set: a layout the family hands back never holds the
+ * measured rows.
+ */
+describe('a widget sized by its content', () => {
+  const grid = resolveColumns(12);
+  const layout = [
+    { key: 'list', x: 0, y: 0, w: 6, h: 2 },
+    { key: 'below', x: 0, y: 2, w: 6, h: 2 },
+  ];
+
+  it('draws the rows its content needs and pushes what is below', () => {
+    const widgets = [{ key: 'list', contentRows: 4 }, { key: 'below' }];
+    const tiles = resolveTiles(layout, widgets, grid);
+    expect(tiles.map(({ key, y, h }) => ({ key, y, h }))).toEqual([
+      { key: 'list', y: 0, h: 4 },
+      { key: 'below', y: 4, h: 2 },
+    ]);
+    expect(materializeLayout(layout, widgets, grid).map(({ key, h }) => ({ key, h }))).toEqual([
+      { key: 'list', h: 2 },
+      { key: 'below', h: 2 },
+    ]);
+  });
+
+  it('keeps the stored height as a minimum and maxRows as a cap', () => {
+    expect(resolveTiles(layout, [{ key: 'list', contentRows: 1 }], grid)[0]?.h).toBe(2);
+    expect(resolveTiles(layout, [{ key: 'list', contentRows: 9, maxRows: 5 }], grid)[0]?.h).toBe(5);
+  });
+});
+
 describe('sizeClassOf', () => {
   it('reads the three classes at 600 and 1024 pixels', () => {
     expect(sizeClassOf(599)).toBe('compact');
     expect(sizeClassOf(600)).toBe('medium');
     expect(sizeClassOf(1024)).toBe('expanded');
+  });
+
+  it('moves the expanded threshold to expandedFrom', () => {
+    expect(sizeClassOf(970)).toBe('medium');
+    expect(sizeClassOf(970, 900)).toBe('expanded');
+    expect(sizeClassOf(599, 400)).toBe('compact');
   });
 });
 

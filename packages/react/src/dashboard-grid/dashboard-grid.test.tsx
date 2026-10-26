@@ -4,6 +4,8 @@ import { createRef, useEffect, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SlottedProvider } from '../i18n';
+import { Page, PageBody } from '../page';
+import { Section, SectionBody, SectionHeader, SectionTitle } from '../section';
 import { DashboardGrid } from './dashboard-grid';
 import { DashboardGridDefaultsProvider } from './dashboard-grid-defaults';
 import { DashboardWidget } from './dashboard-widget';
@@ -24,6 +26,46 @@ type EditingSpy = ReturnType<
 >;
 
 /* Revenue and Orders side by side on the first row, the trend under them. */
+/**
+ * A widget title follows the heading outline, as a section's does: `h2`
+ * directly in a page body, one deeper inside a section. The default was 3,
+ * which skipped a rank under a page heading of level 1.
+ */
+describe('DashboardGrid heading outline', () => {
+  it('titles its widgets one rank under the page heading', () => {
+    render(
+      <Page>
+        <PageBody>
+          <DashboardGrid aria-label="Sales">
+            <DashboardWidget value="a" title="A" />
+          </DashboardGrid>
+        </PageBody>
+      </Page>,
+    );
+    expect(screen.getByRole('heading', { name: 'A' }).tagName).toBe('H2');
+  });
+
+  it('goes one rank deeper inside a section', () => {
+    render(
+      <Page>
+        <PageBody>
+          <Section>
+            <SectionHeader>
+              <SectionTitle>Sales</SectionTitle>
+            </SectionHeader>
+            <SectionBody>
+              <DashboardGrid aria-label="Sales">
+                <DashboardWidget value="a" title="A" />
+              </DashboardGrid>
+            </SectionBody>
+          </Section>
+        </PageBody>
+      </Page>,
+    );
+    expect(screen.getByRole('heading', { name: 'A' }).tagName).toBe('H3');
+  });
+});
+
 function widgets() {
   return [
     <DashboardWidget
@@ -108,7 +150,7 @@ describe('DashboardGrid', () => {
     expect(order()).toEqual(['revenue', 'orders', 'trend']);
     const article = screen.getByRole('article', { name: 'Revenue' });
     expect(article.getAttribute('data-ui')).toBe('card');
-    expect(screen.getByRole('heading', { level: 3, name: 'Revenue' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 2, name: 'Revenue' })).toBeTruthy();
     expect(root().hasAttribute('data-editing')).toBe(false);
   });
 

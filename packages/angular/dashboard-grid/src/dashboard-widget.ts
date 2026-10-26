@@ -111,6 +111,13 @@ export class SlDashboardWidget {
   readonly maxRows = input<number | undefined, number | string | undefined>(undefined, {
     transform: optionalNumber,
   });
+  /**
+   * `auto` draws the widget as many rows as its content measures, within `minRows` and `maxRows`,
+   * and the widgets below make room. The stored rows, which a resize sets, stay the minimum.
+   */
+  readonly rows = input<'auto' | undefined>(undefined);
+  /** The rows the content measures, written by the grid while `rows` is `auto`. */
+  readonly contentRows = signal<number | undefined>(undefined);
   readonly movable = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: optionalBoolean,
   });
@@ -177,6 +184,7 @@ export class SlDashboardWidget {
       maxColumns: this.maxColumns(),
       minRows: this.minRows(),
       maxRows: this.maxRows(),
+      contentRows: this.rows() === 'auto' ? this.contentRows() : undefined,
       movable: this.movable(),
       resizable: this.resizable(),
       removable: this.removable(),

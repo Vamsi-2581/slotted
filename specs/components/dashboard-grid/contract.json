@@ -23,7 +23,7 @@
     "handle": "button with aria-haspopup=menu and aria-expanded: the trigger of the menu family"
   },
   "anatomy": {
-    "root": "a div carrying data-ui=dashboard-grid and data-editing; the container, named dashboard-grid, that the size class is read from",
+    "root": "a div carrying data-ui=dashboard-grid, data-editing and, once measured, data-size-class; the container, named dashboard-grid, that the size class is read from",
     "edit-bar": "the row above the grid while editing and editBar is true: edit-status, then add, reset, cancel and done",
     "edit-status": "messages.editStatus, the instructions every handle is described by; visually hidden when the edit bar is absent",
     "edit-actions": "the group of the edit bar's buttons, held at the inline end and wrapping under the status before any button is squeezed",
@@ -33,7 +33,7 @@
     "done": "a button leaving editing, messages.done; the edit bar's primary action",
     "grid": "a ul, one element in from the root, whose tracks the container query changes: repeat(columns) tracks and rows of --slotted-dashboard-grid-row-size; the containing block of a widget in hand; its ::before is the lattice shown while editing in the expanded class, one dot in the middle of each cell",
     "widget": "an li at its cell: grid-column --_dg-x / span --_dg-w and grid-row --_dg-y / span --_dg-h in the expanded class, span --_dg-span-medium in the medium class, one column in the compact class; data-key, data-status, data-loading, data-movable, data-resizable, data-dragging, data-resizing",
-    "title": "the card's heading, h2 to h6 by headingLevel; two lines, then an ellipsis, with the whole title in the accessible name",
+    "title": "the card's heading, h2 to h6 by headingLevel; auto is one rank under the heading outline around the grid (HeadingLevel / slHeadingLevel, as section reads it), never above h2; two lines, then an ellipsis, with the whole title in the accessible name",
     "description": "the line under the title, when the consumer gives one",
     "detail": "an a with href, or a button when only onDetail is given: the external glyph and messages.detail; the widget's way to its own page",
     "handle": "a button of the family's own, a pill of six dots standing on the card's top edge while editing: the menu trigger, the Alt+Arrow and Shift+Arrow shortcuts, aria-describedby edit-status, and where a finger picks the widget up",
@@ -62,7 +62,8 @@
   "rules": {
     "model": "layout is a list of { key, x, y, w, h, hidden? } in cells of the expanded class. The grid has gravity: every widget rises until something stops it, and a widget put where another stands pushes that one down; a widget with movable=false is fixed and the others flow around it. The DOM holds the widgets by row, then column, so the reading order and the focus order are the picture's",
     "widgets": "the widgets are the consumer's children; a widget with no entry in layout takes the first cell it fits at its defaultColumns and defaultRows, in the order of the children; an entry with no widget stays in the value and is not drawn, because dropping it would change the value without a request",
-    "sizeClass": "expanded from 1024px of the root's inline size places every widget at its cell of columns; medium from 600px flows the same order with each width a half or the whole of ceil(columns / 2): a half for half the expanded columns or less, the whole above; compact below 600px is one column, each widget as tall as its content. columns may also be { expanded, medium, compact }",
+    "sizeClass": "expanded from 1024px of the root's inline size places every widget at its cell of columns; medium from 600px flows the same order with each width a half or the whole of ceil(columns / 2): a half for half the expanded columns or less, the whole above; compact below 600px is one column, each widget as tall as its content. columns may also be { expanded, medium, compact }. expandedFrom moves the expanded threshold, in pixels of the root's inline size. Once measured, the binding writes the class as data-size-class and the stylesheet follows the attribute; before the first measurement the container queries draw the classes at 600 and 1024px",
+    "contentRows": "rows=auto on a widget draws it as many rows as its content measures (observeContentRows: the card less its body, plus the extent of the body's last child, in rows of the grid's track and gap), within minRows and maxRows, and the widgets below make room. The measured rows are drawn and never stored: the stored h, which a resize sets, stays the minimum",
     "clamp": "a place and a size are drawn within [min, max] of the widget and within the columns; the stored value is not rewritten by a clamp",
     "movable": "a widget with movable=false is fixed at its cell: it is never pushed, the others flow around it, and it offers no move in its menu",
     "resizable": "a widget with resizable=false has no edges, no Shift+Arrow and no size items in its menu; in the compact class no widget has a size to pull",
@@ -175,13 +176,13 @@
   },
   "axes": {
     "editBar": [true, false],
-    "headingLevel": ["2", "3", "4", "5", "6"],
+    "headingLevel": ["auto", "2", "3", "4", "5", "6"],
     "status": ["ready", "empty", "error"]
   },
   "resolution": {
     "columns": ["prop", "defaults", 12],
     "editBar": ["prop", "defaults", true],
-    "headingLevel": ["prop", "defaults", "3"]
+    "headingLevel": ["prop", "defaults", "auto"]
   },
   "provides": {
     "dashboardGridDefaults": ["columns", "editBar", "headingLevel"]
@@ -249,7 +250,7 @@
       "defaults": {
         "columns": 12,
         "editBar": true,
-        "headingLevel": "3",
+        "headingLevel": "auto",
         "editing": false,
         "status": "ready",
         "loading": false,

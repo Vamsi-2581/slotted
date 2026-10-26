@@ -49,6 +49,12 @@ export interface DashboardWidgetSpec {
   /** Default 2: one row holds a card's header and nothing under it. */
   readonly minRows?: number;
   readonly maxRows?: number;
+  /**
+   * The rows the widget's content measures (`observeContentRows`). The widget
+   * is drawn at least this tall, within `minRows` and `maxRows`, and the
+   * widgets below make room; the stored height stays the minimum.
+   */
+  readonly contentRows?: number;
   /** Default true. A widget that cannot move is fixed, and the others flow around it. */
   readonly movable?: boolean;
   /** Default true. */
@@ -129,10 +135,14 @@ export function resolveColumns(input: DashboardColumnsInput | undefined): Dashbo
   };
 }
 
-/** The class a width falls in, at the thresholds of `@slotted/core/measure`. */
-export function sizeClassOf(width: number): DashboardSizeClass {
+/**
+ * The class a width falls in, at the thresholds of `@slotted/core/measure`.
+ * `expandedFrom` moves the expanded threshold, for a grid whose own width is
+ * narrower than the page it sits in.
+ */
+export function sizeClassOf(width: number, expandedFrom = EXPANDED_FROM): DashboardSizeClass {
   if (width < COMPACT_BELOW) return 'compact';
-  if (width < EXPANDED_FROM) return 'medium';
+  if (width < expandedFrom) return 'medium';
   return 'expanded';
 }
 
@@ -270,6 +280,7 @@ function settle(
   widgets: readonly DashboardWidgetSpec[],
   grid: DashboardColumns,
   adjust?: Adjust,
+  grow = false,
 ): DashboardTile[] {
   const items = firstByKey(layout);
   const limits = new Map(widgets.map((spec) => [spec.key, limitsOf(spec, grid)]));
@@ -300,6 +311,20 @@ function settle(
   if (mover !== null) {
     pushDown(known, mover);
     compact(known);
+  }
+
+  /* Drawn, not stored: a widget sized by its content takes the rows it measures. */
+  if (grow) {
+    let grew = false;
+    for (const box of [...known].sort(byPlace)) {
+      const limit = limits.get(box.key)!;
+      const rows = limit.spec.contentRows;
+      if (rows === undefined || rows <= box.h) continue;
+      box.h = clamp(Math.ceil(rows), limit.minRows, limit.maxRows);
+      pushDown(known, box);
+      grew = true;
+    }
+    if (grew) compact(known);
   }
 
   const tileOf = (box: Box, isHidden: boolean): DashboardTile => {
@@ -337,7 +362,7 @@ export function resolveTiles(
   widgets: readonly DashboardWidgetSpec[],
   grid: DashboardColumns,
 ): DashboardTile[] {
-  return settle(layout, widgets, grid);
+  return settle(layout, widgets, grid, undefined, true);
 }
 
 /** The private custom properties the stylesheet places a widget by. */
@@ -385,7 +410,7 @@ export function materializeLayout(
   widgets: readonly DashboardWidgetSpec[],
   grid: DashboardColumns,
 ): DashboardLayout {
-  return fromTiles(resolveTiles(layout, widgets, grid), layout, widgets);
+  return fromTiles(settle(layout, widgets, grid), layout, widgets);
 }
 
 function adjusted(

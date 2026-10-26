@@ -417,10 +417,17 @@ export const REACT_DASHBOARD_GRID_DOCS = {
       ],
       [
         'headingLevel',
-        '2 | 3 | 4 | 5 | 6',
-        '3',
+        "'auto' | 2 | 3 | 4 | 5 | 6",
+        'auto',
         'DashboardGrid, DashboardWidget, DashboardGridDefaultsProvider',
-        'The level of each widget’s title',
+        'The level of each widget’s title; auto is one rank under the heading around the grid — h2 in a page body, one deeper inside a section — and never above h2',
+      ],
+      [
+        'expandedFrom',
+        'number',
+        '1024',
+        'DashboardGrid',
+        'The grid’s own width, in pixels, from which the expanded class applies; a grid beside a navigation rail keeps its layout with a lower value',
       ],
       [
         'messages',
@@ -472,6 +479,13 @@ export const REACT_DASHBOARD_GRID_DOCS = {
         '2',
         'DashboardWidget',
         'Rows of a widget the layout does not name',
+      ],
+      [
+        'rows',
+        "'auto'",
+        '—',
+        'DashboardWidget',
+        'Draws the widget as many rows as its content measures, within minRows and maxRows, and moves the widgets below; the stored rows, which a resize sets, stay the minimum',
       ],
       [
         'minColumns',

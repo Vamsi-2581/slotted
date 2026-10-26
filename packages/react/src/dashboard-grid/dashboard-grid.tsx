@@ -19,6 +19,7 @@ import {
   resolveColumns,
   resolveTiles,
   setTileHidden,
+  observeContentRows,
   sizeClassOf,
   spanFromTravel,
   swapTiles,
@@ -136,15 +137,22 @@ function directionOf(element: Element | null): 'ltr' | 'rtl' {
 }
 
 /** A grid not laid out yet — hidden, or in a test — is drawn in its stored class. */
-function classOf(root: HTMLElement | null): DashboardSizeClass {
-  return root !== null && root.clientWidth > 0 ? sizeClassOf(root.clientWidth) : 'expanded';
+function classOf(root: HTMLElement | null, expandedFrom?: number): DashboardSizeClass {
+  return root !== null && root.clientWidth > 0
+    ? sizeClassOf(root.clientWidth, expandedFrom)
+    : 'expanded';
 }
 
 /** The widget's own declaration, read from the element the consumer wrote. */
-function specOf(element: ReactElement<DashboardWidgetProps>): DashboardWidgetSpec {
+function specOf(
+  element: ReactElement<DashboardWidgetProps>,
+  contentRows: ReadonlyMap<string, number>,
+): DashboardWidgetSpec {
   const { props } = element;
+  const measured = props.rows === 'auto' ? contentRows.get(props.value) : undefined;
   return {
     key: props.value,
+    ...(measured === undefined ? {} : { contentRows: measured }),
     ...(props.defaultColumns === undefined ? {} : { defaultColumns: props.defaultColumns }),
     ...(props.defaultRows === undefined ? {} : { defaultRows: props.defaultRows }),
     ...(props.minColumns === undefined ? {} : { minColumns: props.minColumns }),
@@ -250,6 +258,7 @@ export function DashboardGrid({
   defaultLayout = EMPTY_LAYOUT,
   editBar: editBarProp,
   editing: editingProp,
+  expandedFrom,
   headingLevel: headingLevelProp,
   layout: layoutProp,
   messages,
@@ -281,7 +290,12 @@ export function DashboardGrid({
     });
     return byKey;
   }, [children]);
-  const widgets = useMemo(() => [...elements.values()].map(specOf), [elements]);
+  /* The rows each widget sized by its content measures, by value. */
+  const [contentRows, setContentRows] = useState<ReadonlyMap<string, number>>(() => new Map());
+  const widgets = useMemo(
+    () => [...elements.values()].map((element) => specOf(element, contentRows)),
+    [elements, contentRows],
+  );
   const titles = useMemo(
     () => new Map([...elements].map(([key, element]) => [key, element.props.title])),
     [elements],
@@ -347,16 +361,39 @@ export function DashboardGrid({
     [registerIn],
   );
 
+  const autoKeys = [...elements.values()]
+    .filter((element) => element.props.rows === 'auto')
+    .map((element) => element.props.value)
+    .join('\n');
+  useEffect(() => {
+    const list = listRef.current;
+    if (list === null || autoKeys === '') return;
+    const stops = autoKeys.split('\n').map((key) => {
+      const card = cardNodes.current.get(key);
+      if (card === undefined) return () => {};
+      return observeContentRows(card, list, (rows) =>
+        setContentRows((current) => new Map(current).set(key, rows)),
+      );
+    });
+    return () => {
+      for (const stop of stops) stop();
+    };
+  }, [autoKeys, nodesVersion]);
+
   /* The class the grid is drawn in, observed rather than read during render,
-     so a server render and the first client render agree on `expanded`. */
-  const [drawnClass, setDrawnClass] = useState<DashboardSizeClass>('expanded');
+     so a server render and the first client render agree on `expanded`.
+     Once measured it is written on the root, and the stylesheet follows it. */
+  const [measuredClass, setMeasuredClass] = useState<DashboardSizeClass | null>(null);
+  const drawnClass = measuredClass ?? 'expanded';
   useEffect(() => {
     if (!root || typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(() => setDrawnClass(classOf(root)));
+    const measure = () =>
+      setMeasuredClass(root.clientWidth > 0 ? classOf(root, expandedFrom) : null);
+    const observer = new ResizeObserver(measure);
     observer.observe(root);
-    setDrawnClass(classOf(root));
+    measure();
     return () => observer.disconnect();
-  }, [root]);
+  }, [root, expandedFrom]);
 
   /* ── Motion ──────────────────────────────────────────────────────────── */
 
@@ -420,7 +457,10 @@ export function DashboardGrid({
     [announce, measureAll, requestLayout],
   );
 
-  const sizeClass = useCallback((): DashboardSizeClass => classOf(root), [root]);
+  const sizeClass = useCallback(
+    (): DashboardSizeClass => classOf(root, expandedFrom),
+    [root, expandedFrom],
+  );
 
   const movedMessage = useCallback(
     (key: string, drawnIn: DashboardSizeClass) => (next: DashboardLayout) => {
@@ -1175,6 +1215,7 @@ export function DashboardGrid({
     'data-ui': 'dashboard-grid',
     'data-part': 'root',
     ...(editing ? { 'data-editing': '' } : {}),
+    ...(measuredClass === null ? {} : { 'data-size-class': measuredClass }),
     ref: setRoot,
     children: (
       <>

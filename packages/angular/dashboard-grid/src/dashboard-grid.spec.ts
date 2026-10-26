@@ -2,6 +2,7 @@ import { Component, signal, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import type { ComponentFixture } from '@angular/core/testing';
 import { provideSlotted } from '@slotted/angular/i18n';
+import { SlHeadingLevel } from '@slotted/angular/typography';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
@@ -185,7 +186,7 @@ describe('SlDashboardGrid', () => {
     expect(order()).toEqual(['revenue', 'orders', 'trend']);
     const article = widget('revenue').querySelector('article')!;
     expect(article.getAttribute('data-ui')).toBe('card');
-    const title = article.querySelector('h3[data-part="title"]')!;
+    const title = article.querySelector('h2[data-part="title"]')!;
     expect(title.textContent?.trim()).toBe('Revenue');
     expect(article.getAttribute('aria-labelledby')).toBe(title.id);
     expect(widget('revenue').textContent).toContain('€ 482,190');
@@ -467,6 +468,29 @@ describe('SlDashboardGrid', () => {
     grid.commitEditing();
     await settle(fixture);
     expect(fixture.componentInstance.editings.at(-1)!.reason).toBe('programmatic');
+  });
+});
+
+/** A widget title follows the heading outline: one rank under the heading around the grid. */
+@Component({
+  standalone: true,
+  imports: [SlDashboardGrid, SlDashboardWidget, SlHeadingLevel],
+  template: `
+    <div slHeadingLevel>
+      <div slDashboardGrid aria-label="Sales"><sl-dashboard-widget value="a" title="A" /></div>
+    </div>
+  `,
+})
+class OutlineHost {}
+
+describe('SlDashboardGrid heading outline', () => {
+  it('titles its widgets at the rank the outline gives', async () => {
+    const fixture = TestBed.createComponent(OutlineHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('h2[data-part="title"]'),
+    ).not.toBeNull();
   });
 });
 

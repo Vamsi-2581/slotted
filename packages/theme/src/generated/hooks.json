@@ -2071,6 +2071,7 @@
     "data-side",
     "data-sideways",
     "data-size",
+    "data-size-class",
     "data-skeleton",
     "data-slot",
     "data-slot-duration",

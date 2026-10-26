@@ -24,7 +24,7 @@ export type PromptComposerStatus = 'ready' | 'submitted' | 'streaming' | 'error'
 /** Why the value moved: an edit, or the clearing that follows an accepted send. */
 export type PromptComposerValueReason = Extract<
   ChangeRequest<string>['reason'],
-  'keyboard' | 'submit'
+  'keyboard' | 'submit' | 'dictation'
 >;
 
 /** Why a send or a stop was asked for. */
@@ -167,6 +167,16 @@ export interface PromptComposerAttachProps extends Omit<
 > {
   /** The mark; defaults to the paperclip. */
   children?: ReactNode | undefined;
+}
+
+export interface PromptComposerDictateProps extends Omit<
+  ComponentPropsWithRef<'button'>,
+  'children' | 'lang'
+> {
+  /** The mark; defaults to the microphone. */
+  children?: ReactNode | undefined;
+  /** The language the engine listens in, a BCP 47 tag. Defaults to the nearest `lang` attribute. */
+  lang?: string | undefined;
 }
 
 export interface PromptComposerSubmitProps extends Omit<ComponentPropsWithRef<'button'>, 'type'> {

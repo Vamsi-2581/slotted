@@ -58,7 +58,13 @@ export type ChangeReason =
    * rather than by the history. Not `escape`: a touch screen has no such key.
    * Not `dismiss`: the reader pressed nothing of the layer's own.
    */
-  | 'back';
+  | 'back'
+  /**
+   * The reader spoke and the platform's speech recognition wrote the words.
+   * Not `keyboard`: no key was pressed. Not `programmatic`: the application
+   * asked for nothing. `prompt-composer` is the first family that takes speech.
+   */
+  | 'dictation';
 
 export interface ChangeRequest<T> {
   readonly value: T;

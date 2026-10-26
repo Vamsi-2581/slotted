@@ -17,6 +17,7 @@ export default defineConfig({
         currency: resolve(import.meta.dirname, 'src/currency/index.ts'),
         'data-list': resolve(import.meta.dirname, 'src/data-list/index.ts'),
         date: resolve(import.meta.dirname, 'src/date/index.ts'),
+        dictation: resolve(import.meta.dirname, 'src/dictation/index.ts'),
         disclosure: resolve(import.meta.dirname, 'src/disclosure/index.ts'),
         'dismissable-layer': resolve(import.meta.dirname, 'src/dismissable-layer/index.ts'),
         drag: resolve(import.meta.dirname, 'src/drag/index.ts'),

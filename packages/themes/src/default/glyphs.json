@@ -39,6 +39,7 @@
   "--slotted-icon-arrow-down": { "icon": "arrow-down" },
   "--slotted-icon-stop": { "icon": "square", "paint": "fill" },
   "--slotted-icon-paperclip": { "icon": "paperclip" },
+  "--slotted-icon-mic": { "icon": "mic" },
   "--slotted-icon-pipette": { "icon": "pipette" },
   "--slotted-icon-cloud-off": { "icon": "cloud-off" },
   "--slotted-icon-loader-circle": { "icon": "loader-circle", "stroke-width": 3.5 },

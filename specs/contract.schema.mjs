@@ -238,6 +238,13 @@ export const CHANGE_REASONS = [
    * and `app-shell` were the first families to ask.
    */
   'back',
+  /**
+   * The reader spoke, and the platform's speech recognition wrote the words.
+   * It is neither `keyboard`, because no key was pressed, nor `programmatic`,
+   * because the application asked for nothing. `prompt-composer` is the first
+   * family that takes speech.
+   */
+  'dictation',
 ];
 
 export const KNOWN_CAPABILITIES = [

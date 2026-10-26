@@ -46,3 +46,36 @@ describe('a composer with the emphasis ring', () => {
     expect(getComputedStyle(action).outlineStyle).toBe('solid');
   });
 });
+
+/**
+ * The glow is a soft halo. It was a box the reach larger than the composer,
+ * blurred and then cut by a hard-edged mask: a band with sharp edges, and a
+ * box that gave a scrolling ancestor overflow. The halo is the blur's ink
+ * around a box the composer's own size, which adds nothing to a layout and
+ * fades with nothing to cut it.
+ */
+describe('the glow of the emphasis ring', () => {
+  it('adds no overflow to a scrolling container and draws no hard-edged mask', () => {
+    render(
+      <div
+        data-testid="scroller"
+        style={{ overflow: 'auto', blockSize: 200, display: 'grid', alignContent: 'end' }}
+      >
+        <PromptComposer emphasis="ring" style={MOTION}>
+          <PromptComposerInput aria-label="m" />
+        </PromptComposer>
+      </div>,
+    );
+    const scroller = screen.getByTestId('scroller');
+    const root = document.querySelector('[data-ui="prompt-composer"]') as HTMLElement;
+    const glow = root.querySelector('[data-part="glow"]') as HTMLElement;
+
+    expect(scroller.scrollHeight).toBe(scroller.clientHeight);
+    expect(getComputedStyle(glow).maskImage).toBe('none');
+    expect(getComputedStyle(glow).filter).toMatch(/^blur\(/);
+    const outer = root.getBoundingClientRect();
+    const halo = glow.getBoundingClientRect();
+    expect(halo.top).toBeGreaterThanOrEqual(outer.top - 2);
+    expect(halo.bottom).toBeLessThanOrEqual(outer.bottom + 2);
+  });
+});

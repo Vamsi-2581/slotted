@@ -25,7 +25,7 @@ export const REACT_PROMPT_COMPOSER_TOKENS = promptComposerTokens.map((name) => (
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  PromptComposer,\n  PromptComposerAction,\n  PromptComposerAttach,\n  PromptComposerFooter,\n  PromptComposerHeader,\n  PromptComposerInput,\n  PromptComposerSubmit,\n} from '@slotted/react';",
+    "import {\n  PromptComposer,\n  PromptComposerAction,\n  PromptComposerAttach,\n  PromptComposerDictate,\n  PromptComposerFooter,\n  PromptComposerHeader,\n  PromptComposerInput,\n  PromptComposerSubmit,\n} from '@slotted/react';",
 };
 
 const anatomy: AnatomyRow[] = [
@@ -70,6 +70,13 @@ const anatomy: AnatomyRow[] = [
     required: false,
     purpose:
       'Opens the file chooser with the composer’s accept and multiple, and hands the choice to onAttach with reason "pointer".',
+  },
+  {
+    part: 'dictate',
+    element: 'button (PromptComposerDictate)',
+    required: false,
+    purpose:
+      'The microphone: dictation through the platform’s SpeechRecognition, in the lang input or the nearest lang attribute. Each final phrase is written at the end of the value through onValueChange with reason "dictation"; the button is aria-pressed while the engine listens, a second press stops it, and “Listening” is announced as it starts. Without a recognition engine the button renders nothing.',
   },
   {
     part: 'submit',
@@ -279,7 +286,7 @@ const events: EventRow[] = [
   {
     name: 'onValueChange',
     payload: '(value: string, request: ChangeRequest<string>)',
-    when: 'Before the value moves: reason "keyboard" for an edit, "submit" for the clearing after an accepted send. cancel() refuses the move.',
+    when: 'Before the value moves: reason "keyboard" for an edit, "dictation" for a phrase PromptComposerDictate wrote, "submit" for the clearing after an accepted send. cancel() refuses the move.',
   },
   {
     name: 'onValueSubmit',

@@ -722,6 +722,13 @@ export const contract: TokenContract = {
       "root": true
     },
     {
+      "name": "--slotted-icon-mic",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-pipette",
       "layer": "primitive",
       "axis": "base",
@@ -2395,6 +2402,7 @@ export type BaseToken =
   | '--slotted-icon-arrow-down'
   | '--slotted-icon-stop'
   | '--slotted-icon-paperclip'
+  | '--slotted-icon-mic'
   | '--slotted-icon-pipette'
   | '--slotted-icon-cloud-off'
   | '--slotted-icon-loader-circle'

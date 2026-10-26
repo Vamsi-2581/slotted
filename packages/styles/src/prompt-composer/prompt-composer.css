@@ -237,7 +237,7 @@
    */
   [data-ui-prompt-composer]
     > :is([data-part-header], [data-part-footer])
-    > :is([data-part-action], [data-part-attach]) {
+    > :is([data-part-action], [data-part-attach], [data-part-dictate]) {
     align-items: center;
     appearance: none;
     background-color: transparent;
@@ -313,7 +313,7 @@
      finger, and never across the edge two buttons share. */
   [data-ui-prompt-composer]
     > :is([data-part-header], [data-part-footer])
-    > :is([data-part-action], [data-part-attach], [data-part-submit])::after {
+    > :is([data-part-action], [data-part-attach], [data-part-dictate], [data-part-submit])::after {
     content: '';
     inset: min(0px, calc((100% - var(--slotted-target-min, 24px)) / 2));
     position: absolute;
@@ -322,27 +322,41 @@
   @media (pointer: coarse) {
     [data-ui-prompt-composer]
       > :is([data-part-header], [data-part-footer])
-      > :is([data-part-action], [data-part-attach], [data-part-submit])::after {
+      > :is(
+        [data-part-action],
+        [data-part-attach],
+        [data-part-dictate],
+        [data-part-submit]
+      )::after {
       inset: min(0px, calc((100% - var(--slotted-target-comfortable, 44px)) / 2));
     }
 
     [data-ui-prompt-composer]
       > :is([data-part-header], [data-part-footer])
-      > :is([data-part-action], [data-part-attach]):has(+ *)::after {
+      > :is([data-part-action], [data-part-attach], [data-part-dictate]):has(+ *)::after {
       inset-inline-end: 0;
     }
 
     [data-ui-prompt-composer]
       > :is([data-part-header], [data-part-footer])
       > *
-      + :is([data-part-action], [data-part-attach], [data-part-submit])::after {
+      + :is(
+        [data-part-action],
+        [data-part-attach],
+        [data-part-dictate],
+        [data-part-submit]
+      )::after {
       inset-inline-start: 0;
     }
   }
 
   [data-ui-prompt-composer]
     > :is([data-part-header], [data-part-footer])
-    > :is([data-part-action], [data-part-attach]):hover:not(:disabled, [aria-expanded='true']) {
+    > :is([data-part-action], [data-part-attach], [data-part-dictate]):hover:not(
+      :disabled,
+      [aria-expanded='true'],
+      [aria-pressed='true']
+    ) {
     background-color: var(
       --slotted-prompt-composer-action-hover-background,
       var(--slotted-tone-secondary-subtle-hover)
@@ -351,9 +365,11 @@
 
   [data-ui-prompt-composer]
     > :is([data-part-header], [data-part-footer])
-    > :is([data-part-action], [data-part-attach]):is(:active, [aria-expanded='true']):not(
-      :disabled
-    ) {
+    > :is([data-part-action], [data-part-attach], [data-part-dictate]):is(
+      :active,
+      [aria-expanded='true'],
+      [aria-pressed='true']
+    ):not(:disabled) {
     background-color: var(
       --slotted-prompt-composer-action-active-background,
       var(--slotted-tone-secondary-subtle-active)
@@ -362,7 +378,7 @@
 
   [data-ui-prompt-composer]
     > :is([data-part-header], [data-part-footer])
-    > :is([data-part-action], [data-part-attach]):disabled {
+    > :is([data-part-action], [data-part-attach], [data-part-dictate]):disabled {
     color: var(--slotted-disabled-foreground);
     cursor: not-allowed;
   }
@@ -535,7 +551,7 @@
      ring stands against the frame's ground rather than against the accent. */
   [data-ui-prompt-composer]
     > :is([data-part-header], [data-part-footer])
-    > :is([data-part-action], [data-part-attach]):focus-visible {
+    > :is([data-part-action], [data-part-attach], [data-part-dictate]):focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: calc(var(--slotted-focus-ring-offset, 2px) * -1);
   }
@@ -576,8 +592,8 @@
    * outline and its raised shadow; the controls inside keep their own focus
    * rings. Two marks the binding draws, both `aria-hidden`: the ring, a band
    * the width of `--slotted-prompt-composer-ring-width` cut out of a turning
-   * conic gradient, and the glow, the same gradient blurred and cut to what
-   * lies outside the frame. Each turns a square larger than its box by a
+   * conic gradient, and the glow, the same gradient blurred under the frame's
+   * surface, so only its halo outside the frame shows. Each turns a square larger than its box by a
    * `transform`, which the compositor runs at a constant speed.
    */
   [data-ui-prompt-composer][data-part-root][data-emphasis='ring'] {
@@ -627,16 +643,28 @@
     z-index: 1;
   }
 
+  /**
+   * The glow is the frame's own box, blurred: the halo is the blur's ink, which
+   * fades to nothing past the edge, and ink adds no overflow to a scrolling
+   * ancestor. A box the reach larger, cut by a mask, gave both a hard edge and
+   * that overflow. The frame's surface is restated on `::after`, which paints
+   * above the glow, so the halo shows outside the frame only.
+   */
   [data-ui-prompt-composer] > [data-part-glow] {
-    border-radius: calc(var(--_radius) + var(--_ring-reach));
     filter: blur(calc(var(--_ring-reach) / 2));
-    inset: calc(-1 * var(--_ring-reach));
-    mask:
-      linear-gradient(#000 0 0) content-box exclude,
-      linear-gradient(#000 0 0);
+    inset: calc(-1 * var(--slotted-control-border-width, 1px));
     opacity: var(--_glow);
-    padding: var(--_ring-reach);
     transition: opacity var(--slotted-duration-medium) var(--slotted-easing-standard);
+    z-index: -1;
+  }
+
+  [data-ui-prompt-composer][data-part-root][data-emphasis='ring']::after {
+    background-color: inherit;
+    border-radius: inherit;
+    content: '';
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
     z-index: -1;
   }
 

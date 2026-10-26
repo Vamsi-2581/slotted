@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SlField, SlFieldLabel } from '@slotted/angular/field';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/prompt-composer/contract.json';
 import { SlPromptComposer } from './prompt-composer';
@@ -14,6 +14,7 @@ import { SlPromptComposerInput } from './prompt-composer-input';
 import {
   SlPromptComposerAction,
   SlPromptComposerAttach,
+  SlPromptComposerDictate,
   SlPromptComposerFooter,
   SlPromptComposerHeader,
   SlPromptComposerSubmit,
@@ -40,6 +41,7 @@ const COMPOSER = `
     SlPromptComposer,
     SlPromptComposerAction,
     SlPromptComposerAttach,
+    SlPromptComposerDictate,
     SlPromptComposerFooter,
     SlPromptComposerHeader,
     SlPromptComposerInput,
@@ -86,15 +88,76 @@ function enter(fixture: Fixture, init: KeyboardEventInit = {}) {
   fixture.detectChanges();
 }
 
+/** A chat composer offers voice input: a microphone that writes what the reader says. */
+describe('slPromptComposerDictate', () => {
+  class FakeRecognition {
+    static last: FakeRecognition | null = null;
+    lang = '';
+    continuous = false;
+    interimResults = true;
+    onresult: ((event: unknown) => void) | null = null;
+    onend: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    start = vi.fn();
+    stop = vi.fn(() => this.onend?.());
+    abort = vi.fn();
+    constructor() {
+      FakeRecognition.last = this;
+    }
+  }
+
+  const DICTATE = `
+    <div lang="pt-BR">
+      <form slPromptComposer>
+        <textarea slPromptComposerInput aria-label="Mensagem" (valueChange)="changes.push($event)"></textarea>
+        <div slPromptComposerFooter><button slPromptComposerDictate></button></div>
+      </form>
+    </div>`;
+
+  it('writes each final phrase into the value and is pressed until the engine ends', () => {
+    vi.stubGlobal('webkitSpeechRecognition', FakeRecognition);
+    try {
+      const fixture = renderTemplate(DICTATE);
+      const button = query(fixture, '[data-part="dictate"]') as HTMLButtonElement;
+      expect(button.style.display).toBe('');
+      expect(button.getAttribute('aria-pressed')).toBe('false');
+      button.click();
+      fixture.detectChanges();
+      expect(button.getAttribute('aria-pressed')).toBe('true');
+      const engine = FakeRecognition.last as FakeRecognition;
+      expect(engine.lang).toBe('pt-BR');
+
+      engine.onresult?.({
+        resultIndex: 0,
+        results: [Object.assign([{ transcript: 'hello' }], { isFinal: true })],
+      });
+      fixture.detectChanges();
+      expect(input(fixture).value).toBe('hello');
+      expect(fixture.componentInstance.changes.at(-1)?.reason).toBe('dictation');
+
+      engine.onend?.();
+      fixture.detectChanges();
+      expect(button.getAttribute('aria-pressed')).toBe('false');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('is not drawn without a recognition engine', () => {
+    const fixture = renderTemplate(DICTATE);
+    expect((query(fixture, '[data-part="dictate"]') as HTMLElement).style.display).toBe('none');
+  });
+});
+
 describe('SlPromptComposer', () => {
   it('is the consumer’s form holding every part the contract declares', () => {
     const fixture = renderTemplate();
     expect(root(fixture).tagName).toBe('FORM');
     expect(root(fixture).getAttribute('data-variant')).toBe('raised');
     expect(root(fixture).getAttribute('data-status')).toBe('ready');
-    /* The ring and the glow are drawn with emphasis="ring" alone. */
+    /* The ring and the glow are drawn with emphasis="ring" alone, and the dictation button with a recognition engine. */
     for (const part of contract.members.promptComposer.parts.filter(
-      (name) => name !== 'ring' && name !== 'glow',
+      (name) => name !== 'ring' && name !== 'glow' && name !== 'dictate',
     )) {
       const found =
         root(fixture).getAttribute('data-part') === part ||

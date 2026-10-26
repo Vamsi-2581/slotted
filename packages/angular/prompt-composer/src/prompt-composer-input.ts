@@ -16,6 +16,7 @@ import type { OnInit } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import type { ControlValueAccessor } from '@angular/forms';
 import { SlField } from '@slotted/angular/field';
+import { appendPhrase } from '@slotted/core/dictation';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason, ChangeRequest } from '@slotted/core/state';
 
@@ -178,6 +179,14 @@ export class SlPromptComposerInput
     this.onChangeFn('');
   }
 
+  dictate(phrase: string) {
+    const next = appendPhrase(this.mirror(), phrase);
+    if (!this.request(next, 'dictation', undefined)) return;
+    this.element.value = next;
+    this.mirror.set(next);
+    this.onChangeFn(next);
+  }
+
   protected onInput(event: Event) {
     const next = this.element.value;
     if (this.request(next, 'keyboard', event)) {
@@ -204,7 +213,7 @@ export class SlPromptComposerInput
     this.composer.attachFiles(files, 'paste', event);
   }
 
-  private request(next: string, reason: ChangeReason, source: Event): boolean {
+  private request(next: string, reason: ChangeReason, source: Event | undefined): boolean {
     if (next === this.mirror()) return false;
     let cancelled = false;
     const state = createControllable<string>({

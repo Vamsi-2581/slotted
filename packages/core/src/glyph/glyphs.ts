@@ -265,6 +265,16 @@ export const GLYPHS = {
       'm16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551',
     ],
   },
+  mic: {
+    paint: 'stroke',
+    strokeWidth: 2,
+    offset: [0, 0],
+    paths: [
+      'M12 19v3',
+      'M19 10v2a7 7 0 0 1-14 0v-2',
+      'M12 2h0a3 3 0 0 1 3 3v7a3 3 0 0 1 -3 3h0a3 3 0 0 1 -3 -3v-7a3 3 0 0 1 3 -3Z',
+    ],
+  },
   pipette: {
     paint: 'stroke',
     strokeWidth: 2,

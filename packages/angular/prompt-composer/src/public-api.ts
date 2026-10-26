@@ -20,6 +20,7 @@ export { SlPromptComposerInput } from './prompt-composer-input';
 export {
   SlPromptComposerAction,
   SlPromptComposerAttach,
+  SlPromptComposerDictate,
   SlPromptComposerFooter,
   SlPromptComposerHeader,
   SlPromptComposerSubmit,

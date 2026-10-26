@@ -65,6 +65,10 @@
       "types": "./dist/types/disclosure/index.d.ts",
       "import": "./dist/disclosure.js"
     },
+    "./dictation": {
+      "types": "./dist/types/dictation/index.d.ts",
+      "import": "./dist/dictation.js"
+    },
     "./dismissable-layer": {
       "types": "./dist/types/dismissable-layer/index.d.ts",
       "import": "./dist/dismissable-layer.js"

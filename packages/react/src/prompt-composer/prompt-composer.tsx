@@ -7,6 +7,8 @@ import {
   type FamilyTranslator,
   type PromptComposerMessages,
 } from '@slotted/core/i18n';
+import { appendPhrase, createDictation, dictationSupported } from '@slotted/core/dictation';
+import type { Dictation } from '@slotted/core/dictation';
 import { getLiveAnnouncer } from '@slotted/core/live-announcer';
 import { createControllable } from '@slotted/core/state';
 import { selectFiles } from '@slotted/core/upload';
@@ -30,6 +32,7 @@ import type {
   PromptComposerAttachDetail,
   PromptComposerAttachProps,
   PromptComposerBandProps,
+  PromptComposerDictateProps,
   PromptComposerInputProps,
   PromptComposerProps,
   PromptComposerRootProps,
@@ -37,6 +40,7 @@ import type {
   PromptComposerSubmitOn,
   PromptComposerSubmitProps,
   PromptComposerSubmitReason,
+  PromptComposerValueReason,
 } from './prompt-composer.types';
 import { SPINNER_RING } from '../button/spinner-ring';
 
@@ -57,6 +61,8 @@ interface ComposerContext {
   readOnly: boolean | undefined;
   required: boolean | undefined;
   setValue: (next: string, source: unknown) => void;
+  /** Writes a phrase the reader spoke at the end of the value. */
+  dictate: (phrase: string) => void;
   status: PromptComposerStatus;
   stop: (reason: PromptComposerSubmitReason, source: unknown) => void;
   submit: (reason: PromptComposerSubmitReason, source: unknown) => void;
@@ -162,7 +168,7 @@ export function PromptComposer({
     previousStatus.current = status;
   });
 
-  const request = (next: string, reason: 'keyboard' | 'submit', source: unknown) => {
+  const request = (next: string, reason: PromptComposerValueReason, source: unknown) => {
     const state = createControllable<string>({
       controlled: value,
       initial: current,
@@ -222,6 +228,7 @@ export function PromptComposer({
     readOnly: resolvedReadOnly,
     required: field?.required,
     setValue: (next, source) => request(next, 'keyboard', source),
+    dictate: (phrase) => request(appendPhrase(current, phrase), 'dictation', undefined),
     status,
     stop,
     submit,
@@ -456,6 +463,66 @@ export function PromptComposerAttach({
         type="file"
       />
     </>
+  );
+}
+
+/**
+ * The microphone: dictation through the platform's speech recognition. Each
+ * final phrase is written at the end of the value with reason `dictation`;
+ * the button is pressed while the engine listens, and a second press stops
+ * it. Where the platform has no recognition engine it renders nothing.
+ */
+export function PromptComposerDictate({
+  'aria-label': ariaLabel,
+  children,
+  disabled,
+  lang,
+  onClick,
+  ...nativeProps
+}: PromptComposerDictateProps) {
+  const composer = useComposer('Dictate');
+  /* Phrases arrive after the render that started the session: they write through the latest one. */
+  const latest = useRef(composer);
+  latest.current = composer;
+  const session = useRef<Dictation | null>(null);
+  const [listening, setListening] = useState(false);
+  const [supported] = useState(() => dictationSupported());
+  useEffect(() => () => session.current?.destroy(), []);
+  if (!supported) return null;
+  const off = disabled ?? (composer.disabled === true || composer.readOnly === true);
+
+  return (
+    <button
+      {...withSelectorKey(nativeProps, 'part', 'dictate')}
+      aria-label={ariaLabel ?? composer.t('dictate')}
+      aria-pressed={listening}
+      disabled={off}
+      onClick={(event) => {
+        onClick?.(event);
+        if (event.defaultPrevented) return;
+        if (session.current?.listening) {
+          session.current.stop();
+          return;
+        }
+        const button = event.currentTarget;
+        session.current = createDictation({
+          lang: lang ?? button.closest('[lang]')?.getAttribute('lang') ?? undefined,
+          onListeningChange: (next) => {
+            setListening(next);
+            if (next) getLiveAnnouncer(button.ownerDocument).announce(composer.t('listening'));
+          },
+          onPhrase: (phrase) => latest.current.dictate(phrase),
+        });
+        session.current?.start();
+      }}
+      type="button"
+    >
+      {children ?? (
+        <Icon>
+          <Glyph name="mic" />
+        </Icon>
+      )}
+    </button>
   );
 }
 

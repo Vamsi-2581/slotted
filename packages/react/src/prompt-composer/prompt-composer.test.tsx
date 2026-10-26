@@ -1,5 +1,5 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -10,6 +10,7 @@ import {
   PromptComposer,
   PromptComposerAction,
   PromptComposerAttach,
+  PromptComposerDictate,
   PromptComposerFooter,
   PromptComposerHeader,
   PromptComposerInput,
@@ -40,6 +41,83 @@ function file(name: string, type: string, size = 10) {
   return new File(['x'.repeat(size)], name, { type });
 }
 
+/**
+ * A chat composer offers voice input. The family had attach and submit and no
+ * dictation, and the glyph set had no microphone.
+ */
+describe('PromptComposerDictate', () => {
+  class FakeRecognition {
+    static last: FakeRecognition | null = null;
+    lang = '';
+    continuous = false;
+    interimResults = true;
+    onresult: ((event: unknown) => void) | null = null;
+    onend: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    start = vi.fn();
+    stop = vi.fn(() => this.onend?.());
+    abort = vi.fn();
+    constructor() {
+      FakeRecognition.last = this;
+    }
+  }
+
+  function Host() {
+    const [value, setValue] = useState('');
+    const [reasons, setReasons] = useState<string[]>([]);
+    return (
+      <div lang="pt-BR">
+        <PromptComposer
+          value={value}
+          onValueChange={(next, request) => {
+            setValue(next);
+            setReasons((list) => [...list, request.reason]);
+          }}
+        >
+          <PromptComposerInput aria-label="Message" />
+          <PromptComposerFooter>
+            <PromptComposerDictate />
+          </PromptComposerFooter>
+        </PromptComposer>
+        <output data-testid="reasons">{reasons.join(',')}</output>
+      </div>
+    );
+  }
+
+  it('writes each final phrase into the value and is pressed until the engine ends', () => {
+    vi.stubGlobal('webkitSpeechRecognition', FakeRecognition);
+    try {
+      render(<Host />);
+      const button = screen.getByRole('button', { name: 'Dictate' });
+      expect(button).toHaveAttribute('aria-pressed', 'false');
+      fireEvent.click(button);
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+      const engine = FakeRecognition.last as FakeRecognition;
+      expect(engine.lang).toBe('pt-BR');
+
+      act(() => {
+        engine.onresult?.({
+          resultIndex: 0,
+          results: [Object.assign([{ transcript: 'hello' }], { isFinal: true })],
+        });
+      });
+      expect(screen.getByRole('textbox', { name: 'Message' })).toHaveValue('hello');
+      expect(screen.getByTestId('reasons')).toHaveTextContent('dictation');
+      expect(button).toHaveAttribute('aria-pressed', 'true');
+
+      act(() => engine.onend?.());
+      expect(button).toHaveAttribute('aria-pressed', 'false');
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('renders nothing without a recognition engine', () => {
+    render(<Host />);
+    expect(screen.queryByRole('button', { name: 'Dictate' })).toBeNull();
+  });
+});
+
 describe('PromptComposer', () => {
   it('is a form holding every part the contract declares', () => {
     render(<Composer />);
@@ -47,9 +125,9 @@ describe('PromptComposer', () => {
     expect(root()).toHaveAttribute('data-ui', 'prompt-composer');
     expect(root()).toHaveAttribute('data-variant', 'raised');
     expect(root()).toHaveAttribute('data-status', 'ready');
-    /* The ring and the glow are drawn with emphasis="ring" alone. */
+    /* The ring and the glow are drawn with emphasis="ring" alone, and the dictation button with a recognition engine. */
     for (const name of contract.members.promptComposer.parts.filter(
-      (part) => part !== 'ring' && part !== 'glow',
+      (part) => part !== 'ring' && part !== 'glow' && part !== 'dictate',
     )) {
       expect(root().matches(`[data-part="${name}"]`) || part(name) !== null).toBe(true);
     }

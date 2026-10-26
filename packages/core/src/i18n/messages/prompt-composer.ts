@@ -4,6 +4,8 @@ import type { Message } from '../types';
 /** Every word `prompt-composer` writes on its own. */
 export interface PromptComposerMessages {
   readonly attach: Message;
+  readonly dictate: Message;
+  readonly listening: Message;
   readonly retry: Message;
   readonly send: Message;
   readonly sending: Message;
@@ -13,6 +15,8 @@ export interface PromptComposerMessages {
 
 export const en: PromptComposerMessages = {
   attach: 'Attach files',
+  dictate: 'Dictate',
+  listening: 'Listening',
   retry: 'Retry',
   send: 'Send',
   sending: 'Sending',

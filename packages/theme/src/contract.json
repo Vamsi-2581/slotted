@@ -1106,6 +1106,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-mic",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-icon-pipette",
       "layer": "primitive",
       "axis": "base",

@@ -79,7 +79,7 @@ test('rings the frame for the value, and each button for itself', () => {
   );
   assert.match(
     rule(
-      `${ui}>:is([data-part-header],[data-part-footer])>:is([data-part-action],[data-part-attach]):focus-visible`,
+      `${ui}>:is([data-part-header],[data-part-footer])>:is([data-part-action],[data-part-attach],[data-part-dictate]):focus-visible`,
     ),
     /outline-offset:calc\(var\(--slotted-focus-ring-offset,2px\) \* -1\)/,
   );

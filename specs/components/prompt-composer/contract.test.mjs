@@ -36,6 +36,7 @@ test('is a form holding a textarea, a band above, a band below and their buttons
     'footer',
     'action',
     'attach',
+    'dictate',
     'submit',
     'ring',
     'glow',
@@ -57,7 +58,7 @@ test('declares a state model for the value, cleared on an accepted submit', () =
     controlled: 'value',
     uncontrolled: 'defaultValue',
     request: 'onValueChange',
-    reasons: ['keyboard', 'submit'],
+    reasons: ['keyboard', 'submit', 'dictation'],
   });
   assert.equal(contract.submit.clearsOn, 'accepted');
 });

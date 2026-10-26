@@ -79,5 +79,7 @@ export abstract class SlPromptComposerControl {
   abstract readonly resolvedInvalid: Signal<boolean | undefined>;
   /** Empties the value after an accepted send, with reason `submit`. */
   abstract clearAfterSubmit(source: Event): void;
+  /** Writes a phrase the reader spoke at the end of the value, with reason `dictation`. */
+  abstract dictate(phrase: string): void;
   abstract focus(): void;
 }

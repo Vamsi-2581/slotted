@@ -57,6 +57,15 @@ class Host {
   readonly retries: MarkdownRetryReason[] = [];
 }
 
+@Component({
+  imports: [SlMarkdown],
+  template: `<div slMarkdown id="root" [allow]="allow" [source]="source()"></div>`,
+})
+class SourceHost {
+  readonly allow = ['paragraph', 'text', 'list', 'listItem', 'strong', 'link'];
+  readonly source = signal('- **a** [b](/c)');
+}
+
 function mount(source?: string, providers: unknown[] = []) {
   TestBed.configureTestingModule({ providers: providers as never[] });
   const fixture = TestBed.createComponent(Host);
@@ -66,6 +75,23 @@ function mount(source?: string, providers: unknown[] = []) {
   const update = () => fixture.detectChanges();
   return { fixture, host: fixture.componentInstance, root, update };
 }
+
+/** A language model's answer arrives as CommonMark text; the family reads it without a parser of the consumer's own. */
+describe('SlMarkdown from source', () => {
+  it('parses the allowed subset and keeps any other syntax as text', () => {
+    const fixture = TestBed.createComponent(SourceHost);
+    fixture.detectChanges();
+    const root = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>('#root')!;
+    const item = root.querySelector('ul > li') as HTMLElement;
+    expect(item.querySelector('strong')?.textContent).toBe('a');
+    expect(item.querySelector('a')?.getAttribute('href')).toBe('/c');
+
+    fixture.componentInstance.source.set('# t');
+    fixture.detectChanges();
+    expect(root.querySelector('h1')).toBeNull();
+    expect(root.querySelector('p')?.textContent).toBe('# t');
+  });
+});
 
 describe('SlMarkdown', () => {
   it('is selected by the family identifier and writes the contract defaults', () => {

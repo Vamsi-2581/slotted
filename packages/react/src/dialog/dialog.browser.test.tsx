@@ -219,3 +219,34 @@ describe('a dialog whose owner re-renders while it is open', () => {
     },
   );
 });
+
+/**
+ * A full-screen dialog without a body — a confirmation, a header and its
+ * actions — keeps its footer at the bottom of the screen. The panel's grid is
+ * header, body (the row that stretches), footer; the footer took the second
+ * row and its buttons stood in the middle of a phone.
+ */
+describe('a full-screen dialog without a body', () => {
+  it('rests its footer on the bottom of the screen', async () => {
+    render(
+      <Dialog defaultOpen fullScreen="narrow">
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Leave the draft?</DialogTitle>
+          </DialogHeader>
+          <DialogFooter>
+            <button type="button">Leave</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>,
+    );
+    await frame();
+    await frame();
+    const footer = document.querySelector('[data-part="footer"]') as HTMLElement;
+    const button = screen.getByRole('button', { name: 'Leave' });
+    const inset = Number.parseFloat(getComputedStyle(footer).paddingBlockEnd);
+
+    expect(Math.round(footer.getBoundingClientRect().bottom)).toBe(window.innerHeight);
+    expect(Math.round(button.getBoundingClientRect().bottom + inset)).toBe(window.innerHeight);
+  });
+});

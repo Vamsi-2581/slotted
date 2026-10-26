@@ -73,7 +73,12 @@ export interface MarkdownRootProps extends HTMLAttributes<HTMLElement> {
 
 export interface MarkdownProps extends Omit<ComponentPropsWithRef<'div'>, 'children'> {
   /** The document, as mdast — remark's `fromMarkdown`, or `fromMarkedTokens(marked.lexer(source))`. */
-  tree: MarkdownNode | null | undefined;
+  tree?: MarkdownNode | null | undefined;
+  /**
+   * The document as CommonMark text, read by `parseMarkdown` from `@slotted/core/markdown`: the
+   * syntax of the types in `allow` is read and any other stays text. Takes the place of `tree`.
+   */
+  source?: string | undefined;
 
   /** The region's type step; falls back to `prose`'s defaults. */
   size?: ProseSize | undefined;

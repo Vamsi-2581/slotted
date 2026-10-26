@@ -21,7 +21,7 @@ import {
 } from '@angular/core';
 import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
-import { prepareMarkdown } from '@slotted/core/markdown';
+import { completeMarkdown, parseMarkdown, prepareMarkdown } from '@slotted/core/markdown';
 import type {
   MarkdownAlertElement,
   MarkdownElement,
@@ -508,6 +508,11 @@ const KINDS = new Set<string>([
 export class SlMarkdown {
   /** The document, as mdast — remark's `fromMarkdown`, or `fromMarkedTokens(marked.lexer(source))`. */
   readonly tree = input<MarkdownNode | null | undefined>(undefined);
+  /**
+   * The document as CommonMark text, read by `parseMarkdown` from `@slotted/core/markdown`: the
+   * syntax of the types in `allow` is read and any other stays text. Takes the place of `tree`.
+   */
+  readonly source = input<string | undefined>(undefined);
   readonly size = input<ProseSize | undefined>(undefined);
   readonly flow = input<ProseFlow | undefined>(undefined);
   readonly status = input<MarkdownStatus>('ready');
@@ -570,18 +575,25 @@ export class SlMarkdown {
   });
 
   /** The prepared document: headings, footnotes and the outline a table of contents reads. */
-  readonly document = computed(() =>
-    prepareMarkdown(this.tree(), {
+  readonly document = computed(() => {
+    const allow = this.allow() ?? this.defaults.allow;
+    const source = this.source();
+    /* A source still arriving is closed where it was cut before it is read. */
+    const tree =
+      source === undefined
+        ? this.tree()
+        : parseMarkdown(this.streaming() ? completeMarkdown(source) : source, { allow });
+    return prepareMarkdown(tree, {
       alerts: this.alerts() ?? this.defaults.alerts ?? true,
-      allow: this.allow() ?? this.defaults.allow,
+      allow,
       custom: [...this.templateMap().keys()].filter((kind) => !KINDS.has(kind)),
       headingOffset: this.headingOffset(),
       idPrefix: this.idPrefix(),
       isExternal: this.isExternal() ?? this.defaults.isExternal,
       transformUrl: this.transformUrl() ?? this.defaults.transformUrl,
       unwrapDisallowed: this.unwrapDisallowed(),
-    }),
-  );
+    });
+  });
 
   /*
    * The placeholder and the document are two different trees, so the family

@@ -617,6 +617,16 @@
     unicode-bidi: plaintext;
   }
 
+  /**
+   * A bubble is as wide as its words. Prose — markdown's typography — is a size
+   * container for its narrow-column rules, and a size container contributes no
+   * width, so the bubble shrank to its padding. Inside a bubble prose sizes to
+   * its text and its narrow-column rules do not apply.
+   */
+  [data-ui-message][data-part-bubble] > [data-part-content] [data-ui-prose] {
+    container-type: normal;
+  }
+
   [data-ui-message][data-part-bubble][data-variant='solid'] > [data-part-content] {
     --_ground: var(--_solid);
     --_ink: var(--_on-solid);

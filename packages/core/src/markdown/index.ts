@@ -41,4 +41,6 @@ export type {
   MarkdownValueElement,
 } from './markdown';
 export { fromMarkedTokens } from './marked';
+export { parseMarkdown } from './parse';
+export type { ParseMarkdownOptions } from './parse';
 export type { MarkedCellLike, MarkedTokenLike } from './marked';

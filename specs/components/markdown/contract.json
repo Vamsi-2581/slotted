@@ -33,6 +33,7 @@
     "shape": "mdast",
     "spec": "https://github.com/syntax-tree/mdast",
     "adapters": ["fromMarkedTokens"],
+    "source": "source takes the place of tree: parseMarkdown in @slotted/core/markdown reads a CommonMark subset — paragraphs, ATX headings, fenced code, block quotes, thematic breaks, bullet and ordered lists nested by indentation, code spans, strong, emphasis, links, backslash escapes and hard breaks — and reads the syntax of a type only when allow names it, so any other syntax stays text. While streaming, completeMarkdown closes the source before it is read. Dependency-free, for a language model's answer with no parser of the consumer's own",
     "reason": "The family receives a tree and never HTML, as code-block receives tokens. mdast is the tree remark, react-markdown, Streamdown and MDX already produce, so their output passes through untouched; marked's lexer output is mapped by a function that imports nothing."
   },
   "document": {
@@ -119,8 +120,8 @@
       "reason": "Streamdown draws a caret after the last token. The region already says it is busy through aria-busy; a caret is the conversation's indicator, and a second moving mark in the text is what the loading-states rule of one indicator per wait refuses."
     },
     "parsing": {
-      "deferTo": "the adapter the consumer runs",
-      "reason": "docs/process/build-order.md makes the parser an adapter. A parser inside the family would fix one dialect and one version for every consumer, and it is what makes react-markdown's bundle."
+      "deferTo": "the adapter the consumer runs, for CommonMark beyond the subset parseMarkdown reads and for GFM",
+      "reason": "docs/process/build-order.md makes the parser an adapter. A full parser inside the family would fix one dialect and one version for every consumer, and it is what makes react-markdown's bundle; the subset behind source covers the text a language model answers with."
     }
   },
   "messages": [

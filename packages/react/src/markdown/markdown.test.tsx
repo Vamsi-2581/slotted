@@ -12,6 +12,24 @@ import { Markdown, MarkdownDefaultsProvider } from './index';
 
 const md = (source: string): MarkdownNode => fromMarkedTokens(marked.lexer(source));
 
+/**
+ * A language model's answer arrives as CommonMark text. The family took a tree
+ * only, so every consumer brought a parser of its own.
+ */
+describe('Markdown from source', () => {
+  it('parses the allowed subset and keeps any other syntax as text', () => {
+    const allow = ['paragraph', 'text', 'list', 'listItem', 'strong', 'link'];
+    const { container, rerender } = render(<Markdown allow={allow} source="- **a** [b](/c)" />);
+    const item = container.querySelector('ul > li') as HTMLElement;
+    expect(item.querySelector('strong')?.textContent).toBe('a');
+    expect(item.querySelector('a')?.getAttribute('href')).toBe('/c');
+
+    rerender(<Markdown allow={allow} source="# t" />);
+    expect(container.querySelector('h1')).toBeNull();
+    expect(container.querySelector('p')?.textContent).toBe('# t');
+  });
+});
+
 describe('Markdown', () => {
   it('is selected by the family identifier and writes the contract defaults', () => {
     render(<Markdown data-testid="root" tree={md('Hello')} />);

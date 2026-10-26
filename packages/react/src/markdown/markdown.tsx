@@ -5,7 +5,12 @@ import { markdownMessages } from '@slotted/core/i18n';
 import type { FamilyTranslator, MarkdownMessages } from '@slotted/core/i18n';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
 import type { LoadingVisibilityState } from '@slotted/core/loading';
-import { MARKDOWN_KINDS, prepareMarkdown } from '@slotted/core/markdown';
+import {
+  completeMarkdown,
+  MARKDOWN_KINDS,
+  parseMarkdown,
+  prepareMarkdown,
+} from '@slotted/core/markdown';
 import type {
   MarkdownDocument,
   MarkdownElement,
@@ -70,6 +75,7 @@ export function Markdown({
   render,
   renderers,
   size,
+  source,
   status = 'ready',
   streaming = false,
   transformUrl,
@@ -89,9 +95,18 @@ export function Markdown({
   const resolvedAlerts = alerts ?? defaults.alerts ?? true;
   const customTypes = useMemo(() => Object.keys(extensions ?? {}).join('\n'), [extensions]);
 
+  /* A source still arriving is closed where it was cut before it is read. */
+  const parsed = useMemo(
+    () =>
+      source === undefined
+        ? tree
+        : parseMarkdown(streaming ? completeMarkdown(source) : source, { allow: resolvedAllow }),
+    [source, streaming, tree, resolvedAllow],
+  );
+
   const document = useMemo(
     () =>
-      prepareMarkdown(tree, {
+      prepareMarkdown(parsed, {
         alerts: resolvedAlerts,
         allow: resolvedAllow,
         custom: customTypes ? customTypes.split('\n') : [],
@@ -102,7 +117,7 @@ export function Markdown({
         unwrapDisallowed,
       }),
     [
-      tree,
+      parsed,
       resolvedAlerts,
       resolvedAllow,
       customTypes,

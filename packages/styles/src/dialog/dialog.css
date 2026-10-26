@@ -954,6 +954,8 @@
 
   [data-ui-dialog] > [data-part-viewport] > [data-part-content] > form > [data-part-body],
   [data-ui-dialog] > [data-part-viewport] > [data-part-content] > [data-part-body] {
+    /* The row that stretches, with or without a header above it. */
+    grid-row: 2;
     min-block-size: 0;
     overflow-x: hidden;
     overflow-y: auto;
@@ -1005,6 +1007,8 @@
    */
   [data-ui-dialog] > [data-part-viewport] > [data-part-content] > form > [data-part-footer],
   [data-ui-dialog] > [data-part-viewport] > [data-part-content] > [data-part-footer] {
+    /* The last row, with or without a body above it: without one it took the row that stretches. */
+    grid-row: 3;
     display: flex;
     flex-wrap: wrap;
     align-items: center;

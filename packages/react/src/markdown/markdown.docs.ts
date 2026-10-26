@@ -282,6 +282,13 @@ export const REACT_MARKDOWN_DOCS = {
     events,
     api: apiRows([
       ['tree', 'MarkdownNode | null', '—', 'Markdown', 'The document in mdast; never HTML'],
+      [
+        'source',
+        'string',
+        '—',
+        'Markdown',
+        'The document as CommonMark text, read by parseMarkdown in place of tree: the syntax of the types in allow is read and any other stays text. Paragraphs, ATX headings, fenced code, quotes, rules, nested lists, code spans, strong, emphasis, links, escapes and hard breaks; tables, images and HTML need an adapter',
+      ],
       ['size', "'md' | 'lg' | 'xl'", 'lg', 'Markdown', 'The region’s type step, from prose'],
       [
         'flow',

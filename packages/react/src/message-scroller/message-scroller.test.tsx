@@ -142,24 +142,24 @@ describe('MessageScroller', () => {
     expect(jump).toHaveAttribute('data-active', 'false');
   });
 
-  it('hides the viewport until the opening position is applied, except when opening at the start', () => {
-    const { unmount } = render(
-      <MessageScroller>
-        <MessageScrollerViewport data-testid="viewport">
-          <MessageScrollerContent />
-        </MessageScrollerViewport>
-      </MessageScroller>,
-    );
-    expect(screen.getByTestId('viewport')).toHaveAttribute('data-pending');
-    unmount();
+  /**
+   * Pending hides the content until the opening position is applied. With no
+   * item to position, nothing ever applied it, and a notice placed in the
+   * content stayed hidden for good.
+   */
+  it('shows content that holds no item, without a pending state', () => {
     render(
-      <MessageScroller defaultPosition="start">
+      <MessageScroller defaultPosition="end" data-testid="root">
         <MessageScrollerViewport data-testid="viewport">
-          <MessageScrollerContent />
+          <MessageScrollerContent>
+            <p>Notice</p>
+          </MessageScrollerContent>
         </MessageScrollerViewport>
       </MessageScroller>,
     );
+    expect(screen.getByTestId('root')).not.toHaveAttribute('data-pending');
     expect(screen.getByTestId('viewport')).not.toHaveAttribute('data-pending');
+    expect(screen.getByText('Notice')).toBeVisible();
   });
 
   it('exposes the commands and the frame through its ref', () => {

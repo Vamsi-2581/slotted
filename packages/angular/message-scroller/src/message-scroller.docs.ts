@@ -37,7 +37,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The frame. Fills a bounded parent; the engine writes data-scrollable, data-following and data-pending on it while the reader scrolls.',
+      'The frame. Fills a bounded parent; the engine writes data-scrollable, data-following and data-pending on it while the reader scrolls. data-pending hides the content until the opening position is applied, and content that holds no item is never pending.',
   },
   {
     part: 'viewport',

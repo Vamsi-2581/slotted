@@ -330,7 +330,11 @@ export function createMessageScroller(initial: MessageScrollerOptions = {}): Mes
   function applyOpening() {
     if (parts === null || opened) return;
     const list = items(parts.content);
-    if (list.length === 0) return;
+    /* Nothing to position: the content shows, and the first rows to arrive still open it. */
+    if (list.length === 0) {
+      set({ pending: false });
+      return;
+    }
     opened = true;
     known = new Set(list);
     const { viewport, content } = parts;
@@ -530,7 +534,6 @@ export function createMessageScroller(initial: MessageScrollerOptions = {}): Mes
       }
       opened = false;
       applyOpening();
-      if (!opened) set({ pending: options.defaultPosition !== 'start' });
       return () => handle.destroy();
     },
 

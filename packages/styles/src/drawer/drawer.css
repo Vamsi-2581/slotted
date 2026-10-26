@@ -136,7 +136,8 @@
      * decide. A property is resolved on the element instead, and the three
      * states below read as what they are.
      */
-    --_slide: var(--slotted-duration-long) var(--slotted-easing-enter);
+    --_slide: var(--slotted-drawer-slide-duration, var(--slotted-duration-long))
+      var(--slotted-easing-enter);
     --_move: var(--slotted-duration-medium) var(--slotted-easing-enter);
     /**
      * `allow-discrete` is the whole of it. Without it the rule that hides a
@@ -155,7 +156,8 @@
      * it had finished leaving — which is a hundred and fifty milliseconds
      * before `closed` fires.
      */
-    --_reveal: content-visibility var(--slotted-duration-medium) allow-discrete;
+    --_reveal: content-visibility
+      var(--slotted-drawer-slide-exit-duration, var(--slotted-duration-medium)) allow-discrete;
 
     /**
      * The repository has no global reset, so a family that gives a box an
@@ -177,7 +179,8 @@
 
   /** Leaving is shorter than arriving: a reader who has decided is waiting. */
   [data-ui-drawer]:not([data-open]) {
-    --_slide: var(--slotted-duration-medium) var(--slotted-easing-exit);
+    --_slide: var(--slotted-drawer-slide-exit-duration, var(--slotted-duration-medium))
+      var(--slotted-easing-exit);
     --_move: var(--slotted-duration-medium) var(--slotted-easing-exit);
   }
 
@@ -1531,6 +1534,13 @@
     > [data-part-panel]
     > [data-part-resizer] {
     touch-action: pan-y;
+  }
+
+  /* Every region inside the sheet passes its block-axis overscroll on to the sheet, a family's own `contain` included. */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
+    > [data-part-panel]
+    * {
+    overscroll-behavior-y: auto;
   }
 
   /* A region the consumer keeps from the sheet: its own scroll never passes on to it. */

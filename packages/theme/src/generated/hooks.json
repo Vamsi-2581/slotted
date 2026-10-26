@@ -639,6 +639,7 @@
       "root"
     ],
     "drawer": [
+      "actions",
       "backdrop",
       "body",
       "close",

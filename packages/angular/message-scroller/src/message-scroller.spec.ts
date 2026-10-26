@@ -55,6 +55,18 @@ class Chat {
   readonly chat = viewChild.required<SlMessageScroller>('chat');
 }
 
+@Component({
+  imports: [SlMessageScroller, SlMessageScrollerContent, SlMessageScrollerViewport],
+  template: `
+    <div slMessageScroller id="root" defaultPosition="end">
+      <div slMessageScrollerViewport id="viewport">
+        <div slMessageScrollerContent><p>Notice</p></div>
+      </div>
+    </div>
+  `,
+})
+class Notice {}
+
 async function mount() {
   const fixture = TestBed.createComponent(Chat);
   fixture.detectChanges();
@@ -70,6 +82,16 @@ describe('slMessageScroller', () => {
       if (part === 'root' || part === 'jump-count') continue;
       expect(root.querySelector(`[data-part="${part}"]`), part).not.toBeNull();
     }
+  });
+
+  /** Content with no item to position is shown rather than held pending for good. */
+  it('shows content that holds no item, without a pending state', async () => {
+    const fixture = TestBed.createComponent(Notice);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const root = fixture.nativeElement as HTMLElement;
+    expect(root.querySelector('#root')?.hasAttribute('data-pending')).toBe(false);
+    expect(root.querySelector('#viewport')?.hasAttribute('data-pending')).toBe(false);
   });
 
   it('is a labelled, focusable region around a log that holds arrivals back while busy', async () => {

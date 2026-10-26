@@ -5,6 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IconButton } from '../button';
 import {
+  MessageScroller,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerViewport,
+} from '../message-scroller';
+import {
   Drawer,
   DrawerActions,
   DrawerBody,
@@ -462,5 +468,101 @@ describe('an overlay sheet as wide as the screen', () => {
     const panel = sheet({ size: 'full' });
     expect(getComputedStyle(panel).borderLeftWidth).toBe('0px');
     expect(getComputedStyle(panel).borderTopWidth).toBe('0px');
+  });
+});
+
+/**
+ * The slide of a drawer that a transition moves — a side panel, a top sheet —
+ * reads two public tokens, one to arrive and one to leave. It read a private
+ * property only, so a theme could not retune it.
+ */
+describe('the slide of a side drawer', () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute('style');
+  });
+
+  const slide = (panel: HTMLElement) => {
+    const style = getComputedStyle(panel);
+    const index = style.transitionProperty.split(', ').indexOf('translate');
+    return style.transitionDuration.split(', ')[index];
+  };
+
+  it('arrives in --slotted-drawer-slide-duration and leaves in --slotted-drawer-slide-exit-duration', async () => {
+    /* The theme's motion tokens, which the test document does not load. */
+    for (const name of ['short', 'medium', 'long', 'instant'])
+      document.documentElement.style.setProperty(`--slotted-duration-${name}`, '100ms');
+    for (const name of ['enter', 'exit', 'standard'])
+      document.documentElement.style.setProperty(`--slotted-easing-${name}`, 'ease');
+    document.documentElement.style.setProperty('--slotted-drawer-slide-duration', '240ms');
+    document.documentElement.style.setProperty('--slotted-drawer-slide-exit-duration', '160ms');
+    const { rerender } = render(
+      <Drawer mount="eager" open side="end">
+        <DrawerPanel>
+          <DrawerBody>Body</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    const panel = document.querySelector('[data-ui="drawer"] [data-part="panel"]') as HTMLElement;
+    for (let index = 0; index < 5; index += 1) await frame();
+    expect(slide(panel)).toBe('0.24s');
+
+    rerender(
+      <Drawer mount="eager" open={false} side="end">
+        <DrawerPanel>
+          <DrawerBody>Body</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    expect(slide(panel)).toBe('0.16s');
+  });
+});
+
+/**
+ * Inside a sheet that moves with its content (`drag="panel"`), a region's
+ * scroll passes on to the sheet unless the region carries
+ * `data-drawer-drag="none"`. The message scroller contained its overscroll, so
+ * a pull at the top of the list did not move the sheet.
+ */
+describe('a message scroller in a bottom sheet', () => {
+  it('passes a pull at its top on to the sheet', async () => {
+    render(
+      <Drawer defaultOpen side="bottom" size="full">
+        <DrawerPanel>
+          <DrawerBody>
+            <MessageScroller style={{ blockSize: 300 }}>
+              <MessageScrollerViewport>
+                <MessageScrollerContent>
+                  {Array.from({ length: 30 }, (_, index) => (
+                    <MessageScrollerItem key={index} messageId={`m${String(index)}`}>
+                      <p style={{ blockSize: 40, margin: 0 }}>Message {index + 1}</p>
+                    </MessageScrollerItem>
+                  ))}
+                </MessageScrollerContent>
+              </MessageScrollerViewport>
+            </MessageScroller>
+          </DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    for (let index = 0; index < 45; index += 1) await frame();
+    const layer = document.querySelector('[data-ui="drawer"]') as HTMLElement;
+    const viewport = layer.querySelector('[data-part="viewport"]') as HTMLElement;
+    viewport.scrollTop = 0;
+    for (let index = 0; index < 3; index += 1) await frame();
+    const before = layer.scrollTop;
+    const box = viewport.getBoundingClientRect();
+    const x = box.left + box.width / 2;
+    const y = box.top + 20;
+
+    await touch('touchStart', x, y);
+    for (let step = 1; step <= 10; step += 1) {
+      await touch('touchMove', x, y + step * 15);
+      await frame();
+    }
+    const during = layer.scrollTop;
+    await touch('touchEnd', x, y + 150);
+
+    expect(viewport.scrollTop).toBe(0);
+    expect(during).toBeLessThan(before);
   });
 });

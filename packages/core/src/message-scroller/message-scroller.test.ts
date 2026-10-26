@@ -130,12 +130,13 @@ function seed(f: Fixture, count: number, height = 100) {
 }
 
 describe('opening', () => {
-  it('opens at the end when the last turn fits, and is pending until it has rows', async () => {
+  it('opens at the end when the last turn fits, and positions rows that arrive after an empty start', async () => {
     const f = fixture();
     const scroller = createMessageScroller({ defaultPosition: 'last-anchor' });
     scroller.connect(f);
-    expect(scroller.getState().pending).toBe(true);
-    expect(f.viewport.hasAttribute('data-pending')).toBe(true);
+    /* Nothing to position: the content shows rather than waiting for rows that may never come. */
+    expect(scroller.getState().pending).toBe(false);
+    expect(f.viewport.hasAttribute('data-pending')).toBe(false);
 
     seed(f, 10);
     await f.flush();

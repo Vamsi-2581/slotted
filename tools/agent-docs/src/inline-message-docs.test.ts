@@ -35,7 +35,7 @@ describe('the errors and conflicts topic', () => {
       resolve(root, 'tools/agent-docs/content/guidelines/errors-and-conflicts.md'),
       'utf8',
     );
-    const families = /^families: \[(.*)\]$/m.exec(topic)?.[1].split(/,\s*/) ?? [];
+    const families = /^families: \[(.*)\]$/m.exec(topic)?.[1]?.split(/,\s*/) ?? [];
     expect(families).toContain('inline-message');
     expect(families).toContain('alert');
   });

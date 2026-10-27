@@ -2,6 +2,19 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.17 — 2026-10-27
+
+- docs(evals): avaliação de 2026-10-27
+- docs(agent-docs): OV-07 e OV-08 levam a visão geral à dashboard-grid e proíbem moldura dentro de moldura; LA-06 limita o sticky pela altura do scroller; compose-screen encaminha um sticky próprio para LA-06
+- feat(page): a página publica --slotted-page-scrollport-block-size, a altura do scroller, para o teto de um elemento sticky sob um canvas inset
+- feat(dashboard-grid): rows=auto desenha a altura do conteúdo em sub-linhas (DASHBOARD_SUBROWS); um widget dentro de um componente ou fragmento declara-se à grade; fix(dashboard-grid): Reset pede o defaultLayout e os layouts persistidos devolvem o seu; o gráfico de um widget preenche o corpo em todos os tamanhos (achados equori)
+- feat(stat-card): a tendência acompanha a altura da figura em inline e sangra até às bordas do cartão em stacked; a linha sai suavizada e com área por omissão
+- feat(chart): Chart e SlChart genéricos sobre a linha; data aceita linhas tipadas por interface e series, x e recordKey só nomeiam chaves da linha
+
+### Guidelines
+
+- Added: OV-07, OV-08
+
 ## 0.1.0-beta.16 — 2026-10-26
 
 - docs(list-item): a anatomia diz o pai de cada parte e a cena anatomy mostra uma linha lida com duas ações e quando usar end ou actions; feat(list-item): em desenvolvimento, body, label e description fora da caixa, e a caixa dentro de um body, avisam uma vez por parte (itens 21, 22)

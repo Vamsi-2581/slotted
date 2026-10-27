@@ -1,5 +1,6 @@
 import type {
   ChartAnnotation,
+  ChartField,
   ChartGrid,
   ChartLegendEntry,
   ChartModel,
@@ -93,16 +94,20 @@ type NativeFigureProps = Omit<
   'title' | 'children' | 'onError' | 'defaultValue' | 'hidden'
 >;
 
-export interface ChartProps extends NativeFigureProps {
+/**
+ * `Row` is the type of one record. An interface without an index signature is
+ * accepted, and every field a series or the x axis names must be one of its keys.
+ */
+export interface ChartProps<Row extends object = ChartRecord> extends NativeFigureProps {
   /* ── What is drawn ─────────────────────────────────────────────────── */
-  readonly data: readonly ChartRecord[];
-  readonly series: readonly ChartSeries[];
-  readonly x?: ChartXAxis | undefined;
+  readonly data: readonly Row[];
+  readonly series: readonly ChartSeries<ChartField<Row>>[];
+  readonly x?: ChartXAxis<ChartField<Row>> | undefined;
   readonly y?: ChartYAxis | readonly [ChartYAxis, ChartYAxis] | undefined;
   readonly orientation?: ChartOrientation | undefined;
   readonly stackMode?: ChartStackMode | undefined;
   readonly annotations?: readonly ChartAnnotation[] | undefined;
-  readonly recordKey?: string | undefined;
+  readonly recordKey?: ChartField<Row> | undefined;
   readonly locale?: string | undefined;
 
   /* ── The words around it ───────────────────────────────────────────── */

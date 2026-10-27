@@ -40,6 +40,7 @@ import type {
   ChartLegendEntry,
   ChartModel,
   ChartPoint,
+  ChartRecord,
   ChartSpec,
   ChartTheme,
   ChartTooltipContext,
@@ -372,7 +373,7 @@ export function ChartTooltipContent({
  * `@slotted/core/chart`'s, shared with the Angular binding; this file is the
  * React state around them.
  */
-export function Chart(props: ChartProps) {
+export function Chart<Row extends object = ChartRecord>(props: ChartProps<Row>) {
   const {
     data,
     series,
@@ -497,7 +498,8 @@ export function Chart(props: ChartProps) {
   const sameAnnotations = useSameShape(annotations);
   const spec = useMemo<ChartSpec>(
     () => ({
-      data,
+      // The model reads a record only by the fields the series name, which `Row` constrains.
+      data: data as readonly ChartRecord[],
       series: sameSeries,
       x: sameX,
       y: sameY,

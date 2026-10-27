@@ -55,6 +55,7 @@ export type {
   ChartAnnotation,
   ChartColor,
   ChartCurve,
+  ChartField,
   ChartGrid,
   ChartKind,
   ChartNumberFormat,

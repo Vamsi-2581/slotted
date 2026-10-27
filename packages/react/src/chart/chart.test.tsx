@@ -50,10 +50,16 @@ const data = [
   { month: 'Mar', revenue: 150, cost: 95 },
 ];
 const series = [
-  { kind: 'line' as const, field: 'revenue', label: 'Revenue' },
-  { kind: 'bar' as const, field: 'cost', label: 'Cost' },
-];
-const base = { data, series, x: { field: 'month' }, locale: 'en-US', title: 'Revenue and cost' };
+  { kind: 'line', field: 'revenue', label: 'Revenue' },
+  { kind: 'bar', field: 'cost', label: 'Cost' },
+] as const;
+const base = {
+  data,
+  series,
+  x: { field: 'month' } as const,
+  locale: 'en-US',
+  title: 'Revenue and cost',
+};
 
 const root = () => document.querySelector('[data-ui="chart"]')!;
 const part = (name: string) => document.querySelector<HTMLElement>(`[data-part="${name}"]`);
@@ -513,5 +519,32 @@ describe('Chart', () => {
       expect(handle.current!.toDataURL()).toMatch(/^data:image\/svg/);
       expect(handle.current!.toCsv().split('\r\n')[0]).toBe('Category,Revenue,Cost');
     });
+  });
+});
+
+describe('Chart row typing', () => {
+  interface Row {
+    label: string;
+    value: number | null;
+  }
+  const rows: readonly Row[] = [{ label: 'Jan', value: 1 }];
+
+  it('takes rows typed by an interface and checks the fields named against its keys', () => {
+    void (<Chart data={rows} x={{ field: 'label' }} series={[{ kind: 'bar', field: 'value' }]} />);
+    void (
+      <Chart
+        data={rows}
+        // @ts-expect-error -- `cost` is not a key of the row.
+        series={[{ kind: 'bar', field: 'cost' }]}
+      />
+    );
+    void (
+      <Chart
+        data={rows}
+        // @ts-expect-error -- `day` is not a key of the row.
+        x={{ field: 'day' }}
+        series={[{ kind: 'bar', field: 'value' }]}
+      />
+    );
   });
 });

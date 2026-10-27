@@ -217,8 +217,8 @@ const ORDERS_CHART = {
 };
 const DAILY_CHART = {
   data: days(1, 90, 5),
-  series: [{ kind: 'line', field: 'sessions', label: 'Sessões' }] satisfies ChartSeries[],
-  x: { field: 'day', type: 'time' as const },
+  series: [{ kind: 'line', field: 'sessions', label: 'Sessões' }] as const,
+  x: { field: 'day', type: 'time' } as const,
 };
 
 /** Every scene speaks the product's language, set once as an application would. */
@@ -850,7 +850,7 @@ export const LargeData: Story = {
   ),
 };
 
-const WITH_GAPS = MONTHLY.map((row, index) => ({
+const WITH_GAPS: ChartRecord[] = MONTHLY.map((row, index) => ({
   ...row,
   revenue: [3, 4, 8].includes(index) ? null : row['revenue'],
 }));
@@ -1185,10 +1185,8 @@ export const Fullscreen: Story = {
 
 const RANKED = {
   data: REGIONS,
-  series: [
-    { kind: 'pie', field: 'value', label: 'Receita', innerRadius: 0.6 },
-  ] satisfies ChartSeries[],
-  x: { field: 'region' },
+  series: [{ kind: 'pie', field: 'value', label: 'Receita', innerRadius: 0.6 }] as const,
+  x: { field: 'region' } as const,
   y: { format: brlThousands },
 };
 

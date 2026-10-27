@@ -55,6 +55,7 @@ import { chartMessages, type ChartMessages, type PartialMessages } from '@slotte
 import type {
   ChartAnnotation,
   ChartColor,
+  ChartField,
   ChartGrid,
   ChartLegendEntry,
   ChartModel,
@@ -201,16 +202,21 @@ function focusVisible(element: Element) {
     '(keydown)': 'onRootKeyDown($event)',
   },
 })
-export class SlChart implements ChartHandle {
+/**
+ * `Row` is the type of one record, inferred from `data`. An interface without
+ * an index signature is accepted, and every field a series or the x axis names
+ * must be one of its keys.
+ */
+export class SlChart<Row extends object = ChartRecord> implements ChartHandle {
   /* ── What is drawn ─────────────────────────────────────────────────── */
-  readonly data = input<readonly ChartRecord[]>([]);
-  readonly series = input<readonly ChartSeries[]>([]);
-  readonly x = input<ChartXAxis | undefined>(undefined);
+  readonly data = input<readonly Row[]>([]);
+  readonly series = input<readonly ChartSeries<ChartField<Row>>[]>([]);
+  readonly x = input<ChartXAxis<ChartField<Row>> | undefined>(undefined);
   readonly y = input<ChartYAxis | readonly [ChartYAxis, ChartYAxis] | undefined>(undefined);
   readonly orientation = input<ChartOrientation | undefined>(undefined);
   readonly stackMode = input<ChartStackMode | undefined>(undefined);
   readonly annotations = input<readonly ChartAnnotation[] | undefined>(undefined);
-  readonly recordKey = input<string | undefined>(undefined);
+  readonly recordKey = input<ChartField<Row> | undefined>(undefined);
   readonly locale = input<string | undefined>(undefined);
 
   /* ── The words around it ───────────────────────────────────────────── */
@@ -335,7 +341,8 @@ export class SlChart implements ChartHandle {
   }));
 
   private readonly spec = computed<ChartSpec>(() => ({
-    data: this.data(),
+    // The model reads a record only by the fields the series name, which `Row` constrains.
+    data: this.data() as readonly ChartRecord[],
     series: this.series(),
     x: this.x(),
     y: this.y(),

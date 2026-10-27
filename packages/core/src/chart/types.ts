@@ -31,6 +31,13 @@ export type ChartGrid = 'horizontal' | 'vertical' | 'both' | 'none';
 export type ChartRecord = Readonly<Record<string, unknown>>;
 
 /**
+ * A field of a record: a key of the consumer's row type. A row type with no
+ * known keys (`ChartRecord`, or `object` when a binding is read without its
+ * type argument) takes any string.
+ */
+export type ChartField<Row extends object> = object extends Row ? string : keyof Row & string;
+
+/**
  * How a number is written: `Intl.NumberFormat` options read with the chart's
  * locale, or a function for what `Intl` cannot say. A number stays a number
  * in the data; formatting happens at the edge (`docs/component-features.md`
@@ -48,12 +55,13 @@ export type ChartNumberFormat =
 export type ChartTimeFormat =
   Intl.DateTimeFormatOptions | ((value: number, locale: string | undefined) => string);
 
-export interface ChartSeries {
+/** `Field` is the set of field names a record has; a binding narrows it to the keys of its row type. */
+export interface ChartSeries<Field extends string = string> {
   /** Unique within the chart. Defaults to `field`. */
   readonly id?: string | undefined;
   readonly kind: ChartKind;
   /** The field of each record that holds this series' value. */
-  readonly field: string;
+  readonly field: Field;
   /** What the legend, the tooltip and the table call it. Defaults to the id. */
   readonly label?: string | undefined;
   /** Which colour of the data scale. Assigned in order when absent. */
@@ -70,7 +78,7 @@ export interface ChartSeries {
   readonly markers?: 'none' | 'last' | 'all' | undefined;
   readonly labels?: boolean | undefined;
   /** A scatter's bubble size. */
-  readonly sizeField?: string | undefined;
+  readonly sizeField?: Field | undefined;
   /** A pie's hole, as a share of its radius from 0 to 0.9. Above 0 is a donut. */
   readonly innerRadius?: number | undefined;
   /**
@@ -78,16 +86,16 @@ export interface ChartSeries {
    * to 8, so a category keeps the colour it has everywhere else in the
    * application. A slice whose record holds none takes the next free slot.
    */
-  readonly slotField?: string | undefined;
+  readonly slotField?: Field | undefined;
   /** A pie's tone per slice, from the field of each record; wins over `slotField`. */
-  readonly toneField?: string | undefined;
+  readonly toneField?: Field | undefined;
   /** Overrides the value axis' format for this series. */
   readonly format?: ChartNumberFormat | undefined;
 }
 
-export interface ChartXAxis {
+export interface ChartXAxis<Field extends string = string> {
   /** The field of each record that places it: a category, a time or a number. */
-  readonly field: string;
+  readonly field: Field;
   readonly type?: ChartXType | undefined;
   readonly label?: string | undefined;
   readonly format?: ChartNumberFormat | ChartTimeFormat | undefined;

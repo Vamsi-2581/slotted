@@ -506,13 +506,13 @@ export function Overview({ onScreen }: { onScreen: (screen: Screen) => void }) {
                   ? []
                   : [
                       {
-                        kind: 'line' as const,
+                        kind: 'line',
                         field: 'prior',
                         label: 'Prior period',
-                        curve: 'monotone' as const,
-                        stroke: 'dashed' as const,
-                        tone: 'neutral' as const,
-                      },
+                        curve: 'monotone',
+                        stroke: 'dashed',
+                        tone: 'neutral',
+                      } as const,
                     ]),
               ]}
               toolbar="none"

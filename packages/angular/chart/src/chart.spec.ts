@@ -81,9 +81,9 @@ class TestHost {
     { month: 'Mar', revenue: 150, cost: 95 },
   ];
   readonly series = [
-    { kind: 'line' as const, field: 'revenue', label: 'Revenue' },
-    { kind: 'bar' as const, field: 'cost', label: 'Cost' },
-  ];
+    { kind: 'line', field: 'revenue', label: 'Revenue' },
+    { kind: 'bar', field: 'cost', label: 'Cost' },
+  ] as const;
   readonly loading = signal(false);
   readonly error = signal(false);
   readonly legendValues = signal(false);
@@ -396,5 +396,40 @@ describe('SlChart', () => {
     expect(host.zoom()).toEqual({ start: 0, end: 1 });
     expect(chart.toDataURL()).toMatch(/^data:image\/svg/);
     expect(chart.toCsv().split('\r\n')[0]).toBe('Category,Revenue,Cost');
+  });
+});
+
+describe('SlChart row typing', () => {
+  interface Row {
+    label: string;
+    value: number | null;
+  }
+
+  @Component({
+    imports: [SlChart],
+    template: `<figure
+      slChart
+      title="Typed"
+      [data]="rows"
+      [x]="{ field: 'label' }"
+      [series]="[{ kind: 'bar', field: 'value' }]"
+    ></figure>`,
+  })
+  class TypedHost {
+    readonly rows: readonly Row[] = [{ label: 'Jan', value: 1 }];
+  }
+
+  it('takes rows typed by an interface and checks the fields named against its keys', () => {
+    type Series = ReturnType<SlChart<Row>['series']>[number];
+    // @ts-expect-error -- `cost` is not a key of the row.
+    const wrong: Series = { kind: 'bar', field: 'cost' };
+    void wrong;
+
+    TestBed.configureTestingModule({
+      providers: [{ provide: CHART_ENGINE, useValue: recordingEngine }],
+    });
+    const fixture = TestBed.createComponent(TypedHost);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-ui="chart"]')).not.toBeNull();
   });
 });

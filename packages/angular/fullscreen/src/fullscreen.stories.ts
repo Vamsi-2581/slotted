@@ -3,7 +3,6 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePresentation, lucideX } from '@ng-icons/lucide';
 import { SlCard, SlCardBody, SlCardHeader } from '@slotted/angular/card';
 import { SlChart } from '@slotted/angular/chart';
-import type { ChartSeries } from '@slotted/core/chart';
 import { SlSelect, SlSelectItem } from '@slotted/angular/select';
 import { SlHeading, SlText } from '@slotted/angular/typography';
 import { bindScenes, createReferencePage, scenario } from '@slotted/storybook-workbench';
@@ -53,8 +52,8 @@ const brlThousands = (value: number, locale: string | undefined) =>
 /** Every value the chart binds, named once so the templates read as a consumer would write them. */
 const CHART = {
   monthly: MONTHS.map((month, index) => ({ month, revenue: REVENUE[index] })),
-  series: [{ kind: 'bar', field: 'revenue', label: 'Receita' }] as ChartSeries[],
-  month: { field: 'month', label: 'Mês' },
+  series: [{ kind: 'bar', field: 'revenue', label: 'Receita' }] as const,
+  month: { field: 'month', label: 'Mês' } as const,
   brl: { format: brlThousands },
 };
 

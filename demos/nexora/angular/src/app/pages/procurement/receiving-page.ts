@@ -28,7 +28,6 @@ import {
 import { SlSkeleton } from '@slotted/angular/skeleton';
 import { SlTab, SlTabList, SlTabs } from '@slotted/angular/tabs';
 import { SlText } from '@slotted/angular/typography';
-import type { ChartSeries } from '@slotted/core/chart';
 import { emptyQuery, withPageIndex, withPageSize, type GridQuery } from '@slotted/core/grid';
 import type { PurchaseOrderListItem } from '@slotted/demo-nexora-backend';
 
@@ -308,7 +307,7 @@ export class ReceivingPage {
   readonly pageSizes = LIST_PAGE_SIZES;
   readonly phone = phoneSignal();
 
-  readonly series: readonly ChartSeries[] = [
+  readonly series = [
     { id: 'due', kind: 'bar', field: 'due', label: 'Not yet due', stack: 'inbound' },
     {
       id: 'late',
@@ -318,7 +317,7 @@ export class ReceivingPage {
       tone: 'warning',
       stack: 'inbound',
     },
-  ];
+  ] as const;
 
   private readonly can = (permission: string): boolean => {
     void this.session.session();

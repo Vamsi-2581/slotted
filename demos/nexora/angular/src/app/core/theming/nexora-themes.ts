@@ -102,7 +102,9 @@ function relight(scheme: Scheme, token: string, l: number): Derivation {
 /** The library's derivation of `token` with `factor` times its share of the seed's chroma. */
 function rescale(scheme: Scheme, token: string, factor: number): Derivation {
   const rule = seedRule(scheme, token);
-  return { ...rule, c: { scale: rule.c.scale * factor, max: rule.c.max } };
+  // A gamut-limited rule asks for a fixed chroma, so the factor moves what it asks for.
+  const c = 'scale' in rule.c ? { ...rule.c, scale: rule.c.scale * factor } : { ...rule.c, max: rule.c.max * factor };
+  return { ...rule, c };
 }
 
 /** The given parts of the given tones' soft grounds at `factor` times the library's chroma. */
@@ -264,6 +266,7 @@ const precise = extendTheme(
       accent: '#5e6ad2',
       neutral: '#6b6e7d',
       success: '#26a269',
+      info: '#3e8ed0',
       warning: '#e09b2d',
       danger: '#e5484d',
     },
@@ -274,7 +277,7 @@ const precise = extendTheme(
       },
       dark: {
         '--slotted-surface': relight('dark', '--slotted-surface', 0.165),
-        '--slotted-surface-raised': relight('dark', '--slotted-surface-raised', 0.195),
+        '--slotted-surface-raised': relight('dark', '--slotted-surface-raised', 0.21),
         '--slotted-surface-sunken': relight('dark', '--slotted-surface-sunken', 0.14),
         '--slotted-border-subtle': relight('dark', '--slotted-border-subtle', 0.275),
       },
@@ -436,6 +439,7 @@ const editorial = extendTheme(
       accent: '#0d7680',
       neutral: '#8c7a66',
       success: '#3d7a3a',
+      info: '#2f6f9f',
       warning: '#b7791f',
       danger: '#b0302a',
     },
@@ -622,6 +626,7 @@ const corporate = extendTheme(
       accent: '#0c66e4',
       neutral: '#5e6c84',
       success: '#1f845a',
+      info: '#1d7afc',
       warning: '#cf9f02',
       danger: '#c9372c',
     },
@@ -777,6 +782,7 @@ const expressive = extendTheme(
       accent: '#c0267a',
       neutral: '#7a6e74',
       success: '#188038',
+      info: '#1a73e8',
       warning: '#f29900',
       danger: '#d93025',
     },

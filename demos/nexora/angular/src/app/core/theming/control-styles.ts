@@ -143,15 +143,14 @@ function frame(ui: string, input: InputChoice): string {
   if (input !== 'borderless') return rest;
   /*
    * High-contrast paints the secondary surface in the page's white, so a
-   * borderless field there takes the control's line: under the theme's own
-   * scheme on its root, and under a nested scheme. An invalid one keeps the
-   * family's edge.
+   * borderless field there takes the control's line. Every element that
+   * carries a scheme is a scope root, so `&` also covers a nested scheme. An
+   * invalid one keeps the family's edge.
    */
   const field = `${fieldRoot(ui)}:not([data-invalid])`;
   return `${rest}
 
-&[data-slotted-scheme='high-contrast'] ${field},
-[data-slotted-scheme='high-contrast'] ${field} {
+&[data-slotted-scheme='high-contrast'] ${field} {
   border-color: var(--slotted-control-border-color);
 }`;
 }

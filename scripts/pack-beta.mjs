@@ -17,6 +17,8 @@ import { fileURLToPath } from 'node:url';
  *
  * `--only a,b` packs those packages and leaves the other tarballs in place:
  * the loop a demo runs after one library change, without the whole build.
+ * `--pin <package.json>` points that manifest's `file:` specifiers into the
+ * registry at the tarballs just packed, so the next install receives them.
  */
 export const REGISTRY_DIRECTORY = 'demos/.registry';
 
@@ -37,6 +39,15 @@ export function readPackageDirectories(root) {
         ? [directory]
         : readPackageDirectories(directory);
     });
+}
+
+export function pinToRegistry(manifest, index) {
+  for (const [name, specifier] of Object.entries(manifest.dependencies ?? {})) {
+    if (specifier.includes('.registry/') && index[name]) {
+      manifest.dependencies[name] = specifier.replace(/[^/]+\.tgz$/, index[name].tarball);
+    }
+  }
+  return manifest;
 }
 
 function run(command, args, cwd) {
@@ -79,4 +90,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
 
   writeFileSync(indexPath, `${JSON.stringify(index, null, 2)}\n`);
+
+  const pinIndex = process.argv.indexOf('--pin');
+  if (pinIndex !== -1) {
+    const manifestPath = join(repositoryRoot, process.argv[pinIndex + 1]);
+    const manifest = pinToRegistry(JSON.parse(readFileSync(manifestPath, 'utf8')), index);
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  }
 }

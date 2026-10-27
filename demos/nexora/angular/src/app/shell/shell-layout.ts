@@ -21,7 +21,6 @@ import {
   SlAppShellNavFooter,
   SlAppShellNavHeader,
   SlAppShellNavRail,
-  SlAppShellNavToggle,
 } from '@slotted/angular/app-shell';
 import { SlAvatar } from '@slotted/angular/avatar';
 import { SlButton, SlIconButton } from '@slotted/angular/button';
@@ -92,7 +91,6 @@ interface Section {
     SlAppShellNavFooter,
     SlAppShellNavHeader,
     SlAppShellNavRail,
-    SlAppShellNavToggle,
     SlAvatar,
     SlButton,
     SlIconButton,

@@ -358,7 +358,7 @@ describe('customTheme', () => {
     for (const { ui } of FIELD_FAMILIES) {
       const field = `[data-ui='${ui}'][data-part='root']:not([data-variant='plain']):not([data-invalid])`;
       expect(frame).toContain(
-        `&[data-slotted-scheme='high-contrast'] ${field},\n[data-slotted-scheme='high-contrast'] ${field} {\n  border-color: var(--slotted-control-border-color);\n}`,
+        `&[data-slotted-scheme='high-contrast'] ${field} {\n  border-color: var(--slotted-control-border-color);\n}`,
       );
     }
     expect(fieldRules('filled', 'ring')[0]).not.toMatch(/high-contrast/);

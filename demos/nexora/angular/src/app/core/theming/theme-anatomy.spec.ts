@@ -26,13 +26,14 @@ describe('themeAnatomy', () => {
     ]);
   });
 
-  /** The library's own theme is the reference: its five seeds, and nothing laid over it. */
-  it('reads the library’s theme as five seeds and nothing over the reference', () => {
+  /** The library's own theme is the reference: its six seeds, and nothing laid over it. */
+  it('reads the library’s theme as six seeds and nothing over the reference', () => {
     const anatomy = themeAnatomy(defaultTheme);
     expect(anatomy.find((layer) => layer.id === 'seeds')!.items).toEqual([
       'accent #1d4ed8',
       'neutral #64748b',
       'success #15803d',
+      'info oklch(0.6 0.15 255)',
       'warning #facc15',
       'danger #dc2626',
     ]);

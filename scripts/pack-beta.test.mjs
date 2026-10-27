@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
-import { isPublishable, readPackageDirectories, tarballName } from './pack-beta.mjs';
+import { isPublishable, pinToRegistry, readPackageDirectories, tarballName } from './pack-beta.mjs';
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url));
 
@@ -26,6 +26,24 @@ test('the tarball is named the way pnpm pack names it', () => {
     tarballName({ name: '@slotted/themes', version: '0.1.0-beta.3' }),
     'slotted-themes-0.1.0-beta.3.tgz',
   );
+});
+
+test('--pin moves registry specifiers to the packed tarball and leaves the rest', () => {
+  const manifest = pinToRegistry(
+    {
+      dependencies: {
+        '@slotted/core': 'file:../../.registry/slotted-core-0.1.0-beta.0.tgz',
+        '@slotted/react': 'file:../../.registry/slotted-react-0.1.0-beta.0.tgz',
+        rxjs: '~7.8.0',
+      },
+    },
+    { '@slotted/core': { tarball: 'slotted-core-0.1.0-beta.17.tgz' } },
+  );
+  assert.deepEqual(manifest.dependencies, {
+    '@slotted/core': 'file:../../.registry/slotted-core-0.1.0-beta.17.tgz',
+    '@slotted/react': 'file:../../.registry/slotted-react-0.1.0-beta.0.tgz',
+    rxjs: '~7.8.0',
+  });
 });
 
 test('every consumer-facing package is published and the workbench is not', () => {

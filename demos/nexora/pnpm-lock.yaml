@@ -60,20 +60,20 @@ importers:
         specifier: ^36.0.0
         version: 36.1.0(@ng-icons/core@36.1.0(@angular-devkit/schematics@22.2.2(chokidar@5.0.0))(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@schematics/angular@22.2.2(chokidar@5.0.0))(rxjs@7.8.2))
       '@slotted/angular':
-        specifier: file:../../.registry/slotted-angular-0.1.0-beta.0.tgz
-        version: file:../.registry/slotted-angular-0.1.0-beta.0.tgz(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/forms@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(rxjs@7.8.2))(@slotted/core@file:../.registry/slotted-core-0.1.0-beta.0.tgz(echarts@6.1.0))(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.0.tgz)
+        specifier: file:../../.registry/slotted-angular-0.1.0-beta.17.tgz
+        version: file:../.registry/slotted-angular-0.1.0-beta.17.tgz(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/forms@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(rxjs@7.8.2))(@slotted/core@file:../.registry/slotted-core-0.1.0-beta.17.tgz(echarts@6.1.0))(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.17.tgz)
       '@slotted/core':
-        specifier: file:../../.registry/slotted-core-0.1.0-beta.0.tgz
-        version: file:../.registry/slotted-core-0.1.0-beta.0.tgz(echarts@6.1.0)
+        specifier: file:../../.registry/slotted-core-0.1.0-beta.17.tgz
+        version: file:../.registry/slotted-core-0.1.0-beta.17.tgz(echarts@6.1.0)
       '@slotted/demo-nexora-backend':
         specifier: workspace:*
         version: link:../backend
       '@slotted/theme':
-        specifier: file:../../.registry/slotted-theme-0.1.0-beta.0.tgz
-        version: file:../.registry/slotted-theme-0.1.0-beta.0.tgz
+        specifier: file:../../.registry/slotted-theme-0.1.0-beta.17.tgz
+        version: file:../.registry/slotted-theme-0.1.0-beta.17.tgz
       '@slotted/themes':
-        specifier: file:../../.registry/slotted-themes-0.1.0-beta.0.tgz
-        version: file:../.registry/slotted-themes-0.1.0-beta.0.tgz(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.0.tgz)
+        specifier: file:../../.registry/slotted-themes-0.1.0-beta.17.tgz
+        version: file:../.registry/slotted-themes-0.1.0-beta.17.tgz(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.17.tgz)
       echarts:
         specifier: 6.1.0
         version: 6.1.0
@@ -86,7 +86,7 @@ importers:
     devDependencies:
       '@angular/build':
         specifier: ^22.1.8
-        version: 22.2.2(@angular/compiler-cli@22.1.8(@angular/compiler@22.1.8)(typescript@6.0.3))(@angular/compiler@22.1.8)(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(@types/node@24.13.3)(postcss@8.5.30)(supports-color@8.1.1)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11(@types/node@24.13.3)(jsdom@28.1.0(supports-color@8.1.1))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1)))
+        version: 22.2.2(@angular/compiler-cli@22.1.8(@angular/compiler@22.1.8)(typescript@6.0.3))(@angular/compiler@22.1.8)(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(@types/node@24.13.3)(postcss@8.5.30)(supports-color@8.1.1)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11(@types/node@24.13.3)(jsdom@30.1.3)(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1)))
       '@angular/cli':
         specifier: ^22.1.8
         version: 22.2.2(@types/node@24.13.3)(chokidar@5.0.0)
@@ -94,8 +94,8 @@ importers:
         specifier: ~22.1.7
         version: 22.1.8(@angular/compiler@22.1.8)(typescript@6.0.3)
       jsdom:
-        specifier: ^28.0.0
-        version: 28.1.0(supports-color@8.1.1)
+        specifier: ^30.0.1
+        version: 30.1.3
       prettier:
         specifier: ^3.8.1
         version: 3.9.10
@@ -104,7 +104,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: ^4.0.8
-        version: 4.1.11(@types/node@24.13.3)(jsdom@28.1.0(supports-color@8.1.1))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
+        version: 4.1.11(@types/node@24.13.3)(jsdom@30.1.3)(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
 
   backend:
     devDependencies:
@@ -116,12 +116,9 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 4.1.11
-        version: 4.1.11(@types/node@24.13.3)(jsdom@28.1.0(supports-color@8.1.1))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
+        version: 4.1.11(@types/node@24.13.3)(jsdom@30.1.3)(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
 
 packages:
-
-  '@acemir/cssom@0.9.32':
-    resolution: {integrity: sha512-OijrAUu7rrJhSIoHNg6LMPS5e344nwUHA+1EFYYjrh64D+GmytUsfBQjci45TjT+rd5Spsp8B5xsZDT+TgyXXQ==}
 
   '@ampproject/remapping@2.3.0':
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
@@ -266,19 +263,13 @@ packages:
       '@angular/platform-browser': 22.1.8
       rxjs: ^6.5.3 || ^7.4.0
 
-  '@asamuzakjp/css-color@5.1.11':
-    resolution: {integrity: sha512-KVw6qIiCTUQhByfTd78h2yD1/00waTmm9uy/R7Ck/ctUyAPj+AEDLkQIdJW0T8+qGgj3j5bpNKK7Q3G+LedJWg==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+  '@asamuzakjp/css-color@7.1.9':
+    resolution: {integrity: sha512-vZ6JQVq8Ivgz6b/IBlAf90wZviXdluY13cQOPO+nJHbmXwGrPl2GcpqUY7a55/8ZVdfONXpCFMpRijOBCHNlcQ==}
+    engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
-  '@asamuzakjp/dom-selector@6.8.1':
-    resolution: {integrity: sha512-MvRz1nCqW0fsy8Qz4dnLIvhOlMzqDVBabZx6lH+YywFDdjXhMY37SmpV1XFX3JzG5GWHn63j6HX6QPr3lZXHvQ==}
-
-  '@asamuzakjp/generational-cache@1.0.1':
-    resolution: {integrity: sha512-wajfB8KqzMCN2KGNFdLkReeHncd0AslUSrvHVvvYWuU8ghncRJoA50kT3zP9MVL0+9g4/67H+cdvBskj9THPzg==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
-
-  '@asamuzakjp/nwsapi@2.3.9':
-    resolution: {integrity: sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q==}
+  '@asamuzakjp/dom-selector@10.0.5':
+    resolution: {integrity: sha512-EgmJ7oEaGQECTn3H3wmnQpEy4hKY66VvM7VQndwPIQob3p877BgbyOUE3EX0LgXQCciF2H8KMdR+RznqjMNOLw==}
+    engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
   '@babel/code-frame@8.0.6':
     resolution: {integrity: sha512-uMHhvmDmwFiLuiozaoRYTZHqMFuu3fem/X9JY78lohAuLoh8LSGGC8JqUzo2cVuBsBxkjMZNk56CE7ock8Xxkw==}
@@ -1375,35 +1366,35 @@ packages:
     resolution: {integrity: sha512-JxpXKpxdmQcRsJbriWJOhB7HeVTzz9CEsPNw6fQ0LOuPFnvtyUIXLxyFbKv/LfoFUz8wFADCtNU5sjowME5Mvg==}
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0, npm: ^6.11.0 || ^7.5.6 || >=8.0.0, yarn: '>= 1.13.0'}
 
-  '@slotted/angular@file:../.registry/slotted-angular-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-j94GVVtTJHTYBTP6UTphtemiZQHjLgPxhvWeMWQFONhSNKrmTmpQa7TX8os7+hsrb1SP1Cm5UpR+Y1tWueW4+w==, tarball: file:../.registry/slotted-angular-0.1.0-beta.0.tgz}
-    version: 0.1.0-beta.0
+  '@slotted/angular@file:../.registry/slotted-angular-0.1.0-beta.17.tgz':
+    resolution: {integrity: sha512-2v/8XYHfuyB87FIXFhWFYP7yR9wgDeFnIR283RFD2rTJS/LMESnz8KpRcQBeRLQDL7QAQyC3gkJDq3kjomwwDA==, tarball: file:../.registry/slotted-angular-0.1.0-beta.17.tgz}
+    version: 0.1.0-beta.17
     peerDependencies:
       '@angular/common': '>=22.1.0 <23'
       '@angular/core': '>=22.1.0 <23'
       '@angular/forms': '>=22.1.0 <23'
-      '@slotted/core': 0.1.0-beta.0
-      '@slotted/theme': 0.1.0-beta.0
+      '@slotted/core': 0.1.0-beta.17
+      '@slotted/theme': 0.1.0-beta.17
 
-  '@slotted/core@file:../.registry/slotted-core-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-O4zomzuXzJvWBgnCgI7An6Xrihrnfl0omlcNLVZ8myyqS/hzqJxijjxY06uoQRIs7B5UW7xdIOVf3pA50+kFuA==, tarball: file:../.registry/slotted-core-0.1.0-beta.0.tgz}
-    version: 0.1.0-beta.0
+  '@slotted/core@file:../.registry/slotted-core-0.1.0-beta.17.tgz':
+    resolution: {integrity: sha512-bWxp1sLlejuWZbd0vZHekfwrSiA+1FsPvJkNnW2v+W6rjH4gz6j+mg/TVDwxpSCSHQcaZwI2v6Drj0nmPM/3kw==, tarball: file:../.registry/slotted-core-0.1.0-beta.17.tgz}
+    version: 0.1.0-beta.17
     peerDependencies:
       echarts: ^6.1.0
     peerDependenciesMeta:
       echarts:
         optional: true
 
-  '@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-0WLZMMEw/Gdjfxwa0q6STJRDsYihwBLQsu1ygDufxo1kEeC/NQD40LdynhJzkcOHTO95zeHDMFsOT+uF4mWzOQ==, tarball: file:../.registry/slotted-theme-0.1.0-beta.0.tgz}
-    version: 0.1.0-beta.0
+  '@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.17.tgz':
+    resolution: {integrity: sha512-hkToJbCezev0QQuV9MBNFMItfkyS6ae//XxWNMul5kr6m/YDWqwJY22TkfWX4373UUEEnJb5Gg544gPQy/DiTQ==, tarball: file:../.registry/slotted-theme-0.1.0-beta.17.tgz}
+    version: 0.1.0-beta.17
     hasBin: true
 
-  '@slotted/themes@file:../.registry/slotted-themes-0.1.0-beta.0.tgz':
-    resolution: {integrity: sha512-WtQF03N30MzUG8NZNo/9eT5cw7+657nM1vOuzA63lF0wkoeamInKPuweztzPYvVVgCZLDpCZlzrkZ/aBk+tBKA==, tarball: file:../.registry/slotted-themes-0.1.0-beta.0.tgz}
-    version: 0.1.0-beta.0
+  '@slotted/themes@file:../.registry/slotted-themes-0.1.0-beta.17.tgz':
+    resolution: {integrity: sha512-4apBxkiiiUzI9wW+4vweI9QQz12KJOPJn4M/iMn9G2hNue0Aoc9iL63YZwfjfBq/Qr+qT5X13JDU9PBb9YTmzg==, tarball: file:../.registry/slotted-themes-0.1.0-beta.17.tgz}
+    version: 0.1.0-beta.17
     peerDependencies:
-      '@slotted/theme': 0.1.0-beta.0
+      '@slotted/theme': 0.1.0-beta.17
     peerDependenciesMeta:
       '@slotted/theme':
         optional: true
@@ -1463,10 +1454,6 @@ packages:
 
   '@vitest/utils@4.1.11':
     resolution: {integrity: sha512-zTCVGpyFsGWBhllOyKlTw/vnr6D9qxsfSDyfbyZmTyjHw5N/VuvzHpHoQjm2ZJzn4RJgx5w4r7V0er69CmLgPQ==}
-
-  agent-base@7.1.4:
-    resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
-    engines: {node: '>= 14'}
 
   agent-base@9.0.0:
     resolution: {integrity: sha512-TQf59BsZnytt8GdJKLPfUZ54g/iaUL2OWDSFCCvMOhsHduDQxO8xC4PNeyIkVcA5KwL2phPSv0douC0fgWzmnA==}
@@ -1582,13 +1569,9 @@ packages:
     resolution: {integrity: sha512-DH0Bqq3DNp5tdOReuNyAA+Ev4Y2GS5FMbZpeTLP6C4CDi0h5nL0BmUPChXw3o/qbHLDWHl49sbNqQVY7bMSDdw==}
     engines: {node: '>=20.19.0'}
 
-  cssstyle@6.2.0:
-    resolution: {integrity: sha512-Fm5NvhYathRnXNVndkUsCCuR63DCLVVwGOOwQw782coXFi5HhkXdu289l59HlXZBawsyNccXfWRYvLzcDCdDig==}
-    engines: {node: '>=20'}
-
-  data-urls@7.0.0:
-    resolution: {integrity: sha512-23XHcCF+coGYevirZceTVD7NdJOqVn+49IHyxgszm+JIiHLoB2TkmPtsYkNWT1pvRSGkc35L6NHs0yHkN2SumA==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+  data-urls@8.0.0:
+    resolution: {integrity: sha512-JQUCCK+/CAGbGGx618PlFZMXH81Jtj7t73CHv9dd/zVWvxgGT2zLFRjnKb+Ng46GIwcy+f7f88qd4duqllK+WQ==}
+    engines: {node: ^22.14.0 || >=24.0.0}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -1715,21 +1698,13 @@ packages:
     resolution: {integrity: sha512-DeOnSPAvOndYKfw075gt8yZzQ7S2hNztw34zBTfhIzLhmBTswIBg5/y+pqu/VD5cYWm5goAFTusDmUEmKZ0PEQ==}
     engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
-  html-encoding-sniffer@6.0.0:
-    resolution: {integrity: sha512-CV9TW3Y3f8/wT0BRFc1/KAVQ3TUHiXmaAb6VW9vtiMFf7SLoMd1PdAc4W3KFOFETBJUb90KatHqlsZMWV+R9Gg==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+  html-encoding-sniffer@7.0.0:
+    resolution: {integrity: sha512-UikN5yr7xsCDAq87Or5or0PAlD3HJJOKVzM05az588WnpDJ4Ux7a2A53Qi6gofGg2/EtvF/H4hCi/TXfCW4Y6w==}
+    engines: {node: ^22.13.0 || >=24.0.0}
 
   htmlparser2@12.0.0:
     resolution: {integrity: sha512-Tz7u1i95/g2x2jz81+x0FBVhBhY5aRTvD3tXXdFaljuNdzDLJ8UGNRrTcj2cgQvAg3iW/h77Fz15nLW0L0CrZw==}
     engines: {node: '>=20.19.0'}
-
-  http-proxy-agent@7.0.2:
-    resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
-    engines: {node: '>= 14'}
-
-  https-proxy-agent@7.0.6:
-    resolution: {integrity: sha512-vK9P5/iUfdl95AI+JVyUuIcVtd4ofvtrOr3HNtM2yxC9bnMbEdp3x01OhQNnjb8IJYi38VlTE3mBXwcfvywuSw==}
-    engines: {node: '>= 14'}
 
   https-proxy-agent@9.1.0:
     resolution: {integrity: sha512-ag87y7cJJ9/3+GxFr8Oy4O5faDsGRGnBGsJj/YjOSsSx/5eadKLYTMPlzuR6obgoCDDm0abAAZitXXQkMOPSpA==}
@@ -1771,11 +1746,11 @@ packages:
   js-tokens@10.0.0:
     resolution: {integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==}
 
-  jsdom@28.1.0:
-    resolution: {integrity: sha512-0+MoQNYyr2rBHqO1xilltfDjV9G7ymYGlAUazgcDLQaUf8JDHbuGwsxN6U9qWaElZ4w1B2r7yEGIL3GdeW3Rug==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+  jsdom@30.1.3:
+    resolution: {integrity: sha512-hQMUPvRgN7KxsfIytDQji7bimuJeRQa6Qo5+iuiZQk5CafeRxLIA10/cG5YCBFNpD9RO3oqIiN4CO1Y44kxqXg==}
+    engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
     peerDependencies:
-      canvas: ^3.0.0
+      canvas: ^3.2.3
     peerDependenciesMeta:
       canvas:
         optional: true
@@ -2243,9 +2218,6 @@ packages:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
 
-  symbol-tree@3.2.4:
-    resolution: {integrity: sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==}
-
   sync-child-process@1.0.2:
     resolution: {integrity: sha512-8lD+t2KrrScJ/7KXCSyfhT3/hRq78rC0wBFqNJXv3mZyn6hW2ypM05JmlSvtqRbeq6jqA94oHbxAr2vYsJ8vDA==}
     engines: {node: '>=16.0.0'}
@@ -2280,9 +2252,9 @@ packages:
     resolution: {integrity: sha512-exgYmnmL/sJpR3upZfXG5PoatXQii55xAiXGXzY+sROLZ/Y+SLcp9PgJNI9Vz37HpQ74WvDcLT8eqm+kV3FzrA==}
     engines: {node: '>=16'}
 
-  tr46@6.0.0:
-    resolution: {integrity: sha512-bLVMLPtstlZ4iMQHpFHTR7GAGj2jxi8Dg0s2h2MafAE4uSWF98FC/3MomU51iQAMf8/qDUbKWf5GxuvvVcXEhw==}
-    engines: {node: '>=20'}
+  tr46@7.0.0:
+    resolution: {integrity: sha512-BcDSDW+SIGWVOns1Zm6Yg91q9AEj7eaID0QDY9oIqJD1A8dscNwMcl9Sms2DeuWCNov1X0/oXanHGYQBSLwZsg==}
+    engines: {node: ^22.14.0 || >=24.0.0}
 
   tslib@2.3.0:
     resolution: {integrity: sha512-N82ooyxVNm6h1riLCoyS9e3fuJ3AMG2zIZs2Gd1ATcSFjSA23Q0fzjjZeh0jbJvWVDZ0cJT8yaNNaaXHzueNjg==}
@@ -2298,9 +2270,9 @@ packages:
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
-  undici@7.30.0:
-    resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
-    engines: {node: '>=20.18.1'}
+  undici@8.12.3:
+    resolution: {integrity: sha512-+fdndUTwBP86cVjihTp21hZHo7d6oj1c/47XPA3lL8mM0XHs+C4EkcjmgRsFnFk2f/UONGDy9ItBItmXsLOQHw==}
+    engines: {node: '>=22.19.0'}
 
   update-browserslist-db@1.3.4:
     resolution: {integrity: sha512-t8wonIOdQyOjtPd2VktlBu6QjTVTks6v8bSi7kd0r2Vll8TK1JYDZtRRdbmCHOAMphkZgrzK+L+vXK4pyZ8t4A==}
@@ -2407,9 +2379,9 @@ packages:
       jsdom:
         optional: true
 
-  w3c-xmlserializer@5.0.0:
-    resolution: {integrity: sha512-o8qghlI8NZHU1lLPrpi2+Uq7abh4GGPpYANlalzWxyWteJOCsr/P+oPBA49TOLu5FTZO4d3F9MnWJfiMo4BkmA==}
-    engines: {node: '>=18'}
+  w3c-xmlserializer@6.0.0:
+    resolution: {integrity: sha512-4Nsy8K5Tr6SPDH9jhKJOHf7ChDrc1zufZTVSF7x72hwuEXBqxqk9G6cK+K2NRUtB3iELRJqjXb4JPDMBjMTl2Q==}
+    engines: {node: ^22.22.2 || ^24.15.0 || >=26.0.0}
 
   weak-lru-cache@1.2.2:
     resolution: {integrity: sha512-DEAoo25RfSYMuTGc9vPJzZcZullwIqRDSI9LOy+fkCJPi6hykCnfKaXTuPBDuXAUcqHXyOgFtHNp/kB2FjYHbw==}
@@ -2422,9 +2394,9 @@ packages:
     resolution: {integrity: sha512-sXcNcHOC51uPGF0P/D4NVtrkjSU2fNsm9iog4ZvZJsL3rjoDAzXZhkm2MWt1y+PUdggKAYVoMAIYcs78wJ51Cw==}
     engines: {node: '>=20'}
 
-  whatwg-url@16.0.1:
-    resolution: {integrity: sha512-1to4zXBxmXHV3IiSSEInrreIlu02vUOvrhxJJH5vcxYTBDAx51cqZiKdyTxlecdKNSjj8EcxGBxNf6Vg+945gw==}
-    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
+  whatwg-url@17.3.0:
+    resolution: {integrity: sha512-KwOAJrpf+GTgBvcBQJcP38sMF0DsQKdwtG+TxM2pW44P6E5k0hDbWrDmyuJDIF0Uef0aQq0ZoJs+5oI+k8ddhg==}
+    engines: {node: ^22.14.0 || >=24.0.0}
 
   why-is-node-running@2.3.0:
     resolution: {integrity: sha512-hUrmaWBdVDcxvYqnyh09zunKzROWjbZTiNy8dBEjkS7ehEDQibXJ7XvlmtbwuTclUiIyN+CyXQD4Vmko8fNm8w==}
@@ -2480,8 +2452,6 @@ packages:
 
 snapshots:
 
-  '@acemir/cssom@0.9.32': {}
-
   '@ampproject/remapping@2.3.0':
     dependencies:
       '@jridgewell/gen-mapping': 0.3.13
@@ -2515,7 +2485,7 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@angular/build@22.2.2(@angular/compiler-cli@22.1.8(@angular/compiler@22.1.8)(typescript@6.0.3))(@angular/compiler@22.1.8)(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(@types/node@24.13.3)(postcss@8.5.30)(supports-color@8.1.1)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11(@types/node@24.13.3)(jsdom@28.1.0(supports-color@8.1.1))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1)))':
+  '@angular/build@22.2.2(@angular/compiler-cli@22.1.8(@angular/compiler@22.1.8)(typescript@6.0.3))(@angular/compiler@22.1.8)(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(@types/node@24.13.3)(postcss@8.5.30)(supports-color@8.1.1)(tslib@2.8.1)(typescript@6.0.3)(vitest@4.1.11(@types/node@24.13.3)(jsdom@30.1.3)(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1)))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@angular-devkit/architect': 0.2202.2(chokidar@5.0.0)
@@ -2553,7 +2523,7 @@ snapshots:
       '@angular/platform-browser': 22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))
       lmdb: 3.5.6
       postcss: 8.5.30
-      vitest: 4.1.11(@types/node@24.13.3)(jsdom@28.1.0(supports-color@8.1.1))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
+      vitest: 4.1.11(@types/node@24.13.3)(jsdom@30.1.3)(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
     transitivePeerDependencies:
       - '@types/node'
       - '@vitejs/devtools'
@@ -2641,25 +2611,20 @@ snapshots:
       rxjs: 7.8.2
       tslib: 2.8.1
 
-  '@asamuzakjp/css-color@5.1.11':
+  '@asamuzakjp/css-color@7.1.9':
     dependencies:
-      '@asamuzakjp/generational-cache': 1.0.1
       '@csstools/css-calc': 3.4.3(@csstools/css-parser-algorithms@4.0.2(@csstools/css-tokenizer@4.0.2))(@csstools/css-tokenizer@4.0.2)
       '@csstools/css-color-parser': 4.2.6(@csstools/css-parser-algorithms@4.0.2(@csstools/css-tokenizer@4.0.2))(@csstools/css-tokenizer@4.0.2)
       '@csstools/css-parser-algorithms': 4.0.2(@csstools/css-tokenizer@4.0.2)
       '@csstools/css-tokenizer': 4.0.2
+      lru-cache: 11.5.3
 
-  '@asamuzakjp/dom-selector@6.8.1':
+  '@asamuzakjp/dom-selector@10.0.5':
     dependencies:
-      '@asamuzakjp/nwsapi': 2.3.9
       bidi-js: 1.1.0
       css-tree: 3.2.1
       is-potential-custom-element-name: 1.0.1
       lru-cache: 11.5.3
-
-  '@asamuzakjp/generational-cache@1.0.1': {}
-
-  '@asamuzakjp/nwsapi@2.3.9': {}
 
   '@babel/code-frame@8.0.6':
     dependencies:
@@ -3415,28 +3380,28 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@slotted/angular@file:../.registry/slotted-angular-0.1.0-beta.0.tgz(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/forms@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(rxjs@7.8.2))(@slotted/core@file:../.registry/slotted-core-0.1.0-beta.0.tgz(echarts@6.1.0))(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.0.tgz)':
+  '@slotted/angular@file:../.registry/slotted-angular-0.1.0-beta.17.tgz(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/forms@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(rxjs@7.8.2))(@slotted/core@file:../.registry/slotted-core-0.1.0-beta.17.tgz(echarts@6.1.0))(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.17.tgz)':
     dependencies:
       '@angular/common': 22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core': 22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)
       '@angular/forms': 22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(@angular/platform-browser@22.1.8(@angular/common@22.1.8(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@22.1.8(@angular/compiler@22.1.8)(rxjs@7.8.2)))(rxjs@7.8.2)
-      '@slotted/core': file:../.registry/slotted-core-0.1.0-beta.0.tgz(echarts@6.1.0)
-      '@slotted/theme': file:../.registry/slotted-theme-0.1.0-beta.0.tgz
+      '@slotted/core': file:../.registry/slotted-core-0.1.0-beta.17.tgz(echarts@6.1.0)
+      '@slotted/theme': file:../.registry/slotted-theme-0.1.0-beta.17.tgz
       tslib: 2.8.1
 
-  '@slotted/core@file:../.registry/slotted-core-0.1.0-beta.0.tgz(echarts@6.1.0)':
+  '@slotted/core@file:../.registry/slotted-core-0.1.0-beta.17.tgz(echarts@6.1.0)':
     dependencies:
       '@floating-ui/dom': 1.8.0
     optionalDependencies:
       echarts: 6.1.0
 
-  '@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.0.tgz':
+  '@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.17.tgz':
     dependencies:
       lightningcss: 1.33.0
 
-  '@slotted/themes@file:../.registry/slotted-themes-0.1.0-beta.0.tgz(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.0.tgz)':
+  '@slotted/themes@file:../.registry/slotted-themes-0.1.0-beta.17.tgz(@slotted/theme@file:../.registry/slotted-theme-0.1.0-beta.17.tgz)':
     optionalDependencies:
-      '@slotted/theme': file:../.registry/slotted-theme-0.1.0-beta.0.tgz
+      '@slotted/theme': file:../.registry/slotted-theme-0.1.0-beta.17.tgz
 
   '@standard-schema/spec@1.1.0': {}
 
@@ -3501,8 +3466,6 @@ snapshots:
       '@vitest/pretty-format': 4.1.11
       convert-source-map: 2.0.0
       tinyrainbow: 3.2.0
-
-  agent-base@7.1.4: {}
 
   agent-base@9.0.0: {}
 
@@ -3609,17 +3572,10 @@ snapshots:
 
   css-what@8.0.0: {}
 
-  cssstyle@6.2.0:
-    dependencies:
-      '@asamuzakjp/css-color': 5.1.11
-      '@csstools/css-syntax-patches-for-csstree': 1.1.15(css-tree@3.2.1)
-      css-tree: 3.2.1
-      lru-cache: 11.5.3
-
-  data-urls@7.0.0:
+  data-urls@8.0.0:
     dependencies:
       whatwg-mimetype: 5.0.0
-      whatwg-url: 16.0.1
+      whatwg-url: 17.3.0
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -3740,7 +3696,7 @@ snapshots:
     dependencies:
       lru-cache: 11.5.3
 
-  html-encoding-sniffer@6.0.0:
+  html-encoding-sniffer@7.0.0:
     dependencies:
       '@exodus/bytes': 1.16.0
     transitivePeerDependencies:
@@ -3752,20 +3708,6 @@ snapshots:
       domhandler: 6.0.1
       domutils: 4.0.2
       entities: 8.1.0
-
-  http-proxy-agent@7.0.2(supports-color@8.1.1):
-    dependencies:
-      agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  https-proxy-agent@7.0.6(supports-color@8.1.1):
-    dependencies:
-      agent-base: 7.1.4
-      debug: 4.4.3(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
 
   https-proxy-agent@9.1.0(supports-color@8.1.1):
     dependencies:
@@ -3802,32 +3744,30 @@ snapshots:
 
   js-tokens@10.0.0: {}
 
-  jsdom@28.1.0(supports-color@8.1.1):
+  jsdom@30.1.3:
     dependencies:
-      '@acemir/cssom': 0.9.32
-      '@asamuzakjp/dom-selector': 6.8.1
+      '@asamuzakjp/css-color': 7.1.9
+      '@asamuzakjp/dom-selector': 10.0.5
       '@bramus/specificity': 2.4.3
+      '@csstools/css-syntax-patches-for-csstree': 1.1.15(css-tree@3.2.1)
       '@exodus/bytes': 1.16.0
-      cssstyle: 6.2.0
-      data-urls: 7.0.0
+      css-tree: 3.2.1
+      data-urls: 8.0.0
       decimal.js: 10.6.0
-      html-encoding-sniffer: 6.0.0
-      http-proxy-agent: 7.0.2(supports-color@8.1.1)
-      https-proxy-agent: 7.0.6(supports-color@8.1.1)
+      html-encoding-sniffer: 7.0.0
       is-potential-custom-element-name: 1.0.1
+      lru-cache: 11.5.3
       parse5: 8.0.1
       saxes: 6.0.0
-      symbol-tree: 3.2.4
       tough-cookie: 6.0.2
-      undici: 7.30.0
-      w3c-xmlserializer: 5.0.0
+      undici: 8.12.3
+      w3c-xmlserializer: 6.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
-      whatwg-url: 16.0.1
+      whatwg-url: 17.3.0
       xml-name-validator: 5.0.0
     transitivePeerDependencies:
       - '@noble/hashes'
-      - supports-color
 
   jsesc@3.1.0: {}
 
@@ -4281,8 +4221,6 @@ snapshots:
     dependencies:
       has-flag: 4.0.0
 
-  symbol-tree@3.2.4: {}
-
   sync-child-process@1.0.2:
     dependencies:
       sync-message-port: 1.2.0
@@ -4310,7 +4248,7 @@ snapshots:
     dependencies:
       tldts: 7.4.18
 
-  tr46@6.0.0:
+  tr46@7.0.0:
     dependencies:
       punycode: 2.3.1
 
@@ -4322,7 +4260,7 @@ snapshots:
 
   undici-types@7.18.2: {}
 
-  undici@7.30.0: {}
+  undici@8.12.3: {}
 
   update-browserslist-db@1.3.4(browserslist@4.29.3):
     dependencies:
@@ -4352,7 +4290,7 @@ snapshots:
       sass: 1.104.1
       sass-embedded: 1.104.1
 
-  vitest@4.1.11(@types/node@24.13.3)(jsdom@28.1.0(supports-color@8.1.1))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1)):
+  vitest@4.1.11(@types/node@24.13.3)(jsdom@30.1.3)(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1)):
     dependencies:
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(vite@8.3.0(@types/node@24.13.3)(esbuild@0.28.2)(sass-embedded@1.104.1)(sass@1.104.1))
@@ -4376,11 +4314,11 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.3
-      jsdom: 28.1.0(supports-color@8.1.1)
+      jsdom: 30.1.3
     transitivePeerDependencies:
       - msw
 
-  w3c-xmlserializer@5.0.0:
+  w3c-xmlserializer@6.0.0:
     dependencies:
       xml-name-validator: 5.0.0
 
@@ -4391,10 +4329,10 @@ snapshots:
 
   whatwg-mimetype@5.0.0: {}
 
-  whatwg-url@16.0.1:
+  whatwg-url@17.3.0:
     dependencies:
       '@exodus/bytes': 1.16.0
-      tr46: 6.0.0
+      tr46: 7.0.0
       webidl-conversions: 8.0.1
     transitivePeerDependencies:
       - '@noble/hashes'

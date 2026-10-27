@@ -22,7 +22,7 @@
     "format:changed": "node scripts/check-changed.mjs format",
     "pack:beta": "pnpm build && node scripts/pack-beta.mjs",
     "release": "node scripts/release.mjs",
-    "demo:refresh": "turbo run build --filter @slotted/angular --filter @slotted/core --filter @slotted/theme --filter @slotted/themes && node scripts/pack-beta.mjs --only @slotted/angular,@slotted/core,@slotted/theme,@slotted/themes && pnpm --dir demos/nexora install && node -e \"require('node:fs').rmSync('demos/nexora/angular/.angular/cache', { recursive: true, force: true })\"",
+    "demo:refresh": "turbo run build --filter @slotted/angular --filter @slotted/core --filter @slotted/theme --filter @slotted/themes && node scripts/pack-beta.mjs --only @slotted/angular,@slotted/core,@slotted/theme,@slotted/themes --pin demos/nexora/angular/package.json && pnpm --dir demos/nexora install && node -e \"require('node:fs').rmSync('demos/nexora/angular/.angular/cache', { recursive: true, force: true })\"",
     "sync:equori": "turbo run build --filter @slotted/core --filter @slotted/react --filter @slotted/theme --filter @slotted/themes && node scripts/pack-beta.mjs --only @slotted/core,@slotted/react,@slotted/theme,@slotted/themes && node scripts/sync-consumer.mjs ../equori/web @slotted/core,@slotted/react,@slotted/theme,@slotted/themes",
     "demo:nexora": "pnpm demo:refresh && pnpm --dir demos/nexora/angular start",
     "lint": "node scripts/check-changed.mjs lint --all",

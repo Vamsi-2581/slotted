@@ -72,7 +72,6 @@ import {
 } from '@slotted/angular/table';
 import { SlToolbar, SlToolbarItem, SlToolbarOverflow } from '@slotted/angular/toolbar';
 import { SlText } from '@slotted/angular/typography';
-import type { ChartSeries } from '@slotted/core/chart';
 import type { MovementListItem } from '@slotted/demo-nexora-backend';
 
 import {
@@ -839,16 +838,16 @@ export class OverviewPage {
   readonly placeholderRows = [1, 2, 3, 4, 5, 6, 7, 8];
   readonly phone = phoneSignal();
 
-  readonly warehouseSeries: readonly ChartSeries[] = [
+  readonly warehouseSeries = [
     { id: 'belowSafety', kind: 'bar', field: 'belowSafety', label: 'Below safety stock' },
     { id: 'belowReorder', kind: 'bar', field: 'belowReorder', label: 'Below reorder point' },
     { id: 'backordered', kind: 'bar', field: 'backordered', label: 'Short on orders' },
-  ];
+  ] as const;
 
-  readonly daySeries: readonly ChartSeries[] = [
+  readonly daySeries = [
     { id: 'in', kind: 'bar', field: 'in', label: 'Brought stock in' },
     { id: 'out', kind: 'bar', field: 'out', label: 'Took stock out' },
-  ];
+  ] as const;
 
   readonly canTransfer = computed(() => {
     void this.session.session();

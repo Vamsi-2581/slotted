@@ -69,7 +69,7 @@ import {
 } from '@slotted/angular/table';
 import { SlToolbar, SlToolbarItem, SlToolbarOverflow } from '@slotted/angular/toolbar';
 import { SlText } from '@slotted/angular/typography';
-import type { ChartNumberFormat, ChartSeries } from '@slotted/core/chart';
+import type { ChartNumberFormat } from '@slotted/core/chart';
 import type { Money } from '@slotted/demo-nexora-backend';
 
 import { formatDate, formatMoney } from '../../core/catalog/catalog.model';
@@ -902,8 +902,8 @@ export class FinanceOverviewPage {
   /** Whole dollars on the axis: the bars compare magnitudes, the table under them holds the cents. */
   readonly dollars: ChartNumberFormat = { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1 };
 
-  readonly agingSeries: readonly ChartSeries[] = [{ id: 'amount', kind: 'bar', field: 'amount', label: 'Outstanding' }];
-  readonly cashSeries: readonly ChartSeries[] = [{ id: 'amount', kind: 'bar', field: 'amount', label: 'Collected' }];
+  readonly agingSeries = [{ id: 'amount', kind: 'bar', field: 'amount', label: 'Outstanding' }] as const;
+  readonly cashSeries = [{ id: 'amount', kind: 'bar', field: 'amount', label: 'Collected' }] as const;
 
   private readonly can = (permission: string): boolean => {
     void this.session.session();

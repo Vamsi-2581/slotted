@@ -97,7 +97,9 @@ it is written by:
 
 - `pnpm demo:refresh`: the loop after one library change — builds
   `@slotted/angular`, `@slotted/core`, `@slotted/theme` and `@slotted/themes`,
-  repacks only those four at the current version, reinstalls `demos/nexora` and deletes
+  repacks only those four at the current version, points
+  `demos/nexora/angular/package.json` at those tarballs
+  (`pack-beta.mjs --pin`), reinstalls `demos/nexora` and deletes
   `demos/nexora/angular/.angular/cache`, so `demos/nexora/angular` sees the
   change on its next `pnpm start` (a running dev server is restarted). The
   dev server pre-bundles the packages into that cache and would otherwise
@@ -116,8 +118,8 @@ it is written by:
   does not need it. The application returns to the published packages with
   `pnpm install --frozen-lockfile --force` in `equori/web`.
 
-A demo names the version it consumes in its own `package.json` and moves to a
-newer one deliberately, the way a consumer would. `pnpm test:release` checks
+A demo names the version it consumes in its own `package.json`; `pnpm
+demo:refresh` is the deliberate step that moves Nexora to the current one. `pnpm test:release` checks
 that the published set and the shared version stay what this section says.
 
 ## Publishing to npm

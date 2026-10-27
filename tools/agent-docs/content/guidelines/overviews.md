@@ -3,7 +3,7 @@ topic: overviews
 prefix: OV
 triggers:
   [overview, dashboard, flagship, figure, stat card, exception, summary, chart, door, phone, narrow]
-families: [stat-card, chart, list, list-item, table, section, grid]
+families: [stat-card, chart, list, list-item, table, section, grid, dashboard-grid, card]
 ---
 
 # Overviews
@@ -82,3 +82,25 @@ Do: Give every card a short label, its figure and one comparison line; detail th
 Don't: Lengthen one card's label to carry its detail, or give one card of the row a part the others lack.
 Seen in: equori · Categories › Rules, the coverage row · corrected in `699fa5c`
 Check: In every row of `stat-card`s, every label has three words or fewer, and either every card has a comparison or none does.
+
+### OV-07 · An arranged overview is a dashboard-grid
+
+Level: SHOULD
+Applies to: an overview whose blocks the reader moves, resizes or hides
+Rule: The overview is one `dashboard-grid` whose blocks are each one of its widgets, and each headline figure is a widget of its own whose title is the figure's label.
+Why: A grid of the application's own with its own menu for hiding blocks repeats the editing, the keyboard moves, the persistence and the Add widget menu the family already draws.
+Do: Give each widget a `value` and a `title`, and let the `auto` `rows` size a figure's widget to its content; persist the layout with the family's own persistence.
+Don't: Build a `grid` of sections with a menu of the application's own that hides or orders them, or put several figures inside one widget.
+Seen in: equori · Overview, the indicators block and its own hide menu · rewritten in `d5726ea` and `e7cf86d`
+Check: Find every control of the overview that hides, moves or resizes a block: each is the `dashboard-grid`'s own.
+
+### OV-08 · Inside a frame, a figure is plain
+
+Level: SHOULD
+Applies to: `stat-card` and `chart` inside a framed region — a widget of the `dashboard-grid`, a `section` with the `surface` `ground`, a `card`
+Rule: A `stat-card` inside a framed region takes the `plain` `fill` and a `chart` takes the `plain` `variant`; a frame inside a frame is a finding.
+Why: The region's frame already separates the figure from its neighbours, and a second frame inside it draws a card within a card whose inner edge sits one inset from the outer.
+Do: Let the region's title name the figure, as a widget's title does, and keep the figure's own header for a status or an action.
+Don't: Leave a `stat-card` at its default `outline` fill, or a `chart` at the `card` `variant`, inside a widget, a surface section or a card.
+Seen in: equori · Overview, outlined stat-cards inside a surface section · corrected
+Check: For each `stat-card` and `chart`, name the frame around it: inside a widget, a surface section or a card, its fill or variant is `plain`.

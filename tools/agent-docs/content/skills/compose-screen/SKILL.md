@@ -41,7 +41,9 @@ topics.
 1. `{{docsDir}}/guidelines/index.md`.
 2. `{{docsDir}}/guidelines/composition.md`, always.
 3. The topic of step 2. Add `layout-alignment.md` and `shell-composition.md`
-   when the screen places controls in a row or in the application frame.
+   when the screen places controls in a row, makes an element of its own
+   `position: sticky` (a summary or a preview beside a form or a list), or
+   works in the application frame.
 4. Add `errors-and-conflicts.md` and `reading-permissions.md` when the screen
    writes data or reads under a role.
 5. When the screen writes an element of its own, follow
@@ -74,6 +76,10 @@ element stands in that slot.
   useDeferredValue or startTransition) (CP-09). A list longer than a hundred
   rows is a `data-grid`, which windows its rows where it has a height of its
   own and is served in pages below 600 pixels (LP-12, LP-14). Its columns, its disabled keys and a function row key are module constants or memoised: a new one on a render of the screen renders every mounted row again. Its renderers, its messages and its tree may be written inline.
+- An element of the screen's own made `position: sticky` stops under the
+  page's chrome: its offset starts at `--slotted-page-sticky-top`, and its
+  height cap subtracts it (LA-06). An offset from the scroller's edge alone
+  sticks it behind the stuck header.
 - Where no anatomy answers the problem, the screen writes an element of its
   own instead of bending a family into a shape it does not have (CP-04). That
   element is built with `{{docsDir}}/skills/build-own-element/SKILL.md`.
@@ -101,3 +107,6 @@ Every region filled by a request and every control that starts one follow
    against the task, and the reason is written beside it.
 6. At 360 pixels with a coarse pointer, the header's actions and the footer's
    actions each occupy one row (LA-03, LA-07).
+7. Each element of the screen's own made sticky: scroll until the page header
+   sticks, at two positions; its top stands at or below the header's title
+   area (LA-06 Check).

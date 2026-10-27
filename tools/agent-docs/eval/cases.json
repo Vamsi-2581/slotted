@@ -98,6 +98,18 @@
       ]
     },
     {
+      "id": "sticky-summary",
+      "skill": "compose-screen",
+      "prompt": "Write the new-order screen in src/: a page whose header stays while the page scrolls, a long form of order lines on the left, and beside it a summary column (subtotal, tax, total, Place order) that stays in view while the form scrolls; submit calls placeOrder(input) in src/api.ts, which you also write as a stub.",
+      "assertions": [
+        { "kind": "no-literal" },
+        {
+          "kind": "mentions",
+          "pattern": "inset-block-start[^;]*--slotted-page-sticky-top|top[^;]*--slotted-page-sticky-top"
+        }
+      ]
+    },
+    {
       "id": "own-element",
       "skill": "compose-screen",
       "prompt": "Write the team capacity screen in src/: a strip of the next 30 days, one focusable and selectable cell per day, each cell tinted by the day's load (low, normal, high, over), with the selected day's assignments listed below the strip; read from fetchCapacity() in src/api.ts, which you also write as a stub returning a Promise.",
@@ -116,6 +128,16 @@
         { "kind": "no-literal" },
         { "kind": "absent", "pattern": "data-part=" },
         { "kind": "mentions", "pattern": "loading" }
+      ]
+    },
+    {
+      "id": "review-overview",
+      "skill": "review-screen",
+      "seed": "review-overview",
+      "prompt": "Review the overview screen in src/ against the library's guidelines and fix every defect you find.",
+      "assertions": [
+        { "kind": "no-literal" },
+        { "kind": "mentions", "pattern": "fill=[\"']plain[\"']" }
       ]
     },
     {

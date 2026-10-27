@@ -1,4 +1,11 @@
-export { Page, PageBody, PageFooter, STICKY_BOTTOM_PROPERTY, usePage } from './page';
+export {
+  Page,
+  PageBody,
+  PageFooter,
+  SCROLLPORT_BLOCK_SIZE_PROPERTY,
+  STICKY_BOTTOM_PROPERTY,
+  usePage,
+} from './page';
 export { PageDefaultsProvider, usePageDefaults } from './page-defaults';
 export type {
   PageBodyProps,

@@ -38,6 +38,13 @@ export type {
 export const STICKY_BOTTOM_PROPERTY = '--slotted-page-sticky-bottom';
 
 /**
+ * The custom property the scroller carries for its own visible height: a
+ * sticky element of the consumer's caps its height by it rather than by the
+ * viewport, which an inset canvas makes taller than the scroller.
+ */
+export const SCROLLPORT_BLOCK_SIZE_PROPERTY = '--slotted-page-scrollport-block-size';
+
+/**
  * The inset lives on the body, so content written straight into the page is
  * drawn against the viewport's edges and nothing else says why. A header is
  * not that content — it carries its own inset — so it is the one child the
@@ -156,20 +163,35 @@ export class SlPage {
       const bar = () => this.native.querySelector<HTMLElement>(':scope > [data-part="footer"]');
       /* The property inherits, so every write invalidates style for everything
          under the scroller: it is written only when the height changes. */
+      const write = (property: string, length: number) => {
+        const value = `${length}px`;
+        if (target.style.getPropertyValue(property) === value) return;
+        target.style.setProperty(property, value);
+      };
+      /* Under `self` the page's own scroll part is what scrolls. */
+      const scroller =
+        (this.resolvedScroll() === 'self'
+          ? this.native.querySelector<HTMLElement>(':scope > [data-part="scroll"]')
+          : null) ?? target;
       const publish = () => {
         const height = this.resolvedScroll() === 'self' ? 0 : (bar()?.offsetHeight ?? 0);
-        const value = `${height}px`;
-        if (target.style.getPropertyValue(STICKY_BOTTOM_PROPERTY) === value) return;
-        target.style.setProperty(STICKY_BOTTOM_PROPERTY, value);
+        write(STICKY_BOTTOM_PROPERTY, height);
       };
-      const observer = new ResizeObserver(publish);
+      /* The scroller is read on a size report only, never while rendering:
+         the observer reports once as soon as it observes. */
+      const observer = new ResizeObserver(() => {
+        publish();
+        write(SCROLLPORT_BLOCK_SIZE_PROPERTY, scroller.clientHeight);
+      });
       observer.observe(this.native);
+      observer.observe(scroller);
       const footer = bar();
       if (footer !== null) observer.observe(footer);
       publish();
       destroyRef.onDestroy(() => {
         observer.disconnect();
         target.style.removeProperty(STICKY_BOTTOM_PROPERTY);
+        target.style.removeProperty(SCROLLPORT_BLOCK_SIZE_PROPERTY);
       });
     });
   }

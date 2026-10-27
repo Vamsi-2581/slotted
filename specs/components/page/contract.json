@@ -64,6 +64,11 @@
       "writer": "page",
       "target": "the nearest scroll container, or the document element",
       "value": "the footer's height while it is mounted, under scroll=ancestor; 0px under scroll=self, where the footer is outside the scroller"
+    },
+    "--slotted-page-scrollport-block-size": {
+      "writer": "page",
+      "target": "the nearest scroll container, or the document element",
+      "value": "the visible block size of what scrolls the page: the scroll container's clientHeight under scroll=ancestor, the page's own scroll part under scroll=self. Under an app-shell whose canvas is inset the scroller is shorter than the viewport, so a consumer's sticky element caps its height by this and not by 100dvh"
     }
   },
   "bridge": {

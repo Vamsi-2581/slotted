@@ -263,8 +263,10 @@ other families stand on. Justify it at the gate before writing it.
 - **Where the page chrome ends is a property the page publishes, and every
   sticky thing under it reads.** `page` writes `--slotted-page-sticky-top` on
   the element that scrolls — the title area's height, plus the tabs, plus the
-  header area while it is pinned or revealed — and `--slotted-page-sticky-bottom`
-  for its footer, and bridges the first into `--slotted-table-sticky-offset` on
+  header area while it is pinned or revealed — `--slotted-page-sticky-bottom`
+  for its footer, and `--slotted-page-scrollport-block-size` for the
+  scroller's own visible height, which an inset application frame makes
+  shorter than the viewport; and it bridges the first into `--slotted-table-sticky-offset` on
   its own root. `section` sticks its header at that height; `table` already
   reads the bridge. A family that adds a sticky part to a page reads the same
   property and never measures the header itself, and a family that adds

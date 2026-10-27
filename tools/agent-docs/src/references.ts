@@ -84,6 +84,9 @@ export function loadCatalog(root: string): Catalog {
       for (const option of Object.keys(defaults ?? {})) add(option, 'option');
     }
     for (const part of Object.keys((contract['anatomy'] as object) ?? {})) add(part, 'part');
+    // The custom properties a family writes on the page at run time.
+    for (const property of Object.keys((contract['runtime'] as object) ?? {}))
+      if (property.startsWith('--slotted-')) add(property, 'token');
     for (const part of Object.keys((contract['elements'] as object) ?? {})) add(part, 'part');
     const states = contract['stateAttributes'];
     for (const state of Array.isArray(states) ? states : Object.keys((states as object) ?? {})) {

@@ -21,11 +21,18 @@ import type {
 /** The custom property the scroller carries for what sticks above the footer. */
 export const STICKY_BOTTOM_PROPERTY = '--slotted-page-sticky-bottom';
 
-/** Writes the footer offset only when it differs from the value already written. */
-function writeStickyBottom(target: HTMLElement, height: number) {
-  const value = `${height}px`;
-  if (target.style.getPropertyValue(STICKY_BOTTOM_PROPERTY) === value) return;
-  target.style.setProperty(STICKY_BOTTOM_PROPERTY, value);
+/**
+ * The custom property the scroller carries for its own visible height: a
+ * sticky element of the consumer's caps its height by it rather than by the
+ * viewport, which an inset canvas makes taller than the scroller.
+ */
+export const SCROLLPORT_BLOCK_SIZE_PROPERTY = '--slotted-page-scrollport-block-size';
+
+/** Writes a length only when it differs from the value already written. */
+function writeLength(target: HTMLElement, property: string, length: number) {
+  const value = `${length}px`;
+  if (target.style.getPropertyValue(property) === value) return;
+  target.style.setProperty(property, value);
 }
 
 const PageContext = createContext<PageContextValue | undefined>(undefined);
@@ -119,7 +126,8 @@ export function Page({
 
   /**
    * The footer's height, written on the scroller so a table's sticky summary
-   * stops above the bar. Under `self` the footer is outside the scroller and
+   * stops above the bar, and the scroller's own visible height, so a sticky
+   * element of the consumer's caps itself by the scroller and not the viewport. Under `self` the footer is outside the scroller and
    * covers nothing, so the property says nought.
    *
    * The property inherits, so every write invalidates style for everything
@@ -129,12 +137,19 @@ export function Page({
   useIsomorphicLayoutEffect(() => {
     if (root === null || typeof ResizeObserver === 'undefined') return undefined;
     const target = findScroller(root) ?? root.ownerDocument.documentElement;
+    /* Under `self` the page's own scroll part is what scrolls. */
+    const scroller =
+      (resolvedScroll === 'self'
+        ? root.querySelector<HTMLElement>(':scope > [data-part="scroll"]')
+        : null) ?? target;
     const observer = new ResizeObserver(() => {
       const bar = root.querySelector<HTMLElement>(':scope > [data-part="footer"]');
       const height = resolvedScroll === 'self' ? 0 : (bar?.offsetHeight ?? 0);
-      writeStickyBottom(target, height);
+      writeLength(target, STICKY_BOTTOM_PROPERTY, height);
+      writeLength(target, SCROLLPORT_BLOCK_SIZE_PROPERTY, scroller.clientHeight);
     });
     observer.observe(root);
+    observer.observe(scroller);
     const bar = root.querySelector<HTMLElement>(':scope > [data-part="footer"]');
     if (bar !== null) observer.observe(bar);
     return () => observer.disconnect();
@@ -145,6 +160,7 @@ export function Page({
     const target = findScroller(root) ?? root.ownerDocument.documentElement;
     return () => {
       target.style.removeProperty(STICKY_BOTTOM_PROPERTY);
+      target.style.removeProperty(SCROLLPORT_BLOCK_SIZE_PROPERTY);
     };
   }, [root]);
 

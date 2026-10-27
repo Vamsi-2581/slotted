@@ -109,9 +109,11 @@ test('publishes the fixed geometry as runtime properties and bridges table', () 
   assert.deepEqual(Object.keys(contract.runtime), [
     '--slotted-page-sticky-top',
     '--slotted-page-sticky-bottom',
+    '--slotted-page-scrollport-block-size',
   ]);
   assert.equal(contract.runtime['--slotted-page-sticky-top'].writer, 'page-header');
   assert.equal(contract.runtime['--slotted-page-sticky-bottom'].writer, 'page');
+  assert.equal(contract.runtime['--slotted-page-scrollport-block-size'].writer, 'page');
   assert.deepEqual(contract.bridge, {
     '--slotted-table-sticky-offset': '--slotted-page-sticky-top',
     '--slotted-table-sticky-offset-end': '--slotted-page-sticky-bottom',

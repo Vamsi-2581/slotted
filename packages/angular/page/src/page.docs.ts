@@ -298,11 +298,11 @@ export const ANGULAR_PAGE_DOCS = {
         'The five decisions an application takes once. A page that states any of them itself still wins',
       ],
       [
-        '--slotted-page-sticky-top, --slotted-page-sticky-bottom',
+        '--slotted-page-sticky-top, --slotted-page-sticky-bottom, --slotted-page-scrollport-block-size',
         'runtime properties on the scroller',
         '—',
         'every family under the page, and the consumer’s own sticky elements inside it',
-        'The height of the chrome that stays at the top, written by the header, and of the footer, written by the page. A section’s sticky header reads the first; a table with stickyTo="page" reads both through the bridge the page writes on its root. A consumer’s own position: sticky element reads the first as well: inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + gap) stops it under the chrome instead of behind the stuck header, and max-block-size: calc(100dvh - var(--slotted-page-sticky-top, 0px) - gap) bounds one that may be taller than the viewport',
+        'The height of the chrome that stays at the top, written by the header, of the footer, and of the scroller itself, written by the page. A section’s sticky header reads the first; a table with stickyTo="page" reads both through the bridge the page writes on its root. A consumer’s own position: sticky element reads the first as well: inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + gap) stops it under the chrome instead of behind the stuck header, and max-block-size: calc(var(--slotted-page-scrollport-block-size, 100dvh) - var(--slotted-page-sticky-top, 0px) - var(--slotted-page-sticky-bottom, 0px) - 2 * gap) bounds one that may be taller than the scroller. The third is the scroller’s visible height, written by the page; under an inset canvas the scroller is shorter than the viewport',
       ],
       [
         'native attributes',
@@ -346,7 +346,10 @@ export const ANGULAR_PAGE_DOCS = {
         source: `.order-summary {
   position: sticky;
   inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + var(--slotted-space-4));
-  max-block-size: calc(100dvh - var(--slotted-page-sticky-top, 0px) - var(--slotted-space-4));
+  max-block-size: calc(
+    var(--slotted-page-scrollport-block-size, 100dvh) - var(--slotted-page-sticky-top, 0px) -
+      var(--slotted-page-sticky-bottom, 0px) - 2 * var(--slotted-space-4)
+  );
   overflow-y: auto;
 }`,
       }),

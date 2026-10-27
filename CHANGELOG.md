@@ -2,6 +2,22 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.18 — 2026-10-27
+
+- test(agent-docs): o teste de inline-message trata a captura ausente das famílias
+- chore(theme): regenera hooks.json depois da saída de --slotted-app-shell-resizer-color
+- test(app-shell): o teste da marca do resizer procura a regra pelo fim do seletor, que o Prettier mantém numa linha
+- docs(evals): avaliação de 2026-10-27
+- docs(inline-message): a mensagem de uma região é um alert
+- feat(description-list): minColumnWidth sm | md escolhe onde a contagem de colunas dobra
+- feat(app-shell): o aside-resizer desenha a marca do splitter em repouso
+- chore(demo): demo:refresh fixa a Nexora na versão corrente (pack-beta --pin); a Nexora passa a 0.1.0-beta.17
+- fix(angular): as entradas de currency-field e menubar passam a públicas; um teste de fonte recusa input, model ou output protected
+
+### Guidelines
+
+- Added: CP-11
+
 ## 0.1.0-beta.17 — 2026-10-27
 
 - docs(evals): avaliação de 2026-10-27

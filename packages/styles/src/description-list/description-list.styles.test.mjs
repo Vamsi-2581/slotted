@@ -122,6 +122,27 @@ test('collapses a span with the count that produced it', () => {
   assert.ok(narrow.includes('--_span-3:var(--_span-1)'));
 });
 
+/** Each fold belongs to one minColumnWidth step, so `sm` keeps two columns where `md` has folded. */
+test('folds the count at the step minColumnWidth names', () => {
+  const at = (size) => {
+    const start = normalized.indexOf(`(max-width:${size})`);
+    return normalized.slice(start, normalized.indexOf('@container', start + 1));
+  };
+  for (const [size, step] of [
+    ['48rem', 'md'],
+    ['37.5rem', 'sm'],
+    ['34rem', 'md'],
+    ['25rem', 'sm'],
+  ]) {
+    const block = at(size);
+    assert.ok(
+      block.includes(`[data-min-column-width='${step}'][data-columns=`),
+      `${size} folds ${step}`,
+    );
+    assert.ok(!block.includes(`[data-min-column-width='${step === 'md' ? 'sm' : 'md'}']`), size);
+  }
+});
+
 /**
  * A weaker state holds itself back for a stronger one, and a state a reader
  * cannot see in colour is a state that was never painted: the finished copy

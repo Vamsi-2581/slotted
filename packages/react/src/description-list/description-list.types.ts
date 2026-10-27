@@ -12,6 +12,9 @@ export type DescriptionListLayout = 'row' | 'stack';
 /** How many pairs stand side by side before the container narrows. */
 export type DescriptionListColumns = 1 | 2 | 3;
 
+/** The narrowest column before the count folds: `md` 17rem, `sm` 12.5rem. */
+export type DescriptionListMinColumnWidth = 'sm' | 'md';
+
 /** Nothing between pairs, a rule between them, or a framed table. */
 export type DescriptionListVariant = 'plain' | 'ruled' | 'framed';
 
@@ -43,6 +46,8 @@ export interface DescriptionListCopyRequest {
 export interface DescriptionListDefaults {
   columns?: DescriptionListColumns | undefined;
   layout?: DescriptionListLayout | undefined;
+  /** The narrowest column before the count folds: `md` holds two columns to 34rem, `sm` to 25rem. */
+  minColumnWidth?: DescriptionListMinColumnWidth | undefined;
   /** The maximum width of the term column, as a CSS length. */
   termWidth?: string | undefined;
   variant?: DescriptionListVariant | undefined;
@@ -68,6 +73,7 @@ export interface DescriptionListItemContextValue {
 export interface DescriptionListRootProps extends ComponentPropsWithRef<'div'> {
   'data-columns': string;
   'data-layout': DescriptionListLayout;
+  'data-min-column-width': DescriptionListMinColumnWidth;
   'data-part': string;
   'data-ui': string;
   'data-variant': DescriptionListVariant;
@@ -82,6 +88,8 @@ export interface DescriptionListProps extends ComponentPropsWithRef<'div'> {
    * read in place of a missing value.
    */
   messages?: PartialMessages<DescriptionListMessages> | undefined;
+  /** The narrowest column before the count folds: `md` holds two columns to 34rem, `sm` to 25rem. */
+  minColumnWidth?: DescriptionListMinColumnWidth | undefined;
   render?: ((props: DescriptionListRootProps) => ReactNode) | undefined;
   /** The maximum width of the term column, as a CSS length. */
   termWidth?: string | undefined;

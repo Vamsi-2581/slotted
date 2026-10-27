@@ -34,6 +34,7 @@ import {
   copyToClipboard,
   DESCRIPTION_LIST_DEFAULT_COLUMNS,
   DESCRIPTION_LIST_DEFAULT_LAYOUT,
+  DESCRIPTION_LIST_DEFAULT_MIN_COLUMN_WIDTH,
   DESCRIPTION_LIST_DEFAULT_VARIANT,
   DESCRIPTION_LIST_EMPTY_VALUE_MARK,
   injectDescriptionListDefaults,
@@ -44,6 +45,7 @@ import {
   type DescriptionListColumns,
   type DescriptionListCopyRequest,
   type DescriptionListLayout,
+  type DescriptionListMinColumnWidth,
   type DescriptionListVariant,
 } from './description-list.constants';
 
@@ -80,6 +82,7 @@ import {
     'data-part-root': '',
     '[attr.data-layout]': 'layoutValue()',
     '[attr.data-columns]': 'columnsValue()',
+    '[attr.data-min-column-width]': 'minColumnWidthValue()',
     '[attr.data-variant]': 'variantValue()',
     '[style.--slotted-description-list-term-width]': 'termWidthValue() ?? null',
   },
@@ -88,6 +91,8 @@ export class SlDescriptionList {
   readonly layout = input<DescriptionListLayout | undefined>(undefined);
   readonly columns = input(undefined, { transform: optionalColumns });
   readonly variant = input<DescriptionListVariant | undefined>(undefined);
+  /** The narrowest column before the count folds: `md` holds two columns to 34rem, `sm` to 25rem. */
+  readonly minColumnWidth = input<DescriptionListMinColumnWidth | undefined>(undefined);
   /** The maximum width of the term column, as a CSS length. */
   readonly termWidth = input<string | undefined>(undefined);
   /**
@@ -104,6 +109,12 @@ export class SlDescriptionList {
   );
   readonly columnsValue = computed(
     () => this.columns() ?? this.defaults.columns ?? DESCRIPTION_LIST_DEFAULT_COLUMNS,
+  );
+  readonly minColumnWidthValue = computed(
+    () =>
+      this.minColumnWidth() ??
+      this.defaults.minColumnWidth ??
+      DESCRIPTION_LIST_DEFAULT_MIN_COLUMN_WIDTH,
   );
   readonly variantValue = computed(
     () => this.variant() ?? this.defaults.variant ?? DESCRIPTION_LIST_DEFAULT_VARIANT,

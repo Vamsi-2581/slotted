@@ -587,7 +587,9 @@
    * before it gives up on the row.
    *
    * The breakpoints are literals because a container condition cannot read a
-   * custom property, which rule 4 of `docs/token-foundation.md` states.
+   * custom property, which rule 4 of `docs/token-foundation.md` states. That is
+   * why `data-min-column-width` is a step and not a length: `md` folds at
+   * sixteen and seventeen rem a column, `sm` at twelve and a half.
    */
   /**
    * A span is stated in tracks, so it collapses with the count that produced
@@ -598,15 +600,31 @@
    * of a four-track grid.
    */
   @container slotted-description-list (max-width: 48rem) {
-    [data-ui-description-list][data-columns='3'] [data-part-list] {
+    [data-ui-description-list][data-min-column-width='md'][data-columns='3'] [data-part-list] {
       --_cols: repeat(2, var(--_pair));
       --_span-3: var(--_span-2);
     }
   }
 
+  @container slotted-description-list (max-width: 37.5rem) {
+    [data-ui-description-list][data-min-column-width='sm'][data-columns='3'] [data-part-list] {
+      --_cols: repeat(2, var(--_pair));
+      --_span-3: var(--_span-2);
+    }
+  }
+
+  @container slotted-description-list (max-width: 25rem) {
+    [data-ui-description-list][data-min-column-width='sm'][data-columns='2'] [data-part-list],
+    [data-ui-description-list][data-min-column-width='sm'][data-columns='3'] [data-part-list] {
+      --_cols: var(--_pair);
+      --_span-2: var(--_span-1);
+      --_span-3: var(--_span-1);
+    }
+  }
+
   @container slotted-description-list (max-width: 34rem) {
-    [data-ui-description-list][data-columns='2'] [data-part-list],
-    [data-ui-description-list][data-columns='3'] [data-part-list] {
+    [data-ui-description-list][data-min-column-width='md'][data-columns='2'] [data-part-list],
+    [data-ui-description-list][data-min-column-width='md'][data-columns='3'] [data-part-list] {
       --_cols: var(--_pair);
       --_span-2: var(--_span-1);
       --_span-3: var(--_span-1);

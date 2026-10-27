@@ -304,6 +304,13 @@ export const ANGULAR_DESCRIPTION_LIST_DOCS = {
         'Nothing between pairs, a rule between them, or a framed table',
       ],
       [
+        'minColumnWidth',
+        "'sm' | 'md'",
+        'md',
+        'slDescriptionList',
+        'The narrowest column before the count folds: md holds two columns to 34rem of the list and three to 48rem; sm holds two to 25rem and three to 37.5rem',
+      ],
+      [
         'termWidth',
         'string',
         '14rem',
@@ -394,7 +401,7 @@ export const ANGULAR_DESCRIPTION_LIST_DOCS = {
         'DescriptionListDefaults',
         '—',
         'Application',
-        'Sets layout, columns, variant and termWidth once for everything below it; an input on the list still wins',
+        'Sets layout, columns, variant, termWidth and minColumnWidth once for everything below it; an input on the list still wins',
       ],
       [
         'id / aria-describedby',

@@ -28,6 +28,7 @@ export function DescriptionListDefaultsProvider({
       value={{
         columns: defaults.columns ?? inherited.columns,
         layout: defaults.layout ?? inherited.layout,
+        minColumnWidth: defaults.minColumnWidth ?? inherited.minColumnWidth,
         termWidth: defaults.termWidth ?? inherited.termWidth,
         variant: defaults.variant ?? inherited.variant,
       }}

@@ -301,6 +301,13 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
         'Nothing between pairs, a rule between them, or a framed table',
       ],
       [
+        'minColumnWidth',
+        "'sm' | 'md'",
+        'md',
+        'DescriptionList',
+        'The narrowest column before the count folds: md holds two columns to 34rem of the list and three to 48rem; sm holds two to 25rem and three to 37.5rem',
+      ],
+      [
         'termWidth',
         'string',
         '14rem',
@@ -389,10 +396,10 @@ export const REACT_DESCRIPTION_LIST_DOCS = {
       ],
       [
         'DescriptionListDefaultsProvider',
-        'layout | columns | variant | termWidth',
+        'layout | columns | variant | termWidth | minColumnWidth',
         '—',
         'Application',
-        'Sets those four once for everything below it; a prop on the list still wins',
+        'Sets those five once for everything below it; a prop on the list still wins',
       ],
       [
         'children',

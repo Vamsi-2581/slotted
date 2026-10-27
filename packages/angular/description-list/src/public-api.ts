@@ -12,6 +12,7 @@ export {
   DESCRIPTION_LIST_DEFAULTS_TOKEN,
   DESCRIPTION_LIST_DEFAULT_COLUMNS,
   DESCRIPTION_LIST_DEFAULT_LAYOUT,
+  DESCRIPTION_LIST_DEFAULT_MIN_COLUMN_WIDTH,
   DESCRIPTION_LIST_DEFAULT_VARIANT,
   injectDescriptionListDefaults,
   overflowsClamp,
@@ -25,5 +26,6 @@ export type {
   DescriptionListCopyRequest,
   DescriptionListDefaults,
   DescriptionListLayout,
+  DescriptionListMinColumnWidth,
   DescriptionListVariant,
 } from './description-list.constants';

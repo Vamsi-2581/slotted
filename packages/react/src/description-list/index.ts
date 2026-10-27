@@ -32,6 +32,7 @@ export type {
   DescriptionListItemProps,
   DescriptionListItemRootProps,
   DescriptionListLayout,
+  DescriptionListMinColumnWidth,
   DescriptionListProps,
   DescriptionListRevealReason,
   DescriptionListRootProps,

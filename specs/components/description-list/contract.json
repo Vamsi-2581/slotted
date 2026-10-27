@@ -38,9 +38,11 @@
   "reflow": {
     "container": "slotted-description-list",
     "breakpoints": {
-      "48rem": "three columns become two",
-      "34rem": "two columns become one",
-      "26rem": "row becomes stack"
+      "48rem": "three columns become two, under minColumnWidth md",
+      "37.5rem": "three columns become two, under minColumnWidth sm",
+      "34rem": "two columns become one, under minColumnWidth md",
+      "26rem": "row becomes stack",
+      "25rem": "two columns become one, under minColumnWidth sm"
     },
     "reason": "The column count collapses before the arrangement does, so the single-column row form gets the full width before it gives up on the row. PatternFly and Ant key the same decisions on the viewport, which is wrong for a list inside a drawer."
   },
@@ -121,7 +123,7 @@
     }
   },
   "provides": {
-    "descriptionListDefaults": ["layout", "columns", "variant", "termWidth"],
+    "descriptionListDefaults": ["layout", "columns", "variant", "termWidth", "minColumnWidth"],
     "toParts": ["layout", "columns", "variant"]
   },
   "stateAttributes": {
@@ -150,7 +152,8 @@
     "layout": ["prop", "defaults", "row"],
     "columns": ["prop", "defaults", "1"],
     "variant": ["prop", "defaults", "plain"],
-    "termWidth": ["prop", "defaults", "14rem"]
+    "termWidth": ["prop", "defaults", "14rem"],
+    "minColumnWidth": ["prop", "defaults", "md"]
   },
   "members": {
     "descriptionList": {
@@ -160,6 +163,7 @@
         "columns": "1",
         "variant": "plain",
         "termWidth": "14rem",
+        "minColumnWidth": "md",
         "span": 1,
         "clamp": 0,
         "copy": false,

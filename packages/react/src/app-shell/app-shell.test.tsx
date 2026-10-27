@@ -848,6 +848,17 @@ describe('AppShell', () => {
       expect(edge).toHaveAttribute('data-part', 'aside-resizer');
     });
 
+    it('draws the splitter mark, line, grip and line, at rest', () => {
+      render(<Resizable asideExtent={0.3} />);
+      const marks = [...separator().children].map((mark) => mark.getAttribute('data-part'));
+      expect(marks).toEqual(['line', 'grip', 'line']);
+      expect(separator().querySelector('[data-part="grip"]')).toHaveAttribute(
+        'aria-hidden',
+        'true',
+      );
+      expect(separator().querySelector('[data-part-line]')).not.toBeNull();
+    });
+
     it('takes its limits from the shell', () => {
       render(<Resizable asideExtent={0.3} maxAsideExtent={0.5} minAsideExtent={0.2} />);
       expect(separator()).toHaveAttribute('aria-valuemin', '20');

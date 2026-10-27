@@ -1000,10 +1000,17 @@ const TAP_SLOP_PX = 3;
  * pane in a left-to-right document, and shrinks it where `navSide="end"` or a
  * mirrored line puts the pane at the start.
  */
-@Directive({
+@Component({
   selector: '[slAppShellAsideResizer]',
   standalone: true,
   exportAs: 'slAppShellAsideResizer',
+  template: `
+    <span data-part="line" data-part-line="" aria-hidden="true"></span>
+    <span data-part="grip" data-part-grip="" aria-hidden="true"></span>
+    <span data-part="line" data-part-line="" aria-hidden="true"></span>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   host: {
     'data-part': 'aside-resizer',
     'data-part-aside-resizer': '',

@@ -685,6 +685,13 @@ export function AppShellAsideResizer({
     'aria-valuemax': percent(shell.maxAsideExtent),
     'aria-valuemin': percent(shell.minAsideExtent),
     'aria-valuenow': percent(current),
+    children: (
+      <>
+        <span aria-hidden="true" data-part="line" data-part-line="" />
+        <span aria-hidden="true" data-part="grip" data-part-grip="" />
+        <span aria-hidden="true" data-part="line" data-part-line="" />
+      </>
+    ),
     className,
     'data-part': 'aside-resizer',
     onKeyDown: keyDown,

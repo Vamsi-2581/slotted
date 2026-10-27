@@ -580,7 +580,7 @@ test('draws the pane edge on the column and never on the layer', () => {
     column
       .replace(/\s+/g, ' ')
       .includes(
-        ":not([data-aside-mode='overlay']) > [data-part-aside] > [data-part-aside-resizer]:not([hidden]) { display: block;",
+        ":not([data-aside-mode='overlay']) > [data-part-aside] > [data-part-aside-resizer]:not([hidden]) { display: flex;",
       ),
     'the wide query shows no edge on the column',
   );
@@ -598,8 +598,16 @@ test('draws the pane edge on the column and never on the layer', () => {
   assert.match(start.body, /inset-inline-start:\s*auto/);
 });
 
-/** A line under the hand, under the drag and under the keyboard; the ring for the keyboard. */
-test('draws the pane edge as a line under the hand and a ring under the keyboard', () => {
+/** The splitter's mark at rest, grown under the hand, the drag and the keyboard; the ring for the keyboard. */
+test('draws the pane edge as the splitter mark at rest and a ring under the keyboard', () => {
+  const first = rule('> [data-part-aside-resizer] > [data-part-line]:first-child {').body;
+  assert.match(first, /linear-gradient\(to bottom, transparent, var\(--_resizer-rest\)\)/);
+  const grip = rule('> [data-part-aside-resizer] > [data-part-grip] {').body;
+  assert.match(grip, /color:\s*var\(--_resizer-rest\)/);
+  assert.match(
+    rule('[data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] {').body,
+    /--_resizer-rest:\s*var\(--slotted-splitter-line-color,/,
+  );
   const lit = css.indexOf('> [data-part-aside-resizer]:not([data-disabled]):hover,');
   assert.notEqual(lit, -1, 'the edge answers no hover');
   const selector = css.slice(lit, css.indexOf('{', lit));

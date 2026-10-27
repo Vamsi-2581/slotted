@@ -735,29 +735,39 @@
    * under `scroll="content"`, and a scroll container clips what stands outside
    * it. The strip is the rows' own inset wide, so it covers padding and no
    * content. `::before` is the reach, transparent and the WCAG 2.2 floor wide.
-   * At rest it draws nothing; under the hand, the drag and the keyboard its
-   * outer border becomes the line, and the keyboard alone adds the ring.
+   *
+   * It draws the `splitter` family's mark from that family's tokens: two
+   * hairlines fading away from a grip, visible at rest. Under the hand, the
+   * drag and the keyboard the lines run the strip in the active step, and the
+   * keyboard alone adds the ring. The measures are `splitter.css`'s.
    */
   [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] {
     --_resizer-thickness: var(--slotted-space-6, 1rem);
     --_resizer-reach: var(--slotted-target-min, 24px);
+    --_resizer-gap: min(var(--slotted-space-9, 2rem), 12%);
+    --_resizer-dot: var(--slotted-space-2, 0.25rem);
+    --_resizer-rest: var(--slotted-splitter-line-color, var(--slotted-border-strong, ButtonBorder));
+    --_resizer-active: var(
+      --slotted-splitter-line-active-color,
+      var(--slotted-text-muted, ButtonText)
+    );
+    align-items: center;
     background: transparent;
-    border: 0 solid transparent;
-    border-inline-start-width: var(--slotted-border-width-thick, 2px);
     box-sizing: border-box;
     cursor: col-resize;
     display: none;
+    flex-direction: column;
+    gap: var(--_resizer-gap);
     inline-size: var(--_resizer-thickness);
     inset-block: 0;
     inset-inline-start: 0;
+    justify-content: center;
     position: absolute;
     touch-action: none;
-    transition: border-color var(--_duration) var(--_easing);
+    transition: gap var(--_duration) var(--_easing);
     z-index: 1;
   }
   [data-ui-app-shell][data-nav-side='end'] > [data-part-aside] > [data-part-aside-resizer] {
-    border-inline-end-width: var(--slotted-border-width-thick, 2px);
-    border-inline-start-width: 0;
     inset-inline-end: 0;
     inset-inline-start: auto;
   }
@@ -767,13 +777,57 @@
     inset-inline: calc((var(--_resizer-reach) - var(--_resizer-thickness)) / -2);
     position: absolute;
   }
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] > [data-part-line] {
+    border-radius: var(--slotted-radius-sm, 2px);
+    flex: 0 1 min(var(--slotted-space-12, 4rem), 20%);
+    inline-size: var(--slotted-border-width-thin, 1px);
+    min-block-size: 0;
+    transition:
+      flex-basis var(--_duration) var(--_easing),
+      background-color var(--_duration) var(--_easing);
+  }
+  [data-ui-app-shell]
+    > [data-part-aside]
+    > [data-part-aside-resizer]
+    > [data-part-line]:first-child {
+    background: linear-gradient(to bottom, transparent, var(--_resizer-rest));
+  }
+  [data-ui-app-shell]
+    > [data-part-aside]
+    > [data-part-aside-resizer]
+    > [data-part-line]:last-child {
+    background: linear-gradient(to top, transparent, var(--_resizer-rest));
+  }
+  [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] > [data-part-grip] {
+    background-image: radial-gradient(circle at center, currentColor 40%, transparent 42%);
+    background-repeat: repeat;
+    background-size: var(--_resizer-dot) var(--_resizer-dot);
+    block-size: calc(3 * var(--_resizer-dot));
+    color: var(--_resizer-rest);
+    flex: none;
+    inline-size: calc(2 * var(--_resizer-dot));
+    transition: color var(--_duration) var(--_easing);
+  }
   [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer]:not([data-disabled]):hover,
   [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer]:focus-visible,
   [data-ui-app-shell][data-dragging] > [data-part-aside] > [data-part-aside-resizer] {
-    border-color: var(
-      --slotted-app-shell-resizer-color,
-      var(--slotted-border-strong, ButtonBorder)
-    );
+    --_resizer-gap: var(--slotted-space-4, 0.5rem);
+    --_resizer-rest: var(--_resizer-active);
+  }
+  [data-ui-app-shell]
+    > [data-part-aside]
+    > [data-part-aside-resizer]:not([data-disabled]):hover
+    > [data-part-line],
+  [data-ui-app-shell]
+    > [data-part-aside]
+    > [data-part-aside-resizer]:focus-visible
+    > [data-part-line],
+  [data-ui-app-shell][data-dragging]
+    > [data-part-aside]
+    > [data-part-aside-resizer]
+    > [data-part-line] {
+    background: var(--_resizer-active);
+    flex-basis: 100%;
   }
   [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
@@ -1437,6 +1491,16 @@
       --_seam: var(--_rule-width) solid CanvasText;
       --_seam-width: var(--_rule-width);
     }
+    /* A gradient resolves to nothing here, so the edge's mark takes flat system colours. */
+    [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] > [data-part-line] {
+      background: ButtonBorder;
+      forced-color-adjust: none;
+    }
+    [data-ui-app-shell] > [data-part-aside] > [data-part-aside-resizer] > [data-part-grip] {
+      background-color: ButtonBorder;
+      background-image: none;
+      forced-color-adjust: none;
+    }
   }
 
   /* ── The disclosure controls ─────────────────────────────────────────── */
@@ -1834,7 +1898,7 @@
     [data-ui-app-shell]:not([data-aside-mode='overlay'])
       > [data-part-aside]
       > [data-part-aside-resizer]:not([hidden]) {
-      display: block;
+      display: flex;
     }
     [data-ui-app-shell]:not([data-aside-mode='overlay'])[data-nav-side='end'] > [data-part-aside] {
       grid-area: 2 / 1 / 3 / 2;

@@ -630,6 +630,13 @@ describe('SlAppShell', () => {
       return { fixture, host: fixture.componentInstance, edge, key };
     }
 
+    it('draws the splitter mark, line, grip and line, at rest', () => {
+      const { edge } = resizable();
+      const marks = [...edge().children].map((mark) => mark.getAttribute('data-part'));
+      expect(marks).toEqual(['line', 'grip', 'line']);
+      expect(edge().querySelector('[data-part="grip"]')?.getAttribute('aria-hidden')).toBe('true');
+    });
+
     it('is a focusable separator for the pane, valued in whole percentages of the shell', () => {
       const { fixture, edge } = resizable();
       const aside = find(fixture, '[data-part="aside"]');

@@ -169,6 +169,19 @@ const anatomy: AnatomyRow[] = [
       'The pane’s inner edge, from the WAI-ARIA Window Splitter pattern: focusable, aria-controls the pane, its three values the extent as whole percentages of the shell. Placed inside AppShellAside; rendering it is the capability. Drawn on the column alone — under asideMode="overlay" or a closed pane it renders nothing, and a row under the content hides it.',
   },
   {
+    part: 'line',
+    element: 'span inside the aside-resizer, aria-hidden',
+    required: false,
+    purpose:
+      'One of the splitter family’s two hairlines on the pane’s edge, drawn from the splitter tokens: fading away from the grip at rest, running the strip under the hand, the drag and the keyboard.',
+  },
+  {
+    part: 'grip',
+    element: 'span inside the aside-resizer, aria-hidden',
+    required: false,
+    purpose: 'The dot matrix between the two lines, two columns by three rows, in the line’s step.',
+  },
+  {
     part: 'aside-header',
     element: 'div',
     required: false,

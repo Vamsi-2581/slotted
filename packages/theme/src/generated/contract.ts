@@ -2817,7 +2817,6 @@ export type ComponentToken =
   | '--slotted-app-shell-nav-surface'
   | '--slotted-app-shell-radius'
   | '--slotted-app-shell-rail-size'
-  | '--slotted-app-shell-resizer-color'
   | '--slotted-app-shell-row-font-size'
   | '--slotted-app-shell-row-gap'
   | '--slotted-app-shell-row-height'
@@ -5082,7 +5081,6 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-app-shell-nav-surface",
   "--slotted-app-shell-radius",
   "--slotted-app-shell-rail-size",
-  "--slotted-app-shell-resizer-color",
   "--slotted-app-shell-row-font-size",
   "--slotted-app-shell-row-gap",
   "--slotted-app-shell-row-height",

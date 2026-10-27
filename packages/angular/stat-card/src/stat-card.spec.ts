@@ -4,7 +4,7 @@ import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { describe, expect, it } from 'vitest';
 
-import { SlSparkline } from '@slotted/angular/sparkline';
+import { provideSparklineDefaults, SlSparkline } from '@slotted/angular/sparkline';
 
 import { SlStatCard } from './stat-card';
 import { SlStatCardDelta } from './stat-card-delta';
@@ -261,5 +261,26 @@ describe('SlStatCard', () => {
     expect(trendOf(0)).toBe('flat');
     expect(toneOf('down', 'down')).toBe('success');
     expect(toneOf('up', 'none')).toBe('neutral');
+  });
+});
+
+describe('SlStatCardTrend', () => {
+  const sparkline = (root: HTMLElement) =>
+    root.querySelector('[data-ui="sparkline"]') as HTMLElement;
+
+  it('smooths and washes a line unless the application says otherwise', () => {
+    const { part } = mount();
+    const line = sparkline(part('trend')!);
+
+    expect(line.getAttribute('data-curve')).toBe('monotone');
+    expect(line.querySelector('[data-part="area"]')).not.toBeNull();
+  });
+
+  it('leaves the application its own sparkline defaults', () => {
+    const { part } = mount([provideSparklineDefaults({ curve: 'linear', area: false })]);
+    const line = sparkline(part('trend')!);
+
+    expect(line.getAttribute('data-curve')).toBe('linear');
+    expect(line.querySelector('[data-part="area"]')).toBeNull();
   });
 });

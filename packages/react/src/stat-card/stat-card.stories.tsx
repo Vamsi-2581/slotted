@@ -364,13 +364,13 @@ export const Layout: Story = {
     <Grid columns={2} gap={5}>
       <Scene
         label='layout="inline"'
-        note="The trend in its own column, centred on the figure beside it."
+        note="The trend in its own column, as tall as the figure beside it."
       >
         <OpenOrders layout="inline" />
       </Scene>
       <Scene
         label='layout="stacked"'
-        note="The trend takes the last row at full width, level with the bottom of every card in the row."
+        note="The trend takes the last row and runs to the card’s edges, level with the bottom of every card in the row."
       >
         <OpenOrders layout="stacked" />
       </Scene>

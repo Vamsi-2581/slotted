@@ -121,7 +121,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: false,
     purpose:
-      'Where a Sparkline goes: beside the figure, or under it when stacked or under 220 pixels. Hands the sparkline the card’s tone and ground; a block placeholder while loading; hidden under forty pixels.',
+      'Where a Sparkline goes: beside the figure, or under it when stacked or under 220 pixels. Hands the sparkline the card’s tone, ground and box, and draws a line smoothed and washed unless the application or the sparkline says otherwise; a block placeholder in the same box while loading; hidden under forty pixels.',
   },
   {
     part: 'message',
@@ -196,7 +196,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'layout',
     title: 'The trend beside the figure, or under it',
-    note: 'inline puts the sparkline in a column beside the value, centred on the figure; stacked gives it the full width on the last row, level with the bottom of every card in the row. Under 220 pixels a card stacks on its own and drops the value one step.',
+    note: 'inline puts the sparkline in a column beside the value, as tall as the figure; stacked runs it to the card’s edges on the last row, level with the bottom of every card in the row. Under 220 pixels a card stacks on its own and drops the value one step.',
     snippet: defineSnippet({
       id: 'stat-card-react-layout',
       language: 'tsx',
@@ -207,7 +207,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'loading',
     title: 'The layout is kept while the value is on its way',
-    note: 'Every text part stands in with a placeholder of its own line height and the trend with a block the sparkline’s height, so nothing moves when the numbers arrive; the previous value is not shown as if it were current.',
+    note: 'Every text part stands in with a placeholder of its own line height and the trend with a block in the trend’s own box, so nothing moves when the numbers arrive; the previous value is not shown as if it were current.',
     snippet: defineSnippet({
       id: 'stat-card-react-loading',
       language: 'tsx',
@@ -386,7 +386,7 @@ export const REACT_STAT_CARD_DOCS = {
         'children',
         '—',
         'StatCard',
-        'Takes a Sparkline and hands it the card’s tone through --slotted-sparkline-color and its ground for the marker’s ring; a tone or series on the sparkline still wins',
+        'Takes a Sparkline and hands it the card’s tone through --slotted-sparkline-color, its ground for the marker’s ring, and curve="monotone" with area unless sparkline defaults or the sparkline state otherwise; a tone or series on the sparkline still wins',
       ],
       [
         'StatCardStatus, StatCardAction',

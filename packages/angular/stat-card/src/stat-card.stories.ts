@@ -279,8 +279,8 @@ export const Layout: Story = {
     props: DATA,
     template: `
 <div slGrid [columns]="2" [gap]="5">
-  ${scene('layout="inline"', 'The trend in its own column, centred on the figure beside it.', openOrders('layout="inline"'))}
-  ${scene('layout="stacked"', 'The trend takes the last row at full width, level with the bottom of every card in the row.', openOrders('layout="stacked"'))}
+  ${scene('layout="inline"', 'The trend in its own column, as tall as the figure beside it.', openOrders('layout="inline"'))}
+  ${scene('layout="stacked"', 'The trend takes the last row and runs to the card’s edges, level with the bottom of every card in the row.', openOrders('layout="stacked"'))}
 </div>`,
   }),
 };

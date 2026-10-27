@@ -1,11 +1,11 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
-import type { ComponentPropsWithRef } from 'react';
+import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { SlottedProvider } from '../i18n';
-import { Sparkline } from '../sparkline';
+import { Sparkline, SparklineDefaultsProvider } from '../sparkline';
 import {
   StatCard,
   StatCardAction,
@@ -318,5 +318,35 @@ describe('StatCard', () => {
     expect(toneOf('down', 'down')).toBe('success');
     expect(toneOf('down', 'up')).toBe('danger');
     expect(toneOf('up', 'none')).toBe('neutral');
+  });
+});
+
+describe('StatCardTrend', () => {
+  const card = (sparkline: ReactNode) => (
+    <StatCard delta={0.1}>
+      <StatCardFigure>
+        <StatCardValue value={12} />
+      </StatCardFigure>
+      <StatCardTrend>{sparkline}</StatCardTrend>
+    </StatCard>
+  );
+  const line = () => document.querySelector('[data-ui="sparkline"]')!;
+
+  it('smooths and washes a line unless the application or the sparkline says otherwise', () => {
+    const { rerender } = render(card(<Sparkline data={[1, 3, 2]} label="Orders" />));
+    expect(line()).toHaveAttribute('data-curve', 'monotone');
+    expect(line().querySelector('[data-part="area"]')).not.toBeNull();
+
+    rerender(card(<Sparkline area={false} curve="linear" data={[1, 3, 2]} label="Orders" />));
+    expect(line()).toHaveAttribute('data-curve', 'linear');
+    expect(line().querySelector('[data-part="area"]')).toBeNull();
+
+    rerender(
+      <SparklineDefaultsProvider area={false} curve="linear">
+        {card(<Sparkline data={[1, 3, 2]} label="Orders" />)}
+      </SparklineDefaultsProvider>,
+    );
+    expect(line()).toHaveAttribute('data-curve', 'linear');
+    expect(line().querySelector('[data-part="area"]')).toBeNull();
   });
 });

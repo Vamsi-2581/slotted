@@ -4443,6 +4443,9 @@ export type ComponentToken =
   | '--slotted-stat-card-region-gap-sm'
   | '--slotted-stat-card-shadow'
   | '--slotted-stat-card-shadow-elevated'
+  | '--slotted-stat-card-trend-block-size'
+  | '--slotted-stat-card-trend-block-size-lg'
+  | '--slotted-stat-card-trend-block-size-sm'
   | '--slotted-stat-card-trend-gap'
   | '--slotted-stat-card-trend-gap-lg'
   | '--slotted-stat-card-trend-gap-sm'
@@ -6705,6 +6708,9 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-stat-card-region-gap-sm",
   "--slotted-stat-card-shadow",
   "--slotted-stat-card-shadow-elevated",
+  "--slotted-stat-card-trend-block-size",
+  "--slotted-stat-card-trend-block-size-lg",
+  "--slotted-stat-card-trend-block-size-sm",
   "--slotted-stat-card-trend-gap",
   "--slotted-stat-card-trend-gap-lg",
   "--slotted-stat-card-trend-gap-sm",

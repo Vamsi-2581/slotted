@@ -28,6 +28,13 @@
       --slotted-stat-card-trend-inline-size,
       calc(var(--slotted-space-12, 4rem) * 1.5)
     );
+    /* The trend's height when it takes the last row and the card's whole
+       width: one step above the sparkline's own, because a line as wide as
+       the card at the sparkline's height reads flat. */
+    --_trend-block: var(--slotted-stat-card-trend-block-size, var(--slotted-space-11, 3rem));
+    /* The least height of a trend beside the figure, which otherwise takes
+       the figure's height: the sparkline's own step. */
+    --_trend-floor: var(--slotted-sparkline-block-size, var(--slotted-space-9, 2rem));
 
     --_surface: var(--slotted-stat-card-background, var(--slotted-surface-raised, Canvas));
     --_edge: var(--slotted-stat-card-border-color, var(--slotted-border-subtle, ButtonBorder));
@@ -102,6 +109,8 @@
     --_region-gap: var(--slotted-stat-card-region-gap-sm, var(--slotted-space-2, 0.25rem));
     --_trend-gap: var(--slotted-stat-card-trend-gap-sm, var(--slotted-space-5, 0.75rem));
     --_trend-size: var(--slotted-stat-card-trend-inline-size-sm, var(--slotted-space-12, 4rem));
+    --_trend-block: var(--slotted-stat-card-trend-block-size-sm, var(--slotted-space-9, 2rem));
+    --_trend-floor: var(--slotted-sparkline-block-size-sm, var(--slotted-space-7, 1.25rem));
     --_value-size: var(
       --slotted-stat-card-value-font-size-sm,
       var(--slotted-font-size-2xl, 1.25rem)
@@ -135,6 +144,8 @@
       --slotted-stat-card-trend-inline-size-lg,
       calc(var(--slotted-space-12, 4rem) * 2)
     );
+    --_trend-block: var(--slotted-stat-card-trend-block-size-lg, var(--slotted-space-12, 4rem));
+    --_trend-floor: var(--slotted-sparkline-block-size-lg, var(--slotted-space-11, 3rem));
     --_value-size: var(--slotted-stat-card-value-font-size-lg, var(--slotted-font-size-4xl, 2rem));
     --_value-line: var(
       --slotted-stat-card-value-line-height-lg,
@@ -239,8 +250,8 @@
       grid-template-areas:
         'header'
         'figure'
-        'trend'
-        'message';
+        'message'
+        'trend';
       grid-template-columns: minmax(0, 1fr);
       grid-template-rows: auto minmax(0, 1fr) auto auto;
     }
@@ -281,7 +292,7 @@
       /* The marker's ring is the card's ground, not the page's. */
       --slotted-sparkline-ring-color: var(--_surface);
 
-      align-self: center;
+      align-self: stretch;
       container-name: stat-card-trend;
       container-type: inline-size;
       grid-area: trend;
@@ -298,10 +309,32 @@
     }
   }
 
+  /**
+   * On the last row the trend reaches the card's edges: its sides and its
+   * bottom bleed through the inset, and the card's corners round it. A line
+   * drawn inside the inset ends a gutter short of each edge and reads as a
+   * picture placed in the card; a line that runs to the frame reads as the
+   * card's ground. The edge is drawn over it, out of flow. A plain card has
+   * no inset, so the margins are nought there.
+   */
   @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
     :scope[data-layout='stacked'] [data-part-trend] {
       align-self: end;
+      border-end-end-radius: calc(var(--_radius) - var(--_edge-width));
+      border-end-start-radius: calc(var(--_radius) - var(--_edge-width));
+      margin-block-end: calc(-1 * var(--_inset-block));
       margin-block-start: var(--slotted-space-2, 0.25rem);
+      margin-inline: calc(-1 * var(--_inset-inline));
+      overflow: clip;
+      /* The region is wider than the column by the two insets. */
+      inline-size: auto;
+    }
+  }
+
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-layout='stacked'] [data-part-trend] > * {
+      block-size: var(--_trend-block);
+      min-block-size: 0;
     }
   }
 
@@ -324,8 +357,8 @@
         grid-template-areas:
           'header'
           'figure'
-          'trend'
-          'message';
+          'message'
+          'trend';
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: auto minmax(0, 1fr) auto auto;
       }
@@ -334,7 +367,21 @@
     @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
       :scope [data-part-trend] {
         align-self: end;
+        border-end-end-radius: calc(var(--_radius) - var(--_edge-width));
+        border-end-start-radius: calc(var(--_radius) - var(--_edge-width));
+        margin-block-end: calc(-1 * var(--_inset-block));
         margin-block-start: var(--slotted-space-2, 0.25rem);
+        margin-inline: calc(-1 * var(--_inset-inline));
+        overflow: clip;
+        /* The region is wider than the column by the two insets. */
+        inline-size: auto;
+      }
+    }
+
+    @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+      :scope [data-part-trend] > * {
+        block-size: var(--_trend-block);
+        min-block-size: 0;
       }
     }
 
@@ -636,8 +683,24 @@
    */
   @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
     :scope [data-part-trend] {
-      align-self: center;
       display: flex;
+    }
+  }
+
+  /**
+   * Beside the figure the trend is as tall as the figure — the value, the
+   * delta and the comparison under them — so its last point is read level
+   * with the number it ends at, and no gap opens above or below a line of a
+   * fixed height centred on a taller column. The sparkline's own step is the
+   * floor, for a figure with no comparison.
+   */
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope [data-part-trend] > * {
+      block-size: auto;
+      /* No height of its own to give the row: the drawing would otherwise
+         make the figure's row taller than the figure. */
+      contain: size;
+      min-block-size: var(--_trend-floor);
     }
   }
 
@@ -713,9 +776,10 @@
 
   /**
    * The binding renders a `skeleton` in place of each text part and a block
-   * in the trend, each the height of what it stands for; the sheet only has
-   * to keep the trend's box at the sparkline's height so the card does not
-   * change size when the line arrives.
+   * in the trend. The block is the trend region's child, so the rules that
+   * size a sparkline there size it too: the figure's height beside the
+   * figure, the card's width and `--_trend-block` on the last row. The card
+   * does not change size when the line arrives.
    */
   /**
    * The value's box is an inline flex line, so its height is its content's.
@@ -729,33 +793,6 @@
   @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
     :scope[data-loading] [data-part-value] {
       min-block-size: calc(var(--_value-size) * var(--_value-line));
-    }
-  }
-
-  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
-    :scope[data-loading] [data-part-trend] {
-      --slotted-skeleton-block-size: var(
-        --slotted-sparkline-block-size,
-        var(--slotted-space-9, 2rem)
-      );
-    }
-  }
-
-  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
-    :scope[data-loading][data-size='sm'] [data-part-trend] {
-      --slotted-skeleton-block-size: var(
-        --slotted-sparkline-block-size-sm,
-        var(--slotted-space-7, 1.25rem)
-      );
-    }
-  }
-
-  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
-    :scope[data-loading][data-size='lg'] [data-part-trend] {
-      --slotted-skeleton-block-size: var(
-        --slotted-sparkline-block-size-lg,
-        var(--slotted-space-11, 3rem)
-      );
     }
   }
 }

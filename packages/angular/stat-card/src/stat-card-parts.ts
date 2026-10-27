@@ -8,6 +8,7 @@ import {
   ViewEncapsulation,
 } from '@angular/core';
 import { SlSkeleton } from '@slotted/angular/skeleton';
+import { SPARKLINE_DEFAULTS_TOKEN } from '@slotted/angular/sparkline';
 
 import { SlStatCard } from './stat-card';
 
@@ -109,14 +110,32 @@ export class SlStatCardComparison {
 }
 
 /**
- * Where a sparkline goes. The stylesheet hands it the card's tone and the
- * card's ground; while loading it holds a block the sparkline's height, so
- * the card does not change size when the line arrives.
+ * Where a sparkline goes. The stylesheet hands it the card's tone, the card's
+ * ground and its box; while loading it holds a block in that box, so the card
+ * does not change size when the line arrives.
+ *
+ * A line here is smoothed and washed unless the application or the sparkline
+ * says otherwise: a card's trend is read as a shape, and twelve points joined
+ * by straight segments read as a jagged edge at this size. The provider is on
+ * the host, so the projected sparkline reads it.
  */
 @Component({
   selector: '[slStatCardTrend]',
   standalone: true,
   imports: [SlSkeleton],
+  providers: [
+    {
+      provide: SPARKLINE_DEFAULTS_TOKEN,
+      useFactory: () => {
+        const inherited = inject(SPARKLINE_DEFAULTS_TOKEN, { skipSelf: true });
+        return {
+          ...inherited,
+          area: inherited.area ?? true,
+          curve: inherited.curve ?? 'monotone',
+        };
+      },
+    },
+  ],
   template: `@if (card.loading()) {
       <span slSkeleton shape="block"></span>
     } @else {

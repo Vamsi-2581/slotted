@@ -2,6 +2,7 @@ import { keyedProps } from '@slotted/core/selector-key';
 import '@slotted/styles/stat-card/stat-card.css';
 
 import { Skeleton } from '../skeleton';
+import { SparklineDefaultsProvider, useSparklineDefaults } from '../sparkline';
 import { useStatCard } from './stat-card-context';
 import type {
   StatCardActionProps,
@@ -83,16 +84,30 @@ export function StatCardPeriod({ render, ...nativeProps }: StatCardPeriodProps) 
 }
 
 /**
- * Where a sparkline goes. The stylesheet hands it the card's tone and the
- * card's ground; while loading it holds a block the sparkline's height, so
- * the card does not change size when the line arrives.
+ * Where a sparkline goes. The stylesheet hands it the card's tone, the card's
+ * ground and its box; while loading it holds a block in that box, so the card
+ * does not change size when the line arrives.
+ *
+ * A line here is smoothed and washed unless the application or the sparkline
+ * says otherwise: a card's trend is read as a shape, and twelve points joined
+ * by straight segments read as a jagged edge at this size.
  */
 export function StatCardTrend({ children, render, ...nativeProps }: StatCardTrendProps) {
   const { loading, status } = useStatCard();
+  const inherited = useSparklineDefaults();
   if (!loading && status !== 'ready') return null;
   const props = keyedProps({
     ...nativeProps,
-    children: loading ? <Skeleton shape="block" /> : children,
+    children: loading ? (
+      <Skeleton shape="block" />
+    ) : (
+      <SparklineDefaultsProvider
+        area={inherited.area ?? true}
+        curve={inherited.curve ?? 'monotone'}
+      >
+        {children}
+      </SparklineDefaultsProvider>
+    ),
     'data-part': 'trend',
   });
   return render === undefined ? <div {...props} /> : render(props);

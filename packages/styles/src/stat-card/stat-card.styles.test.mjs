@@ -135,8 +135,36 @@ test('gives the value its width and lets the trend give way', () => {
 test('levels a row of cards: figures at the top, stacked trends at the bottom', () => {
   assert.ok(body(`${ui} [data-part-body]`).includes('grid-template-rows:auto minmax(0,1fr) auto'));
   assert.ok(body(`${ui} [data-part-figure]`).includes('align-self:start'));
-  assert.ok(body(`${ui} [data-part-trend]`).includes('align-self:center'));
+  assert.ok(body(`${ui} [data-part-trend]`).includes('align-self:stretch'));
   assert.ok(body(`${ui}[data-layout='stacked'] [data-part-trend]`).includes('align-self:end'));
+});
+
+/**
+ * Beside the figure the trend takes the figure's height, floored at the
+ * sparkline's step; on the last row it bleeds through the inset to the card's
+ * edges and takes a height of its own.
+ */
+test('sizes the trend to the figure beside it and bleeds it to the edges below it', () => {
+  const beside = body(`${ui} [data-part-trend] > *`);
+  assert.ok(beside.includes('block-size:auto'));
+  assert.ok(beside.includes('min-block-size:var(--_trend-floor)'));
+  for (const scope of [undefined, '@container stat-card (max-width:219px)']) {
+    const selector = scope
+      ? `${ui} [data-part-trend]`
+      : `${ui}[data-layout='stacked'] [data-part-trend]`;
+    const below = body(selector, scope);
+    assert.ok(below.includes('margin-inline:calc(-1 * var(--_inset-inline))'));
+    assert.ok(below.includes('margin-block-end:calc(-1 * var(--_inset-block))'));
+    assert.ok(below.includes('overflow:clip'));
+    assert.ok(
+      body(selector.replace('[data-part-trend]', '[data-part-trend] > *'), scope).includes(
+        'block-size:var(--_trend-block)',
+      ),
+    );
+  }
+  /* The message comes before the trend, so the trend is the last row and its
+     bleed meets the bottom edge. */
+  assert.match(body(`${ui}[data-layout='stacked'] [data-part-body]`), /'message'\s*'trend'/);
 });
 
 test('stacks the trend under the figure below 220 pixels, and steps the value down', () => {
@@ -247,12 +275,9 @@ test('hands its tone and its ground to the sparkline in its trend', () => {
   );
 });
 
-test('keeps the trend the height of the sparkline while it loads', () => {
-  assert.ok(
-    body(`${ui}[data-loading] [data-part-trend]`).includes('--slotted-skeleton-block-size:'),
-  );
-  assert.ok(rule(`${ui}[data-loading][data-size='sm'] [data-part-trend]`));
-  assert.ok(rule(`${ui}[data-loading][data-size='lg'] [data-part-trend]`));
+/** The placeholder is the region's child, so the rules that size a sparkline size it. */
+test('keeps the trend in the same box while it loads', () => {
+  assert.ok(!rule(`${ui}[data-loading] [data-part-trend]`));
 });
 
 /**

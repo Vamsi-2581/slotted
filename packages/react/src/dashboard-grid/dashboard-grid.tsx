@@ -4,6 +4,7 @@ import '@slotted/styles/visually-hidden/visually-hidden.css';
 
 import {
   cellAt,
+  DASHBOARD_SUBROWS,
   dashboardKeyIntent,
   gridStyle,
   layoutsEqual,
@@ -19,7 +20,7 @@ import {
   resolveColumns,
   resolveTiles,
   setTileHidden,
-  observeContentRows,
+  observeContentSpan,
   sizeClassOf,
   spanFromTravel,
   swapTiles,
@@ -51,7 +52,7 @@ import {
   type KeyboardEvent,
   type MouseEvent,
   type PointerEvent,
-  type ReactElement,
+  type ReactNode,
 } from 'react';
 
 import { Button } from '../button';
@@ -66,6 +67,9 @@ import {
 } from '../result-state';
 import {
   DashboardGridContext,
+  DashboardWidgetHostContext,
+  DECLARED,
+  type DashboardWidgetDeclaration,
   type DashboardEdge,
   type DashboardGridContextValue,
   type DashboardSlot,
@@ -143,16 +147,15 @@ function classOf(root: HTMLElement | null, expandedFrom?: number): DashboardSize
     : 'expanded';
 }
 
-/** The widget's own declaration, read from the element the consumer wrote. */
+/** The widget's own declaration: the element the consumer wrote, or what it declared on mount. */
 function specOf(
-  element: ReactElement<DashboardWidgetProps>,
-  contentRows: ReadonlyMap<string, number>,
+  props: DashboardWidgetDeclaration,
+  contentSpans: ReadonlyMap<string, number>,
 ): DashboardWidgetSpec {
-  const { props } = element;
-  const measured = props.rows === 'auto' ? contentRows.get(props.value) : undefined;
+  const measured = props.rows === 'auto' ? contentSpans.get(props.value) : undefined;
   return {
     key: props.value,
-    ...(measured === undefined ? {} : { contentRows: measured }),
+    ...(measured === undefined ? {} : { contentSpan: measured }),
     ...(props.defaultColumns === undefined ? {} : { defaultColumns: props.defaultColumns }),
     ...(props.defaultRows === undefined ? {} : { defaultRows: props.defaultRows }),
     ...(props.minColumns === undefined ? {} : { minColumns: props.minColumns }),
@@ -177,9 +180,12 @@ interface Tracks {
 function tracksOf(list: HTMLElement, columns: number): Tracks {
   const styles = getComputedStyle(list);
   const columnGap = parseFloat(styles.columnGap) || 0;
-  const rowGap = parseFloat(styles.rowGap) || 0;
   const track = (list.clientWidth - columnGap * (columns - 1)) / Math.max(1, columns);
-  return { columns, track, columnGap, row: parseFloat(styles.gridAutoRows) || 0, rowGap };
+  /* The tracks are sub-rows with no gap between them; a row is twelve of them
+     less the gap its widget draws below itself. */
+  const pitch = (parseFloat(styles.gridAutoRows) || 0) * DASHBOARD_SUBROWS;
+  const row = Math.max(0, pitch - columnGap);
+  return { columns, track, columnGap, row, rowGap: columnGap };
 }
 
 /** Where a widget was picked up, relative to the grid, in logical terms. */
@@ -216,6 +222,25 @@ function writeOrigin(element: HTMLElement, origin: Origin) {
 function clearLift(element: HTMLElement | undefined) {
   if (element === undefined) return;
   for (const name of LIFT) element.style.removeProperty(name);
+}
+
+/** The children with every fragment opened, in the order they were written. */
+function flatten(children: ReactNode, into: ReactNode[] = []): ReactNode[] {
+  Children.forEach(children, (child) => {
+    if (isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment) {
+      flatten(child.props.children, into);
+    } else {
+      into.push(child);
+    }
+  });
+  return into;
+}
+
+function sameDeclaration(
+  a: DashboardWidgetDeclaration | undefined,
+  b: DashboardWidgetDeclaration,
+): boolean {
+  return a !== undefined && DECLARED.every((name) => a[name] === b[name]);
 }
 
 function sameSlot(a: DashboardSlot, b: DashboardSlot): boolean {
@@ -280,25 +305,70 @@ export function DashboardGrid({
   const headingLevel = headingLevelProp ?? defaults.headingLevel;
   const statusId = `${useId()}-edit-status`;
 
-  /* The widgets, in the order the consumer wrote them, by value. */
-  const elements = useMemo(() => {
-    const byKey = new Map<string, ReactElement<DashboardWidgetProps>>();
-    Children.forEach(children, (child) => {
-      if (!isValidElement<DashboardWidgetProps>(child)) return;
-      const key = child.props.value;
-      if (typeof key === 'string' && !byKey.has(key)) byKey.set(key, child);
-    });
-    return byKey;
-  }, [children]);
+  /**
+   * The widgets, in the order the consumer wrote them, by value. A child that
+   * carries `value` is read where it stands, so it is laid out on the server
+   * and in the first paint. Any other child — a component that renders a
+   * widget — is drawn inside a host the widget declares itself through once
+   * it mounts; until then it is drawn after the others and its widget draws
+   * nothing. Fragments are read through.
+   */
+  const [declared, setDeclared] = useState<ReadonlyMap<number, DashboardWidgetDeclaration>>(
+    () => new Map(),
+  );
+  const hostSetters = useRef(new Map<number, (declaration: DashboardWidgetDeclaration) => void>());
+  const hostOf = useCallback((index: number) => {
+    let setter = hostSetters.current.get(index);
+    if (setter === undefined) {
+      setter = (declaration) =>
+        setDeclared((current) =>
+          sameDeclaration(current.get(index), declaration)
+            ? current
+            : new Map(current).set(index, declaration),
+        );
+      hostSetters.current.set(index, setter);
+    }
+    return setter;
+  }, []);
+  const { declarations, elements, pending } = useMemo(() => {
+    const byKey = new Map<string, DashboardWidgetDeclaration>();
+    const nodes = new Map<string, ReactNode>();
+    const waiting: ReactNode[] = [];
+    let hosts = 0;
+    for (const child of flatten(children)) {
+      if (!isValidElement<Partial<DashboardWidgetProps>>(child)) continue;
+      const { value } = child.props;
+      if (typeof value === 'string') {
+        if (byKey.has(value)) continue;
+        byKey.set(value, child.props as DashboardWidgetDeclaration);
+        nodes.set(value, child);
+        continue;
+      }
+      const index = hosts++;
+      const node = (
+        <DashboardWidgetHostContext.Provider key={`host-${index}`} value={hostOf(index)}>
+          {child}
+        </DashboardWidgetHostContext.Provider>
+      );
+      const declaration = declared.get(index);
+      if (declaration === undefined || byKey.has(declaration.value)) {
+        waiting.push(node);
+        continue;
+      }
+      byKey.set(declaration.value, declaration);
+      nodes.set(declaration.value, node);
+    }
+    return { declarations: byKey, elements: nodes, pending: waiting };
+  }, [children, declared, hostOf]);
   /* The rows each widget sized by its content measures, by value. */
-  const [contentRows, setContentRows] = useState<ReadonlyMap<string, number>>(() => new Map());
+  const [contentSpans, setContentSpans] = useState<ReadonlyMap<string, number>>(() => new Map());
   const widgets = useMemo(
-    () => [...elements.values()].map((element) => specOf(element, contentRows)),
-    [elements, contentRows],
+    () => [...declarations.values()].map((declaration) => specOf(declaration, contentSpans)),
+    [declarations, contentSpans],
   );
   const titles = useMemo(
-    () => new Map([...elements].map(([key, element]) => [key, element.props.title])),
-    [elements],
+    () => new Map([...declarations].map(([key, declaration]) => [key, declaration.title])),
+    [declarations],
   );
 
   const [layout, requestLayout] = useModel<DashboardLayout, { change: DashboardLayoutChange }>(
@@ -361,9 +431,9 @@ export function DashboardGrid({
     [registerIn],
   );
 
-  const autoKeys = [...elements.values()]
-    .filter((element) => element.props.rows === 'auto')
-    .map((element) => element.props.value)
+  const autoKeys = [...declarations.values()]
+    .filter((declaration) => declaration.rows === 'auto')
+    .map((declaration) => declaration.value)
     .join('\n');
   useEffect(() => {
     const list = listRef.current;
@@ -371,8 +441,8 @@ export function DashboardGrid({
     const stops = autoKeys.split('\n').map((key) => {
       const card = cardNodes.current.get(key);
       if (card === undefined) return () => {};
-      return observeContentRows(card, list, (rows) =>
-        setContentRows((current) => new Map(current).set(key, rows)),
+      return observeContentSpan(card, list, (span) =>
+        setContentSpans((current) => new Map(current).set(key, span)),
       );
     });
     return () => {
@@ -602,9 +672,9 @@ export function DashboardGrid({
   const reset = useCallback(
     (reason: DashboardLayoutReason, source?: Event) => {
       const now = live.current;
-      change(EMPTY_LAYOUT, reason, { kind: 'reset', key: null }, source, () => now.t('resetDone'));
+      change(defaultLayout, reason, { kind: 'reset', key: null }, source, () => now.t('resetDone'));
     },
-    [change],
+    [change, defaultLayout],
   );
 
   /* ── Keyboard ────────────────────────────────────────────────────────── */
@@ -1248,9 +1318,12 @@ export function DashboardGrid({
           {/* Keyed by value: a dashboard written as static JSX carries no key,
               and drawn by position a widget that changed places remounted the
               content of the one before it. */}
-          {visible.map((tile) => (
-            <Fragment key={tile.key}>{elements.get(tile.key)}</Fragment>
-          ))}
+          <DashboardWidgetHostContext.Provider value={null}>
+            {visible.map((tile) => (
+              <Fragment key={tile.key}>{elements.get(tile.key)}</Fragment>
+            ))}
+            {pending}
+          </DashboardWidgetHostContext.Provider>
           {placeholderTile ? (
             <li
               ref={placeholderRef}

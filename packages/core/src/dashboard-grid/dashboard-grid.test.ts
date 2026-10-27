@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   cellAt,
+  DASHBOARD_SUBROWS,
   dashboardKeyIntent,
   handleShortcuts,
   layoutsEqual,
@@ -142,7 +143,7 @@ describe('tileStyle', () => {
       '--_dg-x': '3',
       '--_dg-y': '1',
       '--_dg-w': '3',
-      '--_dg-h': '2',
+      '--_dg-h': String(2 * DASHBOARD_SUBROWS),
       '--_dg-span-medium': '3',
     });
   });
@@ -298,12 +299,15 @@ describe('a widget sized by its content', () => {
     { key: 'below', x: 0, y: 2, w: 6, h: 2 },
   ];
 
-  it('draws the rows its content needs and pushes what is below', () => {
-    const widgets = [{ key: 'list', contentRows: 4 }, { key: 'below' }];
-    const tiles = resolveTiles(layout, widgets, grid);
-    expect(tiles.map(({ key, y, h }) => ({ key, y, h }))).toEqual([
-      { key: 'list', y: 0, h: 4 },
-      { key: 'below', y: 4, h: 2 },
+  const S = DASHBOARD_SUBROWS;
+  const picture = (tiles: readonly DashboardTile[]) =>
+    tiles.map(({ key, y, h, top, span }) => ({ key, y, h, top, span }));
+
+  it('draws a taller content at its height, in rows for moves and in sub-rows for the picture', () => {
+    const widgets = [{ key: 'list', contentSpan: 3 * S + 5 }, { key: 'below' }];
+    expect(picture(resolveTiles(layout, widgets, grid))).toEqual([
+      { key: 'list', y: 0, h: 4, top: 0, span: 3 * S + 5 },
+      { key: 'below', y: 4, h: 2, top: 3 * S + 5, span: 2 * S },
     ]);
     expect(materializeLayout(layout, widgets, grid).map(({ key, h }) => ({ key, h }))).toEqual([
       { key: 'list', h: 2 },
@@ -311,9 +315,22 @@ describe('a widget sized by its content', () => {
     ]);
   });
 
-  it('keeps the stored height as a minimum and maxRows as a cap', () => {
-    expect(resolveTiles(layout, [{ key: 'list', contentRows: 1 }], grid)[0]?.h).toBe(2);
-    expect(resolveTiles(layout, [{ key: 'list', contentRows: 9, maxRows: 5 }], grid)[0]?.h).toBe(5);
+  it('draws a shorter content at its height, and what is below rises to it', () => {
+    const widgets = [{ key: 'list', contentSpan: S + 3 }, { key: 'below' }];
+    expect(picture(resolveTiles(layout, widgets, grid))).toEqual([
+      { key: 'list', y: 0, h: 2, top: 0, span: S + 3 },
+      { key: 'below', y: 2, h: 2, top: S + 3, span: 2 * S },
+    ]);
+  });
+
+  it('floors the picture at minRows only when the widget states it, and caps it at maxRows', () => {
+    const span = (spec: DashboardWidgetSpec) => resolveTiles(layout, [spec], grid)[0]?.span;
+    expect(span({ key: 'list', contentSpan: 4 })).toBe(4);
+    expect(span({ key: 'list', contentSpan: 4, minRows: 2 })).toBe(2 * S);
+    expect(span({ key: 'list', contentSpan: 9 * S, maxRows: 5 })).toBe(5 * S);
+    expect(
+      resolveTiles(layout, [{ key: 'list', contentSpan: 9 * S, maxRows: 5 }], grid)[0]?.h,
+    ).toBe(5);
   });
 });
 

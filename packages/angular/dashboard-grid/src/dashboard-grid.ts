@@ -47,6 +47,7 @@ import { SlSkeleton } from '@slotted/angular/skeleton';
 import { SlHeadingLevel } from '@slotted/angular/typography';
 import {
   cellAt,
+  DASHBOARD_SUBROWS,
   dashboardKeyIntent,
   handleShortcuts,
   layoutsEqual,
@@ -54,7 +55,7 @@ import {
   measureTiles,
   moveTile,
   moveTileBy,
-  observeContentRows,
+  observeContentSpan,
   parseDuration,
   playFlip,
   playResize,
@@ -90,6 +91,7 @@ import {
   injectDashboardGridDefaults,
   SlDashboardGridIdFactory,
   SlDashboardGridWords,
+  SlDashboardWidgetHost,
   type DashboardEditingReason,
   type DashboardEditingRequest,
   type DashboardHeadingLevel,
@@ -157,9 +159,12 @@ interface Tracks {
 function tracksOf(list: HTMLElement, columns: number): Tracks {
   const styles = getComputedStyle(list);
   const columnGap = parseFloat(styles.columnGap) || 0;
-  const rowGap = parseFloat(styles.rowGap) || 0;
   const track = (list.clientWidth - columnGap * (columns - 1)) / Math.max(1, columns);
-  return { columns, track, columnGap, row: parseFloat(styles.gridAutoRows) || 0, rowGap };
+  /* The tracks are sub-rows with no gap between them; a row is twelve of them
+     less the gap its widget draws below itself. */
+  const pitch = (parseFloat(styles.gridAutoRows) || 0) * DASHBOARD_SUBROWS;
+  const row = Math.max(0, pitch - columnGap);
+  return { columns, track, columnGap, row, rowGap: columnGap };
 }
 
 /** Where a widget was picked up, relative to the grid, in logical terms. */
@@ -253,7 +258,10 @@ interface Slot {
   selector: '[slDashboardGrid]',
   standalone: true,
   exportAs: 'slDashboardGrid',
-  providers: [{ provide: SlDashboardGridWords, useExisting: forwardRef(() => SlDashboardGrid) }],
+  providers: [
+    { provide: SlDashboardGridWords, useExisting: forwardRef(() => SlDashboardGrid) },
+    { provide: SlDashboardWidgetHost, useExisting: forwardRef(() => SlDashboardGrid) },
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   styleUrls: [
@@ -385,6 +393,7 @@ interface Slot {
           data-part="widget"
           data-part-widget=""
           [attr.data-key]="slot.tile.key"
+          [attr.data-rows]="slot.widget.rows() ?? null"
           [attr.data-status]="slot.widget.status()"
           [attr.data-loading]="slot.widget.painted() ? '' : null"
           [attr.data-movable]="slot.tile.movable ? '' : null"
@@ -709,7 +718,7 @@ interface Slot {
     }
   `,
 })
-export class SlDashboardGrid implements SlDashboardGridWords {
+export class SlDashboardGrid implements SlDashboardGridWords, SlDashboardWidgetHost {
   /**
    * Where each widget stands and how big it is: `[{ key, x, y, w, h, hidden? }]`
    * in cells of the expanded class. Bound at all, it is the value; unbound,
@@ -746,7 +755,17 @@ export class SlDashboardGrid implements SlDashboardGridWords {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly list = viewChild<ElementRef<HTMLUListElement>>('list');
-  protected readonly widgets = contentChildren(SlDashboardWidget);
+  /**
+   * The widgets in the order they are written, then those a component of the
+   * consumer's renders, in the order they were created: the content query
+   * reaches only the grid's own content.
+   */
+  private readonly written = contentChildren(SlDashboardWidget);
+  private readonly declared = signal<readonly SlDashboardWidget[]>([]);
+  protected readonly widgets = computed(() => {
+    const written = this.written();
+    return [...written, ...this.declared().filter((widget) => !written.includes(widget))];
+  });
 
   protected readonly statusId = `${this.base}-edit-status`;
   protected readonly edges = EDGES;
@@ -886,7 +905,7 @@ export class SlDashboardGrid implements SlDashboardGridWords {
           .get(widget.value())
           ?.querySelector<HTMLElement>(':scope > [data-ui="card"]');
         return card
-          ? observeContentRows(card, list, (rows) => widget.contentRows.set(rows))
+          ? observeContentSpan(card, list, (span) => widget.contentSpan.set(span))
           : () => {};
       });
       onCleanup(() => {
@@ -924,6 +943,12 @@ export class SlDashboardGrid implements SlDashboardGridWords {
 
   detailLabel(title: string): string {
     return this.t('detail', { title });
+  }
+
+  declare(widget: object): () => void {
+    const declared = widget as SlDashboardWidget;
+    this.declared.update((current) => [...current, declared]);
+    return () => this.declared.update((current) => current.filter((item) => item !== declared));
   }
 
   protected titleOf(key: string) {
@@ -1134,8 +1159,12 @@ export class SlDashboardGrid implements SlDashboardGridWords {
   }
 
   protected reset(reason: DashboardLayoutReason, source?: unknown) {
-    this.change(EMPTY_LAYOUT, reason, { kind: 'reset', key: null }, source, () =>
-      this.t('resetDone'),
+    this.change(
+      this.defaultLayout() ?? EMPTY_LAYOUT,
+      reason,
+      { kind: 'reset', key: null },
+      source,
+      () => this.t('resetDone'),
     );
   }
 

@@ -301,7 +301,13 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'ts',
       label: 'The application names the store and the key',
       source: `@Component({
-  template: \`<div slDashboardGrid [(layout)]="persisted.layout">…</div>\`,
+  template: \`<div
+    slDashboardGrid
+    [(layout)]="persisted.layout"
+    [defaultLayout]="persisted.defaultLayout"
+  >
+    …
+  </div>\`,
 })
 class SalesPage {
   readonly persisted = persistedDashboardLayout({ key: 'trailhead-sales' });
@@ -386,7 +392,7 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
         'DashboardLayout',
         '[]',
         '[slDashboardGrid]',
-        'The uncontrolled start. A widget it does not name takes the first cell it fits, in the order of the children',
+        'The uncontrolled start, and what Reset asks for, bound or not. A widget it does not name takes the first cell it fits, in the order of the children',
       ],
       [
         'editing',
@@ -451,7 +457,13 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
         '[slDashboardGrid]',
         'id, class, style, data-* and events stay on the host; aria-label and aria-labelledby name the list',
       ],
-      ['value', 'string', '—', 'sl-dashboard-widget', 'The widget’s key in the layout. Required'],
+      [
+        'value',
+        'string',
+        '—',
+        'sl-dashboard-widget',
+        'The widget’s key in the layout. Required. The grid finds a widget in its own content, inside an ng-container, or inside a component of the application',
+      ],
       [
         'title',
         'string',
@@ -479,7 +491,7 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
         "'auto'",
         '—',
         'sl-dashboard-widget',
-        'Draws the widget as many rows as its content measures, within minRows and maxRows, and moves the widgets below; the stored rows, which a resize sets, stay the minimum',
+        'Draws the widget as tall as its content, to a twelfth of a row’s step, and the widgets below rise or make room; at least one sub-row, or minRows when stated, at most maxRows. Moves and resizes read the content’s rows, rounded up',
       ],
       [
         'minColumns',
@@ -619,10 +631,10 @@ export const ANGULAR_DASHBOARD_GRID_DOCS = {
       ],
       [
         'persistedDashboardLayout',
-        '({ key, storage?, defaultLayout?, injector? }) => { layout, clear }',
+        '({ key, storage?, defaultLayout?, injector? }) => { layout, defaultLayout, clear }',
         'localStorage',
         'an injection context',
-        'A signal read once from the store and written after every change; bind it with [(layout)]',
+        'A signal read once from the store and written after every change; bind it with [(layout)], and its defaultLayout to [defaultLayout], which Reset asks for',
       ],
     ]),
     accessibility: [

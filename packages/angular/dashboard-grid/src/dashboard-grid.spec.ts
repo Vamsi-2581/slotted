@@ -4,6 +4,7 @@ import type { ComponentFixture } from '@angular/core/testing';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { SlHeadingLevel } from '@slotted/angular/typography';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
+import { DASHBOARD_SUBROWS } from '@slotted/core/dashboard-grid';
 import { describe, expect, it } from 'vitest';
 
 import { SlDashboardGrid } from './dashboard-grid';
@@ -148,19 +149,22 @@ const part = (name: string) => document.querySelector<HTMLElement>(`[data-part="
 /* No stylesheet paints a glyph: each one is an `icon` holding the library's `Glyph`. */
 const glyphOf = (host: Element | null) =>
   host?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+/* Rows, read back from the sub-rows the widget is drawn in. */
 const place = (key: string) => {
   const style = widget(key).style;
-  return ['--_dg-x', '--_dg-y', '--_dg-w', '--_dg-h'].map((name) =>
+  const [x, top, w, span] = ['--_dg-x', '--_dg-y', '--_dg-w', '--_dg-h'].map((name) =>
     Number(style.getPropertyValue(name)),
   );
+  return [x, (top! - 1) / DASHBOARD_SUBROWS + 1, w, span! / DASHBOARD_SUBROWS];
 };
 const itemOf = (layout: DashboardLayout, key: string) => layout.find((item) => item.key === key);
 /* jsdom lays nothing out: the list gets the width and the row a browser would measure. */
 const lay = () => {
   const list = part('grid');
-  list.style.gridAutoRows = '80px';
+  /* Rows of 80 pixels and gaps of 16, drawn in sub-rows with no gap between them. */
+  list.style.gridAutoRows = `${96 / DASHBOARD_SUBROWS}px`;
   list.style.columnGap = '16px';
-  list.style.rowGap = '16px';
+  list.style.rowGap = '0px';
   Object.defineProperty(list, 'clientWidth', { configurable: true, value: 1200 });
 };
 const pointer = (type: string, x: number, y: number) =>
@@ -175,6 +179,43 @@ const pointer = (type: string, x: number, y: number) =>
   });
 const press = (target: HTMLElement, init: KeyboardEventInit) =>
   target.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...init }));
+
+/** A component of the consumer's that renders one widget. */
+@Component({
+  selector: 'app-revenue',
+  imports: [SlDashboardWidget],
+  template: `<sl-dashboard-widget value="a" title="A" defaultColumns="6"
+    ><p>€ 482,190</p></sl-dashboard-widget
+  >`,
+})
+class Revenue {}
+
+@Component({
+  imports: [SlDashboardGrid, SlDashboardWidget, Revenue],
+  template: `<div slDashboardGrid aria-label="Sales">
+    <app-revenue />
+    <ng-container>
+      <sl-dashboard-widget value="b" title="B" defaultColumns="3" />
+    </ng-container>
+  </div>`,
+})
+class WrapperHost {}
+
+/**
+ * A widget is placed by its own inputs wherever it is written: as the grid's
+ * content, inside an `ng-container`, or inside a component of the consumer's.
+ */
+describe('SlDashboardGrid widget discovery', () => {
+  it('places a widget a component renders, and one inside an ng-container', async () => {
+    const fixture = TestBed.createComponent(WrapperHost);
+    await settle(fixture);
+    expect(order()).toEqual(['b', 'a']);
+    expect(place('a')[2]).toBe(6);
+    expect(place('b')[2]).toBe(3);
+    expect(widget('a').querySelector('h2')?.textContent?.trim()).toBe('A');
+    expect(widget('a').textContent).toContain('€ 482,190');
+  });
+});
 
 describe('SlDashboardGrid', () => {
   it('draws a list of articles named by their titles, in reading order', async () => {
@@ -412,14 +453,27 @@ describe('SlDashboardGrid', () => {
     expect(fixture.componentInstance.editings[0]!.reason).toBe('submit');
   });
 
-  it('resets to every widget at its defaults', async () => {
+  it('resets to the layout the grid was given', async () => {
     const fixture = await setup((host) => {
       host.editing.set(true);
       host.defaultLayout.set([{ key: 'trend', x: 0, y: 0, w: 8, h: 4 }]);
     });
+    press(handle('trend'), { key: 'ArrowRight', shiftKey: true });
+    await settle(fixture);
     part('reset').dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     await settle(fixture);
-    const [request] = fixture.componentInstance.layouts;
+    const request = fixture.componentInstance.layouts.at(-1)!;
+    expect(itemOf(request.value, 'trend')).toEqual({ key: 'trend', x: 0, y: 0, w: 8, h: 4 });
+    expect(request.change.kind).toBe('reset');
+  });
+
+  it('resets to every widget at its defaults when given no layout', async () => {
+    const fixture = await setup((host) => host.editing.set(true));
+    press(handle('trend'), { key: 'ArrowLeft', shiftKey: true });
+    await settle(fixture);
+    part('reset').dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    await settle(fixture);
+    const request = fixture.componentInstance.layouts.at(-1);
     expect(request!.value.map((item) => [item.key, item.x, item.y, item.w])).toEqual([
       ['revenue', 0, 0, 3],
       ['orders', 3, 0, 3],
@@ -632,5 +686,14 @@ describe('persistedDashboardLayout', () => {
       persistedDashboardLayout({ key: 'sales', storage }),
     );
     expect(persisted.layout()).toEqual([]);
+  });
+
+  it('hands back the default, for the grid’s Reset to ask for', () => {
+    const defaultLayout = [{ key: 'trend', x: 0, y: 0, w: 8, h: 4 }];
+    const storage = { getItem: () => null, setItem: () => {}, removeItem: () => {} };
+    const persisted = TestBed.runInInjectionContext(() =>
+      persistedDashboardLayout({ key: 'sales', storage, defaultLayout }),
+    );
+    expect(persisted.defaultLayout).toBe(defaultLayout);
   });
 });

@@ -397,7 +397,7 @@ export const REACT_DASHBOARD_GRID_DOCS = {
         'DashboardLayout',
         '[]',
         'DashboardGrid',
-        'The uncontrolled start, read once. A widget it does not name takes the first cell it fits, in the order of the children',
+        'The uncontrolled start, read once, and what Reset asks for, controlled or not. A widget it does not name takes the first cell it fits, in the order of the children',
       ],
       ['editing', 'boolean', 'false', 'DashboardGrid', 'The edit mode. Present means controlled'],
       ['defaultEditing', 'boolean', 'false', 'DashboardGrid', 'The uncontrolled mode, read once'],
@@ -457,7 +457,13 @@ export const REACT_DASHBOARD_GRID_DOCS = {
         'DashboardGrid',
         'id, className, style, data-* and handlers reach the root; aria-label and aria-labelledby name the list',
       ],
-      ['value', 'string', '—', 'DashboardWidget', 'The widget’s key in the layout. Required'],
+      [
+        'value',
+        'string',
+        '—',
+        'DashboardWidget',
+        'The widget’s key in the layout. Required. Read from the grid’s child, inside a fragment too; a widget a component of the application renders declares it once mounted, so it is placed after the first paint',
+      ],
       [
         'title',
         'string',
@@ -485,7 +491,7 @@ export const REACT_DASHBOARD_GRID_DOCS = {
         "'auto'",
         '—',
         'DashboardWidget',
-        'Draws the widget as many rows as its content measures, within minRows and maxRows, and moves the widgets below; the stored rows, which a resize sets, stay the minimum',
+        'Draws the widget as tall as its content, to a twelfth of a row’s step, and the widgets below rise or make room; at least one sub-row, or minRows when stated, at most maxRows. Moves and resizes read the content’s rows, rounded up',
       ],
       [
         'minColumns',
@@ -605,10 +611,10 @@ export const REACT_DASHBOARD_GRID_DOCS = {
       ],
       [
         'usePersistedDashboardLayout',
-        '({ key, storage?, defaultLayout? }) => { layout, onLayoutChange, clear }',
+        '({ key, storage?, defaultLayout? }) => { layout, defaultLayout, onLayoutChange, clear }',
         'localStorage',
         'a component',
-        'Reads the stored layout once and writes every change; a store that throws reads as empty',
+        'Reads the stored layout once and writes every change; a store that throws reads as empty. Spread on the grid, its defaultLayout is what Reset asks for',
       ],
     ]),
     accessibility: [

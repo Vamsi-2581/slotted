@@ -29,10 +29,20 @@
     min-inline-size: 0;
   }
 
+  /**
+   * A row is the unit a reader moves and resizes by; the tracks are twelve
+   * times finer (`DASHBOARD_SUBROWS` in `@slotted/core/dashboard-grid`), so a
+   * widget sized by its content ends within a twelfth of a row's step of it.
+   * The tracks have no gap between them: each widget draws the gap as its
+   * margin below, inside its own cells, and the grid takes the last one back.
+   * A widget of `h` rows is `h` rows and `h - 1` gaps tall, as before.
+   */
   [data-ui-dashboard-grid] > [data-part-grid] {
+    column-gap: var(--_gap);
     display: grid;
-    gap: var(--_gap);
-    grid-auto-rows: var(--_row);
+    grid-auto-rows: calc((var(--_row) + var(--_gap)) / 12);
+    margin-block-end: calc(-1 * var(--_gap));
+    row-gap: 0;
     grid-template-columns: repeat(var(--_cols), minmax(0, 1fr));
     list-style: none;
     margin: 0;
@@ -54,7 +64,8 @@
    */
   [data-ui-dashboard-grid] :is([data-part-widget], [data-part-placeholder]) {
     grid-column: var(--_dg-x, auto) / span var(--_dg-w, 4);
-    grid-row: var(--_dg-y, auto) / span var(--_dg-h, 2);
+    grid-row: var(--_dg-y, auto) / span var(--_dg-h, 24);
+    margin-block-end: var(--_gap);
     min-block-size: 0;
     min-inline-size: 0;
   }
@@ -82,7 +93,7 @@
     [data-ui-dashboard-grid]:not([data-size-class])
       :is([data-part-widget], [data-part-placeholder]) {
       grid-column: auto / span var(--_dg-span-medium, 3);
-      grid-row: auto / span var(--_dg-h, 2);
+      grid-row: auto / span var(--_dg-h, 24);
     }
   }
 
@@ -94,7 +105,7 @@
   [data-ui-dashboard-grid]:is([data-size-class='medium'], [data-size-class='compact'])
     :is([data-part-widget], [data-part-placeholder]) {
     grid-column: auto / span var(--_dg-span-medium, 3);
-    grid-row: auto / span var(--_dg-h, 2);
+    grid-row: auto / span var(--_dg-h, 24);
   }
 
   @container dashboard-grid (width < 600px) {
@@ -148,8 +159,11 @@
 
   [data-ui-dashboard-grid] [data-part-widget] > [data-ui-card] > [data-part-body] {
     /* A chart's plot takes whatever height the widget leaves it, down to a
-       floor of one and a half rows, instead of its own size step. */
+       floor of one and a half rows, instead of its own size step: the
+       reader sizes a widget, and every step answers to that size. */
     --slotted-chart-plot-block-size: calc(var(--_row) * 1.5);
+    --slotted-chart-plot-block-size-sm: calc(var(--_row) * 1.5);
+    --slotted-chart-plot-block-size-lg: calc(var(--_row) * 1.5);
 
     display: flex;
     flex-direction: column;
@@ -166,6 +180,16 @@
     > [data-part-body]
     > :not([data-part-busy-indicator]) {
     flex: 1 0 auto;
+  }
+
+  /* A widget sized by its content is measured by it: what its body holds
+     keeps its own height, and the cell is that height to a twelfth of a row. */
+  [data-ui-dashboard-grid]
+    [data-part-widget][data-rows='auto']
+    > [data-ui-card]
+    > [data-part-body]
+    > :not([data-part-busy-indicator]) {
+    flex-grow: 0;
   }
 
   /**

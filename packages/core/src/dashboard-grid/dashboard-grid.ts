@@ -18,6 +18,15 @@
 
 import { COMPACT_BELOW, EXPANDED_FROM } from '../measure';
 
+/**
+ * Sub-rows a row's step is drawn in. A row is the unit a reader moves and
+ * resizes by and a store keeps; the grid's tracks are twelve times finer, so
+ * a widget sized by its content ends within a twelfth of a step of it rather
+ * than at the next whole row. The gap is drawn inside each widget's cell.
+ * The stylesheet states the same number.
+ */
+export const DASHBOARD_SUBROWS = 12;
+
 export interface DashboardLayoutItem {
   readonly key: string;
   /** Column of the expanded class, from 0 at the inline start. */
@@ -50,11 +59,13 @@ export interface DashboardWidgetSpec {
   readonly minRows?: number;
   readonly maxRows?: number;
   /**
-   * The rows the widget's content measures (`observeContentRows`). The widget
-   * is drawn at least this tall, within `minRows` and `maxRows`, and the
-   * widgets below make room; the stored height stays the minimum.
+   * The sub-rows the widget's content measures (`observeContentSpan`), in
+   * `DASHBOARD_SUBROWS`ths of a row's step. The widget is drawn this tall —
+   * at least one sub-row, or `minRows` when the widget states it, and at most
+   * `maxRows` — and the widgets below rise to it. Its rows, rounded up, are
+   * what moves, resizes and announcements read.
    */
-  readonly contentRows?: number;
+  readonly contentSpan?: number;
   /** Default true. A widget that cannot move is fixed, and the others flow around it. */
   readonly movable?: boolean;
   /** Default true. */
@@ -87,6 +98,10 @@ export interface DashboardTile {
   readonly y: number;
   readonly w: number;
   readonly h: number;
+  /** Where the widget is drawn, in sub-rows from the top: `y`, unless a widget above it is sized by its content. */
+  readonly top: number;
+  /** Sub-rows drawn: `h` steps, or the content's own height. */
+  readonly span: number;
   readonly hidden: boolean;
   /** Columns of the medium class: a half or the whole. */
   readonly medium: number;
@@ -314,27 +329,49 @@ function settle(
   }
 
   /* Drawn, not stored: a widget sized by its content takes the rows it measures. */
+  const spanOf = (box: Box) => {
+    const limit = limits.get(box.key)!;
+    const measured = limit.spec.contentSpan;
+    if (!grow || measured === undefined) return box.h * DASHBOARD_SUBROWS;
+    const floor = limit.spec.minRows === undefined ? 1 : limit.minRows * DASHBOARD_SUBROWS;
+    return clamp(Math.ceil(measured), floor, Math.max(floor, limit.maxRows * DASHBOARD_SUBROWS));
+  };
   if (grow) {
     let grew = false;
     for (const box of [...known].sort(byPlace)) {
       const limit = limits.get(box.key)!;
-      const rows = limit.spec.contentRows;
-      if (rows === undefined || rows <= box.h) continue;
-      box.h = clamp(Math.ceil(rows), limit.minRows, limit.maxRows);
+      if (limit.spec.contentSpan === undefined) continue;
+      const rows = Math.ceil(spanOf(box) / DASHBOARD_SUBROWS);
+      if (rows <= box.h) continue;
+      box.h = clamp(rows, limit.minRows, limit.maxRows);
       pushDown(known, box);
       grew = true;
     }
     if (grew) compact(known);
   }
 
+  /* The picture, in sub-rows: every widget at its rows, a widget sized by its
+     content at that height, and gravity once more, so what stands below a
+     short widget rises to it rather than to the next whole row. */
+  const drawn = new Map<string, Box>();
+  const fine = known.map((box) => {
+    const each = { ...box, y: box.y * DASHBOARD_SUBROWS, h: spanOf(box) };
+    drawn.set(box.key, each);
+    return each;
+  });
+  compact(fine);
+
   const tileOf = (box: Box, isHidden: boolean): DashboardTile => {
     const limit = limits.get(box.key)!;
+    const picture = drawn.get(box.key);
     return {
       key: box.key,
       x: box.x,
       y: box.y,
       w: box.w,
       h: box.h,
+      top: picture?.y ?? box.y * DASHBOARD_SUBROWS,
+      span: picture?.h ?? box.h * DASHBOARD_SUBROWS,
       hidden: isHidden,
       medium: mediumSpan(box.w, grid),
       movable: limit.spec.movable !== false,
@@ -369,9 +406,9 @@ export function resolveTiles(
 export function tileStyle(tile: DashboardTile): Record<string, string> {
   return {
     '--_dg-x': String(tile.x + 1),
-    '--_dg-y': String(tile.y + 1),
+    '--_dg-y': String(tile.top + 1),
     '--_dg-w': String(tile.w),
-    '--_dg-h': String(tile.h),
+    '--_dg-h': String(tile.span),
     '--_dg-span-medium': String(tile.medium),
   };
 }

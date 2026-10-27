@@ -3,7 +3,9 @@ import { handleShortcuts, tileStyle } from '@slotted/core/dashboard-grid';
 import {
   memo,
   useCallback,
+  useContext,
   useId,
+  useLayoutEffect,
   useRef,
   type AnchorHTMLAttributes,
   type ComponentPropsWithRef,
@@ -35,6 +37,7 @@ import { Skeleton, useSkeletonDefaults } from '../skeleton';
 import { useLoadingVisibility } from '../skeleton/use-loading-visibility';
 import { useHeadingLevel } from '../typography';
 import {
+  DashboardWidgetHostContext,
   useDashboardGrid,
   type DashboardEdge,
   type DashboardGridContextValue,
@@ -99,23 +102,57 @@ function HandleButton({
  */
 export function DashboardWidget({
   headingLevel,
-  /* The widget's own declaration: the grid reads these from the element. */
-  defaultColumns: _defaultColumns,
-  defaultRows: _defaultRows,
-  minColumns: _minColumns,
-  maxColumns: _maxColumns,
-  minRows: _minRows,
-  maxRows: _maxRows,
-  rows: _rows,
-  movable: _movable,
-  resizable: _resizable,
-  removable: _removable,
+  /* The widget's own declaration: the grid reads these from the element, or
+     from the host it declares them through. */
+  defaultColumns,
+  defaultRows,
+  minColumns,
+  maxColumns,
+  minRows,
+  maxRows,
+  rows,
+  movable,
+  resizable,
+  removable,
   loading = false,
   ref,
   ...props
 }: DashboardWidgetProps) {
-  const { value } = props;
+  const { value, title } = props;
   const grid = useDashboardGrid('DashboardWidget');
+  const declare = useContext(DashboardWidgetHostContext);
+  /* Rendered by a component of the consumer's, the grid did not see this
+     widget's props; it declares them once it is on the page. */
+  useLayoutEffect(() => {
+    declare?.({
+      value,
+      title,
+      rows,
+      defaultColumns,
+      defaultRows,
+      minColumns,
+      maxColumns,
+      minRows,
+      maxRows,
+      movable,
+      resizable,
+      removable,
+    });
+  }, [
+    declare,
+    value,
+    title,
+    rows,
+    defaultColumns,
+    defaultRows,
+    minColumns,
+    maxColumns,
+    minRows,
+    maxRows,
+    movable,
+    resizable,
+    removable,
+  ]);
   const ambientLevel = useHeadingLevel();
   const slot = grid.slots.get(value);
   const titleId = `${useId()}-title`;
@@ -152,6 +189,7 @@ export function DashboardWidget({
     <WidgetView
       {...props}
       headingLevel={resolvedLevel}
+      rows={rows}
       drawnSlot={slot}
       painted={painted}
       titleId={titleId}
@@ -215,6 +253,7 @@ type WidgetViewProps = Omit<
  * are not drawn again for each cell the pointer crosses.
  */
 const WidgetView = memo(function WidgetView({
+  rows,
   value,
   title,
   description,
@@ -446,6 +485,7 @@ const WidgetView = memo(function WidgetView({
     },
     'data-part': 'widget',
     'data-key': value,
+    'data-rows': rows,
     'data-status': status,
     ...(painted ? { 'data-loading': '' } : {}),
     ...(tile.movable ? { 'data-movable': '' } : {}),

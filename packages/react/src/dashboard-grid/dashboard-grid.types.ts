@@ -100,6 +100,7 @@ export interface DashboardGridProps extends Omit<
 export type DashboardWidgetRootProps = ComponentPropsWithRef<'li'> & {
   'data-part': 'widget';
   'data-key': string;
+  'data-rows'?: 'auto' | undefined;
   'data-status': DashboardWidgetStatus;
   'data-loading'?: '' | undefined;
   'data-movable'?: '' | undefined;
@@ -129,8 +130,9 @@ export interface DashboardWidgetProps extends Omit<
   /** Default 2. */
   defaultRows?: number;
   /**
-   * `auto` draws the widget as many rows as its content measures, within `minRows` and `maxRows`,
-   * and the widgets below make room. The stored rows, which a resize sets, stay the minimum.
+   * `auto` draws the widget as tall as its content, to a twelfth of a row's step, and the widgets
+   * below rise or make room. At least one sub-row, or `minRows` when stated; at most `maxRows`.
+   * The rows a move or a resize reads are the content's, rounded up to whole rows.
    */
   rows?: 'auto' | undefined;
   minColumns?: number;
@@ -187,6 +189,8 @@ export interface UsePersistedDashboardLayoutOptions {
 
 export interface PersistedDashboardLayout {
   readonly layout: DashboardLayout;
+  /** The layout given to the hook, which the grid's Reset asks for once spread on it. */
+  readonly defaultLayout: DashboardLayout;
   /** Hand to `onLayoutChange`: it stores what it is given and renders it. */
   readonly onLayoutChange: (layout: DashboardLayout) => void;
   /** Forgets what is stored and returns to the default. */

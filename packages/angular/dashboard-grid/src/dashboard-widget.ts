@@ -27,7 +27,7 @@ import { injectSkeletonDefaults } from '@slotted/angular/skeleton';
 import type { DashboardWidgetSpec } from '@slotted/core/dashboard-grid';
 import { initialLoadingVisibility, nextLoadingVisibility } from '@slotted/core/loading';
 
-import { SlDashboardGridWords } from './dashboard-grid-defaults';
+import { SlDashboardGridWords, SlDashboardWidgetHost } from './dashboard-grid-defaults';
 import type { DashboardHeadingLevel, DashboardWidgetStatus } from './dashboard-grid-defaults';
 
 const optionalNumber = (given: number | string | undefined) =>
@@ -149,12 +149,13 @@ export class SlDashboardWidget {
     transform: optionalNumber,
   });
   /**
-   * `auto` draws the widget as many rows as its content measures, within `minRows` and `maxRows`,
-   * and the widgets below make room. The stored rows, which a resize sets, stay the minimum.
+   * `auto` draws the widget as tall as its content, to a twelfth of a row's step, and the widgets
+   * below rise or make room. At least one sub-row, or `minRows` when stated; at most `maxRows`.
+   * The rows a move or a resize reads are the content's, rounded up to whole rows.
    */
   readonly rows = input<'auto' | undefined>(undefined);
-  /** The rows the content measures, written by the grid while `rows` is `auto`. */
-  readonly contentRows = signal<number | undefined>(undefined);
+  /** The sub-rows the content measures, written by the grid while `rows` is `auto`. */
+  readonly contentSpan = signal<number | undefined>(undefined);
   readonly movable = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: optionalBoolean,
   });
@@ -212,7 +213,11 @@ export class SlDashboardWidget {
       const loading = this.loading();
       untracked(() => this.tick(loading));
     });
-    inject(DestroyRef).onDestroy(() => clearTimeout(this.timer));
+    const withdraw = inject(SlDashboardWidgetHost, { optional: true })?.declare(this);
+    inject(DestroyRef).onDestroy(() => {
+      clearTimeout(this.timer);
+      withdraw?.();
+    });
   }
 
   /** What the grid's layout arithmetic reads. */
@@ -224,7 +229,7 @@ export class SlDashboardWidget {
       maxColumns: this.maxColumns(),
       minRows: this.minRows(),
       maxRows: this.maxRows(),
-      contentRows: this.rows() === 'auto' ? this.contentRows() : undefined,
+      contentSpan: this.rows() === 'auto' ? this.contentSpan() : undefined,
       movable: this.movable(),
       resizable: this.resizable(),
       removable: this.removable(),

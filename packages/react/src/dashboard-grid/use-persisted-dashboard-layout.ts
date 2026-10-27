@@ -22,7 +22,8 @@ function defaultStorage(): UsePersistedDashboardLayoutOptions['storage'] {
 
 /**
  * The reader's layout, kept across visits: read once from the store and
- * written after every change. Spread `layout` and `onLayoutChange` on the grid.
+ * written after every change. Spread it on the grid: `layout`, `onLayoutChange`,
+ * and the `defaultLayout` its Reset asks for.
  * The store is reached inside `try` both ways — a private window, a full
  * quota or a blocked origin reads as nothing stored and writes nothing, and
  * the grid keeps working from the default. The component itself never writes;
@@ -65,5 +66,5 @@ export function usePersistedDashboardLayout({
     }
   }, [defaultLayout, key, store]);
 
-  return { layout, onLayoutChange, clear };
+  return { layout, defaultLayout, onLayoutChange, clear };
 }

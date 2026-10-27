@@ -72,3 +72,31 @@ test('brings the lattice forward from the grid itself, never from an ancestor', 
     );
   }
 });
+
+/**
+ * A row's step is drawn in sub-rows with no gap between them, and each widget
+ * draws the gap below itself; the number of sub-rows is the one the core
+ * lays the picture out in. A widget sized by its content does not grow what
+ * its body holds, so the measure reads the content and not the cell.
+ */
+test('draws rows in the sub-rows the core lays out, with the gap inside each cell', () => {
+  const core = readFileSync(
+    new URL('../../../core/src/dashboard-grid/dashboard-grid.ts', import.meta.url),
+    'utf8',
+  );
+  const subrows = core.match(/DASHBOARD_SUBROWS = (\d+);/)?.[1];
+  const grid = rule('[data-ui-dashboard-grid]>[data-part-grid]');
+  assert.ok(grid.includes(`grid-auto-rows:calc((var(--_row) + var(--_gap)) / ${subrows})`));
+  assert.ok(grid.includes('row-gap:0'));
+  assert.ok(grid.includes('margin-block-end:calc(-1 * var(--_gap))'));
+  assert.ok(
+    rule('[data-ui-dashboard-grid]:is([data-part-widget],[data-part-placeholder])').includes(
+      'margin-block-end:var(--_gap)',
+    ),
+  );
+  assert.ok(
+    rule(
+      "[data-ui-dashboard-grid] [data-part-widget][data-rows='auto']>[data-ui-card]>[data-part-body]>:not([data-part-busy-indicator])",
+    ).includes('flex-grow:0'),
+  );
+});

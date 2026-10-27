@@ -304,7 +304,7 @@ class SalesDemo implements OnInit {
     week: `W${index + 27}`,
     revenue: thousands * 1000,
   }));
-  protected readonly weeklySeries = [{ kind: 'bar' as const, field: 'revenue', label: 'Revenue' }];
+  protected readonly weeklySeries = [{ kind: 'bar', field: 'revenue', label: 'Revenue' }] as const;
   protected readonly weeklyAxis = {
     format: { style: 'currency' as const, currency: 'EUR', notation: 'compact' as const },
   };

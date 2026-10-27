@@ -7,7 +7,11 @@ import type { DashboardGridMessages, FamilyTranslator } from '@slotted/core/i18n
 import { createContext, useContext } from 'react';
 import type { KeyboardEvent, PointerEvent } from 'react';
 
-import type { DashboardHeadingLevel, DashboardLayoutReason } from './dashboard-grid.types';
+import type {
+  DashboardHeadingLevel,
+  DashboardLayoutReason,
+  DashboardWidgetProps,
+} from './dashboard-grid.types';
 
 /** An edge a widget is pulled by. The top is not one: gravity decides it. */
 export type DashboardEdge = 'start' | 'end' | 'bottom' | 'bottom-start' | 'bottom-end';
@@ -64,6 +68,38 @@ export interface DashboardGridContextValue {
 }
 
 export const DashboardGridContext = createContext<DashboardGridContextValue | null>(null);
+
+/** The props a declaration holds, which a widget hands its host and the grid compares. */
+export const DECLARED = [
+  'value',
+  'title',
+  'rows',
+  'defaultColumns',
+  'defaultRows',
+  'minColumns',
+  'maxColumns',
+  'minRows',
+  'maxRows',
+  'movable',
+  'resizable',
+  'removable',
+] as const;
+
+/** What a widget states about itself that the grid lays out by: its key, its name, its sizes. */
+export type DashboardWidgetDeclaration = Pick<DashboardWidgetProps, 'value' | 'title'> & {
+  readonly [Name in Exclude<(typeof DECLARED)[number], 'value' | 'title'>]?:
+    DashboardWidgetProps[Name] | undefined;
+};
+
+/**
+ * Around a child of the grid that is not a widget element — a component of the
+ * consumer's that renders one — the grid sets this, and the widget inside
+ * declares itself through it. `null` everywhere else, so a widget written
+ * directly, or one in a grid nested inside a widget, declares nothing here.
+ */
+export const DashboardWidgetHostContext = createContext<
+  ((declaration: DashboardWidgetDeclaration) => void) | null
+>(null);
 
 export function useDashboardGrid(part: string): DashboardGridContextValue {
   const context = useContext(DashboardGridContext);

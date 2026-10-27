@@ -1,6 +1,7 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { createRef, useEffect, useState } from 'react';
+import { DASHBOARD_SUBROWS } from '@slotted/core/dashboard-grid';
 import { describe, expect, it, vi } from 'vitest';
 
 import { SlottedProvider } from '../i18n';
@@ -159,18 +160,21 @@ const part = (name: string) => document.querySelector<HTMLElement>(`[data-part="
 /* No stylesheet paints a glyph: each one is an `icon` holding the library's `Glyph`. */
 const glyphOf = (host: Element | null) =>
   host?.querySelector('[data-ui="icon"] > svg[data-glyph]')?.getAttribute('data-glyph');
+/* Rows, read back from the sub-rows the widget is drawn in. */
 const place = (key: string) => {
   const style = widget(key).style;
-  return ['--_dg-x', '--_dg-y', '--_dg-w', '--_dg-h'].map((name) =>
+  const [x, top, w, span] = ['--_dg-x', '--_dg-y', '--_dg-w', '--_dg-h'].map((name) =>
     Number(style.getPropertyValue(name)),
   );
+  return [x, (top! - 1) / DASHBOARD_SUBROWS + 1, w, span! / DASHBOARD_SUBROWS];
 };
 /* jsdom lays nothing out: the list gets the width and the row a browser would measure. */
 const lay = () => {
   const list = part('grid');
-  list.style.gridAutoRows = '80px';
+  /* Rows of 80 pixels and gaps of 16, drawn in sub-rows with no gap between them. */
+  list.style.gridAutoRows = `${96 / DASHBOARD_SUBROWS}px`;
   list.style.columnGap = '16px';
-  list.style.rowGap = '16px';
+  list.style.rowGap = '0px';
   Object.defineProperty(list, 'clientWidth', { configurable: true, value: 1200 });
   const frame = { left: 0, top: 0, right: 1200, bottom: 800, width: 1200, height: 800, x: 0, y: 0 };
   Object.defineProperty(list, 'getBoundingClientRect', {
@@ -179,6 +183,43 @@ const lay = () => {
   });
 };
 const itemOf = (layout: DashboardLayout, key: string) => layout.find((item) => item.key === key);
+
+/**
+ * A widget is placed by its own props wherever it renders: written directly,
+ * inside a fragment, or inside a component of the consumer's that renders it.
+ */
+describe('DashboardGrid widget discovery', () => {
+  function Revenue() {
+    return (
+      <DashboardWidget value="a" title="A" defaultColumns={6}>
+        <p>€ 482,190</p>
+      </DashboardWidget>
+    );
+  }
+
+  it('places a widget a component renders by the widget’s own key, title and size', () => {
+    mount({ children: [<Revenue key="revenue" />] });
+    expect(order()).toEqual(['a']);
+    expect(place('a')[2]).toBe(6);
+    expect(screen.getByRole('heading', { name: 'A' })).toBeTruthy();
+  });
+
+  it('places a widget inside a fragment', () => {
+    mount({
+      children: (
+        <>
+          <DashboardWidget value="a" title="A" defaultColumns={6} />
+          <>
+            <DashboardWidget value="b" title="B" defaultColumns={3} />
+          </>
+        </>
+      ),
+    });
+    expect(order()).toEqual(['a', 'b']);
+    expect(place('a')[2]).toBe(6);
+    expect(place('b')[2]).toBe(3);
+  });
+});
 
 describe('DashboardGrid', () => {
   it('draws a list of articles named by their titles, in reading order', () => {
@@ -572,19 +613,28 @@ describe('DashboardGrid', () => {
     );
   });
 
-  it('resets to every widget at its defaults', () => {
+  it('resets to the layout the grid was given', () => {
     const { onLayoutChange } = mount({
       defaultEditing: true,
       defaultLayout: [{ key: 'trend', x: 0, y: 0, w: 8, h: 4 }],
     });
+    fireEvent.keyDown(handle('trend'), { key: 'ArrowRight', shiftKey: true });
     fireEvent.click(part('reset'), { detail: 1 });
-    const [layout, request] = onLayoutChange.mock.calls[0]!;
+    const [layout, request] = onLayoutChange.mock.calls.at(-1)!;
+    expect(itemOf(layout, 'trend')).toEqual({ key: 'trend', x: 0, y: 0, w: 8, h: 4 });
+    expect(request.change.kind).toBe('reset');
+  });
+
+  it('resets to every widget at its defaults when given no layout', () => {
+    const { onLayoutChange } = mount({ defaultEditing: true });
+    fireEvent.keyDown(handle('trend'), { key: 'ArrowLeft', shiftKey: true });
+    fireEvent.click(part('reset'), { detail: 1 });
+    const [layout] = onLayoutChange.mock.calls.at(-1)!;
     expect(layout.map((item) => [item.key, item.x, item.y, item.w])).toEqual([
       ['revenue', 0, 0, 3],
       ['orders', 3, 0, 3],
       ['trend', 0, 2, 12],
     ]);
-    expect(request.change.kind).toBe('reset');
   });
 
   it('keeps an entry no widget holds in the value it asks for', () => {
@@ -706,8 +756,18 @@ describe('DashboardWidget', () => {
 });
 
 describe('usePersistedDashboardLayout', () => {
-  function Persisted({ storage }: { storage: Storage }) {
-    const persisted = usePersistedDashboardLayout({ key: 'sales', storage });
+  function Persisted({
+    storage,
+    defaultLayout,
+  }: {
+    storage: Storage;
+    defaultLayout?: DashboardLayout;
+  }) {
+    const persisted = usePersistedDashboardLayout({
+      key: 'sales',
+      storage,
+      ...(defaultLayout === undefined ? {} : { defaultLayout }),
+    });
     const [editing] = useState(true);
     return (
       <DashboardGrid aria-label="Sales" editing={editing} {...persisted}>
@@ -729,6 +789,22 @@ describe('usePersistedDashboardLayout', () => {
     fireEvent.keyDown(handle('orders'), { key: 'ArrowRight', altKey: true });
     const stored = JSON.parse(store.get('sales')!).items as unknown[][];
     expect(stored.find((item) => item[0] === 'orders')).toEqual(['orders', 4, 3, 3, 2]);
+  });
+
+  it('hands the grid its default, which Reset asks for', () => {
+    const store = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => void store.set(key, value),
+      removeItem: (key: string) => void store.delete(key),
+    } as Storage;
+    render(
+      <Persisted storage={storage} defaultLayout={[{ key: 'trend', x: 0, y: 0, w: 8, h: 4 }]} />,
+    );
+    fireEvent.keyDown(handle('trend'), { key: 'ArrowRight', shiftKey: true });
+    fireEvent.click(part('reset'), { detail: 1 });
+    const stored = JSON.parse(store.get('sales')!).items as unknown[][];
+    expect(stored.find((item) => item[0] === 'trend')).toEqual(['trend', 0, 0, 8, 4]);
   });
 
   it('starts from the default when the store holds text it cannot read', () => {

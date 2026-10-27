@@ -25,6 +25,8 @@ export interface PersistedDashboardLayoutOptions {
 export interface PersistedDashboardLayout {
   /** Bind with `[(layout)]`: it is read once from the store and written after every change. */
   readonly layout: WritableSignal<DashboardLayout>;
+  /** The layout given here; bind it to the grid's `defaultLayout`, which its Reset asks for. */
+  readonly defaultLayout: DashboardLayout;
   /** Forgets what is stored and returns to the default. */
   clear(): void;
 }
@@ -84,6 +86,7 @@ export function persistedDashboardLayout({
   );
   return {
     layout,
+    defaultLayout,
     clear() {
       try {
         store?.removeItem(key);

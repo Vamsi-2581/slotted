@@ -600,7 +600,7 @@ test('draws the pane edge on the column and never on the layer', () => {
 
 /** The splitter's mark at rest, grown under the hand, the drag and the keyboard; the ring for the keyboard. */
 test('draws the pane edge as the splitter mark at rest and a ring under the keyboard', () => {
-  const first = rule('> [data-part-aside-resizer] > [data-part-line]:first-child {').body;
+  const first = rule('> [data-part-line]:first-child {').body;
   assert.match(first, /linear-gradient\(to bottom, transparent, var\(--_resizer-rest\)\)/);
   const grip = rule('> [data-part-aside-resizer] > [data-part-grip] {').body;
   assert.match(grip, /color:\s*var\(--_resizer-rest\)/);

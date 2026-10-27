@@ -4,8 +4,8 @@ import { inject, Injectable, InjectionToken } from '@angular/core';
 export type InlineMessageTone = 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
 
 /**
- * The type step the message sits at. `sm` is the message of a field; `md` is
- * the message of a section. Both read the control scales, which the theme
+ * The type step the message sits at. `sm` sits beside a compact field; `md`
+ * beside a large field. A message about a section is an alert. Both read the control scales, which the theme
  * restates per density.
  */
 export type InlineMessageSize = 'sm' | 'md';

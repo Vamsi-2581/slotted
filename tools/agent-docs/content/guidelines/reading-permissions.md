@@ -19,7 +19,7 @@ triggers:
     forbidden,
     scope,
   ]
-families: [data-grid, table, stat-card, inline-message, tabs, filter-bar]
+families: [data-grid, table, stat-card, alert, tabs, filter-bar]
 ---
 
 # Reading under permissions
@@ -48,7 +48,7 @@ Level: SHOULD
 Applies to: a screen that left a value out under PM-01, where its absence changes what the remaining numbers mean
 Rule: One statement names the permission the value needs and the roles that hold it; two missing permissions are one statement, not two.
 Why: A figure row with a hole in it reads as a screen that failed rather than as a screen that was told not to say; and a reader who holds neither permission does not need to be told twice in two tones.
-Do: Put the statement where the absence changes the reading — under the figures on a record, above the rows on a list — and use the permission's own name, which is what a reader asks an administrator for.
+Do: Put the statement in an `alert` where the absence changes the reading — under the figures on a record, above the rows on a list — and use the permission's own name, which is what a reader asks an administrator for.
 Don't: Repeat the statement per tab, per column or per card, or leave the absence unexplained where the rest of the numbers depend on it.
 Seen in: Nexora · the SKU record read as a warehouse operator · corrected
 Verified in: the SKU page suite, "a warehouse operator is shown neither price nor cost, and the page says so once"; A reader holding neither pricing nor cost sees one sentence naming both

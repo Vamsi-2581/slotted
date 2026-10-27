@@ -19,16 +19,17 @@ triggers:
     state,
     transition,
   ]
-families: [inline-message, toast, result-state, button, dialog]
+families: [alert, inline-message, toast, result-state, button, dialog]
 ---
 
 # Errors and conflicts
 
-What a screen does with an answer that is not the one it asked for. The
-library gives `inline-message` six tones, `result-state` four statuses and
-`toast` a place for what is passing; it does not say which of them a refusal
-belongs in, or that two refusals a reader must answer differently should not
-look the same.
+What a screen does with an answer that is not the one it asked for. A field's
+refusal is an `inline-message` under the field; a command's refusal is an
+`alert` at the head of the region the command acted on (CP-11); `result-state`
+replaces a region that cannot be read, and `toast` holds what is passing. The
+library does not say that two refusals a reader must answer differently should
+not look the same.
 
 ### ER-01 · A refusal is classed before it is shown
 

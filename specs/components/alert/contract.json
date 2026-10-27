@@ -4,7 +4,7 @@
   "ui": "alert",
   "catalog": {
     "group": "Feedback",
-    "summary": "Static message with a tone, icon and actions."
+    "summary": "Framed notice heading a section, a form or a page."
   },
   "axes": {
     "tone": ["accent", "secondary", "info", "success", "warning", "danger"],

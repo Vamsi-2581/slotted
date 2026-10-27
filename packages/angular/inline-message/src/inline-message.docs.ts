@@ -94,13 +94,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sizes',
     title: 'The step the message sits at',
-    note: 'sm is the message of a field and md the message of a section. Both read the control scales, so switching the toolbar to dense shrinks them with the rows around them.',
+    note: 'sm sits beside a compact field and md beside a large field. Both read the control scales, so switching the toolbar to dense shrinks them with the rows around them.',
     snippet: defineSnippet({
       id: 'inline-message-angular-sizes',
       language: 'angular',
       label: 'Two steps, both answering density',
       source:
-        '<p slInlineMessage size="sm" tone="danger">A mensagem de um campo.</p>\n<p slInlineMessage size="md" tone="danger">A mensagem de uma seção.</p>',
+        '<p slInlineMessage size="sm" tone="danger">A mensagem de um campo compacto.</p>\n<p slInlineMessage size="md" tone="danger">A mensagem de um campo grande.</p>',
     }),
   },
   {
@@ -207,7 +207,7 @@ export const ANGULAR_INLINE_MESSAGE_DOCS = {
         "'sm' | 'md'",
         'sm',
         'slInlineMessage',
-        'The type step. sm is the message of a field, md the message of a section; both read the control scales, which the theme restates per density',
+        'The type step. sm beside a compact field, md beside a large field; both read the control scales, which the theme restates per density',
       ],
       [
         'live',
@@ -297,6 +297,7 @@ export const ANGULAR_INLINE_MESSAGE_DOCS = {
       ],
     ]),
     accessibility: [
+      'A message about a section, a page or a command’s outcome is an alert, at reach section or page. This family is the message of one field or one control, under or beside it.',
       'There is no WAI-ARIA APG pattern for a message attached to a field. Three documents cover it between them: the APG Alert Pattern (w3.org/WAI/ARIA/apg/patterns/alert/) for the announcing behaviour, MDN’s aria-errormessage reference for the wiring, and WCAG 2.2 Understanding 3.3.1 Error Identification for the requirement that the error be identified in text.',
       'The severity is a word, not only a colour and a mark. A reader who cannot see the message hears the sentence and nothing else, so the family writes “Error:”, “Warning:” or “Success:” in clipped text before it — GOV.UK’s Error message component publishes the idea for errors, and this generalises it to every severity and to a table an application replaces once through provideInlineMessageDefaults.',
       'The live role goes on the host. slAlert puts its role on an inner part because it has a dismiss button beside its text and MDN’s alert role reference restricts the role to text content; this family owns no controls, so the element that is the text is the element that announces. live defaults to off, because a message already present when the page finishes loading is announced by nothing whatever role it carries.',

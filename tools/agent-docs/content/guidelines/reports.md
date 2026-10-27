@@ -19,7 +19,7 @@ triggers:
     history,
     ranking,
   ]
-families: [page-header, select, stat-card, chart, table, list, section, inline-message]
+families: [page-header, select, stat-card, chart, table, list, section, alert]
 ---
 
 # Reports

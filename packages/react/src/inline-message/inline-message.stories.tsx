@@ -42,7 +42,7 @@ const meta = {
       page: createReferencePage({
         title: 'Inline Message',
         description:
-          'One sentence about a field, a section or an action — with a mark saying how serious it is, and the same severity in a word a screen reader reads before the message.',
+          'One sentence about one field or one control — with a mark saying how serious it is, and the same severity in a word a screen reader reads before the message.',
         framework: 'React',
         ...REACT_INLINE_MESSAGE_DOCS.inlineMessage,
         tokens: REACT_INLINE_MESSAGE_TOKENS,
@@ -106,14 +106,14 @@ export const Sizes: Story = {
   render: () => (
     <Grid columns={2}>
       <Scene
-        label="The message of a field, and of a section"
-        note="sm sits under a control and stays quieter than it; md is for a message about a whole section, where there is no control beside it to be quieter than."
+        label="A compact field and a large field"
+        note="sm sits under a compact control and stays quieter than it; md sits under a large control. A message about a whole section is an alert."
       >
         <InlineMessage size="sm" tone="danger">
           sm — a mensagem de um campo.
         </InlineMessage>
         <InlineMessage size="md" tone="danger">
-          md — a mensagem de uma seção inteira.
+          md — a mensagem de um campo grande.
         </InlineMessage>
       </Scene>
       <Scene

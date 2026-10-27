@@ -4,7 +4,7 @@
   "ui": "inline-message",
   "catalog": {
     "group": "Feedback",
-    "summary": "Short status message next to content."
+    "summary": "The hint or error of one field; a region uses alert."
   },
   "axes": {
     "tone": ["accent", "secondary", "info", "success", "warning", "danger"],

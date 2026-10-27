@@ -188,6 +188,15 @@
         { "kind": "mentions", "pattern": "system" },
         { "kind": "absent", "pattern": "--slotted-tone-accent-[a-z-]+\\s*:" }
       ]
+    },
+    {
+      "id": "section-notices",
+      "skill": "compose-screen",
+      "prompt": "Write a settings section in src/ for market data: a list of price sources read from fetchSources() in src/api.ts, which you also write as a stub returning a Promise. When no source is enabled the section says so and offers to enable the suggested one; while an update runs it says the prices are being refreshed; when the backend refuses a change it says the change was not saved. Each source has an API key field that says when the key is malformed.",
+      "assertions": [
+        { "kind": "uses-family", "family": "alert" },
+        { "kind": "absent", "pattern": "(InlineMessage|slInlineMessage)[^>]*size=\"md\"" }
+      ]
     }
   ]
 }

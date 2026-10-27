@@ -25,6 +25,8 @@ triggers:
   ]
 families:
   [
+    alert,
+    inline-message,
     page-header,
     app-shell,
     top-navigation,
@@ -152,3 +154,14 @@ Do: Set `full` on every destination and `wide` on every form, on the page and no
 Don't: Give each page type a measure of its own, or cap a form's body with a width of the screen's own.
 Seen in: equori · Transactions at `bleed`, Categories at `wide`, new transaction at `content` · corrected in `b55d4f2`
 Check: Move between two destinations of the navigation: the header's and the body's start and end edges stay on the same lines.
+
+### CP-11 · A message about a region is an alert
+
+Level: SHOULD
+Applies to: every message a screen shows that is not a `toast` — a notice, a warning, a refusal, a pending state, an absence explained
+Rule: A message about one control or one value is an `inline-message` under or beside that control; a message about anything larger — a section, a form, a panel, a list, a record, the page — is an `alert` at the head of that region.
+Why: `inline-message` is a line of muted text with no frame, sized to stay quieter than the control above it; standing alone at the head of a region it reads as a stray caption, and the region's notice loses the title, the frame and the actions that `alert` carries.
+Do: Name the one control or value each `inline-message` is attached to; where there is none, use `alert` with the tone of the message, a title when the message has more than one sentence, and its actions part for what the reader does next. A control inside `field` takes the field's error and description parts, which render an `inline-message` already.
+Don't: Put an `inline-message` at the top of a section, a card, a drawer, a dialog or a page; give it a larger size to make it read as a section notice; or stack several of them as a list of a region's problems.
+Seen in: equori · settings, the market data notices — a missing source, an overdue source, an update running and a refused change each drawn as an `inline-message` at the head of the section · corrected in `09ee1ab8`
+Check: For each `inline-message` on the screen, point at the one control or value it describes, in the same row or the row above; a message with no such control, or one placed above a region's content, fails.

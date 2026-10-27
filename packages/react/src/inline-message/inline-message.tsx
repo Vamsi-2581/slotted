@@ -58,8 +58,8 @@ const LIVE_ROLE: Record<InlineMessageLive, string | undefined> = {
 };
 
 /**
- * One sentence about something else: a field, a section, an action. Help, an
- * error, a warning, a confirmation, or a wait.
+ * One sentence about one field or one control; a message about a section is
+ * an alert. Help, an error, a warning, a confirmation, or a wait.
  *
  * **The severity is a word as well as a colour.** A reader who cannot see the
  * message hears the sentence and nothing else — neither the red ink nor the

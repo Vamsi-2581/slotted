@@ -56,7 +56,7 @@ const meta: Meta<InlineMessageStoryArgs> = {
       page: createReferencePage({
         title: 'Inline Message',
         description:
-          'One sentence about a field, a section or an action — with a mark saying how serious it is, and the same severity in a word a screen reader reads before the message.',
+          'One sentence about one field or one control — with a mark saying how serious it is, and the same severity in a word a screen reader reads before the message.',
         framework: 'Angular',
         ...ANGULAR_INLINE_MESSAGE_DOCS.inlineMessage,
         tokens: ANGULAR_INLINE_MESSAGE_TOKENS,
@@ -170,10 +170,10 @@ export const Sizes: Story = {
     template: grid(
       2,
       scene(
-        'The message of a field, and of a section',
-        'sm sits under a control and stays quieter than it; md is for a message about a whole section, where there is no control beside it to be quieter than.',
+        'A compact field and a large field',
+        'sm sits under a compact control and stays quieter than it; md sits under a large control. A message about a whole section is an alert.',
         message('size="sm" tone="danger"', 'sm — a mensagem de um campo.') +
-          message('size="md" tone="danger"', 'md — a mensagem de uma seção inteira.'),
+          message('size="md" tone="danger"', 'md — a mensagem de um campo grande.'),
       ) +
         scene(
           'Both answer the density switch',

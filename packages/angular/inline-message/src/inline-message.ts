@@ -56,8 +56,8 @@ const LIVE_ROLE: Record<InlineMessageLive, string | null> = {
 };
 
 /**
- * One sentence about something else: a field, a section, an action. Help, an
- * error, a warning, a confirmation, or a wait.
+ * One sentence about one field or one control; a message about a section is
+ * an alert. Help, an error, a warning, a confirmation, or a wait.
  *
  * The directive is written on the consumer's own element, and the element it
  * belongs on is a `p`: the message is a sentence of prose about something else,

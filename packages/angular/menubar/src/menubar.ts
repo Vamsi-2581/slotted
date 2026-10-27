@@ -75,13 +75,14 @@ export class SlMenubar implements MenubarSurface {
    * The inputs a consumer writes are stated as they are written and read as
    * what they resolve to: `orientation()`, `size()` and `disabled()` answer the
    * bar's actual decision, which is what a menu on the bar reads through
-   * `MENUBAR_SURFACE`. The unresolved value belongs to nobody outside.
+   * `MENUBAR_SURFACE`. The inputs stay public: a template binding to a
+   * protected input fails a consumer's strict template check.
    */
-  protected readonly orientationInput = input<MenubarOrientation | undefined>(undefined, {
+  readonly orientationInput = input<MenubarOrientation | undefined>(undefined, {
     alias: 'orientation',
   });
-  protected readonly sizeInput = input<MenuSize | undefined>(undefined, { alias: 'size' });
-  protected readonly disabledInput = input(undefined, {
+  readonly sizeInput = input<MenuSize | undefined>(undefined, { alias: 'size' });
+  readonly disabledInput = input(undefined, {
     alias: 'disabled',
     transform: (given: boolean | string | undefined) =>
       given === undefined ? undefined : booleanAttribute(given),

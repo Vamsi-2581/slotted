@@ -80,3 +80,19 @@ test('publishes every family folder as an entry point', () => {
     .map((entry) => entry.name);
   assert.deepEqual(missing, []);
 });
+
+/**
+ * A consumer's template binds an input from outside the directive, so a
+ * `protected` input fails the consumer's strict template check (TS2445). The
+ * library's own specs compile without that check and pass anyway.
+ */
+test('declares every input, model and output public', () => {
+  const hidden = componentSources().flatMap(({ path, code }) =>
+    [
+      ...code.matchAll(
+        /^\s*(?:protected|private)\s+readonly\s+(\w+)\s*=\s*(?:input|model|output)\b/gm,
+      ),
+    ].map((match) => `${path} › ${match[1]}`),
+  );
+  assert.deepEqual(hidden, []);
+});

@@ -132,12 +132,12 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
    * `null` is empty, and `undefined` is the absence that makes the control
    * uncontrolled — the two are different answers.
    */
-  protected readonly valueInUnit = input<number | null | undefined, unknown>(undefined, {
+  readonly valueInUnit = input<number | null | undefined, unknown>(undefined, {
     alias: 'value',
     transform: (raw) => (raw === undefined ? undefined : (optionalNumber(raw) ?? null)),
   });
   /** The amount the control starts from when nobody else writes one, in `unit`. */
-  protected readonly defaultValueInUnit = input<number | null, unknown>(null, {
+  readonly defaultValueInUnit = input<number | null, unknown>(null, {
     alias: 'defaultValue',
     transform: (raw) => (raw === undefined ? null : (optionalNumber(raw) ?? null)),
   });
@@ -160,32 +160,32 @@ export class SlCurrencyFieldInput implements ControlValueAccessor, OnInit, SlCur
   readonly formatOn = input<CurrencyFieldFormatOn | undefined>(undefined);
 
   /** The smallest amount, in `unit`. */
-  protected readonly minInUnit = input<number | undefined, unknown>(undefined, {
+  readonly minInUnit = input<number | undefined, unknown>(undefined, {
     alias: 'min',
     transform: optionalNumber,
   });
   /** The largest amount, in `unit`. */
-  protected readonly maxInUnit = input<number | undefined, unknown>(undefined, {
+  readonly maxInUnit = input<number | undefined, unknown>(undefined, {
     alias: 'max',
     transform: optionalNumber,
   });
   /** What the arrows and the two buttons move by, in `unit`. One major unit by default. */
-  protected readonly stepInUnit = input<number | undefined, unknown>(undefined, {
+  readonly stepInUnit = input<number | undefined, unknown>(undefined, {
     alias: 'step',
     transform: optionalNumber,
   });
   /** The amount `Shift` and the page keys move by. Defaults to `step * 10`. */
-  protected readonly largeStepInUnit = input<number | undefined, unknown>(undefined, {
+  readonly largeStepInUnit = input<number | undefined, unknown>(undefined, {
     alias: 'largeStep',
     transform: optionalNumber,
   });
   /** The amount `Alt` moves by. Defaults to `step / 10`. */
-  protected readonly smallStepInUnit = input<number | undefined, unknown>(undefined, {
+  readonly smallStepInUnit = input<number | undefined, unknown>(undefined, {
     alias: 'smallStep',
     transform: optionalNumber,
   });
   /** Where an empty control starts stepping from. Defaults to `min`, then nought. */
-  protected readonly stepFromInUnit = input<number | undefined, unknown>(undefined, {
+  readonly stepFromInUnit = input<number | undefined, unknown>(undefined, {
     alias: 'stepFrom',
     transform: optionalNumber,
   });

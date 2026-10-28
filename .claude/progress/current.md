@@ -1,27 +1,27 @@
 # Checkpoint
 
-- Plano: nenhum (findings avulsos da equori, em fila).
+- Plano: nenhum. Fila: issues GitHub com o rótulo `finding` (`gh issue list --label finding --state open`).
 
-## Fila de pedidos
+## Fila de findings
 
-| # | Pedido | Estado |
-| - | ------ | ------ |
-| 1 | Release `v0.1.0-beta.20` | publicada: workflow `40626675656` |
-| 2 | date-picker: segmentos cortados como item flex ao lado de um Select | refeito em `fefa608d`: `inline-size: 100%` volta aos roots, com `flex-basis: content`; a remoção da beta.20 fazia select e date-picker não preencherem um Stack alinhado ao início |
-| 3 | button: `IconButtonLink` | concluído em `v0.1.0-beta.20` |
-| 4 | docs chart: `aria-label` nomeia o plot sem `title` | React em `v0.1.0-beta.20`; Angular em `b4454b18` |
-| 5 | chart Angular: plot sem `title` não recebia o `aria-label` do host | concluído em `b4454b18` (input `aria-label`, spec, docs, teste agent-docs) |
-| 6 | controlos de campo com `inline-size: 100%` como item flex | concluído em `fefa608d`: 19 roots com `flex-basis: content`; teste `packages/react/src/controls-flex.browser.test.tsx` (19 casos) |
-| 7 | alert: banner page de várias linhas | teste em `f46ac78c`: ação e dismiss na primeira linha |
-| 8 | tag: variante `dashed` | concluído em `b81032aa` (contrato, tipos, CSS, docs, stories, teste browser) |
-| 10 | theme: tamanho base do texto na raiz do tema | concluído em `00339869`: `font-size`/`line-height` do passo md em `[data-slotted-theme]`; teste `packages/react/src/theme/theme-text.browser.test.tsx` (falha antes, 16px contra 14px); snapshot `proof.css` regenerado |
-| 11 | drawer: bottom sheet nos tokens de slide | concluído em `4c73ed37`: scroll salta para o stop, transform do painel em Web Animations leva o desvio a zero; teste browser (100ms, viagem ≤ 150ms, sobe e desce), linha nas docs React e Angular com teste agent-docs |
-| 12 | CI vermelho em `c6a87cba`: snippet Angular do chart fora do formato | corrigido em `6c882bda` |
-| 9 | equori: subir para a nova beta e remover contornos | em curso noutra sessão (árvore da equori com 77 ficheiros alterados, não tocada) |
+| # | Finding | Estado |
+| - | ------- | ------ |
+| 2 | tokens backdrop-filter: overlays do chart, footer do drawer | commit `a8e54300` (push, issue fechada) |
+| 3 | page footer: fade suprime o blur | commit `d5bf4708` (push, issue fechada); inclui correção em `@slotted/core/presence`: `setNode(null)` a meio da saída espera um frame |
+| 9 | parseMarkdown: tabelas GFM | commit `947b319c` (push, issue fechada) |
+| 7 | data-grid: nome do checkbox de seleção | já respondido: coluna `rowHeader: true` (`rowLabelOf`, React e Angular, desde 2026-09-18) ; fechada com comentário |
+| 8 | dialog: form à volta das partes | já respondido desde `v0.1.0-beta.9` (`ef08d483`): `<form>` filho de `DialogContent` (`display: contents`) ou `render` para form; docs nos dois frameworks ; fechada com comentário |
+| 6 | data-grid server mode: agrupamento | já respondido desde `v0.1.0-beta.9`: `groupInOrder` agrupa linhas consecutivas pela ordem dada; teste `data-grid.test.tsx:396` ; fechada com comentário |
+| 4 | glyph calendar no slot start do button | commit `96d3f3c7` (push, issue fechada): offset já correto desde beta.10; teste browser cobre sm/md/lg e falha com offset [0, 0] |
+| 12 | glyph `pencil` | commit `edfeb3c5` push, issue fechada |
+| 13 | stat-card `emphasis="whole"` | commit `0d6a6f54` push, issue fechada |
+| 14 | drawer bottom sheet: entrada ultrapassa o stop | commit `c30f883f` push, issue fechada: snap desligado durante a viagem, offset inline no primeiro frame, snap desligado antes de interromper a saída |
+| 5 | data-grid: `aria-busy` reestiliza todas as linhas | commit `b1b64637` push, issue fechada: custo já limitado desde beta.10 (2 e 1 elementos); teste de desempenho com controlo; harness lê o trace por stream |
 
 ## Estado
 
-- Git: branch main; HEAD sincronizado após o push deste checkpoint.
-- Testes: Angular 3284/3284, React unit 4186/4186, core 2247/2247, agent-docs 227/227, drawer browser 17/17, `pnpm check` verde.
-- Problemas conhecidos: `pnpm typecheck` incremental emite falsos erros circulares em `*.stories.tsx`; apagar `node_modules/.cache/tsc/root.tsbuildinfo`. `stash@{0}` (pre-button-family-integration-2026-08-30) pertence ao utilizador e foi aplicado por engano e revertido; continua na lista.
-- Próxima ação: esperar CI verde no HEAD (`gh run list --branch main --limit 1`), `pnpm release --dry-run`, `pnpm release`, `gh run watch <id>`, verificar os seis pacotes com `npm view @slotted/<p>@0.1.0-beta.21 dist-tags --prefer-online`.
+- Git: branch main, HEAD `b1b64637` = origin/main. Nenhuma issue aberta.
+- Árvore: só este ficheiro alterado.
+- Testes: core 2249 (2 timeouts de chart sob carga, passam isolados), React unit 4186/4186 após ajuste de 3 testes, page browser 5/5, Angular 3284/3284 + bundle 11/11, styles chart/drawer/page 21/21, `pnpm check` verde.
+- Problemas conhecidos: `pnpm typecheck` incremental emite falsos erros circulares em `*.stories.tsx`; apagar `node_modules/.cache/tsc/root.tsbuildinfo`. Load average ~30 (outras sessões) causa timeouts nos testes de chart do core. `stash@{0}` pertence ao utilizador.
+- Próxima ação: `gh issue list --label finding --state open` quando chegarem findings novos. Limite conhecido: o harness de trace ainda pode perder `Tracing.tracingComplete` (1 em 17 execuções observadas); falha em 10 s com mensagem.

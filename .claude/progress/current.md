@@ -1,12 +1,19 @@
 # Checkpoint
 
-- Plano: nenhum (pedido avulso: dois findings da equori — `actionsPlacement` no alert, seeds do portal em profundidade).
-- Tarefas concluídas:
-  - core/portal: `mirrorSeeds` lê as seeds no `[data-slotted-seeds]` ou `[data-slotted-theme]` mais próximo do opener (ou no `documentElement`), e uma seed escrita inline entre o opener e esse elemento continua a valer. Testes: `portal.test.ts` (abertura a profundidade 24 < 500 ms; seed de região com `data-slotted-seeds`), `react/src/menu/menu.test.tsx` (Menu a profundidade 24 < 500 ms; 160 s antes da correção).
-  - alert: `actionsPlacement?: 'below' | 'end'` nas duas bindings; resolvido como prop, depois `end` para `reach="page"` e `below` para as outras; `data-actions-placement` no root. CSS: a regra de 40rem que valia para `data-reach='page'` passa a valer para `data-actions-placement='end'`; as ações entram no grupo de baseline do ícone e do texto, o dismiss fica na primeira linha, na coluna 4. Contrato: eixo `actionsPlacement` e `resolution`. Docs das duas bindings: nota e snippet de `actions`, linha da tabela de props. Testes: `react/src/alert/alert.browser.test.tsx` (6 casos a 960 px e a 30rem), unit React e spec Angular do atributo, teste de estilo reescrito.
-- Em curso: nenhuma.
-- Git: branch main em `93b80000`; alterações sem commit em 18 ficheiros.
-- Testes: core portal 26/26; React menu 38/38; React alert unit 29/29, browser 6/6; Angular alert 27/27; estilos + contrato alert 43/43; agent-docs 223/223; `pnpm check` verde com o cache de tsc apagado.
-- Ajustes de escopo: o banner `page` largo deixou de centrar a ação e o dismiss na caixa inteira; agora ficam na primeira linha da mensagem (igual para uma mensagem de uma linha, diferente para várias linhas). O `actionsPlacement` não entrou no provider de defaults.
-- Problemas conhecidos: `pnpm typecheck` incremental volta a dar erros de inferência circular em `*.stories.tsx` com cache antigo; com o cache apagado dá 0. Visual do banner `page` de várias linhas não verificado fora do teste.
-- Próxima ação: commit dos dois findings e, se pedido, `pnpm release` (beta.20).
+- Plano: nenhum (findings avulsos da equori, em fila).
+
+## Fila de pedidos
+
+| # | Pedido | Estado |
+| - | ------ | ------ |
+| 1 | Release `v0.1.0-beta.20` (portal + alert `actionsPlacement` + `hooks.json`) | CI `40620498867` verde; instrução do dono: push e release depois de concluir os itens 2–4 |
+| 2 | date-picker: segmentos cortados como item flex ao lado de um Select (PageHeaderActions > Inline nowrap > Select + Stack > DatePicker) | concluído: `inline-size: 100%` removido dos roots de select e date-picker; teste de navegador falha antes, passa depois |
+| 3 | button: `IconButtonLink` (props de IconButton + `href`, `render` com props de âncora, `disabled` → `aria-disabled` sem href, como ButtonLink; compõe em ButtonGroup). Aceite: teste de tipos que espalha as props do render num componente `ComponentPropsWithRef<"a">`; teste de render com role="link" e nome dentro de `[data-ui="button-group"]` | pendente |
+| 4 | docs chart: linha `title` de chart.md diz que, sem `title`, o plot é nomeado pelo `aria-label` do Chart; exemplo de Chart dentro de Section com `aria-label` e sem `title`. Aceite: verificação de docs pela frase; teste com role="group" nomeado e sem `data-part="title"` | concluído (React; o Angular não repassa `aria-label` ao plot — lacuna registada) |
+
+## Estado
+
+- Git: branch main; commits `fix(portal)`, `feat(alert)`, `chore(theme)` enviados para origin/main.
+- Não commitado: `packages/react/src/date-picker/date-picker.browser.test.tsx` (com `console.log` de depuração), `packages/react/src/date-picker/zz-probe.browser.test.tsx` (sonda, remover).
+- Problema conhecido: `pnpm typecheck` incremental emite falsos erros circulares em `*.stories.tsx` com cache antigo; apagar `node_modules/.cache/tsc/root.tsbuildinfo`.
+- Próxima ação: verificar o resultado do CI `40620498867`; se verde, `pnpm release`.

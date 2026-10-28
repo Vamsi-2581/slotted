@@ -53,6 +53,31 @@ describe('the actions of an alert', () => {
     expect(dismiss.top).toBeLessThan(actions.bottom);
   });
 
+  it('stand on the first line of a page banner whose message wraps', () => {
+    render(
+      <Alert dismissible reach="page">
+        <AlertContent>
+          <AlertDescription>
+            {'The suggestion changes three lines of the plan and moves the review date. '.repeat(4)}
+          </AlertDescription>
+        </AlertContent>
+        <AlertActions>
+          <Button size="sm">Apply</Button>
+        </AlertActions>
+      </Alert>,
+    );
+    const box = (part: string) =>
+      document.querySelector(`[data-part="${part}"]`)!.getBoundingClientRect();
+    const description = document.querySelector('[data-part="description"]')!;
+    const line = Number.parseFloat(getComputedStyle(description).lineHeight);
+    const content = box('content');
+
+    expect(content.height).toBeGreaterThan(2 * line);
+    expect(box('actions').left).toBeGreaterThanOrEqual(content.right);
+    expect(box('actions').top).toBeLessThan(content.top + line);
+    expect(box('dismiss').top).toBeLessThan(content.top + line);
+  });
+
   it('go back under the message in a box narrower than 40rem', () => {
     render(
       <div style={{ inlineSize: '30rem' }}>

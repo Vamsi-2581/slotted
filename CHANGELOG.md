@@ -2,6 +2,16 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.20 — 2026-10-28
+
+- chore(progress): fila de findings da equori
+- docs(chart): sem title, o plot é nomeado pelo aria-label do Chart; exemplo de um gráfico que a secção já nomeia
+- feat(button): IconButtonLink
+- fix(date-picker): o root do date-picker e o do select deixam de declarar inline-size: 100%, que numa linha flex fazia da linha inteira a base de cada item e cortava a data
+- chore(theme): regenera hooks.json com data-actions-placement do alert
+- feat(alert): actionsPlacement põe as ações no fim da linha da mensagem a partir de 40rem; padrão end para reach page e below para os outros alcances
+- fix(portal): as seeds de uma camada são lidas no elemento que as declara e não no opener; abrir um menu a 24 níveis no jsdom deixa de levar 160 s
+
 ## 0.1.0-beta.19 — 2026-10-28
 
 - docs(evals): avaliação de 2026-10-28

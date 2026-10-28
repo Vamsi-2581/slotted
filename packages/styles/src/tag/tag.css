@@ -230,6 +230,8 @@
    * with nothing behind it. `soft` keeps its edge because in `high-contrast`
    * every tone surface collapses to the page's own white, and there it
    * converges with `outline` — which is what a high-contrast scheme is for.
+   * `dashed` is `outline` with the edge drawn in dashes; a selected tag fills,
+   * and its edge is solid again.
    */
 
   [data-ui-tag][data-part-root][data-variant='solid'] {
@@ -244,10 +246,15 @@
     color: var(--_text, ButtonText);
   }
 
-  [data-ui-tag][data-part-root][data-variant='outline'] {
+  [data-ui-tag][data-part-root][data-variant='outline'],
+  [data-ui-tag][data-part-root][data-variant='dashed'] {
     background-color: transparent;
     border-color: var(--_border, ButtonBorder);
     color: var(--_text, ButtonText);
+  }
+
+  [data-ui-tag][data-part-root][data-variant='dashed']:not([data-selected]) {
+    border-style: dashed;
   }
 
   /* ── Size ─────────────────────────────────────────────────────────────── */
@@ -594,11 +601,15 @@
   }
 
   [data-ui-tag][data-part-root][data-variant='outline']:not([data-disabled]):not([data-selected])
+    :is([data-part-body]:is(a, button), [data-part-remove]):hover:not(:disabled),
+  [data-ui-tag][data-part-root][data-variant='dashed']:not([data-disabled]):not([data-selected])
     :is([data-part-body]:is(a, button), [data-part-remove]):hover:not(:disabled) {
     background-color: var(--_subtle-hover, ButtonFace);
   }
 
   [data-ui-tag][data-part-root][data-variant='outline']:not([data-disabled]):not([data-selected])
+    :is([data-part-body]:is(a, button), [data-part-remove]):active:not(:disabled),
+  [data-ui-tag][data-part-root][data-variant='dashed']:not([data-disabled]):not([data-selected])
     :is([data-part-body]:is(a, button), [data-part-remove]):active:not(:disabled) {
     background-color: var(--_subtle-active, ButtonFace);
   }
@@ -691,7 +702,8 @@
     border-color: var(--slotted-disabled-border, GrayText);
   }
 
-  [data-ui-tag][data-part-root][data-variant='outline'][data-disabled] {
+  [data-ui-tag][data-part-root][data-variant='outline'][data-disabled],
+  [data-ui-tag][data-part-root][data-variant='dashed'][data-disabled] {
     background-color: transparent;
     border-color: var(--slotted-disabled-border, GrayText);
   }

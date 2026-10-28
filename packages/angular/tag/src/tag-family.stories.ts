@@ -14,7 +14,7 @@ import { SlTagRemove } from './tag-remove';
 import { SlTagToggle } from './tag-toggle';
 
 const TONES = ['accent', 'secondary', 'info', 'success', 'warning', 'danger'];
-const VARIANTS = ['solid', 'soft', 'outline'];
+const VARIANTS = ['solid', 'soft', 'outline', 'dashed'];
 const SIZES = ['sm', 'md', 'lg'];
 
 const IMPORTS = [

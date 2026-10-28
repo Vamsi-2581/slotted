@@ -211,6 +211,14 @@ test('gives a tinted chip a hover step the tone ramp does not carry', () => {
   );
 });
 
+/** `dashed` is the outline painting with its edge in dashes, until it is selected. */
+test('draws a dashed tag as an outline whose edge is dashed', () => {
+  assert.ok(normalized.includes(`${root}[data-variant='dashed']{background-color:transparent`));
+  assert.ok(
+    normalized.includes(`${root}[data-variant='dashed']:not([data-selected]){border-style:dashed;`),
+  );
+});
+
 test('keeps a border under forced colours, where the tone is discarded', () => {
   assert.ok(
     normalized.includes(`@media (forced-colors:active){${root}{border-color:currentColor`),

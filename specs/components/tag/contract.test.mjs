@@ -87,7 +87,7 @@ test('reserves the run that holds the tags and owns their keyboard', () => {
 
 test('separates the colour it speaks in from the way that colour is painted', () => {
   assert.deepEqual(contract.axes.tone, TONES);
-  assert.deepEqual(contract.axes.variant, ['solid', 'soft', 'outline']);
+  assert.deepEqual(contract.axes.variant, ['solid', 'soft', 'outline', 'dashed']);
   assert.ok(!('fill' in contract.axes), 'fill is the word button retired');
 });
 

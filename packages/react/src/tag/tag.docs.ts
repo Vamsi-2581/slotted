@@ -18,7 +18,7 @@ export const REACT_TAG_TOKENS = tagTokens.map((name) => ({
 }));
 
 const TONE = "'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger'";
-const VARIANT = "'solid' | 'soft' | 'outline'";
+const VARIANT = "'solid' | 'soft' | 'outline' | 'dashed'";
 const SIZE = "'sm' | 'md' | 'lg'";
 const SHAPE = "'pill' | 'square'";
 
@@ -29,7 +29,7 @@ const appearance = (member: string): ApiTuple[] => [
     VARIANT,
     'soft',
     member,
-    'How that colour is painted: filled, tinted, or an edge alone. A selected tag fills whatever its variant',
+    'How that colour is painted: filled, tinted, an edge alone, or that edge in dashes. A selected tag fills whatever its variant',
   ],
   [
     'size',

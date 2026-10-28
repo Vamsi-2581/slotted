@@ -2,6 +2,19 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.22 — 2026-10-28
+
+- docs(evals): theme-app atende após os tokens de filtro do footer do drawer e dos overlays do chart; checkpoint da fila de findings
+- test(data-grid): entrar e sair de um refresh reestiliza a raiz e o véu, não as linhas
+- fix(drawer): a entrada do bottom sheet viaja da borda, ou de onde a saída parou, até ao stop
+- feat(stat-card): emphasis="whole" desenha o símbolo, as decimais e o sufixo do valor no part unit
+- feat(glyph): pencil, para uma ação de edição
+- test(icon): o corpo do calendar centra-se na altura das maiúsculas do label nos três tamanhos de button
+- feat(markdown): parseMarkdown lê tabelas GFM
+- fix(page): o footer entra e sai só pelo translate, e a saída de presence sobrevive a uma ref que se desliga e volta
+- feat(tokens): backdrop-filter dos overlays do chart e do footer do drawer
+- docs(agents): o CLAUDE.md importa o AGENTS.md, para uma sessão do Claude Code ler as instruções do repositório
+
 ## 0.1.0-beta.21 — 2026-10-28
 
 - docs(agents): findings chegam como issues com o rótulo finding e o formulário de .github/ISSUE_TEMPLATE; o commit que corrige fecha a issue com Fixes #n

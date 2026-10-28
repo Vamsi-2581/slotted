@@ -21,9 +21,11 @@
    */
   [data-ui-date-picker][data-part-root] {
     display: block;
+    /* In a flex row the item's basis is its content, not the whole row. */
+    flex-basis: content;
     /* The anchor the positioner measures is the control, and a block root
-       takes the width the form gave it without `inline-size: 100%`, which in a
-       flex row made the whole row this item's basis and clipped the date. */
+       lets the frame take the width the form gave it. */
+    inline-size: 100%;
   }
 
   /**

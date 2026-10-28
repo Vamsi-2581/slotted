@@ -101,6 +101,8 @@
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
     gap: var(--_gap);
+    /* In a flex row the item's basis is its content, not the whole row. */
+    flex-basis: content;
     inline-size: 100%;
     /* A control in a grid track narrower than its own intrinsic width would
        otherwise refuse to shrink and take the drawer's edge with it. */

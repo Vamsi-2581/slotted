@@ -83,6 +83,8 @@
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
     gap: var(--slotted-space-1, 0.125rem);
+    /* In a flex row the item's basis is its content, not the whole row. */
+    flex-basis: content;
     inline-size: 100%;
     min-inline-size: 0;
     min-block-size: var(--_height);

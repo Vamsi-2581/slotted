@@ -73,6 +73,8 @@
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
     grid-template-columns: minmax(0, 1fr) auto;
+    /* In a flex row the item's basis is its content, not the whole row. */
+    flex-basis: content;
     inline-size: 100%;
     min-block-size: var(--_height);
     min-inline-size: 0;

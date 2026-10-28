@@ -59,6 +59,8 @@
     display: block;
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
+    /* In a flex row the item's basis is its content, not the whole row. */
+    flex-basis: content;
     inline-size: 100%;
     /**
      * The text scale's leading rather than the control's `1`. A control's line

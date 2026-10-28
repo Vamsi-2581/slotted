@@ -30,6 +30,8 @@
    */
   [data-ui-datetime-picker][data-part-root] {
     display: block;
+    /* In a flex row the item's basis is its content, not the whole row. */
+    flex-basis: content;
     /* The anchor the positioner measures is the control, and a block root lets
        the frame take the width the form gave it. */
     inline-size: 100%;

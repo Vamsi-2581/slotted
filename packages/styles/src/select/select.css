@@ -125,7 +125,9 @@
     font-family: var(--slotted-control-font-family, system-ui, sans-serif);
     font-size: var(--_font-size);
     grid-template-columns: minmax(0, 1fr) auto;
-    inline-size: 100%;
+    /* No `inline-size: 100%`: a block box fills its container on its own, and
+       in a flex row a percentage is every item's basis — beside a date picker
+       both claimed the whole row and the shrink clipped the date. */
     /* A control in a grid track narrower than its intrinsic width would
        otherwise refuse to shrink and take the row's edge with it. */
     min-inline-size: 0;

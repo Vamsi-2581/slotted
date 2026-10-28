@@ -130,7 +130,9 @@ export function renderTheme(theme: Theme): string {
   const blocks: string[] = [
     block(
       [themeSelector(name)],
-      declarations({ ...seeds, ...(theme.base ?? {}), ...(theme.components ?? {}) }),
+      /* Text no family draws inherits the body step, not the browser's 16px. */
+      `${declarations({ ...seeds, ...(theme.base ?? {}), ...(theme.components ?? {}) })}\n` +
+        'font-size: var(--slotted-font-size-md);\nline-height: var(--slotted-line-height-md);',
     ),
     /*
      * Firefox (Stylo, measured 146–155) shares one computed style between

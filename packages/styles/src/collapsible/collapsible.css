@@ -121,6 +121,9 @@
    * is the word for the case where it may not.
    */
   [data-ui-collapsible] > [data-part-header] > [data-part-trigger] {
+    /* A height above the content's would otherwise be split over both rows,
+       the empty description row included, and lift the title off centre. */
+    align-content: center;
     align-items: center;
     appearance: none;
     background-color: var(--slotted-collapsible-background, transparent);

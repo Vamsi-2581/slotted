@@ -709,12 +709,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'card',
     title: 'On the page, or as a card',
-    note: 'plain sits on the page’s own surface for a report; card draws its own surface, border and padding, and fills the grid cell it is given.',
+    note: 'plain sits on the page’s own surface for a report; card draws its own surface, border and padding, and fills the grid cell it is given. Inside a section whose heading already names the chart, leave title out and pass aria-label: it names the plot.',
     snippet: defineSnippet({
       id: 'chart-react-card',
       language: 'tsx',
-      label: 'variant',
-      source: '<Chart {...revenue} variant="plain" />;\n<Chart {...revenue} variant="card" />;',
+      label: 'variant, and a chart its section names',
+      source:
+        '<Chart {...revenue} variant="plain" />;\n<Chart {...revenue} variant="card" />;\n\n<Section>\n  <SectionHeader>\n    <SectionTitle>\n      <SectionHeading>Receita</SectionHeading>\n    </SectionTitle>\n  </SectionHeader>\n  <SectionBody>\n    <Chart aria-label="Receita, últimos 12 meses" data={data} series={series} />\n  </SectionBody>\n</Section>;',
     }),
   },
   {
@@ -927,7 +928,7 @@ export const REACT_CHART_DOCS = {
         'ReactNode',
         '—',
         'Chart',
-        'The caption, and the plot’s accessible name. Not the native title attribute',
+        'The caption, and the plot’s accessible name. Not the native title attribute. Without title, the plot is named by the aria-label passed to Chart; use it when a surrounding heading already names the chart',
       ],
       ['description', 'ReactNode', '—', 'Chart', 'One line under the title'],
       ['help', 'ReactNode', '—', 'Chart', 'A note behind an information control beside the title'],

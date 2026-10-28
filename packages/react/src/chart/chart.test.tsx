@@ -87,6 +87,14 @@ beforeEach(() => {
 });
 
 describe('Chart', () => {
+  it('names the plot by its aria-label when no title is written', () => {
+    const { title: _title, ...untitled } = base;
+    render(<Chart {...untitled} aria-label="Revenue, last 12 months" />);
+
+    expect(screen.getByRole('group', { name: 'Revenue, last 12 months' })).toBe(part('plot'));
+    expect(part('title')).toBeNull();
+  });
+
   it('is a figure its caption names, with a plot named by the title and described in words', () => {
     render(<Chart {...base} description="Thousands, 2026" />);
 

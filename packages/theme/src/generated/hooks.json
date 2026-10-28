@@ -1807,6 +1807,7 @@
   "attributes": [
     "data-action",
     "data-actions",
+    "data-actions-placement",
     "data-active",
     "data-adaptive",
     "data-aggregate",

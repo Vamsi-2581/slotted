@@ -729,3 +729,63 @@ describe('a bottom sheet’s entrance', () => {
     },
   );
 });
+
+/**
+ * The entrance leaves the edge from rest. On the emphasized decelerate curve
+ * the first frame of the travel covered about a third of the distance to the
+ * stop, and the sheet read as a jump followed by a slow settle.
+ */
+describe('a bottom sheet’s entrance curve', () => {
+  beforeEach(async () => {
+    await page.viewport(390, 844);
+    /* The motion tokens of `@slotted/themes/default.css`, which this package does not load. */
+    const root = document.documentElement.style;
+    root.setProperty('--slotted-duration-medium', '200ms');
+    root.setProperty('--slotted-duration-long', '320ms');
+    root.setProperty('--slotted-easing-standard', 'cubic-bezier(0.2, 0, 0, 1)');
+    root.setProperty('--slotted-easing-enter', 'cubic-bezier(0.05, 0.7, 0.1, 1)');
+    root.setProperty('--slotted-easing-exit', 'cubic-bezier(0.3, 0, 0.8, 0.15)');
+  });
+  afterEach(async () => {
+    document.documentElement.removeAttribute('style');
+    await page.viewport(412, 915);
+  });
+
+  it('covers at most a tenth of the distance in its first frame, under the default theme’s tokens', async () => {
+    function Sheet() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen(true)} type="button">
+            Open
+          </button>
+          <Drawer onOpenChange={setOpen} open={open} side="bottom" size="full" snapPoints={[0.85]}>
+            <DrawerPanel>
+              <DrawerResizer />
+              <DrawerHeader>
+                <DrawerTitle>Sheet</DrawerTitle>
+              </DrawerHeader>
+              <DrawerBody>
+                <p>A short body.</p>
+              </DrawerBody>
+            </DrawerPanel>
+          </Drawer>
+        </>
+      );
+    }
+    render(<Sheet />);
+    document.querySelector<HTMLElement>('button')?.click();
+    const tops: number[] = [];
+    for (let index = 0; index < 60; index += 1) {
+      await frame();
+      const panel = document.querySelector<HTMLElement>('[data-ui="drawer"] [data-part="panel"]');
+      if (panel) tops.push(panel.getBoundingClientRect().top);
+    }
+    const from = window.innerHeight;
+    const stop = window.innerHeight * 0.15;
+    expect(Math.abs(tops.at(-1)! - stop)).toBeLessThanOrEqual(2);
+    const first = tops.find((top) => top < from - 1);
+    expect(first, 'the panel never moved').toBeDefined();
+    expect((from - first!) / (from - stop)).toBeLessThanOrEqual(0.1);
+  });
+});

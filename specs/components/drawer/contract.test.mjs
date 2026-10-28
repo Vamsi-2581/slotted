@@ -571,7 +571,11 @@ test('settles a sheet on the snap points and the other sides by settleExtent', (
   assert.match(contract.sheet.settle, /settleExtent/);
   assert.match(contract.sheet.settle, /close/);
   assert.match(contract.sheet.overdrag, /overscroll/);
-  assert.match(contract.sheet.motion, /smooth scroll/);
+  assert.match(
+    contract.sheet.motion,
+    /--slotted-drawer-slide-easing \(default --slotted-easing-standard\)/,
+  );
+  assert.match(contract.sheet.motion, /at most a tenth of the distance/);
 });
 
 test('leaves the page undimmed below a stop the consumer names', () => {

@@ -18,7 +18,7 @@ describe.each(['react', 'angular'] as const)('the %s drawer page', (binding) => 
       .join('\n');
 
     expect(page).toMatch(
-      /travel in --slotted-drawer-slide-duration and --slotted-easing-enter going up, and in --slotted-drawer-slide-exit-duration and --slotted-easing-exit going down/,
+      /travel in --slotted-drawer-slide-duration and --slotted-drawer-slide-easing \(default --slotted-easing-standard\) going up, and in --slotted-drawer-slide-exit-duration and --slotted-drawer-slide-exit-easing \(default --slotted-easing-exit\) going down/,
     );
   });
 });

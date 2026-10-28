@@ -117,6 +117,11 @@
      * the motion scale arriving and one step down leaving, because a reader who
      * has decided to close is waiting.
      *
+     * The slide arrives on the standard curve, not the entrance one: the
+     * entrance curve starts at fourteen times its mean speed, and a bottom
+     * sheet on it covered 46 per cent of a 717 px travel in its first frame.
+     * The standard curve covers under 3 per cent there.
+     *
      * `--_move` is any measure that changes — an inline drawer opening, and a
      * separator released onto a snap point. One step below the slide.
      *
@@ -137,7 +142,7 @@
      * states below read as what they are.
      */
     --_slide: var(--slotted-drawer-slide-duration, var(--slotted-duration-long))
-      var(--slotted-easing-enter);
+      var(--slotted-drawer-slide-easing, var(--slotted-easing-standard));
     --_move: var(--slotted-duration-medium) var(--slotted-easing-enter);
     /**
      * `allow-discrete` is the whole of it. Without it the rule that hides a
@@ -180,7 +185,7 @@
   /** Leaving is shorter than arriving: a reader who has decided is waiting. */
   [data-ui-drawer]:not([data-open]) {
     --_slide: var(--slotted-drawer-slide-exit-duration, var(--slotted-duration-medium))
-      var(--slotted-easing-exit);
+      var(--slotted-drawer-slide-exit-easing, var(--slotted-easing-exit));
     --_move: var(--slotted-duration-medium) var(--slotted-easing-exit);
   }
 

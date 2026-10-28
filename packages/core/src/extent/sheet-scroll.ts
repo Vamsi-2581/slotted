@@ -18,8 +18,8 @@
  * drawn where it was, then a Web Animations `transform` on the panel takes
  * that offset to nothing: on the compositor, as the scroll is, and in the
  * drawer's slide tokens. Up reads `--slotted-drawer-slide-duration` and
- * `--slotted-easing-enter`, down `--slotted-drawer-slide-exit-duration` and
- * `--slotted-easing-exit`.
+ * `--slotted-drawer-slide-easing`, down `--slotted-drawer-slide-exit-duration`
+ * and `--slotted-drawer-slide-exit-easing`.
  *
  * Opening forces no layout: the stops are read once the browser has laid the
  * layer out (`afterLayout`), written in the next frame, and the scroll up
@@ -391,7 +391,10 @@ export function attachSheetScroll(
     if (duration === null) return null;
     return {
       duration,
-      easing: read(exit ? '--slotted-easing-exit' : '--slotted-easing-enter') || 'ease',
+      easing:
+        read(exit ? '--slotted-drawer-slide-exit-easing' : '--slotted-drawer-slide-easing') ||
+        read(exit ? '--slotted-easing-exit' : '--slotted-easing-standard') ||
+        'ease',
     };
   };
 

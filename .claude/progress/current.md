@@ -6,14 +6,19 @@
 
 | # | Pedido | Estado |
 | - | ------ | ------ |
-| 1 | Release `v0.1.0-beta.20` (portal + alert `actionsPlacement` + `hooks.json`) | CI `40620498867` verde; instrução do dono: push e release depois de concluir os itens 2–4 |
-| 2 | date-picker: segmentos cortados como item flex ao lado de um Select (PageHeaderActions > Inline nowrap > Select + Stack > DatePicker) | concluído: `inline-size: 100%` removido dos roots de select e date-picker; teste de navegador falha antes, passa depois |
-| 3 | button: `IconButtonLink` (props de IconButton + `href`, `render` com props de âncora, `disabled` → `aria-disabled` sem href, como ButtonLink; compõe em ButtonGroup). Aceite: teste de tipos que espalha as props do render num componente `ComponentPropsWithRef<"a">`; teste de render com role="link" e nome dentro de `[data-ui="button-group"]` | pendente |
-| 4 | docs chart: linha `title` de chart.md diz que, sem `title`, o plot é nomeado pelo `aria-label` do Chart; exemplo de Chart dentro de Section com `aria-label` e sem `title`. Aceite: verificação de docs pela frase; teste com role="group" nomeado e sem `data-part="title"` | concluído (React; o Angular não repassa `aria-label` ao plot — lacuna registada) |
+| 1 | Release `v0.1.0-beta.20` | publicada: workflow `40626675656` |
+| 2 | date-picker: segmentos cortados como item flex ao lado de um Select | refeito em `fefa608d`: `inline-size: 100%` volta aos roots, com `flex-basis: content`; a remoção da beta.20 fazia select e date-picker não preencherem um Stack alinhado ao início |
+| 3 | button: `IconButtonLink` | concluído em `v0.1.0-beta.20` |
+| 4 | docs chart: `aria-label` nomeia o plot sem `title` | React em `v0.1.0-beta.20`; Angular em `b4454b18` |
+| 5 | chart Angular: plot sem `title` não recebia o `aria-label` do host | concluído em `b4454b18` (input `aria-label`, spec, docs, teste agent-docs) |
+| 6 | controlos de campo com `inline-size: 100%` como item flex | concluído em `fefa608d`: 19 roots com `flex-basis: content`; teste `packages/react/src/controls-flex.browser.test.tsx` (19 casos) |
+| 7 | alert: banner page de várias linhas | teste em `f46ac78c`: ação e dismiss na primeira linha |
+| 8 | tag: variante `dashed` | concluído em `b81032aa` (contrato, tipos, CSS, docs, stories, teste browser) |
+| 9 | equori: subir para a nova beta e remover contornos | em curso noutra sessão (árvore da equori com 77 ficheiros alterados, não tocada) |
 
 ## Estado
 
-- Git: branch main; commits `fix(portal)`, `feat(alert)`, `chore(theme)` enviados para origin/main.
-- Não commitado: `packages/react/src/date-picker/date-picker.browser.test.tsx` (com `console.log` de depuração), `packages/react/src/date-picker/zz-probe.browser.test.tsx` (sonda, remover).
-- Problema conhecido: `pnpm typecheck` incremental emite falsos erros circulares em `*.stories.tsx` com cache antigo; apagar `node_modules/.cache/tsc/root.tsbuildinfo`.
-- Próxima ação: verificar o resultado do CI `40620498867`; se verde, `pnpm release`.
+- Git: branch main, 4 commits à frente de origin/main (b4454b18, fefa608d, f46ac78c, b81032aa) mais este ficheiro.
+- Testes: React browser 160/160 (entity-picker falhou uma vez sob carga, passa isolado), unit 4186 (7 falhas sob carga, passam isoladas), styles 1719/1719, Angular chart 23/23 e tag 23/23, `pnpm check` verde (typecheck com cache apagado).
+- Problemas conhecidos: `pnpm typecheck` incremental emite falsos erros circulares em `*.stories.tsx`; apagar `node_modules/.cache/tsc/root.tsbuildinfo`. `stash@{0}` (pre-button-family-integration-2026-08-30) pertence ao utilizador e foi aplicado por engano e revertido; continua na lista.
+- Próxima ação: `git push`, esperar CI verde no HEAD (`gh run list --branch main --limit 1`), `pnpm release`, `gh run watch <id>`, verificar os seis pacotes com `npm view @slotted/<p>@0.1.0-beta.21 dist-tags --prefer-online`.

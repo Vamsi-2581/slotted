@@ -39,6 +39,6 @@ describe('the angular chart page', () => {
     expect(page).toMatch(
       /Without title, the plot is named by the aria-label written on the figure/,
     );
-    expect(page).toMatch(/<figure slChart aria-label=/);
+    expect(page).toMatch(/<figure\s+slChart\s+aria-label=/);
   });
 });

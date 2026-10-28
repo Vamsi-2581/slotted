@@ -726,7 +726,7 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'variant',
       source:
-        '<figure slChart variant="plain" [data]="monthly" [series]="revenue"></figure>\n<figure slChart variant="card" [data]="monthly" [series]="revenue"></figure>\n\n<section slSection>\n  <div slSectionHeader>\n    <div slSectionTitle><h2 slSectionHeading>Receita</h2></div>\n  </div>\n  <div slSectionBody>\n    <figure slChart aria-label="Receita, últimos 12 meses" [data]="monthly" [series]="revenue"></figure>\n  </div>\n</section>',
+        '<figure slChart variant="plain" [data]="monthly" [series]="revenue"></figure>\n<figure slChart variant="card" [data]="monthly" [series]="revenue"></figure>\n\n<section slSection>\n  <div slSectionHeader>\n    <div slSectionTitle><h2 slSectionHeading>Receita</h2></div>\n  </div>\n  <div slSectionBody>\n    <figure\n      slChart\n      aria-label="Receita, últimos 12 meses"\n      [data]="monthly"\n      [series]="revenue"\n    ></figure>\n  </div>\n</section>',
     }),
   },
   {

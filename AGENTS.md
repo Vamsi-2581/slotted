@@ -46,6 +46,15 @@ Do not use Playwright for exploratory browsing, generic UI inspection, broad scr
 
 `demos/*` consume the library as published packages (`docs`: `CONTRIBUTING.md` › "The beta channel"). A problem seen in a demo is triaged with the `demo-triage` skill before any change: package defect → fixed in the family with a test, then `pnpm demo:refresh`; demo mistake → fixed in the demo. Both are recorded in `demos/<app>/LIBRARY-FEEDBACK.md`, the ledger the public-API review reads. A package defect is never worked around inside a demo.
 
+## Findings
+
+An application built with Slotted reports what it meets as a GitHub issue labelled `finding`, with an `area:*` label and the form in `.github/ISSUE_TEMPLATE/finding.yml`. Each issue stands alone: it names no application and carries its own reproduction and `Acceptance` line.
+
+- Read the queue with `gh issue list --label finding --state open`, and one finding with `gh issue view <n>`.
+- A fix starts with the test the `Acceptance` line names, failing before the change.
+- The commit that fixes a finding carries `Fixes #<n>` in its body, so the push to `main` closes the issue. A finding refused, or already answered by the published API, is closed with a comment that says why.
+- The consumer removes its workaround when it installs a release that contains the closing commit.
+
 ## Loading States
 
 Anything a person waits in front of — a skeleton, a spinner, a progress bar, an overlay, a control's own `loading`, and the empty and error states beside them — is built with the `loading-states` skill. It decides which indicator answers which wait, and it holds one rule above the rest: a skeleton is the anatomy of the content it stands in for, and the loaded screen and the loading screen occupy the same boxes.

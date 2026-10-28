@@ -82,6 +82,19 @@
       "states": ["default", "hover", "active", "focus-visible", "disabled", "loading", "pressed"],
       "parts": ["root", "icon", "indicator"]
     },
+    "iconButtonLink": {
+      "nativeElement": "a",
+      "defaults": {
+        "tone": "secondary",
+        "variant": "ghost",
+        "size": "md",
+        "shape": "square",
+        "disabled": false
+      },
+      "capabilities": ["appearance", "shape", "disabled"],
+      "states": ["default", "hover", "active", "focus-visible", "disabled"],
+      "parts": ["root", "icon"]
+    },
     "toggleButton": {
       "nativeElement": "button",
       "defaults": {
@@ -125,6 +138,7 @@
       "pressed",
       "accessibility"
     ],
+    "iconButtonLink": ["playground", "states", "routerIntegration", "accessibility"],
     "toggleButton": ["playground", "pressed", "states", "loading", "accessibility"]
   }
 }

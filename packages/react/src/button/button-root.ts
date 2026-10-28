@@ -4,7 +4,8 @@ import '@slotted/styles/button/button.css';
 import { createControllable } from '@slotted/core/state';
 import type { ChangeReason } from '@slotted/core/state';
 import { useEffect, useState } from 'react';
-import type { MouseEvent, SyntheticEvent } from 'react';
+import type { KeyboardEvent, MouseEvent, SyntheticEvent } from 'react';
+import type { ComponentPropsWithRef } from 'react';
 
 import { useButtonDefaults } from './button-defaults';
 import type {
@@ -76,6 +77,67 @@ export function blockActivation(event: SyntheticEvent) {
   event.preventDefault();
   event.stopPropagation();
   event.nativeEvent.stopImmediatePropagation?.();
+}
+
+type LinkActivationProps = Pick<
+  ComponentPropsWithRef<'a'>,
+  | 'onAuxClick'
+  | 'onAuxClickCapture'
+  | 'onClick'
+  | 'onClickCapture'
+  | 'onKeyDown'
+  | 'onKeyDownCapture'
+  | 'tabIndex'
+>;
+
+/**
+ * What a disabled link is, for every member drawn on an anchor: no `href`, so
+ * no click, middle click or modified click navigates; `role="link"` and
+ * `aria-disabled`, and a stated `tabIndex`, so it stays reachable and says why
+ * nothing happens. Enter is refused with the clicks.
+ */
+export function linkInertness(
+  disabled: boolean,
+  href: string | undefined,
+  rendered: boolean,
+  props: LinkActivationProps,
+) {
+  const block = (event: SyntheticEvent) => {
+    if (!disabled) return false;
+    blockActivation(event);
+    return true;
+  };
+
+  return {
+    'aria-disabled': disabled || undefined,
+    role: disabled ? 'link' : undefined,
+    tabIndex: disabled ? (props.tabIndex ?? 0) : props.tabIndex,
+    ...(!rendered && !disabled ? { href } : {}),
+    onAuxClick: (event: MouseEvent<HTMLAnchorElement>) => {
+      if (block(event)) return;
+      props.onAuxClick?.(event);
+    },
+    onAuxClickCapture: (event: MouseEvent<HTMLAnchorElement>) => {
+      if (block(event)) return;
+      props.onAuxClickCapture?.(event);
+    },
+    onClick: (event: MouseEvent<HTMLAnchorElement>) => {
+      if (block(event)) return;
+      props.onClick?.(event);
+    },
+    onClickCapture: (event: MouseEvent<HTMLAnchorElement>) => {
+      if (block(event)) return;
+      props.onClickCapture?.(event);
+    },
+    onKeyDown: (event: KeyboardEvent<HTMLAnchorElement>) => {
+      if (event.key === 'Enter' && block(event)) return;
+      props.onKeyDown?.(event);
+    },
+    onKeyDownCapture: (event: KeyboardEvent<HTMLAnchorElement>) => {
+      if (event.key === 'Enter' && block(event)) return;
+      props.onKeyDownCapture?.(event);
+    },
+  };
 }
 
 /**

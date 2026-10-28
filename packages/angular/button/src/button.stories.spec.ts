@@ -7,6 +7,7 @@ import * as buttonLinkStories from './button-link.stories';
 import { ANGULAR_BUTTON_DOCS } from './button.docs';
 import * as overviewStories from './button-family.stories';
 import * as buttonStories from './button.stories';
+import * as iconButtonLinkStories from './icon-button-link.stories';
 import * as iconButtonStories from './icon-button.stories';
 import * as toggleButtonStories from './toggle-button.stories';
 
@@ -15,6 +16,7 @@ const storyModules = {
   button: buttonStories,
   buttonLink: buttonLinkStories,
   iconButton: iconButtonStories,
+  iconButtonLink: iconButtonLinkStories,
   toggleButton: toggleButtonStories,
 };
 

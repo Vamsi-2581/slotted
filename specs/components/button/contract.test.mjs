@@ -29,6 +29,7 @@ test('names the members the family publishes, in order', () => {
     'button',
     'buttonLink',
     'iconButton',
+    'iconButtonLink',
     'toggleButton',
   ]);
 });
@@ -65,12 +66,16 @@ test('offers one filled paint, one edged paint and one bare one', () => {
   assert.equal(contract.axes.variant.length, 3);
 });
 
-/** Shape is what an icon-only button differs by, and the only member that has one. */
-test('gives the shape axis to the one member whose geometry differs', () => {
+/** Shape is what an icon-only member differs by, and only those two have one. */
+test('gives the shape axis to the icon-only members, whose geometry differs', () => {
   assert.deepEqual(contract.axes.shape, ['square', 'circle']);
   for (const [name, member] of Object.entries(contract.members)) {
     const declaresShape = 'shape' in member.defaults;
-    assert.equal(declaresShape, name === 'iconButton', `${name} and the shape axis`);
+    assert.equal(
+      declaresShape,
+      name === 'iconButton' || name === 'iconButtonLink',
+      `${name} and the shape axis`,
+    );
   }
 });
 
@@ -79,6 +84,7 @@ test('gives every member a native element and semantic defaults', () => {
     button: { nativeElement: 'button', type: 'button' },
     buttonLink: { nativeElement: 'a' },
     iconButton: { nativeElement: 'button', type: 'button', shape: 'square' },
+    iconButtonLink: { nativeElement: 'a', shape: 'square' },
     toggleButton: { nativeElement: 'button', type: 'button', defaultPressed: false },
   };
 
@@ -111,6 +117,7 @@ test('gives every member a root part and names the parts it renders', () => {
       button: ['root', 'start', 'label', 'end', 'indicator'],
       buttonLink: ['root', 'start', 'label', 'end'],
       iconButton: ['root', 'icon', 'indicator'],
+      iconButtonLink: ['root', 'icon'],
       toggleButton: ['root', 'start', 'label', 'end', 'indicator'],
     },
   );
@@ -124,6 +131,7 @@ test('gives every member a root part and names the parts it renders', () => {
 test('keeps pressed away from the momentary action', () => {
   assert.ok(!contract.members.button.capabilities.includes('pressed'));
   assert.ok(!contract.members.buttonLink.capabilities.includes('pressed'));
+  assert.ok(!contract.members.iconButtonLink.capabilities.includes('pressed'));
   assert.ok(contract.members.toggleButton.capabilities.includes('pressed'));
   assert.ok(contract.members.iconButton.capabilities.includes('pressed'));
 });
@@ -232,6 +240,7 @@ test('provides uniquely named scenarios for every page', () => {
     'button',
     'buttonLink',
     'iconButton',
+    'iconButtonLink',
     'toggleButton',
   ]);
 

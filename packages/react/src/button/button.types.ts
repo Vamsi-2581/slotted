@@ -186,3 +186,29 @@ export interface ToggleButtonProps
   render?: ButtonRender<ButtonRootProps> | undefined;
   type?: ButtonType | undefined;
 }
+
+interface IconButtonLinkSharedProps extends Omit<ButtonAppearanceProps, 'fullWidth' | 'justify'> {
+  children: ReactNode;
+  disabled?: boolean | undefined;
+  shape?: ButtonShape | undefined;
+}
+
+type IconButtonLinkAnchorProps = Omit<
+  ComponentPropsWithRef<'a'>,
+  keyof IconButtonLinkSharedProps | 'aria-label' | 'aria-labelledby' | 'href'
+> &
+  IconButtonLinkSharedProps &
+  IconButtonAccessibleName;
+
+/**
+ * An icon-only control that navigates: IconButton's surface and name on an
+ * anchor, as ButtonLink is Button's. `render` hands it anchor props, so a
+ * router's link component takes them as they are.
+ */
+export type IconButtonLinkProps =
+  | (IconButtonLinkAnchorProps & { href: string; render?: never })
+  | (IconButtonLinkAnchorProps & {
+      href?: never;
+      /** Hands the root props to a router's own link component. */
+      render: ButtonRender<DefinedProps<ButtonLinkRootProps>>;
+    });

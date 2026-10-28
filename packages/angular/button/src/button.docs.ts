@@ -366,6 +366,64 @@ export const ANGULAR_BUTTON_DOCS = {
       }),
     ],
   },
+  iconButtonLink: {
+    imports: imports('a[slIconButtonLink]', 'slIconButtonLink'),
+    anatomy: [
+      root('the anchor element you write', 'data-shape, and data-disabled when it applies.'),
+      {
+        part: 'icon',
+        element: 'span',
+        required: true,
+        purpose: 'Wraps the projected icon.',
+      },
+    ],
+    api: apiRows([
+      [
+        'aria-label | aria-labelledby',
+        'string',
+        'required',
+        'SlIconButtonLink',
+        'The accessible name. Required, because an icon supplies no text; a missing name throws in development. When both are present, aria-labelledby names the link.',
+      ],
+      [
+        'href',
+        'string',
+        '—',
+        'SlIconButtonLink',
+        'The destination. A disabled SlIconButtonLink does not render it.',
+      ],
+      ...appearance('SlIconButtonLink', 'secondary', 'ghost'),
+      [
+        'shape',
+        'square | circle',
+        'square',
+        'SlIconButtonLink',
+        'The corners of the control: square keeps the radius of the control scale, circle rounds it fully. Both are as wide as they are tall.',
+      ],
+      [
+        'disabled',
+        'boolean',
+        'false',
+        'SlIconButtonLink',
+        'Removes the href and refuses activation. The link stays focusable with role="link" and aria-disabled.',
+      ],
+    ]),
+    accessibility: [
+      'SlIconButtonLink applies to an anchor, so it is announced as a link and activates on Enter. Use it for an icon-only control that navigates, such as the previous and next record; an icon-only action is an SlIconButton.',
+      'An accessible name is required: pass aria-label or aria-labelledby. An icon supplies no text the name could be computed from.',
+      'routerLink works on the same anchor and writes its href. Do not also set href.',
+      'A disabled SlIconButtonLink renders no href and stays in the tab sequence with role="link" and aria-disabled.',
+    ],
+    snippets: [
+      defineSnippet({
+        id: 'angular-icon-button-link-router',
+        label: 'Previous and next record',
+        language: 'angular',
+        source:
+          '<div slButtonGroup aria-label="Records">\n  <a slIconButtonLink aria-label="Previous record" routerLink="/records/1">\n    <ng-icon aria-hidden="true" name="lucideChevronLeft"></ng-icon>\n  </a>\n  <a slIconButtonLink aria-label="Next record" routerLink="/records/3">\n    <ng-icon aria-hidden="true" name="lucideChevronRight"></ng-icon>\n  </a>\n</div>',
+      }),
+    ],
+  },
   toggleButton: {
     imports: imports('button[slToggleButton]', 'slToggleButton'),
     anatomy: [

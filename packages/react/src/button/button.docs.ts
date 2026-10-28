@@ -398,6 +398,71 @@ export const REACT_BUTTON_DOCS = {
       }),
     ],
   },
+  iconButtonLink: {
+    imports,
+    anatomy: [
+      root('a, or the element render returns', 'data-shape, and data-disabled when it applies.'),
+      {
+        part: 'icon',
+        element: 'span',
+        required: true,
+        purpose: 'Wraps the children.',
+      },
+    ],
+    api: apiRows([
+      [
+        'aria-label | aria-labelledby',
+        'string',
+        'required',
+        'IconButtonLink',
+        'The accessible name. Required, because an icon supplies no text. When both are present, aria-labelledby names the link.',
+      ],
+      [
+        'href',
+        'string',
+        'required without render',
+        'IconButtonLink',
+        'The destination. A disabled IconButtonLink does not render it.',
+      ],
+      [
+        'render',
+        '(rootProps) => ReactElement',
+        '—',
+        'IconButtonLink',
+        'Renders the root through a router’s link component. The function receives anchor props — every root prop — and must pass all of them on.',
+      ],
+      ...appearance('IconButtonLink', 'secondary', 'ghost'),
+      [
+        'shape',
+        'square | circle',
+        'square',
+        'IconButtonLink',
+        'The corners of the control: square keeps the radius of the control scale, circle rounds it fully. Both are as wide as they are tall.',
+      ],
+      [
+        'disabled',
+        'boolean',
+        'false',
+        'IconButtonLink',
+        'Removes the href and refuses activation. The link stays focusable with role="link" and aria-disabled.',
+      ],
+    ]),
+    accessibility: [
+      'IconButtonLink renders an anchor, so it is announced as a link and activates on Enter. Use it for an icon-only control that navigates, such as the previous and next record; an icon-only action is an IconButton.',
+      'The type requires an accessible name: pass aria-label or aria-labelledby. An icon supplies no text the name could be computed from.',
+      'A disabled IconButtonLink renders no href and stays in the tab sequence with role="link" and aria-disabled.',
+      'The render function receives every root prop, including the accessible name and the data attributes, and must pass all of them to the element it renders.',
+    ],
+    snippets: [
+      defineSnippet({
+        id: 'react-icon-button-link-router',
+        label: 'Previous and next record',
+        language: 'tsx',
+        source:
+          'import { ChevronLeft, ChevronRight } from \'lucide-react\';\n\n<ButtonGroup aria-label="Records">\n  <IconButtonLink\n    aria-label="Previous record"\n    render={(props) => <RouterLink to="/records/1" {...props} />}\n  >\n    <ChevronLeft aria-hidden="true" />\n  </IconButtonLink>\n  <IconButtonLink aria-label="Next record" href="/records/3">\n    <ChevronRight aria-hidden="true" />\n  </IconButtonLink>\n</ButtonGroup>;',
+      }),
+    ],
+  },
   toggleButton: {
     imports,
     anatomy: [

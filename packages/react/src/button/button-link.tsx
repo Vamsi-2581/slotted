@@ -1,9 +1,8 @@
 import { definedProps, keyedProps } from '@slotted/core/selector-key';
-import type { SyntheticEvent } from 'react';
 
 import { ButtonContent } from './button-content';
 import { BUTTON_LINK_DEFAULTS } from './button.constants';
-import { blockActivation, rootData, useAppearance } from './button-root';
+import { linkInertness, rootData, useAppearance } from './button-root';
 import type { ButtonLinkProps, ButtonLinkRootProps } from './button.types';
 
 /**
@@ -41,48 +40,23 @@ export function ButtonLink({
 }: ButtonLinkProps) {
   const appearance = useAppearance({ size, tone, variant }, BUTTON_LINK_DEFAULTS);
 
-  const block = (event: SyntheticEvent) => {
-    if (!disabled) return false;
-    blockActivation(event);
-    return true;
-  };
-
   const rootProps: ButtonLinkRootProps = keyedProps({
     ...anchorProps,
     ...rootData({ disabled, fullWidth, justify, ...appearance }),
-    'aria-disabled': disabled || undefined,
     children: (
       <ButtonContent end={end} start={start}>
         {children}
       </ButtonContent>
     ),
-    role: disabled ? 'link' : undefined,
-    tabIndex: disabled ? (anchorProps.tabIndex ?? 0) : anchorProps.tabIndex,
-    ...(render === undefined && !disabled ? { href } : {}),
-    onAuxClick: (event) => {
-      if (block(event)) return;
-      onAuxClick?.(event);
-    },
-    onAuxClickCapture: (event) => {
-      if (block(event)) return;
-      onAuxClickCapture?.(event);
-    },
-    onClick: (event) => {
-      if (block(event)) return;
-      onClick?.(event);
-    },
-    onClickCapture: (event) => {
-      if (block(event)) return;
-      onClickCapture?.(event);
-    },
-    onKeyDown: (event) => {
-      if (event.key === 'Enter' && block(event)) return;
-      onKeyDown?.(event);
-    },
-    onKeyDownCapture: (event) => {
-      if (event.key === 'Enter' && block(event)) return;
-      onKeyDownCapture?.(event);
-    },
+    ...linkInertness(disabled, href, render !== undefined, {
+      onAuxClick,
+      onAuxClickCapture,
+      onClick,
+      onClickCapture,
+      onKeyDown,
+      onKeyDownCapture,
+      tabIndex: anchorProps.tabIndex,
+    }),
   });
 
   return render === undefined ? <a {...rootProps} /> : render(definedProps(rootProps));

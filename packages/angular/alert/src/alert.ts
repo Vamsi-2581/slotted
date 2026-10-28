@@ -204,7 +204,7 @@ export class SlAlert {
   private cameFrom: HTMLElement | null = null;
   private holdsFocus = false;
 
-  protected readonly resolvedTone = computed(() => this.tone() ?? this.defaults.tone);
+  readonly resolvedTone = computed(() => this.tone() ?? this.defaults.tone);
   protected readonly glyph = computed(() => TONE_GLYPH[this.resolvedTone()]);
   /** A mark the page projected, which draws even where the tone has none. */
   protected readonly suppliedIcon = contentChild(SlAlertIcon);

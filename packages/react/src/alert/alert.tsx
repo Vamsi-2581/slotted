@@ -115,9 +115,10 @@ export function Alert({
      the DOM. */
   useEffect(() => () => restore(), [restore]);
 
+  const resolvedTone = tone ?? defaults.tone;
   const context = useMemo(
-    () => ({ live: resolvedLive, registerTitle: setHasTitle, titleId }),
-    [resolvedLive, titleId],
+    () => ({ live: resolvedLive, registerTitle: setHasTitle, titleId, tone: resolvedTone }),
+    [resolvedLive, titleId, resolvedTone],
   );
 
   function requestClose(reason: AlertCloseReason, source?: SyntheticEvent) {
@@ -130,7 +131,7 @@ export function Alert({
     if (state.request(false, reason, source)) setUncontrolledOpen(false);
   }
 
-  const glyph = TONE_GLYPH[tone ?? defaults.tone];
+  const glyph = TONE_GLYPH[resolvedTone];
 
   const rootProps: AlertRootProps = keyedProps({
     ...(hasTitle ? { 'aria-labelledby': titleId } : {}),
@@ -174,7 +175,7 @@ export function Alert({
     'data-live': resolvedLive,
     'data-part': 'root',
     'data-reach': reach ?? defaults.reach,
-    'data-tone': tone ?? defaults.tone,
+    'data-tone': resolvedTone,
     'data-ui': 'alert',
     'data-variant': variant ?? defaults.variant,
     hidden: !isOpen,

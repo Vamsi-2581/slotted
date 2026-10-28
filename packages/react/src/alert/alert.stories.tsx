@@ -76,12 +76,8 @@ export const Playground: Story = {
           </AlertDescription>
         </AlertContent>
         <AlertActions>
-          <Button size="sm" tone={args.tone ?? 'warning'}>
-            Renovar
-          </Button>
-          <Button size="sm" tone={args.tone ?? 'warning'} variant="ghost">
-            Ver planos
-          </Button>
+          <Button>Renovar</Button>
+          <Button variant="ghost">Ver planos</Button>
         </AlertActions>
       </Alert>
     </div>
@@ -200,9 +196,7 @@ export const Reach: Story = {
             </AlertDescription>
           </AlertContent>
           <AlertActions>
-            <Button size="sm" tone="warning" variant="outline">
-              Detalhes
-            </Button>
+            <Button>Detalhes</Button>
           </AlertActions>
         </Alert>
       </Scene>
@@ -301,12 +295,8 @@ export const Actions: Story = {
             <AlertDescription>Renove para manter o acesso da equipe.</AlertDescription>
           </AlertContent>
           <AlertActions>
-            <Button size="sm" tone="warning">
-              Renovar
-            </Button>
-            <Button size="sm" tone="warning" variant="ghost">
-              Ver planos
-            </Button>
+            <Button>Renovar</Button>
+            <Button variant="ghost">Ver planos</Button>
           </AlertActions>
         </Alert>
       </Scene>
@@ -321,12 +311,8 @@ export const Actions: Story = {
               <AlertDescription>Renove para manter o acesso.</AlertDescription>
             </AlertContent>
             <AlertActions>
-              <Button size="sm" tone="warning">
-                Renovar
-              </Button>
-              <Button size="sm" tone="warning" variant="ghost">
-                Ver planos
-              </Button>
+              <Button>Renovar</Button>
+              <Button variant="ghost">Ver planos</Button>
             </AlertActions>
           </Alert>
         </div>

@@ -150,8 +150,8 @@ export const Playground: Story = {
             </p>
           </div>
           <div slAlertActions>
-            <button slButton size="sm" [tone]="tone" type="button">Renovar</button>
-            <button slButton size="sm" variant="ghost" [tone]="tone" type="button">Ver planos</button>
+            <button slButton type="button">Renovar</button>
+            <button slButton variant="ghost" type="button">Ver planos</button>
           </div>
         </section>
       </div>`,
@@ -229,7 +229,7 @@ export const Reach: Story = {
                <p slAlertDescription>O serviço ficará indisponível das 02h às 04h (UTC−3).</p>
              </div>
              <div slAlertActions>
-               <button slButton size="sm" tone="warning" variant="outline" type="button">
+               <button slButton type="button">
                  Detalhes
                </button>
              </div>
@@ -298,8 +298,8 @@ export const Actions: Story = {
              <p slAlertDescription>Renove para manter o acesso da equipe.</p>
            </div>
            <div slAlertActions>
-             <button slButton size="sm" tone="warning" type="button">Renovar</button>
-             <button slButton size="sm" tone="warning" variant="ghost" type="button">
+             <button slButton type="button">Renovar</button>
+             <button slButton variant="ghost" type="button">
                Ver planos
              </button>
            </div>
@@ -315,8 +315,8 @@ export const Actions: Story = {
                  <p slAlertDescription>Renove para manter o acesso.</p>
                </div>
                <div slAlertActions>
-                 <button slButton size="sm" tone="warning" type="button">Renovar</button>
-                 <button slButton size="sm" tone="warning" variant="ghost" type="button">
+                 <button slButton type="button">Renovar</button>
+                 <button slButton variant="ghost" type="button">
                    Ver planos
                  </button>
                </div>

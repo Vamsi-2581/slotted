@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/alert/contract.json';
+import { Button, ButtonDefaultsProvider } from '../button';
 import { SlottedProvider } from '../i18n';
 import {
   Alert,
@@ -462,5 +463,71 @@ describe('Alert', () => {
 
       expect(screen.getByTestId('tag')).toHaveTextContent('SECTION');
     });
+  });
+});
+
+/**
+ * A button in the actions part took the button defaults, accent and md: over
+ * a warning ground an accent outline button drew no fill, in a colour the
+ * theme never measured against that ground.
+ */
+describe('AlertActions paint', () => {
+  it('gives the buttons in it the alert’s tone and the sm size', () => {
+    render(
+      <Alert tone="warning">
+        <AlertContent>
+          <AlertTitle>Unresolved difference</AlertTitle>
+        </AlertContent>
+        <AlertActions>
+          <Button>Go</Button>
+        </AlertActions>
+      </Alert>,
+    );
+
+    const button = screen.getByRole('button', { name: 'Go' });
+    expect(button).toHaveAttribute('data-tone', 'warning');
+    expect(button).toHaveAttribute('data-size', 'sm');
+    expect(button).toHaveAttribute('data-variant', 'solid');
+  });
+
+  it('takes the alert’s default tone, over an application’s button defaults', () => {
+    render(
+      <ButtonDefaultsProvider size="lg" tone="danger" variant="ghost">
+        <AlertDefaultsProvider tone="secondary">
+          <Alert>
+            <AlertContent>
+              <AlertTitle>Draft</AlertTitle>
+            </AlertContent>
+            <AlertActions>
+              <Button>Go</Button>
+            </AlertActions>
+          </Alert>
+        </AlertDefaultsProvider>
+      </ButtonDefaultsProvider>,
+    );
+
+    const button = screen.getByRole('button', { name: 'Go' });
+    expect(button).toHaveAttribute('data-tone', 'secondary');
+    expect(button).toHaveAttribute('data-size', 'sm');
+    expect(button).toHaveAttribute('data-variant', 'ghost');
+  });
+
+  it('loses to a button that states the axis itself', () => {
+    render(
+      <Alert tone="warning">
+        <AlertContent>
+          <AlertTitle>Unresolved difference</AlertTitle>
+        </AlertContent>
+        <AlertActions>
+          <Button size="md" tone="danger">
+            Go
+          </Button>
+        </AlertActions>
+      </Alert>,
+    );
+
+    const button = screen.getByRole('button', { name: 'Go' });
+    expect(button).toHaveAttribute('data-tone', 'danger');
+    expect(button).toHaveAttribute('data-size', 'md');
   });
 });

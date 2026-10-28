@@ -16,6 +16,10 @@
   "resolution": {
     "actionsPlacement": ["prop", "reach"]
   },
+  "provides": {
+    "buttonDefaults": ["tone", "size"]
+  },
+  "actionsPaint": "the actions part gives each Button in it the alert's resolved tone and size sm; variant stays the inherited button default or the Button's own. A Button prop still wins. The first action is solid and every other one ghost; outline draws no fill over the alert's ground and is not used inside an alert",
   "toneGlyphs": {
     "accent": "status-info",
     "secondary": null,

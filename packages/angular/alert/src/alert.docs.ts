@@ -146,13 +146,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'actions',
     title: 'What the message asks for',
-    note: 'The controls are the consumer’s own buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow. actionsPlacement="end" puts them at the end of the message’s own line once the box is 40rem wide, which a page banner does by default.',
+    note: 'The controls are the consumer’s own buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow. actionsPlacement="end" puts them at the end of the message’s own line once the box is 40rem wide, which a page banner does by default. Each Button in the part takes the alert’s tone and the sm size; a Button that states its own tone or size keeps it. The first action is solid and every other one ghost; outline draws no fill over the alert’s ground and is not used here.',
     snippet: defineSnippet({
       id: 'alert-angular-actions',
       language: 'angular',
       label: 'A message with something to do about it',
       source:
-        '<section slAlert tone="warning">\n  <div slAlertContent>\n    <div slAlertTitle>Sua assinatura expira em três dias</div>\n  </div>\n  <div slAlertActions>\n    <button slButton size="sm" tone="warning" type="button">Renovar</button>\n    <button slButton size="sm" tone="warning" variant="ghost" type="button">Ver planos</button>\n  </div>\n</section>\n\n<section slAlert actionsPlacement="end">\n  <div slAlertContent>\n    <p slAlertDescription>A sugestão altera três linhas do plano.</p>\n  </div>\n  <div slAlertActions>\n    <button slButton size="sm" type="button">Aplicar</button>\n  </div>\n</section>',
+        '<section slAlert tone="warning">\n  <div slAlertContent>\n    <div slAlertTitle>Sua assinatura expira em três dias</div>\n  </div>\n  <div slAlertActions>\n    <button slButton type="button">Renovar</button>\n    <button slButton variant="ghost" type="button">Ver planos</button>\n  </div>\n</section>\n\n<section slAlert actionsPlacement="end">\n  <div slAlertContent>\n    <p slAlertDescription>A sugestão altera três linhas do plano.</p>\n  </div>\n  <div slAlertActions>\n    <button slButton type="button">Aplicar</button>\n  </div>\n</section>',
     }),
   },
   {

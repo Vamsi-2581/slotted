@@ -1,6 +1,7 @@
 import { keyedProps } from '@slotted/core/selector-key';
 import { createContext, useContext, useEffect } from 'react';
 
+import { ButtonDefaultsProvider } from '../button/button-defaults';
 import type {
   AlertActionsProps,
   AlertContentProps,
@@ -8,6 +9,7 @@ import type {
   AlertLive,
   AlertPartProps,
   AlertTitleProps,
+  AlertTone,
 } from './alert.types';
 
 /**
@@ -22,6 +24,7 @@ import type {
  */
 export interface AlertContextValue {
   live: AlertLive;
+  tone: AlertTone;
   titleId: string;
   registerTitle: (present: boolean) => void;
 }
@@ -110,10 +113,16 @@ export function AlertDescription({ render, ...nativeProps }: AlertDescriptionPro
  * The controls that act on the message, outside the region that announces: a
  * reader hearing the message is not read the labels of two buttons in the
  * middle of it. What goes in is the consumer's own `Button`s, because `button`
- * already owns what a button is.
+ * already owns what a button is; they take the alert's tone and the small
+ * size through its defaults, and a button that states an axis still wins.
  */
 export function AlertActions({ render, ...nativeProps }: AlertActionsProps) {
+  const { tone } = useAlertContext('Actions');
   const partProps: AlertPartProps = keyedProps({ ...nativeProps, 'data-part': 'actions' });
 
-  return render === undefined ? <div {...partProps} /> : render(partProps);
+  return (
+    <ButtonDefaultsProvider size="sm" tone={tone}>
+      {render === undefined ? <div {...partProps} /> : render(partProps)}
+    </ButtonDefaultsProvider>
+  );
 }

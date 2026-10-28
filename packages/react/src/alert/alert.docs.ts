@@ -144,13 +144,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'actions',
     title: 'What the message asks for',
-    note: 'The controls are the consumer’s own Buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow. actionsPlacement="end" puts them at the end of the message’s own line once the box is 40rem wide, which a page banner does by default.',
+    note: 'The controls are the consumer’s own Buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow. actionsPlacement="end" puts them at the end of the message’s own line once the box is 40rem wide, which a page banner does by default. Each Button in the part takes the alert’s tone and the sm size; a Button that states its own tone or size keeps it. The first action is solid and every other one ghost; outline draws no fill over the alert’s ground and is not used here.',
     snippet: defineSnippet({
       id: 'alert-react-actions',
       language: 'tsx',
       label: 'A message with something to do about it',
       source:
-        '<Alert tone="warning">\n  <AlertContent>\n    <AlertTitle>Sua assinatura expira em três dias</AlertTitle>\n  </AlertContent>\n  <AlertActions>\n    <Button size="sm" tone="warning">\n      Renovar\n    </Button>\n    <Button size="sm" tone="warning" variant="ghost">\n      Ver planos\n    </Button>\n  </AlertActions>\n</Alert>;\n\n<Alert actionsPlacement="end">\n  <AlertContent>\n    <AlertDescription>A sugestão altera três linhas do plano.</AlertDescription>\n  </AlertContent>\n  <AlertActions>\n    <Button size="sm">Aplicar</Button>\n  </AlertActions>\n</Alert>;',
+        '<Alert tone="warning">\n  <AlertContent>\n    <AlertTitle>Sua assinatura expira em três dias</AlertTitle>\n  </AlertContent>\n  <AlertActions>\n    <Button>Renovar</Button>\n    <Button variant="ghost">Ver planos</Button>\n  </AlertActions>\n</Alert>;\n\n<Alert actionsPlacement="end">\n  <AlertContent>\n    <AlertDescription>A sugestão altera três linhas do plano.</AlertDescription>\n  </AlertContent>\n  <AlertActions>\n    <Button>Aplicar</Button>\n  </AlertActions>\n</Alert>;',
     }),
   },
   {

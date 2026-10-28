@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, expect, it } from 'vitest';
 
+import { provideButtonDefaults, SlButton } from '@slotted/angular/button';
 import { provideSlotted } from '@slotted/angular/i18n';
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
 
@@ -22,14 +23,22 @@ import {
  */
 @Component({
   standalone: true,
-  imports: [SlAlert, SlAlertActions, SlAlertContent, SlAlertDescription, SlAlertIcon, SlAlertTitle],
+  imports: [
+    SlAlert,
+    SlAlertActions,
+    SlAlertContent,
+    SlAlertDescription,
+    SlAlertIcon,
+    SlAlertTitle,
+    SlButton,
+  ],
   template: `<section slAlert>
     <span slAlertIcon></span>
     <div slAlertContent>
       <div slAlertTitle></div>
       <p slAlertDescription></p>
     </div>
-    <div slAlertActions></div>
+    <div slAlertActions><button slButton type="button"></button></div>
   </section>`,
 })
 class Host {}
@@ -380,5 +389,48 @@ describe('SlAlert', () => {
       expect(alert.getAttribute('tabindex')).toBe('0');
       expect(alert.getAttribute('lang')).toBe('pt-BR');
     });
+  });
+});
+
+/**
+ * A button in the actions part took the button defaults, accent and md: over
+ * a warning ground an accent outline button drew no fill, in a colour the
+ * theme never measured against that ground.
+ */
+describe('SlAlertActions paint', () => {
+  const button = (fixture: { nativeElement: HTMLElement }) =>
+    fixture.nativeElement.querySelector<HTMLElement>('[slButton]') as HTMLElement;
+
+  it('gives the buttons in it the alert’s tone and the sm size', () => {
+    const fixture = renderTemplate(
+      `<section slAlert tone="warning">${MESSAGE}<div slAlertActions><button slButton type="button">Go</button></div></section>`,
+    );
+
+    expect(button(fixture).getAttribute('data-tone')).toBe('warning');
+    expect(button(fixture).getAttribute('data-size')).toBe('sm');
+    expect(button(fixture).getAttribute('data-variant')).toBe('solid');
+  });
+
+  it('takes the alert’s default tone, over an application’s button defaults', () => {
+    const fixture = renderTemplate(
+      `<section slAlert>${MESSAGE}<div slAlertActions><button slButton type="button">Go</button></div></section>`,
+      [
+        provideAlertDefaults({ tone: 'secondary' }),
+        provideButtonDefaults({ size: 'lg', tone: 'danger', variant: 'ghost' }),
+      ],
+    );
+
+    expect(button(fixture).getAttribute('data-tone')).toBe('secondary');
+    expect(button(fixture).getAttribute('data-size')).toBe('sm');
+    expect(button(fixture).getAttribute('data-variant')).toBe('ghost');
+  });
+
+  it('loses to a button that states the axis itself', () => {
+    const fixture = renderTemplate(
+      `<section slAlert tone="warning">${MESSAGE}<div slAlertActions><button slButton size="md" tone="danger" type="button">Go</button></div></section>`,
+    );
+
+    expect(button(fixture).getAttribute('data-tone')).toBe('danger');
+    expect(button(fixture).getAttribute('data-size')).toBe('md');
   });
 });

@@ -6,6 +6,8 @@ import {
   inject,
   ViewEncapsulation,
 } from '@angular/core';
+import { BUTTON_DEFAULTS_TOKEN } from '@slotted/angular/button';
+import type { ButtonDefaults } from '@slotted/angular/button';
 
 import { SlAlert } from './alert';
 import type { AlertLive } from './alert-defaults';
@@ -90,6 +92,31 @@ export class SlAlertTitle {
 export class SlAlertDescription {}
 
 /**
+ * The buttons in the actions part take the alert's tone and the small size,
+ * through `button`'s own defaults: a button that states an axis still wins,
+ * and the variant stays the application's or the button's.
+ */
+function provideActionsPaint() {
+  return {
+    provide: BUTTON_DEFAULTS_TOKEN,
+    useFactory: (): ButtonDefaults => {
+      const alert = inject(SlAlert);
+      const inherited = inject(BUTTON_DEFAULTS_TOKEN, { skipSelf: true });
+
+      return {
+        size: 'sm',
+        get tone() {
+          return alert.resolvedTone();
+        },
+        get variant() {
+          return inherited.variant;
+        },
+      };
+    },
+  };
+}
+
+/**
  * The controls that act on the message, outside the region that announces: a
  * reader hearing the message is not read the labels of two buttons in the
  * middle of it. What goes in is the consumer's own buttons, because `button`
@@ -100,6 +127,7 @@ export class SlAlertDescription {}
   standalone: true,
   exportAs: 'slAlertActions',
   host: { 'data-part': 'actions', 'data-part-actions': '' },
+  providers: [provideActionsPaint()],
 })
 export class SlAlertActions {}
 

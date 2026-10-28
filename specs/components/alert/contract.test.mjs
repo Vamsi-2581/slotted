@@ -224,3 +224,14 @@ test('names one reference page, covering every axis and both modes', () => {
     'accessibility',
   ]);
 });
+
+/** The actions part paints the Buttons in it through `button`'s own defaults. */
+test('gives the buttons in its actions the alert’s tone and the small size', async () => {
+  assert.deepEqual(contract.provides.buttonDefaults, ['tone', 'size']);
+  const button = JSON.parse(
+    await readFile(new URL('../button/contract.json', import.meta.url), 'utf8'),
+  );
+  for (const tone of contract.axes.tone) assert.ok(button.axes.tone.includes(tone), tone);
+  assert.match(contract.actionsPaint, /size sm/);
+  assert.match(contract.actionsPaint, /A Button prop still wins/);
+});

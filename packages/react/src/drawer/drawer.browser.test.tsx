@@ -18,6 +18,7 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerPanel,
+  DrawerResizer,
   DrawerTitle,
 } from './index';
 import type { DrawerProps } from './drawer.types';
@@ -624,4 +625,107 @@ describe('a message scroller in a bottom sheet', () => {
     expect(viewport.scrollTop).toBe(0);
     expect(during).toBeLessThan(before);
   });
+});
+
+/**
+ * Every opening of a bottom sheet travels from where the panel is — out of
+ * sight, or where an interrupted exit left it — up to its stop. Under
+ * `size="full"` the first frame drew the panel at the screen's height and the
+ * scroll overshot to twice the stop before it eased back; under
+ * `size="content"` the first opening, and one 60 ms after a close, jumped.
+ */
+describe('a bottom sheet’s entrance', () => {
+  beforeEach(async () => {
+    await page.viewport(390, 844);
+    document.documentElement.style.setProperty('--slotted-duration-medium', '200ms');
+    document.documentElement.style.setProperty('--slotted-duration-long', '320ms');
+    document.documentElement.style.setProperty('--slotted-drawer-slide-duration', '240ms');
+  });
+  afterEach(async () => {
+    document.documentElement.removeAttribute('style');
+    await page.viewport(412, 915);
+  });
+
+  function Sheet({ size }: { size: 'full' | 'content' }) {
+    const [open, setOpen] = useState(false);
+    return (
+      <>
+        <button onClick={() => setOpen((value) => !value)} type="button">
+          Toggle
+        </button>
+        <Drawer
+          modal
+          onOpenChange={setOpen}
+          open={open}
+          outsidePress="none"
+          side="bottom"
+          size={size}
+          snapPoints={[0.85]}
+        >
+          <DrawerPanel>
+            <DrawerResizer />
+            <DrawerHeader>
+              <DrawerTitle>Sheet</DrawerTitle>
+            </DrawerHeader>
+            <DrawerBody>
+              <p>A short body.</p>
+            </DrawerBody>
+            <DrawerFooter>Footer</DrawerFooter>
+          </DrawerPanel>
+        </Drawer>
+      </>
+    );
+  }
+
+  /** The panel's top edge and the layer's scroll, once per frame, until both rest. */
+  async function sample() {
+    const samples: { top: number; scroll: number }[] = [];
+    for (let index = 0; index < 60; index += 1) {
+      await frame();
+      const layer = document.querySelector<HTMLElement>('[data-ui="drawer"]');
+      const panel = layer?.querySelector<HTMLElement>('[data-part="panel"]');
+      if (!layer || !panel) continue;
+      samples.push({ top: panel.getBoundingClientRect().top, scroll: layer.scrollTop });
+    }
+    return samples;
+  }
+
+  function expectTravel(
+    samples: { top: number; scroll: number }[],
+    from: number,
+    size: 'full' | 'content',
+  ) {
+    const rest = samples.at(-1)!;
+    /* A short body under `content` rests at its own height, below the stop. */
+    const stop = size === 'full' ? window.innerHeight * 0.15 : rest.top;
+    expect(Math.abs(rest.top - stop)).toBeLessThanOrEqual(2);
+    expect(samples[0]!.top).toBeGreaterThanOrEqual(from - 2);
+    for (const [index, { top, scroll }] of samples.entries()) {
+      expect(top, `frame ${index} above the stop`).toBeGreaterThanOrEqual(stop - 1);
+      expect(scroll, `frame ${index} scrolled past the stop`).toBeLessThanOrEqual(rest.scroll + 1);
+      if (index > 0)
+        expect(top, `frame ${index} went back down`).toBeLessThanOrEqual(
+          samples[index - 1]!.top + 1,
+        );
+    }
+    /* Travelled: at least one frame between the start and the stop. */
+    expect(samples.some(({ top }) => top > stop + 20 && top < from - 20)).toBe(true);
+  }
+
+  it.each(['full', 'content'] as const)(
+    'travels up from the edge under size="%s", and again from an interrupted exit',
+    async (size) => {
+      render(<Sheet size={size} />);
+      const toggle = document.querySelector('button') as HTMLElement;
+      toggle.click();
+      expectTravel(await sample(), window.innerHeight, size);
+
+      toggle.click();
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      const panel = document.querySelector<HTMLElement>('[data-ui="drawer"] [data-part="panel"]');
+      const left = panel?.getBoundingClientRect().top ?? window.innerHeight;
+      toggle.click();
+      expectTravel(await sample(), left, size);
+    },
+  );
 });

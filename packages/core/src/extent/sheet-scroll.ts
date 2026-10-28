@@ -285,8 +285,15 @@ export function attachSheetScroll(
       view === null ? 0 : new view.DOMMatrixReadOnly(view.getComputedStyle(panel).transform).m42;
     travel.onfinish = null;
     travel.cancel();
-    travel = null;
+    arrived();
     layer.scrollTop -= offset;
+  };
+  /** What a travel wrote for its run, taken back: the snap, and the offset held for its first frame. */
+  const arrived = () => {
+    travel = null;
+    panel.style.removeProperty('transform');
+    /* An opening keeps it off until its own travel: the stops it would snap to are not laid out. */
+    if (!dragging && laidOut) layer.style.removeProperty('scroll-snap-type');
   };
   /** Between an opening's first frame, out of sight, and its arrival: that bottom is no close. */
   let entering = false;
@@ -405,17 +412,20 @@ export function attachSheetScroll(
         : null;
     scrollLayer(layer, top);
     if (timing === null) return;
+    const offset = `translateY(${String(layer.scrollTop - from)}px)`;
+    /* The panel's snap area is its transformed box: snapped, the scroll would follow the offset. */
+    layer.style.scrollSnapType = 'none';
+    /* An animation made after this frame's style applies from the next one; the scroll lands in this one. */
+    panel.style.transform = offset;
     try {
-      travel = panel.animate(
-        [{ transform: `translateY(${String(layer.scrollTop - from)}px)` }, { transform: 'none' }],
-        timing,
-      );
+      travel = panel.animate([{ transform: offset }, { transform: 'none' }], timing);
     } catch {
       /* An easing the engine cannot parse: the jump. */
+      arrived();
       return;
     }
     travel.onfinish = () => {
-      travel = null;
+      arrived();
       settle();
     };
   };
@@ -434,6 +444,7 @@ export function attachSheetScroll(
       read(false);
       lay();
       laidOut = true;
+      layer.style.removeProperty('scroll-snap-type');
       layer.setAttribute('data-sheet-ready', '');
       layer.scrollTop = extent * span;
       markTop();
@@ -447,12 +458,14 @@ export function attachSheetScroll(
 
     enter(extent) {
       pending?.();
-      halt();
-      anchor(false);
-      read(false);
       entering = true;
       laidOut = false;
       layer.removeAttribute('data-sheet-ready');
+      /* Off before the exit is cut short, and until the travel starts: the scroll lands between stops, and the snap would jump it to one. */
+      layer.style.scrollSnapType = 'none';
+      halt();
+      anchor(false);
+      read(false);
       let measured: ReturnType<typeof measure> | null = null;
       let cancelFrame: () => void = () => undefined;
       let cancelStart: () => void = () => undefined;
@@ -471,6 +484,7 @@ export function attachSheetScroll(
             cancelStart = afterLayout(document, () => {
               const target = extent ?? nearestRest();
               scrollToExtent(target, true);
+              if (travel === null) layer.style.removeProperty('scroll-snap-type');
               /* An opening that arrived at once — reduced motion, no Web Animations — is over. */
               if (Math.abs(position() - target * span) <= SAME_PX) entering = false;
             });
@@ -519,7 +533,7 @@ export function attachSheetScroll(
     destroy() {
       pending?.();
       travel?.cancel();
-      travel = null;
+      arrived();
       observer?.disconnect();
       clearTimeout(idle);
       layer.removeEventListener('scroll', scrolled);

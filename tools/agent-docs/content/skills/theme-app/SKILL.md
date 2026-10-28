@@ -79,8 +79,12 @@ has.
    `--slotted-page-footer-background` with
    `--slotted-page-footer-backdrop-filter`, and
    `--slotted-detail-panel-footer-background` with
-   `--slotted-detail-panel-footer-backdrop-filter`, and a dialog's panel
-   `--slotted-dialog-surface` with `--slotted-dialog-backdrop-filter`.
+   `--slotted-detail-panel-footer-backdrop-filter`, and a drawer's footer
+   `--slotted-drawer-footer-surface` with
+   `--slotted-drawer-footer-backdrop-filter`, and a dialog's panel
+   `--slotted-dialog-surface` with `--slotted-dialog-backdrop-filter`. The
+   chart's tooltip, menu and help read one filter,
+   `--slotted-chart-overlay-backdrop-filter`.
 
 ## 4. Restyle a control
 

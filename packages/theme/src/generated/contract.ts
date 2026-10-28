@@ -3021,6 +3021,7 @@ export type ComponentToken =
   | '--slotted-chart-label-size'
   | '--slotted-chart-line-width'
   | '--slotted-chart-marker-size'
+  | '--slotted-chart-overlay-backdrop-filter'
   | '--slotted-chart-plot-block-size'
   | '--slotted-chart-plot-block-size-lg'
   | '--slotted-chart-plot-block-size-sm'
@@ -3555,6 +3556,7 @@ export type ComponentToken =
   | '--slotted-drawer-extent-md'
   | '--slotted-drawer-extent-sm'
   | '--slotted-drawer-extent-xl'
+  | '--slotted-drawer-footer-backdrop-filter'
   | '--slotted-drawer-footer-surface'
   | '--slotted-drawer-radius'
   | '--slotted-drawer-radius-expanded'
@@ -5285,6 +5287,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-chart-label-size",
   "--slotted-chart-line-width",
   "--slotted-chart-marker-size",
+  "--slotted-chart-overlay-backdrop-filter",
   "--slotted-chart-plot-block-size",
   "--slotted-chart-plot-block-size-lg",
   "--slotted-chart-plot-block-size-sm",
@@ -5819,6 +5822,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-drawer-extent-md",
   "--slotted-drawer-extent-sm",
   "--slotted-drawer-extent-xl",
+  "--slotted-drawer-footer-backdrop-filter",
   "--slotted-drawer-footer-surface",
   "--slotted-drawer-radius",
   "--slotted-drawer-radius-expanded",

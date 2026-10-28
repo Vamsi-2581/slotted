@@ -36,3 +36,20 @@ test('recolours the dot grip in its states and never fills its box', () => {
     'a grip state that can reach an inline side fills the dot matrix',
   );
 });
+
+/** The body scrolls under the footer, so a material footer needs a filter of its own; reduced transparency drops it. */
+test('filters the footer’s backdrop from its own token, except under reduced transparency', () => {
+  const footer = '[data-ui-drawer] > [data-part-panel] > [data-part-footer]';
+  assert.ok(
+    rules.some(
+      ({ body, selectors }) =>
+        selectors.includes(footer) &&
+        body.includes('backdrop-filter: var(--slotted-drawer-footer-backdrop-filter, none);'),
+    ),
+  );
+  assert.ok(
+    css.includes(
+      `@media (prefers-reduced-transparency: reduce), (forced-colors: active) { ${footer} { -webkit-backdrop-filter: none; backdrop-filter: none; } }`,
+    ),
+  );
+});

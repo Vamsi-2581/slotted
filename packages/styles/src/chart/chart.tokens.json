@@ -28,6 +28,7 @@
   "--slotted-chart-label-size",
   "--slotted-chart-line-width",
   "--slotted-chart-marker-size",
+  "--slotted-chart-overlay-backdrop-filter",
   "--slotted-chart-plot-block-size",
   "--slotted-chart-plot-block-size-lg",
   "--slotted-chart-plot-block-size-sm",

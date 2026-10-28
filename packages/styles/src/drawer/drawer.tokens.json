@@ -22,6 +22,7 @@
   "--slotted-drawer-extent-md",
   "--slotted-drawer-extent-sm",
   "--slotted-drawer-extent-xl",
+  "--slotted-drawer-footer-backdrop-filter",
   "--slotted-drawer-footer-surface",
   "--slotted-drawer-radius",
   "--slotted-drawer-radius-expanded",

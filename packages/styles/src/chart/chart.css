@@ -397,6 +397,19 @@
     z-index: var(--slotted-z-index-popover, 1100);
   }
 
+  /* A theme that paints the chart's floating layers as a translucent material blurs the plot under them. */
+  [data-ui-chart] :is([data-part-menu], [data-part-help-content], [data-part-tooltip]) {
+    -webkit-backdrop-filter: var(--slotted-chart-overlay-backdrop-filter, none);
+    backdrop-filter: var(--slotted-chart-overlay-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-chart] :is([data-part-menu], [data-part-help-content], [data-part-tooltip]) {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
   [data-ui-chart] [data-part-menu] {
     display: grid;
     min-inline-size: 11rem;

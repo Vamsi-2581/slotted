@@ -1288,6 +1288,16 @@
     padding-block: var(--_padding-block);
     padding-inline: var(--_row-padding-inline-start) var(--_row-padding-inline-end);
     background: var(--slotted-drawer-footer-surface, var(--slotted-surface-sunken, Canvas));
+    /* The body scrolls under the footer; the panel's own filter blurs only what lies behind the panel. */
+    -webkit-backdrop-filter: var(--slotted-drawer-footer-backdrop-filter, none);
+    backdrop-filter: var(--slotted-drawer-footer-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-drawer] > [data-part-panel] > [data-part-footer] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   /**

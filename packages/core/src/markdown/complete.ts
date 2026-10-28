@@ -7,7 +7,8 @@
  * the page into code, and given `[docs](https://ex` draws the bracket syntax
  * until the parenthesis lands. Streamdown ships the same repair as `remend`;
  * this is the part of it that decides a picture: an open fence, an odd count
- * of backticks, `**`, `*` and `~~`, and a link or image cut before its end.
+ * of backticks, `**`, `*` and `~~`, a link or image cut before its end, and
+ * a table's delimiter row cut before its last column.
  *
  * It runs on the string, before any adapter, and is idempotent on complete
  * input: every rule looks for something left open and appends nothing when it
@@ -16,6 +17,9 @@
 export function completeMarkdown(source: string): string {
   const fence = openFence(source);
   if (fence) return `${source}${source.endsWith('\n') ? '' : '\n'}${fence}`;
+
+  const delimiter = openDelimiter(source);
+  if (delimiter !== null) return delimiter;
 
   const start = lastBlockStart(source);
   const head = source.slice(0, start);
@@ -43,6 +47,37 @@ function openFence(source: string): string | null {
     }
   }
   return open ? open.char.repeat(open.length) : null;
+}
+
+/**
+ * The source with its last line completed as the delimiter row of the header
+ * above it, or `null`. Until the row has one cell per header cell the parser
+ * reads both lines as a paragraph, and the header flashes as text.
+ */
+function openDelimiter(source: string): string | null {
+  const lines = source.split('\n');
+  const last = lines.at(-1) as string;
+  const header = lines.at(-2);
+  /* A pipe row above the header makes the last line a body row, not a delimiter. */
+  const above = lines.at(-3) ?? '';
+  if (header === undefined || !header.includes('|') || above.includes('|')) return null;
+  if (!/^ {0,3}\|[ \t:|-]*$/.test(last)) return null;
+  const count = columns(header).length;
+  const written = columns(last);
+  if (written.length > count) return null;
+  if (written.length === count && written.every((mark) => /^:?-+:?$/.test(mark))) return null;
+  const marks = written.map((mark) => (mark.includes('-') ? mark : `${mark}-`));
+  while (marks.length < count) marks.push('---');
+  lines[lines.length - 1] = `| ${marks.join(' | ')} |`;
+  return lines.join('\n');
+}
+
+/** The cells of a row, without its outer pipes; escaped pipes stay in their cell. */
+function columns(line: string): string[] {
+  const parts = line.trim().split(/(?<!\\)\|/);
+  if (parts[0]?.trim() === '') parts.shift();
+  if (parts.length > 0 && parts.at(-1)?.trim() === '') parts.pop();
+  return parts.map((part) => part.trim());
 }
 
 /** Where the last paragraph begins: inline markers never span a blank line. */

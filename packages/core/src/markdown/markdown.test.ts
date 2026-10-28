@@ -339,6 +339,13 @@ describe('prepareMarkdown', () => {
 });
 
 describe('completeMarkdown', () => {
+  it('completes a table delimiter row cut before its last column', () => {
+    expect(completeMarkdown('Totals:\n| a | b |\n| :-')).toBe('Totals:\n| a | b |\n| :- | --- |');
+    expect(completeMarkdown('| a | b |\n|')).toBe('| a | b |\n| --- | --- |');
+    expect(completeMarkdown('| a | b |\n| :--- | ---: |')).toBe('| a | b |\n| :--- | ---: |');
+    expect(completeMarkdown('| a |\n| - |\n| 1 |\n|')).toBe('| a |\n| - |\n| 1 |\n|');
+  });
+
   it('closes an open fence', () => {
     expect(completeMarkdown('Text\n\n```ts\nconst a')).toBe('Text\n\n```ts\nconst a\n```');
     expect(completeMarkdown('~~~~\nx\n~~~~')).toBe('~~~~\nx\n~~~~');

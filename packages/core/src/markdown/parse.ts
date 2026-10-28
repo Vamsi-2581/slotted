@@ -3,10 +3,10 @@
  * language model's answer — with no parser of the consumer's own.
  *
  * Blocks: paragraphs, ATX headings, fenced code, block quotes, thematic
- * breaks, and bullet and ordered lists nested by indentation. Inline: code
- * spans, strong, emphasis, links, backslash escapes and hard breaks. A
- * construct whose mdast type is outside `allow` is not recognised, so its
- * syntax stays in the text. Anything else — tables, images, HTML, reference
+ * breaks, GFM tables, and bullet and ordered lists nested by indentation.
+ * Inline: code spans, strong, emphasis, links, backslash escapes and hard
+ * breaks. A construct whose mdast type is outside `allow` is not recognised,
+ * so its syntax stays in the text. Anything else — images, HTML, reference
  * links, footnotes, setext headings, indented code — is text too; remark or
  * marked through `fromMarkedTokens` read the whole of CommonMark and GFM.
  */
@@ -26,6 +26,7 @@ const HEADING = /^ {0,3}(#{1,6})(?:[ \t]+(.*?))?(?:[ \t]+#+)?[ \t]*$/;
 const RULE = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/;
 const QUOTE = /^ {0,3}> ?/;
 const ITEM = /^( {0,3})([-*+]|\d{1,9}[.)])(?:([ \t]+)(.*)|$)/;
+const DELIMITER = /^:?-+:?$/;
 
 export function parseMarkdown(source: string, options: ParseMarkdownOptions = {}): MarkdownNode {
   const allow = new Set(options.allow ?? MARKDOWN_TYPES);
@@ -34,6 +35,54 @@ export function parseMarkdown(source: string, options: ParseMarkdownOptions = {}
 }
 
 const blank = (line: string) => line.trim() === '';
+
+/**
+ * The cells of a table row: split on every pipe a backslash does not escape,
+ * without the pipes that open and close the row, and with `\|` read as `|`.
+ */
+function cells(line: string): string[] {
+  const out: string[] = [];
+  let cell = '';
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index] as string;
+    if (char === '\\' && line[index + 1] === '|') {
+      cell += '|';
+      index += 1;
+    } else if (char === '|') {
+      out.push(cell);
+      cell = '';
+    } else {
+      cell += char;
+    }
+  }
+  out.push(cell);
+  if (line.trimStart().startsWith('|')) out.shift();
+  if (/(?:^|[^\\])\|[ \t]*$/.test(line)) out.pop();
+  return out.map((part) => part.trim());
+}
+
+/** The alignment of each column when `lines[index]` opens a table, or `null`. */
+function tableAt(
+  lines: readonly string[],
+  index: number,
+): ('left' | 'right' | 'center' | null)[] | null {
+  const header = lines[index];
+  const delimiter = lines[index + 1];
+  if (header === undefined || delimiter === undefined) return null;
+  if (!header.includes('|') || !delimiter.includes('|')) return null;
+  const marks = cells(delimiter);
+  if (!marks.every((mark) => DELIMITER.test(mark))) return null;
+  if (cells(header).length !== marks.length) return null;
+  return marks.map((mark) =>
+    mark.startsWith(':') && mark.endsWith(':')
+      ? 'center'
+      : mark.startsWith(':')
+        ? 'left'
+        : mark.endsWith(':')
+          ? 'right'
+          : null,
+  );
+}
 
 /** Whether a line opens a block that ends the paragraph above it. */
 function interrupts(line: string, allowed: Allowed): boolean {
@@ -123,12 +172,37 @@ function blocks(lines: readonly string[], allowed: Allowed): MarkdownNode[] {
       continue;
     }
 
+    const align = allowed('table') ? tableAt(lines, index) : null;
+    if (align) {
+      /* GFM: a short row takes empty cells, and a long one drops the excess. */
+      const row = (source: string): MarkdownNode => ({
+        type: 'tableRow',
+        children: align.map((_, column) => ({
+          type: 'tableCell',
+          children: inline(cells(source)[column] ?? '', allowed),
+        })),
+      });
+      const rows = [row(line)];
+      index += 2;
+      while (
+        index < lines.length &&
+        !blank(lines[index] as string) &&
+        !interrupts(lines[index] as string, allowed)
+      ) {
+        rows.push(row(lines[index] as string));
+        index += 1;
+      }
+      out.push({ type: 'table', align, children: rows });
+      continue;
+    }
+
     const body: string[] = [line];
     index += 1;
     while (
       index < lines.length &&
       !blank(lines[index] as string) &&
-      !interrupts(lines[index] as string, allowed)
+      !interrupts(lines[index] as string, allowed) &&
+      !(allowed('table') && tableAt(lines, index))
     ) {
       body.push(lines[index] as string);
       index += 1;

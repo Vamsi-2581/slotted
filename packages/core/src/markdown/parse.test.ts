@@ -137,4 +137,46 @@ describe('parseMarkdown', () => {
       children: [{ type: 'paragraph', children: [text('**a [b](c snake_case_word')] }],
     });
   });
+  describe('a GFM table', () => {
+    const cell = (value: string) => ({ type: 'tableCell', children: value ? [text(value)] : [] });
+    const row = (...values: string[]) => ({ type: 'tableRow', children: values.map(cell) });
+
+    it('reads the header, the alignment of each column and the body rows', () => {
+      const tree = parseMarkdown('| a | b |\n| :--- | ---: |\n| 1 | 2 |');
+      expect(tree.children).toHaveLength(1);
+      expect(tree.children?.[0]?.align).toEqual(['left', 'right']);
+      expect(shape(tree)).toEqual({
+        type: 'root',
+        children: [{ type: 'table', children: [row('a', 'b'), row('1', '2')] }],
+      });
+    });
+
+    it('leaves a pipe block without a delimiter row as a paragraph', () => {
+      expect(shape(parseMarkdown('| a | b |\n| c | d |'))).toEqual({
+        type: 'root',
+        children: [{ type: 'paragraph', children: [text('| a | b |\n| c | d |')] }],
+      });
+    });
+
+    it('leaves a delimiter row of another cell count as text', () => {
+      expect(parseMarkdown('| a | b |\n| --- |').children?.[0]?.type).toBe('paragraph');
+    });
+
+    it('ends the paragraph above it, and reads centre, escaped pipes and short and long rows', () => {
+      const tree = parseMarkdown(
+        'Totals:\n| a | b \\| c |\n|:-:|-|\n| 1 |\n| 2 | 3 | 4 |\n\nAfter',
+      );
+      expect(tree.children?.map((node) => node.type)).toEqual(['paragraph', 'table', 'paragraph']);
+      expect(tree.children?.[1]?.align).toEqual(['center', null]);
+      expect(shape(tree.children?.[1] as MarkdownNode)).toEqual({
+        type: 'table',
+        children: [row('a', 'b | c'), row('1', ''), row('2', '3')],
+      });
+    });
+
+    it('stays text when `table` is outside the allowlist', () => {
+      const tree = parseMarkdown('| a |\n| - |', { allow: ['paragraph', 'text'] });
+      expect(tree.children?.[0]?.type).toBe('paragraph');
+    });
+  });
 });

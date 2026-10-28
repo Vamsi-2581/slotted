@@ -925,6 +925,13 @@ export const contract: TokenContract = {
       "root": true
     },
     {
+      "name": "--slotted-icon-pencil",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-font-family-heading",
       "layer": "semantic",
       "axis": "base",
@@ -2431,6 +2438,7 @@ export type BaseToken =
   | '--slotted-icon-grip-horizontal'
   | '--slotted-icon-star'
   | '--slotted-icon-check-check'
+  | '--slotted-icon-pencil'
   | '--slotted-font-family-heading'
   | '--slotted-control-font-family'
   | '--slotted-control-font-weight'

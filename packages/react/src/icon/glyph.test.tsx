@@ -23,6 +23,17 @@ describe('Glyph', () => {
     ).toEqual(GLYPHS.x.paths);
   });
 
+  /** Edit is a record's most common action; `file-text` and `ellipsis` do not name it. */
+  it('draws a pencil for an edit action on the shared view box', () => {
+    expect(Object.keys(GLYPHS)).toContain('pencil');
+    const { container } = render(<Glyph name="pencil" />);
+    const svg = container.querySelector('svg');
+    expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
+    expect(
+      [...(svg?.querySelectorAll('path') ?? [])].map((path) => path.getAttribute('d')),
+    ).toEqual(GLYPHS.pencil.paths);
+  });
+
   it('strokes with the colour it inherits, at the manifest’s weight, or fills', () => {
     const { container } = render(
       <>

@@ -1309,6 +1309,13 @@
       "root": true
     },
     {
+      "name": "--slotted-icon-pencil",
+      "layer": "primitive",
+      "axis": "base",
+      "type": "image",
+      "root": true
+    },
+    {
       "name": "--slotted-font-family-heading",
       "layer": "semantic",
       "axis": "base",

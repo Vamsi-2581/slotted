@@ -197,6 +197,18 @@
         { "kind": "uses-family", "family": "alert" },
         { "kind": "absent", "pattern": "(InlineMessage|slInlineMessage)[^>]*size=\"md\"" }
       ]
+    },
+    {
+      "id": "record-link",
+      "skill": "compose-screen",
+      "prompt": "Write an invoices table in src/: rows read from fetchInvoices() in src/api.ts, which you also write as a stub returning a Promise. The invoice number in each row links to the invoice's record at /invoices/<id> through the application's router: react-router-dom in a React application, @angular/router in an Angular one.",
+      "assertions": [
+        { "kind": "uses-family", "family": "link" },
+        {
+          "kind": "absent",
+          "pattern": "<\\w*Link\\b(?![^>]*\\{\\.\\.\\.)[^>]*\\bto=|<a\\b(?![^>]*slLink)[^>]*routerLink"
+        }
+      ]
     }
   ]
 }

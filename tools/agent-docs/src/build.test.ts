@@ -146,6 +146,14 @@ describe('buildDocs', () => {
       expect(readFileSync(join(b, file), 'utf8'), file).toBe(readFileSync(join(a, file), 'utf8'));
     }
   });
+  it('tells a React agent that a router link is drawn only through a family render prop', async () => {
+    const out = mkdtempSync(join(tmpdir(), 'docs-'));
+    await buildDocs({ binding: 'react', root, out });
+
+    expect(readFileSync(join(out, 'AGENTS.snippet.md'), 'utf8')).toContain(
+      "A router's link is never drawn on its own, only as what a family's `render` returns: `Link` for a link.",
+    );
+  });
   it('writes the guidelines and the skills, identically twice, the same text in both bindings but the package', async () => {
     const react = mkdtempSync(join(tmpdir(), 'docs-'));
     const again = mkdtempSync(join(tmpdir(), 'docs-'));

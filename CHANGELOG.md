@@ -2,6 +2,20 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.21 — 2026-10-28
+
+- docs(agents): findings chegam como issues com o rótulo finding e o formulário de .github/ISSUE_TEMPLATE; o commit que corrige fecha a issue com Fixes #n
+- chore(progress): fila de findings da equori
+- feat(drawer): a viagem programática do bottom sheet
+- fix(chart): o snippet Angular do gráfico numa secção passa no formato que o workbench verifica
+- chore(progress): fila de findings da equori
+- feat(theme): a raiz do tema declara font-size e line-height do passo md, e o texto que nenhuma família desenha herda 14px em vez dos 16px do browser
+- chore(progress): fila de findings da equori
+- feat(tag): variante dashed
+- test(alert): num banner de página cuja mensagem quebra, ação e dismiss ficam na primeira linha
+- fix(field): os roots dos controlos de campo declaram flex-basis: content
+- fix(chart): no Angular, sem title, o plot é nomeado pelo aria-label escrito na figure, como no React; docs e exemplo de um gráfico que a secção já nomeia
+
 ## 0.1.0-beta.20 — 2026-10-28
 
 - chore(progress): fila de findings da equori

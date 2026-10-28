@@ -2,6 +2,11 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.23 — 2026-10-28
+
+- feat(alert): AlertActions dá aos botões o tom do alert e o tamanho sm
+- fix(drawer): a entrada do bottom sheet parte do repouso
+
 ## 0.1.0-beta.22 — 2026-10-28
 
 - docs(evals): theme-app atende após os tokens de filtro do footer do drawer e dos overlays do chart; checkpoint da fila de findings

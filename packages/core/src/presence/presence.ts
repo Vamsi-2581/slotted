@@ -373,10 +373,10 @@ export function createPresence(options: PresenceOptions = {}): PresenceHandle {
         enteredWithoutNode = false;
         waitForEnter();
       }
-      /* Mid-exit, the listeners move with it: a re-render is not a new exit. */
+      /* Mid-exit, the listeners move with it: a re-render is not a new exit.
+         A `null` waits a frame, since a callback ref detaches before its successor attaches. */
       if (status === 'exiting') {
         stopWaiting();
-        if (!node) return complete();
         waitForExit();
       }
     },

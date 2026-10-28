@@ -1,5 +1,5 @@
 import { PT_BR } from '@slotted/core/i18n/pt-BR';
-import { act, render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import contract from '../../../../specs/components/page/contract.json';
@@ -113,12 +113,12 @@ describe('Page', () => {
     );
     const { rerender } = render(<Screen footer={actions} />);
     rerender(<Screen footer={null} />);
-    /* jsdom declares no transition, so the exit completes at once: the footer
-       is either mid-exit or already gone, and never still open. */
-    const footer = document.querySelector('[data-part="footer"]');
-    expect(footer?.getAttribute('data-status') ?? 'unmounted').not.toBe('open');
-    await act(async () => {});
-    expect(document.querySelector('[data-part="footer"]')).toBeNull();
+    /* jsdom declares no transition, so the exit completes a frame later. */
+    expect(document.querySelector('[data-part="footer"]')).toHaveAttribute(
+      'data-status',
+      'exiting',
+    );
+    await waitFor(() => expect(document.querySelector('[data-part="footer"]')).toBeNull());
     rerender(<Screen footer={actions} />);
     expect(['entering', 'open']).toContain(
       document.querySelector('[data-part="footer"]')?.getAttribute('data-status'),

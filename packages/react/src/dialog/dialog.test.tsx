@@ -690,7 +690,7 @@ describe('Dialog', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveAttribute('data-part', 'title');
   });
 
-  it('keeps the state a controlled consumer owns in step with the layer', () => {
+  it('keeps the state a controlled consumer owns in step with the layer', async () => {
     function Controlled() {
       const [open, setOpen] = useState(false);
       return (
@@ -709,7 +709,8 @@ describe('Dialog', () => {
     press(trigger());
     expect(panel()).not.toBeNull();
     escape();
-    expect(panel()).toBeNull();
+    /* The exit completes a frame after the status moves, animated or not. */
+    await waitFor(() => expect(panel()).toBeNull());
   });
 });
 
@@ -873,7 +874,7 @@ describe('stacked layers that close in one change', () => {
     );
   }
 
-  it('returns focus to the trigger of the outermost', () => {
+  it('returns focus to the trigger of the outermost', async () => {
     render(<Stacked />);
     const opener = screen.getByRole('button', { name: 'Change address' });
     opener.focus();
@@ -885,7 +886,7 @@ describe('stacked layers that close in one change', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
 
-    expect(screen.queryByRole('dialog')).toBeNull();
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(document.activeElement).toBe(opener);
     expect(opener.closest('[inert]')).toBeNull();
   });

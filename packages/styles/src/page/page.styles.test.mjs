@@ -123,6 +123,7 @@ test('moves the footer on the presence status', () => {
     `${ui}>[data-part-footer][data-status='entering'],${ui}>[data-part-footer][data-status='exiting']`,
   );
   assert.match(moving, /translate:0 100%/);
+  assert.doesNotMatch(moving, /opacity/, 'a fade suppresses the footer’s backdrop filter');
   assert.match(rule(`${ui}>[data-part-footer]`), /transition:translate var\(--_duration\)/);
 });
 

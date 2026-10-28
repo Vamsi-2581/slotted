@@ -263,6 +263,39 @@ describe('createPresence', () => {
     presence.destroy();
   });
 
+  /**
+   * React detaches a callback ref and attaches its successor in one commit:
+   * the render that writes `exiting` passes `null` and then the same node.
+   */
+  it('keeps the exit running through a ref that detaches and attaches again', () => {
+    const node = mount(FADE);
+    const presence = createPresence({ initialPresent: true });
+    presence.setNode(node);
+
+    presence.request(false, 'escape');
+    presence.setNode(null);
+    presence.setNode(node);
+    vi.advanceTimersToNextFrame();
+    expect(presence.status).toBe('exiting');
+
+    node.dispatchEvent(new Event('animationend'));
+    expect(presence.status).toBe('unmounted');
+    presence.destroy();
+  });
+
+  it('completes the exit a frame after its node leaves for good', () => {
+    const presence = createPresence({ initialPresent: true });
+    presence.setNode(mount(FADE));
+
+    presence.request(false, 'escape');
+    presence.setNode(null);
+    expect(presence.status).toBe('exiting');
+
+    vi.advanceTimersToNextFrame();
+    expect(presence.status).toBe('unmounted');
+    presence.destroy();
+  });
+
   /** A spinner inside a panel would otherwise end the panel's exit. */
   it('ignores an animation that ended on a descendant', () => {
     const node = mount(FADE);

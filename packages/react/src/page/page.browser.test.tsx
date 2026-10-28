@@ -60,6 +60,29 @@ describe('a footer drawn as a material', () => {
     expect(paint(footer)).toEqual({ background: 'rgba(40, 50, 60, 0.5)', filter: 'blur(5px)' });
   });
 
+  /** Chromium draws no backdrop filter on an element whose opacity is below one. */
+  it('keeps the footer opaque through its enter and its exit, so the filter is drawn', async () => {
+    /* The test document has no theme; without a duration the footer neither enters nor exits. */
+    const view = (footer: boolean) => (
+      <div style={{ ...THEME, '--slotted-duration-medium': '200ms' } as React.CSSProperties}>
+        <Page footer={footer ? <PageFooter>Save</PageFooter> : undefined}>
+          <PageBody>Content</PageBody>
+        </Page>
+      </div>
+    );
+    const { rerender } = render(view(false));
+    rerender(view(true));
+    const entering = document.querySelector('[data-ui="page"] > [data-part="footer"]')!;
+    await expect.poll(() => entering.getAttribute('data-status')).toBe('entering');
+    expect(getComputedStyle(entering).opacity).toBe('1');
+    await expect.poll(() => entering.getAttribute('data-status')).toBe('open');
+    rerender(view(false));
+    const exiting = document.querySelector('[data-ui="page"] > [data-part="footer"]')!;
+    await expect.poll(() => exiting.getAttribute('data-status')).toBe('exiting');
+    expect(getComputedStyle(exiting).opacity).toBe('1');
+    expect(getComputedStyle(exiting).backdropFilter).toBe('blur(7px)');
+  });
+
   it('filters nothing under reduced transparency', async () => {
     await cdp().send('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],

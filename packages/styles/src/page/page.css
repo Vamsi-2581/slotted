@@ -133,9 +133,7 @@
     min-inline-size: 0;
     padding-block: var(--_footer-padding-block);
     position: sticky;
-    transition:
-      translate var(--_duration) var(--_easing),
-      opacity var(--_duration) var(--_easing);
+    transition: translate var(--_duration) var(--_easing);
     z-index: var(--slotted-z-index-sticky, 100);
   }
   [data-ui-page][data-scroll='self'] > [data-part-footer] {
@@ -143,14 +141,14 @@
   }
   [data-ui-page] > [data-part-footer][data-status='entering'],
   [data-ui-page] > [data-part-footer][data-status='exiting'] {
-    opacity: 0;
     translate: 0 100%;
   }
 
   /**
    * A theme draws the footer as a material with a ground that has alpha and
-   * `--slotted-page-footer-backdrop-filter`, `none` unless set. The footer's
-   * own fade keeps the filter drawn: only an ancestor's opacity removes it.
+   * `--slotted-page-footer-backdrop-filter`, `none` unless set. The footer
+   * moves by its translate alone: Chromium draws no backdrop filter on an
+   * element whose opacity is below one.
    */
   [data-ui-page] > [data-part-footer] {
     -webkit-backdrop-filter: var(--slotted-page-footer-backdrop-filter, none);

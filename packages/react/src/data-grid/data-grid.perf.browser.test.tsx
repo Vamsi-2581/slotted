@@ -54,33 +54,48 @@ interface TraceEvent {
   args?: { elementCount?: number };
 }
 
-/** Where the trace being collected goes; the listeners are registered once. */
-let sink: TraceEvent[] = [];
-let finished = () => {};
+/** How the trace in flight reports its end, with the stream that holds it; the listener is registered once. */
+let finished: (stream: string) => void = () => {};
 let listening = false;
 
-/** The style and layout events of a run, read from a Chrome trace. */
+/**
+ * The style and layout events of a run, read from a Chrome trace. The trace
+ * is read back as a stream: delivered as `Tracing.dataCollected` events, a
+ * run's trace arrived empty in about one browser session in four, while
+ * `Tracing.tracingComplete` still did; read as a stream, one run in
+ * seventeen still lost that event.
+ */
 async function traced(run: () => Promise<void>): Promise<TraceEvent[]> {
   const session = cdp();
   if (!listening) {
-    session.on('Tracing.dataCollected', (payload) =>
-      sink.push(...(payload.value as unknown as TraceEvent[])),
-    );
-    session.on('Tracing.tracingComplete', () => finished());
+    session.on('Tracing.tracingComplete', (payload) => finished(String(payload.stream)));
     listening = true;
   }
-  const events: TraceEvent[] = [];
-  sink = events;
-  const complete = new Promise<void>((resolve) => {
+  const complete = new Promise<string>((resolve) => {
     finished = resolve;
   });
   await session.send('Tracing.start', {
     categories: 'devtools.timeline',
-    transferMode: 'ReportEvents',
+    transferMode: 'ReturnAsStream',
   });
   await run();
   await session.send('Tracing.end');
-  await complete;
+  /* shortcut: a browser session whose CDP events stop reaching the test fails here, named; retry the run. */
+  const handle = await Promise.race([
+    complete,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Tracing.tracingComplete never arrived')), 10000),
+    ),
+  ]);
+  let text = '';
+  for (;;) {
+    const chunk = await session.send('IO.read', { handle });
+    text += chunk.base64Encoded ? atob(chunk.data) : chunk.data;
+    if (chunk.eof) break;
+  }
+  await session.send('IO.close', { handle });
+  const parsed = JSON.parse(text) as TraceEvent[] | { traceEvents: TraceEvent[] };
+  const events = Array.isArray(parsed) ? parsed : parsed.traceEvents;
   return events.filter((event) => event.ph === 'X');
 }
 
@@ -162,5 +177,63 @@ describe('a windowed data grid while it scrolls', () => {
     expect(before).not.toBeUndefined();
     expect(restyled).toBeLessThan(elements / 3);
     expect(layoutPerStep).toBeLessThan(total(mount, 'Layout') / 4);
+  }, 60000);
+});
+
+/**
+ * A refresh is a veil over the rows the grid has drawn, and its cost is the
+ * veil's: a selector that read the busy root above the rows restyled every
+ * row and cell on the toggle — 340 ms on a throttled phone for 70 rows. A
+ * control in the same run restyles every cell, so a trace that recorded
+ * nothing fails instead of passing.
+ */
+describe('a data grid entering and leaving a refresh', () => {
+  it('restyles the root and the veil, not the rows', async () => {
+    const host = document.createElement('div');
+    host.style.blockSize = '4000px';
+    host.style.display = 'flex';
+    document.body.append(host);
+    const probe = document.createElement('style');
+    probe.textContent = '[data-probe] [data-part="cell"] { outline: 1px solid; }';
+    document.head.append(probe);
+    const root = createRoot(host);
+    const grid = (loading: false | 'refresh') => (
+      <DataGrid<Entry>
+        aria-label="Entries"
+        columns={COLUMNS}
+        loading={loading}
+        rowKey="id"
+        rows={ROWS.slice(0, 70)}
+      />
+    );
+    flushSync(() => root.render(grid(false)));
+    await frame();
+    await frame();
+
+    const restyled = async (change: () => void) =>
+      (
+        await traced(async () => {
+          change();
+          await frame();
+          await frame();
+        })
+      )
+        .filter((event) => event.name === 'UpdateLayoutTree')
+        .reduce((sum, event) => sum + (event.args?.elementCount ?? 0), 0);
+    const rows = host.querySelectorAll('[data-part="body"] > [data-row]').length;
+    const cells = host.querySelectorAll('[data-part="cell"]').length;
+    const control = await restyled(() => host.setAttribute('data-probe', ''));
+    const entering = await restyled(() => flushSync(() => root.render(grid('refresh'))));
+    const busy = host.querySelector('[data-ui="data-grid"]')?.getAttribute('aria-busy');
+    const leaving = await restyled(() => flushSync(() => root.render(grid(false))));
+    root.unmount();
+    host.remove();
+    probe.remove();
+
+    expect(rows).toBe(70);
+    expect(control).toBeGreaterThanOrEqual(cells);
+    expect(busy).toBe('true');
+    expect(entering).toBeLessThan(10);
+    expect(leaving).toBeLessThan(10);
   }, 60000);
 });

@@ -586,8 +586,8 @@ export function DrawerPanel({
 
   /**
    * Opening scrolls the sheet up from out of sight to its resting stop, and
-   * closing other than by the hand scrolls it back down: the platform's smooth
-   * scroll both ways, the motion a released drag ends with.
+   * closing other than by the hand scrolls it back down, in the drawer's slide
+   * tokens both ways, the motion a released drag ends with.
    */
   const interactive = drawer.interactive;
   const wasOpen = useRef(false);

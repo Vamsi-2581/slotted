@@ -243,7 +243,7 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'sheet',
     title: 'A bottom sheet as a phone draws one',
-    note: 'The sheet measures what it holds — the default size on top and bottom — stops at forty rems on a wide layer, and is moved by the platform’s own scroll, so the finger, the fling and the landing on a stop run on the compositor. The sheet and its content are one scroll: pushing up lifts the sheet to the top of the screen and, without letting go, goes on through the list under the header, which sticks there; pulling down from the top of the list brings the sheet down. A fling out of the list stops at its top and never closes the sheet. A tap on the grabber walks the stops.',
+    note: 'The sheet measures what it holds — the default size on top and bottom — stops at forty rems on a wide layer, and is moved by the platform’s own scroll, so the finger, the fling and the landing on a stop run on the compositor. The opening, the close and a tap on the grabber travel in --slotted-drawer-slide-duration and --slotted-easing-enter going up, and in --slotted-drawer-slide-exit-duration and --slotted-easing-exit going down. The sheet and its content are one scroll: pushing up lifts the sheet to the top of the screen and, without letting go, goes on through the list under the header, which sticks there; pulling down from the top of the list brings the sheet down. A fling out of the list stops at its top and never closes the sheet. A tap on the grabber walks the stops.',
     snippet: defineSnippet({
       id: 'drawer-react-sheet',
       language: 'tsx',

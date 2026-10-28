@@ -12,6 +12,15 @@
  *
  * Lengths are pixels and extents are fractions of the layer's height.
  *
+ * A travel the family asks for — the opening, the close, a stop the grabber
+ * or a released mouse drag goes to — is not a smooth scroll, whose time and
+ * curve are the browser's. The scroll jumps to the stop and the panel is
+ * drawn where it was, then a Web Animations `transform` on the panel takes
+ * that offset to nothing: on the compositor, as the scroll is, and in the
+ * drawer's slide tokens. Up reads `--slotted-drawer-slide-duration` and
+ * `--slotted-easing-enter`, down `--slotted-drawer-slide-exit-duration` and
+ * `--slotted-easing-exit`.
+ *
  * Opening forces no layout: the stops are read once the browser has laid the
  * layer out (`afterLayout`), written in the next frame, and the scroll up
  * begins after the layout that follows. A forced layout in the commit that
@@ -28,9 +37,17 @@ const SCROLL_IDLE_MS = 150;
 const SAME_PX = 2;
 
 /** `scrollTo` where the element has it; a document with no layout engine only has `scrollTop`. */
-function scrollLayer(layer: HTMLElement, top: number, behavior: ScrollBehavior) {
-  if (typeof layer.scrollTo === 'function') layer.scrollTo({ behavior, top });
+function scrollLayer(layer: HTMLElement, top: number) {
+  if (typeof layer.scrollTo === 'function') layer.scrollTo({ behavior: 'instant', top });
   else layer.scrollTop = top;
+}
+
+/** A CSS time in milliseconds, or `null` when it is not one. */
+function milliseconds(time: string): number | null {
+  const match = /^(-?[\d.]+)(ms|s)$/.exec(time.trim());
+  if (match === null) return null;
+  const value = Number(match[1]) * (match[2] === 's' ? 1000 : 1);
+  return Number.isFinite(value) && value >= 0 ? value : null;
 }
 
 export interface SheetScrollOptions {
@@ -73,7 +90,7 @@ export interface SheetScroll {
   enter(extent: number | undefined): void;
   /** Whether an opening is still under way: the stops may not be laid out yet. */
   busy(): boolean;
-  /** Moves the sheet to `extent` on the platform's smooth scroll, or at once. */
+  /** Moves the sheet to `extent` in the slide tokens' time and curve, or at once. */
   scrollTo(extent: number, smooth: boolean): void;
   /** The visible fraction now; `1` while the content scrolls under a sheet at the top. */
   at(): number;
@@ -256,12 +273,27 @@ export function attachSheetScroll(
   let dragging = false;
   /** Fingers on the sheet: a scroll they move is a hand's, one without them a fling's. */
   let fingers = 0;
+  /** The travel in flight: the panel's offset from where the scroll already is, easing to nothing. */
+  let travel: Animation | null = null;
+  /**
+   * Ends a travel where it is drawn: the scroll takes the offset the panel
+   * still had, so a finger that lands on a moving sheet holds it there.
+   */
+  const halt = () => {
+    if (travel === null) return;
+    const offset =
+      view === null ? 0 : new view.DOMMatrixReadOnly(view.getComputedStyle(panel).transform).m42;
+    travel.onfinish = null;
+    travel.cancel();
+    travel = null;
+    layer.scrollTop -= offset;
+  };
   /** Between an opening's first frame, out of sight, and its arrival: that bottom is no close. */
   let entering = false;
   const settle = () => {
     moving = false;
     /* Nothing is laid out to settle on yet: the stops come with the opening's frame. */
-    if (dragging || !laidOut) return;
+    if (dragging || travel !== null || !laidOut) return;
     if (entering) {
       if (position() <= SAME_PX) return;
       entering = false;
@@ -275,6 +307,7 @@ export function attachSheetScroll(
 
   const touched = (event: TouchEvent) => {
     fingers = event.touches.length;
+    if (fingers > 0) halt();
     if (fingers > 0) anchor(false);
     else if (reading) anchor(true);
   };
@@ -339,18 +372,64 @@ export function attachSheetScroll(
       stops[0] ?? restAt,
     );
 
-  const scrollToExtent = (extent: number, smooth: boolean) => {
-    anchor(false);
+  /** The slide tokens for a travel up (`enter`) or down (`exit`), as the drawer's stylesheet reads them. */
+  const slide = (exit: boolean): KeyframeAnimationOptions | null => {
+    if (view === null) return null;
+    const style = view.getComputedStyle(layer);
+    const read = (name: string) => style.getPropertyValue(name).trim();
+    const duration = milliseconds(
+      read(exit ? '--slotted-drawer-slide-exit-duration' : '--slotted-drawer-slide-duration') ||
+        read(exit ? '--slotted-duration-medium' : '--slotted-duration-long'),
+    );
+    if (duration === null) return null;
+    return {
+      duration,
+      easing: read(exit ? '--slotted-easing-exit' : '--slotted-easing-enter') || 'ease',
+    };
+  };
+
+  /**
+   * The scroll is put on `top` at once — a stop, so the snap keeps it — and
+   * the panel is drawn where it was and animated there. A travel with no
+   * motion — reduced motion, no Web Animations, no distance — is the jump.
+   */
+  const glide = (top: number, smooth: boolean) => {
+    halt();
+    const from = layer.scrollTop;
     const reduced =
       typeof view?.matchMedia === 'function' &&
       view.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    scrollLayer(layer, extent * span, smooth && !reduced ? 'smooth' : 'instant');
+    const timing =
+      smooth && !reduced && typeof panel.animate === 'function' && Math.abs(top - from) > 1
+        ? slide(top < from)
+        : null;
+    scrollLayer(layer, top);
+    if (timing === null) return;
+    try {
+      travel = panel.animate(
+        [{ transform: `translateY(${String(layer.scrollTop - from)}px)` }, { transform: 'none' }],
+        timing,
+      );
+    } catch {
+      /* An easing the engine cannot parse: the jump. */
+      return;
+    }
+    travel.onfinish = () => {
+      travel = null;
+      settle();
+    };
+  };
+
+  const scrollToExtent = (extent: number, smooth: boolean) => {
+    anchor(false);
+    glide(extent * span, smooth);
   };
 
   return {
     layout(extent) {
       pending?.();
       pending = null;
+      halt();
       anchor(false);
       read(false);
       lay();
@@ -368,6 +447,7 @@ export function attachSheetScroll(
 
     enter(extent) {
       pending?.();
+      halt();
       anchor(false);
       read(false);
       entering = true;
@@ -391,7 +471,7 @@ export function attachSheetScroll(
             cancelStart = afterLayout(document, () => {
               const target = extent ?? nearestRest();
               scrollToExtent(target, true);
-              /* An opening that arrived at once — reduced motion, no smooth scroll — is over. */
+              /* An opening that arrived at once — reduced motion, no Web Animations — is over. */
               if (Math.abs(position() - target * span) <= SAME_PX) entering = false;
             });
           });
@@ -409,6 +489,7 @@ export function attachSheetScroll(
     at,
 
     drag() {
+      halt();
       anchor(false);
       dragging = true;
       const from = layer.scrollTop;
@@ -426,21 +507,19 @@ export function attachSheetScroll(
             (best, value) => (Math.abs(value - top) < Math.abs(best - top) ? value : best),
             positions[0] ?? top,
           );
-          const restore = () => {
-            layer.removeEventListener('scrollend', restore);
-            layer.style.removeProperty('scroll-snap-type');
-            dragging = false;
-            settle();
-          };
-          if (native && Math.abs(nearest - top) > 1) layer.addEventListener('scrollend', restore);
-          scrollLayer(layer, nearest, 'smooth');
-          if (!native || Math.abs(nearest - top) <= 1) restore();
+          layer.style.removeProperty('scroll-snap-type');
+          dragging = false;
+          glide(nearest, true);
+          /* No travel to wait for: the jump has landed, or there was nowhere to go. */
+          if (travel === null) settle();
         },
       };
     },
 
     destroy() {
       pending?.();
+      travel?.cancel();
+      travel = null;
       observer?.disconnect();
       clearTimeout(idle);
       layer.removeEventListener('scroll', scrolled);

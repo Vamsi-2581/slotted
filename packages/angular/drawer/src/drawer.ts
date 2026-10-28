@@ -668,8 +668,8 @@ export class SlDrawer implements OnInit {
 
     /**
      * Opening scrolls the sheet up from out of sight to its resting stop, and
-     * closing other than by the hand scrolls it back down: the platform's
-     * smooth scroll both ways, the motion a released drag ends with. After the
+     * closing other than by the hand scrolls it back down, in the drawer's
+     * slide tokens both ways, the motion a released drag ends with. After the
      * render, when the layer is laid out.
      */
     afterRenderEffect(() => {

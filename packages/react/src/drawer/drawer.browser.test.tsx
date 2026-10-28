@@ -338,6 +338,65 @@ describe('a bottom sheet on the platform scroll', () => {
     }
   });
 
+  it('travels in --slotted-drawer-slide-duration and --slotted-drawer-slide-exit-duration', async () => {
+    document.documentElement.style.setProperty('--slotted-drawer-slide-duration', '100ms');
+    document.documentElement.style.setProperty('--slotted-drawer-slide-exit-duration', '100ms');
+    /** Frames from the panel's first move to its arrival, timed. */
+    const travel = async (panel: HTMLElement) => {
+      const samples: { at: number; top: number }[] = [];
+      for (let index = 0; index < 90; index += 1) {
+        await frame();
+        if (!panel.isConnected) break;
+        samples.push({ at: performance.now(), top: Math.round(panel.getBoundingClientRect().top) });
+      }
+      const last = samples.at(-1)!.top;
+      const start = samples.findIndex(
+        (sample, index) => index > 0 && sample.top !== samples[0]!.top,
+      );
+      const end = samples.findIndex((sample) => sample.top === last);
+      return { duration: samples[end]!.at - samples[Math.max(0, start - 1)]!.at, moved: start > 0 };
+    };
+    function Sheet() {
+      const [open, setOpen] = useState(false);
+      return (
+        <>
+          <button onClick={() => setOpen((value) => !value)} type="button">
+            Toggle
+          </button>
+          <Drawer
+            defaultExtent={0.8}
+            onOpenChange={setOpen}
+            open={open}
+            side="bottom"
+            snapPoints={[0.8]}
+          >
+            <DrawerPanel>
+              <DrawerHeader>
+                <DrawerTitle>Transactions</DrawerTitle>
+              </DrawerHeader>
+              <DrawerBody>{rows}</DrawerBody>
+            </DrawerPanel>
+          </Drawer>
+        </>
+      );
+    }
+    render(<Sheet />);
+    (document.querySelector('button') as HTMLElement).click();
+    let panel: HTMLElement | null = null;
+    while (panel === null) {
+      await frame();
+      panel = document.querySelector<HTMLElement>('[data-ui="drawer"] [data-part="panel"]');
+    }
+    const opening = await travel(panel);
+    expect(opening.moved).toBe(true);
+    expect(opening.duration).toBeLessThanOrEqual(150);
+
+    (document.querySelector('[data-ui="drawer"] [data-part="backdrop"]') as HTMLElement).click();
+    const closing = await travel(panel);
+    expect(closing.moved).toBe(true);
+    expect(closing.duration).toBeLessThanOrEqual(150);
+  });
+
   it('closes on the same fling with a busy main thread', async () => {
     await cdp().send('Emulation.setCPUThrottlingRate', { rate: 6 });
     try {

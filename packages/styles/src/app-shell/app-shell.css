@@ -735,6 +735,8 @@
    * under `scroll="content"`, and a scroll container clips what stands outside
    * it. The strip is the rows' own inset wide, so it covers padding and no
    * content. `::before` is the reach, transparent and the WCAG 2.2 floor wide.
+   * Where the pane is a column the strip moves onto the seam or the gutter
+   * (the wide query below).
    *
    * It draws the `splitter` family's mark from that family's tokens: two
    * hairlines fading away from a grip, visible at rest. Under the hand, the
@@ -1916,6 +1918,37 @@
       )[data-nav-side='end']
       > [data-part-aside] {
       margin-inline: var(--_gutter) 0;
+    }
+    /* The strip lies on the line between the pane and the content: the seam
+       where they meet, the gutter's centre where the gutter separates them.
+       The pane then does not scroll itself — its body does — so it does not
+       clip the half of the strip that stands outside it. */
+    [data-ui-app-shell][data-scroll='content']:not([data-aside-mode='overlay'])
+      > [data-part-aside] {
+      overflow: visible;
+    }
+    [data-ui-app-shell]:not([data-aside-mode='overlay'])
+      > [data-part-aside]
+      > [data-part-aside-resizer] {
+      --_resizer-offset: calc(var(--_seam-width) / -2 - var(--_resizer-thickness) / 2);
+
+      inset-inline-start: var(--_resizer-offset);
+    }
+    [data-ui-app-shell]:not([data-aside-mode='overlay']):is(
+        [data-canvas='floating'],
+        [data-canvas='inset']
+      )
+      > [data-part-aside]
+      > [data-part-aside-resizer] {
+      --_resizer-offset: calc(
+        -1 * (var(--_rule-width) + var(--_gutter) / 2) - var(--_resizer-thickness) / 2
+      );
+    }
+    [data-ui-app-shell]:not([data-aside-mode='overlay'])[data-nav-side='end']
+      > [data-part-aside]
+      > [data-part-aside-resizer] {
+      inset-inline-end: var(--_resizer-offset);
+      inset-inline-start: auto;
     }
     [data-ui-app-shell]:not([data-aside-mode='overlay'])[data-canvas='flush'] > [data-part-aside] {
       border-block-start: none;

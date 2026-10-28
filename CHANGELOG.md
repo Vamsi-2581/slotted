@@ -2,6 +2,14 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.19 — 2026-10-28
+
+- docs(evals): avaliação de 2026-10-28
+- docs(agent-docs): o snippet React diz que um link do roteador só aparece no render de uma família; caso de avaliação record-link
+- fix(app-shell): o aside-resizer de um pane em coluna fica no centro do gutter em inset e floating e no centro da costura em flush e panel; o pane deixa de rolar e só o aside-body rola
+- fix(page-header): o back posto direto na área do título recebe o estilo do back no nav
+- fix(collapsible): um gatilho sem descrição centra o rótulo e o indicador quando a altura do controle excede o conteúdo (align-content: center)
+
 ## 0.1.0-beta.18 — 2026-10-27
 
 - test(agent-docs): o teste de inline-message trata a captura ausente das famílias

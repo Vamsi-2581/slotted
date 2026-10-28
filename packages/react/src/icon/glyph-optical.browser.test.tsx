@@ -31,4 +31,30 @@ describe('a calendar beside a label', () => {
       Math.abs(centre(page.getBoundingClientRect()) - centre(label.getBoundingClientRect())),
     ).toBeLessThanOrEqual(0.25);
   });
+
+  it.each(['sm', 'md', 'lg'] as const)(
+    'centres its page on the cap height of a %s outline button',
+    (size) => {
+      render(
+        <Button
+          size={size}
+          start={
+            <Icon>
+              <Glyph name="calendar" />
+            </Icon>
+          }
+          variant="outline"
+        >
+          Oct 2026
+        </Button>,
+      );
+      const page = document.querySelectorAll('[data-glyph="calendar"] path')[2] as SVGPathElement;
+      const label = document.querySelector('[data-part="label"]') as HTMLElement;
+      const centre = (box: DOMRect) => box.top + box.height / 2;
+
+      expect(
+        Math.abs(centre(page.getBoundingClientRect()) - centre(label.getBoundingClientRect())),
+      ).toBeLessThanOrEqual(0.5);
+    },
+  );
 });

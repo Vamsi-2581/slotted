@@ -718,3 +718,17 @@ describe('header and meta', () => {
     expect(status.querySelector("[data-part='meta']")?.textContent).toBe('Available');
   });
 });
+
+/* A menu opened from a table cell nests its trigger deep; jsdom resolves an
+   inherited custom property per level, which the portal once paid in seconds. */
+describe('a menu opened from a trigger 24 elements deep', () => {
+  it('opens in under 500 ms', async () => {
+    let tree = <Basic />;
+    for (let level = 0; level < 22; level += 1) tree = <div>{tree}</div>;
+    render(tree);
+
+    const start = performance.now();
+    await open();
+    expect(performance.now() - start).toBeLessThan(500);
+  });
+});

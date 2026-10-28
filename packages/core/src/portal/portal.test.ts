@@ -225,6 +225,39 @@ describe('createPortalRoot', () => {
     });
 
     /**
+     * jsdom resolves an inherited custom property by walking the ancestors
+     * again at every level, so reading the seeds off a deep opener cost
+     * seconds: 34 s for a menu opened from a table cell 24 elements deep.
+     */
+    it('opens a layer from an opener 24 elements deep in under 500 ms', () => {
+      document.body.innerHTML = `<div data-slotted-theme="default">${'<div>'.repeat(22)}<button id="trigger"></button>${'</div>'.repeat(22)}</div>`;
+      const trigger = document.getElementById('trigger') as HTMLElement;
+      let depth = 0;
+      for (let node: Element | null = trigger; node; node = node.parentElement) depth += 1;
+      expect(depth).toBeGreaterThanOrEqual(24);
+
+      const start = performance.now();
+      const portal = createPortalRoot({ origin: trigger });
+      expect(performance.now() - start).toBeLessThan(500);
+      portal.release();
+    });
+
+    it('carries a seed a region declares with data-slotted-seeds', () => {
+      document.body.innerHTML = `
+        <div data-slotted-theme="default">
+          <section data-slotted-seeds style="--slotted-seed-accent: #e11d48">
+            <div><span id="trigger"></span></div>
+          </section>
+        </div>`;
+      const portal = createPortalRoot({ origin: document.getElementById('trigger') });
+
+      expect(
+        (portal.container as HTMLElement).style.getPropertyValue('--slotted-seed-accent'),
+      ).toBe('#e11d48');
+      portal.release();
+    });
+
+    /**
      * `applyTheme` replaces the stylesheet of a theme already on the page: the
      * seeds change and no attribute does, so only the event it dispatches
      * tells the open layers to read them again.

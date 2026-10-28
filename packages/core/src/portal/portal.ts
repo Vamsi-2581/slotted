@@ -168,14 +168,35 @@ function mirror(layer: Element, origin: Element | null) {
   mirrorSeeds(layer, origin);
 }
 
+/** A seed written in the `style` of the opener or of an element between it and `source`. */
+function inlineSeed(origin: Element | null, source: Element | null, property: string) {
+  for (let node = origin; node && node !== source; node = node.parentElement) {
+    const value = (node as HTMLElement).style?.getPropertyValue(property);
+    if (value) return value;
+  }
+  return null;
+}
+
 function mirrorSeeds(layer: Element, origin: Element | null) {
   const view = layer.ownerDocument.defaultView;
   const style = (layer as HTMLElement).style as CSSStyleDeclaration | undefined;
   if (!view || !style) return;
-  const computed = origin ? view.getComputedStyle(origin) : null;
+  /* The seeds are declared on the theme's element or on a region that carries
+     `data-slotted-seeds`, near the root, and read there: resolving an inherited
+     custom property off a deep opener costs a walk of its ancestors per level
+     in jsdom — 34 s from a table cell 24 elements deep. A seed written inline
+     between the opener and that element is still the nearest one. */
+  const source =
+    origin?.closest('[data-slotted-seeds], [data-slotted-theme]') ??
+    (origin ? origin.ownerDocument.documentElement : null);
+  const computed = source ? view.getComputedStyle(source) : null;
   let carried = false;
   for (const property of MIRRORED_PROPERTIES) {
-    const value = computed?.getPropertyValue(property).trim() ?? '';
+    const value = (
+      inlineSeed(origin, source, property) ??
+      computed?.getPropertyValue(property) ??
+      ''
+    ).trim();
     if (value) {
       carried = true;
       if (style.getPropertyValue(property) !== value) style.setProperty(property, value);

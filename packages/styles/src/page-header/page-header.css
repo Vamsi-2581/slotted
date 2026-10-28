@@ -340,8 +340,10 @@
    * The way back. A link or a button the consumer renders; the arrow is the
    * family's, the `arrow-left` Glyph element the binding puts before the
    * label, and it points along the reading direction, so its `directional`
-   * box mirrors it in a right-to-left document.
+   * box mirrors it in a right-to-left document. It is styled in the nav part
+   * and directly in the title area, where a page without breadcrumbs puts it.
    */
+  [data-ui-page-header] > * > [data-part-title-area] > [data-part-back],
   [data-ui-page-header] > * > [data-part-title-area] > [data-part-nav] > [data-part-back] {
     --slotted-icon-size: var(--_icon-size);
 
@@ -362,10 +364,18 @@
     text-decoration: none;
     transition: color var(--slotted-duration-short) var(--_easing);
   }
+  /* Outside the nav part nothing sets the row's type or keeps the column from
+     stretching the link across the title area. */
+  [data-ui-page-header] > * > [data-part-title-area] > [data-part-back] {
+    align-self: flex-start;
+    font-size: var(--slotted-font-size-sm, 0.8125rem);
+    line-height: var(--slotted-line-height-sm, 1.45);
+  }
   /* On a finger the way back is a full target among 44-pixel controls: it
      reaches the comfortable size by padding and gives it back as a negative
      margin, so the nav row keeps its height and nothing under it moves. */
   @media (pointer: coarse) {
+    [data-ui-page-header] > * > [data-part-title-area] > [data-part-back],
     [data-ui-page-header] > * > [data-part-title-area] > [data-part-nav] > [data-part-back] {
       --_reach: max(
         0px,
@@ -380,6 +390,10 @@
     > *
     > [data-part-title-area]
     > [data-part-nav]
+    > [data-part-back]:not([data-disabled]):not(:disabled):hover,
+  [data-ui-page-header]
+    > *
+    > [data-part-title-area]
     > [data-part-back]:not([data-disabled]):not(:disabled):hover {
     color: var(--_text);
   }
@@ -387,7 +401,8 @@
     > *
     > [data-part-title-area]
     > [data-part-nav]
-    > [data-part-back]:focus-visible {
+    > [data-part-back]:focus-visible,
+  [data-ui-page-header] > * > [data-part-title-area] > [data-part-back]:focus-visible {
     outline: var(--slotted-focus-ring-width, 2px) solid var(--slotted-focus-ring-color, Highlight);
     outline-offset: var(--slotted-focus-ring-offset, 2px);
   }

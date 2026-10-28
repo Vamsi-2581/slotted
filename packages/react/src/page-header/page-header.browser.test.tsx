@@ -10,8 +10,10 @@ import { Toolbar, ToolbarItem, ToolbarOverflow } from '../toolbar';
 import { PageHeader } from './page-header';
 import {
   PageHeaderActions,
+  PageHeaderBack,
   PageHeaderControls,
   PageHeaderHeading,
+  PageHeaderNav,
   PageHeaderProgress,
   PageHeaderSubheading,
   PageHeaderTabs,
@@ -243,5 +245,42 @@ describe('a toolbar of actions under a rich title on a narrow header', () => {
       (item) => !item.hasAttribute('hidden'),
     );
     expect(visible.length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe('the way back', () => {
+  /* The family's muted colour as the browser resolves it, read off a probe. */
+  function muted(within: Element) {
+    const probe = document.createElement('span');
+    probe.style.color = 'var(--slotted-text-muted, GrayText)';
+    within.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  }
+
+  it.each([
+    ['inside the nav part', true],
+    ['directly in the title area', false],
+  ])('is styled %s', (_, inNav) => {
+    const back = <PageHeaderBack href="#x">Back</PageHeaderBack>;
+    render(
+      <PageHeader>
+        <PageHeaderTitleArea>
+          {inNav ? <PageHeaderNav>{back}</PageHeaderNav> : back}
+          <PageHeaderTitleRow>
+            <PageHeaderTitle>
+              <PageHeaderHeading>Settings</PageHeaderHeading>
+            </PageHeaderTitle>
+          </PageHeaderTitleRow>
+        </PageHeaderTitleArea>
+      </PageHeader>,
+    );
+    const element = document.querySelector('[data-part="back"]') as HTMLElement;
+    const style = getComputedStyle(element);
+
+    expect(style.color).toBe(muted(element.parentElement as Element));
+    expect(style.textDecorationLine).toBe('none');
+    expect(element.getBoundingClientRect().width).toBeLessThan(200);
   });
 });

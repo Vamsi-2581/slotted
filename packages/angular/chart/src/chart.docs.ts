@@ -720,13 +720,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'card',
     title: 'On the page, or as a card',
-    note: 'plain sits on the page’s own surface for a report; card draws its own surface, border and padding, and fills the grid cell it is given.',
+    note: 'plain sits on the page’s own surface for a report; card draws its own surface, border and padding, and fills the grid cell it is given. Inside a section whose heading already names the chart, leave title out and write aria-label: it names the plot.',
     snippet: defineSnippet({
       id: 'chart-angular-card',
       language: 'angular',
       label: 'variant',
       source:
-        '<figure slChart variant="plain" [data]="monthly" [series]="revenue"></figure>\n<figure slChart variant="card" [data]="monthly" [series]="revenue"></figure>',
+        '<figure slChart variant="plain" [data]="monthly" [series]="revenue"></figure>\n<figure slChart variant="card" [data]="monthly" [series]="revenue"></figure>\n\n<section slSection>\n  <div slSectionHeader>\n    <div slSectionTitle><h2 slSectionHeading>Receita</h2></div>\n  </div>\n  <div slSectionBody>\n    <figure slChart aria-label="Receita, últimos 12 meses" [data]="monthly" [series]="revenue"></figure>\n  </div>\n</section>',
     }),
   },
   {
@@ -939,7 +939,7 @@ export const ANGULAR_CHART_DOCS = {
         'string',
         '—',
         'slChart',
-        'The caption, and the plot’s accessible name. Taken from the native title attribute, which the figure does not keep',
+        'The caption, and the plot’s accessible name. Taken from the native title attribute, which the figure does not keep. Without title, the plot is named by the aria-label written on the figure; use it when a surrounding heading already names the chart',
       ],
       ['description', 'string', '—', 'slChart', 'One line under the title'],
       ['help', 'string', '—', 'slChart', 'A note behind an information control beside the title'],

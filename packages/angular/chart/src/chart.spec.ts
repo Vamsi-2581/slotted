@@ -148,7 +148,39 @@ const press = (target: Element) => {
   target.closest<HTMLElement>('[tabindex], a[href], button')?.focus();
 };
 
+@Component({
+  imports: [SlChart],
+  template: `<figure
+    slChart
+    aria-label="Revenue by month"
+    locale="en-US"
+    [data]="data"
+    [series]="[{ kind: 'bar', field: 'revenue', label: 'Revenue' }]"
+    [x]="{ field: 'month' }"
+  ></figure>`,
+})
+class UntitledHost {
+  readonly data = [{ month: 'Jan', revenue: 120 }];
+}
+
 describe('SlChart', () => {
+  it('names the plot by the aria-label of the figure when there is no title', async () => {
+    TestBed.configureTestingModule({
+      imports: [UntitledHost],
+      providers: [{ provide: CHART_ENGINE, useValue: recordingEngine }] as never[],
+    });
+    const fixture = TestBed.createComponent(UntitledHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const root = fixture.nativeElement.querySelector('[data-ui="chart"]') as HTMLElement;
+    const plot = root.querySelector<HTMLElement>('[data-part="plot"]')!;
+
+    expect(root.getAttribute('aria-label')).toBe('Revenue by month');
+    expect(plot.getAttribute('aria-label')).toBe('Revenue by month');
+    expect(plot.getAttribute('aria-labelledby')).toBeNull();
+    expect(root.querySelector('[data-part="title"]')).toBeNull();
+  });
+
   it('is a figure its caption names, with a plot named by the title and described in words', async () => {
     const { root, part } = await mount();
 

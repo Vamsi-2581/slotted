@@ -192,6 +192,7 @@ function focusVisible(element: Element) {
     'data-part': 'root',
     'data-part-root': '',
     '[attr.title]': 'null',
+    '[attr.aria-label]': 'ariaLabel() ?? null',
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-palette]': 'resolvedPalette()',
@@ -222,6 +223,8 @@ export class SlChart<Row extends object = ChartRecord> implements ChartHandle {
   /* ── The words around it ───────────────────────────────────────────── */
   /** The chart's name: the caption, and the plot's accessible name. The host's native tooltip is removed. */
   readonly title = input<string | undefined>(undefined);
+  /** Names the plot when no title is given: a heading around the chart already names it. */
+  readonly ariaLabel = input<string | undefined>(undefined, { alias: 'aria-label' });
   readonly description = input<string | undefined>(undefined);
   /** A note behind an information control beside the title. */
   readonly help = input<string | undefined>(undefined);

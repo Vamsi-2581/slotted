@@ -282,7 +282,7 @@ resolvedToolbar() !== 'none') {
   tabindex="0"
   [attr.aria-roledescription]="t('roledescription')"
   [attr.aria-labelledby]="title() !== undefined ? id + '-title' : null"
-  [attr.aria-label]="title() === undefined ? t('roledescription') : null"
+  [attr.aria-label]="title() === undefined ? (ariaLabel() ?? t('roledescription')) : null"
   [attr.aria-describedby]="describedBy()"
   [attr.aria-busy]="loading() ? 'true' : null"
   (keydown)="onPlotKeyDown($event)"

@@ -23,9 +23,21 @@ import { SlGlyph, SlIcon } from '@slotted/angular/icon';
 import type { GlyphName } from '@slotted/angular/icon';
 
 import { injectAlertDefaults, SlAlertIdFactory } from './alert-defaults';
-import type { AlertLive, AlertReach, AlertTone, AlertVariant } from './alert-defaults';
+import type {
+  AlertActionsPlacement,
+  AlertLive,
+  AlertReach,
+  AlertTone,
+  AlertVariant,
+} from './alert-defaults';
 
-export type { AlertLive, AlertReach, AlertTone, AlertVariant } from './alert-defaults';
+export type {
+  AlertActionsPlacement,
+  AlertLive,
+  AlertReach,
+  AlertTone,
+  AlertVariant,
+} from './alert-defaults';
 
 /**
  * The glyph each tone draws, in its solid form: `specs/components/alert/contract.json`
@@ -118,6 +130,7 @@ export class SlAlertIcon {}
     '[attr.data-tone]': 'resolvedTone()',
     '[attr.data-variant]': 'resolvedVariant()',
     '[attr.data-reach]': 'resolvedReach()',
+    '[attr.data-actions-placement]': 'resolvedActionsPlacement()',
     '[attr.data-live]': 'resolvedLive()',
     '[attr.data-open]': "isOpen() ? '' : null",
     '[attr.hidden]': "isOpen() ? null : ''",
@@ -136,6 +149,8 @@ export class SlAlert {
   readonly reach = input<AlertReach | undefined>(undefined);
   /** Defaults to the provider, then to `off`. */
   readonly live = input<AlertLive | undefined>(undefined);
+  /** Defaults to `end` for a `page` banner and to `below` for every other reach. */
+  readonly actionsPlacement = input<AlertActionsPlacement | undefined>(undefined);
   /** Draws no mark at all, for a callout carrying its own artwork. */
   readonly hideIcon = input(false, { transform: booleanAttribute });
   /**
@@ -195,6 +210,9 @@ export class SlAlert {
   protected readonly suppliedIcon = contentChild(SlAlertIcon);
   protected readonly resolvedVariant = computed(() => this.variant() ?? this.defaults.variant);
   protected readonly resolvedReach = computed(() => this.reach() ?? this.defaults.reach);
+  protected readonly resolvedActionsPlacement = computed(
+    () => this.actionsPlacement() ?? (this.resolvedReach() === 'page' ? 'end' : 'below'),
+  );
   readonly resolvedLive = computed(() => this.live() ?? this.defaults.live);
 
   readonly isOpen = computed(() => this.open() ?? this.own() ?? this.defaultOpen());

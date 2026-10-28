@@ -20,6 +20,12 @@ export type AlertReach = 'inline' | 'section' | 'page';
  */
 export type AlertLive = 'off' | 'polite' | 'assertive';
 
+/**
+ * Where the actions stand: on a row under the words, or at the end of the
+ * words' own row once the box is 40rem wide.
+ */
+export type AlertActionsPlacement = 'below' | 'end';
+
 export interface AlertDefaults {
   live: AlertLive;
   reach: AlertReach;

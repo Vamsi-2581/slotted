@@ -81,6 +81,24 @@ describe('SlAlert', () => {
     expect(alert.getAttribute('tabindex')).toBe('-1');
   });
 
+  it('puts the actions at the end of a page banner and under the words of any other reach', () => {
+    const fixture = renderTemplate(`
+      <section slAlert>${MESSAGE}</section>
+      <section slAlert reach="page">${MESSAGE}</section>
+      <section slAlert actionsPlacement="end">${MESSAGE}</section>
+      <section slAlert reach="page" actionsPlacement="below">${MESSAGE}</section>`);
+    const alerts = [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('[data-ui="alert"]'),
+    ];
+
+    expect(alerts.map((alert) => alert.getAttribute('data-actions-placement'))).toEqual([
+      'below',
+      'end',
+      'end',
+      'below',
+    ]);
+  });
+
   /**
    * The decision the family exists to get right. MDN states that the `alert`
    * role "should only be used for text content, not interactive elements such

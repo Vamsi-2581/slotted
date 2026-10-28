@@ -10,7 +10,11 @@
     "tone": ["accent", "secondary", "info", "success", "warning", "danger"],
     "variant": ["soft", "outline", "solid"],
     "reach": ["inline", "section", "page"],
-    "live": ["off", "polite", "assertive"]
+    "live": ["off", "polite", "assertive"],
+    "actionsPlacement": ["below", "end"]
+  },
+  "resolution": {
+    "actionsPlacement": ["prop", "reach"]
   },
   "toneGlyphs": {
     "accent": "status-info",

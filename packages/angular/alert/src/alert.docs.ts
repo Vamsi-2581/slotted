@@ -146,13 +146,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'actions',
     title: 'What the message asks for',
-    note: 'The controls are the consumer’s own buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow.',
+    note: 'The controls are the consumer’s own buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow. actionsPlacement="end" puts them at the end of the message’s own line once the box is 40rem wide, which a page banner does by default.',
     snippet: defineSnippet({
       id: 'alert-angular-actions',
       language: 'angular',
       label: 'A message with something to do about it',
       source:
-        '<section slAlert tone="warning">\n  <div slAlertContent>\n    <div slAlertTitle>Sua assinatura expira em três dias</div>\n  </div>\n  <div slAlertActions>\n    <button slButton size="sm" tone="warning" type="button">Renovar</button>\n    <button slButton size="sm" tone="warning" variant="ghost" type="button">Ver planos</button>\n  </div>\n</section>',
+        '<section slAlert tone="warning">\n  <div slAlertContent>\n    <div slAlertTitle>Sua assinatura expira em três dias</div>\n  </div>\n  <div slAlertActions>\n    <button slButton size="sm" tone="warning" type="button">Renovar</button>\n    <button slButton size="sm" tone="warning" variant="ghost" type="button">Ver planos</button>\n  </div>\n</section>\n\n<section slAlert actionsPlacement="end">\n  <div slAlertContent>\n    <p slAlertDescription>A sugestão altera três linhas do plano.</p>\n  </div>\n  <div slAlertActions>\n    <button slButton size="sm" type="button">Aplicar</button>\n  </div>\n</section>',
     }),
   },
   {
@@ -247,6 +247,13 @@ export const ANGULAR_ALERT_DOCS = {
         'off',
         'slAlert',
         'Whether the text announces itself. polite writes role="status" on the slAlertContent element and assertive writes role="alert"; both imply aria-live and aria-atomic, and neither is written on the box',
+      ],
+      [
+        'actionsPlacement',
+        "'below' | 'end'",
+        "end for reach='page', below otherwise",
+        'slAlert',
+        'Where the actions stand. below puts them on a row under the words; end puts them at the end of the words’ line, before the dismiss control, once the box is 40rem wide, and under the words below that width',
       ],
       [
         'hideIcon',

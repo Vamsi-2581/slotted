@@ -23,6 +23,12 @@ export type AlertReach = 'inline' | 'section' | 'page';
 export type AlertLive = 'off' | 'polite' | 'assertive';
 
 /**
+ * Where the actions stand: on a row under the words, or at the end of the
+ * words' own row once the box is 40rem wide.
+ */
+export type AlertActionsPlacement = 'below' | 'end';
+
+/**
  * Why the message closed. `dismiss` is the control at its corner; `programmatic`
  * is the application asking. `escape` is deliberately absent: an alert is not a
  * dismissable layer, and one inside a dialog would swallow the dialog's Escape.
@@ -47,6 +53,7 @@ export interface AlertPartProps extends ComponentPropsWithRef<'div'> {
 }
 
 export interface AlertRootProps extends ComponentPropsWithRef<'section'> {
+  'data-actions-placement': AlertActionsPlacement;
   'data-live': AlertLive;
   'data-part': string;
   'data-reach': AlertReach;
@@ -87,6 +94,8 @@ export interface AlertProps extends Omit<ComponentPropsWithRef<'section'>, 'chil
   reach?: AlertReach | undefined;
   /** Defaults to the provider, then to `off`. */
   live?: AlertLive | undefined;
+  /** Defaults to `end` for a `page` banner and to `below` for every other reach. */
+  actionsPlacement?: AlertActionsPlacement | undefined;
   /** Draws no mark at all, for a callout carrying its own artwork. */
   hideIcon?: boolean | undefined;
   /** Replaces the tone's own mark, keeping its box, its size and its place. */

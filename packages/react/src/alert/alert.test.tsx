@@ -54,6 +54,30 @@ describe('Alert', () => {
     expect(alert).toHaveAttribute('data-open', '');
   });
 
+  it('puts the actions at the end of a page banner and under the words of any other reach', () => {
+    render(
+      <>
+        <Alert data-testid="section">
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>
+        <Alert data-testid="page" reach="page">
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>
+        <Alert actionsPlacement="end" data-testid="end">
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>
+        <Alert actionsPlacement="below" data-testid="below" reach="page">
+          <AlertContent>Pronto.</AlertContent>
+        </Alert>
+      </>,
+    );
+
+    expect(screen.getByTestId('section')).toHaveAttribute('data-actions-placement', 'below');
+    expect(screen.getByTestId('page')).toHaveAttribute('data-actions-placement', 'end');
+    expect(screen.getByTestId('end')).toHaveAttribute('data-actions-placement', 'end');
+    expect(screen.getByTestId('below')).toHaveAttribute('data-actions-placement', 'below');
+  });
+
   /**
    * The decision the family exists to get right. MDN states that the `alert`
    * role "should only be used for text content, not interactive elements such

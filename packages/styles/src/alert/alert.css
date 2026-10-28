@@ -692,35 +692,30 @@
   }
 
   /**
-   * A wide page banner. A system message is usually one line with one action,
-   * and stacking that action under it wastes the whole width the banner took;
-   * past this point the action rejoins the message's own line and the dismiss
-   * control moves out to a column of its own. Only `page` reflows: an alert
-   * beside a field group is narrow because the thing it is about is narrow,
-   * however wide the window is.
+   * Actions at the end. A system message is usually one line with one action,
+   * and stacking that action under it wastes the whole width the box took;
+   * past this point the actions rejoin the message's own line and the dismiss
+   * control moves out to a column of its own. A `page` banner does it unless
+   * `actionsPlacement` says `below`; any other reach only when it says `end`:
+   * an alert beside a field group is narrow because the thing it is about is
+   * narrow, however wide the window is. Under 40rem the actions go back under
+   * the words.
    */
   @container slotted-alert (min-width: 40rem) {
-    [data-ui-alert][data-reach='page'] > [data-part-actions] {
-      align-self: center;
+    /* In the mark's and the words' baseline group: the labels of the actions
+       stand on the first line of the message, and a one-line message is
+       centred on the controls beside it. */
+    [data-ui-alert][data-actions-placement='end'] > [data-part-actions] {
+      align-self: baseline;
       grid-column: 3;
       grid-row: 1;
       margin-inline-start: var(--_column-gap);
     }
 
-    /**
-     * Centred with the action beside it rather than pulled onto the title's
-     * line. On its own the control belongs at the message's first line; next to
-     * a control that is centred on the whole box, two marks at two heights read
-     * as an alignment mistake.
-     *
-     * Both block margins go, not only the top one: centring aligns the margin
-     * box, and the negative bottom margin left behind pulled the control's
-     * centre below the action's by half its overhang.
-     */
-    [data-ui-alert][data-reach='page'] > [data-part-dismiss] {
-      align-self: center;
+    /* The dismiss control keeps its place on the first line, beside the
+       actions that now stand on the same line. */
+    [data-ui-alert][data-actions-placement='end'] > [data-part-dismiss] {
       grid-column: 4;
-      margin-block: 0;
     }
   }
 

@@ -266,15 +266,18 @@ test('rounds every line box it sets to an even pixel', () => {
 });
 
 /**
- * A wide page banner centres the dismiss control beside its action. Centring
- * aligns the margin box, so both block margins are cleared, or the negative
- * bottom margin the control keeps on the title's line moves its centre.
+ * Actions at the end join the mark's and the words' baseline group, so their
+ * labels stand on the message's first line, and the dismiss control keeps its
+ * own place on that line, after them.
  */
-test('centres the page banner’s dismiss control on its whole box', () => {
+test('stands actions at the end on the message’s first line, before the dismiss control', () => {
   const wide = normalized.slice(normalized.indexOf('@container slotted-alert (min-width:40rem)'));
-  const dismiss =
-    wide.split(`${ui}[data-reach='page']>[data-part-dismiss]{`)[1]?.split('}')[0] ?? '';
-  assert.match(dismiss, /margin-block:0/);
+  const block = (part) =>
+    wide.split(`${ui}[data-actions-placement='end']>[data-part-${part}]{`)[1]?.split('}')[0] ?? '';
+  assert.match(block('actions'), /align-self:baseline/);
+  assert.match(block('actions'), /grid-column:3/);
+  assert.match(block('actions'), /grid-row:1/);
+  assert.equal(block('dismiss'), 'grid-column:4;');
 });
 
 /**

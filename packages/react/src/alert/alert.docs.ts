@@ -144,13 +144,13 @@ const scenes: ReferenceSceneMeta[] = [
   {
     id: 'actions',
     title: 'What the message asks for',
-    note: 'The controls are the consumer’s own Buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow.',
+    note: 'The controls are the consumer’s own Buttons, in a part outside the live region — a reader hearing the message is not read two button labels in the middle of it. They stack when the box is narrow. actionsPlacement="end" puts them at the end of the message’s own line once the box is 40rem wide, which a page banner does by default.',
     snippet: defineSnippet({
       id: 'alert-react-actions',
       language: 'tsx',
       label: 'A message with something to do about it',
       source:
-        '<Alert tone="warning">\n  <AlertContent>\n    <AlertTitle>Sua assinatura expira em três dias</AlertTitle>\n  </AlertContent>\n  <AlertActions>\n    <Button size="sm" tone="warning">\n      Renovar\n    </Button>\n    <Button size="sm" tone="warning" variant="ghost">\n      Ver planos\n    </Button>\n  </AlertActions>\n</Alert>;',
+        '<Alert tone="warning">\n  <AlertContent>\n    <AlertTitle>Sua assinatura expira em três dias</AlertTitle>\n  </AlertContent>\n  <AlertActions>\n    <Button size="sm" tone="warning">\n      Renovar\n    </Button>\n    <Button size="sm" tone="warning" variant="ghost">\n      Ver planos\n    </Button>\n  </AlertActions>\n</Alert>;\n\n<Alert actionsPlacement="end">\n  <AlertContent>\n    <AlertDescription>A sugestão altera três linhas do plano.</AlertDescription>\n  </AlertContent>\n  <AlertActions>\n    <Button size="sm">Aplicar</Button>\n  </AlertActions>\n</Alert>;',
     }),
   },
   {
@@ -245,6 +245,13 @@ export const REACT_ALERT_DOCS = {
         'off',
         'Alert',
         'Whether the text announces itself. polite writes role="status" on the content part and assertive writes role="alert"; both imply aria-live and aria-atomic, and neither is written on the box',
+      ],
+      [
+        'actionsPlacement',
+        "'below' | 'end'",
+        "end for reach='page', below otherwise",
+        'Alert',
+        'Where the actions stand. below puts them on a row under the words; end puts them at the end of the words’ line, before the dismiss control, once the box is 40rem wide, and under the words below that width',
       ],
       [
         'hideIcon',

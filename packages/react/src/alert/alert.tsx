@@ -53,6 +53,7 @@ const TONE_GLYPH: Record<AlertTone, GlyphName | null> = {
  * it goes back where it came from, and nowhere at all if it never came.
  */
 export function Alert({
+  actionsPlacement,
   children,
   defaultOpen = true,
   dismissible = false,
@@ -168,6 +169,8 @@ export function Alert({
         ) : null}
       </AlertProvider>
     ),
+    'data-actions-placement':
+      actionsPlacement ?? ((reach ?? defaults.reach) === 'page' ? 'end' : 'below'),
     'data-live': resolvedLive,
     'data-part': 'root',
     'data-reach': reach ?? defaults.reach,

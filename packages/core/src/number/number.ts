@@ -527,3 +527,34 @@ export function stepNumber({
         : nearest - step;
   return clamp(roundTo(next, decimals), low, high);
 }
+
+/** A stretch of a formatted figure, and whether it is drawn as the secondary part. */
+export interface FigureRun {
+  readonly text: string;
+  readonly secondary: boolean;
+}
+
+/** The parts that qualify the whole units a reader compares: symbol, decimals, suffix. */
+const SECONDARY_PARTS: ReadonlySet<string> = new Set([
+  'compact',
+  'currency',
+  'decimal',
+  'fraction',
+  'percentSign',
+  'unit',
+]);
+
+/**
+ * A formatted figure in runs, adjacent secondary parts merged, in the locale's
+ * own order and with its literals, so the runs join back to `format()`.
+ */
+export function figureRuns(parts: readonly Intl.NumberFormatPart[]): FigureRun[] {
+  const runs: { text: string; secondary: boolean }[] = [];
+  for (const part of parts) {
+    const secondary = SECONDARY_PARTS.has(part.type);
+    const last = runs.at(-1);
+    if (last && last.secondary === secondary) last.text += part.value;
+    else runs.push({ text: part.value, secondary });
+  }
+  return runs;
+}

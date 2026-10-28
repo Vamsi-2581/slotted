@@ -170,6 +170,44 @@ describe('SlStatCard', () => {
     expect(part('value')?.textContent?.replace(/\s+/g, '')).toBe('48KK');
   });
 
+  it.each([
+    ['pt-BR', 'BRL', ['R$', ',88']],
+    ['de-DE', 'EUR', [',88', '€']],
+  ])(
+    'draws the symbol and the decimals of a %s currency as units under emphasis whole',
+    (locale, currency, units) => {
+      const options = { style: 'currency', currency } as const;
+      @Component({
+        imports: [SlStatCard, SlStatCardFigure, SlStatCardValue],
+        template: `<div slStatCard [locale]="locale">
+          <div slStatCardFigure>
+            <span
+              slStatCardValue
+              emphasis="whole"
+              [formatOptions]="options"
+              [value]="1999.88"
+            ></span>
+          </div>
+        </div>`,
+      })
+      class Whole {
+        readonly locale = locale;
+        readonly options = options;
+      }
+      TestBed.configureTestingModule({ imports: [Whole] });
+      const fixture = TestBed.createComponent(Whole);
+      fixture.detectChanges();
+      const value = fixture.nativeElement.querySelector('[data-part="value"]') as HTMLElement;
+
+      expect(
+        [...value.querySelectorAll('[data-part-unit]')].map((unit) => unit.textContent),
+      ).toEqual(units);
+      const whole = [...value.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE);
+      expect(whole.map((node) => node.textContent).join('')).toContain('1.999');
+      expect(value.textContent).toBe(new Intl.NumberFormat(locale, options).format(1999.88));
+    },
+  );
+
   it('keeps its place with a dash and a message when the value is missing or failed', () => {
     const { fixture, host, root, part } = mount();
     host.status.set('empty');

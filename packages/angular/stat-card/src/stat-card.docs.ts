@@ -339,6 +339,13 @@ export const ANGULAR_STAT_CARD_DOCS = {
         'How a number is written. On the root, the default for the value and the delta',
       ],
       [
+        'emphasis',
+        "'none' | 'whole'",
+        "'none'",
+        'slStatCardValue',
+        'whole draws the symbol, the decimals and the suffix of a numeric value in the unit part, so the whole units carry the figure; the text is the formatter’s either way',
+      ],
+      [
         'messages',
         'Partial<StatCardMessages>',
         '—',

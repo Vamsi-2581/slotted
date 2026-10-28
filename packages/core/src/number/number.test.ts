@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { createNumberFormat, createScrub, decimalsOf, snapToStep, stepNumber } from './index';
+import {
+  createNumberFormat,
+  createScrub,
+  decimalsOf,
+  figureRuns,
+  snapToStep,
+  stepNumber,
+} from './index';
 
 describe('createNumberFormat', () => {
   it('writes the digits, the group and the decimal the locale writes', () => {
@@ -427,5 +434,28 @@ describe('createScrub', () => {
     const scrub = createScrub({ clientX: 100, rtl: true });
     expect(scrub.steps(96)).toBe(2);
     expect(scrub.steps(100)).toBe(-2);
+  });
+});
+
+describe('figureRuns', () => {
+  const runs = (locale: string, options: Intl.NumberFormatOptions, value: number) =>
+    figureRuns(new Intl.NumberFormat(locale, options).formatToParts(value));
+
+  it('sets the symbol and the decimals apart from the whole units, in the locale’s order', () => {
+    const brl = runs('pt-BR', { style: 'currency', currency: 'BRL' }, 1999.88);
+    expect(brl.filter((run) => run.secondary).map((run) => run.text)).toEqual(['R$', ',88']);
+    expect(brl.find((run) => !run.secondary)?.text.trim()).toBe('1.999');
+
+    const eur = runs('de-DE', { style: 'currency', currency: 'EUR' }, 1999.88);
+    expect(eur.at(-1)).toEqual({ text: '€', secondary: true });
+  });
+
+  it('joins back to the formatter’s own output', () => {
+    const options = { style: 'currency', currency: 'BRL' } as const;
+    expect(
+      runs('pt-BR', options, -1999.88)
+        .map((run) => run.text)
+        .join(''),
+    ).toBe(new Intl.NumberFormat('pt-BR', options).format(-1999.88));
   });
 });

@@ -13,6 +13,7 @@ export {
   SlStatCardUnit,
 } from './stat-card-parts';
 export { SlStatCardValue } from './stat-card-value';
+export type { StatCardValueEmphasis } from './stat-card-value';
 export {
   injectStatCardDefaults,
   provideStatCardDefaults,

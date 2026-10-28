@@ -42,5 +42,6 @@ export type {
   StatCardTrendProps,
   StatCardValueStatus,
   StatCardUnitProps,
+  StatCardValueEmphasis,
   StatCardValueProps,
 } from './stat-card.types';

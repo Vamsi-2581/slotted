@@ -172,6 +172,30 @@ describe('StatCard', () => {
     expect(second).toHaveTextContent('up +5%');
   });
 
+  it.each([
+    ['pt-BR', 'BRL', ['R$', ',88']],
+    ['de-DE', 'EUR', [',88', '€']],
+  ])(
+    'draws the symbol and the decimals of a %s currency as units under emphasis whole',
+    (locale, currency, units) => {
+      const options = { style: 'currency', currency } as const;
+      render(
+        <StatCard locale={locale}>
+          <StatCardFigure>
+            <StatCardValue emphasis="whole" formatOptions={options} value={1999.88} />
+          </StatCardFigure>
+        </StatCard>,
+      );
+      const value = part('value')!;
+      expect(
+        [...value.querySelectorAll('[data-part-unit]')].map((unit) => unit.textContent),
+      ).toEqual(units);
+      const whole = [...value.childNodes].filter((node) => node.nodeType === Node.TEXT_NODE);
+      expect(whole.map((node) => node.textContent).join('')).toContain('1.999');
+      expect(value.textContent).toBe(new Intl.NumberFormat(locale, options).format(1999.88));
+    },
+  );
+
   it('formats a numeric value with the card locale, and children win', () => {
     render(
       <StatCard locale="de-DE">

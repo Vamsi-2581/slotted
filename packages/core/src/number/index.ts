@@ -3,6 +3,7 @@ export {
   createScrub,
   decimalsOf,
   digitsOf,
+  figureRuns,
   SCRUB_SENSITIVITY,
   snapToStep,
   STEP_REPEAT_DELAY,
@@ -10,4 +11,4 @@ export {
   STEP_REPEAT_INTERVAL,
   stepNumber,
 } from './number';
-export type { NumberFormat, NumberFormatRequest, Scrub, StepRequest } from './number';
+export type { FigureRun, NumberFormat, NumberFormatRequest, Scrub, StepRequest } from './number';

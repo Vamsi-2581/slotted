@@ -103,8 +103,16 @@ export interface StatCardValueProps extends ComponentPropsWithRef<'span'> {
   /** A number, formatted with the card's locale and `formatOptions`; or the text as the consumer wrote it. `children` wins. */
   value?: number | string | undefined;
   formatOptions?: Intl.NumberFormatOptions;
+  /**
+   * `whole` draws a numeric value's symbol, decimals and suffix in the `unit`
+   * part, so the whole units carry the figure. `none`, the default, draws one
+   * run of text. The text is the formatter's either way.
+   */
+  emphasis?: StatCardValueEmphasis | undefined;
   render?: (props: StatCardPartProps<'span'>) => ReactNode;
 }
+
+export type StatCardValueEmphasis = 'none' | 'whole';
 
 export interface StatCardUnitProps extends ComponentPropsWithRef<'span'> {
   render?: (props: StatCardPartProps<'span'>) => ReactNode;

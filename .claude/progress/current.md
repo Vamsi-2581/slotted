@@ -45,6 +45,20 @@ Fila: #19–#26. Fatias: (1) menu #23 #24 #25; (2) form/field #22 #20 #21; (3) g
 - Limites conhecidos: um `id` dado pelo consumidor a `MenuItemLabel` dentro de um item descrito quebra `aria-labelledby`; o aside cobre 100 filhos diretos do form (`grid-row: 1 / span 100`).
 - Não feito: `pnpm demo:refresh`; exemplos visuais de `width` e `FormAside` nas páginas de docs (só props e partes documentadas).
 - Fila vazia (2026-10-29). CI `40874055360` (`4d1c5030`) falhou: `form.tokens.json` listava `--slotted-page-sticky-top`, valor escrito por script (`packages/styles/src/tokens.test.mjs`); corrigido no commit seguinte.
-- Release pedida pelo utilizador após CI verde. Eval `customer-form --runs 1`: atende (`docs/history/evals/2026-10-29-agent-docs-forms-layout.md`).
-- Próxima ação: CI verde no HEAD (`gh run list --branch main --limit 1`), depois `pnpm release --dry-run`, `pnpm release`, `gh run watch` do workflow `release.yml`, verificação dos seis pacotes com `npm view`.
+- CI `40880476655` (`2c701ebc`) verde.
+- Release `v0.1.0-beta.25` (`1098f697`): workflow `40885120929`; os seis pacotes em `latest` = `0.1.0-beta.25`.
+- Próxima ação: `pnpm demo:refresh` quando pedido; `gh issue list --label finding --state open` quando chegarem findings novos.
 - Problemas conhecidos: `pnpm typecheck` incremental emite falsos erros circulares em `*.stories.tsx`; apagar `node_modules/.cache/tsc/root.tsbuildinfo`. `stash@{0}` pertence ao utilizador.
+
+## Sessão 2026-10-29 (3)
+
+Fila: #27 #28 #29.
+
+| Item | Commit | Estado |
+| ---- | ------ | ------ |
+| #27 select: `className` e `style` de `SelectTrigger` na moldura (React; Angular já no host `sl-select`) | `89feab20` | push |
+| #28 #29 dismissable-layer: `CloseWatcher` onde existe (sem entrada de histórico, Escape com `preventDefault` enquanto houver watcher, recusa cria novo watcher); sem ele, `history.back()` decidido um task depois do fecho | `cf70f570` | push |
+
+- Testes: core dismissable-layer 50/50; React drawer unit 66/66, browser navegação 4/4 (2 falham no código anterior), select unit 74/74 e browser 1/1; React dialog/app-shell/action-sheet/alert-dialog/tour/popover/menu verdes (story tests de select expiram só sob carga, passam isolados); Angular dialog/drawer/app-shell/action-sheet 169/169; `pnpm check` verde.
+- Limites: router que empilha mais de um task depois do fecho ainda é desfeito (comentário `shortcut:` em `releaseEntry`); comportamento real de `CloseWatcher` + Escape `preventDefault` não verificado em Chrome Android.
+- Próxima ação: CI verde no HEAD, `pnpm release`, verificação `npm view` dos seis pacotes.

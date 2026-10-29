@@ -56,9 +56,46 @@ Fila: #27 #28 #29.
 
 | Item | Commit | Estado |
 | ---- | ------ | ------ |
-| #27 select: `className` e `style` de `SelectTrigger` na moldura (React; Angular já no host `sl-select`) | `89feab20` | push |
-| #28 #29 dismissable-layer: `CloseWatcher` onde existe (sem entrada de histórico, Escape com `preventDefault` enquanto houver watcher, recusa cria novo watcher); sem ele, `history.back()` decidido um task depois do fecho | `cf70f570` | push |
+| #27 select: `className` e `style` de `SelectTrigger` na moldura (React; Angular já no host `sl-select`) | `89feab20` | push, issue fechada |
+| #28 #29 dismissable-layer: `CloseWatcher` onde existe (sem entrada de histórico, Escape com `preventDefault` enquanto houver watcher, recusa cria novo watcher); sem ele, `history.back()` decidido um task depois do fecho | `cf70f570` | push, issues fechadas |
 
 - Testes: core dismissable-layer 50/50; React drawer unit 66/66, browser navegação 4/4 (2 falham no código anterior), select unit 74/74 e browser 1/1; React dialog/app-shell/action-sheet/alert-dialog/tour/popover/menu verdes (story tests de select expiram só sob carga, passam isolados); Angular dialog/drawer/app-shell/action-sheet 169/169; `pnpm check` verde.
 - Limites: router que empilha mais de um task depois do fecho ainda é desfeito (comentário `shortcut:` em `releaseEntry`); comportamento real de `CloseWatcher` + Escape `preventDefault` não verificado em Chrome Android.
-- Próxima ação: CI verde no HEAD, `pnpm release`, verificação `npm view` dos seis pacotes.
+- CI `40892331309` (`8aae0443`) verde.
+- Release `v0.1.0-beta.26` (`1aa4832c`): workflow `40896228832`; os seis pacotes em `latest` = `0.1.0-beta.26`.
+- Próxima ação: `pnpm demo:refresh` quando pedido; `gh issue list --label finding --state open` quando chegarem findings novos (fila vazia).
+
+## Sessão 2026-10-29 (4)
+
+Fila: #30–#36. Fatias: (1) headers #30 #31 #32; (2) chart #36; (3) drawer sheet #33 #34; (4) group-label sticky #35.
+
+| Item | Commit | Estado |
+| ---- | ------ | ------ |
+| #30 #31 #32 headers de drawer, popover e card sem a parte final: colunas por presença | `73276d29` | push |
+| #36 `--slotted-chart-table-surface`, `--slotted-chart-table-header-surface` | `0e02b2cc` | push |
+| #33 #34 viagem do sheet: camada do scrim animada com o painel (`data-sheet-travel`, `--slotted-drawer-sheet-dim`); footer compensado num fecho (`--slotted-drawer-sheet-travel`) | `ae5c8667` | push |
+| #35 group-label sticky (select, combobox, multi-select, menu); `revealWithin` lê scroll-padding; menu reutiliza-o | `8e2d316f` | push |
+
+- Testes: React drawer browser 27/27, card/popover/chart browser verdes, React unit drawer/card/popover/chart 156/156, core extent 61/61, Angular drawer 53/53, `pnpm check` verde (typecheck após apagar `node_modules/.cache/tsc/root.tsbuildinfo`).
+- Limites: footer compensado só em viagens para 0 (fecho); viagens entre paragens não verificadas. Dim de abertura implementado, sem teste próprio.
+- Release que inclua `0e02b2cc` corre `pnpm eval:agent-docs` (skill theme-app mudou).
+- #35: React browser group-label 9/9 (7 falham antes), menu/select browser 15/15, React unit 257/257, Angular select/combobox/multi-select/menu 176/176, styles 1722/1722, core collection 156/156, `pnpm check` verde.
+- Limites #35: com `chosen` presente o rótulo fica sob ele (mesma aresta); rótulo com duas linhas excede o scroll-padding; select com campo de pesquisa (`[data-part-list]`) sem teste browser.
+- Fila vazia (2026-10-29). Não feito: `pnpm demo:refresh`, release.
+- Avaliação `brand-theme` (theme-app) atende: `docs/history/evals/2026-10-29-agent-docs-chart-table.md`.
+- Próxima ação: `pnpm release` (beta.27) quando o CI do HEAD passar.
+
+## Sessão 2026-10-29 (5)
+
+Fila: #37 #38 #39.
+
+| Item | Commit | Estado |
+| ---- | ------ | ------ |
+| #37 dialog: `--slotted-dialog-measure-<sm,md,lg,xl>`; sm 32rem, md form-measure + 2 × padding inline (43rem), lg 48rem, xl 56rem | `5c11180d` | push |
+| #38 field: premissa incorreta (Field usa `--slotted-field-row-gap`, 6 px até às maiúsculas); fechada com comentário por decisão do utilizador | — | fechada |
+| #39 tooltip: seta com o fade do conteúdo | ver `git log` | push |
+
+- Testes: dialog browser 12/12, React dialog/alert-dialog unit 141/141, Angular dialog 56/56, contratos 2184/2184, test:docs verde; tooltip browser 1/1, React tooltip/field unit 79/79, Angular tooltip 25/25, styles raiz 270/270; `pnpm check` verde.
+- Nota: o documento de teste browser não carrega os tokens de movimento; um teste que lê `animation` define `--slotted-duration-*` e `--slotted-easing-*` à mão.
+- Avaliação `brand-theme` (theme-app) atende: `docs/history/evals/2026-10-29-agent-docs-chart-table.md`.
+- Próxima ação: `pnpm release` (beta.27) quando o CI do HEAD passar.

@@ -200,19 +200,24 @@
    * moves. In Chromium an ancestor with `opacity` below one is the Backdrop Root
    * of what it holds, so a `backdrop-filter` on the content blurs nothing until
    * the layer is opaque and then appears at once. The content's own opacity
-   * leaves its own filter drawn on every frame of the motion.
+   * leaves its own filter drawn on every frame of the motion. The arrow is
+   * the other part that paints, and it fades on the same rules, so the two
+   * read as one surface.
    */
-  [data-ui-tooltip] > [data-part-content] {
+  [data-ui-tooltip] > [data-part-content],
+  [data-ui-tooltip] > [data-part-arrow] {
     opacity: 0;
     transition: opacity var(--slotted-duration-short) var(--slotted-easing-exit);
   }
 
-  [data-ui-tooltip][data-open] > [data-part-content] {
+  [data-ui-tooltip][data-open] > [data-part-content],
+  [data-ui-tooltip][data-open] > [data-part-arrow] {
     opacity: 1;
     transition: none;
   }
 
-  [data-ui-tooltip][data-open][data-positioned] > [data-part-content] {
+  [data-ui-tooltip][data-open][data-positioned] > [data-part-content],
+  [data-ui-tooltip][data-open][data-positioned] > [data-part-arrow] {
     animation: slotted-tooltip-fade var(--slotted-duration-medium) var(--slotted-easing-enter);
   }
 

@@ -2,6 +2,16 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.27 — 2026-10-29
+
+- docs(evals): theme-app atende após os tokens da tabela do chart; checkpoint da fila de findings
+- fix(tooltip): a seta desvanece com o conteúdo na abertura e no fecho
+- feat(dialog): um token de medida por tamanho; sm, md e lg mais largos
+- feat(select,combobox,multi-select,menu): rótulo de grupo fica no topo enquanto o grupo está à vista
+- fix(drawer): scrim e footer do bottom sheet acompanham a viagem programática
+- feat(tokens): superfícies próprias da vista de tabela do chart
+- fix(styles): header de drawer, popover e card sem a parte final não guarda coluna vazia
+
 ## 0.1.0-beta.26 — 2026-10-29
 
 - chore(progress): checkpoint da sessão (#27 #28 #29)

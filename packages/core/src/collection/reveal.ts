@@ -5,6 +5,9 @@
  * `scrollIntoView` scrolls every ancestor too, and on the first open it runs
  * before the popup is positioned — a control far down a page sent the page to
  * its top.
+ *
+ * The box's `scroll-padding` is kept clear, as `scrollIntoView` keeps it: a
+ * group label stuck to the top of the list covers that much of it.
  */
 export function revealWithin(option: HTMLElement, surface: HTMLElement): void {
   let box: HTMLElement = surface;
@@ -20,8 +23,11 @@ export function revealWithin(option: HTMLElement, surface: HTMLElement): void {
     }
   }
   const row = option.getBoundingClientRect();
-  const top = box.getBoundingClientRect().top + box.clientTop;
-  const bottom = top + box.clientHeight;
+  const style = getComputedStyle(box);
+  const edge = box.getBoundingClientRect().top + box.clientTop;
+  /* `auto` reads as no padding. */
+  const top = edge + (Number.parseFloat(style.scrollPaddingBlockStart) || 0);
+  const bottom = edge + box.clientHeight - (Number.parseFloat(style.scrollPaddingBlockEnd) || 0);
   if (row.top < top) box.scrollTop -= top - row.top;
   else if (row.bottom > bottom) box.scrollTop += Math.min(row.bottom - bottom, row.top - top);
 }

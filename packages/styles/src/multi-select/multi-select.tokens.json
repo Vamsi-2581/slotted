@@ -71,6 +71,7 @@
   "--slotted-multi-select-disabled-color",
   "--slotted-multi-select-field-basis",
   "--slotted-multi-select-field-min",
+  "--slotted-multi-select-group-label-height",
   "--slotted-multi-select-highlight",
   "--slotted-multi-select-highlight-active",
   "--slotted-multi-select-highlight-ring",

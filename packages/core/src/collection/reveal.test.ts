@@ -41,6 +41,15 @@ describe('revealWithin', () => {
     expect(list.scrollTop).toBe(50);
   });
 
+  it('keeps the box’s scroll padding clear', () => {
+    const { surface, list, option } = popup();
+    list.style.setProperty('scroll-padding-block-start', '24px');
+    list.scrollTop = 80;
+    option.getBoundingClientRect = () => box(210, 30);
+    revealWithin(option, surface);
+    expect(list.scrollTop).toBe(66);
+  });
+
   it('scrolls the surface itself when nothing between scrolls', () => {
     const surface = document.createElement('div');
     const option = document.createElement('div');

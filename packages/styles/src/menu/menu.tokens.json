@@ -34,6 +34,7 @@
   "--slotted-menu-backdrop-filter",
   "--slotted-menu-border-color",
   "--slotted-menu-gap",
+  "--slotted-menu-group-label-height",
   "--slotted-menu-highlight",
   "--slotted-menu-highlight-active",
   "--slotted-menu-item-radius",

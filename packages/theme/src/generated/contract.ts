@@ -3137,6 +3137,7 @@ export type ComponentToken =
   | '--slotted-combobox-disabled-background'
   | '--slotted-combobox-disabled-border-color'
   | '--slotted-combobox-disabled-color'
+  | '--slotted-combobox-group-label-height'
   | '--slotted-combobox-highlight'
   | '--slotted-combobox-highlight-active'
   | '--slotted-combobox-highlight-ring'
@@ -3863,6 +3864,7 @@ export type ComponentToken =
   | '--slotted-menu-backdrop-filter'
   | '--slotted-menu-border-color'
   | '--slotted-menu-gap'
+  | '--slotted-menu-group-label-height'
   | '--slotted-menu-highlight'
   | '--slotted-menu-highlight-active'
   | '--slotted-menu-item-radius'
@@ -3926,6 +3928,7 @@ export type ComponentToken =
   | '--slotted-multi-select-disabled-color'
   | '--slotted-multi-select-field-basis'
   | '--slotted-multi-select-field-min'
+  | '--slotted-multi-select-group-label-height'
   | '--slotted-multi-select-highlight'
   | '--slotted-multi-select-highlight-active'
   | '--slotted-multi-select-highlight-ring'
@@ -4320,6 +4323,7 @@ export type ComponentToken =
   | '--slotted-select-disabled-background'
   | '--slotted-select-disabled-border-color'
   | '--slotted-select-disabled-color'
+  | '--slotted-select-group-label-height'
   | '--slotted-select-highlight'
   | '--slotted-select-highlight-active'
   | '--slotted-select-highlight-ring'
@@ -5416,6 +5420,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-combobox-disabled-background",
   "--slotted-combobox-disabled-border-color",
   "--slotted-combobox-disabled-color",
+  "--slotted-combobox-group-label-height",
   "--slotted-combobox-highlight",
   "--slotted-combobox-highlight-active",
   "--slotted-combobox-highlight-ring",
@@ -6142,6 +6147,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-menu-backdrop-filter",
   "--slotted-menu-border-color",
   "--slotted-menu-gap",
+  "--slotted-menu-group-label-height",
   "--slotted-menu-highlight",
   "--slotted-menu-highlight-active",
   "--slotted-menu-item-radius",
@@ -6205,6 +6211,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-multi-select-disabled-color",
   "--slotted-multi-select-field-basis",
   "--slotted-multi-select-field-min",
+  "--slotted-multi-select-group-label-height",
   "--slotted-multi-select-highlight",
   "--slotted-multi-select-highlight-active",
   "--slotted-multi-select-highlight-ring",
@@ -6599,6 +6606,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-select-disabled-background",
   "--slotted-select-disabled-border-color",
   "--slotted-select-disabled-color",
+  "--slotted-select-group-label-height",
   "--slotted-select-highlight",
   "--slotted-select-highlight-active",
   "--slotted-select-highlight-ring",

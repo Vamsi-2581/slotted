@@ -1119,7 +1119,8 @@
     padding-block: var(--_inset-block);
     padding-inline: var(--_inset-inline);
     position: sticky;
-    z-index: 1;
+    /* Above a group label stuck to the same edge. */
+    z-index: 2;
   }
 
   /* ── Groups ───────────────────────────────────────────────────────────── */
@@ -1143,14 +1144,50 @@
     display: none;
   }
 
+  /**
+   * A group's label stays at the top of the list while its group is in view.
+   * The group is the label's containing block, so the next label pushes it out
+   * and a group scrolled past takes its label with it. It sticks to the
+   * scrollport's edge rather than the padding's, on the surface's ground, above
+   * the items and below the parts the surface draws over them.
+   */
   [data-ui-multi-select] [data-part-group-label] {
+    background: var(--_surface);
+    box-sizing: border-box;
     color: var(--_muted);
     font-size: var(--_secondary-font-size);
     font-weight: var(--slotted-font-weight-semibold, 600);
     grid-column: 1 / -1;
+    inset-block-start: calc(-1 * var(--_inset-block));
     line-height: var(--slotted-line-height-sm, 1.45);
+    min-block-size: var(--_group-label-height);
     padding-block: var(--slotted-space-2, 0.25rem);
     padding-inline: var(--_item-inset);
+    position: sticky;
+    z-index: 1;
+  }
+
+  @media (forced-colors: active) {
+    [data-ui-multi-select] [data-part-group-label] {
+      background: Canvas;
+    }
+  }
+
+  /**
+   * The label's height, which the list keeps clear above an item the keys
+   * bring into view (`revealWithin` reads the scroll padding), so the item is
+   * never drawn under a label stuck to the top.
+   */
+  [data-ui-multi-select] > [data-part-content]:has([data-part-group-label]) {
+    --_group-label-height: var(
+      --slotted-multi-select-group-label-height,
+      calc(
+        var(--_secondary-font-size) * var(--slotted-line-height-sm, 1.45) + 2 *
+          var(--slotted-space-2, 0.25rem)
+      )
+    );
+
+    scroll-padding-block-start: var(--_group-label-height);
   }
 
   /* ── Options ──────────────────────────────────────────────────────────── */

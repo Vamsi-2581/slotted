@@ -69,6 +69,7 @@
   "--slotted-select-disabled-background",
   "--slotted-select-disabled-border-color",
   "--slotted-select-disabled-color",
+  "--slotted-select-group-label-height",
   "--slotted-select-highlight",
   "--slotted-select-highlight-active",
   "--slotted-select-highlight-ring",

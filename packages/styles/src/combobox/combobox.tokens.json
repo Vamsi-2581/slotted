@@ -23,6 +23,7 @@
   "--slotted-combobox-disabled-background",
   "--slotted-combobox-disabled-border-color",
   "--slotted-combobox-disabled-color",
+  "--slotted-combobox-group-label-height",
   "--slotted-combobox-highlight",
   "--slotted-combobox-highlight-active",
   "--slotted-combobox-highlight-ring",

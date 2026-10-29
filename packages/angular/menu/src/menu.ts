@@ -1,3 +1,4 @@
+import { revealWithin } from '@slotted/core/collection';
 import { createDismissableLayer } from '@slotted/core/dismissable-layer';
 import type { DismissableLayerHandle } from '@slotted/core/dismissable-layer';
 import { createArrowNavigation, tabbables } from '@slotted/core/focus';
@@ -69,11 +70,7 @@ const enabled = (item: HTMLElement) => item.dataset['disabled'] === undefined;
 const reveal = (item: HTMLElement) => {
   item.focus({ preventScroll: true });
   const surface = item.closest<HTMLElement>("[data-part='content']");
-  if (surface === null) return;
-  const box = surface.getBoundingClientRect();
-  const own = item.getBoundingClientRect();
-  if (own.top < box.top) surface.scrollTop -= box.top - own.top;
-  else if (own.bottom > box.bottom) surface.scrollTop += own.bottom - box.bottom;
+  if (surface !== null) revealWithin(item, surface);
 };
 
 /**

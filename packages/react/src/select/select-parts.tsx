@@ -92,7 +92,14 @@ function attach<T>(node: T, ...refs: (Ref<T> | undefined)[]) {
  * itself carries the role, the wiring and every key in the pattern, and
  * replacing it would replace all three.
  */
-export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectTriggerProps) {
+export function SelectTrigger({
+  children,
+  className,
+  ref,
+  render,
+  style,
+  ...nativeProps
+}: SelectTriggerProps) {
   const select = useSelect();
   const field = useField();
   const register = field?.registerControl;
@@ -337,7 +344,10 @@ export function SelectTrigger({ children, ref, render, ...nativeProps }: SelectT
   const showClear =
     select.clearable && select.selection.length > 0 && !select.disabled && !select.readOnly;
 
+  /* className and style size the frame, the element that draws the control, as on TextField. */
   const rootProps: SelectTriggerRootProps = {
+    className,
+    style,
     'data-part': 'root',
     ...selectorKeyProps('part', 'root'),
     'data-size': select.size,

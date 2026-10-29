@@ -1,6 +1,6 @@
 import type { PartialMessages, SelectMessages } from '@slotted/core/i18n';
 import type { ChangeRequest } from '@slotted/core/state';
-import type { ComponentPropsWithRef, HTMLAttributes, ReactNode, Ref } from 'react';
+import type { ComponentPropsWithRef, CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 
 export type SelectSize = 'sm' | 'md' | 'lg';
 export type SelectVariant = 'outline' | 'subtle' | 'plain';
@@ -220,9 +220,13 @@ export interface SelectTriggerProps extends Omit<
   'children' | 'value'
 > {
   children?: ReactNode;
+  /** Lands on the frame that draws the control, so a width given here sizes the control. */
+  className?: string;
   ref?: Ref<HTMLButtonElement>;
   /** Replaces the frame around the control, not the control itself. */
   render?: (props: SelectTriggerRootProps) => ReactNode;
+  /** Lands on the frame, with `className`. */
+  style?: CSSProperties;
 }
 
 export interface SelectValueProps extends Omit<ComponentPropsWithRef<'span'>, 'children'> {

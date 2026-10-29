@@ -2,6 +2,18 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.25 — 2026-10-29
+
+- fix(form): tokens.json deixa de listar --slotted-page-sticky-top, valor escrito em tempo de execução
+- fix(select): um controlo fechado nomeia a opção cujo valor é a string vazia
+- docs(guidelines): forms.md cobre a disposição de um form (FM-18 a FM-24)
+- feat(form, field): coluna de campos medida, aside, passo entre secções e largura do campo
+- fix(menu): o rótulo nomeia o item descrito; partes escritas como filhos ficam na grelha
+
+### Guidelines
+
+- Added: FM-18, FM-19, FM-20, FM-21, FM-22, FM-23, FM-24
+
 ## 0.1.0-beta.24 — 2026-10-29
 
 - test(angular): um arquivo espera a travessia do histórico de uma camada fechada antes do teardown

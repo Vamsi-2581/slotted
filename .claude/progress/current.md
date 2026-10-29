@@ -110,10 +110,10 @@ Fila: #40 #41.
 
 | Item | Commit | Estado |
 | ---- | ------ | ------ |
-| #41 field/field-group: espaço em texto antes do mark (React `{' '}`, Angular `&ngsp;`); `--slotted-field-mark-gap` e `--slotted-field-group-mark-gap` com padrão 0 (o espaço é a distância); harness com o espaço | ver `git log` | commit local, sem push |
-| #40 field-group: `kind: 'question' \| 'section'` (padrão `question`); `section` não desenha necessidade na legenda e não altera o `necessity` dado aos campos; contrato `defaults.kind`; forms.md FM (tópicos com `kind` `section`) | ver `git log` | commit local, sem push |
+| #41 field/field-group: espaço em texto antes do mark (React `{' '}`, Angular `&ngsp;`); `--slotted-field-mark-gap` e `--slotted-field-group-mark-gap` com padrão 0 (o espaço é a distância); harness com o espaço | `8d810e72` | push |
+| #40 field-group: `kind: 'question' \| 'section'` (padrão `question`); `section` não desenha necessidade na legenda e não altera o `necessity` dado aos campos; contrato `defaults.kind`; forms.md FM (tópicos com `kind` `section`) | `8d810e72` | push |
 
 - Testes: React unit field/field-group/checkbox/checkbox-group/radio-group/switch/text-field 206/206 (3 falham antes), Angular field/field-group/checkbox/checkbox-group/radio-group 134/134 (3 falham antes), styles 105/105, contratos field/field-group 41/41, agent-docs 137/137, `pnpm check` verde.
 - Limites: distância visual label→mark passa de 0.25rem a um espaço da fonte do label (≈0.25em); sem captura visual. Nome acessível verificado só em jsdom e textContent, não no Chrome real.
-- Release que inclua este commit corre `pnpm eval:agent-docs` (forms.md mudou).
-- Próxima ação: `git push` após aprovação; depois `pnpm demo:refresh` quando pedido.
+- Avaliação `compose-screen` (customer-form) atende: `docs/history/evals/2026-10-29-agent-docs-forms-section-kind.md`.
+- Próxima ação: `pnpm release` (beta.28) após CI verde no HEAD.

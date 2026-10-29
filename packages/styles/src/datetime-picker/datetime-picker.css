@@ -304,13 +304,24 @@
    * guess at and cannot be wrong at a width nobody tested.
    */
   [data-ui-datetime-picker] [data-part-content] {
+    --_content-radius: var(--slotted-datetime-picker-content-radius, var(--slotted-radius-lg, 8px));
+    --_content-padding: var(
+      --slotted-datetime-picker-content-padding,
+      var(--slotted-space-3, 0.375rem)
+    );
+    /* Concentric with the panel: its radius less the inset, floored at 0. */
+    --_option-radius: var(
+      --slotted-datetime-picker-option-radius,
+      max(0px, calc(var(--_content-radius) - var(--_content-padding)))
+    );
+
     background-color: var(--slotted-datetime-picker-surface, var(--slotted-surface-raised, Canvas));
     border: var(--slotted-border-width-thin, 1px) solid
       var(
         --slotted-datetime-picker-content-border-color,
         var(--slotted-border-subtle, ButtonBorder)
       );
-    border-radius: var(--slotted-datetime-picker-content-radius, var(--slotted-radius-lg, 8px));
+    border-radius: var(--_content-radius);
     box-shadow: var(--slotted-datetime-picker-content-shadow, var(--slotted-shadow-md));
     box-sizing: border-box;
     color: var(--slotted-datetime-picker-content-color, var(--slotted-text, CanvasText));
@@ -332,7 +343,7 @@
     grid-template-columns: minmax(0, 1fr);
     inline-size: auto;
     max-inline-size: min(34rem, var(--slotted-positioner-available-width, 34rem));
-    padding: var(--slotted-datetime-picker-content-padding, var(--slotted-space-3, 0.375rem));
+    padding: var(--_content-padding);
     /* The layer above gave up the pointer; the surface takes it back. */
     pointer-events: auto;
   }
@@ -650,7 +661,7 @@
   [data-ui-datetime-picker] [data-part-option] {
     align-items: center;
     background-color: transparent;
-    border-radius: var(--slotted-datetime-picker-option-radius, var(--slotted-radius-sm, 4px));
+    border-radius: var(--_option-radius);
     color: inherit;
     cursor: pointer;
     display: flex;

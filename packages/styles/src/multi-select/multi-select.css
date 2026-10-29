@@ -889,7 +889,11 @@
     );
     --_item-inset: var(--slotted-control-padding-inline-md, 0.8125rem);
     --_item-height: var(--slotted-control-height-md, 34px);
-    --_item-radius: var(--slotted-multi-select-item-radius, var(--slotted-control-radius));
+    /* Concentric with the panel: its radius less the inset, floored at 0. */
+    --_item-radius: var(
+      --slotted-multi-select-item-radius,
+      max(0px, calc(var(--_radius) - var(--_inset-inline)))
+    );
     --_content-font-size: var(--slotted-control-font-size-md, 13px);
     --_secondary-font-size: var(--slotted-control-font-size-sm, 12px);
     --_content-icon-size: var(--slotted-control-icon-size-md, 16px);

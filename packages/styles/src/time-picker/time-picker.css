@@ -306,10 +306,21 @@
    * does not stretch one column of times across a page.
    */
   [data-ui-time-picker] [data-part-content] {
+    --_content-radius: var(--slotted-time-picker-content-radius, var(--slotted-radius-lg, 8px));
+    --_content-padding: var(
+      --slotted-time-picker-content-padding,
+      var(--slotted-space-3, 0.375rem)
+    );
+    /* Concentric with the panel: its radius less the inset, floored at 0. */
+    --_option-radius: var(
+      --slotted-time-picker-option-radius,
+      max(0px, calc(var(--_content-radius) - var(--_content-padding)))
+    );
+
     background-color: var(--slotted-time-picker-surface, var(--slotted-surface-raised, Canvas));
     border: var(--slotted-border-width-thin, 1px) solid
       var(--slotted-time-picker-content-border-color, var(--slotted-border-subtle, ButtonBorder));
-    border-radius: var(--slotted-time-picker-content-radius, var(--slotted-radius-lg, 8px));
+    border-radius: var(--_content-radius);
     box-shadow: var(--slotted-time-picker-content-shadow, var(--slotted-shadow-md));
     box-sizing: border-box;
     color: var(--slotted-time-picker-content-color, var(--slotted-text, CanvasText));
@@ -349,7 +360,7 @@
       var(--slotted-time-picker-content-min-inline-size, 11rem),
       min(var(--slotted-positioner-anchor-width, 11rem), 20rem)
     );
-    padding: var(--slotted-time-picker-content-padding, var(--slotted-space-3, 0.375rem));
+    padding: var(--_content-padding);
     /* The layer above gave up the pointer; the surface takes it back. */
     pointer-events: auto;
   }
@@ -386,7 +397,7 @@
     appearance: none;
     background-color: transparent;
     border: 0;
-    border-radius: var(--slotted-time-picker-option-radius, var(--slotted-radius-sm, 4px));
+    border-radius: var(--_option-radius);
     color: var(--slotted-time-picker-now-color, var(--slotted-tone-accent-text));
     cursor: pointer;
     font: inherit;
@@ -471,7 +482,7 @@
   [data-ui-time-picker] [data-part-option] {
     align-items: center;
     background-color: transparent;
-    border-radius: var(--slotted-time-picker-option-radius, var(--slotted-radius-sm, 4px));
+    border-radius: var(--_option-radius);
     color: inherit;
     cursor: pointer;
     display: flex;

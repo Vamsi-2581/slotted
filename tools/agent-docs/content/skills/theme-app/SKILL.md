@@ -81,7 +81,10 @@ has.
    `--slotted-detail-panel-footer-background` with
    `--slotted-detail-panel-footer-backdrop-filter`, and a drawer's footer
    `--slotted-drawer-footer-surface` with
-   `--slotted-drawer-footer-backdrop-filter`, and a dialog's panel
+   `--slotted-drawer-footer-backdrop-filter`, and a bottom sheet's sticky
+   header and resizer, once content scrolls under them,
+   `--slotted-drawer-header-surface` with
+   `--slotted-drawer-header-backdrop-filter`, and a dialog's panel
    `--slotted-dialog-surface` with `--slotted-dialog-backdrop-filter`. The
    chart's tooltip, menu and help read one filter,
    `--slotted-chart-overlay-backdrop-filter`. A chart's table view takes

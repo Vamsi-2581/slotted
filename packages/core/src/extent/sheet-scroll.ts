@@ -244,13 +244,24 @@ export function attachSheetScroll(
    * Content past the top is read with the snap off (`data-sheet-content`):
    * with it on, any layout — a render, a row arriving — re-snaps the panel to
    * its start and throws the reader back to the top of the list. The snap is
-   * back the moment the sheet is below the top again.
+   * back the moment the sheet is below the top again. The sticky resizer and
+   * header have content under them from then on (`data-stuck`), and paint a
+   * surface of their own only then.
    */
   let reading = false;
   const read = (on: boolean) => {
     if (on === reading) return;
     reading = on;
     layer.toggleAttribute('data-sheet-content', on);
+    stick(on);
+  };
+  /* shortcut: a header or resizer mounted while content is read stays unmarked until the next
+     crossing; observe the panel's children when a consumer mounts one there. */
+  const stick = (on: boolean) => {
+    for (const part of panel.querySelectorAll(
+      ':scope > [data-part="resizer"], :scope > [data-part="header"]',
+    ))
+      part.toggleAttribute('data-stuck', on);
   };
 
   /**
@@ -591,6 +602,7 @@ export function attachSheetScroll(
       layer.removeAttribute('data-top-stop');
       layer.removeAttribute('data-sheet-scrolls');
       layer.removeAttribute('data-sheet-content');
+      stick(false);
       layer.removeAttribute('data-sheet-anchored');
       layer.removeAttribute('data-sheet-ready');
     },

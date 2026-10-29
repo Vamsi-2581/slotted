@@ -1520,7 +1520,6 @@
     position: sticky;
     inset-block-start: 0;
     z-index: 2;
-    background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
   }
 
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
@@ -1529,7 +1528,33 @@
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
-    background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
+  }
+
+  /**
+   * At rest the panel's own surface is behind the resizer and the header, and
+   * a second coat of a translucent surface read as a darker band. They paint
+   * one only once the content passes under them (`data-stuck`), in tokens of
+   * their own, as the footer has: a frosted theme gives them a blur and a
+   * lighter fill there.
+   */
+  [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
+    > [data-part-panel]
+    > :is([data-part-resizer], [data-part-header])[data-stuck] {
+    background: var(
+      --slotted-drawer-header-surface,
+      var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas))
+    );
+    -webkit-backdrop-filter: var(--slotted-drawer-header-backdrop-filter, none);
+    backdrop-filter: var(--slotted-drawer-header-backdrop-filter, none);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']
+      > [data-part-panel]
+      > :is([data-part-resizer], [data-part-header])[data-stuck] {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
   }
 
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag='panel']

@@ -3574,6 +3574,8 @@ export type ComponentToken =
   | '--slotted-drawer-extent-xl'
   | '--slotted-drawer-footer-backdrop-filter'
   | '--slotted-drawer-footer-surface'
+  | '--slotted-drawer-header-backdrop-filter'
+  | '--slotted-drawer-header-surface'
   | '--slotted-drawer-radius'
   | '--slotted-drawer-radius-expanded'
   | '--slotted-drawer-resizer-line-active-color'
@@ -5863,6 +5865,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-drawer-extent-xl",
   "--slotted-drawer-footer-backdrop-filter",
   "--slotted-drawer-footer-surface",
+  "--slotted-drawer-header-backdrop-filter",
+  "--slotted-drawer-header-surface",
   "--slotted-drawer-radius",
   "--slotted-drawer-radius-expanded",
   "--slotted-drawer-resizer-line-active-color",

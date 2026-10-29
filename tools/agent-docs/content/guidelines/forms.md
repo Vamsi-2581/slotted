@@ -18,8 +18,26 @@ triggers:
     read-only,
     permission,
     conflict,
+    layout,
+    section,
+    width,
   ]
-families: [form, field, text-field, select, currency-field, checkbox, section, grid, page-header]
+families:
+  [
+    form,
+    field,
+    field-group,
+    text-field,
+    number-field,
+    select,
+    currency-field,
+    checkbox,
+    radio-group,
+    segmented-control,
+    section,
+    grid,
+    page-header,
+  ]
 ---
 
 # Forms
@@ -231,3 +249,73 @@ Do: Write one `field` after another inside the `form`; set `--slotted-form-field
 Don't: Write a margin or a spacer element between two fields, or wrap each field in an element of the page's own that breaks the run of fields the form spaces.
 Seen in: equori · forms written from the minimal example rendered their fields touching · corrected
 Check: Two consecutive fields of a form stand apart by the form's step, and no field or wrapper between them carries its own margin.
+
+### FM-18 · One column at a bounded measure
+
+Level: SHOULD
+Applies to: every form a page draws, on any page width
+Rule: The fields of a form stand in one column no wider than `--slotted-form-measure` (40rem); a field never spans the page's whole measure, and the page's own width does not widen the column.
+Why: A reader goes down one column without losing their place, and a field as wide as an 80rem page puts the label and the end of the answer a head turn apart (Baymard, "Avoid Multi-Column Forms"; CXL, "Form Field Usability").
+Do: Write the fields as direct children of `form`, which holds them at the measure; let the page keep its own width for the header and the footer.
+Don't: Set the page to `measure` to narrow the form, widen a field past the measure with a style of the page's own, or wrap the fields in a grid that fills the page.
+Check: In a page 80rem wide, no control of the form is wider than 40rem.
+
+### FM-19 · Two fields share a row only when they are one answer
+
+Level: SHOULD
+Applies to: a row of a form that holds more than one field
+Rule: Two fields stand side by side only when together they answer one question — a start and an end, a frequency and its interval, an amount and its unit — in a `field-group` whose `orientation` is `horizontal`; unrelated fields never share a row to fill width.
+Why: Two unrelated fields side by side make the reading order zig-zag, and a reader skips the field on the right (Baymard, "Avoid Multi-Column Forms").
+Do: Write the pair in one horizontal `field-group` whose legend names the answer they make together; keep every other field on a row of its own.
+Don't: Write a two-column `grid` of fields to fill the width, or pair a name with a date because both are short.
+Check: Every row with two or more fields is one `field-group`, and its legend names one answer the fields make together.
+
+### FM-20 · A field's width says what it expects
+
+Level: SHOULD
+Applies to: every field whose answer has a known length
+Rule: A field's `width` follows its expected answer: `short` for an integer of up to four digits, `medium` for an amount, a code or a choice among short words, `full` (the default) for free text, a name or a picker of records.
+Why: The width of a control is a cue to the length of its answer, and a two-digit field as wide as a description reads as a request for a sentence (Baymard, "Form Field Usability: Matching User Expectations").
+Do: Set `width` to `short` on a day of the month or an interval, and to `medium` on an amount or a currency; change `--slotted-field-width-short` and `--slotted-field-width-medium` on the theme to change the steps for every form.
+Don't: Write a class or a style that sizes one field, or leave a numeric field of two digits at full width.
+Check: No field whose answer is an integer of up to four digits renders a control wider than `--slotted-field-width-short`.
+
+### FM-21 · Sections group a topic
+
+Level: SHOULD
+Applies to: a form with more than six fields, or with two or more topics
+Rule: The fields are split by topic into `field-group`s, each with a legend that names the topic; consecutive groups stand apart by `--slotted-form-section-gap`, a step larger than the gap between two fields.
+Why: A long form whose fields all stand at one distance shows no structure, and a reader cannot tell where one topic ends.
+Do: Write each topic as a `field-group` with a `legend`, the groups as direct children of `form`; set `--slotted-form-section-gap` on the theme to change the step.
+Don't: Write a margin, a heading or a separator of the page's own between two groups, or hold seven fields in one run with no group.
+Check: A form with more than six fields holds at least two `field-group`s, and two consecutive groups stand further apart than two fields of one group.
+
+### FM-22 · Every set of choices is a question
+
+Level: MUST
+Applies to: a `segmented-control`, a `radio-group` or a set of checkboxes in a form
+Rule: A set of choices is a `field-group` whose legend asks the question the choices answer.
+Why: A set of options with no question above it is announced as a list of words, and a reader who sees it out of order cannot tell what is being chosen.
+Do: Write the legend as the question — "How often does it run?" — and the options as its answers.
+Don't: Leave a segmented control or a radio set with no legend, or put the question in a placeholder or a description under the options.
+Check: Every segmented control, radio group and checkbox set of the form has a `field-group` legend as its accessible name.
+
+### FM-23 · Necessity is said once, the same way
+
+Level: SHOULD
+Applies to: every application whose forms hold required and optional fields
+Rule: One `necessity` holds for the whole application, set once through the field defaults provider; `optional` is preferred, which marks the fields a reader may skip and says nothing on the rest.
+Why: A form that marks some fields with an asterisk and others with a word asks the reader to learn two conventions, and in a form where most fields are required the asterisk on every one says nothing (Adam Silver, "Don't mark required fields with an asterisk").
+Do: Set `necessity` to `optional` on the field defaults provider at the application's root.
+Don't: Set `necessity` field by field, or mix a mark and a word in one form.
+Check: No field of the application sets `necessity` on itself, and every form renders one convention.
+
+### FM-24 · Help sits where its question is
+
+Level: SHOULD
+Applies to: every text that helps a reader answer a form
+Rule: A format or a consequence of one answer is a one-line `description` under its control; the definition of a term is the field's `help` beside the label; what the whole record will do is the form's `aside`, beside the fields on a wide form and after them on a narrow one.
+Why: Help placed away from its question is read after the answer is given, or not at all, and a paragraph above the form is skipped.
+Do: Write the format under the field it applies to, the definition behind the help control, and the summary of the record in the aside.
+Don't: Write a paragraph of help above the form, a description of more than one line, or a summary of the record in a field's description.
+Check: Every help text of the form is a description, a help hint or the aside, and no description runs past one line.

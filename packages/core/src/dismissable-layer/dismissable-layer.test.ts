@@ -170,6 +170,93 @@ describe('createDismissableLayer', () => {
     });
   });
 
+  /**
+   * Where the platform has `CloseWatcher`, the layer answers the way back with
+   * one watcher and leaves the history alone. The stub records each watcher.
+   */
+  describe('back with a close watcher', () => {
+    const watchers: { onclose: ((event: Event) => void) | null; destroyed: boolean }[] = [];
+
+    beforeEach(() => {
+      watchers.length = 0;
+      mount('<div id="outer"></div><div id="inner"></div>');
+      vi.stubGlobal(
+        'CloseWatcher',
+        class {
+          onclose: ((event: Event) => void) | null = null;
+          destroyed = false;
+          constructor() {
+            watchers.push(this);
+          }
+          destroy() {
+            this.destroyed = true;
+          }
+        },
+      );
+      return () => {
+        vi.unstubAllGlobals();
+        vi.restoreAllMocks();
+      };
+    });
+
+    it('holds a watcher instead of a history entry, and destroys it on close', async () => {
+      const push = vi.spyOn(history, 'pushState');
+      const back = vi.spyOn(history, 'back');
+
+      const handle = createDismissableLayer(element('outer'), { ...recorder(), back: true });
+      handle.destroy();
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(push).not.toHaveBeenCalled();
+      expect(watchers).toHaveLength(1);
+      expect(watchers[0]!.destroyed).toBe(true);
+      expect(back).not.toHaveBeenCalled();
+    });
+
+    it('asks with back when the watcher closes', () => {
+      const log = recorder();
+      const handle = createDismissableLayer(element('outer'), { ...log, back: true });
+
+      watchers[0]!.onclose!(new Event('close'));
+
+      expect(log.reasons).toEqual(['back']);
+      handle.destroy();
+    });
+
+    it('watches again when the layer refuses', () => {
+      const handle = createDismissableLayer(element('outer'), {
+        back: true,
+        onDismiss: (request) => request.cancel(),
+      });
+
+      watchers[0]!.onclose!(new Event('close'));
+
+      expect(watchers).toHaveLength(2);
+      handle.destroy();
+      expect(watchers[1]!.destroyed).toBe(true);
+    });
+
+    it('keeps Escape from the watchers, so one press closes one layer', () => {
+      const outer = recorder();
+      const inner = recorder();
+      const first = createDismissableLayer(element('outer'), { ...outer, back: true });
+      const second = createDismissableLayer(element('inner'), inner);
+      const event = new KeyboardEvent('keydown', {
+        key: 'Escape',
+        bubbles: true,
+        cancelable: true,
+      });
+
+      document.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+      expect(inner.reasons).toEqual(['escape']);
+      expect(outer.reasons).toEqual([]);
+      second.destroy();
+      first.destroy();
+    });
+  });
+
   describe('escape', () => {
     beforeEach(() => {
       mount('<div id="outer"></div><div id="inner"></div><button id="away">away</button>');

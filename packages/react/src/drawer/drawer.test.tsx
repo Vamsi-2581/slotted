@@ -235,6 +235,60 @@ describe('Drawer', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: 'escape' }));
   });
 
+  /**
+   * Where the platform has `CloseWatcher`, the way back reaches the drawer
+   * through a watcher and the history is left alone (`@slotted/core/dismissable-layer`).
+   */
+  describe('with a close watcher', () => {
+    const watchers: { onclose: ((event: Event) => void) | null; destroyed: boolean }[] = [];
+
+    afterEach(() => {
+      watchers.length = 0;
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    function stubCloseWatcher() {
+      vi.stubGlobal(
+        'CloseWatcher',
+        class {
+          onclose: ((event: Event) => void) | null = null;
+          destroyed = false;
+          constructor() {
+            watchers.push(this);
+          }
+          destroy() {
+            this.destroyed = true;
+          }
+        },
+      );
+    }
+
+    it('closes on the watcher, carrying back, and pushes no history entry', () => {
+      stubCloseWatcher();
+      const push = vi.spyOn(history, 'pushState');
+      const onOpenChange = vi.fn();
+      render(<Basic defaultOpen onOpenChange={onOpenChange} />);
+
+      act(() => watchers[0]?.onclose?.(new Event('close')));
+
+      expect(push).not.toHaveBeenCalled();
+      expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: 'back' }));
+    });
+
+    it('destroys the watcher on close and never steps the history back', async () => {
+      stubCloseWatcher();
+      const back = vi.spyOn(history, 'back');
+      const { rerender } = render(<Basic open />);
+
+      rerender(<Basic open={false} />);
+      await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
+
+      expect(watchers[0]?.destroyed).toBe(true);
+      expect(back).not.toHaveBeenCalled();
+    });
+  });
+
   it('refuses Escape when the policy says so', () => {
     const onOpenChange = vi.fn();
     render(<Basic defaultOpen escape="none" onOpenChange={onOpenChange} />);

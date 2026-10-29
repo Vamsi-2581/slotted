@@ -132,10 +132,32 @@ describe('a bottom sheet at its last stop', () => {
  * A link inside a sheet closes it and navigates in one turn. A router keeps
  * the state it finds when it pushes, so the sheet's history token survives the
  * push, and the sheet's own step back — taken once it has left — undid the
- * navigation. The destination stays.
+ * navigation. A router that pushes from a microtask pushes after the sheet
+ * closed, and the step back queued at the close undid that one too. The
+ * destination stays, on the history entry where `CloseWatcher` is missing and
+ * on the close watcher where Chromium has one.
  */
-describe('a bottom sheet closed for a navigation', () => {
-  it('keeps the destination a router pushed in the same turn', async () => {
+describe.each([
+  ['a history entry', true],
+  ['a close watcher', false],
+])('a bottom sheet holding %s, closed for a navigation', (_, withoutWatcher) => {
+  beforeEach(() => {
+    if (withoutWatcher) vi.stubGlobal('CloseWatcher', undefined);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it.each([
+    [
+      'in the same turn, keeping the state',
+      (url: string) => history.pushState({ ...history.state, key: 'b' }, '', url),
+    ],
+    [
+      'from a microtask, with its own state',
+      (url: string) => queueMicrotask(() => history.pushState({ key: 'b' }, '', url)),
+    ],
+  ])('keeps the destination a router pushed %s', async (_, navigate) => {
     const start = location.search;
     function Host() {
       const [open, setOpen] = useState(true);
@@ -151,7 +173,7 @@ describe('a bottom sheet closed for a navigation', () => {
                 onClick={(event) => {
                   event.preventDefault();
                   setOpen(false);
-                  history.pushState({ ...history.state, key: 'b' }, '', '?route=b');
+                  navigate('?route=b');
                 }}
               >
                 Go to b
@@ -163,9 +185,13 @@ describe('a bottom sheet closed for a navigation', () => {
     }
     render(<Host />);
     for (let index = 0; index < 10; index += 1) await frame();
+    const length = history.length;
+
     (document.querySelector('a[href="?route=b"]') as HTMLElement).click();
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
     expect(location.search).toBe('?route=b');
+    expect(history.length).toBeLessThanOrEqual(length + 1);
     history.replaceState(null, '', location.pathname + start);
   });
 });

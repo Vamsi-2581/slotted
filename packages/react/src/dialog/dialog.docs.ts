@@ -868,7 +868,7 @@ export const REACT_DIALOG_DOCS = {
         "'close' | 'none'",
         'close',
         'Dialog, DialogDefaultsProvider',
-        'Whether the browser’s way back, a back button or a phone’s back gesture, closes a modal dialog instead of leaving the page. Each open modal dialog adds one history entry, and the close request carries the reason back.',
+        'Whether the browser’s way back, a back button or a phone’s back gesture, closes a modal dialog instead of leaving the page. Each open modal dialog holds one close watcher where the browser has CloseWatcher, and adds one history entry elsewhere; the close request carries the reason back. A dialog opened without a press shares the way back with the layer opened before it.',
       ],
       [
         'surface',

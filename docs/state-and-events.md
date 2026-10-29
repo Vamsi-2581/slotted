@@ -61,9 +61,10 @@ corner are gestures and none of them is a press on the control, and neither is
 button — was used while a modal layer stood over the page, and the layer
 answered instead of the history. It is neither `escape`, which is a key the
 platform may not have, nor `dismiss`, which is the reader pressing a control
-of the layer's own. `dismissable-layer` holds one history entry per layer
-that asks for it, so the gesture reaches the layer and never the page under
-it; `dialog`, `drawer` and `app-shell` were the first families to ask.
+of the layer's own. `dismissable-layer` holds one close watcher per layer
+that asks for it where the platform has `CloseWatcher`, and one history entry
+elsewhere, so the gesture reaches the layer and never the page under it;
+`dialog`, `drawer` and `app-shell` were the first families to ask.
 
 `dictation` says the reader spoke and the platform's speech recognition wrote
 the words. It is neither `keyboard`, because no key was pressed, nor

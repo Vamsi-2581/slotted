@@ -801,7 +801,7 @@ export const REACT_APP_SHELL_DOCS = {
         "'close' | 'none'",
         'close',
         'AppShell, AppShellDefaultsProvider',
-        "The platform's way back — a phone's gesture, a browser's button — closes the layer instead of leaving the page, while it is modal: @slotted/core/dismissable-layer holds one history entry per modal layer and answers the popstate that leaves it with the reason back",
+        "The platform's way back — a phone's gesture, a browser's button — closes the layer instead of leaving the page, while it is modal: @slotted/core/dismissable-layer holds one close watcher per modal layer where the browser has CloseWatcher, and one history entry elsewhere, and answers the way back with the reason back",
       ],
       [
         'closeOnNavigate',

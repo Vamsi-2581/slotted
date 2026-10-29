@@ -234,8 +234,9 @@ export const CHANGE_REASONS = [
    * used while a modal layer stood over the page, and answered by the layer
    * rather than by the history. Neither `escape`, a key a touch screen does
    * not have, nor `dismiss`, a control of the layer's own. `dismissable-layer`
-   * keeps one history entry per layer that asks for it; `dialog`, `drawer`
-   * and `app-shell` were the first families to ask.
+   * keeps one close watcher per layer that asks for it where the platform has
+   * `CloseWatcher`, and one history entry elsewhere; `dialog`, `drawer` and
+   * `app-shell` were the first families to ask.
    */
   'back',
   /**

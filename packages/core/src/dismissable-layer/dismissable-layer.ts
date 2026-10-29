@@ -58,12 +58,19 @@ export interface DismissableLayerOptions {
    * The platform's own way back — a phone's gesture, a browser's button —
    * dismisses the layer instead of leaving the page. Default `false`.
    *
-   * The layer holds one entry of the session history while it stands: pushed
-   * when it opens, on the same URL and over the state that was there, and
-   * taken back when it closes by any other path. A `popstate` that leaves the
-   * entry is the gesture, and it reaches the topmost layer that holds one;
-   * a layer that refuses puts its entry back. Nothing under the layer sees the
-   * gesture, which is what a modal layer promises about everything else.
+   * Where the platform has `CloseWatcher`, the layer holds one watcher while
+   * it stands, and its `close` is the gesture; the history is not touched.
+   * The platform closes the newest watcher first, which is the topmost layer.
+   * A watcher is ungrouped only when created after a press: a layer opened
+   * without one shares the gesture with the layer opened before it.
+   *
+   * Elsewhere the layer holds one entry of the session history while it
+   * stands: pushed when it opens, on the same URL and over the state that was
+   * there, and taken back when it closes by any other path. A `popstate` that
+   * leaves the entry is the gesture, and it reaches the topmost layer that
+   * holds one; a layer that refuses puts its entry back. Nothing under the
+   * layer sees the gesture, which is what a modal layer promises about
+   * everything else.
    */
   back?: boolean;
   /** Everything outside the layer becomes `inert`. Default `false`. */
@@ -123,7 +130,17 @@ interface Layer {
   releaseScroll: (() => void) | null;
   /** The history entry the layer holds, under `back`, or none. */
   entry: HistoryEntry | null;
+  /** The close watcher the layer holds, under `back` where the platform has one, or none. */
+  watcher: CloseWatcherLike | null;
 }
+
+/** The platform's close watcher (Chromium). TypeScript's DOM library does not declare it yet. */
+interface CloseWatcherLike {
+  onclose: ((event: Event) => void) | null;
+  destroy: () => void;
+}
+
+type CloseWatcherConstructor = new () => CloseWatcherLike;
 
 interface HistoryEntry {
   /** What the entry's state carries under `ENTRY_KEY`, so it is known again. */
@@ -179,10 +196,12 @@ const stacks = new WeakMap<Document, DocumentStack>();
 const traversals = new WeakMap<Document, Promise<void>>();
 const TRAVERSAL_WAIT = 500;
 
-function awaitTraversal(doc: Document): Promise<void> {
+/** Starts the wait for a traversal. Returns the function that ends it early, when none is made. */
+function awaitTraversal(doc: Document): () => void {
   const view = doc.defaultView;
+  let done = () => {};
   const landed = new Promise<void>((resolve) => {
-    const done = () => {
+    done = () => {
       view?.removeEventListener('popstate', done, true);
       clearTimeout(timer);
       if (traversals.get(doc) === landed) traversals.delete(doc);
@@ -192,7 +211,7 @@ function awaitTraversal(doc: Document): Promise<void> {
     view?.addEventListener('popstate', done, true);
   });
   traversals.set(doc, landed);
-  return landed;
+  return done;
 }
 const locks = new WeakMap<Document, DocumentLock>();
 
@@ -270,8 +289,12 @@ function handleKeyDown(state: DocumentStack, event: KeyboardEvent) {
   /* A key ends the pointer sequence: a click the keyboard makes began nowhere. */
   state.pressStart = null;
   if (event.key !== 'Escape') return;
-  /* A held key closes one layer; Escape cancelling an IME composition closes none. */
-  if (event.repeat || event.isComposing) return;
+  /* Escape cancelling an IME composition closes none. */
+  if (event.isComposing) return;
+  /* Escape is the stack's: a close watcher answering it too would close a second layer. */
+  if (state.layers.some((layer) => layer.watcher !== null)) event.preventDefault();
+  /* A held key closes one layer. */
+  if (event.repeat) return;
 
   const top = state.layers.at(-1);
   if (!top) return;
@@ -319,6 +342,19 @@ function currentToken(doc: Document): string | null {
   return typeof token === 'string' ? token : null;
 }
 
+/**
+ * The layer holds a close watcher until it is destroyed. A layer that refuses
+ * the gesture gets a new watcher, since the platform spends one per close.
+ */
+function watchClose(Watcher: CloseWatcherConstructor, layer: Layer) {
+  const watcher = new Watcher();
+  watcher.onclose = (event) => {
+    layer.watcher = null;
+    if (!request(layer, 'back', event)) watchClose(Watcher, layer);
+  };
+  layer.watcher = watcher;
+}
+
 /** The layer holds an entry of the session history until it is destroyed. */
 function pushEntry(doc: Document, layer: Layer) {
   const history = doc.defaultView?.history;
@@ -363,16 +399,27 @@ function handlePopState(doc: Document, state: DocumentStack, event: Event) {
  * `history.back()` that lands later would undo the navigation. A location
  * that is no longer the one the entry was pushed at says the page moved on:
  * the entry stays in the history as a step the reader's Back crosses unread.
+ *
+ * The question is asked again a task after the close. A press that closes
+ * the layer and navigates closes it first, and a router that pushes from a
+ * microtask pushes after the close. A layer that opens meanwhile waits, as for a
+ * traversal on its way.
+ *
+ * shortcut: a router that pushes later than one task is undone; a longer wait if one does.
  */
 function releaseEntry(doc: Document, state: DocumentStack, layer: Layer) {
   const entry = layer.entry;
   layer.entry = null;
-  if (entry === null) return;
   const history = doc.defaultView?.history;
-  if (!history || currentToken(doc) !== entry.token || doc.location.href !== entry.href) return;
-  state.ownPops += 1;
-  void awaitTraversal(doc);
-  history.back();
+  const current = () => currentToken(doc) === entry?.token && doc.location.href === entry.href;
+  if (entry === null || !history || !current()) return;
+
+  const done = awaitTraversal(doc);
+  setTimeout(() => {
+    if (!current()) return done();
+    state.ownPops += 1;
+    history.back();
+  }, 0);
 }
 
 function reindex(state: DocumentStack) {
@@ -516,6 +563,7 @@ export function createDismissableLayer(
     releaseInert: null,
     releaseScroll: null,
     entry: null,
+    watcher: null,
   };
 
   state.layers.push(layer);
@@ -523,7 +571,9 @@ export function createDismissableLayer(
 
   if (options.modal === true) layer.releaseInert = applyInert(node);
   let destroyed = false;
-  if (options.back === true) {
+  const Watcher = (globalThis as { CloseWatcher?: CloseWatcherConstructor }).CloseWatcher;
+  if (options.back === true && Watcher !== undefined) watchClose(Watcher, layer);
+  else if (options.back === true) {
     const pending = traversals.get(doc);
     if (pending === undefined) pushEntry(doc, layer);
     else
@@ -585,6 +635,8 @@ export function createDismissableLayer(
 
       layer.releaseInert?.();
       layer.releaseScroll?.();
+      layer.watcher?.destroy();
+      layer.watcher = null;
       releaseEntry(doc, state, layer);
       node.style.removeProperty(LAYER_DEPTH_PROPERTY);
       if (node.getAttribute('style') === '') node.removeAttribute('style');

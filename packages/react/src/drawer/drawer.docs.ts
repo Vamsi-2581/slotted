@@ -691,7 +691,7 @@ const api = apiRows([
     "'close' | 'none'",
     'close',
     'Drawer, DrawerDefaultsProvider',
-    'Whether the browser’s back button or a phone’s back gesture closes a modal drawer instead of leaving the page. The drawer holds one history entry while it is open. It has no effect under mode="inline".',
+    'Whether the browser’s back button or a phone’s back gesture closes a modal drawer instead of leaving the page. The drawer holds one close watcher while it is open where the browser has CloseWatcher, and one history entry elsewhere; a drawer opened without a press shares the way back with the layer opened before it. It has no effect under mode="inline".',
   ],
   [
     'drag',

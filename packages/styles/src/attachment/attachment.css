@@ -346,11 +346,9 @@
   }
 
   /*
-   * The name answers as well as the ground, because the ground's step is
-   * 0.03 of lightness and a reader looking at the words should not have to
-   * find it at the edge. The underline says link; the press settles the name
-   * by a hairline — the answer `upload` gives its file name — so press and
-   * hover differ on the trigger itself and not only on the attachment.
+   * The underline says link; a press keeps it and darkens the whole
+   * attachment. Keep the trigger itself untransformed: its stretched ::after
+   * must keep the root as its containing block throughout the press.
    */
   [data-ui-attachment] [data-part-trigger]:not(:disabled):not([aria-disabled='true']):hover {
     text-decoration-line: underline;
@@ -360,7 +358,6 @@
   [data-ui-attachment] [data-part-trigger]:not(:disabled):not([aria-disabled='true']):active {
     text-decoration-line: underline;
     text-underline-offset: 0.2em;
-    translate: 0 var(--slotted-border-width-thin, 1px);
   }
 
   [data-ui-attachment] [data-part-trigger]:is(:disabled, [aria-disabled='true']) {

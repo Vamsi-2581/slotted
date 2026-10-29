@@ -1,5 +1,29 @@
 import { selectorKeyMismatches } from '@slotted/core/selector-key';
-import { afterEach, beforeEach } from 'vitest';
+import { afterAll, afterEach, beforeEach } from 'vitest';
+
+/**
+ * A layer that closes takes its history entry back with `history.back()`, and
+ * `@slotted/core/dismissable-layer` waits up to 500ms for that traversal. A
+ * file whose last test closed a layer was torn down before the traversal
+ * landed, and the wait's timer then fired on a window with no listener API:
+ * an unhandled error that failed the whole run. While the current entry still
+ * carries a layer's token, the file waits for the traversal, bounded past the
+ * library's own wait.
+ */
+afterAll(async () => {
+  const state: unknown = window.history.state;
+  if (typeof state !== 'object' || state === null || !('__slottedLayer' in state)) return;
+
+  await new Promise<void>((resolve) => {
+    const done = () => {
+      window.removeEventListener('popstate', done);
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(done, 600);
+    window.addEventListener('popstate', done);
+  });
+});
 
 /**
  * The stylesheet matches the selector key (`data-part-cell`), not the public

@@ -2,6 +2,12 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.26 — 2026-10-29
+
+- chore(progress): checkpoint da sessão (#27 #28 #29)
+- fix(dismissable-layer): CloseWatcher responde ao back; release do histórico espera um task
+- fix(select): className e style de SelectTrigger vão para a moldura
+
 ## 0.1.0-beta.25 — 2026-10-29
 
 - fix(form): tokens.json deixa de listar --slotted-page-sticky-top, valor escrito em tempo de execução

@@ -2,6 +2,11 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.28 — 2026-10-29
+
+- docs(evals): compose-screen atende após kind="section" em forms.md
+- fix(field,field-group): espaço antes da palavra de necessidade; kind="section" no grupo
+
 ## 0.1.0-beta.27 — 2026-10-29
 
 - docs(evals): theme-app atende após os tokens da tabela do chart; checkpoint da fila de findings

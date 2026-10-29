@@ -1,5 +1,5 @@
 import { useFormDefaults, useFormState } from './form-context';
-import type { FormActionsProps, FormSummaryProps } from './form.types';
+import type { FormActionsProps, FormAsideProps, FormSummaryProps } from './form.types';
 
 /**
  * The summary of everything wrong with the form: a focusable region with a
@@ -102,6 +102,24 @@ export function FormActions({ align, ref, ...nativeProps }: FormActionsProps) {
       data-ui-form=""
       data-part="actions"
       data-part-actions=""
+      {...nativeProps}
+      ref={ref}
+    />
+  );
+}
+
+/**
+ * What the form says about the whole record — a live preview, a summary in
+ * words, a help panel — beside the column of fields on a wide form, and after
+ * the last field on a narrow one.
+ */
+export function FormAside({ ref, ...nativeProps }: FormAsideProps) {
+  return (
+    <div
+      data-ui="form"
+      data-ui-form=""
+      data-part="aside"
+      data-part-aside=""
       {...nativeProps}
       ref={ref}
     />

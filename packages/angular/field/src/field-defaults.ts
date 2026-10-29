@@ -12,6 +12,14 @@ export type FieldSize = 'sm' | 'md' | 'lg';
 export type FieldLabelPlacement = 'top' | 'side';
 
 /**
+ * The longest the control stands, as a cue to the length of its answer:
+ * `short` for an integer of up to four digits, `medium` for an amount, a code
+ * or a short word, `full` for free text, a name or a picker of records. The
+ * control still shrinks below the bound in a narrower container.
+ */
+export type FieldWidth = 'short' | 'medium' | 'full';
+
+/**
  * How necessity is said. `mark` draws the asterisk every surveyed
  * implementation draws on a required field; `optional` writes `(optional)` on
  * the fields a reader may skip and nothing on the others, which is what GOV.UK

@@ -20,6 +20,7 @@ export type {
   FieldLabelPlacement,
   FieldNecessity,
   FieldSize,
+  FieldWidth,
 } from './field-defaults';
 export { formatFieldCount, isFieldCountOver, SlFieldCounter } from './field-counter';
 export type { FieldCount } from './field-counter';

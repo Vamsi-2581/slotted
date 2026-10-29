@@ -265,6 +265,13 @@ export const REACT_FIELD_DOCS = {
         'How necessity is written: an asterisk on a required field, (optional) on a field a reader may skip, both words, or nothing, for a form that says once that every field is required.',
       ],
       [
+        'width',
+        "'short' | 'medium' | 'full'",
+        'full',
+        'Field',
+        'The longest the control stands, as a cue to the length of its answer: short (--slotted-field-width-short, 6rem) for an integer of up to four digits, medium (--slotted-field-width-medium, 15rem) for an amount, a code or a short word, full for free text, a name or a picker of records. The control still shrinks below the bound in a narrower field.',
+      ],
+      [
         'messages',
         'Partial<FieldMessages>',
         '—',

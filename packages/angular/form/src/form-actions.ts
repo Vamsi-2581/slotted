@@ -35,3 +35,21 @@ export class SlFormActions {
     () => this.align() ?? this.form?.resolvedAlign() ?? 'end',
   );
 }
+
+/**
+ * What the form says about the whole record — a live preview, a summary in
+ * words, a help panel — beside the column of fields on a wide form, and after
+ * the last field on a narrow one.
+ */
+@Directive({
+  selector: '[slFormAside]',
+  standalone: true,
+  exportAs: 'slFormAside',
+  host: {
+    'data-ui': 'form',
+    'data-ui-form': '',
+    'data-part': 'aside',
+    'data-part-aside': '',
+  },
+})
+export class SlFormAside {}

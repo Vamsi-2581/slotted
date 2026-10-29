@@ -165,6 +165,70 @@
     margin-block-start: var(--slotted-form-field-gap, var(--slotted-space-6, 1rem));
   }
 
+  /**
+   * Two sections stand apart by a step larger than the one between two fields
+   * of a section: at the same 1rem, a form split into topics showed none.
+   */
+  [data-ui-form][data-part-root] > [data-ui-field-group] + [data-ui-field-group] {
+    margin-block-start: var(--slotted-form-section-gap, var(--slotted-space-9, 2rem));
+  }
+
+  /**
+   * One column at a bounded measure: a field never spans a wide page, and the
+   * summary and the actions end where the fields end.
+   */
+  [data-ui-form][data-part-root]
+    > :is(
+      [data-ui-field],
+      [data-ui-field-group],
+      [data-ui-form][data-part-summary],
+      [data-ui-form][data-part-actions]
+    ) {
+    max-inline-size: var(--slotted-form-measure, 40rem);
+  }
+
+  /* ── The aside ────────────────────────────────────────────────────────
+   *
+   * A form that holds one is a grid of one column at the measure. The aside's
+   * track is implicit: it exists only once the aside is placed in it, which
+   * happens from the form's own breakpoint, because the root cannot change its
+   * template under a query on itself. Below it the aside follows in source
+   * order, after the last field when it is written there.
+   */
+  [data-ui-form][data-part-root]:has(> [data-ui-form][data-part-aside]) {
+    column-gap: var(--slotted-space-9, 2rem);
+    display: grid;
+    grid-auto-columns: minmax(0, var(--slotted-form-aside-size, 20rem));
+    grid-template-columns: minmax(0, var(--slotted-form-measure, 40rem));
+    justify-content: space-between;
+  }
+
+  [data-ui-form][data-part-aside] {
+    margin-block-start: var(--slotted-form-section-gap, var(--slotted-space-9, 2rem));
+    min-inline-size: 0;
+  }
+
+  /**
+   * Beside the column, every child of the form keeps to the first track and
+   * the aside spans the rows they fill, so it stays in view under the page's
+   * chrome while the fields scroll. shortcut: the span covers 100 children of
+   * the form; past them the aside stops following.
+   */
+  @container slotted-form (min-width: 75rem) {
+    [data-ui-form][data-part-root]:has(> [data-ui-form][data-part-aside]) > * {
+      grid-column: 1;
+    }
+
+    [data-ui-form][data-part-root] > [data-ui-form][data-part-aside] {
+      align-self: start;
+      grid-column: 2;
+      grid-row: 1 / span 100;
+      inset-block-start: calc(var(--slotted-page-sticky-top, 0px) + var(--slotted-space-6, 1rem));
+      margin-block-start: 0;
+      position: sticky;
+    }
+  }
+
   /* ── The action row ───────────────────────────────────────────────────
    *
    * Its own container, because the question it answers is how much room the

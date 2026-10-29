@@ -94,6 +94,21 @@
     min-inline-size: 0;
   }
 
+  /**
+   * The width says what the field expects: the control stands no wider than
+   * the step, and still shrinks with a narrower field. The control is the
+   * child that is another family's root, or the part a consumer wrote.
+   */
+  [data-ui-field][data-part-root][data-width='short']
+    > :is([data-part-control], [data-ui]:not([data-ui-inline-message])) {
+    max-inline-size: var(--slotted-field-width-short, 6rem);
+  }
+
+  [data-ui-field][data-part-root][data-width='medium']
+    > :is([data-part-control], [data-ui]:not([data-ui-inline-message])) {
+    max-inline-size: var(--slotted-field-width-medium, 15rem);
+  }
+
   /* ── Size ─────────────────────────────────────────────────────────────
    *
    * Three steps, matching the control the field wraps. Fluent ships the same

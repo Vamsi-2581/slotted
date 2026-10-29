@@ -120,6 +120,7 @@ export function Field({
   render,
   required,
   size,
+  width = 'full',
   ...nativeProps
 }: FieldProps) {
   const defaults = useFieldDefaults();
@@ -264,6 +265,7 @@ export function Field({
     'data-part': 'root',
     'data-size': resolvedSize,
     'data-ui': 'field',
+    'data-width': width,
   });
 
   return (

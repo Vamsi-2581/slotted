@@ -804,6 +804,7 @@
     ],
     "form": [
       "actions",
+      "aside",
       "root",
       "summary",
       "summary-item",

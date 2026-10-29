@@ -56,6 +56,7 @@ describe('Field', () => {
     expect(field).toHaveAttribute('data-size', defaults.size);
     expect(field).toHaveAttribute('data-label-placement', defaults.labelPlacement);
     expect(field).toHaveAttribute('data-necessity', defaults.necessity);
+    expect(field).toHaveAttribute('data-width', defaults.width);
     for (const state of ['data-disabled', 'data-invalid', 'data-required', 'data-readonly']) {
       expect(field).not.toHaveAttribute(state);
     }

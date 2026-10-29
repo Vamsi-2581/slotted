@@ -3670,6 +3670,8 @@ export type ComponentToken =
   | '--slotted-field-mark-gap'
   | '--slotted-field-mark-text-color'
   | '--slotted-field-row-gap'
+  | '--slotted-field-width-medium'
+  | '--slotted-field-width-short'
   | '--slotted-filter-bar-chip-seam'
   | '--slotted-filter-bar-color'
   | '--slotted-filter-bar-color-muted'
@@ -3685,8 +3687,11 @@ export type ComponentToken =
   | '--slotted-filter-bar-surface'
   | '--slotted-filter-bar-value-max'
   | '--slotted-filter-bar-value-max-narrow'
+  | '--slotted-form-aside-size'
   | '--slotted-form-color'
   | '--slotted-form-field-gap'
+  | '--slotted-form-measure'
+  | '--slotted-form-section-gap'
   | '--slotted-form-summary-background'
   | '--slotted-form-summary-border-color'
   | '--slotted-form-summary-color'
@@ -4050,6 +4055,7 @@ export type ComponentToken =
   | '--slotted-page-header-snapped-heading-size-md'
   | '--slotted-page-header-snapped-heading-size-sm'
   | '--slotted-page-padding-block'
+  | '--slotted-page-sticky-top'
   | '--slotted-pagination-color'
   | '--slotted-pagination-color-disabled'
   | '--slotted-pagination-color-muted'
@@ -5940,6 +5946,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-field-mark-gap",
   "--slotted-field-mark-text-color",
   "--slotted-field-row-gap",
+  "--slotted-field-width-medium",
+  "--slotted-field-width-short",
   "--slotted-filter-bar-chip-seam",
   "--slotted-filter-bar-color",
   "--slotted-filter-bar-color-muted",
@@ -5955,8 +5963,11 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-filter-bar-surface",
   "--slotted-filter-bar-value-max",
   "--slotted-filter-bar-value-max-narrow",
+  "--slotted-form-aside-size",
   "--slotted-form-color",
   "--slotted-form-field-gap",
+  "--slotted-form-measure",
+  "--slotted-form-section-gap",
   "--slotted-form-summary-background",
   "--slotted-form-summary-border-color",
   "--slotted-form-summary-color",
@@ -6320,6 +6331,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-page-header-snapped-heading-size-md",
   "--slotted-page-header-snapped-heading-size-sm",
   "--slotted-page-padding-block",
+  "--slotted-page-sticky-top",
   "--slotted-pagination-color",
   "--slotted-pagination-color-disabled",
   "--slotted-pagination-color-muted",

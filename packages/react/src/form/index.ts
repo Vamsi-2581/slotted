@@ -1,10 +1,11 @@
 export { Form } from './form';
 export { useFormDefaults, useFormState } from './form-context';
 export { FormDefaultsProvider } from './form-defaults';
-export { FormActions, FormSummary } from './form-parts';
+export { FormActions, FormAside, FormSummary } from './form-parts';
 export type {
   FormActionsAlign,
   FormActionsProps,
+  FormAsideProps,
   FormContextValue,
   FormDefaults,
   FormDefaultsProviderProps,

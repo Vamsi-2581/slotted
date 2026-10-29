@@ -25,7 +25,7 @@ export const ANGULAR_FORM_TOKENS = formTokens.map((name) => ({
 
 const imports: ReferenceImport = {
   source:
-    "import {\n  provideFormDefaults,\n  provideFormErrorMessages,\n  SlForm,\n  SlFormActions,\n  SlFormSummary,\n} from '@slotted/angular/form';",
+    "import {\n  provideFormDefaults,\n  provideFormErrorMessages,\n  SlForm,\n  SlFormActions,\n  SlFormAside,\n  SlFormSummary,\n} from '@slotted/angular/form';",
   selector: 'form[slForm]',
   exportAs: 'slForm',
 };
@@ -73,13 +73,20 @@ const anatomy: AnatomyRow[] = [
     purpose:
       'The row a form’s actions stand in, aligned to the reading end. Below 360 container pixels it becomes a column of full-width actions with the primary one first — a reader’s thumb is at the bottom of a phone and their eye at the end of a row. It carries data-ui="form" beside its data-part, so a nested family’s actions — a section’s — keep their own row.',
   },
+  {
+    part: 'aside',
+    element: 'the element carrying slFormAside',
+    required: false,
+    purpose:
+      'What the form says about the whole record — a live preview, a summary in words, a help panel. From a form 75rem wide it stands beside the column of fields, --slotted-form-aside-size (20rem) wide at the end, and sticks under --slotted-page-sticky-top while the fields scroll; below that it follows in source order, so write it after the last field. With or without it, the fields, the summary and the actions stand at most --slotted-form-measure (40rem) wide.',
+  },
 ];
 
 const scenes: ReferenceSceneMeta[] = [
   {
     id: 'playground',
     title: 'Playground',
-    note: 'A form of two fields with the family’s whole lifecycle on it. Submit it empty: the platform’s own messages appear in the summary, focus moves there, and each link jumps to the field it names. Two fields written one after the other inside the form stand apart by --slotted-form-field-gap (space-6 by default); a layout the page draws itself — a Grid, a Stack — keeps its own gap.',
+    note: 'A form of two fields with the family’s whole lifecycle on it. Submit it empty: the platform’s own messages appear in the summary, focus moves there, and each link jumps to the field it names. Two fields written one after the other inside the form stand apart by --slotted-form-field-gap (space-6 by default), and two field groups by --slotted-form-section-gap (space-9 by default); a layout the page draws itself — a Grid, a Stack — keeps its own gap.',
     snippet: defineSnippet({
       id: 'form-angular-playground',
       language: 'angular',

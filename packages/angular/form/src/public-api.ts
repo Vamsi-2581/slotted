@@ -1,4 +1,4 @@
-export { SlFormActions } from './form-actions';
+export { SlFormActions, SlFormAside } from './form-actions';
 export {
   FORM_DEFAULTS,
   injectFormDefaults,

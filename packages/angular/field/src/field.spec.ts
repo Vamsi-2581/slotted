@@ -69,6 +69,7 @@ describe('SlField', () => {
     expect(field.getAttribute('data-size')).toBe(defaults.size);
     expect(field.getAttribute('data-label-placement')).toBe(defaults.labelPlacement);
     expect(field.getAttribute('data-necessity')).toBe(defaults.necessity);
+    expect(field.getAttribute('data-width')).toBe(defaults.width);
     for (const state of ['data-disabled', 'data-invalid', 'data-required', 'data-readonly']) {
       expect(field.hasAttribute(state)).toBe(false);
     }

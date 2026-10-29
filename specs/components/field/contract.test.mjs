@@ -268,6 +268,7 @@ test('stacks the side label when the field is too narrow to hold both', () => {
  */
 test('steps with the control it wraps', () => {
   assert.deepEqual(contract.axes.size, ['sm', 'md', 'lg']);
+  assert.deepEqual(contract.axes.width, ['full', 'medium', 'short']);
   assert.equal(field.defaults.size, 'md');
 });
 
@@ -284,7 +285,12 @@ test('leaves every shared state unset, so the group can answer it', () => {
     assert.ok(field.capabilities.includes(capability), `field cannot be ${capability}`);
     assert.ok(!(capability in field.defaults), `${capability} defaults instead of deferring`);
   }
-  assert.deepEqual(Object.keys(field.defaults).sort(), ['labelPlacement', 'necessity', 'size']);
+  assert.deepEqual(Object.keys(field.defaults).sort(), [
+    'labelPlacement',
+    'necessity',
+    'size',
+    'width',
+  ]);
 });
 
 /**
@@ -352,6 +358,8 @@ test('records the reason for every value that is not a token', () => {
   assert.deepEqual(Object.keys(contract.literals), [
     '--slotted-field-label-inline-size',
     'reflowBreakpoint',
+    '--slotted-field-width-short',
+    '--slotted-field-width-medium',
   ]);
   for (const reason of Object.values(contract.literals)) {
     assert.ok(reason.length > 40, 'a literal is recorded with no reason');

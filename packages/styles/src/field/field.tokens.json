@@ -36,6 +36,8 @@
   "--slotted-field-mark-gap",
   "--slotted-field-mark-text-color",
   "--slotted-field-row-gap",
+  "--slotted-field-width-medium",
+  "--slotted-field-width-short",
   "--slotted-focus-ring-color",
   "--slotted-focus-ring-offset",
   "--slotted-focus-ring-width",

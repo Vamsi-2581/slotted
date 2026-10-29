@@ -26,13 +26,19 @@ import {
   SlFieldIdFactory,
   SlFieldIndicatorSlot,
 } from './field-defaults';
-import type { FieldLabelPlacement, FieldNecessity, FieldSize } from './field-defaults';
+import type { FieldLabelPlacement, FieldNecessity, FieldSize, FieldWidth } from './field-defaults';
 import { formatFieldCount, isFieldCountOver, SlFieldCounter } from './field-counter';
 import type { FieldCount } from './field-counter';
 import { SlFieldDescription, SlFieldError } from './field-messages';
 
 export type { FieldCount } from './field-counter';
-export type { FieldIds, FieldLabelPlacement, FieldNecessity, FieldSize } from './field-defaults';
+export type {
+  FieldIds,
+  FieldLabelPlacement,
+  FieldNecessity,
+  FieldSize,
+  FieldWidth,
+} from './field-defaults';
 
 /**
  * One control, its name, its necessity, its help and its error — and the
@@ -118,6 +124,7 @@ export type { FieldIds, FieldLabelPlacement, FieldNecessity, FieldSize } from '.
     '[attr.data-size]': 'resolvedSize()',
     '[attr.data-label-placement]': 'resolvedLabelPlacement()',
     '[attr.data-necessity]': 'resolvedNecessity()',
+    '[attr.data-width]': 'width()',
     '[attr.data-disabled]': "resolvedDisabled() === true ? '' : null",
     '[attr.data-invalid]': "invalid() === true ? '' : null",
     '[attr.data-readonly]': "resolvedReadOnly() === true ? '' : null",
@@ -131,6 +138,7 @@ export class SlField {
   readonly labelPlacement = input<FieldLabelPlacement | undefined>(undefined);
   /** Defaults to the token, then to `mark`. */
   readonly necessity = input<FieldNecessity | undefined>(undefined);
+  readonly width = input<FieldWidth>('full');
   /**
    * Words laid over the catalog of the language in force, key by key: the
    * necessity words (`optional`, `required`) and the help control's name (`help`).

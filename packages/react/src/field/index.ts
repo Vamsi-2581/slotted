@@ -45,4 +45,5 @@ export type {
   FieldProps,
   FieldRootProps,
   FieldSize,
+  FieldWidth,
 } from './field.types';

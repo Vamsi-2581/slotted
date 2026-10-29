@@ -157,3 +157,7 @@ export interface FormActionsProps extends HTMLAttributes<HTMLElement> {
   align?: FormActionsAlign | undefined;
   ref?: Ref<HTMLDivElement> | undefined;
 }
+
+export interface FormAsideProps extends HTMLAttributes<HTMLElement> {
+  ref?: Ref<HTMLDivElement> | undefined;
+}

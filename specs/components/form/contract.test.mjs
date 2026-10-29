@@ -164,7 +164,7 @@ test('names when validation runs, and lets it be turned off', () => {
   assert.equal(member.defaults.validate, 'submit');
 });
 
-test('draws six parts, and no message family of its own', () => {
+test('draws seven parts, and no message family of its own', () => {
   assert.deepEqual(Object.keys(contract.members), ['form']);
   assert.deepEqual(member.parts, [
     'root',
@@ -173,6 +173,7 @@ test('draws six parts, and no message family of its own', () => {
     'summary-list',
     'summary-item',
     'actions',
+    'aside',
   ]);
   assert.ok(!member.parts.includes('field'), 'the field family owns a field');
   assert.ok(!member.parts.includes('message'), 'inline-message and alert already say a thing once');

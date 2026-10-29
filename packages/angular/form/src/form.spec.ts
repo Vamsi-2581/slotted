@@ -6,13 +6,13 @@ import { PT_BR } from '@slotted/core/i18n/pt-BR';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/form/contract.json';
-import { SlFormActions } from './form-actions';
+import { SlFormActions, SlFormAside } from './form-actions';
 import { provideFormDefaults, provideFormErrorMessages } from './form-defaults';
 import { SlForm, SlFormSummary } from './form';
 
 @Component({
   standalone: true,
-  imports: [SlForm, SlFormActions],
+  imports: [SlForm, SlFormActions, SlFormAside],
   template: `<form
     slForm
     [errors]="errors"
@@ -26,6 +26,7 @@ import { SlForm, SlFormSummary } from './form';
     <input id="name" name="name" required />
     <label for="email">E-mail</label>
     <input id="email" name="email" type="email" />
+    <div slFormAside>Resumo</div>
     <div slFormActions></div>
   </form>`,
 })
@@ -190,6 +191,15 @@ describe('SlForm', () => {
     const actions = fixture.nativeElement.querySelector('[data-part="actions"]') as HTMLElement;
 
     expect(actions.getAttribute('data-align')).toBe('end');
+  });
+
+  it('names the aside by the family, so the stylesheet sets it beside the fields', () => {
+    const fixture = mount();
+    const aside = fixture.nativeElement.querySelector('[data-part="aside"]') as HTMLElement;
+
+    expect(aside.getAttribute('data-ui')).toBe('form');
+    expect(aside.hasAttribute('data-ui-form')).toBe(true);
+    expect(aside.hasAttribute('data-part-aside')).toBe(true);
   });
 
   /**

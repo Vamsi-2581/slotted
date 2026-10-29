@@ -4577,6 +4577,7 @@ export type ComponentToken =
   | '--slotted-table-sticky-inset'
   | '--slotted-table-sticky-offset'
   | '--slotted-table-sticky-offset-end'
+  | '--slotted-table-sticky-surface'
   | '--slotted-table-surface'
   | '--slotted-tabs-actions-gap'
   | '--slotted-tabs-active-background'
@@ -6846,6 +6847,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-table-sticky-inset",
   "--slotted-table-sticky-offset",
   "--slotted-table-sticky-offset-end",
+  "--slotted-table-sticky-surface",
   "--slotted-table-surface",
   "--slotted-tabs-actions-gap",
   "--slotted-tabs-active-background",

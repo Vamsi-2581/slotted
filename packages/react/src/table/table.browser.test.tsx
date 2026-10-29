@@ -67,4 +67,16 @@ describe('a pinned column of a framed table wider than its scroller', () => {
     expect(transparent).not.toContain(ground('th[data-sticky="end"]'));
     expect(transparent).not.toContain(ground('td[data-sticky="end"]'));
   });
+
+  /* The layer under the row read `--slotted-surface` alone: a table over a
+     card with a transparent surface showed one opaque band, the pinned column. */
+  it('paints the family’s sticky surface under the row ground', () => {
+    const { container } = render(table('light'));
+    (container.querySelector('[data-ui="table"]') as HTMLElement).style.setProperty(
+      '--slotted-table-sticky-surface',
+      'rgb(1 2 3)',
+    );
+
+    expect(ground('td[data-sticky="end"]')).toBe('rgb(1, 2, 3)');
+  });
 });

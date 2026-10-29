@@ -740,14 +740,18 @@
   /* The ground the row is painted with, whatever state it is in, so a
      hovered, striped or selected row keeps one colour across the seam — over
      the page's own surface, so a row on a transparent table surface still
-     covers what scrolls under it. `inherit` copied a transparent row as is. */
+     covers what scrolls under it. `inherit` copied a transparent row as is.
+     The layer under the row is the family's token, so a table drawn over a
+     card states the card's ground. It is painted whether the table overflows
+     or not: the overflow is known only after a measurement, and a column
+     pinned to the end has content under it from the first frame. */
   [data-ui-table] [data-sticky] {
     background:
       linear-gradient(
         var(--_pinned-ground, var(--_row-ground)),
         var(--_pinned-ground, var(--_row-ground))
       ),
-      var(--slotted-surface, Canvas);
+      var(--slotted-table-sticky-surface, var(--slotted-surface, Canvas));
   }
 
   [data-ui-table] [data-sticky='start'] {

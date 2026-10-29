@@ -1383,13 +1383,11 @@
   }
 
   /**
-   * Opening and closing are the same scroll a hand ends with: the binding
-   * scrolls the layer to the resting stop or to nothing on the platform's
-   * smooth scroll, so a sheet sent away by a press outside leaves the way a
-   * dragged one does. The panel does not slide on its own, and the layer is
-   * kept for as long as that scroll takes (Chrome: about 440 ms across a
-   * phone's height). Leaving, nothing re-snaps: a re-snap would lift the panel
-   * back into view on its way out.
+   * Opening and closing are a travel of the binding: the scroll lands on the
+   * resting stop or on nothing at once, and the panel slides there from where
+   * it was drawn, in the slide tokens (`attachSheetScroll`). The layer is kept
+   * for as long as the exit takes. Leaving, nothing re-snaps: a re-snap would
+   * lift the panel back into view on its way out.
    */
   [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag] {
     --_reveal: content-visibility
@@ -1457,7 +1455,12 @@
     > [data-part-panel]
     > [data-part-footer] {
     position: sticky;
-    inset-block-end: var(--slotted-keyboard-inset, 0px);
+    /* A close lands the scroll at once and slides the panel with a transform,
+       which sticky positioning ignores: the travel's length holds the footer
+       where it rested in the panel (`--slotted-drawer-sheet-travel`). */
+    inset-block-end: calc(
+      var(--slotted-keyboard-inset, 0px) - var(--slotted-drawer-sheet-travel, 0px)
+    );
     z-index: 1;
     background: var(--slotted-drawer-surface, var(--slotted-surface-raised, Canvas));
   }
@@ -1613,6 +1616,14 @@
     [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag][data-sheet-content]
       > [data-part-backdrop]::before {
       animation: none;
+    }
+
+    /* Along a travel the scroll has already landed: the binding animates the layer
+       with the panel, from the value held here for the first frame. */
+    [data-ui-drawer][data-mode='overlay'][data-side='bottom'][data-drag][data-sheet-travel]
+      > [data-part-backdrop]::before {
+      animation: none;
+      opacity: var(--slotted-drawer-sheet-dim, 1);
     }
   }
 

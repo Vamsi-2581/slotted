@@ -19,7 +19,9 @@
  * that offset to nothing: on the compositor, as the scroll is, and in the
  * drawer's slide tokens. Up reads `--slotted-drawer-slide-duration` and
  * `--slotted-drawer-slide-easing`, down `--slotted-drawer-slide-exit-duration`
- * and `--slotted-drawer-slide-exit-easing`.
+ * and `--slotted-drawer-slide-exit-easing`. The scrim's dim layer, which the
+ * scroll drives, is animated along with the panel (`data-sheet-travel`), and
+ * a close holds the sticky footer where the scroll left it.
  *
  * Opening forces no layout: the stops are read once the browser has laid the
  * layer out (`afterLayout`), written in the next frame, and the scroll up
@@ -288,10 +290,17 @@ export function attachSheetScroll(
     arrived();
     layer.scrollTop -= offset;
   };
+  /** The scrim's dim layer along a travel, which the scroll that already landed would drive. */
+  let dimming: Animation | null = null;
   /** What a travel wrote for its run, taken back: the snap, and the offset held for its first frame. */
   const arrived = () => {
     travel = null;
+    dimming?.cancel();
+    dimming = null;
     panel.style.removeProperty('transform');
+    layer.removeAttribute('data-sheet-travel');
+    layer.style.removeProperty('--slotted-drawer-sheet-dim');
+    layer.style.removeProperty('--slotted-drawer-sheet-travel');
     /* An opening keeps it off until its own travel: the stops it would snap to are not laid out. */
     if (!dragging && laidOut) layer.style.removeProperty('scroll-snap-type');
   };
@@ -431,6 +440,38 @@ export function attachSheetScroll(
       arrived();
       settle();
     };
+    dim(from, layer.scrollTop, timing);
+    /* A transform takes no part in sticky positioning: closed, the scroll would stick the footer to the panel's top. */
+    if (layer.scrollTop <= SAME_PX) {
+      layer.style.setProperty(
+        '--slotted-drawer-sheet-travel',
+        `${String(from - layer.scrollTop)}px`,
+      );
+    }
+  };
+
+  /**
+   * The dim layer from where the panel is drawn to where it goes, on the
+   * travel's curve. Its value is held on the layer for the first frame, as the
+   * panel's offset is; it is whole from the lowest stop up, so a travel across
+   * that stop reaches it at the point of the curve where the panel does.
+   */
+  const dim = (from: number, to: number, timing: KeyframeAnimationOptions) => {
+    const backdrop = layer.querySelector<HTMLElement>(':scope > [data-part="backdrop"]');
+    if (backdrop === null) return;
+    const floor = Math.round((stops[0] ?? 1) * span);
+    const share = (top: number) => (floor > 0 ? Math.min(top / floor, 1) : 1);
+    const keyframes: Keyframe[] = [{ opacity: share(from) }, { opacity: share(to) }];
+    if ((from - floor) * (to - floor) < 0) {
+      keyframes.splice(1, 0, { offset: (floor - from) / (to - from), opacity: 1 });
+    }
+    layer.style.setProperty('--slotted-drawer-sheet-dim', String(share(from)));
+    layer.setAttribute('data-sheet-travel', '');
+    try {
+      dimming = backdrop.animate(keyframes, { ...timing, pseudoElement: '::before' });
+    } catch {
+      /* No pseudo-element animations: the layer is held at the start until the panel arrives. */
+    }
   };
 
   const scrollToExtent = (extent: number, smooth: boolean) => {

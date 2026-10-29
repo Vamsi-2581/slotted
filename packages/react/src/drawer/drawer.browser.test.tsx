@@ -365,6 +365,59 @@ describe('a bottom sheet on the platform scroll', () => {
     }
   });
 
+  /** Frames until `ms` have passed since `start`. */
+  async function until(start: number, ms: number) {
+    while (performance.now() - start < ms) await frame();
+  }
+
+  /* The scroll lands on the stop in the travel's first frame, and the scrim's dim layer is driven by it. */
+  it('dims the scrim along a close by a press outside', async () => {
+    document.documentElement.style.setProperty('--slotted-drawer-slide-exit-duration', '400ms');
+    const { layer } = await open({ children: 'Short', snapPoints: [0.4], defaultExtent: 0.4 });
+    const backdrop = layer.querySelector('[data-part="backdrop"]') as HTMLElement;
+    const dim = () => Number(getComputedStyle(backdrop, '::before').opacity);
+    expect(dim()).toBe(1);
+
+    const start = performance.now();
+    backdrop.click();
+    await until(start, 200);
+
+    expect(dim()).toBeGreaterThan(0);
+    expect(dim()).toBeLessThan(1);
+  });
+
+  /* A transform takes no part in sticky positioning: with the scroll at 0 the footer stuck to the panel's top. */
+  it('keeps the footer in its place in the panel along a close', async () => {
+    document.documentElement.style.setProperty('--slotted-drawer-slide-exit-duration', '400ms');
+    render(
+      <Drawer defaultOpen side="bottom" size="full" snapPoints={[0.85]}>
+        <DrawerPanel>
+          <DrawerResizer />
+          <DrawerHeader>
+            <DrawerTitle>Title</DrawerTitle>
+            <DrawerClose />
+          </DrawerHeader>
+          <DrawerBody>Body</DrawerBody>
+          <DrawerFooter>Footer</DrawerFooter>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    for (let index = 0; index < 45; index += 1) await frame();
+    const layer = document.querySelector('[data-ui="drawer"]') as HTMLElement;
+    const panel = layer.querySelector('[data-part="panel"]') as HTMLElement;
+    const footer = layer.querySelector('[data-part="footer"]') as HTMLElement;
+    const offset = () => footer.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    const atRest = offset();
+    expect(atRest).toBeGreaterThan(100);
+
+    const start = performance.now();
+    (layer.querySelector('[data-part="close"]') as HTMLElement).click();
+    await until(start, 200);
+
+    expect(panel.getBoundingClientRect().top).toBeGreaterThan(layer.getBoundingClientRect().top);
+    expect(Math.abs(offset() - atRest)).toBeLessThanOrEqual(1);
+  });
+
   it('travels in --slotted-drawer-slide-duration and --slotted-drawer-slide-exit-duration', async () => {
     document.documentElement.style.setProperty('--slotted-drawer-slide-duration', '100ms');
     document.documentElement.style.setProperty('--slotted-drawer-slide-exit-duration', '100ms');

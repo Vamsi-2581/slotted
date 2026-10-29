@@ -85,6 +85,17 @@ describe('applyTheme', () => {
   });
 });
 
+describe('applyTheme in a document without constructed stylesheets', () => {
+  it('writes the nonce a style-src policy allows on the <style> element', () => {
+    expect(document.adoptedStyleSheets).toBeUndefined();
+
+    applyTheme(theme('#1d4ed8'), { nonce: 'r4nd0m' });
+
+    const sheet = document.head.querySelector<HTMLStyleElement>('style[data-slotted-theme-sheet]');
+    expect(sheet!.nonce).toBe('r4nd0m');
+  });
+});
+
 describe('applyTheme on a theme that did not come from defineTheme', () => {
   it('refuses it before the name reaches a selector or a value reaches the page', () => {
     const seen: Event[] = [];

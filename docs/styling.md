@@ -127,6 +127,9 @@ seeds, a recipe, token values, component tokens, fonts and CSS rules;
 `extendTheme` builds one theme on another. `slotted-build-theme` compiles a
 theme module to CSS at build time; `applyTheme` compiles and applies one at
 runtime.
+`applyTheme` adopts a constructed stylesheet, which a `style-src` policy
+without `'unsafe-inline'` does not refuse. A document without constructed
+stylesheets receives a `<style>` element, which carries the `nonce` option.
 
 Extending the shipped theme for one new accent:
 

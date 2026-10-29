@@ -98,18 +98,31 @@
       --slotted-data-grid-row-surface-hover,
       var(--slotted-tone-secondary-subtle-hover, ButtonFace)
     );
+    /**
+     * A run of selected rows reads as one block: the accent border mixed
+     * into the row's ground, the same border closing the run above and
+     * below, and every rule inside it — between rows and at a pinned zone's
+     * edge — tinted toward that border; no rail (R1). The ink stays the
+     * row's own. The ground mixes the border, which is the light accent in
+     * the dark scheme and the dark one in the light: at 20% it stands 1.3:1
+     * from the page in both on the default theme, above the stripe and the
+     * hover. The accent's surfaces read as nothing on a dark row, and its
+     * solid ink at any one share was twice as strong in light as in dark.
+     */
+    --_selected-edge: var(
+      --slotted-data-grid-row-border-color-selected,
+      var(--slotted-tone-accent-border, Highlight)
+    );
     --_selected: var(
       --slotted-data-grid-row-surface-selected,
-      var(--slotted-tone-accent-surface, Canvas)
+      color-mix(in oklab, var(--_selected-edge) 20%, var(--_surface))
     );
     --_selected-hover: var(
       --slotted-data-grid-row-surface-selected-hover,
-      var(--slotted-tone-accent-subtle-hover, ButtonFace)
+      color-mix(in oklab, var(--_selected-edge) 28%, var(--_surface))
     );
-    --_selected-text: var(
-      --slotted-data-grid-row-color-selected,
-      var(--slotted-tone-accent-text, CanvasText)
-    );
+    --_selected-text: var(--slotted-data-grid-row-color-selected, var(--_text));
+    --_selected-rule: color-mix(in oklab, var(--_selected-edge) 30%, var(--_selected));
     /**
      * The cursor and the range are one colour: the accent border, which holds
      * the non-text ratio against the page and against the accent ground it
@@ -1236,7 +1249,11 @@
 
   [data-ui-data-grid] [data-part-row] {
     background-color: var(--_surface);
-    transition: background-color var(--_transition);
+    /* The block's edges settle with its ground, not a frame before it. */
+    transition:
+      background-color var(--_transition),
+      border-color var(--_transition),
+      box-shadow var(--_transition);
   }
 
   /**
@@ -1419,6 +1436,31 @@
     :is([data-part-body], [data-part-pinned-rows])
     > [data-part-row][data-selected]:not([data-disabled]):hover {
     background-color: var(--_selected-hover);
+  }
+
+  /* The block's edges. The bottom is the row's own rule; the top is drawn
+     over the rule of the row above, by a shadow one rule tall, because a row
+     cannot reach its previous sibling. Inside a run the shadow takes the
+     inner tint. A head above, being sticky, paints over the shadow and its
+     own rule closes the block; a frame below closes it the same way. */
+  [data-ui-data-grid]:is([data-variant='ruled'], [data-variant='framed'])
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row][data-selected] {
+    border-block-end-color: var(--_selected-edge);
+    box-shadow: 0 calc(var(--_rule-width) * -1) 0 var(--_selected-edge);
+  }
+
+  [data-ui-data-grid]:is([data-variant='ruled'], [data-variant='framed'])
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row][data-selected]
+    + [data-part-row][data-selected] {
+    box-shadow: 0 calc(var(--_rule-width) * -1) 0 var(--_selected-rule);
+  }
+
+  [data-ui-data-grid][data-variant='framed']
+    :is([data-part-body], [data-part-pinned-rows])
+    > [data-part-row][data-selected]:last-child {
+    border-block-end-color: transparent;
   }
 
   [data-ui-data-grid] [data-part-row][data-disabled] {
@@ -1772,7 +1814,9 @@
     > :is([data-part-body], [data-part-pinned-rows])
     > [data-part-row][data-selected]
     > [data-pinned] {
-    background-color: var(--_selected);
+    /* The zone's edge inside the block is one of the block's inner rules. The
+     ground is the row's, inherited, so it follows the row's hover. */
+    --_rule: var(--_selected-rule);
   }
 
   /* The last pinned cell of each zone draws the edge: the same hairline as
@@ -1916,13 +1960,6 @@
     inset-inline-start: 0;
     position: sticky;
     z-index: calc(var(--slotted-z-index-sticky, 100) + 2);
-  }
-
-  [data-ui-data-grid]
-    :is([data-part-body], [data-part-pinned-rows])
-    > [data-part-row][data-selected]
-    > [data-part-selection] {
-    background-color: var(--_selected);
   }
 
   [data-ui-data-grid] [role='row'] > [data-part-selection] > [data-ui-checkbox] {

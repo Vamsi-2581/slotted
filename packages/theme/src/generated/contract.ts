@@ -3266,6 +3266,7 @@ export type ComponentToken =
   | '--slotted-data-grid-resize-guide-color'
   | '--slotted-data-grid-resize-guide-width'
   | '--slotted-data-grid-row-block-size'
+  | '--slotted-data-grid-row-border-color-selected'
   | '--slotted-data-grid-row-color-selected'
   | '--slotted-data-grid-row-max-block-size'
   | '--slotted-data-grid-row-surface-hover'
@@ -5534,6 +5535,7 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-data-grid-resize-guide-color",
   "--slotted-data-grid-resize-guide-width",
   "--slotted-data-grid-row-block-size",
+  "--slotted-data-grid-row-border-color-selected",
   "--slotted-data-grid-row-color-selected",
   "--slotted-data-grid-row-max-block-size",
   "--slotted-data-grid-row-surface-hover",

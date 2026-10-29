@@ -510,6 +510,136 @@ export const Selection: Story = {
   render: () => <SelectionDemo />,
 };
 
+/** The keys of the shipments at these one-based positions. */
+const nth = (...positions: number[]) => positions.map((position) => `SHP-${20480 + position}`);
+
+const SELECTION_SCENES: {
+  label: string;
+  note: string;
+  props: Partial<DataGridProps<Shipment>>;
+  room?: 'desktop' | 'phone';
+}[] = [
+  {
+    label: 'ruled: a run and a lone row',
+    note: 'Rows 2–4 are one block; row 7 stands alone; row 10, the last, closes on its own edge.',
+    props: { defaultValue: nth(2, 3, 4, 7, 10), rows: FIFTY.slice(0, 10), variant: 'ruled' },
+  },
+  {
+    label: 'framed: runs at both ends',
+    note: 'The head closes the top run and the frame closes the bottom one.',
+    props: { defaultValue: nth(1, 2, 7, 8), rows: EIGHT, variant: 'framed' },
+  },
+  {
+    label: 'framed, striped',
+    note: 'A run over even and odd rows: one ground for both.',
+    props: { defaultValue: nth(3, 4, 5), rows: EIGHT, striped: true },
+  },
+  {
+    label: 'plain',
+    note: 'No rules to tint: the ground alone.',
+    props: { defaultValue: nth(2, 3, 6), rows: EIGHT, variant: 'plain' },
+  },
+  {
+    label: 'pinned zones, scrolled',
+    note: 'Scroll sideways: the zone edges inside the block take the inner tint, the shadow stays.',
+    props: {
+      defaultColumnState: { pinned: { start: ['id'], end: ['priority'] } },
+      defaultValue: nth(2, 3, 4),
+      rows: EIGHT,
+    },
+    room: 'phone',
+  },
+  {
+    label: 'every row',
+    note: 'The whole body is one block.',
+    props: { defaultValue: nth(1, 2, 3, 4, 5, 6), rows: FIFTY.slice(0, 6), variant: 'ruled' },
+  },
+  {
+    label: 'single',
+    note: 'One selected row; press another to move it.',
+    props: { defaultValue: 'SHP-20483', rows: EIGHT, selectionMode: 'single' },
+  },
+  {
+    label: 'the cursor in a selected row',
+    note: 'The cursor rests on Customer of row 3; Enter edits it inside the block.',
+    props: {
+      defaultCurrent: { row: 'SHP-20483', column: 'customer' },
+      defaultValue: nth(2, 3, 4),
+      rows: EIGHT,
+    },
+  },
+  {
+    label: 'compact',
+    note: 'The block at the compact density.',
+    props: { defaultValue: nth(2, 3, 4), density: 'compact', rows: EIGHT },
+  },
+  {
+    label: 'dense',
+    note: 'The block at the dense density.',
+    props: { defaultValue: nth(2, 3, 4), density: 'dense', rows: EIGHT },
+  },
+  {
+    label: 'grouped',
+    note: 'A group row between two selected rows ends one block and starts the next.',
+    props: {
+      defaultQuery: { ...emptyQuery(), group: ['carrier'] },
+      defaultValue: nth(1, 2, 3, 4, 5, 6, 7, 8),
+      rows: FIFTY.slice(0, 12),
+    },
+  },
+  {
+    label: 'a detail open under a selected row',
+    note: 'Row 2 is selected and expanded; the detail is outside the block.',
+    props: {
+      defaultExpanded: ['SHP-20482'],
+      defaultValue: nth(2, 3),
+      renderDetail: (row) => (
+        <Text size="sm" tone="muted">
+          {row.customer} · {row.destination} · {row.carrier}
+        </Text>
+      ),
+      rows: EIGHT,
+    },
+  },
+  {
+    label: 'pinned rows',
+    note: 'Row 1 pinned to the top and row 8 to the bottom, both selected with their neighbours.',
+    props: {
+      defaultValue: nth(1, 2, 8, 7),
+      pinnedRows: { top: ['SHP-20481'], bottom: ['SHP-20488'] },
+      rows: FIFTY.slice(0, 20),
+    },
+  },
+  {
+    label: 'a disabled row inside a run',
+    note: 'Row 4 is disabled and unselected; it splits the run in two.',
+    props: { defaultValue: nth(2, 3, 5, 6), disabledKeys: nth(4), rows: EIGHT },
+  },
+  {
+    label: 'ten thousand rows, windowed',
+    note: 'Two rows in every three selected; scroll to see the blocks enter and leave the window.',
+    props: {
+      defaultValue: TEN_THOUSAND.filter((_row, index) => index % 3 !== 2).map((row) => row.id),
+      rows: TEN_THOUSAND,
+    },
+  },
+];
+
+/** Every arrangement a selected row meets, on one page, for review in both schemes. */
+export const SelectionLab: Story = {
+  render: () => (
+    <div className="slotted-demo-grid" data-columns="1">
+      {SELECTION_SCENES.map(({ label, note, props, room = 'desktop' }) => (
+        <Scene key={label} label={label} note={note}>
+          <Screen room={room} size="tall">
+            <Shipments selectionMode="multiple" {...props} />
+          </Screen>
+        </Scene>
+      ))}
+    </div>
+  ),
+};
+
 const RangeDemo = () => {
   const [range, setRange] = useState<GridRange | null>({
     anchor: { row: 'SHP-20482', column: 'customer' },

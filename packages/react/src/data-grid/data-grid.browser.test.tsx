@@ -141,6 +141,44 @@ describe('a grid reading its rows again', () => {
 });
 
 /**
+ * A run of selected rows is one block: the accent edge above its first row and
+ * under its last, the inner tint between, and the pinned chooser on the row's
+ * own ground — it held the resting selected ground while the row took the
+ * hovered one.
+ */
+describe('DataGrid selected rows', () => {
+  it('draws one block around a run and keeps pinned cells on the hovered ground', async () => {
+    const { container } = render(
+      <DataGrid<Entry>
+        aria-label="Entries"
+        columns={COLUMNS}
+        defaultValue={['E1', 'E2']}
+        rowKey="id"
+        rows={ROWS.slice(0, 4)}
+        selectionMode="multiple"
+        variant="ruled"
+        virtualize={false}
+      />,
+    );
+    await frame();
+    const [, first, second] = container.querySelectorAll<HTMLElement>('[data-part="row"]');
+    const firstStyle = getComputedStyle(first!);
+    const secondStyle = getComputedStyle(second!);
+
+    expect(firstStyle.boxShadow).not.toBe('none');
+    expect(secondStyle.boxShadow).not.toBe(firstStyle.boxShadow);
+    expect(secondStyle.borderBottomColor).toBe(firstStyle.borderBottomColor);
+
+    await userEvent.hover(second!);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    const chooser = second!.querySelector<HTMLElement>('[data-part="selection"]')!;
+
+    expect(getComputedStyle(chooser).backgroundColor).toBe(secondStyle.backgroundColor);
+    expect(secondStyle.backgroundColor).not.toBe(firstStyle.backgroundColor);
+  });
+});
+
+/**
  * A template that fits the frame scrolls nothing. The last column's resizer
  * is held inside the row, but the rule found it as the row's last child, and
  * with columns that yield to the frame the pop-in header comes after it: half

@@ -1256,9 +1256,11 @@
   }
 
   /* The table view: in the plot's box, scrolling inside it, in the document's
-     direction, on the plot's ground. */
+     direction, on the plot's ground. The ground has a token of its own because
+     `--slotted-chart-surface` is what the series mix with, so it stays opaque
+     where a translucent theme makes the table translucent. */
   [data-ui-chart] [data-part-table-region] {
-    background-color: var(--_chart-surface);
+    background-color: var(--slotted-chart-table-surface, var(--_chart-surface));
     border-radius: var(--_radius);
     inset: 0;
     overflow: auto;
@@ -1316,7 +1318,10 @@
   }
 
   [data-ui-chart] [data-part-table] thead th {
-    background-color: var(--_chart-surface);
+    background-color: var(
+      --slotted-chart-table-header-surface,
+      var(--slotted-chart-table-surface, var(--_chart-surface))
+    );
     color: var(--slotted-text-muted, GrayText);
     font-weight: var(--slotted-font-weight-medium, 500);
     inset-block-start: 0;

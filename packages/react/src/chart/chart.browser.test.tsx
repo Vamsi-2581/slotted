@@ -57,3 +57,51 @@ describe('the header of a card chart', () => {
     expect(Math.abs(centre(actions) - centre(toolbarButton))).toBeLessThan(0.5);
   });
 });
+
+/**
+ * `--slotted-chart-surface` is the opaque ground the series are mixed with, so a
+ * translucent theme could not make the table view translucent without it.
+ */
+describe('the table view of a chart', () => {
+  it('paints its region and its header from tokens of its own', () => {
+    const tokens = {
+      '--slotted-chart-surface': '#fff',
+      '--slotted-chart-table-surface': 'transparent',
+      '--slotted-chart-table-header-surface': 'rgb(0 0 0 / 0.2)',
+    } as CSSProperties;
+    const { container } = render(
+      <>
+        <Chart
+          data={data}
+          defaultTableOpen
+          palette="sequential"
+          series={[{ kind: 'line', field: 'revenue', label: 'Revenue' }]}
+          style={tokens}
+          title="With table tokens"
+          x={{ field: 'month' }}
+        />
+        <Chart
+          data={data}
+          palette="sequential"
+          series={[{ kind: 'line', field: 'revenue', label: 'Revenue' }]}
+          style={{ '--slotted-chart-surface': '#fff' } as CSSProperties}
+          title="Without"
+          x={{ field: 'month' }}
+        />
+      </>,
+    );
+    const [themed, plain] = container.querySelectorAll<HTMLElement>('[data-ui="chart"]');
+    const region = themed!.querySelector('[data-part="table-region"]')!;
+    const headers = [...themed!.querySelectorAll('[data-part="table"] thead th')];
+    const slot = (chart: HTMLElement) =>
+      getComputedStyle(chart).getPropertyValue('--_chart-slot-2');
+
+    expect(getComputedStyle(region).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(headers.length).toBeGreaterThan(0);
+    for (const header of headers) {
+      expect(getComputedStyle(header).backgroundColor).toBe('rgba(0, 0, 0, 0.2)');
+    }
+    expect(slot(themed!)).not.toBe('');
+    expect(slot(themed!)).toBe(slot(plain!));
+  });
+});

@@ -84,7 +84,10 @@ has.
    `--slotted-drawer-footer-backdrop-filter`, and a dialog's panel
    `--slotted-dialog-surface` with `--slotted-dialog-backdrop-filter`. The
    chart's tooltip, menu and help read one filter,
-   `--slotted-chart-overlay-backdrop-filter`.
+   `--slotted-chart-overlay-backdrop-filter`. A chart's table view takes
+   `--slotted-chart-table-surface` and its sticky header
+   `--slotted-chart-table-header-surface`; `--slotted-chart-surface` stays
+   opaque, because the series colours mix with it.
 
 ## 4. Restyle a control
 

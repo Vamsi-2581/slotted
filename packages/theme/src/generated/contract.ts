@@ -3038,6 +3038,8 @@ export type ComponentToken =
   | '--slotted-chart-sequential-color'
   | '--slotted-chart-skeleton-hole'
   | '--slotted-chart-surface'
+  | '--slotted-chart-table-header-surface'
+  | '--slotted-chart-table-surface'
   | '--slotted-chart-tooltip-surface'
   | '--slotted-checkbox-active-background'
   | '--slotted-checkbox-background'
@@ -5313,6 +5315,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-chart-sequential-color",
   "--slotted-chart-skeleton-hole",
   "--slotted-chart-surface",
+  "--slotted-chart-table-header-surface",
+  "--slotted-chart-table-surface",
   "--slotted-chart-tooltip-surface",
   "--slotted-checkbox-active-background",
   "--slotted-checkbox-background",

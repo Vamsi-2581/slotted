@@ -95,6 +95,7 @@ export function FieldGroup({
   disabled,
   id,
   invalid,
+  kind,
   labelPlacement,
   messages: words,
   necessity,
@@ -150,6 +151,7 @@ export function FieldGroup({
 
   const value: FieldGroupContextValue = {
     ids,
+    kind: kind ?? 'question',
     /**
      * One step louder than a field's own. `inline-message` defines `md` as the
      * message of a section and `sm` as the message of a field, and what a group

@@ -47,7 +47,10 @@ export function FieldGroupLegend({
 }: FieldGroupLegendProps) {
   const group = useFieldGroup();
   const own = useMessages(fieldMessages);
-  const mark = necessityMark(group?.necessity ?? 'mark', group?.required === true, group?.t ?? own);
+  const mark =
+    group?.kind === 'section'
+      ? null
+      : necessityMark(group?.necessity ?? 'mark', group?.required === true, group?.t ?? own);
 
   const rootProps: FieldGroupLegendRootProps = keyedProps({
     ...nativeProps,
@@ -55,9 +58,12 @@ export function FieldGroupLegend({
       <>
         {children}
         {mark === null ? null : (
-          <span {...withSelectorKey(mark.hidden ? { 'aria-hidden': true } : {}, 'part', 'mark')}>
-            {mark.text}
-          </span>
+          <>
+            {/* Text rather than a margin, so the accessible name reads `Note (optional)`. */}{' '}
+            <span {...withSelectorKey(mark.hidden ? { 'aria-hidden': true } : {}, 'part', 'mark')}>
+              {mark.text}
+            </span>
+          </>
         )}
       </>
     ),

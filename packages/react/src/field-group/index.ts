@@ -10,6 +10,7 @@ export type {
   FieldGroupContentRootProps,
   FieldGroupContextValue,
   FieldGroupIds,
+  FieldGroupKind,
   FieldGroupLegendProps,
   FieldGroupLegendRootProps,
   FieldGroupMessageProps,

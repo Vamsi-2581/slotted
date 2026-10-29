@@ -39,6 +39,7 @@
     "fieldGroup": {
       "nativeElement": "fieldset",
       "defaults": {
+        "kind": "question",
         "size": "md",
         "orientation": "vertical",
         "necessity": "mark"

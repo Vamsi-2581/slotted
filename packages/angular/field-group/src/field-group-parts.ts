@@ -26,9 +26,13 @@ import { SlFieldGroup } from './field-group';
   exportAs: 'slFieldGroupLegend',
   template: `<ng-content />
     @if (mark(); as text) {
-      <span data-part="mark" data-part-mark="" [attr.aria-hidden]="markHidden() ? 'true' : null">{{
-        text
-      }}</span>
+      <!-- Text rather than a margin, so the accessible name reads "Note (optional)". -->
+      &ngsp;<span
+        data-part="mark"
+        data-part-mark=""
+        [attr.aria-hidden]="markHidden() ? 'true' : null"
+        >{{ text }}</span
+      >
     }`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
@@ -44,7 +48,9 @@ export class SlFieldGroupLegend {
 
   protected readonly legendId = computed(() => this.writtenId ?? this.group.ids().legend);
   private readonly necessity = computed(() =>
-    necessityMark(this.group.resolvedNecessity(), this.group.required() === true, this.group.t),
+    this.group.kind() === 'section'
+      ? null
+      : necessityMark(this.group.resolvedNecessity(), this.group.required() === true, this.group.t),
   );
   protected readonly markHidden = computed(() => this.necessity()?.hidden === true);
   protected readonly mark = computed(() => this.necessity()?.text ?? null);

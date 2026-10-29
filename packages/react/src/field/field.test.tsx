@@ -216,6 +216,23 @@ describe('Field', () => {
     expect(screen.queryByText('*')).not.toBeInTheDocument();
   });
 
+  /**
+   * The gap on screen is CSS, and an accessible name is computed from text: with
+   * no space in the DOM the control read as `Note(optional)`.
+   */
+  it('separates the necessity word from the label in the accessible name', () => {
+    render(
+      <FieldDefaultsProvider necessity="optional">
+        <Field>
+          <FieldLabel>Note</FieldLabel>
+          <TextField />
+        </Field>
+      </FieldDefaultsProvider>,
+    );
+
+    expect(screen.getByRole('textbox', { name: 'Note (optional)' })).toBeInTheDocument();
+  });
+
   it('speaks the necessity words of the language in force, and lets a field lay its own over them', () => {
     render(
       <SlottedProvider locale="pt-BR" catalogs={{ 'pt-BR': PT_BR }}>

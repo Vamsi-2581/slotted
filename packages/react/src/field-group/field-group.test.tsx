@@ -3,7 +3,8 @@ import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
 import contract from '../../../../specs/components/field-group/contract.json';
-import { Field, FieldControl, FieldLabel } from '../field';
+import { Field, FieldControl, FieldDefaultsProvider, FieldLabel } from '../field';
+import { TextField } from '../text-field';
 import {
   FieldGroup,
   FieldGroupContent,
@@ -155,6 +156,39 @@ describe('FieldGroup', () => {
 
     expect(screen.getByText('*')).toHaveAttribute('data-part', 'mark');
     expect(screen.getByTestId('field')).not.toHaveAttribute('data-required');
+  });
+
+  /**
+   * A section is a topic rather than a question: its legend says nothing about
+   * necessity, and its fields keep the style the application set.
+   */
+  it('says nothing about the necessity of a section and leaves its fields the application’s style', () => {
+    render(
+      <FieldDefaultsProvider necessity="optional">
+        <FieldGroup kind="section">
+          <FieldGroupLegend>Value</FieldGroupLegend>
+          <FieldGroupContent>
+            <Field>
+              <FieldLabel>Note</FieldLabel>
+              <TextField />
+            </Field>
+          </FieldGroupContent>
+        </FieldGroup>
+      </FieldDefaultsProvider>,
+    );
+
+    expect(screen.getByRole('group', { name: 'Value' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Note (optional)' })).toBeInTheDocument();
+  });
+
+  it('separates the necessity word from the legend in the accessible name', () => {
+    render(
+      <FieldGroup necessity="optional">
+        <FieldGroupLegend>Value</FieldGroupLegend>
+      </FieldGroup>,
+    );
+
+    expect(screen.getByRole('group', { name: 'Value (optional)' })).toBeInTheDocument();
   });
 
   it('says the set’s necessity in words when the application asks for words', () => {

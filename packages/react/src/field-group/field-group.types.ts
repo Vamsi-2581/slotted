@@ -3,6 +3,13 @@ import type { ComponentPropsWithRef, HTMLAttributes, ReactNode } from 'react';
 
 import type { FieldLabelPlacement, FieldMessageProps, FieldNecessity, FieldSize } from '../field';
 
+/**
+ * Whether the group asks something. A `question` (a set of radios) states its
+ * own necessity on the legend; a `section` ("Address") is a topic, and says
+ * nothing about it.
+ */
+export type FieldGroupKind = 'question' | 'section';
+
 /** How the fields inside the group flow. */
 export type FieldGroupOrientation = 'vertical' | 'horizontal';
 
@@ -15,6 +22,7 @@ export interface FieldGroupIds {
 
 export interface FieldGroupContextValue {
   ids: FieldGroupIds;
+  kind: FieldGroupKind;
   messageSize: 'sm' | 'md';
   registerMessage: (slot: 'description' | 'error', present: boolean) => void;
   necessity: FieldNecessity;
@@ -57,6 +65,8 @@ export interface FieldGroupProps extends Omit<ComponentPropsWithRef<'fieldset'>,
   id?: string | undefined;
   /** Unstated rather than `false`. Writes `data-invalid` on the fieldset. */
   invalid?: boolean | undefined;
+  /** A `section` draws no necessity on its legend. Defaults to `question`. */
+  kind?: FieldGroupKind | undefined;
   /** Provided to every field inside, unless the field states its own. */
   labelPlacement?: FieldLabelPlacement | undefined;
   /**

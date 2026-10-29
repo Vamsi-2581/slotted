@@ -112,7 +112,8 @@
    */
   [data-ui-field-group] > [data-part-legend] > [data-part-mark] {
     color: var(--slotted-field-group-mark-color, var(--slotted-tone-danger-text));
-    margin-inline-start: var(--slotted-field-group-mark-gap, var(--slotted-space-2, 0.25rem));
+    /* The space written before the mark is the distance; the token adds to it. */
+    margin-inline-start: var(--slotted-field-group-mark-gap, 0);
     overflow-wrap: normal;
     /* Its own bidi run, for the reason the field's marker records: a Latin
        legend in a right-to-left document is one left-to-right run, and a marker

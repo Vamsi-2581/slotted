@@ -94,9 +94,12 @@ export function FieldLabel({
       <>
         {children}
         {mark === null ? null : (
-          <span {...withSelectorKey(mark.hidden ? { 'aria-hidden': true } : {}, 'part', 'mark')}>
-            {mark.text}
-          </span>
+          <>
+            {/* Text rather than a margin, so the accessible name reads `Note (optional)`. */}{' '}
+            <span {...withSelectorKey(mark.hidden ? { 'aria-hidden': true } : {}, 'part', 'mark')}>
+              {mark.text}
+            </span>
+          </>
         )}
       </>
     ),

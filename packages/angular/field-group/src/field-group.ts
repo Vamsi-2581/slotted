@@ -27,6 +27,13 @@ import { fieldMessages, type FieldMessages, type PartialMessages } from '@slotte
 
 import { SlFieldGroupDescription, SlFieldGroupError } from './field-group-parts';
 
+/**
+ * Whether the group asks something. A `question` (a set of radios) states its
+ * own necessity on the legend; a `section` ("Address") is a topic, and says
+ * nothing about it.
+ */
+export type FieldGroupKind = 'question' | 'section';
+
 /** How the fields inside the group flow. */
 export type FieldGroupOrientation = 'vertical' | 'horizontal';
 
@@ -145,6 +152,8 @@ export class SlFieldGroup extends SlFieldDefaultsSource {
   readonly disabled = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),
   });
+  /** A `section` draws no necessity on its legend. */
+  readonly kind = input<FieldGroupKind>('question');
   /** Unstated rather than `false`. Writes `data-invalid` on the fieldset. */
   readonly invalid = input<boolean | undefined, boolean | string | undefined>(undefined, {
     transform: (value) => (value === undefined ? undefined : booleanAttribute(value)),

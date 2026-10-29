@@ -83,7 +83,9 @@ Fila: #30–#36. Fatias: (1) headers #30 #31 #32; (2) chart #36; (3) drawer shee
 - Limites #35: com `chosen` presente o rótulo fica sob ele (mesma aresta); rótulo com duas linhas excede o scroll-padding; select com campo de pesquisa (`[data-part-list]`) sem teste browser.
 - Fila vazia (2026-10-29). Não feito: `pnpm demo:refresh`, release.
 - Avaliação `brand-theme` (theme-app) atende: `docs/history/evals/2026-10-29-agent-docs-chart-table.md`.
-- Próxima ação: `pnpm release` (beta.27) quando o CI do HEAD passar.
+- CI `40925149492` (`e5ecaa4d`) verde.
+- Release `v0.1.0-beta.27` (`96c78d0d`): workflow `40928169309`; os seis pacotes em `latest` = `0.1.0-beta.27`.
+- Próxima ação: `pnpm demo:refresh` quando pedido; `gh issue list --label finding --state open` quando chegarem findings novos (fila vazia).
 
 ## Sessão 2026-10-29 (5)
 
@@ -98,4 +100,20 @@ Fila: #37 #38 #39.
 - Testes: dialog browser 12/12, React dialog/alert-dialog unit 141/141, Angular dialog 56/56, contratos 2184/2184, test:docs verde; tooltip browser 1/1, React tooltip/field unit 79/79, Angular tooltip 25/25, styles raiz 270/270; `pnpm check` verde.
 - Nota: o documento de teste browser não carrega os tokens de movimento; um teste que lê `animation` define `--slotted-duration-*` e `--slotted-easing-*` à mão.
 - Avaliação `brand-theme` (theme-app) atende: `docs/history/evals/2026-10-29-agent-docs-chart-table.md`.
-- Próxima ação: `pnpm release` (beta.27) quando o CI do HEAD passar.
+- CI `40925149492` (`e5ecaa4d`) verde.
+- Release `v0.1.0-beta.27` (`96c78d0d`): workflow `40928169309`; os seis pacotes em `latest` = `0.1.0-beta.27`.
+- Próxima ação: `pnpm demo:refresh` quando pedido; `gh issue list --label finding --state open` quando chegarem findings novos (fila vazia).
+
+## Sessão 2026-10-29 (6)
+
+Fila: #40 #41.
+
+| Item | Commit | Estado |
+| ---- | ------ | ------ |
+| #41 field/field-group: espaço em texto antes do mark (React `{' '}`, Angular `&ngsp;`); `--slotted-field-mark-gap` e `--slotted-field-group-mark-gap` com padrão 0 (o espaço é a distância); harness com o espaço | ver `git log` | commit local, sem push |
+| #40 field-group: `kind: 'question' \| 'section'` (padrão `question`); `section` não desenha necessidade na legenda e não altera o `necessity` dado aos campos; contrato `defaults.kind`; forms.md FM (tópicos com `kind` `section`) | ver `git log` | commit local, sem push |
+
+- Testes: React unit field/field-group/checkbox/checkbox-group/radio-group/switch/text-field 206/206 (3 falham antes), Angular field/field-group/checkbox/checkbox-group/radio-group 134/134 (3 falham antes), styles 105/105, contratos field/field-group 41/41, agent-docs 137/137, `pnpm check` verde.
+- Limites: distância visual label→mark passa de 0.25rem a um espaço da fonte do label (≈0.25em); sem captura visual. Nome acessível verificado só em jsdom e textContent, não no Chrome real.
+- Release que inclua este commit corre `pnpm eval:agent-docs` (forms.md mudou).
+- Próxima ação: `git push` após aprovação; depois `pnpm demo:refresh` quando pedido.

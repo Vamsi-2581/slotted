@@ -223,6 +223,18 @@ describe('SlField', () => {
     expect(markOf('f')).toBeNull();
   });
 
+  /**
+   * The gap on screen is CSS, and an accessible name is computed from text: with
+   * no space in the DOM the control read as `Note(optional)`.
+   */
+  it('separates the necessity word from the label in the accessible name', () => {
+    const fixture = renderTemplate(
+      `<div slField necessity="optional"><label slFieldLabel>Note</label></div>`,
+    );
+
+    expect(root(fixture, 'label').textContent?.trim()).toBe('Note (optional)');
+  });
+
   it('speaks the necessity words of the language in force, and follows a change of it in place', () => {
     const locale = signal('pt-BR');
     const fixture = renderTemplate(

@@ -211,6 +211,34 @@ describe('SlFieldGroup', () => {
     expect(root(fixture, '#one').querySelector('[data-part="mark"]')).toBeNull();
   });
 
+  /**
+   * A section is a topic rather than a question: its legend says nothing about
+   * necessity, and its fields keep the style the application set.
+   */
+  it('says nothing about the necessity of a section and leaves its fields the application’s style', () => {
+    const fixture = renderTemplate(
+      `<fieldset slFieldGroup necessity="optional">
+         <fieldset slFieldGroup kind="section">
+           <legend slFieldGroupLegend>Value</legend>
+           <div slField id="note"><label slFieldLabel>Note</label></div>
+         </fieldset>
+       </fieldset>`,
+    );
+
+    expect(root(fixture, 'legend').textContent?.trim()).toBe('Value');
+    expect(root(fixture, '#note label').textContent?.trim()).toBe('Note (optional)');
+  });
+
+  it('separates the necessity word from the legend in the accessible name', () => {
+    const fixture = renderTemplate(
+      `<fieldset slFieldGroup necessity="optional">
+         <legend slFieldGroupLegend>Value</legend>
+       </fieldset>`,
+    );
+
+    expect(root(fixture, 'legend').textContent?.trim()).toBe('Value (optional)');
+  });
+
   it('says the set’s necessity in words when the page asks for words', () => {
     const fixture = renderTemplate(
       `<fieldset slFieldGroup required necessity="words">

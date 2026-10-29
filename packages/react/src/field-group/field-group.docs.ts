@@ -185,6 +185,13 @@ export const REACT_FIELD_GROUP_DOCS = {
         'How the set’s necessity is said on its legend — an asterisk, (optional) on an optional set only, both words, or nothing — and the style provided to every field inside',
       ],
       [
+        'kind',
+        "'question' | 'section'",
+        'question',
+        'FieldGroup',
+        'A section names a topic rather than asking something, so its legend draws no necessity and its fields keep the style the application set',
+      ],
+      [
         'messages',
         'Partial<FieldMessages>',
         '—',

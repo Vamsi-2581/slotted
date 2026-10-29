@@ -155,7 +155,12 @@ test('leaves every shared state unset, so the application can answer it', () => 
     assert.ok(group.capabilities.includes(capability), `the group cannot be ${capability}`);
     assert.ok(!(capability in group.defaults), `${capability} defaults instead of deferring`);
   }
-  assert.deepEqual(Object.keys(group.defaults).sort(), ['necessity', 'orientation', 'size']);
+  assert.deepEqual(Object.keys(group.defaults).sort(), [
+    'kind',
+    'necessity',
+    'orientation',
+    'size',
+  ]);
 });
 
 /**

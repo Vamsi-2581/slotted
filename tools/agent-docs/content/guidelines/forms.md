@@ -286,7 +286,7 @@ Level: SHOULD
 Applies to: a form with more than six fields, or with two or more topics
 Rule: The fields are split by topic into `field-group`s, each with a legend that names the topic; consecutive groups stand apart by `--slotted-form-section-gap`, a step larger than the gap between two fields.
 Why: A long form whose fields all stand at one distance shows no structure, and a reader cannot tell where one topic ends.
-Do: Write each topic as a `field-group` with a `legend`, the groups as direct children of `form`; set `--slotted-form-section-gap` on the theme to change the step.
+Do: Write each topic as a `field-group` whose `kind` is `section`, with a `legend`, the groups as direct children of `form`; set `--slotted-form-section-gap` on the theme to change the step.
 Don't: Write a margin, a heading or a separator of the page's own between two groups, or hold seven fields in one run with no group.
 Check: A form with more than six fields holds at least two `field-group`s, and two consecutive groups stand further apart than two fields of one group.
 

@@ -209,7 +209,9 @@
   [data-ui-field] > [data-part-label] > [data-part-mark],
   [data-ui-field] > [data-part-header] > [data-part-label] > [data-part-mark] {
     color: var(--slotted-field-mark-color, var(--slotted-tone-danger-text));
-    margin-inline-start: var(--slotted-field-mark-gap, var(--slotted-space-2, 0.25rem));
+    /* The distance is the space written before the mark, which the accessible
+       name needs as text; the token adds to it. */
+    margin-inline-start: var(--slotted-field-mark-gap, 0);
     /* The label breaks anywhere; the necessity word never does. `(required)`
        split across two lines as `(re` and `quired)` in the 240-pixel capture,
        because a rule for one unbreakable German noun had reached the one part

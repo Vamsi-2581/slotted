@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
-import { userEvent } from 'vitest/browser';
+import { afterEach, describe, expect, it } from 'vitest';
+import { page, userEvent } from 'vitest/browser';
 
 import {
   AlertDialog,
@@ -248,5 +248,47 @@ describe('a full-screen dialog without a body', () => {
 
     expect(Math.round(footer.getBoundingClientRect().bottom)).toBe(window.innerHeight);
     expect(Math.round(button.getBoundingClientRect().bottom + inset)).toBe(window.innerHeight);
+  });
+});
+
+/**
+ * Every size read `--slotted-dialog-measure`, so a theme could not widen one
+ * step without collapsing all of them to one width.
+ */
+describe('the measure of a dialog size', () => {
+  afterEach(async () => {
+    await page.viewport(412, 915);
+  });
+
+  /* Wide enough that a narrow layer does not take the panel to the whole screen. */
+  const measure = async (size: 'sm' | 'md') => {
+    await page.viewport(1280, 915);
+    render(
+      <Dialog defaultOpen size={size}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Title</DialogTitle>
+          </DialogHeader>
+          <DialogBody>Body</DialogBody>
+        </DialogContent>
+      </Dialog>,
+    );
+    await frame();
+    const content = document.querySelector('[data-ui="dialog"] [data-part="content"]')!;
+    return getComputedStyle(content).maxInlineSize;
+  };
+
+  it('reads a token of its own before the shared one', async () => {
+    document.documentElement.style.setProperty('--slotted-dialog-measure-sm', '30rem');
+    try {
+      expect(await measure('sm')).toBe('480px');
+    } finally {
+      document.documentElement.style.removeProperty('--slotted-dialog-measure-sm');
+    }
+  });
+
+  it('holds the form measure and the panel’s inline padding at md', async () => {
+    /* 40rem of form and 1.5rem of padding on each side. */
+    expect(await measure('md')).toBe('688px');
   });
 });

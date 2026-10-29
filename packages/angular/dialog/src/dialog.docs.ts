@@ -593,7 +593,14 @@ const composition = apiRows([
     'length',
     'from size',
     'the root part',
-    'The maximum width of the panel, for a width the five sizes do not hold, such as a two-column form at 46rem. Set it with a style attribute on one dialog, with a rule for a region, or once in the theme. It takes precedence over size.',
+    'The maximum width of the panel, for a width the five sizes do not hold, such as a two-column form at 46rem. Set it with a style attribute on one dialog, with a rule for a region, or once in the theme. It takes precedence over size, and a step token takes precedence over it.',
+  ],
+  [
+    '--slotted-dialog-measure-sm, -md, -lg, -xl',
+    'length',
+    'from size',
+    'the root part',
+    'The maximum width of one size step, read before --slotted-dialog-measure, so a theme widens one step and keeps the others.',
   ],
   [
     'container',
@@ -695,7 +702,7 @@ const sharedApi: ApiTuple[] = [
     "'sm' | 'md' | 'lg' | 'xl' | 'full'",
     'md',
     'sl-dialog, provideDialogDefaults',
-    'The maximum width of the panel: 24rem, 32rem, 42rem, 56rem, or the whole layer less its padding. For another width, set --slotted-dialog-measure.',
+    'The maximum width of the panel: 32rem, the form measure plus the panel padding (43rem by default), 48rem, 56rem, or the whole layer less its padding. For another width, set --slotted-dialog-measure, or --slotted-dialog-measure-sm, -md, -lg or -xl for one step.',
   ],
   [
     'placement',
@@ -837,7 +844,7 @@ export const ANGULAR_DIALOG_DOCS = {
               "'sm' | 'md' | 'lg' | 'xl' | 'full'",
               'sm',
               'sl-alert-dialog',
-              'The maximum width of the panel. sl-alert-dialog defaults to sm, 24rem.',
+              'The maximum width of the panel. sl-alert-dialog defaults to sm, 32rem.',
             ] as ApiTuple)
           : row[0] === 'initialFocus'
             ? ([

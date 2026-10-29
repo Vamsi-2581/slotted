@@ -3539,6 +3539,10 @@ export type ComponentToken =
   | '--slotted-dialog-description-color'
   | '--slotted-dialog-footer-surface'
   | '--slotted-dialog-measure'
+  | '--slotted-dialog-measure-lg'
+  | '--slotted-dialog-measure-md'
+  | '--slotted-dialog-measure-sm'
+  | '--slotted-dialog-measure-xl'
   | '--slotted-dialog-padding-block'
   | '--slotted-dialog-padding-block-sm'
   | '--slotted-dialog-padding-inline'
@@ -5822,6 +5826,10 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-dialog-description-color",
   "--slotted-dialog-footer-surface",
   "--slotted-dialog-measure",
+  "--slotted-dialog-measure-lg",
+  "--slotted-dialog-measure-md",
+  "--slotted-dialog-measure-sm",
+  "--slotted-dialog-measure-xl",
   "--slotted-dialog-padding-block",
   "--slotted-dialog-padding-block-sm",
   "--slotted-dialog-padding-inline",

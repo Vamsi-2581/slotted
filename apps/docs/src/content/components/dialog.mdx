@@ -9,7 +9,7 @@ description: A window over the page that holds one task, such as an edit, a form
 
 ## Sizes
 
-`size` sets the panel's maximum width to one of five steps: `sm` (24rem) for one field or one question, `md` (32rem, the default) for a short form, `lg` (42rem) for a record with a table, `xl` (56rem) for two columns, and `full` for the whole layer less its padding. Set `--slotted-dialog-measure` on the dialog for a width the steps do not hold.
+`size` sets the panel's maximum width to one of five steps: `sm` (32rem) for one field or one question, `md` (the default: the form measure, 40rem, plus the panel's inline padding) for a form, `lg` (48rem) for a record with a table, `xl` (56rem) for two columns, and `full` for the whole layer less its padding. `--slotted-dialog-measure-sm`, `-md`, `-lg` and `-xl` retune one step; `--slotted-dialog-measure` sets every step, for a width the steps do not hold.
 
 <Example name="sizes" />
 

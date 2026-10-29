@@ -47,9 +47,21 @@
      * own image. It is a family token rather than a prop, so it is set per
      * instance with a style attribute, per region with a rule, or once for an
      * application in the theme; and because every step reads it, an explicit
-     * measure wins over the step whichever step is asked for.
+     * measure wins over the step whichever step is asked for. Each step reads
+     * a token of its own first (`--slotted-dialog-measure-<size>`), so a theme
+     * retunes one step and keeps the others.
+     *
+     * `md`, the default, holds a form: the form's own measure and the panel's
+     * inline padding on each side, so a form in a dialog keeps the column it
+     * has on a page.
      */
-    --_measure: var(--slotted-dialog-measure, 32rem);
+    --_measure: var(
+      --slotted-dialog-measure-md,
+      var(
+        --slotted-dialog-measure,
+        calc(var(--slotted-form-measure, 40rem) + 2 * var(--_padding-inline))
+      )
+    );
     /** The air between the panel and the edge of the layer. */
     --_layer-padding: var(--slotted-space-8, 1.5rem);
     /**
@@ -185,7 +197,7 @@
   }
 
   [data-ui-dialog][data-size='sm'] {
-    --_measure: var(--slotted-dialog-measure, 24rem);
+    --_measure: var(--slotted-dialog-measure-sm, var(--slotted-dialog-measure, 32rem));
     --_padding-inline: var(--slotted-dialog-padding-inline-sm, var(--slotted-space-7, 1.25rem));
     --_padding-block: var(--slotted-dialog-padding-block-sm, var(--slotted-space-6, 1rem));
     --_header-padding-block: var(--slotted-space-5, 0.75rem);
@@ -194,11 +206,11 @@
   }
 
   [data-ui-dialog][data-size='lg'] {
-    --_measure: var(--slotted-dialog-measure, 42rem);
+    --_measure: var(--slotted-dialog-measure-lg, var(--slotted-dialog-measure, 48rem));
   }
 
   [data-ui-dialog][data-size='xl'] {
-    --_measure: var(--slotted-dialog-measure, 56rem);
+    --_measure: var(--slotted-dialog-measure-xl, var(--slotted-dialog-measure, 56rem));
   }
 
   /**

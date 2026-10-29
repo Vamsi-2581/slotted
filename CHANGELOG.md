@@ -2,6 +2,13 @@
 
 Every release of the six `@slotted/*` packages, newest first, at one shared version. `pnpm release` writes each entry from the commit subjects since the previous `v*` tag. The `0.x` line changes its public API between beta releases without deprecation.
 
+## 0.1.0-beta.24 — 2026-10-29
+
+- test(angular): um arquivo espera a travessia do histórico de uma camada fechada antes do teardown
+- fix(overlays): o raio de um item é concêntrico com o painel em toda escala de cantos
+- fix(table): a camada sob uma coluna sticky lê --slotted-table-sticky-surface
+- feat(data-grid): uma corrida de linhas selecionadas é um bloco
+
 ## 0.1.0-beta.23 — 2026-10-28
 
 - feat(alert): AlertActions dá aos botões o tom do alert e o tamanho sm

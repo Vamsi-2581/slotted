@@ -33,6 +33,7 @@ describe('the stretched attachment trigger', () => {
     );
 
     const trigger = document.querySelector<HTMLElement>('[data-part="trigger"]')!;
+    expect(getComputedStyle(trigger).position).toBe('static');
     const points = [
       document.querySelector<HTMLElement>('[data-part="preview"]')!,
       document.querySelector<HTMLElement>('[data-part="detail"]')!,

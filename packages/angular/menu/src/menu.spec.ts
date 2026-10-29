@@ -255,6 +255,16 @@ describe('SlMenu', () => {
     expect(share?.getAttribute('data-tone')).toBe('danger');
   });
 
+  it('names an item by its label alone when a line describes it', async () => {
+    await open();
+
+    const share = item('Share');
+    const label = share?.querySelector(":scope > [data-part='label']");
+    expect(share?.getAttribute('aria-labelledby')).toBe(label?.id);
+    expect(label?.id).toBeTruthy();
+    expect(item('Duplicate')?.hasAttribute('aria-labelledby')).toBe(false);
+  });
+
   it('names a group by the label inside it', async () => {
     await open();
 

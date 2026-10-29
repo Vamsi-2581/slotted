@@ -3,7 +3,16 @@ import { keysMessages } from '@slotted/core/i18n';
 import type { KbdPlatform, KeysTranslator } from '@slotted/core/keys';
 import { canonicalKey, parseShortcut, resolveShortcut } from '@slotted/core/keys';
 import { createControllable } from '@slotted/core/state';
-import { createContext, useCallback, useContext, useEffect, useId, useState } from 'react';
+import {
+  Children,
+  createContext,
+  isValidElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+} from 'react';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 
 import { useMessages } from '../i18n';
@@ -92,12 +101,21 @@ export function MenuItemIcon({ children, ...nativeProps }: MenuItemIconProps) {
   return <span {...withSelectorKey(nativeProps, 'part', 'icon')}>{children}</span>;
 }
 
+/** The prefix of the ids an item's label and description take, so the item can point at them. */
+const MenuItemPartsContext = createContext<string | null>(null);
+
 export function MenuItemLabel({ children, ...nativeProps }: MenuItemLabelProps) {
-  return <span {...withSelectorKey(nativeProps, 'part', 'label')}>{children}</span>;
+  const ids = useContext(MenuItemPartsContext);
+  const props = { ...(ids === null ? {} : { id: `${ids}label` }), ...nativeProps };
+
+  return <span {...withSelectorKey(props, 'part', 'label')}>{children}</span>;
 }
 
 export function MenuItemDescription({ children, ...nativeProps }: MenuItemDescriptionProps) {
-  return <span {...withSelectorKey(nativeProps, 'part', 'description')}>{children}</span>;
+  const ids = useContext(MenuItemPartsContext);
+  const props = { ...(ids === null ? {} : { id: `${ids}description` }), ...nativeProps };
+
+  return <span {...withSelectorKey(props, 'part', 'description')}>{children}</span>;
 }
 
 /** What the item holds or counts, in its own column before the shortcut. */
@@ -176,7 +194,18 @@ function Item({
   const menu = useMenu();
   const surface = useMenuSurface();
   const platform = useResolvedPlatform(undefined);
-  const descriptionId = `${useId()}description`;
+  const ids = useId();
+  /* An item written from its parts holds its own label; one written from props
+     has its children wrapped in one. */
+  const parts = Children.toArray(children).flatMap((child) =>
+    isValidElement(child) ? [child.type] : [],
+  );
+  const written = parts.includes(MenuItemLabel);
+  /* The label names the item alone, or the line under it would be read twice:
+     once in the name, once as the description. */
+  const described = description !== undefined || parts.includes(MenuItemDescription);
+  const named =
+    nativeProps['aria-label'] !== undefined || nativeProps['aria-labelledby'] !== undefined;
 
   const select = (reason: MenuValueReason, source: Event | undefined) => {
     if (disabled === true) return;
@@ -254,19 +283,20 @@ function Item({
   const rootProps: MenuItemRootProps = keyedProps({
     ...nativeProps,
     children: (
-      <>
+      <MenuItemPartsContext.Provider value={ids}>
         {indicator}
         {icon === undefined ? null : <MenuItemIcon>{icon}</MenuItemIcon>}
-        <MenuItemLabel>{children}</MenuItemLabel>
+        {written ? children : <MenuItemLabel>{children}</MenuItemLabel>}
         {description === undefined ? null : (
-          <MenuItemDescription id={descriptionId}>{description}</MenuItemDescription>
+          <MenuItemDescription>{description}</MenuItemDescription>
         )}
         {meta === undefined ? null : <MenuItemMeta>{meta}</MenuItemMeta>}
         {shortcut === undefined ? null : <MenuItemShortcut keys={shortcut} />}
-      </>
+      </MenuItemPartsContext.Provider>
     ),
     ...(checked === undefined ? {} : { 'aria-checked': checked }),
-    ...(description === undefined ? {} : { 'aria-describedby': descriptionId }),
+    ...(described ? { 'aria-describedby': `${ids}description` } : {}),
+    ...(described && !named ? { 'aria-labelledby': `${ids}label` } : {}),
     ...(checked ? { 'data-checked': '' } : {}),
     ...(disabled === true ? { 'aria-disabled': true, 'data-disabled': '' } : {}),
     ...(shortcut === undefined ? {} : { 'aria-keyshortcuts': announce(shortcut, platform) }),

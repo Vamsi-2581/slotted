@@ -207,8 +207,14 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'angular',
       label: 'One choice among several',
       source: `<sl-menu-radio-group [(value)]="sort">
-  <button slMenuRadioItem value="name">Name</button>
-  <button slMenuRadioItem value="date">Date modified</button>
+  <button slMenuRadioItem value="name">
+    Name
+    <span slMenuItemDescription>A to Z</span>
+  </button>
+  <button slMenuRadioItem value="date">
+    Date modified
+    <span slMenuItemDescription>Newest first</span>
+  </button>
 </sl-menu-radio-group>`,
     }),
   },

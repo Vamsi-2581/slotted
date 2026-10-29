@@ -220,8 +220,12 @@ const scenes: ReferenceSceneMeta[] = [
       language: 'tsx',
       label: 'One choice among several',
       source: `<MenuRadioGroup value={sort} onValueChange={setSort}>
-  <MenuRadioItem value="name">Name</MenuRadioItem>
-  <MenuRadioItem value="date">Date modified</MenuRadioItem>
+  <MenuRadioItem value="name" description="A to Z">
+    Name
+  </MenuRadioItem>
+  <MenuRadioItem value="date" description="Newest first">
+    Date modified
+  </MenuRadioItem>
 </MenuRadioGroup>;`,
     }),
   },
@@ -654,8 +658,8 @@ const api = apiRows([
     'description',
     'ReactNode',
     '—',
-    'MenuItem',
-    'The line under the label, referenced with aria-describedby.',
+    'MenuItem, MenuCheckboxItem, MenuRadioItem',
+    'The line under the label, referenced with aria-describedby; the label alone names the item.',
   ],
   [
     'meta',

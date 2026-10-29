@@ -438,6 +438,41 @@ describe('Menu', () => {
     );
   });
 
+  it('names an item by its label and describes it by the line under it', async () => {
+    render(
+      <Basic>
+        <MenuRadioGroup value="a" onValueChange={() => undefined}>
+          <MenuRadioItem value="a" description="Buy or sell an asset">
+            Trade
+          </MenuRadioItem>
+        </MenuRadioGroup>
+      </Basic>,
+    );
+    await open();
+
+    const trade = screen.getByRole('menuitemradio', { name: 'Trade' });
+    expect(trade).toHaveAccessibleDescription('Buy or sell an asset');
+  });
+
+  it('places the parts an item is written from as its own children', async () => {
+    render(
+      <Basic>
+        <MenuRadioGroup value="a" onValueChange={() => undefined}>
+          <MenuRadioItem value="a">
+            <MenuItemLabel>Trade</MenuItemLabel>
+            <MenuItemDescription>Buy or sell an asset</MenuItemDescription>
+          </MenuRadioItem>
+        </MenuRadioGroup>
+      </Basic>,
+    );
+    await open();
+
+    const trade = screen.getByRole('menuitemradio', { name: 'Trade' });
+    expect(trade.querySelector(':scope > [data-part="description"]')).not.toBeNull();
+    expect(trade.querySelectorAll('[data-part="label"]')).toHaveLength(1);
+    expect(trade).toHaveAccessibleDescription('Buy or sell an asset');
+  });
+
   it('names a group by the label inside it', async () => {
     render(
       <Basic>

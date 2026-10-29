@@ -242,14 +242,20 @@ export const RadioItems: Story = {
     const [sort, setSort] = useState('name');
 
     return (
-      <Viewport>
+      <Viewport size="tall">
         <Menu defaultOpen={isolated(context)} portal={false}>
           <Trigger>Sort</Trigger>
           <MenuContent>
             <MenuRadioGroup onValueChange={setSort} value={sort}>
-              <MenuRadioItem value="name">Name</MenuRadioItem>
-              <MenuRadioItem value="date">Date modified</MenuRadioItem>
-              <MenuRadioItem value="size">Size</MenuRadioItem>
+              <MenuRadioItem description="A to Z" value="name">
+                Name
+              </MenuRadioItem>
+              <MenuRadioItem description="Newest first" value="date">
+                Date modified
+              </MenuRadioItem>
+              <MenuRadioItem description="Largest first" value="size">
+                Size
+              </MenuRadioItem>
             </MenuRadioGroup>
           </MenuContent>
         </Menu>

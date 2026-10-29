@@ -103,6 +103,7 @@ export interface MenuSelectEvent {
     '[attr.aria-checked]': 'role === "menuitem" ? null : isChecked()',
     '[attr.aria-disabled]': 'disabled() ? true : null',
     '[attr.aria-describedby]': 'describedBy() ?? null',
+    '[attr.aria-labelledby]': 'describedBy() === null ? null : labelId',
     '[attr.aria-keyshortcuts]': 'announced()',
     '[attr.data-disabled]': 'disabled() ? "" : null',
     '[attr.data-checked]': 'isChecked() ? "" : null',
@@ -119,7 +120,7 @@ export interface MenuSelectEvent {
       ></span>
     }
     <ng-content select="[slMenuItemIcon]" />
-    <span data-part="label" data-part-label=""><ng-content /></span>
+    <span data-part="label" data-part-label="" [id]="labelId"><ng-content /></span>
     <ng-content select="[slMenuItemDescription]" />
     <ng-content select="[slMenuItemMeta]" />
     @if (legend(); as printed) {
@@ -155,6 +156,11 @@ export class SlMenuItem {
 
   /** The line under the label, which describes the item rather than naming it. */
   readonly describedBy = signal<string | null>(null);
+  /**
+   * What names the item while a line describes it: the label alone, or the
+   * description would be read twice, once in the name and once after it.
+   */
+  protected readonly labelId = `sl-menu-label-${Math.random().toString(36).slice(2, 8)}`;
 
   private readonly menu = inject(SlMenu);
   private readonly group = inject(SlMenuRadioGroup, { optional: true });

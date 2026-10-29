@@ -263,13 +263,22 @@ export const RadioItems: Story = {
   render: (_args, context) => ({
     props: { pictured: isolated(context) },
     template: `
-      <div class="slotted-demo-viewport" data-place="top" data-size="layer">
+      <div class="slotted-demo-viewport" data-place="top" data-size="tall">
         <button slButton size="sm" variant="outline" [slMenuTriggerFor]="menu">Sort</button>
         <sl-menu #menu [open]="pictured" [portal]="false">
           <sl-menu-radio-group value="name">
-            <button slMenuRadioItem value="name">Name</button>
-            <button slMenuRadioItem value="date">Date modified</button>
-            <button slMenuRadioItem value="size">Size</button>
+            <button slMenuRadioItem value="name">
+              Name
+              <span slMenuItemDescription>A to Z</span>
+            </button>
+            <button slMenuRadioItem value="date">
+              Date modified
+              <span slMenuItemDescription>Newest first</span>
+            </button>
+            <button slMenuRadioItem value="size">
+              Size
+              <span slMenuItemDescription>Largest first</span>
+            </button>
           </sl-menu-radio-group>
         </sl-menu>
       </div>

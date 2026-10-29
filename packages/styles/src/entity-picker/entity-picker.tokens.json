@@ -61,6 +61,7 @@
   "--slotted-entity-picker-error-color",
   "--slotted-entity-picker-field-basis",
   "--slotted-entity-picker-field-min",
+  "--slotted-entity-picker-group-label-height",
   "--slotted-entity-picker-highlight",
   "--slotted-entity-picker-highlight-active",
   "--slotted-entity-picker-highlight-ring",

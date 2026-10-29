@@ -16,6 +16,7 @@ import { injectStatCardDefaults } from './stat-card-defaults';
 import {
   toneOf,
   trendOf,
+  type StatCardAttention,
   type StatCardFill,
   type StatCardGoodWhen,
   type StatCardLayout,
@@ -64,6 +65,7 @@ let nextId = 0;
     '[attr.data-status]': 'status()',
     '[attr.data-good-when]': 'resolvedGoodWhen()',
     '[attr.data-tone]': 'resolvedTone() ?? null',
+    '[attr.data-attention]': 'resolvedAttention() ?? null',
     '[attr.data-loading]': 'loading() ? "" : null',
   },
 })
@@ -84,6 +86,12 @@ export class SlStatCard {
   readonly delta = input<number | undefined, unknown>(undefined, { transform: optionalNumber });
   /** The tone the card hands to its trend. Unset, it is the delta's. */
   readonly tone = input<StatCardTone | undefined>(undefined);
+  /**
+   * The figure is past a threshold the product states: the value and the
+   * edge take the tone, the delta keeps its own. A ready value only; the
+   * comparison line says which threshold it passed.
+   */
+  readonly attention = input<StatCardAttention | undefined>(undefined);
   /** The locale numbers are written in; the language in force when absent. */
   readonly locale = input<string | undefined>(undefined);
   /** How the value, the delta and the comparison read numbers. */
@@ -122,6 +130,10 @@ export class SlStatCard {
     const delta = this.delta();
     return delta === undefined ? undefined : toneOf(trendOf(delta), this.resolvedGoodWhen());
   });
+
+  readonly resolvedAttention = computed(() =>
+    this.status() === 'ready' && !this.loading() ? this.attention() : undefined,
+  );
 
   readonly labelledBy = computed(() =>
     this.ownLabel !== null ? null : (this.ownLabelledBy ?? this.labelId),

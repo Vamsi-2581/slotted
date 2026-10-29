@@ -203,6 +203,33 @@
     --_radius: var(--slotted-radius-none, 0px);
   }
 
+  /* ── Attention: a figure past a threshold the product states ─────────── */
+
+  /**
+   * The value and the edge take the tone; the delta keeps the tone of its
+   * change, and the trend the root's `tone`. The binding writes the
+   * attribute on a ready value only. A `plain` card has no edge to paint.
+   */
+  [data-ui-stat-card][data-attention='warning'] {
+    --_attention-ink: var(--slotted-stat-card-attention-ink, var(--slotted-tone-warning-text));
+    --_attention-edge: var(
+      --slotted-stat-card-attention-border-color,
+      var(--slotted-tone-warning-border)
+    );
+  }
+
+  [data-ui-stat-card][data-attention='danger'] {
+    --_attention-ink: var(--slotted-stat-card-attention-ink, var(--slotted-tone-danger-text));
+    --_attention-edge: var(
+      --slotted-stat-card-attention-border-color,
+      var(--slotted-tone-danger-border)
+    );
+  }
+
+  [data-ui-stat-card][data-attention]:not([data-fill='plain']) {
+    --_edge: var(--_attention-edge);
+  }
+
   /* ── The body ─────────────────────────────────────────────────────────── */
 
   /**
@@ -546,6 +573,12 @@
          rather than clips, and a consumer who wants it whole formats it
          compact or stacks the card. */
       overflow-wrap: break-word;
+    }
+  }
+
+  @scope ([data-ui-stat-card]) to (:scope [data-ui] > *) {
+    :scope[data-attention] [data-part-value] {
+      color: var(--_attention-ink);
     }
   }
 

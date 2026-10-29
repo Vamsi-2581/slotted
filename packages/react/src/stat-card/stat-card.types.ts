@@ -8,6 +8,7 @@ export type StatCardValueStatus = 'ready' | 'empty' | 'error';
 export type StatCardGoodWhen = 'up' | 'down' | 'none';
 export type StatCardTone =
   'neutral' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
+export type StatCardAttention = 'warning' | 'danger';
 export type StatCardDirection = 'up' | 'down' | 'flat';
 export type StatCardDeltaFormat = 'percent' | 'decimal';
 
@@ -31,6 +32,7 @@ export interface StatCardDefaultsProviderProps extends StatCardDefaults {
 
 export interface StatCardRootProps extends ComponentPropsWithRef<'div'> {
   'aria-busy': true | undefined;
+  'data-attention': StatCardAttention | undefined;
   'data-fill': StatCardFill;
   'data-good-when': StatCardGoodWhen;
   'data-layout': StatCardLayout;
@@ -61,6 +63,12 @@ export interface StatCardProps extends ComponentPropsWithRef<'div'> {
   delta?: number;
   /** The tone the card hands to its trend. Unset, it is the delta's. */
   tone?: StatCardTone;
+  /**
+   * The figure is past a threshold the product states: the value and the
+   * edge take the tone, the delta keeps its own. A ready value only; the
+   * comparison line says which threshold it passed.
+   */
+  attention?: StatCardAttention;
   /** The locale numbers are written in; the language in force when absent. */
   locale?: string;
   /** How the value, the delta and the comparison read numbers. */

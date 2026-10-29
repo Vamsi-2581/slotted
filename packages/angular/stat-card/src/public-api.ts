@@ -22,6 +22,7 @@ export {
 export type { StatCardDefaults } from './stat-card-defaults';
 export { toneOf, trendOf } from './stat-card.constants';
 export type {
+  StatCardAttention,
   StatCardDeltaFormat,
   StatCardDirection,
   StatCardFill,

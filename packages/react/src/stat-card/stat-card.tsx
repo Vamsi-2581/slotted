@@ -26,6 +26,7 @@ import type { StatCardContextValue, StatCardProps, StatCardRootProps } from './s
  * one announcement for a whole dashboard wraps it in a `SkeletonRegion`.
  */
 export function StatCard({
+  attention,
   children,
   delta,
   fill,
@@ -87,6 +88,7 @@ export function StatCard({
     'aria-labelledby': labelId,
     ...nativeProps,
     'aria-busy': loading || undefined,
+    'data-attention': status === 'ready' && !loading ? attention : undefined,
     children: (
       <StatCardProvider value={context}>
         <div data-part="body" data-part-body="">

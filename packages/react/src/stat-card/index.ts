@@ -17,6 +17,7 @@ export {
 export { StatCardValue } from './stat-card-value';
 export type {
   StatCardActionProps,
+  StatCardAttention,
   StatCardComparisonProps,
   StatCardContextValue,
   StatCardDefaults,

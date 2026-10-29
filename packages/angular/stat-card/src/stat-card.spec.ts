@@ -46,6 +46,7 @@ import { toneOf, trendOf } from './stat-card.constants';
     [delta]="delta()"
     [goodWhen]="goodWhen()"
     [tone]="tone()"
+    [attention]="attention()"
     [status]="status()"
     [loading]="loading()"
     [size]="size()"
@@ -73,6 +74,7 @@ class TestHost {
   readonly delta = signal<number | undefined>(0.124);
   readonly goodWhen = signal<'up' | 'down' | 'none' | undefined>(undefined);
   readonly tone = signal<'warning' | undefined>(undefined);
+  readonly attention = signal<'warning' | 'danger' | undefined>(undefined);
   readonly status = signal<'ready' | 'empty' | 'error'>('ready');
   readonly loading = signal(false);
   readonly size = signal<'sm' | 'md' | 'lg' | undefined>(undefined);
@@ -153,6 +155,25 @@ describe('SlStatCard', () => {
     host.tone.set('warning');
     fixture.detectChanges();
     expect(root.getAttribute('data-tone')).toBe('warning');
+  });
+
+  it('writes attention on a ready value, and leaves the delta its own tone', () => {
+    const { fixture, host, root, part } = mount();
+    expect(root.hasAttribute('data-attention')).toBe(false);
+
+    host.attention.set('danger');
+    fixture.detectChanges();
+    expect(root.getAttribute('data-attention')).toBe('danger');
+    expect(part('delta')?.getAttribute('data-tone')).toBe('success');
+
+    host.loading.set(true);
+    fixture.detectChanges();
+    expect(root.hasAttribute('data-attention')).toBe(false);
+
+    host.loading.set(false);
+    host.status.set('error');
+    fixture.detectChanges();
+    expect(root.hasAttribute('data-attention')).toBe(false);
   });
 
   it('reads the delta as a signed percentage with the direction said before it, and a second delta on its own', () => {

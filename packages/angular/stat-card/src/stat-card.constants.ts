@@ -5,6 +5,7 @@ export type StatCardValueStatus = 'ready' | 'empty' | 'error';
 export type StatCardGoodWhen = 'up' | 'down' | 'none';
 export type StatCardTone =
   'neutral' | 'accent' | 'secondary' | 'info' | 'success' | 'warning' | 'danger';
+export type StatCardAttention = 'warning' | 'danger';
 export type StatCardDirection = 'up' | 'down' | 'flat';
 export type StatCardDeltaFormat = 'percent' | 'decimal';
 

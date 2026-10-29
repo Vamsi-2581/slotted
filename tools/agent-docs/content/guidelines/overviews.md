@@ -49,17 +49,17 @@ Seen in: Nexora · Inventory overview read by a warehouse operator scoped to CHI
 Verified in: Sign in as Jordan Wells: the overview has no warehouse chart and says CHI-01's three counts in one sentence
 Check: Sign in as a reader whose scope holds one category: the overview draws no comparison chart, and one sentence states that category's numbers.
 
-### OV-04 · A threshold is said, not painted
+### OV-04 · A threshold is said, then painted
 
 Level: SHOULD
 Applies to: a figure of an overview whose reading changes at a share the product states — overdue receivables against all receivables
-Rule: The thresholds are stated once in words beside the figures, and a figure past one says so in its own comparison line, on the line the placeholder reserves.
-Why: The figure card's tone is the trend's and paints nothing on a card without one, and a mark added beside the label moves the card's header to a second line.
-Do: Keep the shares in one place of the page's code and one sentence on screen ("a warning from 20 percent of receivables and a danger from 33"), and end the crossed figure's comparison with the threshold it passed ("26% of receivables, above 20%").
-Don't: Set a tone on a card with no trend and expect it to read, or add a badge to the card's header for the crossing.
+Rule: The thresholds are stated once in words beside the figures, and a figure past one says so in its own comparison line, on the line the placeholder reserves; the card takes `attention` at the threshold's level (`warning` or `danger`).
+Why: Colour is a second channel: `attention` paints the value and the edge of the card, and a reader who does not see the colour reads the crossing in the comparison. The card's `tone` is the trend's and paints nothing on a card without one, and a mark added beside the label moves the card's header to a second line.
+Do: Keep the shares in one place of the page's code and one sentence on screen ("a warning from 20 percent of receivables and a danger from 33"), end the crossed figure's comparison with the threshold it passed ("26% of receivables, above 20%"), and set `attention` to `warning` on that card.
+Don't: Set `attention` on a card whose comparison does not name the threshold, set `tone` to flag a crossing, or add a badge to the card's header for the crossing.
 Seen in: Nexora · Finance overview, overdue receivables in healthy and in collections pressure (ledger row "stat-card, tone is the trend's") · corrected
 Verified in: the finance overview suite, "turns the overdue figure to a warning and a danger at the shares the page states" and "reads differently under collections pressure: the overdue share crosses the danger".
-Check: Bring a figure past each stated threshold: the threshold sentence stands beside the figures, and the figure's own comparison line says it crossed, on the line its placeholder reserved.
+Check: Bring a figure past each stated threshold: the threshold sentence stands beside the figures, the figure's own comparison line says it crossed, on the line its placeholder reserved, and the card carries `attention` at the threshold's level.
 
 ### OV-05 · A chart is framed only as a tile
 

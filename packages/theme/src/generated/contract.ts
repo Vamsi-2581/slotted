@@ -4438,6 +4438,8 @@ export type ComponentToken =
   | '--slotted-splitter-disabled-line-color'
   | '--slotted-splitter-line-active-color'
   | '--slotted-splitter-line-color'
+  | '--slotted-stat-card-attention-border-color'
+  | '--slotted-stat-card-attention-ink'
   | '--slotted-stat-card-background'
   | '--slotted-stat-card-background-subtle'
   | '--slotted-stat-card-border-color'
@@ -6725,6 +6727,8 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-splitter-disabled-line-color",
   "--slotted-splitter-line-active-color",
   "--slotted-splitter-line-color",
+  "--slotted-stat-card-attention-border-color",
+  "--slotted-stat-card-attention-ink",
   "--slotted-stat-card-background",
   "--slotted-stat-card-background-subtle",
   "--slotted-stat-card-border-color",

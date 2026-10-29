@@ -38,6 +38,8 @@
   "--slotted-sparkline-block-size",
   "--slotted-sparkline-block-size-lg",
   "--slotted-sparkline-block-size-sm",
+  "--slotted-stat-card-attention-border-color",
+  "--slotted-stat-card-attention-ink",
   "--slotted-stat-card-background",
   "--slotted-stat-card-background-subtle",
   "--slotted-stat-card-border-color",
@@ -93,9 +95,11 @@
   "--slotted-text",
   "--slotted-text-muted",
   "--slotted-tone-accent-text",
+  "--slotted-tone-danger-border",
   "--slotted-tone-danger-text",
   "--slotted-tone-info-text",
   "--slotted-tone-secondary-text",
   "--slotted-tone-success-text",
+  "--slotted-tone-warning-border",
   "--slotted-tone-warning-text"
 ]

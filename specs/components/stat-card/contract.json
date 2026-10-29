@@ -13,7 +13,8 @@
     "status": ["ready", "empty", "error"],
     "goodWhen": ["up", "down", "none"],
     "tone": ["neutral", "accent", "secondary", "info", "success", "warning", "danger"],
-    "trend": ["up", "down", "flat"]
+    "trend": ["up", "down", "flat"],
+    "attention": ["warning", "danger"]
   },
   "members": {
     "stat-card": {

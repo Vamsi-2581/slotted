@@ -83,6 +83,17 @@ test('derives the tone of a change from what the metric means', () => {
 });
 
 /**
+ * A figure past a threshold the product states is flagged apart from its
+ * change: `attention` paints the value and the edge, and the delta keeps the
+ * tone its direction earned. Unset by default, because a threshold is the
+ * product's to state.
+ */
+test('flags a figure past a threshold apart from the tone of its change', () => {
+  assert.deepEqual(contract.axes.attention, ['warning', 'danger']);
+  assert.ok(!('attention' in member.defaults));
+});
+
+/**
  * A metric with nothing to show still takes its place in the row. `empty`
  * and `error` are statuses of the value, not of the card, so the card keeps
  * its frame and its height and puts the message where the figure was.

@@ -37,7 +37,7 @@ const anatomy: AnatomyRow[] = [
     element: 'div',
     required: true,
     purpose:
-      'The frame and the query container: role="group" named by the label, carrying size, fill, layout, status, goodWhen, the derived tone and the loading state. Floored at ten rem; under that it overflows its column rather than shrinking.',
+      'The frame and the query container: role="group" named by the label, carrying size, fill, layout, status, goodWhen, the derived tone, attention and the loading state. Floored at ten rem; under that it overflows its column rather than shrinking.',
   },
   {
     part: 'body',
@@ -323,6 +323,13 @@ export const ANGULAR_STAT_CARD_DOCS = {
         '—',
         'slStatCard, slStatCardDelta',
         'An explicit tone, which wins over the derived one. On the root it is what the trend hands its sparkline',
+      ],
+      [
+        'attention',
+        "'warning' | 'danger'",
+        '—',
+        'slStatCard',
+        'The figure is past a threshold the product states: the value and the edge take the tone, the delta keeps its own. Ready values only; the comparison line names the threshold',
       ],
       [
         'locale',

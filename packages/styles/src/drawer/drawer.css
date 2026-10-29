@@ -1131,6 +1131,20 @@
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
 
+  /* A column gap is drawn beside an empty track too, so a header holds only the
+     columns of the parts it has. */
+  [data-ui-drawer]
+    > [data-part-panel]
+    > [data-part-header]:has(> [data-part-actions]):not(:has(> [data-part-close])) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  [data-ui-drawer]
+    > [data-part-panel]
+    > [data-part-header]:not(:has(> [data-part-actions], > [data-part-close])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   [data-ui-drawer] > [data-part-panel] > [data-part-header] > [data-part-actions] {
     grid-column: 2;
     grid-row: 1 / span 2;

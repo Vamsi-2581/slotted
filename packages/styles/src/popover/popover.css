@@ -320,6 +320,11 @@
     padding-inline: var(--_inset-inline);
   }
 
+  /* A column gap is drawn beside an empty track too. */
+  [data-ui-popover] > [data-part-content] > [data-part-header]:not(:has(> [data-part-close])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   [data-ui-popover] > [data-part-content] > [data-part-header] > [data-part-title] {
     grid-column: 1;
     margin: 0;

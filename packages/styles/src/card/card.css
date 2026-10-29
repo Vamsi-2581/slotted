@@ -269,6 +269,12 @@
     row-gap: var(--slotted-card-header-gap, var(--slotted-space-2, 0.25rem));
   }
 
+  /* A column gap is drawn beside an empty track too, so a header with no corner
+     keeps no corner column. */
+  [data-ui-card] > [data-part-header]:not(:has(> [data-part-actions])) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   [data-ui-card] > [data-part-header] > * {
     grid-column: 1;
     min-inline-size: 0;
@@ -304,6 +310,10 @@
    */
   [data-ui-card] > [data-part-header]:has([data-part-selection]) {
     grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  [data-ui-card] > [data-part-header]:has([data-part-selection]):not(:has(> [data-part-actions])) {
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   [data-ui-card] > [data-part-header]:has([data-part-selection]) > * {

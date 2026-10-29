@@ -485,6 +485,52 @@ describe('a drawer header with actions', () => {
     expect(tops).toHaveLength(4);
     expect(new Set(tops).size).toBe(1);
   });
+
+  /* An empty `auto` track keeps its gutter: the close column left one gap at the end. */
+  it('ends the actions at the inset the title starts at when the header has no close', async () => {
+    render(
+      <Drawer defaultOpen side="bottom">
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Title</DrawerTitle>
+            <DrawerActions>
+              <IconButton aria-label="Close">X</IconButton>
+            </DrawerActions>
+          </DrawerHeader>
+          <DrawerBody>Body</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    for (let index = 0; index < 10; index += 1) await frame();
+    const panel = document.querySelector('[data-ui="drawer"] [data-part="panel"]') as HTMLElement;
+    const box = (part: string) =>
+      (panel.querySelector(`[data-part="${part}"]`) as HTMLElement).getBoundingClientRect();
+
+    expect(panel.getBoundingClientRect().right - box('actions').right).toBeCloseTo(
+      box('title').left - panel.getBoundingClientRect().left,
+      0,
+    );
+  });
+
+  it('gives a lone title the header’s full content width', async () => {
+    render(
+      <Drawer defaultOpen side="end">
+        <DrawerPanel>
+          <DrawerHeader>
+            <DrawerTitle>Title</DrawerTitle>
+          </DrawerHeader>
+          <DrawerBody>Body</DrawerBody>
+        </DrawerPanel>
+      </Drawer>,
+    );
+    for (let index = 0; index < 10; index += 1) await frame();
+    const header = document.querySelector('[data-ui="drawer"] [data-part="header"]') as HTMLElement;
+    const title = header.querySelector('[data-part="title"]') as HTMLElement;
+    const contentRight =
+      header.getBoundingClientRect().right - parseFloat(getComputedStyle(header).paddingRight);
+
+    expect(title.getBoundingClientRect().right).toBeCloseTo(contentRight, 0);
+  });
 });
 
 /**

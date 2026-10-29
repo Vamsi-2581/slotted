@@ -1044,11 +1044,11 @@ export function SelectContent({
    * While such a value is held and the popup is not built, the options are
    * rendered once into a fragment no document holds: each registers its label,
    * and the fragment goes in the next commit. A set of values no option names
-   * is collected once, not on every render.
+   * is collected once, not on every render. The key is `null` when every held
+   * value has a label: a joined key would read the one value `""` as none.
    */
-  const unresolved = select.selection
-    .filter((held) => select.labelFor(held) === undefined)
-    .join('\u0000');
+  const pending = select.selection.filter((held) => select.labelFor(held) === undefined);
+  const unresolved = pending.length === 0 ? null : JSON.stringify(pending);
   const [collector, setCollector] = useState<DocumentFragment | null>(null);
   const collected = useRef<string | null>(null);
   useEffect(() => {
@@ -1056,7 +1056,7 @@ export function SelectContent({
       setCollector(null);
       return;
     }
-    if (mounted || unresolved === '' || collected.current === unresolved) return;
+    if (mounted || unresolved === null || collected.current === unresolved) return;
     collected.current = unresolved;
     setCollector((select.triggerNode?.ownerDocument ?? document).createDocumentFragment());
   }, [collector, mounted, select.triggerNode, unresolved]);

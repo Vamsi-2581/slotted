@@ -256,6 +256,23 @@ describe('Select', () => {
    * label cannot be read from it. `items` is what a select that knows its
    * options up front hands over instead.
    */
+  /** The empty string is an option value as HTML's own `<option value="">` is one. */
+  it('names an option whose value is the empty string', async () => {
+    render(
+      <Select value="" onValueChange={() => undefined}>
+        <SelectTrigger aria-label="Statement">
+          <SelectValue placeholder="Choose" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="">Automatic</SelectItem>
+          <SelectItem value="2026-12">December 2026</SelectItem>
+        </SelectContent>
+      </Select>,
+    );
+
+    await waitFor(() => expect(screen.getByRole('combobox')).toHaveTextContent('Automatic'));
+  });
+
   it('names a value from items before the popup has ever been built', () => {
     render(<Basic defaultValue="blueberry" items={[{ label: 'Blueberry', value: 'blueberry' }]} />);
     expect(trigger()).toHaveTextContent('Blueberry');

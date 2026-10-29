@@ -85,6 +85,29 @@ function pressOption(fixture: ComponentFixture<unknown>, option: HTMLElement) {
 })
 class LabelledHost {}
 
+@Component({
+  standalone: true,
+  imports: [SlSelect, SlSelectItem],
+  template: `<sl-select aria-label="Statement" placeholder="Choose" value="">
+    <sl-select-item value="">Automatic</sl-select-item>
+    <sl-select-item value="2026-12">December 2026</sl-select-item>
+  </sl-select>`,
+})
+class EmptyValueHost {}
+
+/** The empty string is an option value as HTML's own `<option value="">` is one. */
+describe('SlSelect, holding the empty string', () => {
+  it('names the option whose value it is', async () => {
+    await TestBed.configureTestingModule({ imports: [EmptyValueHost] }).compileComponents();
+    const fixture = TestBed.createComponent(EmptyValueHost);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(trigger().textContent?.trim()).toBe('Automatic');
+  });
+});
+
 describe('SlSelect, named by another element', () => {
   it('carries a written aria-labelledby to the trigger, not the root', async () => {
     await TestBed.configureTestingModule({ imports: [LabelledHost] }).compileComponents();

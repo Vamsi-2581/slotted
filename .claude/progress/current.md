@@ -30,13 +30,21 @@
 
 - Release `v0.1.0-beta.23`: workflow `40780722946`; os seis pacotes em `latest` = `0.1.0-beta.23`.
 
-## Seleção de linhas no data-grid (validada pelo utilizador)
+## Sessão 2026-10-29 (2)
 
-- Desenho: uma corrida de linhas selecionadas é um bloco. Chão = `accent-border` 20 % sobre a superfície (hover 28 %); medido no tema default: 1,30 (claro) e 1,29 (escuro) contra a página, 1,16/1,20 contra a listra; borda `accent-border` acima (sombra de 1 regra sobre a régua da linha anterior) e abaixo (régua própria); réguas internas e aresta das zonas fixas = `--_selected-rule` (borda 30 % sobre o chão; 1,42 claro, 1,65 escuro); bordas e sombra entram na transição da linha; tinta = a da linha. Sem barra lateral (R1, `state-rail.test.mjs`). `plain`: só o chão. `framed`: a última linha cede a borda à moldura.
-- Correção incluída: células fixas e seletor de linha selecionada herdam o chão da linha (antes ficavam no chão em repouso durante o hover).
-- Tokens novos: `--slotted-data-grid-row-border-color-selected`; sai `--slotted-tone-accent-subtle-hover`. `contract.ts` regenerado.
-- Ficheiros: `packages/styles/src/data-grid/data-grid.css`, `data-grid.tokens.json`, `packages/theme/src/generated/contract.ts`, `packages/react/src/data-grid/data-grid.stories.tsx` (story `SelectionLab`), `data-grid.browser.test.tsx` (teste "selected rows", falha contra HEAD).
-- Testes: styles 1722/1722, data-grid browser 8/8, `pnpm check` verde.
-- Lab: Storybook em `0.0.0.0:6006`, `?path=/story/components-data-grid--selection-lab`.
-- Angular: linhas irmãs diretas do corpo (`ng-template #bodyRow`), seletores `+` válidos.
-- Próxima ação: `git push` quando o utilizador pedir; `gh issue list --label finding --state open` para a fila.
+Fila: #19–#26. Fatias: (1) menu #23 #24 #25; (2) form/field #22 #20 #21; (3) guideline #19; (4) select #26.
+
+| Item | Commit | Estado |
+| ---- | ------ | ------ |
+| #23 #24 #25 menu: aria-labelledby no rótulo de item descrito; partes como filhos sem rótulo aninhado (React); docs/stories radio com descrição | `d39dbf9d` | push, issues fechadas |
+| #20 #21 #22 form/field: `--slotted-form-section-gap`, `--slotted-form-measure`, `FormAside`/`slFormAside` (grelha a partir de 75rem, sticky), `Field width` short/medium/full | `54ff55f2` | push |
+| #19 forms.md FM-18 a FM-24 | `5a5e62ea` | push, issue fechada |
+| #26 select: valor "" nomeado no controlo fechado (chave de recolha `null` em vez de string vazia); spec Angular de guarda | `4d1c5030` | push, issue fechada |
+
+- Testes: React suite completa 4376/4378 (entity-picker e dialog-presence falham só sob carga, passam isolados), Angular form+field+menu 97/97, contratos 2184/2184, agent-docs 227/227, `pnpm check` verde (typecheck após apagar `node_modules/.cache/tsc/root.tsbuildinfo`).
+- Limites conhecidos: um `id` dado pelo consumidor a `MenuItemLabel` dentro de um item descrito quebra `aria-labelledby`; o aside cobre 100 filhos diretos do form (`grid-row: 1 / span 100`).
+- Não feito: `pnpm demo:refresh`; exemplos visuais de `width` e `FormAside` nas páginas de docs (só props e partes documentadas).
+- Fila vazia (2026-10-29). CI `40874055360` (`4d1c5030`) falhou: `form.tokens.json` listava `--slotted-page-sticky-top`, valor escrito por script (`packages/styles/src/tokens.test.mjs`); corrigido no commit seguinte.
+- Release pedida pelo utilizador após CI verde. Eval `customer-form --runs 1`: atende (`docs/history/evals/2026-10-29-agent-docs-forms-layout.md`).
+- Próxima ação: CI verde no HEAD (`gh run list --branch main --limit 1`), depois `pnpm release --dry-run`, `pnpm release`, `gh run watch` do workflow `release.yml`, verificação dos seis pacotes com `npm view`.
+- Problemas conhecidos: `pnpm typecheck` incremental emite falsos erros circulares em `*.stories.tsx`; apagar `node_modules/.cache/tsc/root.tsbuildinfo`. `stash@{0}` pertence ao utilizador.

@@ -4055,7 +4055,6 @@ export type ComponentToken =
   | '--slotted-page-header-snapped-heading-size-md'
   | '--slotted-page-header-snapped-heading-size-sm'
   | '--slotted-page-padding-block'
-  | '--slotted-page-sticky-top'
   | '--slotted-pagination-color'
   | '--slotted-pagination-color-disabled'
   | '--slotted-pagination-color-muted'
@@ -6331,7 +6330,6 @@ export const COMPONENT_TOKENS: readonly ComponentToken[] = [
   "--slotted-page-header-snapped-heading-size-md",
   "--slotted-page-header-snapped-heading-size-sm",
   "--slotted-page-padding-block",
-  "--slotted-page-sticky-top",
   "--slotted-pagination-color",
   "--slotted-pagination-color-disabled",
   "--slotted-pagination-color-muted",
